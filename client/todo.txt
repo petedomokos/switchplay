@@ -1,0 +1,229 @@
+
+NEXT
+
+ 1. DONE  - sort the addRefs and removeRefs stuff for adding and removing players and datasets from groups - 
+ just changed update method on group ctrl so it gets group first so it can compare exisitng players
+
+ 2a. DONE   -  work out why the deeper paths arent working for populate methods
+
+ 2b. DONE - get the User profile page displaying the datasets that they are part of, via their groups. (we will do individual later)
+
+ 3. DONE (except calculations not finished) impl addDatasets measures property -> impl SimpleTable to do this
+    - have raw and derived measures. eg raw = time, penalties   derived = score = time + penalties
+
+ 4. DONE - impl addDatapoints (note: no need to do targets differently - a target is just a datapoint with a future date)
+ add surface and notes properties to datapoint model, and also add notes to datasets model
+ add fatigueLevel (1 - 10) to datapoint.model
+
+5: PLAYER DASHBOARD.....
+
+5a) DONE - add notes option to dataset model and createDataset
+ 
+5b) DONE impl fetchmultipleFullDatasets on server side
+
+
+5c) DONE show scatter/line chart for all user datasets with their datapoints pn PlayerDashboard
+
+5d) sort sizings so they look good on mobile ie full width
+
+DONE - put clip path onto chart
+
+DONE - develop a resuable chart superDataset() function
+
+DONE - target completion  -added startdate to dataset
+
+DONE - derivedMeaures and rawMeasures
+DONE - editDataset
+DONE - Projections are only calcuated for the latest difficulty measure of each dataset.
+DONE - impl a sectiondata option instead of goalsData.
+DONE - Lewis datasets and datapoints
+DONE - hide hidden measures 
+DONE - use derivedMeasures to get calculated values from them 
+DONE -make ds with lower level to current transparent like projections
+------------------------------------------------------
+
+DOING NOW
+
+add a 'show hidden' button to each PlayerDashboard Dataset Section.
+add goals
+add overall completion
+change calctargetCompletion so it uses best score (at target difficulty level) rather than most recent score.
+add sharkskills and t-test datasets
+add datapoints and targets for filmed tests
+
+----------------------------
+NEXT
+
+allow entering of derived measures fro target ds, insread of raw measures eg options game, should eb able to just enter the median or mean
+
+stop order of measures being changed in measures list when they are amended
+change measures to rawMeasures in dataset.model
+
+for overall dataset, have a percenatge change since last datapoint (ie just most recent) so its like a session report
+which compares to last session. provide a filter for only within last day, last week, last month, forever
+(note 1 - later, we will also provide a weeklyMax superDataset option, so this can be used in conjunctoin with the above to provide
+a wek-to-week %change score which updates immediatelky when a new d is entered in teh current week)
+(note 2 - targetCompletion provides an up-to-date value of most recent session w.r.t. start and target date)
+
+
+allow dataset datapoints to first be filtered by measure values, before projections and rendering
+note this means that, even when formatted to have a .value key, the ds .values property will 
+still be needed for such filtering purposes, as .values contains the values fro ALL measures
+not just the one that it has been formatted to show.
+even target datapoints will also have a .values property and can have a value for the difficulty meaasure,
+currentDifficultyLevel is determined by most recent datapoints measure value for difficulty.
+
+
+
+editUserProfile, inc add photo
+
+----------------------------------------------------
+ TODO
+
+ User also has option of filtering an individual dataset time series for a particular difficulty index,
+
+
+filter by and group by measure option fro chart. this is after teh dataset measure has 
+been selected, so its separate to the value s
+add dtatapoints bug - when you add datapoints and then immediately go to teh dataset wihtout rereshing, the players name is not there under the datapoints
+
+
+ 20. fix bugs and refactor everything to date.
+a) create dataset sometimes gives admin as [null]
+b) when refreshing page, loadUsers doesnt work - gets stuck
+
+c) load users bug when page refreshes
+
+
+
+
+  7. change url to user.username instead of id.
+
+  8. include add videos fro user profile - make it look good
+
+  add tiredness factor to datapoints
+
+
+
+  add option to apply a new datapoint to more than 1 player. This allows us to 
+  (a) make a group target
+  (b) make an actual datapoint for a group score eg a test in pairs, or a small group -> the d is added to all players, and the players property
+  shows which players it was with if this is needed for contextual info
+
+
+
+10. make addDatapoint only show for users when they have datasets administered. also check all other edit, add and delete options that they 
+only show fro authorized users (can worry about server auth checking later)
+
+and add tags and subtags to dataset eg fitness -> core / LB /LME / maximal strength
+
+implement tags to datasets in createdataset and dataset.model -> just an array of strings for now,
+    //and just have an array of strings to choose from in a file, no typing and no hierarchy for now.
+
+
+11. schedule component on userhome, done with matchref days, 1 row per match, match day is at teh end of row
+incldues food plan, training plan, and other section
+for past days, includes summary of data
+
+think about schedule
+think about targets -> need a way to track what players focus was on a date, and then we see the 
+progress they made. so they can show managers, ' 2 months ago my target was to improve strength
+and this is what I achieved in that time.'
+
+allow multiple players for a dataset and datapoint
+
+use d3 rolllup for generting summary values eg superDatasets
+
+
+incorect email or password error handling display - see logError func in CommonActions
+
+implement PrivateRoutes so that they dont redirect to home but to referrer
+
+incoproate Signup into store, sharing the action with createUser action. Its the same excepot the dialog at teh end should be diffrent 
+(ie for a signed in user, it is 'create another' and 'return home', whereas for a non-signed in user, its just 'signin')
+
+impl the sign up mesg into dialog for CreatUser, in both cases. do this by refactoring dialog state object into ...
+dialog:{
+    createUser:{
+        open:false, mesg:''
+    }
+}
+
+
+refactor asyncProcesses into an object that contains the response if required
+eg for CreateGroup 
+{status:creating}
+then
+{status:completed, error:?, group:? }
+then
+{status:undefined}
+
+whereas for loading group, no need to store group here aswell as in the right place,so just
+{status:loading}
+then
+{status:completed}
+then
+{status:undefined}
+THEN I CAN IMPL THINGS LIKE 'GO TO GROUP' LINK IN DIALOG IN CREATEGROUP, AND 'GO TO USER' IN CREATEUSER
+
+
+move auth stuff out of ui comps into cotainers (so containers deals with store and storage) - look online about best practice
+
+CHECK ALL ROUTES AND AUTH ACTIONS - make aure only a user can edit or delete their account or groups
+
+STORE QUESTIONS when signup, is the dialog initiated?
+
+
+change asyncProcesses so it stores teh id of teh user or group that is loading.
+that way, more than one user or group can be loaded simultaneously through multiple fetchUser calls
+eg is if we are on User page of another user and page is refreshed - then first teh signedin user is loaded,
+and currently the other User cannot start loading until signed in user returns,
+becuase teh HOC withLoader looks to see if  loading =true. So need that loading flag to be false for that User.
+ie multiple loading flags via use of ideg asyncProcesses = {loading.user._id = true}
+BUT we also need to integrate with error (see below)
+
+!!! HANDLE ERRORS - EG CreatUser and CreateGroup need to have different action buttons if not created
+allowing them to fix error
+
+//warning - username should be unique - needed fro CreateUser for example
+
+for fetchUsers on the wserver side, we will filter them to only users who are 
+connected to teh signedIn user. That means users who are in a group that teh signedInUser
+is a memberOf or is admin for. (ie must be in user.administeredGroups.players
+or user.groupsMemberOf.players) //in future, we will also add a following option
+so any 2 players can choose top connect with each other and see each others profiles
+and data
+
+chain promises in create methods in user and group controllers, to go back into db and populate admin with username etc
+instead of just sending back teh created user or group
+
+Dialogs have an onClose prop - not sure what that is for - investigate eg see DeleteUser
+
+Think thought how to handle that fact that the database could update from elsewhere during a session eg another user 
+may change their name or delete. In that case, currently, loadUsers when called may bring the latest groups and administeredUsers,
+but these would not override a deep user or group if I have previously loaded them.
+One solution is a helper function eg groupHasUpdated, and call it in eg loadUsers.
+current soln is to merge associated users and groups (with existing versions ) whenever a deep user or group is loaded 
+
+
+Group addPlayers page - useEffect to remind user to save, and to reset
+
+
+chnage groupsMemberOf to groups, and datasetsMemberOf to just datasets. so we have administeredGroups, and groups (same for datsets)
+
+
+impl add/remove datasets from group - atm the Group page just shows all datasets. we want group admin to be able to edit, just like with players.
+need to decide how best to handle datasetsMemberOf property in users. we dont want it getting overfilled every time a group asdmin adds another dataset.
+But then again, we want a coach to be able to add a dataset to their groupo, and tehn when they go to the individual player page, they can see the dataset for that player,
+rtaher than only being able to see it for the group.
+So best soln is to keep user.groupsMemberOf fro only teh users benefit. And just when loading a user, we get groupsMemberOf, aso we can get groupsMemberOf.datasetsMemberOf for each group using 'populate' with a deep path
+
+impl Delete/Edit Group/Dataset profiles
+
+
+in SinmpleList, reduce secondary text to a max nr of chars, replace last  3 with ... and on hover reveal the full secondary text in a tooltip eg dataset.desc
+
+on server addRef methods, they should only be added if they are unique. eg when adding players, we only want to 
+add a groupRef if it doesnt exist yet. (we can tempoirarily filtering on client for now)
+
+impl user being able to add datasets to themselves or to an administeredUser
