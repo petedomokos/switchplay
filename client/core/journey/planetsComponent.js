@@ -103,7 +103,7 @@ export default function planetsComponent() {
     };
 
     //state
-    let linkGoals = [];
+    let prevClickedGoal;
     let timer;
 
     //dom
@@ -197,7 +197,7 @@ export default function planetsComponent() {
                     contentsG.select("ellipse.core-inner.visible")
                         //@todo - add transition to this opacity change
                         .attr("opacity", !selectedMeasure || selectedMeasureIsInGoal(d) ? planetOpacity.normal : planetOpacity.available)
-                        .attr("fill", linkGoals.find(g => g.id === d.id) ? COLOURS.potentialLinkPlanet : d.fill)
+                        .attr("fill", prevClickedGoal?.id === d.id ? COLOURS.potentialLinkPlanet : d.fill)
                    
                     //title
                     contentsG.select("text.title")
@@ -350,28 +350,22 @@ export default function planetsComponent() {
             })
 
             function handleClick(e, d){
-                console.log("handleClick", d)
                 const planetG = d3.select("g#planet-"+d.id);
                 planetG.select("ellipse.core-inner.visible")
                     .attr("fill", COLOURS.potentialLinkPlanet)
                 
-                if(linkGoals.length !== 0){
-                    const prevGoal = linkGoals[linkGoals.length - 1];
+                if(prevClickedGoal){
                     //create link
-                    onAddLink({ src:prevGoal.id, targ:d.id })
+                    onAddLink({ src:prevClickedGoal.id, targ:d.id })
                 }
-                linkGoals = [d];
-                if(timer) { 
-                    console.log("stop timer");
-                    timer.stop(); 
-                }
+                prevClickedGoal = d;
+                if(timer) { timer.stop(); }
                 timer = d3.timeout(() => {
                     d3.selectAll("g.planet")
                         .each(function(e,d){
                             d3.select(this).select("ellipse.core-inner.visible").attr("fill", d => d.fill);
                         })
-
-                linkGoals = [];
+                prevClickedGoal = undefined;
                 }, 2000);
 
             }
