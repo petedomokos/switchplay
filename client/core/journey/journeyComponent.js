@@ -168,7 +168,7 @@ export default function journeyComponent() {
 
     let withCompletionPaths = false;
 
-    let enhancedZoom = dragEnhancements();
+    let enhancedZoom = dragEnhancements().longpressThreshold(200);
 
     const myChannelsLayout = channelsLayout();
     const myAxesLayout = axesLayout();
@@ -318,14 +318,17 @@ export default function journeyComponent() {
                 //.beforeAll(() => { updateSelected(undefined); })
                 .onClick(handleCanvasClick)
                 .onLongpressStart(function(e,d){
+                    console.log("longpress cnvas")
                     if(!enhancedZoom.wasMoved()){
+                        handleCanvasClick.call(this, e, d, true)
                         //longpress toggles isOpen
-                        const chan = pointChannel({ x:e.sourceEvent.layerX, y:e.sourceEvent.layerY });
-                        if(!chan){ return; }
-                        const { id, isOpen } = chan;
+                        //const chan = pointChannel({ x:e.sourceEvent.layerX, y:e.sourceEvent.layerY });
+                        //if(!chan){ return; }
+                        //const { id, isOpen } = chan;
                         //there must be a diff between this code and the udate code above, or the way axis is updwted, because in zoomed state
                         //sometimes the opening of c channel is only corrected on state update
-                        updateChannel({ id, isOpen:!isOpen })
+                        console.log("....")
+                        //updateChannel({ id, isOpen:!isOpen })
                     }
                 })
 
@@ -357,7 +360,7 @@ export default function journeyComponent() {
             contentsG.call(zoom)
             //.on("wheel.zoom", null)
 
-            function handleCanvasClick(e, d){
+            function handleCanvasClick(e, d, shouldCreateGoal){
                 if(editing){
                     endEditPlanet(d);
                 }
@@ -365,7 +368,7 @@ export default function journeyComponent() {
                 else if(selected){
                     updateSelected(undefined);
                 //if bar open, we dont want the click to propagate through
-                }else{
+                }else if(shouldCreateGoal){
                     const x = e.sourceEvent.layerX;
                     const y = e.sourceEvent.layerY; 
                     const goalAim = aimsData

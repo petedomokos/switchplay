@@ -4,10 +4,10 @@ import { getClientPoint } from "./domHelpers.js";
 // todo - look into whetehr its possible to enhance d3.drag itself rather than have to enhance each drag handler
 export default function dragEnhancements() {
     // consts
-    const LONGPRESS_TIME_THRESHOLD = 500;
 
     // settings
     let dragThreshold = 10;
+    let longpressThreshold = 500;
     let isDragEnabled = true;
     let withLongpress = false;
     let withClick = false;
@@ -145,7 +145,7 @@ export default function dragEnhancements() {
                 onLongpressStart.call(this, e, d);
             }
             longpressTimer = undefined;
-        }, LONGPRESS_TIME_THRESHOLD);
+        }, longpressThreshold);
     }
 
     function clearLongpressTimer() {
@@ -168,6 +168,11 @@ export default function dragEnhancements() {
     withEnhancements.dragThreshold = function (value) {
         if (!arguments.length) { return dragThreshold; }
         dragThreshold = value;
+        return withEnhancements;
+    };
+    withEnhancements.longpressThreshold = function (value) {
+        if (!arguments.length) { return longpressThreshold; }
+        longpressThreshold = value;
         return withEnhancements;
     };
     withEnhancements.isDragEnabled = function (value) {
