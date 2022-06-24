@@ -123,6 +123,7 @@ export const saveJourney = (journey, shouldPersist=true)  => dispatch => {
 	//console.log("jwt", jwt)
 	if(!jwt.user) { return; }
 	const journeyIsNew = !serverJourney._id;
+	alert("saving a new journey")
 	//console.log("id is", serverJourney._id)
 	const url = '/api/users/'+jwt.user._id+'/journey' +(serverJourney._id ? "/"+serverJourney._id : "")
 	console.log("fetch...", url)
