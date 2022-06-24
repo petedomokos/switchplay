@@ -490,7 +490,9 @@ export default function journeyComponent() {
                     .onDragStart(function(e, d){
                         //aim is raised already in aimComponent
                     })
-                    .onClickName((e,d) => { updateSelected(d); })
+                    .onClickName((e,d) => { 
+                        console.log("click name", d)
+                        updateSelected(d); })
                     .onDrag(function(e, aim){
                         //links
                         //this is the dragged aim, so we get the planets from it

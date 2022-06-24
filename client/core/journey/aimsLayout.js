@@ -117,6 +117,7 @@ export default function aimsLayout(){
         const aims = [ mainAim, ...subAims ]
             .map(aim => ({
                 ...aim,
+                dataType:"aim",
                 //add latest planets, overiding the previous
                 //add aim-related planet properties
                 planets:planets

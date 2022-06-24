@@ -40,7 +40,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function NameForm({ data, onUpdate, onClose }) {
     const { aim, planet, nameOnly, nameAndTargOnly } = data;
-    // console.log("NameForm", data)
+    //console.log("NameForm", data)
     const styleProps = { };
     const classes = useStyles(styleProps) 
     const [values, setValues] = useState({

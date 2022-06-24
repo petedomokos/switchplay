@@ -35,7 +35,7 @@ const journeyByID = async (req, res, next, id) => {
       .populate('datasetsMemberOf', '_id name desc notes photo admin created')
       */
 
-    console.log('journey in journeyById', journey)
+    //console.log('journey in journeyById', journey)
     if (!journey)
       return res.status('400').json({
         error: "Journey not found"
@@ -53,7 +53,9 @@ const journeyByID = async (req, res, next, id) => {
 attempts to create a new user in in db. 
 */
 const create = async (req, res) => {
-    console.log('create journey...user', req.user._id)
+    console.log('create journey...user.................................................................', req.user._id)
+    console.log("req body", req.body)
+    /*
     //create new
     //const id = "new-journey" //todo - use uuid() or date etc to make unique
     const journey = new Journey({ 
@@ -89,10 +91,11 @@ const create = async (req, res) => {
         error: errorHandler.getErrorMessage(err)
       })
     }
+    */
   }
   
   const update = async (req, res) => {
-    console.log('updating journey....................', req.user)
+    console.log('updating journey....................', req.user._id)
     let journey = req.journey;
     //console.log("req journey", journey)
     //console.log("body", req.body)

@@ -79,7 +79,7 @@ const initChannels = d3.range(numberMonths)
 //width and height may be full screen, but may not be
 const Journey = ({ data, availableJourneys, screen, width, height, save, setActive, closeDialog }) => {
   console.log("Journey data", data)
-  console.log("Journey avail", availableJourneys)
+  //console.log("Journey avail", availableJourneys)
   const { _id, name, aims, goals, links, measures } = data;
   const [journey, setJourney] = useState(null);
   const [channels, setChannels] = useState(initChannels);
@@ -356,7 +356,7 @@ const toggleJourneysOpen = useCallback(() => {
         save({ ...data, [name]: value }, false)
       }else{
         const props = { id:d.id, [name]: value };
-        const _aims = updatedState(prevState, props)
+        const _aims = updatedState(aims, props)
         save({ ...data, aims:_aims }, false);
       }
   }
@@ -409,7 +409,7 @@ const toggleJourneysOpen = useCallback(() => {
   }
 
   const importMeasures = measureIds => {
-      setMeasures(prevState => [...measureIds, ...prevState]);
+      setMeasures(measures => [...measureIds, ...measures]);
       setModalData(undefined);
   }
 
