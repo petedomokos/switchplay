@@ -121,7 +121,7 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
             </Link>
           </span>)
         }
-        {
+        {/**
           user && (<span>
             <Link to={"/user/" + auth.isAuthenticated().user._id}>
               <Button
@@ -130,8 +130,8 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
               </Button>
             </Link>
           </span>)
-        }
-        {
+          */}
+        {/**
           user && user.isPlayer && (<span>
             <Link to={"/user/" + auth.isAuthenticated().user._id+"/dashboard"}>
               <Button
@@ -140,13 +140,7 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
               </Button>
             </Link>
           </span>)
-        }
-         <Link to={"/games"}>
-          <Button
-            className={classes.menuBtn}
-            style={isActive(history, "/games")}>games
-          </Button>
-        </Link>
+          */}
         {
           user && (<span>
             <Button
