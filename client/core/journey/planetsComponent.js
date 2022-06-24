@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 //import "d3-selection-multi";
 import { calcAdjX, findPointChannel, findDateChannel, findNearestChannelByEndDate, getTransformationFromTrans } from './helpers';
-import { ellipse } from "./ellipse";
+//import { ellipse } from "./ellipse";
 import { grey10, COLOURS, DIMNS, AVAILABLE_GOAL_MULTIPLIER } from "./constants";
 import { findNearestPlanet, distanceBetweenPoints, channelContainsPoint, channelContainsDate } from './geometryHelpers';
 import dragEnhancements from './enhancedDragHandler';
@@ -90,7 +90,7 @@ export default function planetsComponent() {
     let enhancedDrag = dragEnhancements();
 
     //components
-    const ring = ellipse().className("ring");
+    //const ring = ellipse().className("ring");
     let menus = {};
     let menuOptions = (d) => {
         const basicOpts = [
@@ -116,9 +116,9 @@ export default function planetsComponent() {
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
                 .onClick(onClick)
-                .onLongpressStart(longpressStart)
-                .onLongpressDragged(longpressDragged)
-                .onLongpressEnd(longpressEnd);
+                //.onLongpressStart(longpressStart)
+                //.onLongpressDragged(longpressDragged)
+                //.onLongpressEnd(longpressEnd);
 
             const planetDrag = d3.drag()
                 .on("start", enhancedDrag(onDragStart))
@@ -238,32 +238,8 @@ export default function planetsComponent() {
                 })
                 //.call(updateHighlighted)
                 .call(planetDrag)
-                //note-  could just store the planetId in here when mousedover ie 
-                //ie stored as active or something
-                //the current approach when measure is  doesnt work
-                //becuase it covers up teh pointer-event so mouseover isnt called.
-                //how did i resolve this in expression builder?
-                /*
-                .on("mouseover", function(e,d){
-                    d3.select(this).raise();
-                    //console.log("mo goal")
-                    //const selectedMeasureIsInPlanet = !!d.measures.find(m => m.id === selectedMeasure);
-                    //if(measuresBar.selected() && (selectedMeasureIsInPlanet || measuresBar.dragged())){
-                    if(selectedMeasure){
-                        //in all cases where a measure is selected (eg could be dragged)
-                        //then whether or not planet has meaure already, we highlight.
-                        //But the two cass are diffrernt.. need to clarify teh behaviour we want when measure
-                        //is already in planet compared to when not is when being dragged on
-                    //do we need to stored hoveredPlanet anywhere????
-                        //hoveredPlanetId = d.id;
-                        //planets.highlight(hoveredPlanetId, measuresBar.dragged());
-                        highlight(hoveredPlanetId);
-                    }
-                    //onMouseover.call(this, e,d);
-                })
-                .on("mouseout", onMouseout)
-                */
                 //@todo - use mask to make it a donut and put on top
+                /*
                 .call(withRing ? 
                     ring
                         .rx(d => d.ringRx(width))
@@ -278,6 +254,7 @@ export default function planetsComponent() {
                         return selection; 
                     }
                 )
+                */
                 .each(function(d){
                     //helper
                     //dont show menu if targOnly form open is if planet has the selectedMeasure on it
