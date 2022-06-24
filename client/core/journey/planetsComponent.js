@@ -102,6 +102,10 @@ export default function planetsComponent() {
         //also on src planet. BUT it does mean we need to also put it on src. Could have a goals library, or just use the dataset library (1 goal per dataset for now)
     };
 
+    //state
+    let linkGoals = [];
+    let timer;
+
     //dom
     let containerG;
 
@@ -115,7 +119,8 @@ export default function planetsComponent() {
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
-                .onClick(onClick)
+                //.onClick(onClick)
+                .onClick(handleClick)
                 //.onLongpressStart(longpressStart)
                 //.onLongpressDragged(longpressDragged)
                 //.onLongpressEnd(longpressEnd);
@@ -186,13 +191,13 @@ export default function planetsComponent() {
                     contentsG.selectAll("ellipse.core-inner")
                         .attr("rx", d.rx(width))
                         .attr("ry", d.ry(height))
-                        .attr("stroke", d.isMilestone ? grey10(1) : "none")
+                        .attr("stroke", "none")// d.isMilestone ? grey10(1) : "none")
 
                     //ellipse fills and opacities
                     contentsG.select("ellipse.core-inner.visible")
                         //@todo - add transition to this opacity change
                         .attr("opacity", !selectedMeasure || selectedMeasureIsInGoal(d) ? planetOpacity.normal : planetOpacity.available)
-                        .attr("fill", d.fill)
+                        .attr("fill", linkGoals.find(g => g.id === d.id) ? COLOURS.potentialLinkPlanet : d.fill)
                    
                     //title
                     contentsG.select("text.title")
@@ -344,13 +349,46 @@ export default function planetsComponent() {
                 }
             })
 
+            function handleClick(e, d){
+                console.log("handleClick", d)
+                const planetG = d3.select("g#planet-"+d.id);
+                planetG.select("ellipse.core-inner.visible")
+                    .attr("fill", COLOURS.potentialLinkPlanet)
+                
+                if(linkGoals.length !== 0){
+                    const prevGoal = linkGoals[linkGoals.length - 1];
+                    //create link
+                    onAddLink({ src:prevGoal.id, targ:d.id })
+                }
+                linkGoals = [d];
+                if(timer) { 
+                    console.log("stop timer");
+                    timer.stop(); 
+                }
+                timer = d3.timeout(() => {
+                    d3.selectAll("g.planet")
+                        .each(function(e,d){
+                            d3.select(this).select("ellipse.core-inner.visible").attr("fill", d => d.fill);
+                        })
+
+                linkGoals = [];
+                }, 2000);
+
+            }
+
             let linkPlanets = [];
+
             //longpress
             function longpressStart(e, d) {
                 linkPlanets = [d];
                 const planetG = d3.select("g#planet-"+d.id);
+
+                planetG.select("ellipse.core-inner.visible")
+                    .attr("fill", COLOURS.potentialLinkPlanet)
+
+                linkPlanets.push(d)
                 //update ring fill
-                ring.fill((d,hovered) => hovered || linkPlanets.find(g => g.id === d.id) ? COLOURS.potentialLinkPlanet : "transparent");
+                //ring.fill((d,hovered) => hovered || linkPlanets.find(g => g.id === d.id) ? COLOURS.potentialLinkPlanet : "transparent");
                 
                 planetG.select("g.contents")
                     .insert("line", ":first-child")
@@ -361,7 +399,7 @@ export default function planetsComponent() {
                         .attr("y2", e.sourceEvent.offsetY - yScale(d.yPC))
                         .attr("stroke-width", 1)
                         .attr("stroke", COLOURS.potentialLink)
-                        .attr("fill", COLOURS.potentialLink);
+                        .attr("fill", "#BBC2CC");
 
                 onLongpressStart.call(this, e, d)
             };
