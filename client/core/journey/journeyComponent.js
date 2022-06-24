@@ -163,8 +163,10 @@ export default function journeyComponent() {
         menuBarHeight = menuBarData.displayedBar ? DIMNS.menuBar.height : 0
         //note- for some reason, reducing canvasHeight doesnt seem to move axis properly, so instead just subtract menuBarHeight for axis translateY
         canvasHeight = contentsHeight;// - menuBarHeight; //this should be lrge enough for all planets, and rest can be accesed via pan
-        widgetsY = canvasHeight - WIDGETS_HEIGHT - DIMNS.xAxis.height;
+        widgetsY = canvasHeight - WIDGETS_HEIGHT - DIMNS.xAxis.height - menuBarHeight;
+        console.log("widgetsY", widgetsY)
     };
+
 
     let withCompletionPaths = false;
 
@@ -858,12 +860,13 @@ export default function journeyComponent() {
             const widgets = [
                 { key:"aim" }
             ]
+
+            widgetsG.attr("transform", "translate("+widgetsX +"," +widgetsY +")");
+
             const widgetG = widgetsG.selectAll("g.widget").data(widgets)
             widgetG.enter()
                 .append("g")
                     .attr("class", "widget")
-                    //we posiiotn each widget separately as an item on the canvas so that drag can simply use e.dx and dy
-                    .attr("transform", "translate("+widgetsX +"," +widgetsY +")")
                     .each(function(d){
                         //aim
                         if(d.key === "aim"){
@@ -871,8 +874,6 @@ export default function journeyComponent() {
                                 .append("rect")
                                     .attr("class", "widget")
                                     .attr("rx", 10)
-                                    //.attr("x", WIDGETS_MARGIN.left)
-                                    //.attr("y", WIDGETS_MARGIN.top)
                                     .attr("width", WIDGET_WIDTH)
                                     .attr("height", WIDGET_HEIGHT)
                                     //.attr("fill", "transparent")
@@ -910,8 +911,10 @@ export default function journeyComponent() {
                     function dragWidgetEnd(e,d){
                         //remove the clone
                         cloneG.remove();
-                        createAim(e);
-                        //add item to state eg aim -> and it should start with the small icon dimns and transition to larger
+                        //cant use e as the finishing position, as need to add the widgetsG position
+                        //(could have made widgetsG the drag continer, but then would have had to subtract it from the first dx/dy
+                        const { translateX, translateY } = getTransformationFromTrans(d3.select("g.widgets").attr("transform"));
+                        createAim({ x: e.x + translateX, y: e.y + translateY });
                     }
         }
 
@@ -934,16 +937,11 @@ export default function journeyComponent() {
 
             axesG = contentsG.append("g").attr("class", "axes");
 
-            widgetsG = contentsG
-                .append("g")
-                    .attr("class", "widgets")
-                    //.attr("transform", "translate("+10 +"," +(canvasHeight - WIDGETS_HEIGHT - 40) +")")
+            widgetsG = contentsG.append("g").attr("class", "widgets")
 
             widgetsG
                 .append("rect")
                     .attr("class", "bg")
-                    .attr("x", widgetsX)
-                    .attr("y", widgetsY)
                     .attr("width", WIDGETS_WIDTH)
                     .attr("height", WIDGETS_HEIGHT)
                     .attr("fill", COLOURS?.canvas || "#FAEBD7")
