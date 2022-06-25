@@ -8,6 +8,8 @@ export default function aimsLayout(){
     let yScale = x => 0;
     let currentZoom = d3.zoomIdentity;
 
+    let aligned = false;
+
     //let selected;
 
     let channelsData;
@@ -50,8 +52,9 @@ export default function aimsLayout(){
                 dataType: "planet",
                 aimId: p.aimId || "main",
                 channel,
-                displayDate:p.unaligned ? p.targetDate : channel.endDate,
-                x:p.unaligned ? targetX : channel.endX, //planets positioned on channel end line
+                //an individual goal can be unaligned, or the whole journey display can be !aligned
+                displayDate:!aligned || p.unaligned ? p.targetDate : channel.endDate,
+                x:!aligned || p.unaligned ? targetX : channel.endX, //planets positioned on channel end line
                 y: yScale(p.yPC),
                 targetX,
                 rx,
@@ -134,6 +137,11 @@ export default function aimsLayout(){
     update.canvasDimns = function (value) {
         if (!arguments.length) { return canvasDimns; }
         canvasDimns = { ...canvasDimns, ...value };
+        return update;
+    };
+    update.aligned = function (value) {
+        if (!arguments.length) { return aligned; }
+        aligned = value;
         return update;
     };
     update.timeScale = function (value) {

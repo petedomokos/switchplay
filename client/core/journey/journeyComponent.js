@@ -406,6 +406,7 @@ export default function journeyComponent() {
             function updateAimsData(){
                 //note - planetsLayout was also taking in .selected for siSelected n planets, but not needed
                 myAimsLayout
+                    .aligned(aligned)
                     .canvasDimns({ width:canvasWidth, height: canvasHeight })
                     .currentZoom(currentZoom)
                     .timeScale(zoomedTimeScale)
