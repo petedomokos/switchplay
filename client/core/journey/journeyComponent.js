@@ -166,7 +166,7 @@ export default function journeyComponent() {
         widgetsY = canvasHeight - WIDGETS_HEIGHT - DIMNS.xAxis.height - menuBarHeight;
     };
 
-
+    let aligned = false;
     let withCompletionPaths = false;
 
     let enhancedZoom = dragEnhancements().longpressThreshold(200);
@@ -1139,6 +1139,11 @@ export default function journeyComponent() {
     journey.modalData = function (value) {
         if (!arguments.length) { return modalData; }
         modalData = value;
+        return journey;
+    };
+    journey.aligned = function (value) {
+        if (!arguments.length) { return aligned; }
+        aligned = value;
         return journey;
     };
     journey.withCompletionPaths = function (value) {

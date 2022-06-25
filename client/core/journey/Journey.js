@@ -52,7 +52,15 @@ const useStyles = makeStyles((theme) => ({
     height:props => props.modal?.height
   },
   ctrls:{
+    display:"flex",
+    justifyContent:"space-between"
+  },
+  leftCtrls:{
     display:"flex"
+  },
+  rightCtrls:{
+    display:"flex",
+    justifyContent:"flex-end"
   }
 }))
 
@@ -84,6 +92,7 @@ const Journey = ({ data, availableJourneys, screen, width, height, save, setActi
   const [journey, setJourney] = useState(null);
   const [channels, setChannels] = useState(initChannels);
   const [withCompletionPaths, setWithCompletionPath] = useState(false);
+  const [aligned, setAligned] = useState(false);
   const [modalData, setModalData] = useState(undefined);
   const [displayedBar, setDisplayedBar] = useState("");
   const shouldD3UpdateRef = useRef(true);
@@ -103,7 +112,7 @@ const Journey = ({ data, availableJourneys, screen, width, height, save, setActi
             const { width, height } = DIMNS.form.single;
             const goalNameX = d => d.x - width/2;
             const goalNameY = d => d.y - height/2;
-            const aimNameX = d => d.displayX + DIMNS.aim.name.margin.left;
+            const aimNameX = d => (aligned ? d.goalFitX : d.x) + DIMNS.aim.name.margin.left;
             const aimNameY = d => d.y + DIMNS.aim.name.margin.top;
 
             const journeyNameLeft = screen.isLarge ? DIMNS.journey.name.margin.left : DIMNS.burgerBarWidth;
@@ -115,7 +124,7 @@ const Journey = ({ data, availableJourneys, screen, width, height, save, setActi
                 modal:{
                   width: d.id === "main" ? journeyNameWidth : width,
                   height: d.id === "main" ? journeyNameHeight : height,
-                  //@todo - sort this out...for now, planet has x whereas aim has displayX
+                  //@todo - sort this out...for now, planet has x whereas aim has goalFitX potentially
                   left:(d.dataType === "planet" ? goalNameX(d) : (d.id === "main" ? journeyNameLeft : aimNameX(d))) + "px",
                   top:(d.dataType === "planet" ? goalNameY(d) : (d.id === "main" ? journeyNameTop : aimNameY(d))) + "px",
                   targTop:"20px"
@@ -185,6 +194,7 @@ const Journey = ({ data, availableJourneys, screen, width, height, save, setActi
         .width(journeyWidth)
         .height(journeyHeight)
         .screen(screen)
+        .aligned(aligned)
         .withCompletionPaths(withCompletionPaths)
         .menuBarData(menuBarData)
         .measuresOpen(displayedBar === "measures" ? measures : undefined)
@@ -308,10 +318,14 @@ const Journey = ({ data, availableJourneys, screen, width, height, save, setActi
       //.datum({ canvas, aims, planets, links, channels, measures })
       .call(journey)
 
-  }, [JSON.stringify(data), journey, withCompletionPaths, displayedBar, modalData, width, height, screen ])
+  }, [JSON.stringify(data), journey, aligned, withCompletionPaths, displayedBar, modalData, width, height, screen ])
 
   const toggleCompletion = () => {
-      setWithCompletionPath(prevState => !prevState)
+      setWithCompletionPath(prevState => !prevState);
+  }
+
+  const toggleAligned = () => {
+    setAligned(prevState => !prevState);
   }
 
   //for now, we just open or close all measures
@@ -417,11 +431,17 @@ const toggleJourneysOpen = useCallback(() => {
     <div className={classes.root}>
         <svg className={classes.svg} ref={containerRef}></svg>
         <div className={classes.ctrls}>
-            <Button className={classes.btn} color="primary" variant="contained" onClick={toggleMeasuresOpen} >
-              {displayedBar === "measures" ?"Close Measures" : "Measures"}</Button>
-            <Button className={classes.btn} color="primary" variant="contained" onClick={toggleJourneysOpen} >
-              {displayedBar === "journeys" ?"Close Journeys" : "Journeys"}</Button>
-            {/**<Button className={classes.btn} color="primary" variant="contained" onClick={toggleCompletion} >completion</Button>**/}
+            <div className={classes.leftCtrls}>
+                <Button className={classes.btn} color="primary" variant="contained" onClick={toggleMeasuresOpen} >
+                  {displayedBar === "measures" ?"Close Measures" : "Measures"}</Button>
+                <Button className={classes.btn} color="primary" variant="contained" onClick={toggleJourneysOpen} >
+                  {displayedBar === "journeys" ?"Close Journeys" : "Journeys"}</Button>
+            </div>
+            <div className={classes.rightCtrls}>
+                <Button className={classes.btn} color="primary" variant="contained" onClick={toggleAligned} >
+                  {aligned ?"Unalign goals" : "Align goals"}</Button>
+                {/**<Button className={classes.btn} color="primary" variant="contained" onClick={toggleCompletion} >completion</Button>**/}
+            </div>
         </div>
         {modalData && 
           <div ref={modalRef} className={classes.modal}>
