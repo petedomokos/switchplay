@@ -119,8 +119,10 @@ export default function planetsComponent() {
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
+                .onDblClick(() => { console.log("dblClick"); })
+                .onClick(() => { console.log("clicked")})
                 //.onClick(onClick)
-                .onClick(handleClick)
+                //.onClick(handleClick)
                 //.onLongpressStart(longpressStart)
                 //.onLongpressDragged(longpressDragged)
                 //.onLongpressEnd(longpressEnd);
@@ -129,7 +131,7 @@ export default function planetsComponent() {
                 .on("start", enhancedDrag(onDragStart))
                 .on("drag", enhancedDrag(onDrag))
                 .on("end", enhancedDrag(function(e,d){
-                    if(enhancedDrag.isClick()) { 
+                    if(enhancedDrag.isClick() || enhancedDrag.isDblClick()) { 
                         return; 
                     }
                     onDragEnd.call(this, e, d);
@@ -243,23 +245,6 @@ export default function planetsComponent() {
                 })
                 //.call(updateHighlighted)
                 .call(planetDrag)
-                //@todo - use mask to make it a donut and put on top
-                /*
-                .call(withRing ? 
-                    ring
-                        .rx(d => d.ringRx(width))
-                        .ry(d => d.ringRy(height))
-                        .fill((d, hovered) => hovered ? COLOURS.potentialLinkPlanet : "transparent")
-                        .stroke("none")
-                        .opacity(planetOpacity.normal)
-                        .container("g.contents") 
-                    : 
-                    function(selection){
-                        selection.selectAll("ellipse.ring").remove();
-                        return selection; 
-                    }
-                )
-                */
                 .each(function(d){
                     //helper
                     //dont show menu if targOnly form open is if planet has the selectedMeasure on it
@@ -381,9 +366,7 @@ export default function planetsComponent() {
                     .attr("fill", COLOURS.potentialLinkPlanet)
 
                 linkPlanets.push(d)
-                //update ring fill
-                //ring.fill((d,hovered) => hovered || linkPlanets.find(g => g.id === d.id) ? COLOURS.potentialLinkPlanet : "transparent");
-                
+
                 planetG.select("g.contents")
                     .insert("line", ":first-child")
                         .attr("class", "temp-link")
@@ -436,17 +419,12 @@ export default function planetsComponent() {
                 //console.log("linkPlanet", linkPlanet)
                 linkPlanets = linkPlanet ? [d, linkPlanet] : [d];
 
-                //update ring fill
-                ring.fill((d,hovered) => hovered || linkPlanets.find(g => g.id === d.id) ? COLOURS.potentialLinkPlanet : "transparent");
-                
                 onLongpressDragged.call(this, e, d)
             };
             function longpressEnd(e, d) {
                 const planetG = d3.select("g#planet-"+d.id);
                 //cleanup dom
                 planetG.select("line.temp-link").remove();
-                ring.fill((d,hovered) => hovered ? COLOURS.potentialLinkPlanet : "transparent");
-
                 //set x2, y2 to centre of nearest planet
                 if(linkPlanets.length === 2){
                     //note - goal fill will go back to its aim colour on general update so no need to undo highlighting

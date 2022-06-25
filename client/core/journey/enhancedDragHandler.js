@@ -11,6 +11,7 @@ export default function dragEnhancements() {
     let isDragEnabled = true;
     let withLongpress = false;
     let withClick = false;
+    let withDblClick = false;
     let longpressSettings = {};
     let alwaysCallDrag = true;
 
@@ -20,12 +21,14 @@ export default function dragEnhancements() {
     let onLongpressDragged;
     let onLongpressEnd;
     let onClick = function () {};
+    let onDblClick = function () {};
 
     // local state
     // isLongpress will only be set to true if at least one longoress handler is set, and the threshold is met
     let isLongpress = false;
     // isClick will only be set to true if onClick has been defined
     let isClick = false;
+    let isDblClick = false;
     let isMultitouch = false;
     // helper variables
     let startPoint;
@@ -34,6 +37,11 @@ export default function dragEnhancements() {
     let originalCursor;
 
     let startCallback;
+
+    //let prevClickTime;
+    //let prevStart;
+    let dblClickTimer;
+
     function withEnhancements(cb = () => { }) {
         return function (e, d) {
             beforeAll.call(this, e, d);
@@ -77,6 +85,9 @@ export default function dragEnhancements() {
                     }
                     //console.log("was moved")
                     wasMoved = true;
+                    //cannot be dbl-clik if dragged
+                    //prevStart = null;
+
                     if(!isLongpress && startCallback){
                         startCallback();
                         startCallback = undefined;
@@ -112,8 +123,17 @@ export default function dragEnhancements() {
                         reset();
                         break;
                     }
-                    if (isClick) { 
-                        onClick.call(this, e, d);
+                    if (isClick) {
+                        if(dblClickTimer){
+                            onDblClick.call(this, e, d)
+                            dblClickTimer.stop();
+                            dblClickTimer = null;
+                        }else{
+                            dblClickTimer = d3.timeout(() => {
+                                dblClickTimer = null;
+                                onClick.call(this, e, d);
+                            }, 200)
+                        }
                         reset();
                         break; 
                     }
@@ -216,6 +236,12 @@ export default function dragEnhancements() {
         withClick = true;
         return withEnhancements;
     };
+    withEnhancements.onDblClick = function (func) {
+        if (!arguments.length) { return onDblClick; }
+        onDblClick = func;
+        withDblClick = true;
+        return withEnhancements;
+    };
     withEnhancements.isMultitouch = function (value) {
         if (!arguments.length) { return isMultitouch; }
         isMultitouch = value;
@@ -223,6 +249,7 @@ export default function dragEnhancements() {
     };
     // exposed state
     withEnhancements.isClick = function () { return isClick; };
+    withEnhancements.isDblClick = function () { return isClick; };
     withEnhancements.isLongpress = function () { return isLongpress; };
     withEnhancements.wasMoved = function () { return wasMoved; }
 

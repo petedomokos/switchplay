@@ -164,7 +164,6 @@ export default function journeyComponent() {
         //note- for some reason, reducing canvasHeight doesnt seem to move axis properly, so instead just subtract menuBarHeight for axis translateY
         canvasHeight = contentsHeight;// - menuBarHeight; //this should be lrge enough for all planets, and rest can be accesed via pan
         widgetsY = canvasHeight - WIDGETS_HEIGHT - DIMNS.xAxis.height - menuBarHeight;
-        console.log("widgetsY", widgetsY)
     };
 
 
@@ -318,9 +317,8 @@ export default function journeyComponent() {
             enhancedZoom
                 //.dragThreshold(200) //dont get why this has to be so large
                 //.beforeAll(() => { updateSelected(undefined); })
-                .onClick(handleCanvasClick)
+                //.onClick(handleCanvasClick)
                 .onLongpressStart(function(e,d){
-                    console.log("longpress cnvas")
                     if(!enhancedZoom.wasMoved()){
                         handleCanvasClick.call(this, e, d, true)
                         //longpress toggles isOpen
@@ -329,7 +327,6 @@ export default function journeyComponent() {
                         //const { id, isOpen } = chan;
                         //there must be a diff between this code and the udate code above, or the way axis is updwted, because in zoomed state
                         //sometimes the opening of c channel is only corrected on state update
-                        console.log("....")
                         //updateChannel({ id, isOpen:!isOpen })
                     }
                 })
@@ -340,6 +337,7 @@ export default function journeyComponent() {
                 .scaleExtent([0.125, 2])
                 .on("start", enhancedZoom())
                 .on("zoom", enhancedZoom(function(e){
+                    console.log("zoomed", e)
                     if(e.sourceEvent){
                         //user has manually zoomed so close selected/editing
                         //selected = undefined;
@@ -360,6 +358,8 @@ export default function journeyComponent() {
 
             //svg.call(zoom)
             contentsG.call(zoom)
+                .on("dblclick.zoom", null)
+                //.on("dblclick", null)
             //.on("wheel.zoom", null)
 
             function handleCanvasClick(e, d, shouldCreateGoal){
@@ -495,9 +495,7 @@ export default function journeyComponent() {
                     .onDragStart(function(e, d){
                         //aim is raised already in aimComponent
                     })
-                    .onClickName((e,d) => { 
-                        console.log("click name", d)
-                        updateSelected(d); })
+                    .onClickName((e,d) => { updateSelected(d); })
                     .onDrag(function(e, aim){
                         //links
                         //this is the dragged aim, so we get the planets from it
@@ -773,7 +771,6 @@ export default function journeyComponent() {
                         .onUpdateSelected(updateAims)
                         .onNewItemButtonClick((item) => {
                             if(displayedBar === "measures"){
-                                console.log("new measure........")
                                 //setModalData({ measureOnly: true });
                             }else{
                                 createJourney();
