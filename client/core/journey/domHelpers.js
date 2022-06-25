@@ -48,22 +48,49 @@ export function updatePos(selection, pos={}, transition){
     })
 }
 
-export function oscillate(selection, options = {}) {
-    const { interval = 20 } = options;
-    let i = 0;
-    const timer = d3.interval(() => {
-        // create a delta for horizontal oscillation based on count
-        const dx = i % 2 ? -2.5 : 2.5;
-        selection.each(function (d) {
-            d3.select(this).attr("transform", `translate(${d.x + dx},${d.y}) scale(1.1)`);
-        });
 
-        if (i === 4) {
+// Provides a shake and a slight increase in size, with specifics such as scale (k), centre of enlargement
+// and size of shake (dx) an duration passed in as options
+export function Oscillator(options = {}) {
+    let timer;
+    const start = (selection, dynamicOptions={}) => {
+        const allOptions = { ...options, ...dynamicOptions };
+        // translate dx, x, y,  scale k
+        const { interval = 20, k = 1.05, dx = 5, centre, nrOscillations } = allOptions;
+        let i = 0;
+        timer = d3.interval(() => {
+            // get any existing transform on the selection
+            const { translate, scale } = parseTransform(selection.attr("transform"));
+            // scale may be an array and in that case just use x compooinent for now. Also use + to coerce.
+            const currentScale = typeof scale === "string" ? +scale : +scale[0];
+            const newK = currentScale * k;
+
+            // create a delta for horizontal oscillation based on count
+            const newDx = i === 4 ? 0 : (i % 2 ? -dx / 2 : dx / 2);
+            const newX = +translate[0] + newDx;
+            const newY = +translate[1];
+            selection.each(function () {
+                d3.select(this)
+                    .attr("transform", `translate(${newX},${newY}) scale(${newK})`)
+                    .attr("transform-origin", centre ? `${centre[0]} ${centre[1]}` : null);
+            });
+
+            if (nrOscillations && i === nrOscillations - 1) {
+                timer.stop();
+            }
+
+            i += 1;
+        }, interval);
+    }
+
+    const stop = () => {
+        if(timer){
             timer.stop();
+            timer = null;
         }
+    }
 
-        i += 1;
-    }, interval);
+    return { start, stop }
 }
 
 // e can be a source event or a d3 drag event, and mouse or touch

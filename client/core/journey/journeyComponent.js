@@ -245,6 +245,7 @@ export default function journeyComponent() {
 
     function journey(selection) {
         updateDimns();
+
         selection.each(function (journeyData) {
             data = journeyData;
             //console.log("journey", data)
@@ -317,7 +318,7 @@ export default function journeyComponent() {
             enhancedZoom
                 //.dragThreshold(200) //dont get why this has to be so large
                 //.beforeAll(() => { updateSelected(undefined); })
-                //.onClick(handleCanvasClick)
+                .onClick(handleCanvasClick)
                 .onLongpressStart(function(e,d){
                     if(!enhancedZoom.wasMoved()){
                         handleCanvasClick.call(this, e, d, true)
@@ -337,7 +338,6 @@ export default function journeyComponent() {
                 .scaleExtent([0.125, 2])
                 .on("start", enhancedZoom())
                 .on("zoom", enhancedZoom(function(e){
-                    console.log("zoomed", e)
                     if(e.sourceEvent){
                         //user has manually zoomed so close selected/editing
                         //selected = undefined;
@@ -574,7 +574,9 @@ export default function journeyComponent() {
                         updateSelected(d); 
                     })
                     //@TODO WARNING - may cause touch issues as drag handlers are updated - need this to not update planetsComp or at least not teh drag handlers
-                    .onDragGoalStart(function(){ updateSelected(undefined); })
+                    .onDragGoalStart(function(){ 
+                        //console.log("drg goal start")
+                        updateSelected(undefined); })
                     .onDragGoal(function(e , d, /*shouldUpdateSelected = true*/){ //pass in onDragGoal
                         //console.log("journey drgGoal")
                         //if(shouldUpdateSelected){
@@ -916,7 +918,11 @@ export default function journeyComponent() {
         }
 
         function init(){
-            svg = d3.select(this);
+            svg = d3.select(this)
+                
+            svg
+                .append("defs")
+                .call(appendDefs);
 
             contentsG = svg
                 .append("g")
@@ -944,6 +950,29 @@ export default function journeyComponent() {
                     .attr("fill", COLOURS?.canvas || "#FAEBD7")
                     //.attr("stroke", "black");
 
+        }
+
+        //defs
+        function appendDefs(defs){
+            // shadow filter def
+            const filter = defs.append("filter")
+                .attr("id", "drop-shadow")
+                .attr("height", "140%");
+    
+            filter.append("feDropShadow")
+                .attr("in", "SourceAlpha")
+                .attr("stdDeviation", 10)
+                .attr("dy", 10)
+                .attr("flood-opacity", 0.6)
+                .attr("result", "shadow");
+    
+            const feMerge = filter.append("feMerge");
+    
+            feMerge.append("feMergeNode")
+                .attr("in", "shadow");
+    
+            feMerge.append("feMergeNode")
+                .attr("in", "SourceGraphic");
         }
 
         updateSelected = (d) => {

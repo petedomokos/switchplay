@@ -36,6 +36,12 @@ export default function dragEnhancements() {
     let longpressTimer;
     let originalCursor;
 
+    let distanceDragged;
+    //@todo - store last 5 events and do speed based on them only
+    let startTime;
+    let elapsedTime;
+    let avgSpeed;
+
     let startCallback;
 
     //let prevClickTime;
@@ -56,6 +62,7 @@ export default function dragEnhancements() {
                     if (isMultitouch) { break; }
                     // set up for drag threshold test
                     startPoint = getClientPoint(e);
+                    startTime = e.sourceEvent.timeStamp;
                     // set up longpress test
                     if (withLongpress) {
                         setLongpressTimer.call(this, e, d);
@@ -78,7 +85,9 @@ export default function dragEnhancements() {
                     // CHECK ITS REACHED THE DRAG THRESHOLD
                     const currentPoint = getClientPoint(e);
                     if(!startPoint) { startPoint = currentPoint; }
-                    const distanceDragged = distanceBetweenPoints(startPoint, currentPoint);
+                    distanceDragged = distanceBetweenPoints(startPoint, currentPoint);
+                    elapsedTime = e.sourceEvent.timeStamp - startTime;
+                    avgSpeed = distanceDragged / elapsedTime;
                     //console.log("distanceDragged", distanceDragged)
                     if (distanceDragged < minDistance) {
                         break;
@@ -182,6 +191,7 @@ export default function dragEnhancements() {
         isLongpress = false;
         isMultitouch = false;
         wasMoved = false;
+        distanceDragged = 0;
     }
 
     // api
@@ -252,6 +262,9 @@ export default function dragEnhancements() {
     withEnhancements.isDblClick = function () { return isClick; };
     withEnhancements.isLongpress = function () { return isLongpress; };
     withEnhancements.wasMoved = function () { return wasMoved; }
+    withEnhancements.distanceDragged = function () { return distanceDragged; }
+    withEnhancements.elapsedTime = function () { return elapsedTime; }
+    withEnhancements.avgSpeed = function () { return avgSpeed; }
 
     return withEnhancements;
 }

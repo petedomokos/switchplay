@@ -372,9 +372,9 @@ export default function aimsComponent() {
                                     .availablePlanetSizeMultiplier(planetSettings.availablePlanetSizeMultiplier)
 
                                     .onClick(onClickGoal)
-                                    //.onDragStart(dragGoalStart)
-                                    //.onDrag(draggedGoal)
-                                    //.onDragEnd(dragGoalEnd)
+                                    .onDragStart(dragGoalStart)
+                                    .onDrag(draggedGoal)
+                                    .onDragEnd(dragGoalEnd)
                                     //.onLongpressStart(longpressGoalStart)
                                     //.onLongpressDragged(longpressGoalDragged)
                                     //.onLongpressEnd(longpressGoalEnd)
@@ -538,7 +538,6 @@ export default function aimsComponent() {
 
         }
         function draggedGoal(e , d, shouldUpdateSelected){
-            console.log("dragged goal")
             d.x += e.dx;
             d.y += e.dy;
 

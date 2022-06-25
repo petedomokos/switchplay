@@ -6,6 +6,7 @@ import { grey10, COLOURS, DIMNS, AVAILABLE_GOAL_MULTIPLIER } from "./constants";
 import { findNearestPlanet, distanceBetweenPoints, channelContainsPoint, channelContainsDate } from './geometryHelpers';
 import dragEnhancements from './enhancedDragHandler';
 import menuComponent from './menuComponent';
+import { Oscillator } from './domHelpers';
 /*
 
 */
@@ -88,6 +89,8 @@ export default function planetsComponent() {
 
 
     let enhancedDrag = dragEnhancements();
+    //@todo - find out why k=1.05 makes such a big increase in size
+    let oscillator = Oscillator({k:1});
 
     //components
     //const ring = ellipse().className("ring");
@@ -120,12 +123,12 @@ export default function planetsComponent() {
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
                 .onDblClick(() => { console.log("dblClick"); })
-                .onClick(() => { console.log("clicked")})
+                //.onClick(() => { console.log("clicked")})
                 //.onClick(onClick)
-                //.onClick(handleClick)
-                //.onLongpressStart(longpressStart)
-                //.onLongpressDragged(longpressDragged)
-                //.onLongpressEnd(longpressEnd);
+                .onClick(handleClick)
+                .onLongpressStart(longpressStart)
+                .onLongpressDragged(longpressDragged)
+                .onLongpressEnd(longpressEnd);
 
             const planetDrag = d3.drag()
                 .on("start", enhancedDrag(onDragStart))
@@ -339,10 +342,11 @@ export default function planetsComponent() {
                 planetG.select("ellipse.core-inner.visible")
                     .attr("fill", COLOURS.potentialLinkPlanet)
                 
-                if(prevClickedGoal){
+                if(prevClickedGoal && prevClickedGoal.id !== d.id){
                     //create link
                     onAddLink({ src:prevClickedGoal.id, targ:d.id })
                 }
+
                 prevClickedGoal = d;
                 if(timer) { timer.stop(); }
                 timer = d3.timeout(() => {
@@ -356,83 +360,72 @@ export default function planetsComponent() {
             }
 
             let linkPlanets = [];
+            let deleted = false;
+
+            //temp way to grab svg
+            const svg = d3.select("svg");
 
             //longpress
             function longpressStart(e, d) {
-                linkPlanets = [d];
-                const planetG = d3.select("g#planet-"+d.id);
+                //console.log("e", e)
+                //todo - check defs appended, and use them here, then longopressDrag should trigger the delete of a goal
+                //then do same for aims and links
+                /*
+                svg.select("defs").select("filter").select("feDropShadow")
+                    .attr("flood-opacity", 0.6)
+                    .attr("stdDeviation", 10)
+                    .attr("dy", 10);
+                */
 
-                planetG.select("ellipse.core-inner.visible")
-                    .attr("fill", COLOURS.potentialLinkPlanet)
+                d3.select(this)
+                    //.style("filter", "url(#drop-shadow)")
+                    .call(oscillator.start);
 
-                linkPlanets.push(d)
-
-                planetG.select("g.contents")
-                    .insert("line", ":first-child")
-                        .attr("class", "temp-link")
-                        .attr("x1", e.sourceEvent.offsetX - timeScale(d.displayDate))
-                        .attr("y1", e.sourceEvent.offsetY - yScale(d.yPC))
-                        .attr("x2", e.sourceEvent.offsetX - timeScale(d.displayDate))
-                        .attr("y2", e.sourceEvent.offsetY - yScale(d.yPC))
-                        .attr("stroke-width", 1)
-                        .attr("stroke", COLOURS.potentialLink)
-                        .attr("fill", "#BBC2CC");
-
-                onLongpressStart.call(this, e, d)
+                // onLongpressStart.call(this, e, d)
             };
             function longpressDragged(e, d) {
-                const planetG = d3.select("g#planet-"+d.id);
-                const line = planetG.select("line.temp-link");
-                planetG.select("line.temp-link")
-                    .attr("x2", +line.attr("x2") + e.dx)
-                    .attr("y2", +line.attr("y2") + e.dy);
+                if(deleted) { return; }
 
-                //find nearest planet and if dist is below threshold, set planet as target candidate
-                const LINK_THRESHOLD = 100;
-                //need all planets not just ones in this aim
-                const availablePlanets = d3.selectAll("g.planet")
-                    .filter(p => p.id !== d.id)
-                    .filter(p => !linksData.find(l => l.id.includes(d.id) && l.id.includes(p.id)))
-                    .data();
+                if(enhancedDrag.distanceDragged() > 200 && enhancedDrag.avgSpeed() > 0.1){
+                    d3.select(this)
+                        //.style("filter", "url(#drop-shadow)")
+                        .call(oscillator.stop);
 
-                const nearestPlanet = findNearestPlanet(e, availablePlanets);
-                //console.log("near", nearestPlanet)
-                const linkPlanet = distanceBetweenPoints(e, nearestPlanet) <= LINK_THRESHOLD ? nearestPlanet : undefined;
-                const prevLinkPlanet = linkPlanets[1];
-                if(prevLinkPlanet?.id !== linkPlanet?.id){
-                    //remove prev highlighting
-                    if(prevLinkPlanet){
-                        d3.select("g.planet-"+prevLinkPlanet.id).selectAll("ellipse.core.visible")
-                            .transition()
-                            .duration(200)
-                                .attr("fill", d.fill)
-                    }
-                    //add new highlighting
-                    if(linkPlanet){
-                        d3.select("g.planet-"+linkPlanet.id).selectAll("ellipse.core.visible")
-                            .transition()
-                            .duration(200)
-                                .attr("fill", COLOURS.potentialLinkPlanet)
-                    }
+                    deleted = true;
+                    d3.select(this)
+                        .transition()
+                        .duration(50)
+                            .attr("opacity", 0)
+                            .on("end", () => {
+                                deletePlanet(d.id)
+                            })
+                }else{
+                    onDrag.call(this, e, d)
                 }
-                //const { x, y, ...rest } = linkPlanet
-                //console.log("linkPlanet", linkPlanet)
-                linkPlanets = linkPlanet ? [d, linkPlanet] : [d];
-
                 onLongpressDragged.call(this, e, d)
             };
+
             function longpressEnd(e, d) {
-                const planetG = d3.select("g#planet-"+d.id);
-                //cleanup dom
-                planetG.select("line.temp-link").remove();
-                //set x2, y2 to centre of nearest planet
-                if(linkPlanets.length === 2){
-                    //note - goal fill will go back to its aim colour on general update so no need to undo highlighting
-                    //save new link
-                    const sortedLinks = linkPlanets.sort((a, b) => d3.ascending(a.x, b.x))
-                    onAddLink({ src:sortedLinks[0].id, targ:sortedLinks[1].id })
+                if(deleted){ 
+                    deleted = false;
+                    return; 
                 }
-                onLongpressEnd.call(this, e, d)
+                /*
+                svg.select("defs").select("filter").select("feDropShadow")
+                    .transition("filter-transition")
+                    .duration(300)
+                        .attr("flood-opacity", 0)
+                        .attr("stdDeviation", 0)
+                        .attr("dy", 0)
+                        .on("end", () => {
+                            d3.select(this).style("filter", null);
+                        });*/
+
+                d3.select(this)
+                    //.style("filter", "url(#drop-shadow)")
+                    .call(oscillator.stop);
+                
+                // onLongpressEnd.call(this, e, d)
             };
 
             prevData = data;
