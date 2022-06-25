@@ -57,7 +57,7 @@ export default function planetsComponent() {
     let stopShowingAvailabilityStatus = function() {};
 
     //API CALLBACKS
-    let onClick = function(){};
+    let onDblClick = function(){};
     let onDragStart = function() {};
     let onDrag = function() {};
     let onDragEnd = function() {};
@@ -122,9 +122,7 @@ export default function planetsComponent() {
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
-                .onDblClick(() => { console.log("dblClick"); })
-                //.onClick(() => { console.log("clicked")})
-                //.onClick(onClick)
+                .onDblClick(onDblClick)
                 .onClick(handleClick)
                 .onLongpressStart(longpressStart)
                 .onLongpressDragged(longpressDragged)
@@ -339,8 +337,20 @@ export default function planetsComponent() {
 
             function handleClick(e, d){
                 const planetG = d3.select("g#planet-"+d.id);
-                planetG.select("ellipse.core-inner.visible")
-                    .attr("fill", COLOURS.potentialLinkPlanet)
+                const ellipse = planetG.select("ellipse.core-inner.visible");
+                
+                if(prevClickedGoal?.id === d.id){
+                    //treat same as a dbl-click
+                    console.log("reset fill")
+                    timer.stop();
+                    timer = null;
+                    ellipse.attr("fill", d.fill)
+                    prevClickedGoal = null;
+                    onDblClick.call(this, e, d);
+                    return;
+                }
+
+                ellipse.attr("fill", COLOURS.potentialLinkPlanet);
                 
                 if(prevClickedGoal && prevClickedGoal.id !== d.id){
                     //create link
@@ -354,7 +364,7 @@ export default function planetsComponent() {
                         .each(function(e,d){
                             d3.select(this).select("ellipse.core-inner.visible").attr("fill", d => d.fill);
                         })
-                prevClickedGoal = undefined;
+                prevClickedGoal = null;
                 }, 2000);
 
             }
@@ -386,7 +396,7 @@ export default function planetsComponent() {
             function longpressDragged(e, d) {
                 if(deleted) { return; }
 
-                if(enhancedDrag.distanceDragged() > 200 && enhancedDrag.avgSpeed() > 0.1){
+                if(enhancedDrag.distanceDragged() > 200 && enhancedDrag.avgSpeed() > 0.08){
                     d3.select(this)
                         //.style("filter", "url(#drop-shadow)")
                         .call(oscillator.stop);
@@ -505,9 +515,9 @@ export default function planetsComponent() {
         timeScale = value;
         return planets;
     };
-    planets.onClick = function (value) {
-        if (!arguments.length) { return onClick; }
-        onClick = value;
+    planets.onDblClick = function (value) {
+        if (!arguments.length) { return onDblClick; }
+        onDblClick = value;
         return planets;
     };
     planets.onDragStart = function (value) {

@@ -570,7 +570,7 @@ export default function journeyComponent() {
                     })
                     //.onMouseover(() => {})
                     //.onMouseout(() => {})
-                    .onClickGoal((e,d) => {
+                    .onDblClickGoal((e,d) => {
                         updateSelected(d); 
                     })
                     //@TODO WARNING - may cause touch issues as drag handlers are updated - need this to not update planetsComp or at least not teh drag handlers

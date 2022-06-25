@@ -60,7 +60,7 @@ export default function aimsComponent() {
     let onMouseover = function(){};
     let onMouseout = function(){};
     let onClickName = function(){};
-    let onClickGoal = function(){};
+    let onDblClickGoal = function(){};
     let onDragGoalStart = function() {};
     let onDragGoal = function() {};
     let onDragGoalEnd = function() {};
@@ -371,7 +371,7 @@ export default function aimsComponent() {
                                     .fontSize(planetSettings.fontSize)
                                     .availablePlanetSizeMultiplier(planetSettings.availablePlanetSizeMultiplier)
 
-                                    .onClick(onClickGoal)
+                                    .onDblClick(onDblClickGoal)
                                     .onDragStart(dragGoalStart)
                                     .onDrag(draggedGoal)
                                     .onDragEnd(dragGoalEnd)
@@ -775,9 +775,9 @@ export default function aimsComponent() {
         onClickName = value;
         return aims;
     };
-    aims.onClickGoal = function (value) {
-        if (!arguments.length) { return onClickGoal; }
-        onClickGoal = value;
+    aims.onDblClickGoal = function (value) {
+        if (!arguments.length) { return onDblClickGoal; }
+        onDblClickGoal = value;
         return aims;
     };
     aims.onDragGoalStart = function (value) {
