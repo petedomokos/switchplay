@@ -427,6 +427,8 @@ const toggleJourneysOpen = useCallback(() => {
       setModalData(undefined);
   }
 
+  console.log("modalData", modalData)
+
   return (
     <div className={classes.root}>
         <svg className={classes.svg} ref={containerRef}></svg>

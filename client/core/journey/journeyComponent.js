@@ -771,9 +771,11 @@ export default function journeyComponent() {
                             //note - eventually will have option to pass in filter settings eg tags like fitness, or groupId
                             setModalData({ importing: true, filters:[] })
                         })
+                        //why update aims???
                         .onUpdateSelected(updateAims)
                         .onNewItemButtonClick((item) => {
                             if(displayedBar === "measures"){
+                                updateAims();
                                 //setModalData({ measureOnly: true });
                             }else{
                                 createJourney();
@@ -781,7 +783,7 @@ export default function journeyComponent() {
                         })
                         .onItemClick((e, item) => {
                             if(displayedBar === "measures"){
-                                setModalData({ measureOnly: true });
+                                //setModalData({ measureOnly: true, d:item });
                             }else{
                                 //journeys
                                 //open journey
