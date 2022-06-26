@@ -235,7 +235,7 @@ export default function journeyComponent() {
     //data
     let channelsData;
     let aimsData;
-    let planetsData; //note - this is just derived from aimsData merging all planets - will remove
+    let goalsData; //note - this is just derived from aimsData merging all planets - will remove
     let linksData;
     let modalData;
 
@@ -398,7 +398,7 @@ export default function journeyComponent() {
 
             //if adding a new planet, we must select on next update once x and y pos are defined, as they are used for form position
             if(selectedPending){
-                const goal = planetsData.find(p => p.id === selectedPending);
+                const goal = goalsData.find(p => p.id === selectedPending);
                 selectedPending = undefined;
                 updateSelected(goal);
             }
@@ -415,7 +415,7 @@ export default function journeyComponent() {
                 
                 aimsData = myAimsLayout(data);
                 //temp - until we remove places that use it as a dependency
-                planetsData = aimsData.map(a => a.planets).reduce((a, b) => [...a, ...b], []);
+                goalsData = aimsData.map(a => a.planets).reduce((a, b) => [...a, ...b], []);
 
             }
 
@@ -426,7 +426,7 @@ export default function journeyComponent() {
                     .selected(selected?.id)
                     .currentZoom(currentZoom)
                     .channelsData(channelsData)
-                    .planetsData(planetsData);
+                    .aimsData(aimsData);
 
                 linksData = myLinksLayout(data.links);
 
@@ -445,7 +445,7 @@ export default function journeyComponent() {
     
                 aims
                     .view(getView())
-                    .selected(selected)
+                    //.selected(selected) dont want to overide selections each time
                     .selectedMeasure(measuresOpen?.find(m => m.id === menuBar.selected()))
                     .contentsToShow(aim => modalData?.d.id === aim.id ? "none" : "basic")
                     .goalContentsToShow(g => modalData?.d.id === g.id ? "none" : "basic")
@@ -587,9 +587,9 @@ export default function journeyComponent() {
                         //}
                         //temp
                         data.goals = data.goals.map(p => { return p.id === d.id ? d : p });
-                        //update aimsData, which also updates planetsData
+                        //update aimsData, which also updates goalsData
                         updateAimsData();
-                        updateLinksData(); //uses the new planetsData
+                        updateLinksData(); //uses the new goalsData
                         canvasG.selectAll("g.links")
                             .data([linksData])
                             .join("g")
@@ -792,7 +792,7 @@ export default function journeyComponent() {
                         })
                         .onItemDragStart((e, m) => {
                             updateSelected(undefined);
-                            aims.stopShowingAvailabilityStatus(planetsData);
+                            aims.stopShowingAvailabilityStatus(goalsData);
                             //goalIsAvailable = !goalContainsMeasure(m);
                             //todo - move to aims, and work out why measure not being added to goal
                             //planets.withRing(false);
@@ -801,12 +801,12 @@ export default function journeyComponent() {
                             //for now, offsetX and y are used to convert sourceEvent pos to canvas pos
                             const pt = { x: e.sourceEvent.offsetX, y: e.sourceEvent.offsetY };
                             const planetInnerCircleRadius = d3.min([DIMNS.planet.width, DIMNS.planet.height]);
-                            const draggedOverPlanet = planetsData.find(p => distanceBetweenPoints(pt, p) < planetInnerCircleRadius);
+                            const draggedOverPlanet = goalsData.find(p => distanceBetweenPoints(pt, p) < planetInnerCircleRadius);
 
                             //@todo - fix enhancedDrag so it only calls dragStart when its a drag, then can do the following in dragStart
                             if(!menuItemWasMoved){
                                 //first drag event
-                                aims.stopShowingAvailabilityStatus(planetsData);
+                                aims.stopShowingAvailabilityStatus(goalsData);
                                 menuItemWasMoved = true;
                                 prevDraggedOverPlanet = draggedOverPlanet;
                                 return;
@@ -830,10 +830,10 @@ export default function journeyComponent() {
                         })
                         .onItemDragEnd((e, m) => {
                             //stop showing unavailability
-                            //aims.stopShowingAvailabilityStatus(planetsData.filter(p => !goalIsAvailable(p)));
+                            //aims.stopShowingAvailabilityStatus(goalsData.filter(p => !goalIsAvailable(p)));
                             //stop showing availability of draggedOverPlanet
                             //todo - return a Promise instead of using cbs
-                            aims.stopShowingAvailabilityStatus(planetsData, () => {
+                            aims.stopShowingAvailabilityStatus(goalsData, () => {
                                 //@todo - add
                                 if(prevDraggedOverPlanet){
                                     const { id, measures } = prevDraggedOverPlanet;
@@ -1117,11 +1117,11 @@ export default function journeyComponent() {
     };
     journey.selected = function (goalId, selectOnNextUpdate = true) {
         if (!arguments.length) { return selected; }
-        //note - must get goal from planetsData so it has x and y
+        //note - must get goal from goalsData so it has x and y
         if(selectOnNextUpdate){
             selectedPending = goalId;
         }else{
-            updateSelected(planetsData.find(g => g.id === goalId));
+            updateSelected(goalsData.find(g => g.id === goalId));
         }
         //selected = value;
         return journey;

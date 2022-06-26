@@ -57,6 +57,7 @@ export default function planetsComponent() {
     let stopShowingAvailabilityStatus = function() {};
 
     //API CALLBACKS
+    let onClick = function(){};
     let onDblClick = function(){};
     let onDragStart = function() {};
     let onDrag = function() {};
@@ -123,7 +124,7 @@ export default function planetsComponent() {
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
                 .onDblClick(onDblClick)
-                .onClick(handleClick)
+                .onClick(onClick)
                 .onLongpressStart(longpressStart)
                 .onLongpressDragged(longpressDragged)
                 .onLongpressEnd(longpressEnd);
@@ -200,7 +201,7 @@ export default function planetsComponent() {
                     contentsG.select("ellipse.core-inner.visible")
                         //@todo - add transition to this opacity change
                         .attr("opacity", !selectedMeasure || selectedMeasureIsInGoal(d) ? planetOpacity.normal : planetOpacity.available)
-                        .attr("fill", prevClickedGoal?.id === d.id ? COLOURS.potentialLinkPlanet : d.fill)
+                        .attr("fill", selected?.id === d.id ? COLOURS.potentialLinkPlanet : d.fill)
                    
                     //title
                     contentsG.select("text.title")
@@ -249,7 +250,7 @@ export default function planetsComponent() {
                 .each(function(d){
                     //helper
                     //dont show menu if targOnly form open is if planet has the selectedMeasure on it
-                    const showContextMenu = d => selected?.id === d.id;// && !d.measures.find(m => m.id === selectedMeasure?.id);
+                    const showContextMenu = d => false;//selected?.id === d.id;// && !d.measures.find(m => m.id === selectedMeasure?.id);
                     const menuG = d3.select(this).selectAll("g.menu").data(showContextMenu(d) ? [menuOptions(d)] : [], d => d.key);
                     const menuGEnter = menuG.enter()
                         .append("g")
@@ -334,40 +335,6 @@ export default function planetsComponent() {
                             .on("end", function() { d3.select(this).remove(); });
                 }
             })
-
-            function handleClick(e, d){
-                const planetG = d3.select("g#planet-"+d.id);
-                const ellipse = planetG.select("ellipse.core-inner.visible");
-                
-                if(prevClickedGoal?.id === d.id){
-                    //treat same as a dbl-click
-                    console.log("reset fill")
-                    timer.stop();
-                    timer = null;
-                    ellipse.attr("fill", d.fill)
-                    prevClickedGoal = null;
-                    onDblClick.call(this, e, d);
-                    return;
-                }
-
-                ellipse.attr("fill", COLOURS.potentialLinkPlanet);
-                
-                if(prevClickedGoal && prevClickedGoal.id !== d.id){
-                    //create link
-                    onAddLink({ src:prevClickedGoal.id, targ:d.id })
-                }
-
-                prevClickedGoal = d;
-                if(timer) { timer.stop(); }
-                timer = d3.timeout(() => {
-                    d3.selectAll("g.planet")
-                        .each(function(e,d){
-                            d3.select(this).select("ellipse.core-inner.visible").attr("fill", d => d.fill);
-                        })
-                prevClickedGoal = null;
-                }, 2000);
-
-            }
 
             let linkPlanets = [];
             let deleted = false;
@@ -513,6 +480,11 @@ export default function planetsComponent() {
     planets.timeScale = function (value) {
         if (!arguments.length) { return timeScale; }
         timeScale = value;
+        return planets;
+    };
+    planets.onClick = function (value) {
+        if (!arguments.length) { return onClick; }
+        onClick = value;
         return planets;
     };
     planets.onDblClick = function (value) {

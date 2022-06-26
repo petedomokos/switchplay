@@ -39,6 +39,8 @@ export default function aimsComponent() {
     let selectedLink;
     let selectedMeasure;
 
+    let prevSelectedTimer;
+
     let prevData = [];
     let linksData = [];
     let channelsData = [];
@@ -370,7 +372,7 @@ export default function aimsComponent() {
                                     .yScale(yScale)
                                     .fontSize(planetSettings.fontSize)
                                     .availablePlanetSizeMultiplier(planetSettings.availablePlanetSizeMultiplier)
-
+                                    .onClick(handleClickGoal)
                                     .onDblClick(onDblClickGoal)
                                     .onDragStart(dragGoalStart)
                                     .onDrag(draggedGoal)
@@ -526,8 +528,56 @@ export default function aimsComponent() {
             })
         }
 
+        function handleClickGoal(e, d){
+            const planetG = d3.select("g#planet-"+d.id);
+            const ellipse = planetG.select("ellipse.core-inner.visible");
+            
+            if(selectedGoal?.id === d.id){
+                //treat same as a dbl-click
+                prevSelectedTimer.stop();
+                prevSelectedTimer = null;
+                ellipse.attr("fill", d.fill)
+                selectedGoal = null;
+                onDblClickGoal.call(this, e, d);
+                return;
+            }
+
+            ellipse.attr("fill", COLOURS.potentialLinkPlanet);
+            
+            if(selectedGoal && selectedGoal.id !== d.id){
+                //create link
+                onAddLink({ src:selectedGoal.id, targ:d.id })
+            }
+            else if(selectedAim){
+                //create link from aim to goal
+                onAddLink({ src:selectedAim.id, targ:d.id })
+                //todo 
+                // 1 - allow aim to be selected by clicking aim anywhere, using same colour as potentiallinkplanet
+                // 2 - go through layout and components to make aim-goal link supported
+                // 3 - visually represent aim to goal link (ie from the nearest midpoint of the aim edges to the goal)
+                // 4 - improve handleAimClick to allow goal to aim links, and visually represent
+                // 5 - refactor teh two handleClick functions to take out common code
+            }
+
+            selectedGoal = d;
+            if(prevSelectedTimer) { prevSelectedTimer.stop(); }
+            prevSelectedTimer = d3.timeout(() => {
+                d3.selectAll("g.planet")
+                    .each(function(e,d){
+                        d3.select(this).select("ellipse.core-inner.visible").attr("fill", d => d.fill);
+                    })
+                selectedGoal = null;
+                //need to update
+                containerG.call(aims);
+
+            }, 2000);
+            //need to update
+            //@todo - should consider using react state update instead
+            containerG.call(aims);
+
+        }
+
         function dragGoalStart(e , d){
-            console.log("drag goal start")
             //const s = Snap(this);
             //console.log("bbox", s.getBBox())
             //works - will use the inner circle
@@ -554,7 +604,6 @@ export default function aimsComponent() {
             onDragGoal.call(this, e, { ...d, targetDate, yPC, unaligned:true }, shouldUpdateSelected)
         }
         function dragGoalEnd(e, d){
-            console.log("drag goal end")
             //we want aim width to transition in next update
             shouldTransitionAim = true;
             onDragGoalEnd.call(this, e, d);

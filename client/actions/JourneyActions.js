@@ -118,7 +118,7 @@ export const saveJourney = (journey, shouldPersist=true)  => dispatch => {
     //2. save to server
     //3. on response, undo if errors, add id (if new) or anything else from server to store
 	const serverJourney = transformJourneyForServer(journey);
-	console.log("serverJourney", serverJourney);
+	//console.log("serverJourney", serverJourney);
 	const jwt = auth.isAuthenticated();
 	//console.log("jwt", jwt)
 	if(!jwt.user) { return; }
