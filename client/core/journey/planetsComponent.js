@@ -201,7 +201,7 @@ export default function planetsComponent() {
                     contentsG.select("ellipse.core-inner.visible")
                         //@todo - add transition to this opacity change
                         .attr("opacity", !selectedMeasure || selectedMeasureIsInGoal(d) ? planetOpacity.normal : planetOpacity.available)
-                        .attr("fill", selected?.id === d.id ? COLOURS.potentialLinkPlanet : d.fill)
+                        .attr("fill", selected?.id === d.id ? COLOURS.selected : d.fill)
                    
                     //title
                     contentsG.select("text.title")

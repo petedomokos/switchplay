@@ -99,7 +99,8 @@ export default function aimsComponent() {
 
     function aims(selection, options={}) {
         //console.log("aims", planetSettings.availablePlanetSizeMultiplier)
-        withClick.onClick(onClick)
+        //withClick.onClick(onClick)
+        withClick.onClick(handleClick)
         const drag = d3.drag()
             .filter((e,d) => d.id !== "main")
             .on("start", withClick(dragStart))
@@ -138,7 +139,6 @@ export default function aimsComponent() {
                                 .attr("stroke", "none")
                                 .attr("display", d.id === "main" ? "none" : null)
                                 //.attr("pointer-events", d.id === "main" ? "none" : "all")
-                                .attr("fill-opacity", 0.15)
 
                         controlledContentsG.selectAll("rect.aim-bg")
                             .attr("rx", 15)
@@ -176,7 +176,8 @@ export default function aimsComponent() {
                             .attr("transform", "translate(" + (d.displayX) +"," + d.y +")")
                         
                         controlledContentsG.select("rect.semi-transparent-bg")
-                            .attr("fill", d.colour || "transparent")
+                            .attr("fill-opacity", selectedAim?.id === d.id ? 1 : 0.15)
+                            .attr("fill", selectedAim?.id === d.id ? COLOURS.selected : (d.colour || "transparent"))
                         
                         controlledContentsG.select("rect.solid-bg")
                             .attr("fill", view.goals ? "none" : COLOURS.canvas);
@@ -528,9 +529,52 @@ export default function aimsComponent() {
             })
         }
 
+        //note - 'this' is g.controlled-contents not g.aim
+        function handleClick(e, d){
+            const rect = d3.select(this).select("rect.semi-transparent-bg");
+            console.log("click aim", rect.node())
+
+            if(selectedAim?.id === d.id){
+                //treat same as a dbl-click
+                prevSelectedTimer.stop();
+                prevSelectedTimer = null;
+                //@todo - remove this when onDblClickAim implemented as it will update anyway
+                rect.attr("opacity", 0.15).attr("fill", d.colour || "transparent")
+                selectedAim = null;
+                //@todo - impl this so it opens name form
+                //onDblClickAim.call(this, e, d);
+                return;
+            }
+            
+            if(selectedAim && selectedAim.id !== d.id){
+                //create link
+                onAddLink({ src:selectedAim.id, targ:d.id })
+            }
+            else if(selectedGoal){
+                //create link from goal to aiim
+                onAddLink({ src:selectedGoal.id, targ:d.id })
+            }
+
+            //@todo - have 1 selected variable
+            selectedAim = d;
+            selectedGoal = null;
+            selectedLink= null;
+
+            if(prevSelectedTimer) { prevSelectedTimer.stop(); }
+            prevSelectedTimer = d3.timeout(() => {
+                selectedAim = null;
+                //need to update
+                containerG.call(aims);
+
+            }, 2000);
+            //need to update
+            //@todo - should consider using react state update instead
+            containerG.call(aims);
+
+        }
+
         function handleClickGoal(e, d){
-            const planetG = d3.select("g#planet-"+d.id);
-            const ellipse = planetG.select("ellipse.core-inner.visible");
+            const ellipse = d3.select(this).select("ellipse.core-inner.visible");
             
             if(selectedGoal?.id === d.id){
                 //treat same as a dbl-click
@@ -551,15 +595,12 @@ export default function aimsComponent() {
             else if(selectedAim){
                 //create link from aim to goal
                 onAddLink({ src:selectedAim.id, targ:d.id })
-                //todo 
-                // 1 - allow aim to be selected by clicking aim anywhere, using same colour as potentiallinkplanet
-                // 2 - go through layout and components to make aim-goal link supported
-                // 3 - visually represent aim to goal link (ie from the nearest midpoint of the aim edges to the goal)
-                // 4 - improve handleAimClick to allow goal to aim links, and visually represent
-                // 5 - refactor teh two handleClick functions to take out common code
             }
 
             selectedGoal = d;
+            selectedAim = null;
+            selectedLink = null;
+
             if(prevSelectedTimer) { prevSelectedTimer.stop(); }
             prevSelectedTimer = d3.timeout(() => {
                 d3.selectAll("g.planet")

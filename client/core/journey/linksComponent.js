@@ -36,7 +36,7 @@ export default function linksComponent() {
     function links(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true } = options;
         selection.each(function (data) {
-            //console.log("links comp", transitionUpdate)
+            console.log("links comp", data)
             if(data){ linksData = data;}
            
             const linkG = d3.select(this).selectAll("g.link").data(linksData, l => l.id);

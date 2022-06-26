@@ -23,10 +23,12 @@ export default function linkslayout(){
             //const theta = 
             //we want all visible channels to show, even if actual targetDate is not after, so we use x to get channels not dates
             //include teh src and targ channels, plus any in between
-            //const channels = channelsData.filter(ch => src.channel.nr === ch.nr || targ.channel.nr === ch.nr || ch.startX >= src.x && ch.endX <= targ.x);
-            //const channels = channelsData.filter(ch => ch.startX >= src.channel.startX && ch.endX <= targ.channel.endX);
-            const channels = channelsData.filter(ch => src.channel.endX <= ch.startX && ch.endX <= targ.channel.endX);
-            const isOpen = !!channels.find(ch => ch.isOpen);
+            //old...const channels = channelsData.filter(ch => src.channel.nr === ch.nr || targ.channel.nr === ch.nr || ch.startX >= src.x && ch.endX <= targ.x);
+            //old...const channels = channelsData.filter(ch => ch.startX >= src.channel.startX && ch.endX <= targ.channel.endX);
+
+            //this will now need to change as links can be to aims too
+            //const channels = channelsData.filter(ch => src.channel.endX <= ch.startX && ch.endX <= targ.channel.endX);
+            const isOpen = false//!!channels.find(ch => ch.isOpen);
             /*
             console.log("src", src)
             console.log("link", l)
