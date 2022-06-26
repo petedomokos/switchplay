@@ -362,6 +362,7 @@ export default function journeyComponent() {
                 //.on("dblclick", null)
             //.on("wheel.zoom", null)
 
+            //@todo - change name - split longoress and click , instead of using this shouldCreateGoal thing for longpress
             function handleCanvasClick(e, d, shouldCreateGoal){
                 if(editing){
                     endEditPlanet(d);
@@ -370,7 +371,9 @@ export default function journeyComponent() {
                 else if(selected){
                     updateSelected(undefined);
                 //if bar open, we dont want the click to propagate through
-                }else if(shouldCreateGoal){
+                }
+                //create a goal even if something else was selected
+                if(shouldCreateGoal){
                     const x = e.sourceEvent.layerX;
                     const y = e.sourceEvent.layerY; 
                     const goalAim = aimsData
@@ -414,7 +417,7 @@ export default function journeyComponent() {
                     .channelsData(channelsData);
                 
                 aimsData = myAimsLayout(data);
-                console.log("aimsData", aimsData)
+                //console.log("aimsData", aimsData)
                 //temp - until we remove places that use it as a dependency
                 goalsData = aimsData.map(a => a.planets).reduce((a, b) => [...a, ...b], []);
 
@@ -430,7 +433,7 @@ export default function journeyComponent() {
                     .aimsData(aimsData);
 
                 linksData = myLinksLayout(data.links);
-                console.log("linksData", linksData)
+                //console.log("linksData", linksData)
 
             }
 
