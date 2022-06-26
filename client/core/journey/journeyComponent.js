@@ -985,7 +985,7 @@ export default function journeyComponent() {
             }
 
             //open name form too, but as selected rather than editing
-            const measureIsOnPlanet = d.dataType === "planet"? d.measures.find(d => d.id === bar.selected()) : false;
+            const measureIsOnPlanet = d.dataType === "planet"? d.measures.find(d => d.id === menuBar.selected()) : false;
             const measure = measureIsOnPlanet && measuresOpen?.find(m => m.id === menuBar.selected());
             //could be an aim or a planet
             const modalData = measure ? { d, measure, nameAndTargOnly: true } : { d, nameOnly:true };
