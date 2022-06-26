@@ -54,17 +54,17 @@ export default function linksComponent() {
                                 .attr("class", "main")
                                 .attr("stroke", grey10(5))
                                 .attr("cursor", "pointer")
-                                //there are no cases where we want an entering link to transition in from actualX1 or actualX2
+                                //there are no cases where we want an entering link to transition in from x1 or x2
                                 .call(updatePos, { 
-                                    x1: () => d.src.x,
-                                    y1: ()=> d.src.y,
-                                    x2: () => d.targ.x,
-                                    y2: () => d.targ.y
+                                    x1: () => d.x1,
+                                    y1: ()=> d.y1,
+                                    x2: () => d.x2,
+                                    y2: () => d.y2
                                 })
-                                //.attr("x1", d.src.x)
-                                //.attr("y1", d.src.y)
-                                //.attr("x2", d.targ.x)
-                                //.attr("y2", d.targ.y)
+                                //.attr("x1", d.x1)
+                                //.attr("y1", d.y1)
+                                //.attr("x2", d.x2)
+                                //.attr("y2", d.y2)
                         
                         //completion line
                         linkG
@@ -73,8 +73,8 @@ export default function linksComponent() {
                                 .attr("display", withCompletion ? "inline" : "none")
                                 .attr("stroke", "blue")
                                 .attr("cursor", "pointer")
-                                .attr("x1", d.src.x)
-                                .attr("y1", d.src.y)
+                                .attr("x1", d.x1)
+                                .attr("y1", d.y1)
                                 .attr("x2", d.compX)
                                 .attr("y2", d.compY)
 
@@ -115,16 +115,17 @@ export default function linksComponent() {
                     })
                     .merge(linkG)
                     .each(function(d){
+                        console.log("update link", d)
                         //ENTER AND UPDATE
                         // console.log("update link", d)
                         //lines
                         d3.select(this).select("line.main")
                             .attr("stroke-width", strokeWidth)
                             .call(updatePos, { 
-                                x1: () => d.src.x,
-                                y1: ()=> d.src.y,
-                                x2: () => d.targ.x,
-                                y2: () => d.targ.y
+                                x1: () => d.x1,
+                                y1: ()=> d.y1,
+                                x2: () => d.x2,
+                                y2: () => d.y2
                             }, transitionUpdate)
                             .on("click", onClick)
 
@@ -135,10 +136,10 @@ export default function linksComponent() {
                         //hitbox
                         const hitboxWidth = 5;
                         d3.select(this).select("rect.hitbox")
-                            .attr("transform", "rotate(" +d.rotation +" " +d.src.x +" " +d.src.y +")")
-                            .attr("x", d.src.x)
-                            .attr("y", d.src.y - hitboxWidth/2)
-                            .attr("width", distanceBetweenPoints(d.src, d.targ))
+                            .attr("transform", "rotate(" +d.rotation +" " +d.x1 +" " +d.y1 +")")
+                            .attr("x", d.x1)
+                            .attr("y", d.y1 - hitboxWidth/2)
+                            .attr("width", distanceBetweenPoints({ x:d.x1, y:d.y1 }, { x:d.x2, y:d.y2 }))
                             .attr("height", hitboxWidth)
                             .on("click", onClick)
                        
@@ -191,29 +192,29 @@ export default function linksComponent() {
                         .transition()
                         .delay(50)
                         .duration(200)
-                            .attr("x1", d.src.x)
-                            .attr("y1", d.src.y)
-                            .attr("x2", d.targ.x)
-                            .attr("y2", d.targ.y)
+                            .attr("x1", d.x1)
+                            .attr("y1", d.y1)
+                            .attr("x2", d.x2)
+                            .attr("y2", d.y2)
 
                     compLine
                         .transition()
                         .delay(50)
                         .duration(200)
-                            .attr("x1", d.src.x)
-                            .attr("y1", d.src.y)
+                            .attr("x1", d.x1)
+                            .attr("y1", d.y1)
                             .attr("x2", d.compX)
                             .attr("y2", d.compY)
                 }else{
                     mainLine
-                        .attr("x1", d.src.x)
-                        .attr("y1", d.src.y)
-                        .attr("x2", d.targ.x)
-                        .attr("y2", d.targ.y)
+                        .attr("x1", d.x1)
+                        .attr("y1", d.y1)
+                        .attr("x2", d.x2)
+                        .attr("y2", d.y2)
                     
                     compLine
-                        .attr("x1", d.src.x)
-                        .attr("y1", d.src.y)
+                        .attr("x1", d.x1)
+                        .attr("y1", d.y1)
                         .attr("x2", d.compX)
                         .attr("y2", d.compY)
                 }
@@ -296,11 +297,11 @@ export default function linksComponent() {
         d3.selectAll("g.link")
             .filter(l => l.src.id === d.id)
             .each(function(l){
-                l.src.x = d.x;
-                l.src.y = d.y;
+                l.x1 = d.x;
+                l.y1 = d.y;
                 d3.select(this).select("line")
-                    .attr("x1", l.src.x)
-                    .attr("y1", l.src.y)
+                    .attr("x1", l.x1)
+                    .attr("y1", l.y1)
                 
                  //bar pos
                 d3.select(this).select("g.bar-chart")
@@ -312,11 +313,11 @@ export default function linksComponent() {
         d3.selectAll("g.link")
             .filter(l => l.targ.id === d.id)
             .each(function(l){
-                l.targ.x = d.x;
-                l.targ.y = d.y;
+                l.x2 = d.x;
+                l.y2 = d.y;
                 d3.select(this).select("line")
-                    .attr("x2", l.targ.x)
-                    .attr("y2", l.targ.y)
+                    .attr("x2", l.x2)
+                    .attr("y2", l.y2)
             })
         
         return links;

@@ -414,6 +414,7 @@ export default function journeyComponent() {
                     .channelsData(channelsData);
                 
                 aimsData = myAimsLayout(data);
+                console.log("aimsData", aimsData)
                 //temp - until we remove places that use it as a dependency
                 goalsData = aimsData.map(a => a.planets).reduce((a, b) => [...a, ...b], []);
 
@@ -429,6 +430,7 @@ export default function journeyComponent() {
                     .aimsData(aimsData);
 
                 linksData = myLinksLayout(data.links);
+                console.log("linksData", linksData)
 
             }
 
@@ -636,7 +638,15 @@ export default function journeyComponent() {
                     })
                     .updatePlanet(updatePlanet)
                     .startEditPlanet(startEditPlanet)
-                    .onAddLink(onAddLink)
+                    .onAddLink((d1, d2) => {
+                        //check its not a link between a goal and its own aim
+                        if(d1?.aimId === d2.id || d2.aimId === d1.id) { return; }
+
+                        const date = d => d.dataType === "planet" ? d.targetDate : d.startDate;
+                        const src = d3.least([d1,d2], d => date(d)).id;
+                        const targ = src === d1.id ? d2.id : d1.id;
+                        onAddLink({ src, targ })
+                    })
 
                 //render
                 const aimsG = canvasG.selectAll("g.aims").data([aimsData]);

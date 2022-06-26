@@ -47,6 +47,9 @@ export default function aimsLayout(){
                 return { ...m, targ:typeof m.targ === "string" ? +m.targ : undefined }
             })
 
+            const x = !aligned || p.unaligned ? targetX : channel.endX; //planets positioned on channel end line
+            const y = yScale(p.yPC);
+
             return {
                 ...p,
                 dataType: "planet",
@@ -54,13 +57,11 @@ export default function aimsLayout(){
                 channel,
                 //an individual goal can be unaligned, or the whole journey display can be !aligned
                 displayDate:!aligned || p.unaligned ? p.targetDate : channel.endDate,
-                x:!aligned || p.unaligned ? targetX : channel.endX, //planets positioned on channel end line
-                y: yScale(p.yPC),
+                x,
+                y,
                 targetX,
                 rx,
                 ry,
-                ringRx:width => rx(width) * PLANET_RING_MULTIPLIER,
-                ringRy:height => ry(height) * PLANET_RING_MULTIPLIER,
                 //isSelected:selected === p.id,
                 measures,
                 //turn milestones concept off
@@ -82,25 +83,28 @@ export default function aimsLayout(){
             ];
             //console.log("timeScale startDate", timeScale(startDate))
             //console.log("timeScale endDate", timeScale(endDate))
-            const actualX = timeScale(startDate);
-            const actualX2 = timeScale(endDate);
+            const x = timeScale(startDate);
+            const x2 = timeScale(endDate);
             const y = yScale(startYPC);
-            const width = timeScale(endDate) - actualX;
+            const width = timeScale(endDate) - x;
             const height = yScale(endYPC) - y;
             //console.log("aimBounds", aimBounds)
             //increase aim size if planets dont fit in when displayed
-            const displayX = d3.min([actualX, planetBounds[0]]);
-            const displayX2 = d3.max([actualX2, planetBounds[1]])
+            const displayX = d3.min([x, planetBounds[0]]);
+            const displayX2 = d3.max([x2, planetBounds[1]])
             const displayWidth = d3.max([width, displayX2 - displayX])
             return {
                 ...aim,
                 planets:aimPlanets,
-                actualX,
+                x,
                 y,
                 width,
                 height,
                 displayX,//:planetBounds[0],
                 displayWidth,//: planetBounds[1] - planetBounds[0],
+                endX:x + width,
+                displayEndX:displayX + displayWidth,
+                endY:y + height
                 //note - planets have alreayd been configured for the visual
             }
         })
@@ -111,7 +115,7 @@ export default function aimsLayout(){
             planets:planets.filter(p => p.aimId === "main"),
             name:data.name,
             dataType:"aim",
-            actualX:0,
+            x:0,
             displayX:0,
             y:0,
             width:canvasDimns.width,

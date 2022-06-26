@@ -384,7 +384,6 @@ export default function aimsComponent() {
 
                                     //.onMouseover(onMouseoverGoal)
                                     //.onMouseout(onMouseoutGoal)
-                                    .onAddLink(onAddLink)
                                     .updatePlanet(updatePlanet)
                                     .deletePlanet(deletePlanet)
                                     .onAddLink(onAddLink)
@@ -548,11 +547,13 @@ export default function aimsComponent() {
             
             if(selectedAim && selectedAim.id !== d.id){
                 //create link
-                onAddLink({ src:selectedAim.id, targ:d.id })
+                //onAddLink({ src:selectedAim.id, targ:d.id })
+                onAddLink(selectedAim, d)
             }
             else if(selectedGoal){
                 //create link from goal to aiim
-                onAddLink({ src:selectedGoal.id, targ:d.id })
+                //onAddLink({ src:selectedGoal.id, targ:d.id })
+                onAddLink(selectedGoal, d)
             }
 
             //@todo - have 1 selected variable
@@ -590,11 +591,11 @@ export default function aimsComponent() {
             
             if(selectedGoal && selectedGoal.id !== d.id){
                 //create link
-                onAddLink({ src:selectedGoal.id, targ:d.id })
+                onAddLink(selectedGoal, d)
             }
             else if(selectedAim){
                 //create link from aim to goal
-                onAddLink({ src:selectedAim.id, targ:d.id })
+                onAddLink(selectedAim, d)
             }
 
             selectedGoal = d;
