@@ -618,60 +618,39 @@ export default function planetsComponent() {
     };
     //functions
     planets.showAvailabilityStatus = function (g, cb = () => {}) {
-        //const goal = prevData.find(g => g.id === goalId);
-        //todo - find out why if we reference containeG instead of d3 here, it causes a new enter of planetG!
         const rx = g.rx(width);
         const ry =  g.ry(height);
-        const ringRx = g.ringRx(width);
-        const ringRy = g.ringRy(height);
-        const deltaRx = ringRx - rx;
-        const deltaRy = ringRy - ry;
 
-        const planetG = d3.select("g.planet-"+g.id);
-        const innerEllipses = planetG.selectAll("ellipse.core-inner");
-        //check - does attr("rx") still return a value when multiple sel?
-        const alreadyIncreased = +innerEllipses.attr("rx") !== rx;
-        //Math.abs(+coreEllipse.attr("rx") - planetG.datum().rx(width)) > 0.001;
-        //console.log("already increased?", alreadyIncreased)
+        const ellipses = d3.select("g.planet-"+g.id).selectAll("ellipse.core-inner");
+        const alreadyIncreased = +ellipses.attr("rx") !== rx;
+
         if(!selectedMeasureIsInGoal(g) && !alreadyIncreased){
-            //console.log("increase size", goal.id)
-            //increase size to show available
-            //ellipses
-            console.log("available", availablePlanetSizeMultiplier)
-            innerEllipses
+            //increase size
+            ellipses
                 .transition()
                     .duration(200)
-                    .attr("rx", (rx - deltaRx) * availablePlanetSizeMultiplier)
-                    .attr("ry", (ry - deltaRy) * availablePlanetSizeMultiplier)
+                    .attr("rx", rx * availablePlanetSizeMultiplier)
+                    .attr("ry", ry * availablePlanetSizeMultiplier)
                         .on("end", () => cb(g.id. measureId));
         }
         
         return planets;
     };
     planets.stopShowingAvailabilityStatus = function (g, cb = () => {}) {
-        //const goal = prevData.find(g => g.id === goalId);
-        //todo -see above - why cant use containerG instead of d3
         const rx = g.rx(width);
         const ry =  g.ry(height);
-        const ringRx = g.ringRx(width);
-        const ringRy = g.ringRy(height);
-        const deltaRx = ringRx - rx;
-        const deltaRy = ringRy - ry;
 
-        const planetG = d3.select("g.planet-"+g.id);
         //ellipses
-        const innerEllipses = planetG.selectAll("ellipse.core-inner");
-        const alreadyReset = +innerEllipses.attr("rx") === rx;
-        //Math.abs(+coreEllipse.attr("rx") - planetG.datum().rx(width)) < 0.001;
-        //console.log("already reset?", alreadyReset)
+        const ellipses = d3.select("g.planet-"+g.id).selectAll("ellipse.core-inner");
+        const alreadyReset = +ellipses.attr("rx") === rx;
+
         if(!selectedMeasureIsInGoal(g) && !alreadyReset){
-            //console.log("reduce size", goal.id)
             //stop showing available
-            innerEllipses
+            ellipses
                 .transition()
                     .duration(200)
-                        .attr("rx", rx - deltaRx)
-                        .attr("ry", ry - deltaRy)
+                        .attr("rx", rx)
+                        .attr("ry", ry)
                             .on("end", () => cb(g.id. selectedMeasure?.id));
         }
         return planets;

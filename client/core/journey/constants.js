@@ -7,7 +7,7 @@ export const DEFAULT_D3_TICK_SIZE = 6;
 export const DEFAULT_PLANET_RX = 70;
 export const DEFAULT_PLANET_RY = 50;
 export const PLANET_RING_MULTIPLIER = 1.4;
-export const AVAILABLE_GOAL_MULTIPLIER = 4;
+export const AVAILABLE_GOAL_MULTIPLIER = 2.5;
 
 export const WIDGETS_WIDTH = 40;
 export const WIDGETS_HEIGHT = 40;
