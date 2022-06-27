@@ -1100,8 +1100,8 @@ export default function journeyComponent() {
                 .data()
                 .map(g => g.id);
 
-            handleCreateAim(aim, planetIdsInAim);
-            updateSelected(undefined);          
+            updateSelected(undefined);       
+            handleCreateAim(aim, planetIdsInAim);   
         }
 
         return selection;
