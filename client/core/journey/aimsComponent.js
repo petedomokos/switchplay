@@ -36,7 +36,6 @@ export default function aimsComponent() {
 
     let selectedAim;
     let selectedGoal;
-    let selectedLink;
     let selectedMeasure;
 
     let prevSelectedTimer;
@@ -530,78 +529,72 @@ export default function aimsComponent() {
 
         //note - 'this' is g.controlled-contents not g.aim
         function handleClick(e, d){
-            const rect = d3.select(this).select("rect.semi-transparent-bg");
-            console.log("click aim", rect.node())
-
-            if(selectedAim?.id === d.id){
-                //treat same as a dbl-click
-                prevSelectedTimer.stop();
-                prevSelectedTimer = null;
-                //@todo - remove this when onDblClickAim implemented as it will update anyway
-                rect.attr("opacity", 0.15).attr("fill", d.colour || "transparent")
-                selectedAim = null;
-                //@todo - impl this so it opens name form
-                //onDblClickAim.call(this, e, d);
-                return;
-            }
-            
-            if(selectedAim && selectedAim.id !== d.id){
-                //create link
-                //onAddLink({ src:selectedAim.id, targ:d.id })
-                onAddLink(selectedAim, d)
-            }
-            else if(selectedGoal){
-                //create link from goal to aiim
-                //onAddLink({ src:selectedGoal.id, targ:d.id })
-                onAddLink(selectedGoal, d)
-            }
-
-            //@todo - have 1 selected variable
+            const prevSelectedAim = selectedAim;
+            const prevSelectedGoal = selectedGoal;
             selectedAim = d;
             selectedGoal = null;
-            selectedLink= null;
 
+            //in all cases, reset timer
             if(prevSelectedTimer) { prevSelectedTimer.stop(); }
             prevSelectedTimer = d3.timeout(() => {
                 selectedAim = null;
                 //need to update
                 containerG.call(aims);
-
             }, 2000);
-            //need to update
-            //@todo - should consider using react state update instead
-            containerG.call(aims);
 
-        }
+            //grab the bg rect to be animated
+            const rect = d3.select(this).select("rect.semi-transparent-bg");
 
-        function handleClickGoal(e, d){
-            const ellipse = d3.select(this).select("ellipse.core-inner.visible");
-            
-            if(selectedGoal?.id === d.id){
+            //check if same aim was clicked twice
+            if(prevSelectedAim?.id === selectedAim.id){
                 //treat same as a dbl-click
                 prevSelectedTimer.stop();
                 prevSelectedTimer = null;
-                ellipse.attr("fill", d.fill)
-                selectedGoal = null;
-                onDblClickGoal.call(this, e, d);
+                //@todo - remove this when onDblClickAim implemented as it will update anyway
+                rect.attr("opacity", 0.15).attr("fill", selectedAim.colour || "transparent")
+                selectedAim = null;
+                //@todo - impl this so it opens name form
+                //onDblClickAim.call(this, e, d);
                 return;
             }
-
-            ellipse.attr("fill", COLOURS.potentialLinkPlanet);
-            
-            if(selectedGoal && selectedGoal.id !== d.id){
-                //create link
-                onAddLink(selectedGoal, d)
-            }
-            else if(selectedAim){
-                //create link from aim to goal
+    
+            if(prevSelectedAim && prevSelectedAim.id !== selectedAim.id){
+                //create link from aim to aim
+                //onAddLink({ src:selectedAim.id, targ:d.id })
                 onAddLink(selectedAim, d)
             }
+            else if(prevSelectedGoal){
+                //create link from goal to aim
 
-            selectedGoal = d;
+                //grab the prev ellipse to be animated
+                const prevEllipse = d3.select("g.planet-"+prevSelectedGoal.id).select("ellipse.core-inner.visible");
+
+                prevEllipse
+                    .transition("creating-link")
+                    .duration(200)
+                        .attr("fill", COLOURS.creatingLink);
+
+                prevEllipse
+                    .transition("link-created")
+                    .delay(800)
+                    .duration(200)
+                       .attr("fill", prevSelectedGoal.fill)
+                       .on("end", () => {
+                            onAddLink(prevSelectedGoal, selectedAim)
+                       })
+            }else{
+                //manually call dom update as no react state change
+                containerG.call(aims);
+            }
+        }
+
+        function handleClickGoal(e, d){
+            const prevSelectedAim = selectedAim;
+            const prevSelectedGoal = selectedGoal;
             selectedAim = null;
-            selectedLink = null;
+            selectedGoal = d;
 
+            //in all cases, reset timer
             if(prevSelectedTimer) { prevSelectedTimer.stop(); }
             prevSelectedTimer = d3.timeout(() => {
                 d3.selectAll("g.planet")
@@ -612,11 +605,94 @@ export default function aimsComponent() {
                 //need to update
                 containerG.call(aims);
 
-            }, 2000);
-            //need to update
-            //@todo - should consider using react state update instead
-            containerG.call(aims);
+            }, 3000);
 
+            //grab the ellipse to be animated
+            const clickedEllipse = d3.select(this).select("ellipse.core-inner.visible");
+            
+            //check if same goal was clicked twice
+            if(prevSelectedGoal?.id === selectedGoal.id){
+                //treat same as a dbl-click
+                prevSelectedTimer.stop();
+                prevSelectedTimer = null;
+                clickedEllipse.attr("fill", d.fill)
+                selectedGoal = null;
+                onDblClickGoal.call(this, e, d);
+                return;
+            }
+
+            //show clicked goal as selected
+            clickedEllipse
+                .transition("selecting")
+                .duration(200)
+                    .attr("fill", COLOURS.selected);
+
+            if(!prevSelectedGoal && !prevSelectedAim){
+                //must update dom manually as no react state change
+                containerG.call(aims);
+            }
+
+            //animate then add link to state
+            //2 cases: goal to goal, and aim to goal (src-targ order determined by dates though)
+            if(prevSelectedGoal && prevSelectedGoal.id !== selectedGoal.id){
+                //create link from goal to goal
+                //transition a temp link in
+                const tempLine = d3.select("g.aims")
+                    .append("line")
+                        .attr("class", "temp")
+                        .attr("stroke", COLOURS.creatingLink)
+                        .attr("opacity", 0)
+                        .attr("x1", prevSelectedGoal.x)
+                        .attr("y1", prevSelectedGoal.y)
+                        .attr("x2", selectedGoal.x)
+                        .attr("y2", selectedGoal.y)
+                
+                tempLine
+                    .transition("enter")
+                    .duration(600)
+                        .attr("opacity", 1)
+                
+                //@todo - also allow any delay for fading in of links in linksComponent - or just remove that transition in there
+                tempLine
+                    .transition("exit")
+                    .delay(1000) 
+                    .duration(200)
+                        .attr("opacity", 0)
+                        .on("end", function(){
+                            d3.select(this).remove();
+                        })
+
+
+                //grab the prev ellipse to be animated
+                const prevEllipse = d3.select("g.planet-"+prevSelectedGoal.id).select("ellipse.core-inner.visible");
+                const bothEllipses = d3.selectAll("g.planet").select("ellipse.core-inner.visible")
+                    .filter(g => g.id === prevSelectedGoal.id || g.id === selectedGoal.id);
+
+                bothEllipses
+                    .transition("creating-link-goal1")
+                    .delay(200) //allow first anim to run
+                    .duration(200)
+                        .attr("fill", COLOURS.creatingLink);
+
+                prevEllipse
+                    .transition("link-created")
+                    .delay(1000) //allow first and second anim to run, plus a 400ms gap
+                    .duration(200)
+                       .attr("fill", prevSelectedGoal.fill)
+
+                clickedEllipse
+                    .transition("link-created")
+                        .delay(1000) //allow first and second anim to run, plus a 400ms gap
+                        .duration(200)
+                        .attr("fill", COLOURS.selected)
+                        .on("end", () => {
+                                onAddLink(prevSelectedGoal, selectedGoal)
+                        })
+            }
+            else if(prevSelectedAim){
+                //create link from aim to goal
+                onAddLink(prevSelectedAim, selectedGoal)
+            }
         }
 
         function dragGoalStart(e , d){
