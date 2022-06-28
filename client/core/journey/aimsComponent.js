@@ -680,13 +680,17 @@ export default function aimsComponent() {
                     .duration(200)
                        .attr("fill", prevSelectedGoal.fill)
 
+                //store goal in case state changes again before transition ends
+                const g1 = prevSelectedGoal;
+                const g2 = selectedGoal;
+
                 clickedEllipse
                     .transition("link-created")
                         .delay(1000) //allow first and second anim to run, plus a 400ms gap
                         .duration(200)
                         .attr("fill", COLOURS.selected)
                         .on("end", () => {
-                                onAddLink(prevSelectedGoal, selectedGoal)
+                            onAddLink(g1, g2)
                         })
             }
             else if(prevSelectedAim){
