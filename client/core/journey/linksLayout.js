@@ -4,6 +4,47 @@ import { getGoalsData } from '../../data/planets';
 import { distanceBetweenPoints, angleOfRotation, angleOfElevation, toRadians } from './geometryHelpers';
 import { CollectionsOutlined } from '@material-ui/icons';
 
+export function calcLinkPos(src, targ){
+    //todo - below doesnt handle aim to aim!!!
+    let x1;
+    let y1;
+    let x2;
+    let y2;
+    if(src.dataType === "planet"){
+        x1 = src.x;
+        y1 = src.y;
+    }else{
+        //src is aim (assume targ must be goal for now!!!)
+        if(targ.targetDate > src.endDate){
+            x1 = src.displayEndX;
+            y1 = src.y + src.height/2;
+            //go from midpoint of right edge
+        }else if(targ.yPC < src.startYPC){
+            // go vertically up from the upper edge
+            x1 = targ.x;
+            y1 = src.y;
+        }else{
+            // must be goal.yPC < aim.endYPC because otherwise goal would be in the aim
+            //go vertically down from the lower edge
+            x1 = targ.x;
+            y1 = src.endY;
+        }
+    }
+    if(targ.dataType === "planet"){
+        x2 = targ.x;
+        y2 = targ.y;
+    }else{
+        //targ is aim (assume src must be goal for now!!!)
+        //src.targetDate must be before targ.startDate
+        //so go to midpoint of left edge in all cases
+        x2 = targ.displayX;
+        y2 = targ.y + targ.height/2
+
+    }
+
+    return { x1, y1, x2, y2 };
+}
+
 export default function linkslayout(){
     //const barChartWidth = 100;
     //const barChartHeight = 100; 
@@ -20,47 +61,12 @@ export default function linkslayout(){
         return data.map((l,i) => {
             const src = [...aimsData, ...goalsData].find(p => p.id === l.src);
             const targ = [...aimsData, ...goalsData].find(p => p.id === l.targ);
-            console.log("src", src)
-            console.log("targ", targ)
+            //console.log("src", src)
+            //console.log("targ", targ)
 
             //todo - below doesnt handle aim to aim!!!
-            let x1;
-            let y1;
-            let x2;
-            let y2;
-            if(src.dataType === "planet"){
-                x1 = src.x;
-                y1 = src.y;
-            }else{
-                //src is aim (assume targ must be goal for now!!!)
-                if(targ.targetDate > src.endDate){
-                    x1 = src.displayEndX;
-                    y1 = src.y + src.height/2;
-                    //go from midpoint of right edge
-                }else if(targ.yPC < src.startYPC){
-                    // go vertically up from the upper edge
-                    x1 = targ.x;
-                    y1 = src.y;
-                }else{
-                    // must be goal.yPC < aim.endYPC because otherwise goal would be in the aim
-                    //go vertically down from the lower edge
-                    x1 = targ.x;
-                    y1 = src.endY;
-                }
-            }
-            if(targ.dataType === "planet"){
-                x2 = targ.x;
-                y2 = targ.y;
-            }else{
-                //targ is aim (assume src must be goal for now!!!)
-                //src.targetDate must be before targ.startDate
-                //so go to midpoint of left edge in all cases
-                x2 = targ.displayX;
-                y2 = targ.y + targ.height/2
-
-            }
+            const { x1, y1, x2, y2 } = calcLinkPos(src, targ);
             
-
             //const theta = 
             //we want all visible channels to show, even if actual targetDate is not after, so we use x to get channels not dates
             //include teh src and targ channels, plus any in between

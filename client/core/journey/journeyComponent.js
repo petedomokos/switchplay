@@ -364,6 +364,7 @@ export default function journeyComponent() {
 
             //@todo - change name - split longoress and click , instead of using this shouldCreateGoal thing for longpress
             function handleCanvasClick(e, d, shouldCreateGoal){
+                console.log("canvas click")
                 if(editing){
                     endEditPlanet(d);
                 }

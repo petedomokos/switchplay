@@ -109,6 +109,7 @@ export default function planetsComponent() {
     //state
     let prevClickedGoal;
     let timer;
+    let longpressed;
 
     //dom
     let containerG;
@@ -117,7 +118,7 @@ export default function planetsComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            //console.log("planets..........", transitionsOn)
+            console.log("planets..........", longpressed)
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
             containerG = d3.select(this);
@@ -250,7 +251,7 @@ export default function planetsComponent() {
                 .each(function(d){
                     //helper
                     //dont show menu if targOnly form open is if planet has the selectedMeasure on it
-                    const showContextMenu = d => false;//selected?.id === d.id;// && !d.measures.find(m => m.id === selectedMeasure?.id);
+                    const showContextMenu = d => false//longpressed?.id === d.id;// && !d.measures.find(m => m.id === selectedMeasure?.id);
                     const menuG = d3.select(this).selectAll("g.menu").data(showContextMenu(d) ? [menuOptions(d)] : [], d => d.key);
                     const menuGEnter = menuG.enter()
                         .append("g")
@@ -354,9 +355,12 @@ export default function planetsComponent() {
                     .attr("dy", 10);
                 */
 
-                d3.select(this)
+                d3.select(this).select("ellipse.core-inner.visible")
                     //.style("filter", "url(#drop-shadow)")
                     .call(oscillator.start);
+
+                longpressed = d;
+                containerG.call(planets);
 
                 // onLongpressStart.call(this, e, d)
             };
@@ -407,6 +411,8 @@ export default function planetsComponent() {
 
             prevData = data;
         })
+        //remove one-off settings
+        longpressed = null;
 
         return selection;
     }
@@ -425,6 +431,12 @@ export default function planetsComponent() {
     planets.selected = function (value) {
         if (!arguments.length) { return selected; }
         selected = value;
+        return planets;
+    };
+    planets.longpressed = function (value) {
+        console.log("call to longpressed", longpressed)
+        if (!arguments.length) { return longpressed; }
+        longpressed = value;
         return planets;
     };
     planets.selectedMeasure = function (value) {

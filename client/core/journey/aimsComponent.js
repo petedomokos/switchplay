@@ -6,6 +6,7 @@ import menuComponent from './menuComponent';
 import planetsComponent from './planetsComponent';
 import { pointIsInRect } from "./geometryHelpers";
 import nameComponent from "./nameComponent";
+import { calcLinkPos } from './linksLayout';
 /*
 
 */
@@ -97,6 +98,20 @@ export default function aimsComponent() {
     let shouldTransitionAim = false;
 
     function aims(selection, options={}) {
+
+        //helper
+        //returns the first (and only longpressed goal)
+        //note - atm, there can infact be multiple
+        function longpressedGoal(){
+            Object.keys(planets).forEach(aimId => {
+                console.log("aimid...", planets[aimId].longpressed());
+                if(planets[aimId].longpressed()){
+                    return planets[aimId].longpressed();
+                }
+                return null;
+            })
+        }
+        console.log("aims longpressedGoal", longpressedGoal())
         //console.log("aims", planetSettings.availablePlanetSizeMultiplier)
         //withClick.onClick(onClick)
         withClick.onClick(handleClick)
@@ -540,10 +555,10 @@ export default function aimsComponent() {
                 selectedAim = null;
                 //need to update
                 containerG.call(aims);
-            }, 2000);
+            }, 4000);
 
             //grab the bg rect to be animated
-            const rect = d3.select(this).select("rect.semi-transparent-bg");
+            const clickedRect = d3.select(this).select("rect.semi-transparent-bg");
 
             //check if same aim was clicked twice
             if(prevSelectedAim?.id === selectedAim.id){
@@ -551,37 +566,154 @@ export default function aimsComponent() {
                 prevSelectedTimer.stop();
                 prevSelectedTimer = null;
                 //@todo - remove this when onDblClickAim implemented as it will update anyway
-                rect.attr("opacity", 0.15).attr("fill", selectedAim.colour || "transparent")
+                clickedRect.attr("opacity", 0.15).attr("fill", selectedAim.colour || "transparent")
                 selectedAim = null;
                 //@todo - impl this so it opens name form
                 //onDblClickAim.call(this, e, d);
                 return;
             }
+
+            //show clicked aim as selected
+            clickedRect
+                .transition("selecting")
+                .duration(200)
+                    .attr("fill", COLOURS.selected);
     
             if(prevSelectedAim && prevSelectedAim.id !== selectedAim.id){
+                const { x1, x2, y1, y2 } = calcLinkPos(prevSelectedAim, selectedAim);
                 //create link from aim to aim
-                //onAddLink({ src:selectedAim.id, targ:d.id })
-                onAddLink(selectedAim, d)
+                //transition a temp link in
+                 const tempLine = d3.select("g.aims")
+                 .append("line")
+                     .attr("class", "temp")
+                     .attr("stroke", COLOURS.creatingLink)
+                     .attr("opacity", 0)
+                     .attr("x1", x1)
+                     .attr("y1", y1)
+                     .attr("x2", x2)
+                     .attr("y2", y2)
+             
+             tempLine
+                 .transition("enter")
+                 .duration(600)
+                     .attr("opacity", 1)
+             
+             //@todo - also allow any delay for fading in of links in linksComponent - or just remove that transition in there
+             tempLine
+                 .transition("exit")
+                 .delay(1000) 
+                 .duration(200)
+                     .attr("opacity", 0)
+                     .on("end", function(){
+                         d3.select(this).remove();
+                     })
+
+
+             //grab the prev ellipse to be animated
+             const prevRect = d3.select("g.aim-"+prevSelectedAim.id).select("rect.semi-transparent-bg");
+             const bothRects = d3.selectAll("g.aim").select("rect.semi-transparent-bg")
+                 .filter(a => a.id === prevSelectedAim.id || a.id === selectedAim.id);
+
+             //light both up both
+             bothRects
+                 .transition("creating-link-rects")
+                 .delay(200) //allow first anim to run
+                 .duration(200)
+                     .attr("fill", COLOURS.creatingLink);
+
+             //put fill back for prev
+             /*
+             //should need this, but atm its overridden by the add link change
+             prevRect
+                 .transition("link-created")
+                 .delay(1200) //allow first and second anim to run, plus a 400ms gap
+                 .duration(200)
+                    .attr("fill", prevSelectedAim.colour) //using .colour instead of .fill for aims
+            */
+
+             //store goal in case state changes again before transition ends
+             const a1 = prevSelectedAim;
+             const a2 = selectedAim;
+
+             //put fill back for clicked, then create link
+             clickedRect
+                 .transition("link-created")
+                     .delay(1000) //allow first and second anim to run, plus a 400ms gap
+                     .duration(200)
+                     .attr("fill", COLOURS.selected)
+                     .on("end", () => {
+                         onAddLink(a1, a2)
+                     })
             }
             else if(prevSelectedGoal){
                 //create link from goal to aim
+                const { x1, x2, y1, y2 } = calcLinkPos(prevSelectedGoal, selectedAim);
+                //transition a temp link in
+                const tempLine = d3.select("g.aims")
+                    .append("line")
+                        .attr("class", "temp")
+                        .attr("stroke", COLOURS.creatingLink)
+                        .attr("opacity", 0)
+                        .attr("x1", x1)
+                        .attr("y1", y1)
+                        .attr("x2", x2)
+                        .attr("y2", y2)
+                
+                tempLine
+                    .transition("enter")
+                    .duration(600)
+                        .attr("opacity", 1)
+                
+                //@todo - also allow any delay for fading in of links in linksComponent - or just remove that transition in there
+                tempLine
+                    .transition("exit")
+                    .delay(1000) 
+                    .duration(200)
+                        .attr("opacity", 0)
+                        .on("end", function(){
+                            d3.select(this).remove();
+                        })
+
 
                 //grab the prev ellipse to be animated
                 const prevEllipse = d3.select("g.planet-"+prevSelectedGoal.id).select("ellipse.core-inner.visible");
 
-                prevEllipse
-                    .transition("creating-link")
-                    .duration(200)
-                        .attr("fill", COLOURS.creatingLink);
+                //light both up
+                clickedRect
+                    .transition("creating-link-aim")
+                    .delay(200) //allow first anim to run
+                        .duration(200)
+                            .attr("fill", COLOURS.creatingLink);
 
                 prevEllipse
+                    .transition("creating-link-goal")
+                    .delay(200) //allow first anim to run
+                    .duration(200)
+                        .attr("fill", COLOURS.creatingLink);
+                /*
+                //put fill back for prev
+                //should need this, but atm its overridden by the add link change
+                prevEllipse
                     .transition("link-created")
-                    .delay(800)
+                    .delay(1600) //allow first and second anim to run, plus a 400ms gap
                     .duration(200)
                        .attr("fill", prevSelectedGoal.fill)
-                       .on("end", () => {
-                            onAddLink(prevSelectedGoal, selectedAim)
-                       })
+                */
+
+                //store goal in case state changes again before transition ends
+                const g = prevSelectedGoal;
+                const a = selectedAim;
+
+                //put fill back for clicked, then add link
+                clickedRect
+                    .transition("link-created")
+                        .delay(1000) //allow first and second anim to run, plus a 400ms gap
+                        .duration(200)
+                        .attr("fill", COLOURS.selected)
+                        .on("end", () => {
+                            console.log("adding link------------")
+                            onAddLink(g, a)
+                        })
             }else{
                 //manually call dom update as no react state change
                 containerG.call(aims);
@@ -605,7 +737,7 @@ export default function aimsComponent() {
                 //need to update
                 containerG.call(aims);
 
-            }, 3000);
+            }, 4000);
 
             //grab the ellipse to be animated
             const clickedEllipse = d3.select(this).select("ellipse.core-inner.visible");
@@ -636,16 +768,17 @@ export default function aimsComponent() {
             //2 cases: goal to goal, and aim to goal (src-targ order determined by dates though)
             if(prevSelectedGoal && prevSelectedGoal.id !== selectedGoal.id){
                 //create link from goal to goal
+                const { x1, x2, y1, y2 } = calcLinkPos(prevSelectedGoal, selectedGoal);
                 //transition a temp link in
                 const tempLine = d3.select("g.aims")
                     .append("line")
                         .attr("class", "temp")
                         .attr("stroke", COLOURS.creatingLink)
                         .attr("opacity", 0)
-                        .attr("x1", prevSelectedGoal.x)
-                        .attr("y1", prevSelectedGoal.y)
-                        .attr("x2", selectedGoal.x)
-                        .attr("y2", selectedGoal.y)
+                        .attr("x1", x1)
+                        .attr("y1", y1)
+                        .attr("x2", x2)
+                        .attr("y2", y2)
                 
                 tempLine
                     .transition("enter")
@@ -668,22 +801,27 @@ export default function aimsComponent() {
                 const bothEllipses = d3.selectAll("g.planet").select("ellipse.core-inner.visible")
                     .filter(g => g.id === prevSelectedGoal.id || g.id === selectedGoal.id);
 
+                //light both up both
                 bothEllipses
                     .transition("creating-link-goal1")
                     .delay(200) //allow first anim to run
                     .duration(200)
                         .attr("fill", COLOURS.creatingLink);
 
+                //put fill back for prev
+                /*
+                //should need this, but atm its overridden by the add link change
                 prevEllipse
                     .transition("link-created")
-                    .delay(1000) //allow first and second anim to run, plus a 400ms gap
+                    .delay(1200) //allow first and second anim to run, plus a 400ms gap
                     .duration(200)
-                       .attr("fill", prevSelectedGoal.fill)
+                       .attr("fill", prevSelectedGoal.fill)*/
 
                 //store goal in case state changes again before transition ends
                 const g1 = prevSelectedGoal;
                 const g2 = selectedGoal;
 
+                //put fill back for clicked, then create link
                 clickedEllipse
                     .transition("link-created")
                         .delay(1000) //allow first and second anim to run, plus a 400ms gap
@@ -695,7 +833,73 @@ export default function aimsComponent() {
             }
             else if(prevSelectedAim){
                 //create link from aim to goal
-                onAddLink(prevSelectedAim, selectedGoal)
+                const { x1, x2, y1, y2 } = calcLinkPos(prevSelectedAim, selectedGoal);
+                //transition a temp link in
+                const tempLine = d3.select("g.aims")
+                    .append("line")
+                        .attr("class", "temp")
+                        .attr("stroke", COLOURS.creatingLink)
+                        .attr("opacity", 0)
+                        .attr("x1", x1)
+                        .attr("y1", y1)
+                        .attr("x2", x2)
+                        .attr("y2", y2)
+                
+                tempLine
+                    .transition("enter")
+                    .duration(600)
+                        .attr("opacity", 1)
+                
+                //@todo - also allow any delay for fading in of links in linksComponent - or just remove that transition in there
+                tempLine
+                    .transition("exit")
+                    .delay(1000) 
+                    .duration(200)
+                        .attr("opacity", 0)
+                        .on("end", function(){
+                            d3.select(this).remove();
+                        })
+
+
+                //grab the prev ellipse to be animated
+
+                const prevRect = d3.select("g.aim-"+prevSelectedAim.id).select("rect.semi-transparent-bg");
+
+                //light both up both
+                clickedEllipse
+                    .transition("creating-link-goal1")
+                    .delay(200) //allow first anim to run
+                    .duration(200)
+                        .attr("fill", COLOURS.creatingLink);
+                
+                prevRect
+                    .transition("creating-link-aim")
+                    .delay(200) //allow first anim to run
+                        .duration(200)
+                            .attr("fill", COLOURS.creatingLink);
+
+                //put fill back for prev
+                /*
+                //should need this, but atm its overridden by the add link change
+                prevRect
+                    .transition("link-created")
+                    .delay(1200) //allow first and second anim to run, plus a 400ms gap
+                    .duration(200)
+                       .attr("fill", prevSelectedGoal.fill)*/
+
+                //store goal in case state changes again before transition ends
+                const a = prevSelectedAim;
+                const g = selectedGoal;
+
+                //put fill back for clicked, then create link
+                clickedEllipse
+                    .transition("link-created")
+                        .delay(1000) //allow first and second anim to run, plus a 400ms gap
+                        .duration(200)
+                        .attr("fill", COLOURS.selected)
+                        .on("end", () => {
+                            onAddLink(a, g)
+                        })
             }
         }
 
