@@ -56,6 +56,7 @@ export default function aimsComponent() {
 
     //API CALLBACKS
     let onClick = function(){};
+    let onLongpressStart = function(){};
     let onDragStart = function() {};
     let onDrag = function() {};
     let onDragEnd = function() {};
@@ -79,7 +80,7 @@ export default function aimsComponent() {
 
     let onDeleteAim = function() {};
 
-    let withClick = dragEnhancements();
+    let enhancedDrag = dragEnhancements();
 
     //components
     let planets = {};
@@ -104,22 +105,23 @@ export default function aimsComponent() {
         //note - atm, there can infact be multiple
         function longpressedGoal(){
             Object.keys(planets).forEach(aimId => {
-                console.log("aimid...", planets[aimId].longpressed());
                 if(planets[aimId].longpressed()){
                     return planets[aimId].longpressed();
                 }
                 return null;
             })
         }
-        console.log("aims longpressedGoal", longpressedGoal())
         //console.log("aims", planetSettings.availablePlanetSizeMultiplier)
-        //withClick.onClick(onClick)
-        withClick.onClick(handleClick)
+        //enhancedDrag.onClick(onClick)
+        enhancedDrag
+            .onClick(handleClick)
+            .onLongpressStart(longpressStart);
+
         const drag = d3.drag()
             .filter((e,d) => d.id !== "main")
-            .on("start", withClick(dragStart))
-            .on("drag", withClick(dragged))
-            .on("end", withClick(dragEnd));
+            .on("start", enhancedDrag(dragStart))
+            .on("drag", enhancedDrag(dragged))
+            .on("end", enhancedDrag(dragEnd));
 
         // expression elements
         selection.each(function (data) {
@@ -542,6 +544,14 @@ export default function aimsComponent() {
             })
         }
 
+        
+
+
+        //longpress
+        function longpressStart(e, d) {
+            onLongpressStart.call(this, e, d)
+        };
+
         //note - 'this' is g.controlled-contents not g.aim
         function handleClick(e, d){
             const prevSelectedAim = selectedAim;
@@ -948,7 +958,7 @@ export default function aimsComponent() {
         let planetGsStartingOutsideAim;
 
         function dragStart(e , d){
-            //console.log("drag aim start", this)
+            console.log("drag aim start")
             d3.select(this.parentNode).raise();
 
             planetGsStartingOutsideAim = d3.selectAll("g.planet").filter(g => g.id !== d.id);
@@ -957,6 +967,7 @@ export default function aimsComponent() {
             onDragStart.call(this, e, d)
         }
         function dragged(e , d){
+            console.log("aim dragged")
             //controlled components
             d.displayX += e.dx;
             d.y += e.dy;
@@ -985,10 +996,11 @@ export default function aimsComponent() {
 
         //note: newX and Y should be stored as d.x and d.y
         function dragEnd(e, d){
+            console.log("aim drag end", d)
             //on next update, we want aim dimns/pos to transition
             shouldTransitionAim = true;
 
-            if(withClick.isClick()) { return; }
+            if(enhancedDrag.isClick()) { return; }
 
             const outsidePlanetsToUpdate = planetGsStartingOutsideAim
                 .filter(p => p.aimId === d.id)
@@ -1104,10 +1116,14 @@ export default function aimsComponent() {
         view = value;
         return aims;
     };
-
     aims.onClick = function (value) {
         if (!arguments.length) { return onClick; }
         onClick = value;
+        return aims;
+    };
+    aims.onLongpressStart = function (value) {
+        if (!arguments.length) { return onLongpressStart; }
+        onLongpressStart = value;
         return aims;
     };
     aims.onDragStart = function (value) {

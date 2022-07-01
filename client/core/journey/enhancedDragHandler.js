@@ -127,8 +127,8 @@ export default function dragEnhancements() {
                     // click flag
                     isClick = withClick && !wasMoved && !isLongpress && !isMultitouch;
 
-                    if (isLongpress && onLongpressEnd) {
-                        onLongpressEnd.call(this, e, d);
+                    if (isLongpress) {
+                        if(onLongpressEnd) { onLongpressEnd.call(this, e, d);}
                         reset();
                         break;
                     }

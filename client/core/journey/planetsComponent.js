@@ -118,7 +118,6 @@ export default function planetsComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            console.log("planets..........", longpressed)
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
             containerG = d3.select(this);
@@ -434,7 +433,6 @@ export default function planetsComponent() {
         return planets;
     };
     planets.longpressed = function (value) {
-        console.log("call to longpressed", longpressed)
         if (!arguments.length) { return longpressed; }
         longpressed = value;
         return planets;

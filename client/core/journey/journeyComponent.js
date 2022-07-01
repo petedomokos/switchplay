@@ -321,7 +321,7 @@ export default function journeyComponent() {
                 .onClick(handleCanvasClick)
                 .onLongpressStart(function(e,d){
                     if(!enhancedZoom.wasMoved()){
-                        handleCanvasClick.call(this, e, d, true)
+                        handleCanvasClick(e, d, true)
                         //longpress toggles isOpen
                         //const chan = pointChannel({ x:e.sourceEvent.layerX, y:e.sourceEvent.layerY });
                         //if(!chan){ return; }
@@ -364,14 +364,13 @@ export default function journeyComponent() {
 
             //@todo - change name - split longoress and click , instead of using this shouldCreateGoal thing for longpress
             function handleCanvasClick(e, d, shouldCreateGoal){
-                console.log("canvas click")
                 if(editing){
                     endEditPlanet(d);
                 }
                 //note - on start editing, selected is already set to undefined
                 else if(selected){
                     updateSelected(undefined);
-                //if bar open, we dont want the click to propagate through
+                    //if bar open, we dont want the click to propagate through
                 }
                 //create a goal even if something else was selected
                 if(shouldCreateGoal){
@@ -499,6 +498,7 @@ export default function journeyComponent() {
                     })
                     //.onUpdateAim(function(){ })
                     .onClick(handleCanvasClick)
+                    .onLongpressStart((e,d) => handleCanvasClick(e, d, true))
                     .onDragStart(function(e, d){
                         //aim is raised already in aimComponent
                     })
