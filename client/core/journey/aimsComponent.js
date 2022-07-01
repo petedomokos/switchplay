@@ -420,7 +420,7 @@ export default function aimsComponent() {
                         })
 
                         //menu
-                        const menuG = controlledContentsG.selectAll("g.menu").data(selectedAim?.id === d.id ? [menuOptions(d)] : [], opt => opt.key);
+                        const menuG = controlledContentsG.selectAll("g.menu").data([]/*selectedAim?.id === d.id ? [menuOptions(d)] : []*/, opt => opt.key);
                         const menuGEnter = menuG.enter()
                             .append("g")
                                 .attr("class", "menu")
@@ -603,59 +603,59 @@ export default function aimsComponent() {
                      .attr("x2", x2)
                      .attr("y2", y2)
              
-             tempLine
-                 .transition("enter")
-                 .duration(600)
-                     .attr("opacity", 1)
+                tempLine
+                    .transition("enter")
+                    .duration(600)
+                        .attr("opacity", 1)
              
-             //@todo - also allow any delay for fading in of links in linksComponent - or just remove that transition in there
-             tempLine
-                 .transition("exit")
-                 .delay(1000) 
-                 .duration(200)
-                     .attr("opacity", 0)
-                     .on("end", function(){
-                         d3.select(this).remove();
-                     })
+                //@todo - also allow any delay for fading in of links in linksComponent - or just remove that transition in there
+                tempLine
+                    .transition("exit")
+                    .delay(1000) 
+                    .duration(200)
+                        .attr("opacity", 0)
+                        .on("end", function(){
+                            d3.select(this).remove();
+                        })
 
 
-             //grab the prev ellipse to be animated
-             const prevRect = d3.select("g.aim-"+prevSelectedAim.id).select("rect.semi-transparent-bg");
-             const bothRects = d3.selectAll("g.aim").select("rect.semi-transparent-bg")
-                 .filter(a => a.id === prevSelectedAim.id || a.id === selectedAim.id);
+                //grab the prev ellipse to be animated
+                const prevRect = d3.select("g.aim-"+prevSelectedAim.id).select("rect.semi-transparent-bg");
+                const bothRects = d3.selectAll("g.aim").select("rect.semi-transparent-bg")
+                    .filter(a => a.id === prevSelectedAim.id || a.id === selectedAim.id);
 
-             //light both up both
-             bothRects
-                 .transition("creating-link-rects")
-                 .delay(200) //allow first anim to run
-                 .duration(200)
-                     .attr("fill", COLOURS.creatingLink);
+                //light both up both
+                bothRects
+                    .transition("creating-link-rects")
+                    .delay(200) //allow first anim to run
+                    .duration(200)
+                        .attr("fill", COLOURS.creatingLink);
 
-             //put fill back for prev
-             /*
-             //should need this, but atm its overridden by the add link change
-             prevRect
-                 .transition("link-created")
-                 .delay(1200) //allow first and second anim to run, plus a 400ms gap
-                 .duration(200)
-                    .attr("fill", prevSelectedAim.colour) //using .colour instead of .fill for aims
-            */
+                //put fill back for prev
+                /*
+                //should need this, but atm its overridden by the add link change
+                prevRect
+                    .transition("link-created")
+                    .delay(1200) //allow first and second anim to run, plus a 400ms gap
+                    .duration(200)
+                        .attr("fill", prevSelectedAim.colour) //using .colour instead of .fill for aims
+                */
 
-             //store goal in case state changes again before transition ends
-             const a1 = prevSelectedAim;
-             const a2 = selectedAim;
+                //store goal in case state changes again before transition ends
+                const a1 = prevSelectedAim;
+                const a2 = selectedAim;
 
-             //put fill back for clicked, then create link
-             clickedRect
-                 .transition("link-created")
-                     .delay(1000) //allow first and second anim to run, plus a 400ms gap
-                     .duration(200)
-                     .attr("fill", COLOURS.selected)
-                     .on("end", () => {
-                         onAddLink(a1, a2)
-                     })
+                //put fill back for clicked, then create link
+                clickedRect
+                    .transition("link-created")
+                        .delay(1000) //allow first and second anim to run, plus a 400ms gap
+                        .duration(200)
+                        .attr("fill", COLOURS.selected)
+                        .on("end", () => {
+                            onAddLink(a1, a2)
+                        })
             }
-            else if(prevSelectedGoal){
+            else if(prevSelectedGoal && prevSelectedGoal.aimId !== selectedAim.id){
                 //create link from goal to aim
                 const { x1, x2, y1, y2 } = calcLinkPos(prevSelectedGoal, selectedAim);
                 //transition a temp link in
@@ -721,7 +721,6 @@ export default function aimsComponent() {
                         .duration(200)
                         .attr("fill", COLOURS.selected)
                         .on("end", () => {
-                            console.log("adding link------------")
                             onAddLink(g, a)
                         })
             }else{
@@ -768,11 +767,6 @@ export default function aimsComponent() {
                 .transition("selecting")
                 .duration(200)
                     .attr("fill", COLOURS.selected);
-
-            if(!prevSelectedGoal && !prevSelectedAim){
-                //must update dom manually as no react state change
-                containerG.call(aims);
-            }
 
             //animate then add link to state
             //2 cases: goal to goal, and aim to goal (src-targ order determined by dates though)
@@ -841,7 +835,7 @@ export default function aimsComponent() {
                             onAddLink(g1, g2)
                         })
             }
-            else if(prevSelectedAim){
+            else if(prevSelectedAim && prevSelectedAim.id !== selectedGoal.aimId){
                 //create link from aim to goal
                 const { x1, x2, y1, y2 } = calcLinkPos(prevSelectedAim, selectedGoal);
                 //transition a temp link in
@@ -910,6 +904,9 @@ export default function aimsComponent() {
                         .on("end", () => {
                             onAddLink(a, g)
                         })
+            }else{
+                //manually update as no state change
+                containerG.call(aims);
             }
         }
 
