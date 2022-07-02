@@ -364,6 +364,8 @@ export default function journeyComponent() {
 
             //@todo - change name - split longoress and click , instead of using this shouldCreateGoal thing for longpress
             function handleCanvasClick(e, d, shouldCreateGoal){
+                //@todo next - if a goal or aim is selected, must deselect
+                //but not sure if selected is up to date in this component with the planetsComponet and aimsComp
                 if(editing){
                     endEditPlanet(d);
                 }

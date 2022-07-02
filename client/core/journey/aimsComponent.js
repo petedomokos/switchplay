@@ -770,7 +770,10 @@ export default function aimsComponent() {
 
             //animate then add link to state
             //2 cases: goal to goal, and aim to goal (src-targ order determined by dates though)
-            if(prevSelectedGoal && prevSelectedGoal.id !== selectedGoal.id){
+            //helper
+            const linkIncludesGoal = (link, g) => link && g && (g.id === link.src.id || g.id === link.targ.id);
+            const linkExists = (g1, g2) => linksData.find(l => linkIncludesGoal(l, g1) && linkIncludesGoal(l, g2));
+            if(prevSelectedGoal && prevSelectedGoal.id !== selectedGoal.id && !linkExists(prevSelectedGoal, selectedGoal)){
                 //create link from goal to goal
                 const { x1, x2, y1, y2 } = calcLinkPos(prevSelectedGoal, selectedGoal);
                 //transition a temp link in
