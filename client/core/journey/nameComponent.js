@@ -1,5 +1,8 @@
 
 import * as d3 from 'd3';
+import dragEnhancements from './enhancedDragHandler';
+
+const enhancedDrag = dragEnhancements();
 
 export default function nameComponent(containerG, options={}){
     const {
@@ -8,11 +11,27 @@ export default function nameComponent(containerG, options={}){
         translate = { x: 0, y: 0},
         bg,
         text,
-        onClick = function(){}
+        onClick = function(){ console.log("clicked")},
+        onDblClick = function(){},
+        longpressStart = function(){}
     } = options;
+    console.log("opts", options)
 
     const { width, height } = bg;  //can also pass x and y
     const { name, textAnchor = "start", fill = "transparent", fontSize = 12, stroke = "black", strokeWidth = 0.1 } = text;  //can also pass x and y
+
+    enhancedDrag
+        .onClick((e, d) => { 
+            console.log("clk", onClick)
+            onClick(e, d)
+        })
+        .onDblClick(onDblClick)
+        .onLongpressStart(longpressStart);
+
+    const drag = d3.drag()
+        .on("start", enhancedDrag(() => { console.log("test")} ))
+        .on("drag", enhancedDrag())
+        .on("end", enhancedDrag());
 
     containerG.each(function(d){
         const nameG = containerG.selectAll("g." +className).data(shouldDisplay ? [d] : []);
@@ -32,7 +51,8 @@ export default function nameComponent(containerG, options={}){
                     nameG
                         .append("rect")
                             .attr("class", "bg")
-                            .attr("fill", fill);
+                            .attr("fill", fill)
+                            .attr("stroke", "grey");
                     nameG
                         .append("text")
                             .attr("class", "main")
@@ -44,8 +64,7 @@ export default function nameComponent(containerG, options={}){
                 .merge(nameG)
                 .attr("transform", "translate(" + translate.x + "," +translate.y +")")
                 .attr("cursor", "pointer")
-                .call(d3.drag()) //need drag just to prevent canvas receiving the click - dont know why
-                .on("click", onClick)
+                .call(drag) //need drag just to prevent canvas receiving the click - dont know why
                 .each(function(d){
                     const nameG = d3.select(this);
                     nameG.select("rect.bg")

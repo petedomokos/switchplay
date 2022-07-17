@@ -144,6 +144,17 @@ export const DIMNS = {
     }
 }
 export const COLOURS = {
+    canvas:"#F8F8F8",
+    planet:"#6495ED",//grey10(5),
+    milestone:grey10(2),
+    link:grey10(5),
+    selected:grey10(2),
+    creatingLink:"white",
+    potentialLinkPlanet:grey10(3),
+    potentialLink:grey10(3),
+    barMenuItem:"none",
+    selectedBarMenuItem:"white",
+    /*
     canvas:"#FAEBD7",
     planet:grey10(5),
     milestone:grey10(2),
@@ -154,6 +165,7 @@ export const COLOURS = {
     potentialLink:grey10(3),
     barMenuItem:"none",
     selectedBarMenuItem:"white"
+    */
 }
 
 export const SMALL_FONT = 9;

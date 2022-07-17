@@ -55,6 +55,7 @@ export default function aimsComponent() {
     let stopShowingAvailabilityStatus = function() {};
 
     //API CALLBACKS
+    let onSetEditing = function(){};
     let onClick = function(){};
     let onLongpressStart = function(){};
     let onDragStart = function() {};
@@ -115,6 +116,7 @@ export default function aimsComponent() {
         //enhancedDrag.onClick(onClick)
         enhancedDrag
             .onClick(handleClick)
+            .onDblClick((e,d) => { onSetEditing(d) })
             .onLongpressStart(longpressStart);
 
         const drag = d3.drag()
@@ -204,15 +206,44 @@ export default function aimsComponent() {
                         updateCentredName(d.width, d.height, d.name);
                         //top-left name
                         function updateTopLeftName(name){
-                            //console.log("set", nameSettings(d))
+                            console.log("update top left name")
                             const { width, height, margin, fontSize } = nameSettings(d);
                             const contentsWidth = d3.max([width - margin.left - margin.right, 0]);
                             const contentsHeight = d3.max([height - margin.top - margin.bottom, 0]);
 
+                            /*
+
+                            todo next - sort out nameComponent - maybe turn it into a details component,
+                            so user can change colour too etc, and also it has a solid rect bg to click
+                            or longoress. 
+                            - lp should bring up teh delete aim animation.
+                            - click should be same as aim click -> so it selects the aim, and makes a link if 
+                            another goal or aim is already selected
+                             - drag should be same as draggin aim too.
+                             so its all the saem as aim, except longpress.
+
+                             BUT this is not ideal - it makes the user have to think! Mayber its better to remove all this
+                             , put it back to how it was so we just haev a native click handler,
+                             and allow aims and links to be deleted differently to goals.
+
+                             so its just goals that have the longpress to delete or create
+                             so the instruciton is just 'longpress to create or delete goals'
+                             and for aims and links, the delete icon shows up on edit maybe? ie dbl-click.
+                             and this can also be true for goals, so goals haev two ways to delete - longopress or dbl-click
+
+                            */
                             controlledContentsG.call(nameComponent, {
                                 className:"top-left-name", //note: curr name compo can only take one classname else it messes selection up
                                 shouldDisplay:!nameCentred,
-                                onClick:onClickName,
+                                onClick:(e,d) => {
+                                    console.log("click name---------", d)
+                                },
+                                onDblClick:(e,d) => {
+                                    console.log("dbl click name", d)
+                                },
+                                onLongpressStart:(e,d) => {
+                                    console.log("longpress name", d)
+                                },
                                 translate:{ x: margin.left, y: margin.top },
                                 bg:{
                                     width:contentsWidth,
@@ -578,6 +609,7 @@ export default function aimsComponent() {
                 //@todo - remove this when onDblClickAim implemented as it will update anyway
                 clickedRect.attr("opacity", 0.15).attr("fill", selectedAim.colour || "transparent")
                 selectedAim = null;
+                onSetEditing(d);
                 //@todo - impl this so it opens name form
                 //onDblClickAim.call(this, e, d);
                 return;
@@ -758,7 +790,8 @@ export default function aimsComponent() {
                 prevSelectedTimer = null;
                 clickedEllipse.attr("fill", d.fill)
                 selectedGoal = null;
-                onDblClickGoal.call(this, e, d);
+                onSetEditing(d);
+                //onDblClickGoal.call(this, e, d);
                 return;
             }
 
@@ -1060,25 +1093,20 @@ export default function aimsComponent() {
         return aims;
     };
     aims.selected = function (value) {
-        if (!arguments.length) { return { selectedAim, selectedGoal }; }
+        if (!arguments.length) { return { aim:selectedAim, goal:selectedGoal }; }
         if(value?.dataType === "aim"){
             selectedAim = value;
             selectedGoal = undefined;
-            selectedLink = undefined;
         }else if(value?.dataType === "planet"){
             selectedAim = undefined;
             selectedGoal = value;
-            selectedLink = undefined;
         }else if(value?.dataType === "link"){
             selectedAim = undefined;
             selectedGoal = undefined;
-            selectedLink = value;
         }else{
             //reset as no value
             selectedAim = undefined;
             selectedGoal = undefined;
-            selectedLink = undefined;
-
         }
         return aims;
     };
@@ -1159,6 +1187,11 @@ export default function aimsComponent() {
         if(typeof value === "function"){
             onMouseout = value;
         }
+        return aims;
+    };
+    aims.onSetEditing = function (value) {
+        if (!arguments.length) { return onSetEditing; }
+        onSetEditing = value;
         return aims;
     };
     aims.onClickName = function (value) {

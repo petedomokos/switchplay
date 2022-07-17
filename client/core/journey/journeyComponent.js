@@ -364,13 +364,15 @@ export default function journeyComponent() {
 
             //@todo - change name - split longoress and click , instead of using this shouldCreateGoal thing for longpress
             function handleCanvasClick(e, d, shouldCreateGoal){
-                //@todo next - if a goal or aim is selected, must deselect
-                //but not sure if selected is up to date in this component with the planetsComponet and aimsComp
+                console.log("canvas click editing", editing)
+                console.log("canvas click aim sel", aims.selected())
+                //@todo - either remove selected in journey, or remove selected state in aims.
+                
                 if(editing){
                     endEditPlanet(d);
                 }
                 //note - on start editing, selected is already set to undefined
-                else if(selected){
+                if(selected || aims.selected().goal || aims.selected().aim){
                     updateSelected(undefined);
                     //if bar open, we dont want the click to propagate through
                 }
@@ -405,7 +407,9 @@ export default function journeyComponent() {
             if(selectedPending){
                 const goal = goalsData.find(p => p.id === selectedPending);
                 selectedPending = undefined;
-                updateSelected(goal);
+                editing = goal;
+                //updateSelected(goal);
+                updateModalData(goal);
             }
 
             function updateAimsData(){
@@ -498,13 +502,22 @@ export default function journeyComponent() {
                         editing = undefined;
                         onDeleteAim(aimId);
                     })
+                    .onSetEditing((d) => {
+                        console.log("setting aim as editing")
+                        editing = d;
+                        updateModalData(d);
+                    })
                     //.onUpdateAim(function(){ })
-                    .onClick(handleCanvasClick)
+                    //.onClick(handleCanvasClick)
                     .onLongpressStart((e,d) => handleCanvasClick(e, d, true))
                     .onDragStart(function(e, d){
                         //aim is raised already in aimComponent
                     })
-                    .onClickName((e,d) => { updateSelected(d); })
+                    //.onDblClickName((e,d) => {
+                        //editing = d;
+                        //updataModalData(d); 
+                        //updateSelected(d); 
+                    //})
                     .onDrag(function(e, aim){
                         //links
                         //this is the dragged aim, so we get the planets from it
@@ -580,7 +593,9 @@ export default function journeyComponent() {
                     //.onMouseover(() => {})
                     //.onMouseout(() => {})
                     .onDblClickGoal((e,d) => {
-                        updateSelected(d); 
+                        editing = d;
+                        updateModalData(d);
+                        //updateSelected(d); 
                     })
                     //@TODO WARNING - may cause touch issues as drag handlers are updated - need this to not update planetsComp or at least not teh drag handlers
                     .onDragGoalStart(function(){ 
@@ -995,22 +1010,37 @@ export default function journeyComponent() {
         }
 
         updateSelected = (d) => {
+            console.log("updatesel", d)
+            //@todo - choose between storing selected her ein journey or in aims and links 
             selected = d;
+            if(d?.dataType === "planet" || d?.dataType === "aim"){
+                aims.selected(d);
+            }
             if(!d){
-                setModalData(undefined);
-                //update(); not needed
+                if(aims.selected().goal || aims.selected().aim){
+                    aims.selected(null);
+                    //manually call if not editing as no modal data change will not trigger re-render
+                    if(!editing) { canvasG.selectAll("g.aims").call(aims); }
+                }
                 return;
             }
 
+            if(editing){
+                updateModalData();
+            }
+        }
+
+        function updateModalData(d){
+            if(!d) {
+                setModalData(null);
+                return; 
+            }
             //open name form too, but as selected rather than editing
             const measureIsOnPlanet = d.dataType === "planet"? d.measures.find(d => d.id === menuBar.selected()) : false;
             const measure = measureIsOnPlanet && measuresOpen?.find(m => m.id === menuBar.selected());
             //could be an aim or a planet
             const modalData = measure ? { d, measure, nameAndTargOnly: true } : { d, nameOnly:true };
             setModalData(modalData);
-            return;
-
-            //update(); not needed
         }
 
         //helpers
@@ -1055,6 +1085,7 @@ export default function journeyComponent() {
             setModalData(undefined)
             editing = undefined;
             //zoom is only applied for full edit, not if its nameOnly
+            /*
             if(preEditZoom){
                 svg.transition().duration(750).call(
                     zoom.transform, 
@@ -1081,9 +1112,10 @@ export default function journeyComponent() {
                             }
                         })
             }
-            updateSelected(undefined);
+            */
+            //updateSelected(undefined);
             //reset
-            preEditZoom = undefined;
+            //preEditZoom = undefined;
         }
 
         createAim = function(e){
