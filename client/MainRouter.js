@@ -15,6 +15,7 @@ import CreateDatasetContainer from './dataset/containers/CreateDatasetContainer'
 import CreateDatapointContainer from './dataset/datapoints/containers/CreateDatapointContainer'
 import PrivateRoute from './auth/PrivateRoute'
 import MenuContainer from './core/containers/MenuContainer'
+import Profile from './core/profile/Profile'
 import auth from './auth/auth-helper'
 import Expression from "./expression/Expression"
 import Games from "./games/Games"
@@ -69,6 +70,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
       <Route path="/signup" component={CreateUserContainer}/>
       <Route path="/signin" component={SigninContainer}/>
       {(!jwt || userId) && <Switch>
+          <Route path="/profile" component={Profile}/>
           {jwt ?
             <Route exact path="/" component={UserHomeContainer} />
             :

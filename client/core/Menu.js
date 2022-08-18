@@ -105,6 +105,12 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
                   className={classes.homeIcon}/>
           </IconButton>
         </Link>
+        <Link to="/profile">
+            <Button 
+              className={classes.menuBtn}
+              style={isActive(history, "/profile")}>Profile
+            </Button>
+          </Link>
         {
           !user && (<span>
             <Link to="/signup">
@@ -113,12 +119,12 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
                 style={isActive(history, "/signup")}>Sign up
               </Button>
           </Link>
-            <Link to="/signin">
-              <Button 
-                className={classes.menuBtn}
-                style={isActive(history, "/signin")}>Sign In
-              </Button>
-            </Link>
+          <Link to="/signin">
+            <Button 
+              className={classes.menuBtn}
+              style={isActive(history, "/signin")}>Sign In
+            </Button>
+          </Link>
           </span>)
         }
         {/**
