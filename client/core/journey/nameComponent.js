@@ -15,7 +15,7 @@ export default function nameComponent(containerG, options={}){
         onDblClick = function(){},
         longpressStart = function(){}
     } = options;
-    console.log("opts", options)
+    //console.log("opts", options)
 
     const { width, height } = bg;  //can also pass x and y
     const { name, textAnchor = "start", fill = "transparent", fontSize = 12, stroke = "black", strokeWidth = 0.1 } = text;  //can also pass x and y

@@ -41,7 +41,8 @@ export default function barChartComponent() {
             contentsG.select("rect.inner-bg")
                 .attr("width", contentsWidth)
                 .attr("height", contentsHeight)
-                .attr("stroke", "red")
+                .attr("stroke", "grey")
+                .attr("stroke-width", 0.3)
                 .attr("fill", "transparent")
             
             //BARS
@@ -75,6 +76,10 @@ export default function barChartComponent() {
             contentsG.select("text.title")
                 .raise()
                 .attr("transform", `translate(${x}, ${y})`)
+                .attr("stroke-width", 0.3)
+                .attr("font-size", 14)
+                .attr("stroke", "grey")
+                .attr("fill", "grey")
                 .text(title)
             
         })

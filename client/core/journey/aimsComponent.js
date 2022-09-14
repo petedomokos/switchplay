@@ -206,7 +206,7 @@ export default function aimsComponent() {
                         updateCentredName(d.width, d.height, d.name);
                         //top-left name
                         function updateTopLeftName(name){
-                            console.log("update top left name")
+                            //console.log("update top left name")
                             const { width, height, margin, fontSize } = nameSettings(d);
                             const contentsWidth = d3.max([width - margin.left - margin.right, 0]);
                             const contentsHeight = d3.max([height - margin.top - margin.bottom, 0]);
@@ -1000,7 +1000,7 @@ export default function aimsComponent() {
             onDragStart.call(this, e, d)
         }
         function dragged(e , d){
-            console.log("aim dragged")
+            //console.log("aim dragged")
             //controlled components
             d.displayX += e.dx;
             d.y += e.dy;

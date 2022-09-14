@@ -18,7 +18,7 @@ const mockMeasures = [
 	{ id:"mock2", name:"Drive 1", desc: "nr D1s to Fairway" },
 	{ id:"mock3", name:"Drive 2", desc: "nr D2s to Fairway" }
 ]
-const newJourney = { _id:"temp", aims:[], goals:[], links:[], measures:mockMeasures}
+const newJourney = { _id:"temp", profiles:[], aims:[], goals:[], links:[], measures:mockMeasures}
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -86,9 +86,9 @@ const initChannels = d3.range(numberMonths)
 
 //width and height may be full screen, but may not be
 const Journey = ({ data, availableJourneys, screen, width, height, save, setActive, closeDialog }) => {
-  // console.log("Journey data", data)
+  console.log("Journey data", data)
   //console.log("Journey avail", availableJourneys)
-  const { _id, name, aims, goals, links, measures } = data;
+  const { _id, name, profiles, aims, goals, links, measures } = data;
   const [journey, setJourney] = useState(null);
   const [channels, setChannels] = useState(initChannels);
   const [withCompletionPaths, setWithCompletionPath] = useState(false);
@@ -213,6 +213,13 @@ const Journey = ({ data, availableJourneys, screen, width, height, save, setActi
             const _measures = measures.map(m => ({ ...m, ...(updates.measures?.find(meas => meas.id === m.id) || {} ) }))
             save({ ...data, aims:_aims, goals:_goals, links:_links, measures:_measures })
             //@todo - make createId handle prefixes so all ids are unique
+        })
+        .handleCreateProfile(function(profile){
+          const id = createId(profiles.map(p => p.id));
+          const colour = "orange";
+          //updates
+          const _profiles = [ ...profiles, { id , colour, dataType:"profile", ...profile }];
+          save({ ...data, profiles:_profiles });
         })
         .handleCreateAim(function(aim, planetIds){
           const id = createId(aims.map(a => a.id));
@@ -487,6 +494,7 @@ const toggleJourneysOpen = useCallback(() => {
 Journey.defaultProps = {
   data:{
     _id:"temp",
+    profiles:[],
     aims:[],
     goals:[],
     links:[],

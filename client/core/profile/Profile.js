@@ -10,8 +10,6 @@ const useStyles = makeStyles((theme) => ({
       margin:"50px",
       width:600,
       height:500,
-      border:'solid',
-      borderWidth:"thin"
   }
 }))
 

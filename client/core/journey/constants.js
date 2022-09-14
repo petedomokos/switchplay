@@ -9,10 +9,9 @@ export const DEFAULT_PLANET_RY = 50;
 export const PLANET_RING_MULTIPLIER = 1.4;
 export const AVAILABLE_GOAL_MULTIPLIER = 2.5;
 
-export const WIDGETS_WIDTH = 40;
-export const WIDGETS_HEIGHT = 40;
 export const WIDGET_WIDTH = 30;
-export const WIDGET_HEIGHT = 30;
+export const WIDGET_HEIGHT = 40;
+export const WIDGET_MARGIN = { left: 0, right: 0, top:5, bottom:5 }
 
 export const FONTSIZES = {
     ctrls:{
@@ -97,6 +96,10 @@ export const DIMNS = {
         }
 
 
+    },
+    profile:{
+        width:100,
+        height:150
     },
     planet:{
         width:110,

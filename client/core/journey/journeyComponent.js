@@ -12,7 +12,7 @@ import menuBarComponent from './menuBarComponent';
 import { updatePos } from "./domHelpers"
 //import { COLOURS, DIMNS } from "./constants";
 import { addWeeks } from "../../util/TimeHelpers"
-import { zoomLevel, DEFAULT_D3_TICK_SIZE,WIDGETS_WIDTH, WIDGETS_HEIGHT, WIDGET_WIDTH, WIDGET_HEIGHT, COLOURS, FONTSIZES, DIMNS, AVAILABLE_GOAL_MULTIPLIER, grey10 } from "./constants";
+import { zoomLevel, DEFAULT_D3_TICK_SIZE, WIDGET_WIDTH, WIDGET_HEIGHT, WIDGET_MARGIN, COLOURS, FONTSIZES, DIMNS, AVAILABLE_GOAL_MULTIPLIER, grey10 } from "./constants";
 import { pointIsInRect, distanceBetweenPoints, } from './geometryHelpers';
 import dragEnhancements from './enhancedDragHandler';
 import { getTransformationFromTrans } from './helpers';
@@ -129,6 +129,10 @@ import { getTransformationFromTrans } from './helpers';
       - if not allowing links to be created from aims, then replace the drag handle corners with just a boundary all the way around each aim
     */
 
+const widgets = [
+    { key:"aim", r:10, width:30, height:20, rx:10, ry:10, fill: grey10(5) },
+    { key:"profile", r:2, width:20, height:30, rx:2, ry:2, fill: "orange" },
+]
 
 /*
 
@@ -163,7 +167,7 @@ export default function journeyComponent() {
         menuBarHeight = menuBarData.displayedBar ? DIMNS.menuBar.height : 0
         //note- for some reason, reducing canvasHeight doesnt seem to move axis properly, so instead just subtract menuBarHeight for axis translateY
         canvasHeight = contentsHeight;// - menuBarHeight; //this should be lrge enough for all planets, and rest can be accesed via pan
-        widgetsY = canvasHeight - WIDGETS_HEIGHT - DIMNS.xAxis.height - menuBarHeight;
+        widgetsY = canvasHeight - DIMNS.xAxis.height - menuBarHeight;
     };
 
     let aligned = false;
@@ -189,9 +193,13 @@ export default function journeyComponent() {
     let preEditZoom;
     let zoomViewLevel;
 
+    //profiles
+    let handleCreateProfile = function(){};
+
     let handleCreateAim = function(){};
     let updateAim = function(){};
     let onDeleteAim = function(){};
+
     let createPlanet = function(){};
     //@todo - change name to updatePlanetState and so on to distinguish from dom changes eg updateplanets could be either
     let updatePlanet = function(){};
@@ -208,6 +216,7 @@ export default function journeyComponent() {
     let endEditPlanet = function (){};
     let createJourney = function (){};
     let createAim = function (){};
+    let createProfile = function (){};
     let updateSelected = function (){};
     let setActiveJourney = () => {};
 
@@ -248,7 +257,7 @@ export default function journeyComponent() {
 
         selection.each(function (journeyData) {
             data = journeyData;
-            //console.log("journey", data)
+            console.log("journey", data)
             if(!svg){
                 //enter
                 init.call(this);
@@ -890,44 +899,54 @@ export default function journeyComponent() {
                 .on("drag", draggedWidget)
                 .on("end", dragWidgetEnd);
             //bg
-            const widgets = [
-                { key:"aim" }
-            ]
 
             widgetsG.attr("transform", "translate("+widgetsX +"," +widgetsY +")");
 
-            const widgetG = widgetsG.selectAll("g.widget").data(widgets)
+            const widgetG = widgetsG.selectAll("g.widget").data(widgets, d => d.key)
             widgetG.enter()
                 .append("g")
                     .attr("class", "widget")
-                    .each(function(d){
+                    .each(function(d, i){
                         //aim
                         if(d.key === "aim"){
                             d3.select(this)
                                 .append("rect")
                                     .attr("class", "widget")
-                                    .attr("rx", 10)
-                                    .attr("width", WIDGET_WIDTH)
-                                    .attr("height", WIDGET_HEIGHT)
-                                    //.attr("fill", "transparent")
+                                    .attr("x", (WIDGET_WIDTH - d.width) / 2)
+                                    .attr("width", d.width)
+                                    .attr("height", d.height)
+                                    .attr("rx", d.rx)
+                                    .attr("ry", d.ry)
+                                    .attr("fill", d.fill)
+                                    .style("cursor", "pointer")
+                                    .attr("opacity", 0.5);
+                        }
+                        if(d.key === "profile"){
+                            d3.select(this)
+                                .append("rect")
+                                    .attr("class", "widget")
+                                    .attr("x", (WIDGET_WIDTH - d.width) / 2)
+                                    .attr("width", d.width)
+                                    .attr("height", d.height)
+                                    .attr("rx", d.rx)
+                                    .attr("ry", d.ry)
+                                    .attr("fill", d.fill)
                                     .style("cursor", "pointer")
                                     .attr("opacity", 0.5);
                         }
                     })
                     .merge(widgetG)
+                    .attr("transform", (d,i) => "translate(0," +((- (i + 1) * WIDGET_HEIGHT) + WIDGET_MARGIN.top) +")")
                     .each(function(d){
                         //aim
                         if(d.key === "aim"){
                             d3.select(this).select("rect.widget")
-                                .attr("fill", grey10(5))
-                                //.attr("stroke", draggedWidget === d.key ? "white" : grey10(5))
-                                //.attr("fill", draggedWidget === d.key ? "white" : grey10(5))
-
                         }
                     })
                     .call(widgetDrag)
 
                     let cloneG;
+                    let wasMoved = false;
                     function dragWidgetStart(e,d){
                         //create a clone 
                         cloneG = d3.select(this)
@@ -935,6 +954,7 @@ export default function journeyComponent() {
                             .attr("opacity", 1)
                     }
                     function draggedWidget(e,d){
+                        wasMoved = true;
                         const { translateX, translateY } = getTransformationFromTrans(cloneG.attr("transform"));
                         const newX = translateX + e.dx;
                         const newY = translateY + e.dy;
@@ -942,12 +962,30 @@ export default function journeyComponent() {
                         cloneG.attr("transform", "translate("+newX +"," +newY +")");
                     }
                     function dragWidgetEnd(e,d){
+                        console.log("drag end", d)
                         //remove the clone
                         cloneG.remove();
+
+                        const startingHeight = d.key === "aim" ? DIMNS.aim.initHeight : DIMNS.profile.height;
+
                         //cant use e as the finishing position, as need to add the widgetsG position
                         //(could have made widgetsG the drag continer, but then would have had to subtract it from the first dx/dy
-                        const { translateX, translateY } = getTransformationFromTrans(d3.select("g.widgets").attr("transform"));
-                        createAim({ x: e.x + translateX, y: e.y + translateY });
+                        const widgetsTrans = getTransformationFromTrans(d3.select("g.widgets").attr("transform"));
+                        const widgetTransX = widgetsTrans.translateX;
+                        const widgetTransY = widgetsTrans.translateY;
+                        let pos;
+                        if(!wasMoved){
+                            pos = { x: widgetTransX + WIDGET_WIDTH + 30, y: widgetTransY - startingHeight };
+                        }else{
+                            pos = { x: widgetTransX + e.x, y: widgetTransY + e.y };
+                            //reset
+                            wasMoved = false;
+                        }
+                        if(d.key === "aim"){
+                            createAim(pos);
+                        }else if(d.key === "profile"){
+                            createProfile(pos);
+                        }
                     }
         }
 
@@ -979,8 +1017,9 @@ export default function journeyComponent() {
             widgetsG
                 .append("rect")
                     .attr("class", "bg")
-                    .attr("width", WIDGETS_WIDTH)
-                    .attr("height", WIDGETS_HEIGHT)
+                    .attr("y", - widgets.length * WIDGET_HEIGHT)
+                    .attr("width", WIDGET_WIDTH)
+                    .attr("height", widgets.length * WIDGET_HEIGHT)
                     .attr("fill", COLOURS?.canvas || "#FAEBD7")
                     //.attr("stroke", "black");
 
@@ -1118,25 +1157,36 @@ export default function journeyComponent() {
             //preEditZoom = undefined;
         }
 
-        createAim = function(e){
+        createAim = function(pos){
             //todo - transition from icon dimns
             const width = DIMNS.aim.initWidth
             const height = DIMNS.aim.initHeight;
             const aim = {
-                startDate:zoomedTimeScale.invert(e.x - WIDGET_WIDTH/2),
-                endDate:zoomedTimeScale.invert(e.x + width),
-                startYPC:zoomedYScale.invert(e.y - WIDGET_HEIGHT/2),
-                endYPC:zoomedYScale.invert(e.y + height)
+                startDate:zoomedTimeScale.invert(pos.x - WIDGET_WIDTH/2),
+                endDate:zoomedTimeScale.invert(pos.x + width),
+                startYPC:zoomedYScale.invert(pos.y - WIDGET_HEIGHT/2),
+                endYPC:zoomedYScale.invert(pos.y + height)
             }
 
             //calculate here which planets are in based on the actual x (not displayX)
             const planetIdsInAim = d3.selectAll("g.planet")
-                .filter(g => pointIsInRect(g, { x: e.x, y:e.y, width, height }))
+                .filter(g => pointIsInRect(g, { x: pos.x, y:pos.y, width, height }))
                 .data()
                 .map(g => g.id);
 
             updateSelected(undefined);       
             handleCreateAim(aim, planetIdsInAim);   
+        }
+
+        createProfile = function(pos){
+            console.log("create profile", pos)
+            const profile = {
+                date:zoomedTimeScale.invert(pos.x),
+                yPC:zoomedYScale.invert(pos.y)
+            }
+
+            updateSelected(undefined);       
+            handleCreateProfile(profile);   
         }
 
         return selection;
@@ -1220,6 +1270,13 @@ export default function journeyComponent() {
         if (!arguments.length) { return handleCreateAim; }
         if(typeof value === "function"){
             handleCreateAim = value;
+        }
+        return journey;
+    };
+    journey.handleCreateProfile = function (value) {
+        if (!arguments.length) { return handleCreateProfile; }
+        if(typeof value === "function"){
+            handleCreateProfile = value;
         }
         return journey;
     };
