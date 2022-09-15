@@ -10,7 +10,9 @@ export default function profileCardsLayout(){
     function update(data){
         
         return data.map(p => ({
-            ...p
+            ...p,
+            x:timeScale(p.date),
+            y:yScale(p.yPC)
         }));
     }
 

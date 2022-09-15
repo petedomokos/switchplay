@@ -90,7 +90,7 @@ export default function profileCardsComponent() {
                         .style("pointer-events", "none")
                 
                 })
-                .attr("transform", "translate(300,300)")
+                .attr("transform", d =>  "translate(" +d.x +"," +d.y +")")
                 //.call(transform, { x: d => adjX(timeScale(d.targetDate)), y:d => d.y })
                 //.call(transform, { x: d => d.x, y:d => d.y }, transitionEnter && transitionsOn)
                 .merge(profileCardG)

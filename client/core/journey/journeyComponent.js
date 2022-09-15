@@ -1014,7 +1014,8 @@ export default function journeyComponent() {
                         const widgetTransY = widgetsTrans.translateY;
                         let pos;
                         if(!wasMoved){
-                            pos = { x: widgetTransX + WIDGET_WIDTH + 30, y: widgetTransY - startingHeight };
+                            const xShift = d.key === "aim" ? WIDGET_WIDTH + 30 : WIDGET_WIDTH + 30 + DIMNS.profile.width/2;
+                            pos = { x: widgetTransX + xShift, y: widgetTransY - startingHeight };
                         }else{
                             pos = { x: widgetTransX + e.x, y: widgetTransY + e.y };
                             //reset
