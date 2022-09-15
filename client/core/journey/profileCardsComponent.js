@@ -48,6 +48,7 @@ export default function profileCardsComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
+            //console.log("profileCards update", data)
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
             containerG = d3.select(this);
@@ -60,16 +61,16 @@ export default function profileCardsComponent() {
                 .onLongpressEnd(longpressEnd);
 
             const drag = d3.drag()
-                .on("start", enhancedDrag(onDragStart))
-                .on("drag", enhancedDrag(onDrag))
-                .on("end", enhancedDrag(onDragEnd));
+                .on("start", enhancedDrag(dragStart))
+                .on("drag", enhancedDrag(dragged))
+                .on("end", enhancedDrag(dragEnd));
 
             const profileCardG = containerG.selectAll("g.profile-card").data(data, d => d.id);
             profileCardG.enter()
                 .append("g")
                 .attr("class", d => "profile-card profile-card-"+d.id)
                 .each(function(d,i){
-                    console.log("entering", d)
+                    //console.log("entering", d)
                     //ENTER
                     const contentsG = d3.select(this)
                         .append("g")
@@ -90,10 +91,11 @@ export default function profileCardsComponent() {
                         .style("pointer-events", "none")
                 
                 })
-                .attr("transform", d =>  "translate(" +d.x +"," +d.y +")")
+                .style("cursor", "grab")
                 //.call(transform, { x: d => adjX(timeScale(d.targetDate)), y:d => d.y })
                 //.call(transform, { x: d => d.x, y:d => d.y }, transitionEnter && transitionsOn)
                 .merge(profileCardG)
+                .attr("transform", d =>  "translate(" +d.x +"," +d.y +")")
                 .each(function(d){
                     //ENTER AND UPDATE
                     const contentsG = d3.select(this).select("g.contents")
@@ -192,13 +194,42 @@ export default function profileCardsComponent() {
                 }
             })
 
+            function dragStart(e , d){
+                console.log("dragStart", d.x)
+                d3.select(this).raise();
+
+                onDragStart.call(this, e, d)
+            }
+            function dragged(e , d){
+                //controlled components
+                d.x += e.dx;
+                d.y += e.dy;
+                d3.select(this)
+                    .attr("transform", "translate(" + d.x +"," + d.y +")")
+                    //.call(updateTransform, { x: d => d.displayX })
+        
+                //onDrag does nothing
+                onDrag.call(this, e, d)
+            }
+    
+            //note: newX and Y should be stored as d.x and d.y
+            function dragEnd(e, d){
+                console.log("dragEnd", d.x)
+                //on next update, we want aim dimns/pos to transition
+                //shouldTransitionAim = true;
+    
+                if(enhancedDrag.isClick()) { return; }
+    
+                onDragEnd.call(this, e, d);
+            }
+
             //DELETION
             let deleted = false;
             const svg = d3.select("svg");
 
             //longpress
             function longpressStart(e, d) {
-                //console.log("e", e)
+                console.log("lps", e)
                 //todo - check defs appended, and use them here, then longopressDrag should trigger the delete of a goal
                 //then do same for aims and links
                 /*

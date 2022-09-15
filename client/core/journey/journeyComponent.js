@@ -18,6 +18,7 @@ import { zoomLevel, DEFAULT_D3_TICK_SIZE, WIDGET_WIDTH, WIDGET_HEIGHT, WIDGET_MA
 import { pointIsInRect, distanceBetweenPoints, } from './geometryHelpers';
 import dragEnhancements from './enhancedDragHandler';
 import { getTransformationFromTrans } from './helpers';
+import { Save } from '@material-ui/icons';
 
 /*
     *** = needed for Brian to test the basic design of a canvas (no measures, just planets, aims, and links)
@@ -476,14 +477,24 @@ export default function journeyComponent() {
                 //component
                 profileCards
                     .yScale(zoomedYScale)
-                    .timeScale(zoomedTimeScale);
+                    .timeScale(zoomedTimeScale)
+                    .onDragEnd(function(e,d){
+                        const _profile = { 
+                            id:d.id,
+                            date:zoomedTimeScale.invert(d.x),
+                            yPC:zoomedYScale.invert(d.y)
+                        }
+
+                        updateState({ profiles:[_profile] })
+                        
+                    });
 
                 //render
                 //@todo - prob need to move links to above aims but below planets somehow
                 //otherwise they will be hidden by any background of the aims
                 //or maybe have a separate links component for each aim, unless we are allowing links from a goal
                 //in one aim to a goal in another aim
-                const profileCardsG = canvasG.selectAll("g.profileCards").data([profileCardsData])
+                const profileCardsG = canvasG.selectAll("g.profile-cards").data([profileCardsData])
                 profileCardsG
                     .join("g")
                     .attr("class", "profile-cards")

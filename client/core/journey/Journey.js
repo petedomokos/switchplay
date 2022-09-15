@@ -207,11 +207,12 @@ const Journey = ({ data, availableJourneys, screen, width, height, save, setActi
         .updateState(updates => {
             //can be used to update multiple items, only needed for aims, goals, links and measures
             //for each entity that is updated (eg aims), we replace only the properties defined in the update.
+            const _profiles = profiles.map(p => ({ ...p, ...(updates.profiles?.find(prof => prof.id === p.id) || {} ) }))
             const _aims = aims.map(a => ({ ...a, ...(updates.aims?.find(aim => aim.id === a.id) || {} ) }))
             const _goals = goals.map(g => ({ ...g, ...(updates.goals?.find(goal => goal.id === g.id) || {} ) }))
             const _links = links.map(l => ({ ...l, ...(updates.links?.find(link => link.id === l.id) || {} ) }))
             const _measures = measures.map(m => ({ ...m, ...(updates.measures?.find(meas => meas.id === m.id) || {} ) }))
-            save({ ...data, aims:_aims, goals:_goals, links:_links, measures:_measures })
+            save({ ...data, profiles:_profiles, aims:_aims, goals:_goals, links:_links, measures:_measures })
             //@todo - make createId handle prefixes so all ids are unique
         })
         .handleCreateProfile(function(profile){
