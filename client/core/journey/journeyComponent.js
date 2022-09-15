@@ -3,9 +3,11 @@ import "snapsvg-cjs";
 //import "d3-selection-multi";
 import channelsLayout from "./channelsLayout";
 import axesLayout from "./axesLayout";
+import profileCardsLayout from "./profileCardsLayout";
 import linksLayout from "./linksLayout";
 import aimsLayout from './aimsLayout';
 import axesComponent from "./axesComponent";
+import profileCardsComponent from "./profileCardsComponent";
 import linksComponent from "./linksComponent";
 import aimsComponent from './aimsComponent';
 import menuBarComponent from './menuBarComponent';
@@ -177,10 +179,12 @@ export default function journeyComponent() {
 
     const myChannelsLayout = channelsLayout();
     const myAxesLayout = axesLayout();
-    const myLinksLayout = linksLayout();
+    const myProfileCardsLayout = profileCardsLayout();
     const myAimsLayout = aimsLayout();
+    const myLinksLayout = linksLayout();
 
     const axes = axesComponent();
+    const profileCards = profileCardsComponent();
     const links = linksComponent();
     const aims = aimsComponent();
     const openedLinks = {};
@@ -243,6 +247,7 @@ export default function journeyComponent() {
 
     //data
     let channelsData;
+    let profileCardsData;
     let aimsData;
     let goalsData; //note - this is just derived from aimsData merging all planets - will remove
     let linksData;
@@ -373,8 +378,8 @@ export default function journeyComponent() {
 
             //@todo - change name - split longoress and click , instead of using this shouldCreateGoal thing for longpress
             function handleCanvasClick(e, d, shouldCreateGoal){
-                console.log("canvas click editing", editing)
-                console.log("canvas click aim sel", aims.selected())
+                // console.log("canvas click editing", editing)
+                // console.log("canvas click aim sel", aims.selected())
                 //@todo - either remove selected in journey, or remove selected state in aims.
                 
                 if(editing){
@@ -406,9 +411,11 @@ export default function journeyComponent() {
             if(newZoomViewLevel !== zoomViewLevel){ zoomViewLevel = newZoomViewLevel; }
 
             //data
+            updateProfileCardsData();
             updateAimsData();
             updateLinksData();
             //components
+            updateProfileCards();
             updateAims();
             updateLinks();
 
@@ -419,6 +426,19 @@ export default function journeyComponent() {
                 editing = goal;
                 //updateSelected(goal);
                 updateModalData(goal);
+            }
+
+            function updateProfileCardsData(){
+                //note - planetsLayout was also taking in .selected for siSelected n planets, but not needed
+                myProfileCardsLayout
+                    .aligned(aligned)
+                    //.canvasDimns({ width:canvasWidth, height: canvasHeight })
+                    .currentZoom(currentZoom)
+                    .timeScale(zoomedTimeScale)
+                    .yScale(zoomedYScale);
+                
+                profileCardsData = myProfileCardsLayout(data.profiles);
+                //console.log("profilesData",profilesData);
             }
 
             function updateAimsData(){
@@ -451,6 +471,25 @@ export default function journeyComponent() {
                 //console.log("linksData", linksData)
 
             }
+
+            function updateProfileCards(){
+                //component
+                profileCards
+                    .yScale(zoomedYScale)
+                    .timeScale(zoomedTimeScale);
+
+                //render
+                //@todo - prob need to move links to above aims but below planets somehow
+                //otherwise they will be hidden by any background of the aims
+                //or maybe have a separate links component for each aim, unless we are allowing links from a goal
+                //in one aim to a goal in another aim
+                const profileCardsG = canvasG.selectAll("g.profileCards").data([profileCardsData])
+                profileCardsG
+                    .join("g")
+                    .attr("class", "profile-cards")
+                    .call(profileCards, options.profileCards)
+            }
+            
 
             function updateAims(){
                 //helper
