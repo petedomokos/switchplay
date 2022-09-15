@@ -28,6 +28,7 @@ export default function profileCardsComponent() {
     let onLongpressStart = function() {};
     let onLongpressDragged = function() {};
     let onLongpressEnd = function() {};
+    let onDelete = function() {};
 
 
     let onMouseover = function(){};
@@ -229,7 +230,6 @@ export default function profileCardsComponent() {
 
             //longpress
             function longpressStart(e, d) {
-                console.log("lps", e)
                 //todo - check defs appended, and use them here, then longopressDrag should trigger the delete of a goal
                 //then do same for aims and links
                 /*
@@ -238,21 +238,18 @@ export default function profileCardsComponent() {
                     .attr("stdDeviation", 10)
                     .attr("dy", 10);
                 */
-                /*
 
-                d3.select(this).select("ellipse.core-inner.visible")
+                d3.select(this).select("rect.bg")
                     //.style("filter", "url(#drop-shadow)")
                     .call(oscillator.start);
 
                 longpressed = d;
                 containerG.call(profileCards);
-                */
 
                 onLongpressStart.call(this, e, d)
             };
             function longpressDragged(e, d) {
                 if(deleted) { return; }
-                /*
 
                 if(enhancedDrag.distanceDragged() > 200 && enhancedDrag.avgSpeed() > 0.08){
                     d3.select(this)
@@ -265,12 +262,12 @@ export default function profileCardsComponent() {
                         .duration(50)
                             .attr("opacity", 0)
                             .on("end", () => {
-                                deletePlanet(d.id)
+                                onDelete(d.id)
                             })
                 }else{
-                    onDrag.call(this, e, d)
+                    dragged.call(this, e, d)
                 }
-                */
+
                 onLongpressDragged.call(this, e, d)
             };
 
@@ -290,9 +287,9 @@ export default function profileCardsComponent() {
                             d3.select(this).style("filter", null);
                         });*/
 
-                //d3.select(this)
+                d3.select(this)
                     //.style("filter", "url(#drop-shadow)")
-                    //.call(oscillator.stop);
+                    .call(oscillator.stop);
                 
                 onLongpressEnd.call(this, e, d)
             };
@@ -405,10 +402,10 @@ export default function profileCardsComponent() {
         }
         return profileCards;
     };
-    profileCards.deletePlanet = function (value) {
-        if (!arguments.length) { return deletePlanet; }
+    profileCards.onDelete = function (value) {
+        if (!arguments.length) { return onDelete; }
         if(typeof value === "function"){
-            deletePlanet = value;
+            onDelete = value;
         }
         return profileCards;
     };

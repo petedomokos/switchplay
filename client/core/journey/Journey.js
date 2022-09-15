@@ -276,6 +276,12 @@ const Journey = ({ data, availableJourneys, screen, width, height, save, setActi
           const _aims = updatedState(aims, props);
           save({ ...data, aims:_aims });
         })
+        .onDeleteProfile(id => {
+          setModalData(undefined);
+          //must delete link first, but when state is put together this wont matter
+          const _profiles = profiles.filter(p => p.id !== id);
+          save({ ...data, profiles:_profiles });
+        })
        .onDeleteAim(aimId => {
           //this doesnt work - it deltes a planet instead!
           //@todo - create a Dialog to see if user wants goals deleted too (if aiim has goals), or to cancel

@@ -200,6 +200,7 @@ export default function journeyComponent() {
 
     //profiles
     let handleCreateProfile = function(){};
+    let onDeleteProfile = function(){};
 
     let handleCreateAim = function(){};
     let updateAim = function(){};
@@ -487,6 +488,11 @@ export default function journeyComponent() {
 
                         updateState({ profiles:[_profile] })
                         
+                    })
+                    .onDelete(id => {
+                        selected = undefined;
+                        editing = undefined;
+                        onDeleteProfile(id);
                     });
 
                 //render
@@ -1328,6 +1334,13 @@ export default function journeyComponent() {
         if (!arguments.length) { return handleCreateProfile; }
         if(typeof value === "function"){
             handleCreateProfile = value;
+        }
+        return journey;
+    };
+    journey.onDeleteProfile = function (value) {
+        if (!arguments.length) { return onDeleteProfile; }
+        if(typeof value === "function"){
+            onDeleteProfile = value;
         }
         return journey;
     };
