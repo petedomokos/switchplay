@@ -12,7 +12,9 @@ export default function contractsComponent() {
     let width = DIMNS.contract.width;
     let height = DIMNS.contract.height;
 
-    let fontSize = 9;
+    let fontSizes = {
+        name:9
+    };
 
     let timeScale = x => 0;
     let yScale = x => 0;
@@ -109,7 +111,7 @@ export default function contractsComponent() {
                    
                     //title
                     contentsG.select("text.name")
-                        .attr("font-size", fontSize)
+                        .attr("font-size", fontSizes.name)
                         .text(d.name || "Contract")
 
                     //targ
@@ -309,6 +311,11 @@ export default function contractsComponent() {
         height = value;
         return contracts;
     };
+    contracts.fontSizes = function (values) {
+        if (!arguments.length) { return fontSizes; }
+        fontSizes = { ...fontSizes, ...values };
+        return contracts;
+    };
     contracts.selected = function (value) {
         if (!arguments.length) { return selected; }
         selected = value;
@@ -322,11 +329,6 @@ export default function contractsComponent() {
     contracts.yScale = function (value) {
         if (!arguments.length) { return yScale; }
         yScale = value;
-        return contracts;
-    };
-    contracts.fontSize = function (value) {
-        if (!arguments.length) { return fontSize; }
-        fontSize = value;
         return contracts;
     };
     contracts.timeScale = function (value) {

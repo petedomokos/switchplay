@@ -360,7 +360,7 @@ export default function journeyComponent() {
             zoom = d3.zoom()
                 //.scaleExtent([1, 3])
                 .extent(extent)
-                .scaleExtent([0.125, 2])
+                .scaleExtent([0.125, 3])
                 .on("start", enhancedZoom())
                 .on("zoom", enhancedZoom(function(e){
                     if(e.sourceEvent){
@@ -503,6 +503,11 @@ export default function journeyComponent() {
                 contracts
                     .yScale(zoomedYScale)
                     .timeScale(zoomedTimeScale)
+                    .width(DIMNS.contract.width * k)
+                    .height(DIMNS.contract.height * k)
+                    .fontSizes({
+                        name:9 * k
+                    })
                     .onDragEnd(function(e,d){
                         const _contract = { 
                             id:d.id,
@@ -534,6 +539,11 @@ export default function journeyComponent() {
             function updateProfileCards(){
                 //component
                 profileCards
+                    .width(DIMNS.profile.width * k)
+                    .height(DIMNS.profile.height * k)
+                    .fontSizes({
+                        name:9 * k
+                    })
                     .yScale(zoomedYScale)
                     .timeScale(zoomedTimeScale)
                     .onDragEnd(function(e,d){

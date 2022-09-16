@@ -12,7 +12,9 @@ export default function profileCardsComponent() {
     let width = DIMNS.profile.width;
     let height = DIMNS.profile.height;
 
-    let fontSize = 9;
+    let fontSizes = {
+        name:9
+    };
 
     let timeScale = x => 0;
     let yScale = x => 0;
@@ -109,7 +111,7 @@ export default function profileCardsComponent() {
                    
                     //title
                     contentsG.select("text.name")
-                        .attr("font-size", fontSize)
+                        .attr("font-size", fontSizes.name)
                         .text(d.name || "Profile Name")
 
                     //targ
@@ -309,6 +311,11 @@ export default function profileCardsComponent() {
         height = value;
         return profileCards;
     };
+    profileCards.fontSizes = function (values) {
+        if (!arguments.length) { return fontSizes; }
+        fontSizes = { ...fontSizes, ...values };
+        return profileCards;
+    };
     profileCards.selected = function (value) {
         if (!arguments.length) { return selected; }
         selected = value;
@@ -322,11 +329,6 @@ export default function profileCardsComponent() {
     profileCards.yScale = function (value) {
         if (!arguments.length) { return yScale; }
         yScale = value;
-        return profileCards;
-    };
-    profileCards.fontSize = function (value) {
-        if (!arguments.length) { return fontSize; }
-        fontSize = value;
         return profileCards;
     };
     profileCards.timeScale = function (value) {
