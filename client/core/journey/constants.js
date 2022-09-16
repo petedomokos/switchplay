@@ -97,6 +97,10 @@ export const DIMNS = {
 
 
     },
+    contract:{
+        width:50,
+        height:70
+    },
     profile:{
         width:100,
         height:150

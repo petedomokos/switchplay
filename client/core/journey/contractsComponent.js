@@ -6,11 +6,11 @@ import { Oscillator } from './domHelpers';
 /*
 
 */
-export default function profileCardsComponent() {
+export default function contractsComponent() {
     //API SETTINGS
     // dimensions
-    let width = DIMNS.profile.width;
-    let height = DIMNS.profile.height;
+    let width = DIMNS.contract.width;
+    let height = DIMNS.contract.height;
 
     let fontSize = 9;
 
@@ -41,11 +41,11 @@ export default function profileCardsComponent() {
     //dom
     let containerG;
 
-    function profileCards(selection, options={}) {
+    function contracts(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            //console.log("profileCards update", data)
+            //console.log("contracts update", data)
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
             containerG = d3.select(this);
@@ -62,16 +62,16 @@ export default function profileCardsComponent() {
                 .on("drag", enhancedDrag(dragged))
                 .on("end", enhancedDrag(dragEnd));
 
-            const profileCardG = containerG.selectAll("g.profile-card").data(data, d => d.id);
-            profileCardG.enter()
+            const contractG = containerG.selectAll("g.contract").data(data, d => d.id);
+            contractG.enter()
                 .append("g")
-                .attr("class", d => "profile-card profile-card-"+d.id)
+                .attr("class", d => "contract contract-"+d.id)
                 .each(function(d,i){
                     //console.log("entering", d)
                     //ENTER
                     const contentsG = d3.select(this)
                         .append("g")
-                        .attr("class", "contents profile-card-contents")
+                        .attr("class", "contents contract-contents")
 
                     //bg rect
                     contentsG
@@ -79,7 +79,7 @@ export default function profileCardsComponent() {
                         .attr("class", "bg")
                             .attr("rx", 3)
                             .attr("ry", 3)
-                            .attr("fill", "orange");
+                            .attr("fill", "white");
 
                     //title text
                     contentsG
@@ -93,7 +93,7 @@ export default function profileCardsComponent() {
                 .style("cursor", "grab")
                 //.call(transform, { x: d => adjX(timeScale(d.targetDate)), y:d => d.y })
                 //.call(transform, { x: d => d.x, y:d => d.y }, transitionEnter && transitionsOn)
-                .merge(profileCardG)
+                .merge(contractG)
                 .attr("transform", d =>  "translate(" +d.x +"," +d.y +")")
                 .each(function(d){
                     //ENTER AND UPDATE
@@ -110,7 +110,7 @@ export default function profileCardsComponent() {
                     //title
                     contentsG.select("text.name")
                         .attr("font-size", fontSize)
-                        .text(d.name || "Profile Name")
+                        .text(d.name || "Contract")
 
                     //targ
                     /*
@@ -163,7 +163,7 @@ export default function profileCardsComponent() {
                     //translate is undefined when we drag a planet into an aim and release
                     const { translateX, translateY } = getTransformationFromTrans(planetG.attr("transform"));
                     //on call from enter, there will be no translate so deltas are 0 so no transition
-                    //but then transform is called again on entered profileCards after merge with update
+                    //but then transform is called again on entered contracts after merge with update
                     const deltaX = translateX ? Math.abs(translateX - x(d)) : 0;
                     const deltaY = translateY ? Math.abs(translateY - y(d)) : 0;
                     if(transition && (deltaX > 0.1 || deltaY > 0.1)){
@@ -181,7 +181,7 @@ export default function profileCardsComponent() {
             */
 
             //EXIT
-            profileCardG.exit().each(function(d){
+            contractG.exit().each(function(d){
                 //will be multiple exits because of the delay in removing
                 if(!d3.select(this).attr("class").includes("exiting")){
                     d3.select(this)
@@ -242,7 +242,7 @@ export default function profileCardsComponent() {
                     .call(oscillator.start);
 
                 longpressed = d;
-                containerG.call(profileCards);
+                containerG.call(contracts);
 
                 onLongpressStart.call(this, e, d)
             };
@@ -299,118 +299,118 @@ export default function profileCardsComponent() {
     }
     
     //api
-    profileCards.width = function (value) {
+    contracts.width = function (value) {
         if (!arguments.length) { return width; }
         width = value;
-        return profileCards;
+        return contracts;
     };
-    profileCards.height = function (value) {
+    contracts.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
-        return profileCards;
+        return contracts;
     };
-    profileCards.selected = function (value) {
+    contracts.selected = function (value) {
         if (!arguments.length) { return selected; }
         selected = value;
-        return profileCards;
+        return contracts;
     };
-    profileCards.longpressed = function (value) {
+    contracts.longpressed = function (value) {
         if (!arguments.length) { return longpressed; }
         longpressed = value;
-        return profileCards;
+        return contracts;
     };
-    profileCards.yScale = function (value) {
+    contracts.yScale = function (value) {
         if (!arguments.length) { return yScale; }
         yScale = value;
-        return profileCards;
+        return contracts;
     };
-    profileCards.fontSize = function (value) {
+    contracts.fontSize = function (value) {
         if (!arguments.length) { return fontSize; }
         fontSize = value;
-        return profileCards;
+        return contracts;
     };
-    profileCards.timeScale = function (value) {
+    contracts.timeScale = function (value) {
         if (!arguments.length) { return timeScale; }
         timeScale = value;
-        return profileCards;
+        return contracts;
     };
-    profileCards.onClick = function (value) {
+    contracts.onClick = function (value) {
         if (!arguments.length) { return onClick; }
         onClick = value;
-        return profileCards;
+        return contracts;
     };
-    profileCards.onDblClick = function (value) {
+    contracts.onDblClick = function (value) {
         if (!arguments.length) { return onDblClick; }
         onDblClick = value;
-        return profileCards;
+        return contracts;
     };
-    profileCards.onDragStart = function (value) {
+    contracts.onDragStart = function (value) {
         if (!arguments.length) { return onDragStart; }
         if(typeof value === "function"){
             onDragStart = value;
         }
-        return profileCards;
+        return contracts;
     };
-    profileCards.onDrag = function (value) {
+    contracts.onDrag = function (value) {
         if (!arguments.length) { return onDrag; }
         if(typeof value === "function"){
             onDrag = value;
         }
-        return profileCards;
+        return contracts;
     };
-    profileCards.onDragEnd = function (value) {
+    contracts.onDragEnd = function (value) {
         if (!arguments.length) { return onDragEnd; }
         if(typeof value === "function"){
             onDragEnd = value;
         }
-        return profileCards;
+        return contracts;
     };
-    profileCards.onLongpressStart = function (value) {
+    contracts.onLongpressStart = function (value) {
         if (!arguments.length) { return onLongpressStart; }
         if(typeof value === "function"){
             onLongpressStart = value;
         }
-        return profileCards;
+        return contracts;
     };
-    profileCards.onLongpressDragged = function (value) {
+    contracts.onLongpressDragged = function (value) {
         if (!arguments.length) { return onLongpressDragged; }
         if(typeof value === "function"){
             onLongpressDragged = value;
         }
-        return profileCards;
+        return contracts;
     };
-    profileCards.onLongpressEnd = function (value) {
+    contracts.onLongpressEnd = function (value) {
         if (!arguments.length) { return onLongpressEnd; }
         if(typeof value === "function"){
             onLongpressEnd = value;
         }
-        return profileCards;
+        return contracts;
     };
-    profileCards.onMouseover = function (value) {
+    contracts.onMouseover = function (value) {
         if (!arguments.length) { return onMouseover; }
         if(typeof value === "function"){
             onMouseover = value;
         }
-        return profileCards;
+        return contracts;
     };
-    profileCards.onMouseout = function (value) {
+    contracts.onMouseout = function (value) {
         if (!arguments.length) { return onMouseout; }
         if(typeof value === "function"){
             onMouseout = value;
         }
-        return profileCards;
+        return contracts;
     };
-    profileCards.onDelete = function (value) {
+    contracts.onDelete = function (value) {
         if (!arguments.length) { return onDelete; }
         if(typeof value === "function"){
             onDelete = value;
         }
-        return profileCards;
+        return contracts;
     };
-    profileCards.onAddLink = function (value) {
+    contracts.onAddLink = function (value) {
         if (!arguments.length) { return onAddLink; }
         if(typeof value === "function"){ onAddLink = value; }
-        return profileCards;
+        return contracts;
     };
-    return profileCards;
+    return contracts;
 }

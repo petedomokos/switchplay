@@ -3,10 +3,12 @@ import "snapsvg-cjs";
 //import "d3-selection-multi";
 import channelsLayout from "./channelsLayout";
 import axesLayout from "./axesLayout";
+import contractsLayout from "./contractsLayout";
 import profileCardsLayout from "./profileCardsLayout";
 import linksLayout from "./linksLayout";
 import aimsLayout from './aimsLayout';
 import axesComponent from "./axesComponent";
+import contractsComponent from "./contractsComponent";
 import profileCardsComponent from "./profileCardsComponent";
 import linksComponent from "./linksComponent";
 import aimsComponent from './aimsComponent';
@@ -18,7 +20,6 @@ import { zoomLevel, DEFAULT_D3_TICK_SIZE, WIDGET_WIDTH, WIDGET_HEIGHT, WIDGET_MA
 import { pointIsInRect, distanceBetweenPoints, } from './geometryHelpers';
 import dragEnhancements from './enhancedDragHandler';
 import { getTransformationFromTrans } from './helpers';
-import { Save } from '@material-ui/icons';
 
 /*
     *** = needed for Brian to test the basic design of a canvas (no measures, just planets, aims, and links)
@@ -135,6 +136,7 @@ import { Save } from '@material-ui/icons';
 const widgets = [
     { key:"aim", r:10, width:30, height:20, rx:10, ry:10, fill: grey10(5) },
     { key:"profile", r:2, width:20, height:30, rx:2, ry:2, fill: "orange" },
+    { key:"contract", r:2, width:20, height:25, rx:2, ry:2, fill: "white", stroke:"orange", opacity:"1" },
 ]
 
 /*
@@ -180,11 +182,13 @@ export default function journeyComponent() {
 
     const myChannelsLayout = channelsLayout();
     const myAxesLayout = axesLayout();
+    const myContractsLayout = contractsLayout();
     const myProfileCardsLayout = profileCardsLayout();
     const myAimsLayout = aimsLayout();
     const myLinksLayout = linksLayout();
 
     const axes = axesComponent();
+    const contracts = contractsComponent();
     const profileCards = profileCardsComponent();
     const links = linksComponent();
     const aims = aimsComponent();
@@ -197,6 +201,10 @@ export default function journeyComponent() {
     let editing;
     let preEditZoom;
     let zoomViewLevel;
+
+    //contracts
+    let handleCreateContract = function(){};
+    let onDeleteContract = function(){};
 
     //profiles
     let handleCreateProfile = function(){};
@@ -221,6 +229,7 @@ export default function journeyComponent() {
     let startEditPlanet = function (){};
     let endEditPlanet = function (){};
     let createJourney = function (){};
+    let createContract = function (){};
     let createAim = function (){};
     let createProfile = function (){};
     let updateSelected = function (){};
@@ -249,6 +258,7 @@ export default function journeyComponent() {
 
     //data
     let channelsData;
+    let contractsData;
     let profileCardsData;
     let aimsData;
     let goalsData; //note - this is just derived from aimsData merging all planets - will remove
@@ -264,7 +274,6 @@ export default function journeyComponent() {
 
         selection.each(function (journeyData) {
             data = journeyData;
-            console.log("journey", data)
             if(!svg){
                 //enter
                 init.call(this);
@@ -413,10 +422,12 @@ export default function journeyComponent() {
             if(newZoomViewLevel !== zoomViewLevel){ zoomViewLevel = newZoomViewLevel; }
 
             //data
+            updateContractsData();
             updateProfileCardsData();
             updateAimsData();
             updateLinksData();
             //components
+            updateContracts();
             updateProfileCards();
             updateAims();
             updateLinks();
@@ -428,6 +439,19 @@ export default function journeyComponent() {
                 editing = goal;
                 //updateSelected(goal);
                 updateModalData(goal);
+            }
+
+            function updateContractsData(){
+                //note - planetsLayout was also taking in .selected for siSelected n planets, but not needed
+                myContractsLayout
+                    .aligned(aligned)
+                    //.canvasDimns({ width:canvasWidth, height: canvasHeight })
+                    .currentZoom(currentZoom)
+                    .timeScale(zoomedTimeScale)
+                    .yScale(zoomedYScale);
+                
+                contractsData = myContractsLayout(data.contracts);
+                //console.log("profilesData",profilesData);
             }
 
             function updateProfileCardsData(){
@@ -472,6 +496,39 @@ export default function journeyComponent() {
                 linksData = myLinksLayout(data.links);
                 //console.log("linksData", linksData)
 
+            }
+
+            function updateContracts(){
+                //component
+                contracts
+                    .yScale(zoomedYScale)
+                    .timeScale(zoomedTimeScale)
+                    .onDragEnd(function(e,d){
+                        const _contract = { 
+                            id:d.id,
+                            date:zoomedTimeScale.invert(d.x),
+                            yPC:zoomedYScale.invert(d.y)
+                        }
+
+                        updateState({ contracts:[_contract] })
+                        
+                    })
+                    .onDelete(id => {
+                        selected = undefined;
+                        editing = undefined;
+                        onDeleteContract(id);
+                    });
+
+                //render
+                //@todo - prob need to move links to above aims but below planets somehow
+                //otherwise they will be hidden by any background of the aims
+                //or maybe have a separate links component for each aim, unless we are allowing links from a goal
+                //in one aim to a goal in another aim
+                const contractsG = canvasG.selectAll("g.contracts").data([contractsData])
+                contractsG
+                    .join("g")
+                    .attr("class", "contracts")
+                    .call(contracts, options.contracts)
             }
 
             function updateProfileCards(){
@@ -568,7 +625,6 @@ export default function journeyComponent() {
                         onDeleteAim(aimId);
                     })
                     .onSetEditing((d) => {
-                        console.log("setting aim as editing")
                         editing = d;
                         updateModalData(d);
                     })
@@ -963,42 +1019,45 @@ export default function journeyComponent() {
                 .append("g")
                     .attr("class", "widget")
                     .each(function(d, i){
+                        const widgetG = d3.select(this)
+                            .attr("fill", d.fill)
+                            .attr("stroke", d.stroke || "none")
+                            .attr("stroke-width", 0.3)
+                            .style("cursor", "pointer")
+                            .attr("opacity", d.opacity || 0.5);
+
                         //aim
                         if(d.key === "aim"){
-                            d3.select(this)
+                            widgetG
                                 .append("rect")
-                                    .attr("class", "widget")
                                     .attr("x", (WIDGET_WIDTH - d.width) / 2)
                                     .attr("width", d.width)
                                     .attr("height", d.height)
                                     .attr("rx", d.rx)
                                     .attr("ry", d.ry)
-                                    .attr("fill", d.fill)
-                                    .style("cursor", "pointer")
-                                    .attr("opacity", 0.5);
+                                    
                         }
                         if(d.key === "profile"){
-                            d3.select(this)
+                            widgetG
                                 .append("rect")
-                                    .attr("class", "widget")
                                     .attr("x", (WIDGET_WIDTH - d.width) / 2)
                                     .attr("width", d.width)
                                     .attr("height", d.height)
                                     .attr("rx", d.rx)
-                                    .attr("ry", d.ry)
-                                    .attr("fill", d.fill)
-                                    .style("cursor", "pointer")
-                                    .attr("opacity", 0.5);
+                                    .attr("ry", d.ry);
+                        }
+                        if(d.key === "contract"){
+                            widgetG
+                                .append("rect")
+                                    .attr("x", (WIDGET_WIDTH - d.width) / 2)
+                                    .attr("width", d.width)
+                                    .attr("height", d.height)
+                                    .attr("rx", d.rx)
+                                    .attr("ry", d.ry);
                         }
                     })
                     .merge(widgetG)
                     .attr("transform", (d,i) => "translate(0," +((- (i + 1) * WIDGET_HEIGHT) + WIDGET_MARGIN.top) +")")
-                    .each(function(d){
-                        //aim
-                        if(d.key === "aim"){
-                            d3.select(this).select("rect.widget")
-                        }
-                    })
                     .call(widgetDrag)
 
                     let cloneG;
@@ -1042,6 +1101,8 @@ export default function journeyComponent() {
                             createAim(pos);
                         }else if(d.key === "profile"){
                             createProfile(pos);
+                        }else if(d.key === "contract"){
+                            createContract(pos);
                         }
                     }
         }
@@ -1106,7 +1167,7 @@ export default function journeyComponent() {
         }
 
         updateSelected = (d) => {
-            console.log("updatesel", d)
+            // console.log("updatesel", d)
             //@todo - choose between storing selected her ein journey or in aims and links 
             selected = d;
             if(d?.dataType === "planet" || d?.dataType === "aim"){
@@ -1235,8 +1296,17 @@ export default function journeyComponent() {
             handleCreateAim(aim, planetIdsInAim);   
         }
 
+        createContract = function(pos){
+            const contract = {
+                date:zoomedTimeScale.invert(pos.x),
+                yPC:zoomedYScale.invert(pos.y)
+            }
+
+            updateSelected(undefined);       
+            handleCreateContract(contract);   
+        }
+
         createProfile = function(pos){
-            console.log("create profile", pos)
             const profile = {
                 date:zoomedTimeScale.invert(pos.x),
                 yPC:zoomedYScale.invert(pos.y)
@@ -1327,6 +1397,20 @@ export default function journeyComponent() {
         if (!arguments.length) { return handleCreateAim; }
         if(typeof value === "function"){
             handleCreateAim = value;
+        }
+        return journey;
+    };
+    journey.handleCreateContract = function (value) {
+        if (!arguments.length) { return handleCreateContract; }
+        if(typeof value === "function"){
+            handleCreateContract = value;
+        }
+        return journey;
+    };
+    journey.onDeleteContract = function (value) {
+        if (!arguments.length) { return onDeleteContract; }
+        if(typeof value === "function"){
+            onDeleteContract = value;
         }
         return journey;
     };

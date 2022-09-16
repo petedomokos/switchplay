@@ -54,7 +54,7 @@ attempts to create a new user in in db.
 */
 const create = async (req, res) => {
     console.log('create journey...user.................................................................', req.user._id)
-    console.log("req body", req.body)
+    //console.log("req body", req.body)
     /*
     //create new
     //const id = "new-journey" //todo - use uuid() or date etc to make unique

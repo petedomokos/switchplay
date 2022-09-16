@@ -18,7 +18,7 @@ const mockMeasures = [
 	{ id:"mock2", name:"Drive 1", desc: "nr D1s to Fairway" },
 	{ id:"mock3", name:"Drive 2", desc: "nr D2s to Fairway" }
 ]
-const newJourney = { _id:"temp", profiles:[], aims:[], goals:[], links:[], measures:mockMeasures}
+const newJourney = { _id:"temp", contracts:[], profiles:[], aims:[], goals:[], links:[], measures:mockMeasures}
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -86,9 +86,9 @@ const initChannels = d3.range(numberMonths)
 
 //width and height may be full screen, but may not be
 const Journey = ({ data, availableJourneys, screen, width, height, save, setActive, closeDialog }) => {
-  console.log("Journey data", data)
+  //console.log("Journey data", data)
   //console.log("Journey avail", availableJourneys)
-  const { _id, name, profiles, aims, goals, links, measures } = data;
+  const { _id, name, contracts, profiles, aims, goals, links, measures } = data;
   const [journey, setJourney] = useState(null);
   const [channels, setChannels] = useState(initChannels);
   const [withCompletionPaths, setWithCompletionPath] = useState(false);
@@ -207,13 +207,21 @@ const Journey = ({ data, availableJourneys, screen, width, height, save, setActi
         .updateState(updates => {
             //can be used to update multiple items, only needed for aims, goals, links and measures
             //for each entity that is updated (eg aims), we replace only the properties defined in the update.
+            const _contracts = contracts.map(c => ({ ...c, ...(updates.contracts?.find(cont => cont.id === c.id) || {} ) }))
             const _profiles = profiles.map(p => ({ ...p, ...(updates.profiles?.find(prof => prof.id === p.id) || {} ) }))
             const _aims = aims.map(a => ({ ...a, ...(updates.aims?.find(aim => aim.id === a.id) || {} ) }))
             const _goals = goals.map(g => ({ ...g, ...(updates.goals?.find(goal => goal.id === g.id) || {} ) }))
             const _links = links.map(l => ({ ...l, ...(updates.links?.find(link => link.id === l.id) || {} ) }))
             const _measures = measures.map(m => ({ ...m, ...(updates.measures?.find(meas => meas.id === m.id) || {} ) }))
-            save({ ...data, profiles:_profiles, aims:_aims, goals:_goals, links:_links, measures:_measures })
+            save({ ...data, contracts:_contracts, profiles:_profiles, aims:_aims, goals:_goals, links:_links, measures:_measures })
             //@todo - make createId handle prefixes so all ids are unique
+        })
+        .handleCreateContract(function(contract){
+          const id = createId(contracts.map(p => p.id));
+          const colour = "orange";
+          //updates
+          const _contracts = [ ...contracts, { id , colour, dataType:"contract", ...contract }];
+          save({ ...data, contracts:_contracts });
         })
         .handleCreateProfile(function(profile){
           const id = createId(profiles.map(p => p.id));
@@ -275,6 +283,12 @@ const Journey = ({ data, availableJourneys, screen, width, height, save, setActi
           //updates
           const _aims = updatedState(aims, props);
           save({ ...data, aims:_aims });
+        })
+        .onDeleteContract(id => {
+          setModalData(undefined);
+          //must delete link first, but when state is put together this wont matter
+          const _contracts = contracts.filter(p => p.id !== id);
+          save({ ...data, contracts:_contracts });
         })
         .onDeleteProfile(id => {
           setModalData(undefined);
@@ -501,6 +515,7 @@ const toggleJourneysOpen = useCallback(() => {
 Journey.defaultProps = {
   data:{
     _id:"temp",
+    contracts:[],
     profiles:[],
     aims:[],
     goals:[],

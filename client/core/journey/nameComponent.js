@@ -52,7 +52,7 @@ export default function nameComponent(containerG, options={}){
                         .append("rect")
                             .attr("class", "bg")
                             .attr("fill", fill)
-                            .attr("stroke", "grey");
+                            .attr("stroke", "none");
                     nameG
                         .append("text")
                             .attr("class", "main")

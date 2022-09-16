@@ -9,6 +9,19 @@ const transformJourneyForServer = journey => {
 	//if we want to persist the users last zoom level. Or maybe just preserve the zoom level then?
 	//for now, we dont anyway
 	//completion paths are off for now, so again we dont persist 
+	const contracts = journey.contracts.map(c => ({
+		id:c.id,
+		date:c.date,
+		yPC:c.yPC
+	}));
+	
+	const profiles = journey.profiles.map(p => ({
+		id:p.id,
+		name:p.name,
+		date:p.date,
+		yPC:p.yPC,
+	}));
+
 	const aims = journey.aims.map(a => ({
 		id:a.id,
 		name:a.name,
@@ -52,6 +65,8 @@ const transformJourneyForServer = journey => {
 		_id: journey._id !== "temp" ? journey._id : undefined, 
 		name: journey.name || "",
 		desc: journey.desc || "",
+		contracts,
+		profiles,
 		aims,
 		goals,
 		links,
@@ -61,9 +76,18 @@ const transformJourneyForServer = journey => {
 }
 
 export const transformJourneyForClient = journey => {
-	const { aims, goals, updated, created } = journey;
+	const { contracts, profiles, aims, goals, updated, created } = journey;
 	return {
 		...journey,
+		contracts:contracts? contracts.map(c => ({
+			...c,
+			date:new Date(c.date),
+		})) : [],
+		profiles:profiles? profiles.map(p => ({
+			...p,
+			date:new Date(p.date),
+			yPC:+p.yPC
+		})) : [],
 		aims:aims.map(a => ({
 			...a,
 			startDate:new Date(a.startDate),

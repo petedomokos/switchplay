@@ -1,4 +1,6 @@
 import mongoose from 'mongoose'
+import ContractSchema from './contract.model';
+import ProfileSchema from './profile.model';
 import AimSchema from './aim.model';
 import GoalSchema from './goal.model';
 import LinkSchema from './link.model';
@@ -18,6 +20,8 @@ const JourneySchema = new mongoose.Schema({
   desc:String,
   //photo:{data:Buffer,contentType:String},
   //users who have admin rights over this journey
+  contracts:[ContractSchema],
+  profiles:[ProfileSchema],
   aims:[AimSchema],
   goals:[GoalSchema],
   links:[LinkSchema],
