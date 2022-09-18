@@ -461,7 +461,10 @@ export default function journeyComponent() {
                     //.canvasDimns({ width:canvasWidth, height: canvasHeight })
                     .currentZoom(currentZoom)
                     .timeScale(zoomedTimeScale)
-                    .yScale(zoomedYScale);
+                    .yScale(zoomedYScale)
+                    .datasets(data.datasets)
+                    .info(data.userInfo)
+                    .kpis(data.userKpis);
                 
                 profileCardsData = myProfileCardsLayout(data.profiles);
                 //console.log("profilesData",profilesData);
@@ -1087,7 +1090,7 @@ export default function journeyComponent() {
                         cloneG.attr("transform", "translate("+newX +"," +newY +")");
                     }
                     function dragWidgetEnd(e,d){
-                        console.log("drag end", d)
+                        // console.log("drag end", d)
                         //remove the clone
                         cloneG.remove();
 

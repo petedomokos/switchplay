@@ -2,23 +2,29 @@ import { connect } from 'react-redux'
 import Journey  from './Journey'
 import { saveJourney, setActive } from '../../actions/JourneyActions'
 import { closeDialog } from '../../actions/CommonActions'
+import { getKpis } from "../../data/userKpis"
 
 const mapStateToProps = (state, ownProps) => {
     //const { journeyId }  = ownProps.match.params;state,
 	const { journeys=[], homeJourney } = state.user;
-	let data;
-	if(state.system.activeJourney){
-		data = journeys.find(j => j._id === state.system.activeJourney);
+	const journeyId = state.system.activeJourney || homeJourney;
+	const data = journeys.find(j => j._id === journeyId) || journeys[0];
+	//todo - if its a different user to the signedin user (eg a coach looking at a player). then may need to load the user
+	const userInfo = {
+		//for now assume its same player as signed in
+		name:state.user?.name || "Profile name",
+		position:state.user?.position || "position",
+		age:21
 	}
-	else if(homeJourney){
-		data = journeys.find(j => j._id === homeJourney);
-	}
-	else{
-		data = journeys[0] //may be undefined
-	}
+	//todo - store kpis in db
+	const userKpis = getKpis(data?.userId);
+
 	return{
 		//@todo - use activeJourney instead of homeJourney. It defaults to homeJourney on home page but user can overide.
 		data,
+		userKpis,
+		userInfo,
+		datasets:undefined, //state.user?.datasetsMemberOf || [],
 		availableJourneys:journeys,
 		screen:state.system.screen,
         width:state.system.screen.width,

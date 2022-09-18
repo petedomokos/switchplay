@@ -85,10 +85,10 @@ const initChannels = d3.range(numberMonths)
   })
 
 //width and height may be full screen, but may not be
-const Journey = ({ data, availableJourneys, screen, width, height, save, setActive, closeDialog }) => {
+const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog }) => {
   //console.log("Journey data", data)
   //console.log("Journey avail", availableJourneys)
-  const { _id, name, contracts, profiles, aims, goals, links, measures } = data;
+  const { _id, userId, name, contracts, profiles, aims, goals, links, measures } = data;
   const [journey, setJourney] = useState(null);
   const [channels, setChannels] = useState(initChannels);
   const [withCompletionPaths, setWithCompletionPath] = useState(false);
@@ -226,8 +226,7 @@ const Journey = ({ data, availableJourneys, screen, width, height, save, setActi
         .handleCreateProfile(function(profile){
           const id = createId(profiles.map(p => p.id));
           const colour = "orange";
-          //updates
-          const _profiles = [ ...profiles, { id , colour, dataType:"profile", ...profile }];
+          const _profiles = [ ...profiles, { id , userId, colour, dataType:"profile", ...profile }];
           save({ ...data, profiles:_profiles });
         })
         .handleCreateAim(function(aim, planetIds){
@@ -342,7 +341,7 @@ const Journey = ({ data, availableJourneys, screen, width, height, save, setActi
         })
 
     d3.select(containerRef.current)
-      .datum({ ...data, channels })
+      .datum({ ...data, channels, userInfo, userKpis, datasets })
       //.datum({ canvas, aims, planets, links, channels, measures })
       .call(journey)
 
@@ -512,6 +511,45 @@ const toggleJourneysOpen = useCallback(() => {
   )
 }
 
+const mockDatasets = [
+  { 
+    _id: "606b6aef720202523cc3589d", 
+    name:"Press ups", 
+    measures:[
+      { 
+        _id:"606b6aef720202523cc3589e", 
+        name:"Reps", 
+        unit:"reps", 
+        fullNameShort:"Press-ups", 
+        fullNameLong:"Nr of Press-ups in 1 Min",
+        bands:[ { min:"0", max:"60" } ],
+        standards:[ { name:"minimum", value:"0" }],
+      }
+    ],
+    datapoints:[
+      { 
+        isTarget:false,
+        player: "", 
+        date:"2021-03-31T18:26:00.000+00:00",
+        values:[
+          { 
+            measure:"606b6aef720202523cc3589e", 
+            value:"33" ,
+            key:"reps"
+          }
+        ]
+      }
+      //add target datapoints here when a future profile card kpi targets
+      //only need to create it when we actually have a target set ie on teh lng run, this 
+      // will be when user has dragged a kpi bar to vary it. For now, it is when we set it manually here
+      // if there is no target kpi for specific date, then the future profile card defaults to the latest datapoint BEFORE the 
+      // card date, whether this be a target, ot if no target, then teh latest actual datapoint.
+      //also consider, if it is an actaul datapoint, we may want to use teh best score rather than the latest,
+      // or the median avg of the previous 3.
+    ]
+  }
+]
+
 Journey.defaultProps = {
   data:{
     _id:"temp",
@@ -522,6 +560,9 @@ Journey.defaultProps = {
     links:[],
     measures:mockMeasures
   },
+  userInfo:{},
+  userKpis:{},
+  datasets:mockDatasets,
   availableJourneys:[],
   screen: {},
   width: 0,

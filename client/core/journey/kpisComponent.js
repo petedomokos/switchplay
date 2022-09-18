@@ -1,14 +1,11 @@
 import * as d3 from 'd3';
 import { DIMNS } from "./constants";
 import dragEnhancements from './enhancedDragHandler';
-// import menuComponent from './menuComponent';
-import profileInfoComponent from './profileInfoComponent';
-import kpisComponent from './kpisComponent';
 import { Oscillator } from './domHelpers';
 /*
 
 */
-export default function profileCardsComponent() {
+export default function kpisComponent() {
     //API SETTINGS
     // dimensions
     let width = DIMNS.profile.width;
@@ -17,9 +14,6 @@ export default function profileCardsComponent() {
     let fontSizes = {
         name:9
     };
-
-    let timeScale = x => 0;
-    let yScale = x => 0;
 
     let selected;
 
@@ -45,16 +39,11 @@ export default function profileCardsComponent() {
     //dom
     let containerG;
 
-    //components
-    let profileInfoComponents = {};
-    let kpisComponents = {};
-
-
-    function profileCards(selection, options={}) {
+    function kpis(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            //console.log("profileCards update", data)
+            // console.log("kpis update", data)
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
             containerG = d3.select(this);
@@ -71,96 +60,18 @@ export default function profileCardsComponent() {
                 .on("drag", enhancedDrag(dragged))
                 .on("end", enhancedDrag(dragEnd));
 
-            const profileCardG = containerG.selectAll("g.profile-card").data(data, d => d.id);
-            profileCardG.enter()
+            const kpiG = containerG.selectAll("g.kpi").data(data, d => d.id);
+            kpiG.enter()
                 .append("g")
-                .attr("class", d => "profile-card profile-card-"+d.id)
+                .attr("class", d => "kpi kpi-"+d.id)
                 .each(function(d,i){
-                    profileInfoComponents[d.id] = profileInfoComponent();
-                    kpisComponents[d.id] = kpisComponent();
-                    // console.log("entering card", d)
-                    //ENTER
-                    const contentsG = d3.select(this)
-                        .append("g")
-                        .attr("class", "contents profile-card-contents")
-
-                    //bg rect
-                    contentsG
-                        .append("rect")
-                        .attr("class", "bg")
-                            .attr("rx", 3)
-                            .attr("ry", 3)
-                            .attr("fill", "orange");
-
-                    contentsG.append("g").attr("class", "info")
-                    contentsG.append("g").attr("class", "kpis")
-                
+                    //...
                 })
                 .style("cursor", "grab")
-                //.call(transform, { x: d => adjX(timeScale(d.targetDate)), y:d => d.y })
-                //.call(transform, { x: d => d.x, y:d => d.y }, transitionEnter && transitionsOn)
-                .merge(profileCardG)
+                .merge(kpiG)
                 .attr("transform", d =>  "translate(" +d.x +"," +d.y +")")
                 .each(function(d){
-                    const profileInfo = profileInfoComponents[d.id];
-                    const kpis = kpisComponents[d.id];
-                    //ENTER AND UPDATE
-                    const contentsG = d3.select(this).select("g.contents")
-
-                    //rect sizes
-                    contentsG.selectAll("rect.bg")
-                        .attr("x", -width/2)
-                        .attr("y", -height/2)
-                        .attr("width", width)
-                        .attr("height", height)
-                        //.attr("stroke", "none")// d.isMilestone ? grey10(1) : "none")
-                   
-                    contentsG.selectAll("g.info")
-                        .attr("transform", "translate(0," +(height/2) +")")
-                        .datum(d.info)
-                        .call(profileInfo)
-                    
-                    /*contentsG.selectAll("g.kpis")
-                        .attr("transform", "translate(0," +(height/2) +")")
-                        .datum(d.kpis)
-                        .call(kpis)*/
-
-                    //targ
-                    /*
-                    let kpiData = [];
-                    //getting error when doing this
-                    if(selectedMeasureIsInGoal(d)){
-                        const planetMeasureData = d.measures.find(m => m.id === selectedMeasure.id);
-                        targData.push({ ...selectedMeasure, ...planetMeasureData });
-                    }
-
-                    const kpiG = contentsG.selectAll("g.kpi").data(kpiData)
-                    kpiG.enter()
-                        .append("g")
-                            .attr("class", "kpi")
-                            .each(function(measure){
-                                d3.select(this)
-                                    .append("text")
-                                        .attr("text-anchor", "middle")
-                                        .attr("dominant-baseline", "middle")
-                                        .style("pointer-events", "none")
-                            })
-                            .merge(kpiG)
-                            .attr("transform", "translate(0, " +d.ry(height)/2 +")")
-                            .each(function(m){
-                                d3.select(this).select("text")
-                                    .attr("opacity", !selectedMeasure || selectedMeasureIsInGoal(d) ? planetOpacity.normal : planetOpacity.unavailable)
-                                    .style("font-size", fontSize * 1.2)
-                                    //.attr("stroke-width", 0.5)
-                                    .attr("fill", "white")
-                                    //.attr("stroke", COLOURS.selectedMeasure)
-                                    .text("target "+(typeof m.targ === "number" ? m.targ : "not set"))
-
-                            })
-                            
-                    kpiG.exit().remove();
-                    */
-                            
+                    //...          
                 })
                 //.call(updateHighlighted)
                 .call(drag)
@@ -168,33 +79,8 @@ export default function profileCardsComponent() {
 
                 })
 
-            /*
-            function transform(selection, transform={}, transition){
-                const { x = d => 0, y = d => 0, k = d => 1 } = transform;
-                selection.each(function(d){
-                    const planetG = d3.select(this);
-                    //translate is undefined when we drag a planet into an aim and release
-                    const { translateX, translateY } = getTransformationFromTrans(planetG.attr("transform"));
-                    //on call from enter, there will be no translate so deltas are 0 so no transition
-                    //but then transform is called again on entered profileCards after merge with update
-                    const deltaX = translateX ? Math.abs(translateX - x(d)) : 0;
-                    const deltaY = translateY ? Math.abs(translateY - y(d)) : 0;
-                    if(transition && (deltaX > 0.1 || deltaY > 0.1)){
-                        planetG
-                            .transition()
-                                .delay(transition.delay || 0)
-                                .duration(transition.duration || 200)
-                                .attr("transform", "translate("+x(d) +"," +y(d) +") scale("+k(d) +")");
-
-                    }else{
-                        planetG.attr("transform", "translate("+x(d) +"," +y(d) +") scale("+k(d) +")");
-                    }
-                })
-            }
-            */
-
             //EXIT
-            profileCardG.exit().each(function(d){
+            kpiG.exit().each(function(d){
                 //will be multiple exits because of the delay in removing
                 if(!d3.select(this).attr("class").includes("exiting")){
                     d3.select(this)
@@ -255,7 +141,7 @@ export default function profileCardsComponent() {
                     .call(oscillator.start);
 
                 longpressed = d;
-                containerG.call(profileCards);
+                containerG.call(kpis);
 
                 onLongpressStart.call(this, e, d)
             };
@@ -312,118 +198,103 @@ export default function profileCardsComponent() {
     }
     
     //api
-    profileCards.width = function (value) {
+    kpis.width = function (value) {
         if (!arguments.length) { return width; }
         width = value;
-        return profileCards;
+        return kpis;
     };
-    profileCards.height = function (value) {
+    kpis.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
-        return profileCards;
+        return kpis;
     };
-    profileCards.fontSizes = function (values) {
+    kpis.fontSizes = function (values) {
         if (!arguments.length) { return fontSizes; }
         fontSizes = { ...fontSizes, ...values };
-        return profileCards;
+        return kpis;
     };
-    profileCards.selected = function (value) {
+    kpis.selected = function (value) {
         if (!arguments.length) { return selected; }
         selected = value;
-        return profileCards;
+        return kpis;
     };
-    profileCards.longpressed = function (value) {
+    kpis.longpressed = function (value) {
         if (!arguments.length) { return longpressed; }
         longpressed = value;
-        return profileCards;
+        return kpis;
     };
-    profileCards.yScale = function (value) {
-        if (!arguments.length) { return yScale; }
-        yScale = value;
-        return profileCards;
-    };
-    profileCards.timeScale = function (value) {
-        if (!arguments.length) { return timeScale; }
-        timeScale = value;
-        return profileCards;
-    };
-    profileCards.onClick = function (value) {
+    kpis.onClick = function (value) {
         if (!arguments.length) { return onClick; }
         onClick = value;
-        return profileCards;
+        return kpis;
     };
-    profileCards.onDblClick = function (value) {
+    kpis.onDblClick = function (value) {
         if (!arguments.length) { return onDblClick; }
         onDblClick = value;
-        return profileCards;
+        return kpis;
     };
-    profileCards.onDragStart = function (value) {
+    kpis.onDragStart = function (value) {
         if (!arguments.length) { return onDragStart; }
         if(typeof value === "function"){
             onDragStart = value;
         }
-        return profileCards;
+        return kpis;
     };
-    profileCards.onDrag = function (value) {
+    kpis.onDrag = function (value) {
         if (!arguments.length) { return onDrag; }
         if(typeof value === "function"){
             onDrag = value;
         }
-        return profileCards;
+        return kpis;
     };
-    profileCards.onDragEnd = function (value) {
+    kpis.onDragEnd = function (value) {
         if (!arguments.length) { return onDragEnd; }
         if(typeof value === "function"){
             onDragEnd = value;
         }
-        return profileCards;
+        return kpis;
     };
-    profileCards.onLongpressStart = function (value) {
+    kpis.onLongpressStart = function (value) {
         if (!arguments.length) { return onLongpressStart; }
         if(typeof value === "function"){
             onLongpressStart = value;
         }
-        return profileCards;
+        return kpis;
     };
-    profileCards.onLongpressDragged = function (value) {
+    kpis.onLongpressDragged = function (value) {
         if (!arguments.length) { return onLongpressDragged; }
         if(typeof value === "function"){
             onLongpressDragged = value;
         }
-        return profileCards;
+        return kpis;
     };
-    profileCards.onLongpressEnd = function (value) {
+    kpis.onLongpressEnd = function (value) {
         if (!arguments.length) { return onLongpressEnd; }
         if(typeof value === "function"){
             onLongpressEnd = value;
         }
-        return profileCards;
+        return kpis;
     };
-    profileCards.onMouseover = function (value) {
+    kpis.onMouseover = function (value) {
         if (!arguments.length) { return onMouseover; }
         if(typeof value === "function"){
             onMouseover = value;
         }
-        return profileCards;
+        return kpis;
     };
-    profileCards.onMouseout = function (value) {
+    kpis.onMouseout = function (value) {
         if (!arguments.length) { return onMouseout; }
         if(typeof value === "function"){
             onMouseout = value;
         }
-        return profileCards;
+        return kpis;
     };
-    profileCards.onDelete = function (value) {
+    kpis.onDelete = function (value) {
         if (!arguments.length) { return onDelete; }
         if(typeof value === "function"){
             onDelete = value;
         }
-        return profileCards;
+        return kpis;
     };
-    profileCards.onAddLink = function (value) {
-        if (!arguments.length) { return onAddLink; }
-        if(typeof value === "function"){ onAddLink = value; }
-        return profileCards;
-    };
-    return profileCards;
+    return kpis;
 }
