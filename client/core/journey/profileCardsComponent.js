@@ -13,9 +13,18 @@ export default function profileCardsComponent() {
     // dimensions
     let width = DIMNS.profile.width;
     let height = DIMNS.profile.height;
+    let kpiHeight = 10;
 
     let fontSizes = {
-        name:9
+        info:{
+            name:9,
+            age:11,
+            position:8
+        },
+        kpis:{
+            name:9,
+            values:9
+        }
     };
 
     let timeScale = x => 0;
@@ -87,7 +96,7 @@ export default function profileCardsComponent() {
                     //bg rect
                     contentsG
                         .append("rect")
-                        .attr("class", "bg")
+                            .attr("class", "bg")
                             .attr("rx", 3)
                             .attr("ry", 3)
                             .attr("fill", "orange");
@@ -102,28 +111,36 @@ export default function profileCardsComponent() {
                 .merge(profileCardG)
                 .attr("transform", d =>  "translate(" +d.x +"," +d.y +")")
                 .each(function(d){
-                    const profileInfo = profileInfoComponents[d.id];
-                    const kpis = kpisComponents[d.id];
+                    const profileInfo = profileInfoComponents[d.id]
+                        .width(width)
+                        .height(height/2)
+                        .fontSizes(fontSizes.info);
+
+                    const kpis = kpisComponents[d.id]
+                        .width(width)
+                        .height(height/2)
+                        .kpiHeight(kpiHeight)
+                        .fontSizes(fontSizes.kpis);
+
                     //ENTER AND UPDATE
                     const contentsG = d3.select(this).select("g.contents")
+                        .attr("transform", d =>  `translate(${-width/2},${-height/2})`)
 
                     //rect sizes
                     contentsG.selectAll("rect.bg")
-                        .attr("x", -width/2)
-                        .attr("y", -height/2)
                         .attr("width", width)
                         .attr("height", height)
                         //.attr("stroke", "none")// d.isMilestone ? grey10(1) : "none")
                    
+                    // why is this too far down
                     contentsG.selectAll("g.info")
-                        .attr("transform", "translate(0," +(height/2) +")")
                         .datum(d.info)
                         .call(profileInfo)
                     
-                    /*contentsG.selectAll("g.kpis")
+                    contentsG.selectAll("g.kpis")
                         .attr("transform", "translate(0," +(height/2) +")")
                         .datum(d.kpis)
-                        .call(kpis)*/
+                        .call(kpis)
 
                     //targ
                     /*
@@ -207,7 +224,6 @@ export default function profileCardsComponent() {
             })
 
             function dragStart(e , d){
-                console.log("dragStart", d.x)
                 d3.select(this).raise();
 
                 onDragStart.call(this, e, d)
@@ -320,6 +336,11 @@ export default function profileCardsComponent() {
     profileCards.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
+        return profileCards;
+    };
+    profileCards.kpiHeight = function (value) {
+        if (!arguments.length) { return kpiHeight; }
+        kpiHeight = value;
         return profileCards;
     };
     profileCards.fontSizes = function (values) {

@@ -544,8 +544,17 @@ export default function journeyComponent() {
                 profileCards
                     .width(DIMNS.profile.width * k)
                     .height(DIMNS.profile.height * k)
+                    .kpiHeight(10 * k)
                     .fontSizes({
-                        name:9 * k
+                        info:{
+                            name:4 * k,
+                            age:6 * k,
+                            position: 3 * k
+                        },
+                        kpis:{
+                            name:4 * k,
+                            values:4 * k
+                        }
                     })
                     .yScale(zoomedYScale)
                     .timeScale(zoomedTimeScale)

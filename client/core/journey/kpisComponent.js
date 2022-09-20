@@ -10,9 +10,44 @@ export default function kpisComponent() {
     // dimensions
     let width = DIMNS.profile.width;
     let height = DIMNS.profile.height;
+    let margin;
+    let contentsWidth;
+    let contentsHeight;
+
+    let kpiHeight;
+    let gapBetweenKpis;
+
+    let kpiNameHeight;
+    let kpiNameMargin;
+
+    let barWidth;
+    let numbersWidth;
+
+    let barHeight;
+    let barMargin;
+    let barContentsWidth;
+    let barContentsHeight;
+
+    function updateDimns(){
+        margin = { left: width * 0.1, right: width * 0.1, top:height * 0.1, bottom: height * 0.1 };
+        contentsWidth = width - margin.left - margin.right;
+        contentsHeight = height - margin.top - margin.bottom;
+
+        barWidth = contentsWidth * 0.7;
+        numbersWidth = contentsWidth * 0.3;
+        //todo - reduce kpiHeight and place kpi name above each bar 
+        gapBetweenKpis = kpiHeight * 0.3;
+        kpiNameHeight = kpiHeight * 0.4;
+        barHeight = kpiHeight * 0.6;
+        kpiNameMargin = { left: 0, right: 0, top: kpiNameHeight * 0.1, bottom: kpiNameHeight * 0.1 };
+        barMargin = { left: 0, right: 0, top: barHeight * 0.15, bottom: barHeight * 0.15 };
+        barContentsWidth = barWidth - barMargin.left - barMargin.right;
+        barContentsHeight = barHeight - barMargin.top - barMargin.bottom; 
+        
+    }
 
     let fontSizes = {
-        name:9
+        name:12
     };
 
     let selected;
@@ -36,14 +71,17 @@ export default function kpisComponent() {
 
     let longpressed;
 
+    let scales = {};
+
     //dom
     let containerG;
 
     function kpis(selection, options={}) {
+        updateDimns();
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            // console.log("kpis update", data)
+            console.log("kpis update", data)
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
             containerG = d3.select(this);
@@ -60,37 +98,96 @@ export default function kpisComponent() {
                 .on("drag", enhancedDrag(dragged))
                 .on("end", enhancedDrag(dragEnd));
 
-            const kpiG = containerG.selectAll("g.kpi").data(data, d => d.id);
-            kpiG.enter()
-                .append("g")
-                .attr("class", d => "kpi kpi-"+d.id)
-                .each(function(d,i){
-                    //...
-                })
-                .style("cursor", "grab")
-                .merge(kpiG)
-                .attr("transform", d =>  "translate(" +d.x +"," +d.y +")")
-                .each(function(d){
-                    //...          
-                })
-                //.call(updateHighlighted)
-                .call(drag)
-                .each(function(d){
+            containerG.selectAll("g.contents").data([1])
+                .join("g")
+                .attr("class", "contents")
+                .attr("transform", d =>  `translate(${margin.left},${margin.top})`)
+                .each(function(){
+                    const kpiG = d3.select(this).selectAll("g.kpi").data(data, d => d.id);
+                    kpiG.enter()
+                        .append("g")
+                        .attr("class", d => "kpi kpi-"+d.id)
+                        .each(function(d,i){
+                            scales[d.id] = d3.scaleLinear();
 
+                            const kpiG = d3.select(this);
+                            kpiG.append("rect")
+                                .attr("class", "bg");
+
+                            kpiG.append("g")
+                                    .attr("class", "name")
+                                        .append("text")
+                                            .attr("dominant-baseline", "central");
+
+                            kpiG.append("g").attr("class", "bars");
+
+                            kpiG.append("g").attr("class", "numbers");
+
+    
+        
+                        })
+                        .style("cursor", "grab")
+                        .merge(kpiG)
+                        .attr("transform", (d,i) =>  `translate(0,${i * (kpiHeight + gapBetweenKpis)})`)
+                        .each(function(d){
+                            const { min, max } = d;
+                            const kpiG = d3.select(this);
+                            kpiG.select("rect.bg")
+                                .attr("width", contentsWidth)
+                                .attr("height", kpiHeight)
+                                .attr("fill", "none")
+                                .attr("stroke", "black")
+                                .attr("stroke-width", 0.3)  
+                            
+                            const nameG = kpiG.select("g.name")
+                                .attr("transform", `translate(0, ${kpiNameHeight/2})`);
+                            
+                            nameG.select("text")
+                                .attr("font-size", fontSizes.name)
+                                .text("kpi name here")
+                    
+                            const scale = scales[d.id].domain([min, max]).range([0, barContentsWidth])
+
+                            const barsG = kpiG.select("g.bars")
+                                .attr("transform", `translate(${barMargin.left}, ${kpiNameHeight +barMargin.top})`)
+                            
+                            console.log("update barsData", d.barsData)
+                            console.log("barsG", barsG.node())
+                            const barRect = barsG.selectAll("rect.bar").data(d.barsData, d => d.key)
+                            barRect.enter()
+                                .append("rect")
+                                    .attr("class", "bar")
+                                    .attr("fill", d => {
+                                        console.log("enter rect")
+                                        return d.fill
+                                    })
+                                    .merge(barRect)
+                                    .attr("x", d => scale(d.from))
+                                    .attr("width", d => scale(d.to) - scale(d.from))
+                                    .attr("height", barContentsHeight)
+
+                            //target lines
+                            const linesData = [
+                                { key:"expected-current", value: 0 },
+                                { key: "target", value: 0 }
+                            ]
+                            //...
+                        })
+
+                    //EXIT
+                    kpiG.exit().each(function(d){
+                        //will be multiple exits because of the delay in removing
+                        if(!d3.select(this).attr("class").includes("exiting")){
+                            d3.select(this)
+                                .classed("exiting", true)
+                                .transition()
+                                    .duration(200)
+                                    .attr("opacity", 0)
+                                    .on("end", function() { d3.select(this).remove(); });
+                        }
+                    })
                 })
 
-            //EXIT
-            kpiG.exit().each(function(d){
-                //will be multiple exits because of the delay in removing
-                if(!d3.select(this).attr("class").includes("exiting")){
-                    d3.select(this)
-                        .classed("exiting", true)
-                        .transition()
-                            .duration(200)
-                            .attr("opacity", 0)
-                            .on("end", function() { d3.select(this).remove(); });
-                }
-            })
 
             function dragStart(e , d){
                 console.log("dragStart", d.x)
@@ -206,6 +303,11 @@ export default function kpisComponent() {
     kpis.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
+        return kpis;
+    };
+    kpis.kpiHeight = function (value) {
+        if (!arguments.length) { return kpiHeight; }
+        kpiHeight = value;
         return kpis;
     };
     kpis.fontSizes = function (values) {

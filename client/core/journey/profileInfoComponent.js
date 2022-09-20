@@ -9,10 +9,19 @@ export default function profileInfoComponent() {
     //API SETTINGS
     // dimensions
     let width = DIMNS.profile.width;
-    let height = DIMNS.profile.height;
+    let height = DIMNS.profile.height / 2;
+    let photoHeight;
+    let textInfoHeight;
+
+    function updateDimns(){
+        photoHeight = height * 0.8;
+        textInfoHeight = height * 0.2;
+    }
 
     let fontSizes = {
-        name:9
+        name:9,
+        age:11,
+        position:8
     };
 
     //API CALLBACKS
@@ -27,10 +36,11 @@ export default function profileInfoComponent() {
     let containerG;
 
     function profileInfo(selection, options={}) {
+        //console.log("profileinfo", height)
+        updateDimns();
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            console.log("sel profileInfo update", data)
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
@@ -45,6 +55,106 @@ export default function profileInfoComponent() {
 
             // todo - append photo, name, age, pos
             //note - need a quick way of getting a photo for each player
+            const photosG = containerG.selectAll("g.photos").data([data.photos]);
+            photosG.enter()
+                .append("g")
+                    .attr("class", "photos")
+                    .each(function(d){
+                    })
+                    .merge(photosG)
+                    .each(function(d){
+
+                    })
+
+            const textInfoG = containerG.selectAll("g.text-info").data([data]);
+            textInfoG.enter()
+                .append("g")
+                    .attr("class", "text-info")
+                    .each(function(d){
+    
+                        const textInfoG = d3.select(this);
+
+                        textInfoG.append("rect")
+                            .attr("class", "bg")
+                            .attr("fill", "black");
+
+                        //NAME
+                        const nameG = textInfoG.append("g").attr("class", "name");
+                        nameG.append("text").attr("class", "first-name")
+                        nameG.append("text").attr("class", "surname");
+
+                        nameG.selectAll("text")
+                            .attr("dominant-baseline", "central")
+                            .attr("stroke", "white")
+                            .attr("stroke-width", 0.5)
+                            .attr("fill", "white");
+
+                        //OTHER TEXT: AGE AND POSITION
+                        const otherTextInfoG = textInfoG.append("g").attr("class", "other-text-info");
+                        otherTextInfoG.append("text").attr("class", "age")
+                            .attr("font-size", fontSizes.age);
+
+                        otherTextInfoG.append("text").attr("class", "position")
+                            .attr("font-size", fontSizes.position);
+
+                        otherTextInfoG.selectAll("text")
+                            .attr("dominant-baseline", "central")
+                            .attr("text-anchor", "middle")
+                            .attr("stroke", "white")
+                            .attr("stroke-width", 0.5)
+                            .attr("fill", "white");
+                        
+
+
+                        textInfoG.append("line").attr("class", "divider")
+                            .attr("stroke", "white");
+
+                    })
+                    .merge(textInfoG)
+                    .attr("transform", `translate(0, ${photoHeight})`)
+                    .each(function(d){
+        
+                        const textMargin = { left: width * 0.1, right: width * 0.1 };
+
+                        const textInfoG = d3.select(this);
+                        textInfoG.select("rect.bg")
+                            .attr("width", width)
+                            .attr("height", textInfoHeight);
+
+                        const nameG = textInfoG.select("g.name")
+                            .attr("transform", `translate(${textMargin.left},0)`) //move to middle of name area
+                        
+                        nameG.select("text.first-name")
+                            .attr("transform", `translate(0, ${textInfoHeight * 0.33})`)
+                            .text("FIRST NAME");
+                        
+                        nameG.select("text.surname")
+                            .attr("transform", `translate(0, ${textInfoHeight * 0.67})`)
+                            .text("SURNAME");
+                        
+                        nameG.selectAll("text")
+                            .attr("font-size", fontSizes.name);
+                        
+                        //OTHER: AGE, POSITION
+                        const otherTextInfoG = textInfoG.select("g.other-text-info")
+                            .attr("transform", "translate("+width * 0.75 +",0)");
+                            
+
+                        otherTextInfoG.select("text.age")
+                            .attr("transform", `translate(0, ${textInfoHeight * 0.33})`)
+                            .attr("font-size", fontSizes.age)
+                            .text("23");
+
+                        otherTextInfoG.select("text.position")
+                            .attr("transform", `translate(0, ${textInfoHeight * 0.67})`)
+                            .attr("font-size", fontSizes.position)
+                            .text("midfield");;
+
+                        textInfoG.select("line.divider")
+                            .attr("transform", `translate(${width/2},0)`)
+                            .attr("y2", textInfoHeight);
+
+                    })
 
         })
 

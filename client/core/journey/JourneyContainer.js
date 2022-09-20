@@ -24,7 +24,7 @@ const mapStateToProps = (state, ownProps) => {
 		data,
 		userKpis,
 		userInfo,
-		datasets:undefined, //state.user?.datasetsMemberOf || [],
+		datasets:undefined,//state.user?.datasetsMemberOf || undefined,
 		availableJourneys:journeys,
 		screen:state.system.screen,
         width:state.system.screen.width,
