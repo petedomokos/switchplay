@@ -360,7 +360,7 @@ export default function journeyComponent() {
             zoom = d3.zoom()
                 //.scaleExtent([1, 3])
                 .extent(extent)
-                .scaleExtent([0.125, 3])
+                .scaleExtent([0.125, 10])
                 .on("start", enhancedZoom())
                 .on("zoom", enhancedZoom(function(e){
                     if(e.sourceEvent){
@@ -454,9 +454,10 @@ export default function journeyComponent() {
                 //console.log("profilesData",profilesData);
             }
 
-            function updateProfileCardsData(){
+            function updateProfileCardsData(format){
                 //note - planetsLayout was also taking in .selected for siSelected n planets, but not needed
                 myProfileCardsLayout
+                    .format(format || "progress")
                     .aligned(aligned)
                     //.canvasDimns({ width:canvasWidth, height: canvasHeight })
                     .currentZoom(currentZoom)
@@ -558,6 +559,12 @@ export default function journeyComponent() {
                     })
                     .yScale(zoomedYScale)
                     .timeScale(zoomedTimeScale)
+                    .onCtrlClick((e,d) => {
+                        //update format in layout and recalc layout
+                        updateProfileCardsData(d.key);
+                        //call all kpis components again
+                        updateProfileCards();
+                    })
                     .onDragEnd(function(e,d){
                         const _profile = { 
                             id:d.id,

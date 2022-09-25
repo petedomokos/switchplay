@@ -34,6 +34,8 @@ export default function profileCardsComponent() {
 
     //API CALLBACKS
     let onClick = function(){};
+    let onCtrlClick = () => {};
+
     let onDblClick = function(){};
     let onDragStart = function() {};
     let onDrag = function() {};
@@ -44,6 +46,7 @@ export default function profileCardsComponent() {
     let onMouseover = function(){};
     let onMouseout = function(){};
     let onDelete = function() {};
+    
 
     let enhancedDrag = dragEnhancements();
     //@todo - find out why k=1.05 makes such a big increase in size
@@ -120,7 +123,8 @@ export default function profileCardsComponent() {
                         .width(width)
                         .height(height/2)
                         .kpiHeight(kpiHeight)
-                        .fontSizes(fontSizes.kpis);
+                        .fontSizes(fontSizes.kpis)
+                        .onCtrlClick(onCtrlClick);
 
                     //ENTER AND UPDATE
                     const contentsG = d3.select(this).select("g.contents")
@@ -139,7 +143,7 @@ export default function profileCardsComponent() {
                     
                     contentsG.selectAll("g.kpis")
                         .attr("transform", "translate(0," +(height/2) +")")
-                        .datum(d.kpis)
+                        .datum({ kpisData: d.kpis, ctrlsData:d.ctrlsData })
                         .call(kpis)
 
                     //targ
@@ -371,6 +375,11 @@ export default function profileCardsComponent() {
     profileCards.onClick = function (value) {
         if (!arguments.length) { return onClick; }
         onClick = value;
+        return profileCards;
+    };
+    profileCards.onCtrlClick = function (value) {
+        if (!arguments.length) { return onCtrlClick; }
+        onCtrlClick = value;
         return profileCards;
     };
     profileCards.onDblClick = function (value) {

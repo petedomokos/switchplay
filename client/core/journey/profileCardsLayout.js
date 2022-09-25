@@ -9,6 +9,7 @@ export default function profileCardsLayout(){
     let info = {};
 
     let aligned = false;
+    let format = "compare";
 
     //helper
     const statValue = (date, statId, datapoints, method="latest") => {
@@ -28,16 +29,22 @@ export default function profileCardsLayout(){
         //console.log("cardslayout data", data)
         //console.log("kpis", kpis)
         //console.log("datasets", datasets)
+
+        const ctrlsData = [
+            { key: "compare", label:"Compare", isSelected:format === "compare" },
+            { key: "progress", label:"Progress", isSelected:format === "progress" }
+        ]
         
         return data.map((p,i) => {
             const { date, yPC } = p;
             const prevCardDate = i === 0 ? undefined : data[i - 1];
             return {
                 ...p,
+                ctrlsData,
                 x:timeScale(date),
                 y:yScale(yPC),
                 info,
-                kpis:kpis.map(kpi => {
+                kpis:kpis/*.slice(0,1)*/.map((kpi,i) => {
                     const { datasetId, statId } = kpi;
                     const dataset = datasets.find(dset => dset._id === datasetId);
                     const stat = dataset.measures.find(m => m._id === statId);
@@ -55,26 +62,63 @@ export default function profileCardsLayout(){
                     const previous = statValue(prevCardDate, statId, actualDatapoints);
                     //for now, we manually seyt this to test it renders as red. But should be based on linear interpolation
                     const expectedCurrent = { date, value:currentValue * 1.3 };//calculateExpected(previous, target, date)
-                    
+                    const handleData = {}
                     //bars
-                    let barsData = [
-                        { id: "band", from:min, to:max, fill:"transparent" },
-                        { id: "target", from:min, to:targetValue, fill:"#DCDCDC" },
-                        { id: "current", from:min, to:currentValue, fill:"#696969" },
-                    ];
+                    const currentColour = "#696969";
+                    const colours = {
+                        current: currentColour,
+                        target: "#DCDCDC",
+                        expectedBehind:"red",
+                        expectedAhead:currentColour
+                    }
+
+                    const isOnTrack = expectedCurrent.value <= currentValue;
+                    const start = format === "compare" ? min : (previous?.value || min);
+                    const end = format === "compare" ? max : targetValue;
+
+                    const rangeDatum = { id: "range", from:start, to:end, fill:"transparent", stroke:"grey" };
+                    const targetDatum = { id: "target", from:start, to:targetValue, fill:colours.target };
+                    const currentDatum = { id: "current", from:start, to:currentValue, fill:colours.current };
+                    const targetHandleDatum = { ...targetDatum, value:targetDatum.to }
+                    const expectedHandleDatum = { 
+                        id: "expected", 
+                        value:expectedCurrent.value,
+                        //@todo - handle decreasing datasets ie less is best
+                        fill:isOnTrack ? colours.expectedAhead : colours.expectedBehind
+                    }
+                    const barsData = format === "compare" ? [rangeDatum, targetDatum, currentDatum] : [rangeDatum, currentDatum];
+                    const handlesData = format === "compare" ? [targetHandleDatum, expectedHandleDatum] : [expectedHandleDatum];
+
+                    //@todo later - handle target === 0
+                    const pcCompletion = targetValue !== 0 ? ((currentValue/targetValue) * 100).toFixed(0) : 100;
+                    const numbersData = format === "compare" ? 
+                        [ 
+                            { id: "actual", value: currentValue, colour:colours.current } 
+                        ]
+                        :
+                        [
+                            { id: "pc", value: `${pcCompletion}%`, colour:isOnTrack ? colours.current : "red" },
+                            { id: "actual", value: `${currentValue}`, colour:colours.current }
+                        ]
                     if(currentValue < expectedCurrent.value){
                         barsData.push({ id:"deficit", from:currentValue, to:expectedCurrent.value, fill:"red" })
                     }
+
                     return {
+                        id:`kpi${i}`, // temp - in reality, each kpi unique id will come from datasetId + statId
                         ...kpi,
                         //stat full name stands alone without needing the dataset name before it
                         name:stat.fullNameShort,
                         longName:stat.fullNameLong,
                         unit:stat.unit,
                         barsData,
+                        handlesData,
+                        numbersData,
                         bands:bands.map(band => ({ ...band, min:+band.min, max:+band.max })),
                         min,
                         max,
+                        start,
+                        end,
                         standards:standards.map(standard => ({ ...standard, value:+standard.value })),
                         //3 date-value objects for previous, current and target values
                         previous,
@@ -91,6 +135,11 @@ export default function profileCardsLayout(){
     update.aligned = function (value) {
         if (!arguments.length) { return aligned; }
         aligned = value;
+        return update;
+    };
+    update.format = function (value) {
+        if (!arguments.length) { return format; }
+        format = value;
         return update;
     };
     update.timeScale = function (value) {

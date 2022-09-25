@@ -14,6 +14,16 @@ export default function kpisComponent() {
     let contentsWidth;
     let contentsHeight;
 
+    let listHeight;
+    let ctrlsHeight;
+
+    let ctrlsMargin;
+    let ctrlsContentsWidth;
+    let ctrlsContentsHeight;
+    let btnWidth;
+    let btnHeight;
+    let btnFontSize;
+
     let kpiHeight;
     let gapBetweenKpis;
 
@@ -28,13 +38,29 @@ export default function kpisComponent() {
     let barContentsWidth;
     let barContentsHeight;
 
-    function updateDimns(){
-        margin = { left: width * 0.1, right: width * 0.1, top:height * 0.1, bottom: height * 0.1 };
+    let numbersHeight;
+    let numbersMargin;
+    let numbersContentsWidth;
+    let numbersContentsHeight;
+
+    function updateDimns(nrOfNumberValues, nrCtrlsButtons){
+        margin = { left: width * 0.1, right: width * 0.1, top:height * 0.1, bottom: height * 0.05 };
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
-        barWidth = contentsWidth * 0.7;
-        numbersWidth = contentsWidth * 0.3;
+        ctrlsHeight = contentsHeight * 0.15;
+        listHeight = contentsHeight - ctrlsHeight;
+
+        ctrlsMargin = { left: contentsWidth * 0.2, right: contentsWidth * 0.2, top: ctrlsHeight * 0.1, bottom: ctrlsHeight * 0.1 };
+        ctrlsContentsWidth = contentsWidth - ctrlsMargin.left - ctrlsMargin.right;
+        ctrlsContentsHeight = ctrlsHeight - ctrlsMargin.top - ctrlsMargin.bottom;
+        btnWidth = ctrlsContentsWidth / nrCtrlsButtons;
+        btnHeight = ctrlsContentsHeight;
+        btnFontSize = btnWidth / 5;
+
+        const numbersPCWidth = nrOfNumberValues === 2 ? 0.4 : (nrOfNumberValues === 1 ? 0.3 : 0);
+        numbersWidth = contentsWidth * numbersPCWidth;
+        barWidth = contentsWidth - numbersWidth;
         //todo - reduce kpiHeight and place kpi name above each bar 
         gapBetweenKpis = kpiHeight * 0.3;
         kpiNameHeight = kpiHeight * 0.4;
@@ -43,7 +69,11 @@ export default function kpisComponent() {
         barMargin = { left: 0, right: 0, top: barHeight * 0.15, bottom: barHeight * 0.15 };
         barContentsWidth = barWidth - barMargin.left - barMargin.right;
         barContentsHeight = barHeight - barMargin.top - barMargin.bottom; 
-        
+
+        numbersHeight = kpiHeight;
+        numbersMargin = { left:numbersWidth * 0.1, right:numbersWidth * 0.1, top:numbersHeight * 0.1, bottom: numbersHeight * 0.1 };
+        numbersContentsWidth = numbersWidth - numbersMargin.left - numbersMargin.right;
+        numbersContentsHeight = numbersHeight - numbersMargin.top - numbersMargin.bottom;
     }
 
     let fontSizes = {
@@ -64,6 +94,7 @@ export default function kpisComponent() {
     let onMouseover = function(){};
     let onMouseout = function(){};
     let onDelete = function() {};
+    let onCtrlClick = () => {};
 
     let enhancedDrag = dragEnhancements();
     //@todo - find out why k=1.05 makes such a big increase in size
@@ -77,11 +108,14 @@ export default function kpisComponent() {
     let containerG;
 
     function kpis(selection, options={}) {
-        updateDimns();
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            console.log("kpis update", data)
+            //console.log("kpis update", data)
+            const { kpisData, ctrlsData } = data;
+            const nrOfNumberValues = kpisData[0] ? kpisData[0].numbersData.length : 0;
+            const nrOfCtrlsButtons = ctrlsData?.length;
+            updateDimns(nrOfNumberValues, nrOfCtrlsButtons);
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
             containerG = d3.select(this);
@@ -98,95 +132,252 @@ export default function kpisComponent() {
                 .on("drag", enhancedDrag(dragged))
                 .on("end", enhancedDrag(dragEnd));
 
-            containerG.selectAll("g.contents").data([1])
-                .join("g")
-                .attr("class", "contents")
-                .attr("transform", d =>  `translate(${margin.left},${margin.top})`)
-                .each(function(){
-                    const kpiG = d3.select(this).selectAll("g.kpi").data(data, d => d.id);
-                    kpiG.enter()
-                        .append("g")
-                        .attr("class", d => "kpi kpi-"+d.id)
-                        .each(function(d,i){
-                            scales[d.id] = d3.scaleLinear();
+            const contentsG = containerG.selectAll("g.contents").data([1]);
+            contentsG.enter()
+                .append("g")
+                    .attr("class", "contents")
+                    .each(function(){
+                        const contentsG = d3.select(this)
 
-                            const kpiG = d3.select(this);
-                            kpiG.append("rect")
-                                .attr("class", "bg");
+                        contentsG
+                            .append("rect")
+                                .attr("class", "contents-bg")
+                                .attr("fill", "transparent")
+                                .attr("stroke", "none");
 
-                            kpiG.append("g")
-                                    .attr("class", "name")
-                                        .append("text")
-                                            .attr("dominant-baseline", "central");
+                        contentsG.append("g").attr("class", "kpis-list")
+                            .append("rect")
+                                .attr("class", "list-bg");
 
-                            kpiG.append("g").attr("class", "bars");
-
-                            kpiG.append("g").attr("class", "numbers");
-
-    
-        
-                        })
-                        .style("cursor", "grab")
-                        .merge(kpiG)
-                        .attr("transform", (d,i) =>  `translate(0,${i * (kpiHeight + gapBetweenKpis)})`)
-                        .each(function(d){
-                            const { min, max } = d;
-                            const kpiG = d3.select(this);
-                            kpiG.select("rect.bg")
-                                .attr("width", contentsWidth)
-                                .attr("height", kpiHeight)
-                                .attr("fill", "none")
-                                .attr("stroke", "black")
-                                .attr("stroke-width", 0.3)  
-                            
-                            const nameG = kpiG.select("g.name")
-                                .attr("transform", `translate(0, ${kpiNameHeight/2})`);
-                            
-                            nameG.select("text")
-                                .attr("font-size", fontSizes.name)
-                                .text("kpi name here")
-                    
-                            const scale = scales[d.id].domain([min, max]).range([0, barContentsWidth])
-
-                            const barsG = kpiG.select("g.bars")
-                                .attr("transform", `translate(${barMargin.left}, ${kpiNameHeight +barMargin.top})`)
-                            
-                            console.log("update barsData", d.barsData)
-                            console.log("barsG", barsG.node())
-                            const barRect = barsG.selectAll("rect.bar").data(d.barsData, d => d.key)
-                            barRect.enter()
-                                .append("rect")
-                                    .attr("class", "bar")
-                                    .attr("fill", d => {
-                                        console.log("enter rect")
-                                        return d.fill
-                                    })
-                                    .merge(barRect)
-                                    .attr("x", d => scale(d.from))
-                                    .attr("width", d => scale(d.to) - scale(d.from))
-                                    .attr("height", barContentsHeight)
-
-                            //target lines
-                            const linesData = [
-                                { key:"expected-current", value: 0 },
-                                { key: "target", value: 0 }
-                            ]
-                            //...
-                        })
-
-                    //EXIT
-                    kpiG.exit().each(function(d){
-                        //will be multiple exits because of the delay in removing
-                        if(!d3.select(this).attr("class").includes("exiting")){
-                            d3.select(this)
-                                .classed("exiting", true)
-                                .transition()
-                                    .duration(200)
-                                    .attr("opacity", 0)
-                                    .on("end", function() { d3.select(this).remove(); });
-                        }
+                        contentsG.append("g").attr("class", "kpis-ctrls")
+                            .append("rect")
+                                .attr("class", "ctrls-bg");;
                     })
-                })
+                    .merge(contentsG)
+                    .attr("transform", d =>  `translate(${margin.left},${margin.top})`)
+                    .each(function(){
+                        const contentsG = d3.select(this);
+
+                        contentsG.select("rect.contents-bg")
+                            .attr("width", contentsWidth)
+                            .attr("height", contentsHeight)
+
+                        //kpi list
+                        const listG = contentsG.select("g.kpis-list");
+                        listG.select("rect.list-bg")
+                            .attr("width", contentsWidth)
+                            .attr("height", listHeight)
+                            .attr("fill", "transparent")
+                            .attr("stroke", "none")
+
+                        //todo - get liust bg showing
+                        //make kpi bar width font size etc based on listHeight
+
+                        const kpiG = listG.selectAll("g.kpi").data(kpisData, d => d.id);
+                        kpiG.enter()
+                            .append("g")
+                            .attr("class", d => "kpi kpi-"+d.id)
+                            .each(function(d,i){
+                                scales[d.id] = d3.scaleLinear();
+
+                                const kpiG = d3.select(this);
+                                kpiG.append("rect")
+                                    .attr("class", "kpi-bg");
+
+                                kpiG.append("g")
+                                        .attr("class", "name")
+                                            .append("text")
+                                                .attr("dominant-baseline", "central");
+
+                                kpiG.append("g").attr("class", "bars");
+
+                                kpiG.append("g")
+                                        .attr("class", "numbers")
+                                            .append("g")
+                                                .attr("class", "numbers-contents")
+                                                    .append("rect")
+                                                        .attr("fill", "none")
+                                                        .attr("stroke", "none");
+            
+                            })
+                            .style("cursor", "grab")
+                            .merge(kpiG)
+                            .attr("transform", (d,i) =>  `translate(0,${i * (kpiHeight + gapBetweenKpis)})`)
+                            .each(function(d){
+                                //console.log("update--------", kpiHeight)
+                                const { start, end, name } = d;
+                                const kpiG = d3.select(this);
+                                kpiG.select("rect.kpi-bg")
+                                    .attr("width", contentsWidth)
+                                    .attr("height", kpiHeight)
+                                    .attr("fill", "none")
+                                    .attr("stroke", "none")
+                                    .attr("stroke-width", 0.3)  
+                                
+                                const nameG = kpiG.select("g.name")
+                                    .attr("transform", `translate(0, ${kpiNameHeight/2})`);
+                                
+                                nameG.select("text")
+                                    .attr("font-size", fontSizes.name)
+                                    .text(name)
+                        
+                                const scale = scales[d.id].domain([start, end]).range([0, barContentsWidth])
+                                const targetOffset = 0;// 0.1 * barContentsHeight;
+
+                                const barsG = kpiG.select("g.bars")
+                                    .attr("transform", `translate(${barMargin.left}, ${kpiNameHeight +barMargin.top})`)
+                                
+                                const barRect = barsG.selectAll("rect.bar").data(d.barsData, d => d.id)
+                                barRect.enter()
+                                    .append("rect")
+                                        .attr("class", b => "bar bar-"+b.id)
+                                        .attr("fill", b => b.fill || "none")
+                                        .attr("stroke", b => b.stroke || "none")
+                                        .merge(barRect)
+                                        .attr("x", b => scale(b.from) +(b.id === "target" ? targetOffset : 0))
+                                        .attr("y", b => b.id === "target" ? -targetOffset : 0)
+                                        .attr("width", b => scale(b.to) - scale(b.from))
+                                        .attr("height", barContentsHeight)
+
+                                const handleHeight = barContentsHeight * 0.6;
+                                const handleWidth = handleHeight * 0.4;
+                                const handleRect = barsG.selectAll("rect.handle").data(d.handlesData)
+                                handleRect.enter()
+                                    .append("rect")
+                                        .attr("class", "handle")
+                                        .merge(handleRect)
+                                        .attr("x", h => scale(h.value) - handleWidth + targetOffset)
+                                        .attr("y", -handleHeight - targetOffset)
+                                        .attr("width", handleWidth)
+                                        .attr("height", handleHeight)
+                                        .attr("fill", h => h.fill)
+
+
+                                //numbers
+                                const numberWidth = numbersContentsWidth / d.numbersData.length;
+                                //ext - could allow quadrants if 4 numbers
+                                const numberHeight = numbersContentsHeight;
+                                const numberFontSize = numberWidth * 0.4;
+
+                                const numbersG = kpiG.select("g.numbers")
+                                    .attr("transform", `translate(${barWidth}, ${0})`)
+                                
+                                const numbersContentsG = numbersG.select("g.numbers-contents")
+                                    .attr("transform", `translate(${numbersMargin.left}, ${numbersMargin.top})`)
+                                
+                                numbersContentsG.select("rect")
+                                    .attr("width", numbersContentsWidth)
+                                    .attr("height", numbersContentsHeight);
+                                
+                                const numberG = numbersContentsG.selectAll("g.number").data(d.numbersData, n => n.id);
+                                numberG.enter()
+                                    .append("g")
+                                        .attr("class", "number")
+                                        .each(function(){
+                                            d3.select(this)
+                                                .append("rect")
+                                                .attr("stroke", "none")
+                                                .attr("fill", "none")
+
+                                            d3.select(this)
+                                                .append("text")
+                                                    .attr("text-anchor", "middle")
+                                                    .attr("dominant-baseline", "central")
+                                        })
+                                        .merge(numberG)
+                                        .attr("transform", (n,i) => `translate(${i * numberWidth},0)`)
+                                        .each(function(n){
+                                            d3.select(this).select("rect")
+                                                .attr("width", numberWidth)
+                                                .attr("height", numberHeight)
+
+
+                                            d3.select(this).select("text")
+                                                .attr("x", numberWidth/2)
+                                                .attr("y", numberHeight/2)
+                                                .attr("font-size", numberFontSize)
+                                                .attr("stroke-width", 0.3)
+                                                .attr("fill", n => n.colour)
+                                                .attr("stroke", n => n.colour)
+                                                .text(n.value)
+
+                                        })
+                                numberG.exit().each(function(d){
+                                    //will be multiple exits because of the delay in removing
+                                    if(!d3.select(this).attr("class").includes("exiting")){
+                                        d3.select(this)
+                                            .classed("exiting", true)
+                                            .transition()
+                                                .duration(200)
+                                                .attr("opacity", 0)
+                                                .on("end", function() { d3.select(this).remove(); });
+                                    }
+                                })
+                
+                            })
+
+                        //EXIT
+                        kpiG.exit().each(function(d){
+                            //will be multiple exits because of the delay in removing
+                            if(!d3.select(this).attr("class").includes("exiting")){
+                                d3.select(this)
+                                    .classed("exiting", true)
+                                    .transition()
+                                        .duration(200)
+                                        .attr("opacity", 0)
+                                        .on("end", function() { d3.select(this).remove(); });
+                            }
+                        })
+
+                        //ctrls
+                        const ctrlsG = contentsG.select("g.kpis-ctrls")
+                            .attr("transform", d => `translate(${ctrlsMargin.left},${listHeight + ctrlsMargin.top})`);
+                        
+                        ctrlsG.select("rect.ctrls-bg")
+                            .attr("width", ctrlsContentsWidth)
+                            .attr("height", ctrlsContentsHeight)
+                            .attr("fill", "none")
+
+                        const btnG = ctrlsG.selectAll("g.btn").data(ctrlsData);
+                        btnG.enter()
+                            .append("g")
+                                .attr("class", "btn")
+                                .each(function(b){
+                                    const btnG = d3.select(this)
+                                        .style("cursor", "pointer");
+
+                                    btnG.append("rect").attr("class", "hitbox");
+                                    btnG
+                                        .append("text")
+                                            .attr("class", "name")
+                                            .attr("text-anchor", "middle")
+                                            .attr("dominant-baseline", "central")
+
+                                })
+                                .merge(btnG)
+                                .attr("transform", (b,i) => `translate(${i * btnWidth}, 0)`)
+                                .each(function(b){
+                                    const btnG = d3.select(this)
+                                        .on("click", onCtrlClick);
+                                        
+                                    btnG.select("rect.hitbox")
+                                        .attr("width", btnWidth)
+                                        .attr("height", btnHeight)
+                                        .attr("fill", "transparent")
+                                        .attr("stroke", "none")
+
+                                    btnG.select("text.name")
+                                        .attr("x", btnWidth/2)
+                                        .attr("y", btnHeight/2)
+                                        .attr("fill", d => d.isSelected ? "white" : "grey")
+                                        .attr("stroke", d => d.isSelected ? "white" : "grey")
+                                        .attr("font-size", btnFontSize)
+                                        .attr("stroke-width", 0.1)
+                                        .text(d => d.label)
+
+                                })
+
+                    })
 
 
             function dragStart(e , d){
@@ -328,6 +519,11 @@ export default function kpisComponent() {
     kpis.onClick = function (value) {
         if (!arguments.length) { return onClick; }
         onClick = value;
+        return kpis;
+    };
+    kpis.onCtrlClick = function (value) {
+        if (!arguments.length) { return onCtrlClick; }
+        onCtrlClick = value;
         return kpis;
     };
     kpis.onDblClick = function (value) {
