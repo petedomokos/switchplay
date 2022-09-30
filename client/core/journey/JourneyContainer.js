@@ -4,6 +4,14 @@ import { saveJourney, setActive } from '../../actions/JourneyActions'
 import { closeDialog } from '../../actions/CommonActions'
 import { getKpis } from "../../data/userKpis"
 
+const mockPlayer = {
+	name:"Lewis Campbell",
+	firstName:"Lewis",
+	surname:"Campbell",
+	position:"Forward",
+	age:21
+}
+
 const mapStateToProps = (state, ownProps) => {
     //const { journeyId }  = ownProps.match.params;state,
 	const { journeys=[], homeJourney } = state.user;
@@ -12,9 +20,11 @@ const mapStateToProps = (state, ownProps) => {
 	//todo - if its a different user to the signedin user (eg a coach looking at a player). then may need to load the user
 	const userInfo = {
 		//for now assume its same player as signed in
-		name:state.user?.name || "Profile name",
-		position:state.user?.position || "position",
-		age:21
+		firstName:state.user?.firstName || mockPlayer.firstName,
+		surname:state.user?.surname || mockPlayer.surname,
+		position:state.user?.position || mockPlayer.position,
+		age:21,
+		photos:[{label:"main"}]
 	}
 	//todo - store kpis in db
 	const userKpis = getKpis(data?.userId);

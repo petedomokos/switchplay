@@ -246,7 +246,7 @@ export default function profileCardsComponent() {
     
             //note: newX and Y should be stored as d.x and d.y
             function dragEnd(e, d){
-                console.log("dragEnd", d.x)
+                //console.log("dragEnd", d.x)
                 //on next update, we want aim dimns/pos to transition
                 //shouldTransitionAim = true;
     

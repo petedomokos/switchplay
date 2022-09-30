@@ -41,6 +41,8 @@ export default function profileInfoComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
+            // console.log("data", data)
+            const { firstName, surname, age, position } = data;
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
@@ -52,17 +54,24 @@ export default function profileInfoComponent() {
                 .on("drag", enhancedDrag())
                 .on("end", enhancedDrag());
 
-
             // todo - append photo, name, age, pos
+            //helper
+            const photoUrl = d => `/players/${firstName}_${surname}/${d.label}.png`
             //note - need a quick way of getting a photo for each player
-            const photosG = containerG.selectAll("g.photos").data([data.photos]);
+            const photosG = containerG.selectAll("g.photos").data(data.photos, d => d.label);
             photosG.enter()
                 .append("g")
                     .attr("class", "photos")
                     .each(function(d){
+                        d3.select(this)
+                            .insert("image","text")
+                            .attr("xlink:href", photoUrl(d))
                     })
                     .merge(photosG)
                     .each(function(d){
+                        d3.select(this).select("image")  
+                            .attr("width", width)
+                            //.attr("height", photoHeight)
 
                     })
 
@@ -126,11 +135,11 @@ export default function profileInfoComponent() {
                         
                         nameG.select("text.first-name")
                             .attr("transform", `translate(0, ${textInfoHeight * 0.33})`)
-                            .text("FIRST NAME");
+                            .text(d.firstName?.toUpperCase() || "FIRST NAME");
                         
                         nameG.select("text.surname")
                             .attr("transform", `translate(0, ${textInfoHeight * 0.67})`)
-                            .text("SURNAME");
+                            .text(d.surname?.toUpperCase() || "SURNAME");
                         
                         nameG.selectAll("text")
                             .attr("font-size", fontSizes.name);
