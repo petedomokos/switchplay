@@ -31,8 +31,8 @@ export default function profileCardsLayout(){
         //console.log("datasets", datasets)
 
         const ctrlsData = [
-            { key: "compare", label:"Compare", isSelected:format === "compare" },
-            { key: "progress", label:"Progress", isSelected:format === "progress" }
+            { key: "progress", label:"Progress", isSelected:format === "progress" },
+            { key: "compare", label:"Compare", isSelected:format === "compare" }
         ]
         
         return data.map((p,i) => {

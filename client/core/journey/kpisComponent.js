@@ -239,6 +239,18 @@ export default function kpisComponent() {
                                         .attr("width", b => scale(b.to) - scale(b.from))
                                         .attr("height", barContentsHeight)
 
+                                barRect.exit().each(function(d){
+                                    //will be multiple exits because of the delay in removing
+                                    if(!d3.select(this).attr("class").includes("exiting")){
+                                        d3.select(this)
+                                            .classed("exiting", true)
+                                            .transition()
+                                                .duration(200)
+                                                .attr("opacity", 0)
+                                                .on("end", function() { d3.select(this).remove(); });
+                                    }
+                                })
+
                                 const handleHeight = barContentsHeight * 0.6;
                                 const handleWidth = handleHeight * 0.4;
                                 const handleRect = barsG.selectAll("rect.handle").data(d.handlesData)
@@ -251,6 +263,18 @@ export default function kpisComponent() {
                                         .attr("width", handleWidth)
                                         .attr("height", handleHeight)
                                         .attr("fill", h => h.fill)
+
+                                handleRect.exit().each(function(d){
+                                    //will be multiple exits because of the delay in removing
+                                    if(!d3.select(this).attr("class").includes("exiting")){
+                                        d3.select(this)
+                                            .classed("exiting", true)
+                                            .transition()
+                                                .duration(200)
+                                                .attr("opacity", 0)
+                                                .on("end", function() { d3.select(this).remove(); });
+                                    }
+                                })
 
 
                                 //numbers
