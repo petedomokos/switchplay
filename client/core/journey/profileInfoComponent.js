@@ -21,7 +21,8 @@ export default function profileInfoComponent() {
     let fontSizes = {
         name:9,
         age:11,
-        position:8
+        position:8,
+        date:9
     };
 
     //API CALLBACKS
@@ -41,7 +42,7 @@ export default function profileInfoComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            // console.log("data", data)
+            console.log("data", data)
             const { firstName, surname, age, position } = data;
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
@@ -74,6 +75,19 @@ export default function profileInfoComponent() {
                             //.attr("height", photoHeight)
 
                     })
+
+            const format = d3.timeFormat("%_d %b, %y");
+
+            containerG.selectAll("text.date").data([data.date])
+                .join("text")
+                    .attr("class", "date")
+                    .attr("transform", "rotate(-45)")
+                    .attr("x", - width * 0.1)
+                    .attr("y", height * 0.19)
+                    .attr("dominant-baseline", "hanging")
+                    .attr("fill", d => d <= new Date() ? "white" : "grey")
+                    .attr("font-size", fontSizes.date)
+                    .text(d => format(d))
 
             const textInfoG = containerG.selectAll("g.text-info").data([data]);
             textInfoG.enter()

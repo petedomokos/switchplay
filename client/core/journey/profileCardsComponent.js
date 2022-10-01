@@ -138,7 +138,7 @@ export default function profileCardsComponent() {
                    
                     // why is this too far down
                     contentsG.selectAll("g.info")
-                        .datum(d.info)
+                        .datum({ ...d.info, date:d.date })
                         .call(profileInfo)
                     
                     contentsG.selectAll("g.kpis")

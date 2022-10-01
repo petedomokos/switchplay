@@ -468,7 +468,7 @@ export default function journeyComponent() {
                     .kpis(data.userKpis);
                 
                 profileCardsData = myProfileCardsLayout(data.profiles);
-                //console.log("profilesData",profilesData);
+                //console.log("profileCardsData",profilesData);
             }
 
             function updateAimsData(){
@@ -550,7 +550,8 @@ export default function journeyComponent() {
                         info:{
                             name:4 * k,
                             age:6 * k,
-                            position: 3 * k
+                            position: 3 * k,
+                            date:5 * k
                         },
                         kpis:{
                             name:4 * k,
