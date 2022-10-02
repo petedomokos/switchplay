@@ -3,6 +3,7 @@ import { DIMNS } from "./constants";
 import dragEnhancements from './enhancedDragHandler';
 // import menuComponent from './menuComponent';
 import { Oscillator } from './domHelpers';
+import { getTransformationFromTrans } from './helpers';
 /*
 
 */
@@ -96,7 +97,7 @@ export default function contractsComponent() {
                 //.call(transform, { x: d => adjX(timeScale(d.targetDate)), y:d => d.y })
                 //.call(transform, { x: d => d.x, y:d => d.y }, transitionEnter && transitionsOn)
                 .merge(contractG)
-                .attr("transform", d =>  "translate(" +d.x +"," +d.y +")")
+                .attr("transform", d =>  "translate(" +timeScale(d.date) +"," +yScale(d.yPC) +")")
                 .each(function(d){
                     //ENTER AND UPDATE
                     const contentsG = d3.select(this).select("g.contents")
@@ -203,10 +204,9 @@ export default function contractsComponent() {
             }
             function dragged(e , d){
                 //controlled components
-                d.x += e.dx;
-                d.y += e.dy;
+                const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                 d3.select(this)
-                    .attr("transform", "translate(" + d.x +"," + d.y +")")
+                    .attr("transform", "translate(" + (translateX +e.dx) +"," + (translateY + e.dy) +")")
                     //.call(updateTransform, { x: d => d.displayX })
         
                 //onDrag does nothing
@@ -215,7 +215,7 @@ export default function contractsComponent() {
     
             //note: newX and Y should be stored as d.x and d.y
             function dragEnd(e, d){
-                console.log("dragEnd", d.x)
+                //console.log("dragEnd", d.x)
                 //on next update, we want aim dimns/pos to transition
                 //shouldTransitionAim = true;
     

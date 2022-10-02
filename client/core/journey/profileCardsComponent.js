@@ -5,6 +5,7 @@ import dragEnhancements from './enhancedDragHandler';
 import profileInfoComponent from './profileInfoComponent';
 import kpisComponent from './kpisComponent';
 import { Oscillator } from './domHelpers';
+import { getTransformationFromTrans } from './helpers';
 /*
 
 */
@@ -112,7 +113,7 @@ export default function profileCardsComponent() {
                 //.call(transform, { x: d => adjX(timeScale(d.targetDate)), y:d => d.y })
                 //.call(transform, { x: d => d.x, y:d => d.y }, transitionEnter && transitionsOn)
                 .merge(profileCardG)
-                .attr("transform", d =>  "translate(" +d.x +"," +d.y +")")
+                .attr("transform", d =>  "translate(" +timeScale(d.date) +"," +yScale(d.yPC) +")")
                 .each(function(d){
                     const profileInfo = profileInfoComponents[d.id]
                         .width(width)
@@ -234,10 +235,9 @@ export default function profileCardsComponent() {
             }
             function dragged(e , d){
                 //controlled components
-                d.x += e.dx;
-                d.y += e.dy;
+                const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                 d3.select(this)
-                    .attr("transform", "translate(" + d.x +"," + d.y +")")
+                    .attr("transform", "translate(" + (translateX +e.dx) +"," + (translateY + e.dy) +")")
                     //.call(updateTransform, { x: d => d.displayX })
         
                 //onDrag does nothing

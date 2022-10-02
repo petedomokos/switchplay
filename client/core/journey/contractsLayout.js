@@ -10,9 +10,7 @@ export default function contractsLayout(){
     function update(data){
         
         return data.map(p => ({
-            ...p,
-            x:timeScale(p.date),
-            y:yScale(p.yPC)
+            ...p
         }));
     }
 

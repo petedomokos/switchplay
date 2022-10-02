@@ -513,10 +513,11 @@ export default function journeyComponent() {
                         name:9 * k
                     })
                     .onDragEnd(function(e,d){
+                        const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                         const _contract = { 
                             id:d.id,
-                            date:zoomedTimeScale.invert(d.x),
-                            yPC:zoomedYScale.invert(d.y)
+                            date:zoomedTimeScale.invert(translateX),
+                            yPC:zoomedYScale.invert(translateY)
                         }
 
                         updateState({ contracts:[_contract] })
@@ -567,10 +568,11 @@ export default function journeyComponent() {
                         updateProfileCards();
                     })
                     .onDragEnd(function(e,d){
+                        const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                         const _profile = { 
                             id:d.id,
-                            date:zoomedTimeScale.invert(d.x),
-                            yPC:zoomedYScale.invert(d.y)
+                            date:zoomedTimeScale.invert(translateX),
+                            yPC:zoomedYScale.invert(translateY)
                         }
 
                         updateState({ profiles:[_profile] })

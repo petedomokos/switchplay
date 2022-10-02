@@ -1,15 +1,10 @@
 import * as d3 from 'd3';
 
-export default function profileCardsLayout(){
-    let timeScale = x => 0;
-    let yScale = x => 0;
-    let currentZoom = d3.zoomIdentity;
-    let datasets = [];
-    let kpis = [];
-    let info = {};
-
-    let aligned = false;
+export default function kpisLayout(){
+    let date = new Date();
+    let
     let format = "progress";
+    let datasets = [];
 
     //helper
     const statValue = (date, statId, datapoints, method="latest") => {
@@ -26,22 +21,21 @@ export default function profileCardsLayout(){
     }
 
     function update(data){
-        //console.log("update format..............", format)
-        // console.log("cardslayout data", data)
-        //console.log("kpis", kpis)
-        //console.log("datasets", datasets)
+        //console.log("update kpis layout")
 
         const ctrlsData = [
             { key: "progress", label:"Progress", isSelected:format === "progress" },
             { key: "compare", label:"Compare", isSelected:format === "compare" }
         ]
         
-        return data.map((p,i) => {
+        return data.map((kpi,i) => {
             const { date, yPC } = p;
             const prevCardDate = i === 0 ? undefined : data[i - 1];
             return {
                 ...p,
                 ctrlsData,
+                x:timeScale(date),
+                y:yScale(yPC),
                 info,
                 kpis:kpis/*.slice(0,1)*/.map((kpi,i) => {
                     const { datasetId, statId } = kpi;
@@ -139,9 +133,9 @@ export default function profileCardsLayout(){
         });
     }
 
-    update.aligned = function (value) {
-        if (!arguments.length) { return aligned; }
-        aligned = value;
+    update.date = function (value) {
+        if (!arguments.length) { return date; }
+        date = value;
         return update;
     };
     update.format = function (value) {
@@ -150,36 +144,10 @@ export default function profileCardsLayout(){
         if(value){ format = value; }
         return update;
     };
-    update.timeScale = function (value) {
-        if (!arguments.length) { return timeScale; }
-        timeScale = value;
-        return update;
-    };
-    update.yScale = function (value) {
-        if (!arguments.length) { return yScale; }
-        yScale = value;
-        return update;
-    };
-    update.currentZoom = function (value) {
-        if (!arguments.length) { return currentZoom; }
-        currentZoom = value;
-        return update;
-    };
     update.datasets = function (value) {
         if (!arguments.length) { return datasets; }
         datasets = value;
         return update;
     };
-    update.kpis = function (value) {
-        if (!arguments.length) { return kpis; }
-        kpis = value;
-        return update;
-    };
-    update.info = function (value) {
-        if (!arguments.length) { return info; }
-        info = value;
-        return update;
-    };
-
     return update;
 }
