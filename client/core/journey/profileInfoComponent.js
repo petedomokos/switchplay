@@ -42,7 +42,7 @@ export default function profileInfoComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            console.log("data", data)
+            //console.log("data", data)
             const { firstName, surname, age, position } = data;
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both

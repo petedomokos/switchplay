@@ -457,7 +457,7 @@ export default function journeyComponent() {
             function updateProfileCardsData(format){
                 //note - planetsLayout was also taking in .selected for siSelected n planets, but not needed
                 myProfileCardsLayout
-                    .format(format || "progress")
+                    .format(format)
                     .aligned(aligned)
                     //.canvasDimns({ width:canvasWidth, height: canvasHeight })
                     .currentZoom(currentZoom)

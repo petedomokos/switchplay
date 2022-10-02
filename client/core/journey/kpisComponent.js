@@ -222,7 +222,6 @@ export default function kpisComponent() {
                                     .text(name)
                         
                                 const scale = scales[d.id].domain([start, end]).range([0, barContentsWidth])
-                                const targetOffset = 0;// 0.1 * barContentsHeight;
 
                                 const barsG = kpiG.select("g.bars")
                                     .attr("transform", `translate(${barMargin.left}, ${kpiNameHeight +barMargin.top})`)
@@ -234,8 +233,7 @@ export default function kpisComponent() {
                                         .attr("fill", b => b.fill || "none")
                                         .attr("stroke", b => b.stroke || "none")
                                         .merge(barRect)
-                                        .attr("x", b => scale(b.from) +(b.id === "target" ? targetOffset : 0))
-                                        .attr("y", b => b.id === "target" ? -targetOffset : 0)
+                                        .attr("x", b => scale(b.from))
                                         .attr("width", b => scale(b.to) - scale(b.from))
                                         .attr("height", barContentsHeight)
 
@@ -252,19 +250,30 @@ export default function kpisComponent() {
                                 })
 
                                 const handleHeight = barContentsHeight * 0.6;
-                                const handleWidth = handleHeight * 0.4;
-                                const handleRect = barsG.selectAll("rect.handle").data(d.handlesData)
-                                handleRect.enter()
-                                    .append("rect")
-                                        .attr("class", "handle")
-                                        .merge(handleRect)
-                                        .attr("x", h => scale(h.value) - handleWidth + targetOffset)
-                                        .attr("y", -handleHeight - targetOffset)
-                                        .attr("width", handleWidth)
-                                        .attr("height", handleHeight)
-                                        .attr("fill", h => h.fill)
+                                const handleWidth = handleHeight * 0.6;
+                                const handlePathD = (w, h, pos) =>  {
+                                    if(pos === "below"){
+                                        return `M0 0 l ${-w/2} ${-h} h ${w} l ${-w/2} ${h}`;
+                                    }
+                                    return `M0 0 l ${-w/2} ${-h} h ${w} l ${-w/2} ${h}`;
+                                }
 
-                                handleRect.exit().each(function(d){
+                                const handleG = barsG.selectAll("g.handle").data(d.handlesData, d => d.id)
+                                handleG.enter()
+                                    .append("g")
+                                        .attr("class", "handle")
+                                        .each(function(hd){
+                                            d3.select(this).append("path")
+                                                .attr("fill", hd => hd.fill)
+                                        })
+                                        .merge(handleG)
+                                        .attr("transform", h => `translate(${scale(h.value)}, ${0})`)
+                                        .each(function(hd){
+                                            d3.select(this).select("path")
+                                                .attr("d", handlePathD(handleWidth, handleHeight, hd.pos))
+                                        })
+
+                                handleG.exit().each(function(d){
                                     //will be multiple exits because of the delay in removing
                                     if(!d3.select(this).attr("class").includes("exiting")){
                                         d3.select(this)

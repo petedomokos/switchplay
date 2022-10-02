@@ -59,6 +59,14 @@ export const DIMNS = {
             margin:{ left: 15, right: 0, top: 15, bottom: 0 }
         }
     },
+    profiles:{
+        height:120,
+        margin:{ left:0, right:0, top:0, bottom:0 },
+        profile:{
+            width:50,
+            height:100
+        }
+    },
     ctrls:{
         btnWidth:130,
         btnHeight:20

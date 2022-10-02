@@ -26,7 +26,7 @@ export default function profileCardsLayout(){
     }
 
     function update(data){
-        //console.log("update format..............", format)
+        console.log("update format..............", format)
         // console.log("cardslayout data", data)
         //console.log("kpis", kpis)
         //console.log("datasets", datasets)

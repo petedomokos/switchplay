@@ -11,7 +11,8 @@ import MeasureForm from "./form/MeasureForm";
 import TargetForm from './form/TargetForm';
 import Form from "./form/Form";
 import ImportMeasures from './ImportMeasures';
-import { DIMNS, FONTSIZES } from './constants';
+import MilestonesBar from './MilestonesBar';
+import { DIMNS, FONTSIZES, grey10 } from './constants';
 
 const mockMeasures = [
 	{ id:"mock1", name:"Puts Per Round", desc: "nr of puts in a round" },
@@ -27,6 +28,13 @@ const useStyles = makeStyles((theme) => ({
     marginRight:DIMNS.journey.margin.right,
     marginTop:DIMNS.journey.margin.top, 
     marginBottom:DIMNS.journey.margin.bottom
+  },
+  overlay:{
+    position:"absolute",
+    background:grey10(9),
+    border:"solid",
+    width:"100%",
+    height:"100%"
   },
   svg:{
     //position:"absolute"
@@ -86,7 +94,7 @@ const initChannels = d3.range(numberMonths)
 
 //width and height may be full screen, but may not be
 const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog }) => {
-  console.log("Journey data", data)
+  //console.log("Journey data", data)
   //console.log("Journey avail", availableJourneys)
   const { _id, userId, name, contracts, profiles, aims, goals, links, measures } = data;
   const [journey, setJourney] = useState(null);
@@ -95,6 +103,8 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
   const [aligned, setAligned] = useState(false);
   const [modalData, setModalData] = useState(undefined);
   const [displayedBar, setDisplayedBar] = useState("");
+  const shouldShowOverlay = displayedBar === "profiles";
+
   const shouldD3UpdateRef = useRef(true);
 
   const ctrlsHeight = 10;
@@ -148,6 +158,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
   //console.log("styleProps", styleProps)
   const classes = useStyles(styleProps) 
   const containerRef = useRef(null);
+  const overlayRef = useRef(null);
   const modalRef = useRef(null);
   const modalDimnsRef = useRef({ width:500, height:700 });
 
@@ -166,13 +177,24 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
     }
   }, [journeyWidth, journeyHeight])
 
-  //init
+  //overlay
+  useEffect(() => {
+    if(!overlayRef.current){return; }
+    const overlayDiv = d3.select(overlayRef.current)
+      .style("display", shouldShowOverlay ? "inline" : "none")
+      //.style("opacity", shouldShowOverlay ? 1 : 0);
+    //const currentDisplay = overlayRef.attr("display");
+    console.log("div", overlayDiv.node())
+  }, [shouldShowOverlay])
+
+ //init journey
   useEffect(() => {
     if(!containerRef.current){return; }
     const journey = journeyComponent();
     setJourney(() => journey);
   }, [])
 
+  //render and update journey
   useEffect(() => {
     if(!containerRef.current || !journey){return; }
     if(!shouldD3UpdateRef.current){
@@ -181,7 +203,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
       return;
     }
 
-    let menuBarData = { displayedBar };
+    let menuBarData = displayedBar && ["journeys", "measures"].includes(displayedBar) ? { displayedBar } : {};
     if(displayedBar === "journeys"){
       //On first load for a user with no saved journeys, this intial journey is not yet saved to store, so it wont be in availableJourneys, so we add it
       const allUserJourneys = availableJourneys.length === 0 ? [ ...availableJourneys, data] : availableJourneys;
@@ -189,6 +211,17 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
     }else if(displayedBar === "measures"){
       menuBarData = { ...menuBarData, data: measures }
     }
+
+    // todo - put thes einto here...profilecardsData and contractsData - x and y will depend on whether it is displayed in profiles bar or in canvas
+    //also render the overlay always but fade it in and out then in a separate useeffect set display to none/init based on displayedBar property
+    //also need to clean it up in the returned object from the use effect
+    //profilesbarLayout takes contarctsand profileCards data and merges them into one, 
+    //in the order that they will be rendered in teh bar, and assigns new x/y s to them
+    //const myProfilesBarLayout = profilesBarLayout()
+      //.cardWidth(50)
+      //.cardHeight(100);
+
+    //for bar layouts, x and y can also be a funcitn of width and height??
 
     journey
         .width(journeyWidth)
@@ -357,21 +390,24 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
 
   //for now, we just open or close all measures
   const toggleMeasuresOpen = useCallback((planetId) => {
-      setDisplayedBar(prevState => prevState === "measures" ? "" : "measures");
-}, [JSON.stringify(data)]);
+        setDisplayedBar(prevState => prevState === "measures" ? "" : "measures");
+  }, [JSON.stringify(data)]);
 
-//for now, we just open or close all user's journeys
-const toggleJourneysOpen = useCallback(() => {
-    setDisplayedBar(prevState => prevState === "journeys" ? "" : "journeys");
-}, [JSON.stringify(data)]);
+  //for now, we just open or close all user's journeys
+  const toggleJourneysOpen = useCallback(() => {
+      setDisplayedBar(prevState => prevState === "journeys" ? "" : "journeys");
+  }, [JSON.stringify(data)]);
+
+  const toggleProfilesOpen = useCallback(() => {
+    setDisplayedBar(prevState => prevState === "profiles" ? "" : "profiles");
+  }, [JSON.stringify(data)]);
 
   //for now, we just open or close all measures
   const openNewJourney = useCallback((planetId) => {
       //create a new journey, immediately save it to store and it will become the activeJourney
       // (but not to server yet until first change),
       setDisplayedBar("");
-
-}, [JSON.stringify(data)]);
+  }, [JSON.stringify(data)]);
 
   const onUpdatePlanetForm = modalType => (name, value) => {
       //console.log("updatePlanetForm")
@@ -456,6 +492,9 @@ const toggleJourneysOpen = useCallback(() => {
 
   return (
     <div className={classes.root}>
+        <div className={classes.overlay} ref={overlayRef}>
+          <MilestonesBar profiles={profiles} contracts={contracts} />
+        </div>
         <svg className={classes.svg} ref={containerRef}></svg>
         <div className={classes.ctrls}>
             <div className={classes.leftCtrls}>
@@ -463,6 +502,8 @@ const toggleJourneysOpen = useCallback(() => {
                   {displayedBar === "measures" ?"Close Measures" : "Measures"}</Button>
                 <Button className={classes.btn} color="primary" variant="contained" onClick={toggleJourneysOpen} >
                   {displayedBar === "journeys" ?"Close Journeys" : "Journeys"}</Button>
+                <Button className={classes.btn} color="primary" variant="contained" onClick={toggleProfilesOpen} >
+                  {displayedBar === "profiles" ?"Close Profiles" : "Profiles"}</Button>
             </div>
             <div className={classes.rightCtrls}>
                 <Button className={classes.btn} color="primary" variant="contained" onClick={toggleAligned} >
