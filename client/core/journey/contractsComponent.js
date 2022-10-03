@@ -12,12 +12,21 @@ export default function contractsComponent() {
     // dimensions
     let width = DIMNS.contract.width;
     let height = DIMNS.contract.height;
+    let margin = { top:0, bottom: 0, left:0, right:0 }
+    let contentsWidth;
+    let contentsHeight;
+
+    function updateDimns(){
+        contentsWidth = width - margin.left - margin.right;
+        contentsHeight = height - margin.top - margin.bottom;
+    }
 
     let fontSizes = {
         name:9
     };
 
-    let timeScale = x => 0;
+    let xScale = x => 0;
+    let xKey = "date";
     let yScale = x => 0;
 
     let selected;
@@ -45,9 +54,13 @@ export default function contractsComponent() {
     let containerG;
 
     function contracts(selection, options={}) {
-        const { transitionEnter=true, transitionUpdate=true } = options;
+        const { transitionEnter=true, transitionUpdate=true, log } = options;
         // expression elements
         selection.each(function (data) {
+            if(log){
+                console.log("contracts update", data)
+            }
+            updateDimns();
             //console.log("contracts update", data)
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
@@ -94,20 +107,21 @@ export default function contractsComponent() {
                 
                 })
                 .style("cursor", "grab")
-                //.call(transform, { x: d => adjX(timeScale(d.targetDate)), y:d => d.y })
+                //.call(transform, { x: d => adjX(xScale(d.targetDate)), y:d => d.y })
                 //.call(transform, { x: d => d.x, y:d => d.y }, transitionEnter && transitionsOn)
                 .merge(contractG)
-                .attr("transform", d =>  "translate(" +timeScale(d.date) +"," +yScale(d.yPC) +")")
+                //note - unusually, the scale also passes through i in case the view is a list
+                .attr("transform", (d) => "translate(" +xScale(d[xKey]) +"," +yScale(d.yPC) +")")
                 .each(function(d){
                     //ENTER AND UPDATE
                     const contentsG = d3.select(this).select("g.contents")
 
                     //rect sizes
                     contentsG.selectAll("rect.bg")
-                        .attr("x", -width/2)
-                        .attr("y", -height/2)
-                        .attr("width", width)
-                        .attr("height", height)
+                        .attr("x", -contentsWidth/2)
+                        .attr("y", -contentsHeight/2)
+                        .attr("width", contentsWidth)
+                        .attr("height", contentsHeight)
                         //.attr("stroke", "none")// d.isMilestone ? grey10(1) : "none")
                    
                     //title
@@ -311,6 +325,11 @@ export default function contractsComponent() {
         height = value;
         return contracts;
     };
+    contracts.margin = function (value) {
+        if (!arguments.length) { return margin; }
+        margin = value;
+        return contracts;
+    };
     contracts.fontSizes = function (values) {
         if (!arguments.length) { return fontSizes; }
         fontSizes = { ...fontSizes, ...values };
@@ -331,9 +350,10 @@ export default function contractsComponent() {
         yScale = value;
         return contracts;
     };
-    contracts.timeScale = function (value) {
-        if (!arguments.length) { return timeScale; }
-        timeScale = value;
+    contracts.xScale = function (value, key) {
+        if (!arguments.length) { return xScale; }
+        xScale = value;
+        if(key) { xKey = key; }
         return contracts;
     };
     contracts.onClick = function (value) {

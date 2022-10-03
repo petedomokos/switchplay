@@ -19,6 +19,47 @@ const mockMeasures = [
 	{ id:"mock2", name:"Drive 1", desc: "nr D1s to Fairway" },
 	{ id:"mock3", name:"Drive 2", desc: "nr D2s to Fairway" }
 ]
+
+
+const mockDatasets = [
+  { 
+    _id: "606b6aef720202523cc3589d", 
+    name:"Press ups", 
+    measures:[
+      { 
+        _id:"606b6aef720202523cc3589e", 
+        name:"Reps", 
+        unit:"reps", 
+        fullNameShort:"Press-ups", 
+        fullNameLong:"Nr of Press-ups in 1 Min",
+        bands:[ { min:"0", max:"60" } ],
+        standards:[ { name:"minimum", value:"0" }],
+      }
+    ],
+    datapoints:[
+      { 
+        isTarget:false,
+        player: "", 
+        date:"2021-03-31T18:26:00.000+00:00",
+        values:[
+          { 
+            measure:"606b6aef720202523cc3589e", 
+            value:"33" ,
+            key:"reps"
+          }
+        ]
+      }
+      //add target datapoints here when a future profile card kpi targets
+      //only need to create it when we actually have a target set ie on teh lng run, this 
+      // will be when user has dragged a kpi bar to vary it. For now, it is when we set it manually here
+      // if there is no target kpi for specific date, then the future profile card defaults to the latest datapoint BEFORE the 
+      // card date, whether this be a target, ot if no target, then teh latest actual datapoint.
+      //also consider, if it is an actaul datapoint, we may want to use teh best score rather than the latest,
+      // or the median avg of the previous 3.
+    ]
+  }
+]
+
 const newJourney = { _id:"temp", contracts:[], profiles:[], aims:[], goals:[], links:[], measures:mockMeasures}
 
 const useStyles = makeStyles((theme) => ({
@@ -34,7 +75,10 @@ const useStyles = makeStyles((theme) => ({
     background:grey10(9),
     border:"solid",
     width:"100%",
-    height:"100%"
+    height:"100%",
+    flexDirection:"column",
+    justifyContent:"center",
+    alignItems:"center",
   },
   svg:{
     //position:"absolute"
@@ -181,10 +225,9 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
   useEffect(() => {
     if(!overlayRef.current){return; }
     const overlayDiv = d3.select(overlayRef.current)
-      .style("display", shouldShowOverlay ? "inline" : "none")
-      //.style("opacity", shouldShowOverlay ? 1 : 0);
-    //const currentDisplay = overlayRef.attr("display");
-    console.log("div", overlayDiv.node())
+      .style("display", shouldShowOverlay ? "flex" : "none")
+    d3.select(containerRef.current)
+      .attr("opacity", shouldShowOverlay ? 0 : 1)
   }, [shouldShowOverlay])
 
  //init journey
@@ -492,8 +535,9 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
 
   return (
     <div className={classes.root}>
-        <div className={classes.overlay} ref={overlayRef}>
-          <MilestonesBar profiles={profiles} contracts={contracts} />
+        <div className={`${classes.overlay} overlay`} ref={overlayRef}>
+          <MilestonesBar profiles={profiles} contracts={contracts} datasets={datasets}
+            userInfo={userInfo} kpiFormat="progress" kpis={userKpis} />
         </div>
         <svg className={classes.svg} ref={containerRef}></svg>
         <div className={classes.ctrls}>
@@ -551,45 +595,6 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
     </div>
   )
 }
-
-const mockDatasets = [
-  { 
-    _id: "606b6aef720202523cc3589d", 
-    name:"Press ups", 
-    measures:[
-      { 
-        _id:"606b6aef720202523cc3589e", 
-        name:"Reps", 
-        unit:"reps", 
-        fullNameShort:"Press-ups", 
-        fullNameLong:"Nr of Press-ups in 1 Min",
-        bands:[ { min:"0", max:"60" } ],
-        standards:[ { name:"minimum", value:"0" }],
-      }
-    ],
-    datapoints:[
-      { 
-        isTarget:false,
-        player: "", 
-        date:"2021-03-31T18:26:00.000+00:00",
-        values:[
-          { 
-            measure:"606b6aef720202523cc3589e", 
-            value:"33" ,
-            key:"reps"
-          }
-        ]
-      }
-      //add target datapoints here when a future profile card kpi targets
-      //only need to create it when we actually have a target set ie on teh lng run, this 
-      // will be when user has dragged a kpi bar to vary it. For now, it is when we set it manually here
-      // if there is no target kpi for specific date, then the future profile card defaults to the latest datapoint BEFORE the 
-      // card date, whether this be a target, ot if no target, then teh latest actual datapoint.
-      //also consider, if it is an actaul datapoint, we may want to use teh best score rather than the latest,
-      // or the median avg of the previous 3.
-    ]
-  }
-]
 
 Journey.defaultProps = {
   data:{

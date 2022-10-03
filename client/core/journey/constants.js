@@ -59,12 +59,18 @@ export const DIMNS = {
             margin:{ left: 15, right: 0, top: 15, bottom: 0 }
         }
     },
-    profiles:{
-        height:120,
+    milestonesBar:{
+        height:500,
         margin:{ left:0, right:0, top:0, bottom:0 },
         profile:{
-            width:50,
-            height:100
+            width:300,
+            height:450,
+            margin:{ top:0, bottom:0, left:10, right: 0}
+        },
+        contract:{
+            width:200,
+            height:250,
+            margin:{ top:0, bottom:0, left:10, right: 0}
         }
     },
     ctrls:{

@@ -3,8 +3,7 @@ import "snapsvg-cjs";
 //import "d3-selection-multi";
 import channelsLayout from "./channelsLayout";
 import axesLayout from "./axesLayout";
-import contractsLayout from "./contractsLayout";
-import profileCardsLayout from "./profileCardsLayout";
+import milestonesLayout from "./milestonesLayout";
 import linksLayout from "./linksLayout";
 import aimsLayout from './aimsLayout';
 import axesComponent from "./axesComponent";
@@ -182,8 +181,8 @@ export default function journeyComponent() {
 
     const myChannelsLayout = channelsLayout();
     const myAxesLayout = axesLayout();
-    const myContractsLayout = contractsLayout();
-    const myProfileCardsLayout = profileCardsLayout();
+    const myContractsLayout = milestonesLayout();
+    const myProfileCardsLayout = milestonesLayout();
     const myAimsLayout = aimsLayout();
     const myLinksLayout = linksLayout();
 
@@ -444,14 +443,10 @@ export default function journeyComponent() {
             function updateContractsData(){
                 //note - planetsLayout was also taking in .selected for siSelected n planets, but not needed
                 myContractsLayout
-                    .aligned(aligned)
-                    //.canvasDimns({ width:canvasWidth, height: canvasHeight })
-                    .currentZoom(currentZoom)
-                    .timeScale(zoomedTimeScale)
-                    .yScale(zoomedYScale);
+                    .aligned(aligned);
                 
                 contractsData = myContractsLayout(data.contracts);
-                //console.log("profilesData",profilesData);
+                //console.log("contractsData",contractsData);
             }
 
             function updateProfileCardsData(format){
@@ -459,10 +454,6 @@ export default function journeyComponent() {
                 myProfileCardsLayout
                     .format(format)
                     .aligned(aligned)
-                    //.canvasDimns({ width:canvasWidth, height: canvasHeight })
-                    .currentZoom(currentZoom)
-                    .timeScale(zoomedTimeScale)
-                    .yScale(zoomedYScale)
                     .datasets(data.datasets)
                     .info(data.userInfo)
                     .kpis(data.userKpis);
@@ -505,8 +496,8 @@ export default function journeyComponent() {
             function updateContracts(){
                 //component
                 contracts
+                    .xScale(zoomedTimeScale)
                     .yScale(zoomedYScale)
-                    .timeScale(zoomedTimeScale)
                     .width(DIMNS.contract.width * k)
                     .height(DIMNS.contract.height * k)
                     .fontSizes({
@@ -559,8 +550,8 @@ export default function journeyComponent() {
                             values:4 * k
                         }
                     })
+                    .xScale(zoomedTimeScale)
                     .yScale(zoomedYScale)
-                    .timeScale(zoomedTimeScale)
                     .onCtrlClick((e,d) => {
                         //update format in layout and recalc layout
                         updateProfileCardsData(d.key);

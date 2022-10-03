@@ -14,6 +14,14 @@ export default function profileCardsComponent() {
     // dimensions
     let width = DIMNS.profile.width;
     let height = DIMNS.profile.height;
+    let margin = { top:0, bottom: 0, left:0, right:0 }
+    let contentsWidth;
+    let contentsHeight;
+
+    function updateDimns(){
+        contentsWidth = width - margin.left - margin.right;
+        contentsHeight = height - margin.top - margin.bottom;
+    }
     let kpiHeight = 10;
 
     let fontSizes = {
@@ -28,7 +36,8 @@ export default function profileCardsComponent() {
         }
     };
 
-    let timeScale = x => 0;
+    let xScale = x => 0;
+    let xKey = "date";
     let yScale = x => 0;
 
     let selected;
@@ -64,9 +73,13 @@ export default function profileCardsComponent() {
 
 
     function profileCards(selection, options={}) {
-        const { transitionEnter=true, transitionUpdate=true } = options;
+        const { transitionEnter=true, transitionUpdate=true, log=false } = options;
         // expression elements
         selection.each(function (data) {
+            updateDimns();
+            if(log){
+                console.log("profileCards update", data)
+            }
             //console.log("profileCards update", data)
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
@@ -110,31 +123,32 @@ export default function profileCardsComponent() {
                 
                 })
                 .style("cursor", "grab")
-                //.call(transform, { x: d => adjX(timeScale(d.targetDate)), y:d => d.y })
+                //.call(transform, { x: d => adjX(xScale(d.targetDate)), y:d => d.y })
                 //.call(transform, { x: d => d.x, y:d => d.y }, transitionEnter && transitionsOn)
                 .merge(profileCardG)
-                .attr("transform", d =>  "translate(" +timeScale(d.date) +"," +yScale(d.yPC) +")")
+                 //note - unusually, the scale also passes through i in case the view is a list
+                .attr("transform", (d) => "translate(" +xScale(d[xKey]) +"," +yScale(d.yPC) +")")
                 .each(function(d){
                     const profileInfo = profileInfoComponents[d.id]
-                        .width(width)
-                        .height(height/2)
+                        .width(contentsWidth)
+                        .height(contentsHeight/2)
                         .fontSizes(fontSizes.info);
 
                     const kpis = kpisComponents[d.id]
-                        .width(width)
-                        .height(height/2)
+                        .width(contentsWidth)
+                        .height(contentsHeight/2)
                         .kpiHeight(kpiHeight)
                         .fontSizes(fontSizes.kpis)
                         .onCtrlClick(onCtrlClick);
 
                     //ENTER AND UPDATE
                     const contentsG = d3.select(this).select("g.contents")
-                        .attr("transform", d =>  `translate(${-width/2},${-height/2})`)
+                        .attr("transform", d =>  `translate(${-contentsWidth/2},${-contentsHeight/2})`)
 
                     //rect sizes
                     contentsG.selectAll("rect.bg")
-                        .attr("width", width)
-                        .attr("height", height)
+                        .attr("width", contentsWidth)
+                        .attr("height", contentsHeight)
                         //.attr("stroke", "none")// d.isMilestone ? grey10(1) : "none")
                    
                     // why is this too far down
@@ -143,7 +157,7 @@ export default function profileCardsComponent() {
                         .call(profileInfo)
                     
                     contentsG.selectAll("g.kpis")
-                        .attr("transform", "translate(0," +(height/2) +")")
+                        .attr("transform", "translate(0," +(contentsHeight/2) +")")
                         .datum({ kpisData: d.kpis, ctrlsData:d.ctrlsData })
                         .call(kpis)
 
@@ -342,6 +356,11 @@ export default function profileCardsComponent() {
         height = value;
         return profileCards;
     };
+    profileCards.margin = function (value) {
+        if (!arguments.length) { return margin; }
+        margin = value;
+        return profileCards;
+    };
     profileCards.kpiHeight = function (value) {
         if (!arguments.length) { return kpiHeight; }
         kpiHeight = value;
@@ -367,9 +386,13 @@ export default function profileCardsComponent() {
         yScale = value;
         return profileCards;
     };
-    profileCards.timeScale = function (value) {
-        if (!arguments.length) { return timeScale; }
-        timeScale = value;
+    profileCards.xScale = function (value, key) {
+        console.log("xScale....................", key)
+        if (!arguments.length) { return xScale; }
+        xScale = value;
+        if(key) { 
+            console.log("setting xkey.................")
+            xKey = key; }
         return profileCards;
     };
     profileCards.onClick = function (value) {

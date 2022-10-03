@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
+import kpisLayout from "./kpisLayout";
 
-export default function profileCardsLayout(){
+export default function milestonesLayout(){
     let timeScale = x => 0;
     let yScale = x => 0;
     let currentZoom = d3.zoomIdentity;
@@ -10,6 +11,8 @@ export default function profileCardsLayout(){
 
     let aligned = false;
     let format = "progress";
+
+    const myKpisLayout = kpisLayout();
 
     //helper
     const statValue = (date, statId, datapoints, method="latest") => {
@@ -25,118 +28,37 @@ export default function profileCardsLayout(){
         //}
     }
 
+    const ctrlsData = [
+        { key: "progress", label:"Progress", isSelected:format === "progress" },
+        { key: "compare", label:"Compare", isSelected:format === "compare" }
+    ]
+
     function update(data){
-        console.log("update format..............", format)
-        // console.log("cardslayout data", data)
-        //console.log("kpis", kpis)
-        //console.log("datasets", datasets)
-
-        const ctrlsData = [
-            { key: "progress", label:"Progress", isSelected:format === "progress" },
-            { key: "compare", label:"Compare", isSelected:format === "compare" }
-        ]
+        //console.log("update milestones data")
         
-        return data.map((p,i) => {
-            const { date, yPC } = p;
-            const prevCardDate = i === 0 ? undefined : data[i - 1];
-            return {
-                ...p,
-                ctrlsData,
-                x:timeScale(date),
-                y:yScale(yPC),
-                info,
-                kpis:kpis/*.slice(0,1)*/.map((kpi,i) => {
-                    const { datasetId, statId } = kpi;
-                    const dataset = datasets.find(dset => dset._id === datasetId);
-                    const stat = dataset.measures.find(m => m._id === statId);
-                    const { bands, standards } = stat;
-                    const min = bands[0] ? +bands[0].min : undefined;
-                    const max = bands[0] ? +bands[bands.length - 1].max : undefined;
-                    const actualDatapoints = dataset.datapoints.filter(d => !d.isTarget);
-                    const targetDatapoints = dataset.datapoints.filter(d => d.isTarget);
-                    const currentDatapoint = d3.greatest(actualDatapoints, d => d.date);
-                    const targetDatapoint = d3.greatest(targetDatapoints, d => d.date);
-                    const currentValue = currentDatapoint ? +currentDatapoint.values.find(v => v.measure === statId).value : min;
-                    //temp
-                    const defaultTarg = currentValue ? currentValue * 1.5 : min;
-                    const targetValue = targetDatapoint ? +targetDatapoint.values.find(v => v.measure === statId).value : defaultTarg;
-                    const previous = statValue(prevCardDate, statId, actualDatapoints);
-                    //for now, we manually seyt this to test it renders as red. But should be based on linear interpolation
-                    const expectedCurrent = { date, value:currentValue * 1.3 };//calculateExpected(previous, target, date)
-                    //bars
-                    const currentColour = "#696969";
-                    const colours = {
-                        current: currentColour,
-                        target: "#DCDCDC",
-                        expectedBehind:"red",
-                        expectedAhead:currentColour
-                    }
+        return data.map((milestone,i) => {
+            const { date, dataType } = milestone;
+            if(dataType === "profile"){
+                myKpisLayout
+                    .date(date)
+                    .prevCardDate(i === 0 ? undefined : data[i - 1])
+                    .format(format)
+                    .datasets(datasets);
 
-                    const isOnTrack = expectedCurrent.value <= currentValue;
-                    const start = format === "compare" ? min : (previous?.value || min);
-                    const end = format === "compare" ? max : targetValue;
+                return {
+                    nr:i,
+                    ...milestone,
+                    ctrlsData,
+                    info,
+                    kpis:myKpisLayout(kpis),
+                }
+            }else{
+                //must be a contract
+                return {
+                    nr:i,
+                    ...milestone
+                }
 
-                    const rangeDatum = { id: "range", from:start, to:end, fill:"transparent", stroke:"grey" };
-                    const targetDatum = { id: "target", from:start, to:targetValue, fill:colours.target };
-                    const currentDatum = { id: "current", from:start, to:currentValue, fill:colours.current };
-                    const targetHandleDatum = { ...targetDatum, value:targetDatum.to, pos:"above" }
-
-                    const prevHandleDatum = { 
-                        id: "previous", 
-                        ...previous,
-                        fill:colours.current,
-                        pos:"below"
-                    }
-
-                    const expectedHandleDatum = { 
-                        id: "expected", 
-                        value:expectedCurrent.value,
-                        //@todo - handle decreasing datasets ie less is best
-                        fill:isOnTrack ? colours.expectedAhead : colours.expectedBehind,
-                        pos:"above"
-                    }
-                    const barsData = format === "compare" ? [rangeDatum, targetDatum, currentDatum] : [rangeDatum, currentDatum];
-                    const handlesData = format === "compare" ? [prevHandleDatum, targetHandleDatum, expectedHandleDatum] : [expectedHandleDatum];
-
-                    //@todo later - handle target === 0
-                    const pcCompletion = targetValue !== 0 ? ((currentValue/targetValue) * 100).toFixed(0) : 100;
-                    const numbersData = format === "compare" ? 
-                        [ 
-                            { id: "actual", value: currentValue, colour:colours.current } 
-                        ]
-                        :
-                        [
-                            { id: "pc", value: `${pcCompletion}%`, colour:isOnTrack ? colours.current : "red" },
-                            { id: "actual", value: `${currentValue}`, colour:colours.current }
-                        ]
-                    if(currentValue < expectedCurrent.value){
-                        barsData.push({ id:"deficit", from:currentValue, to:expectedCurrent.value, fill:"red" })
-                    }
-
-                    return {
-                        id:`kpi${i}`, // temp - in reality, each kpi unique id will come from datasetId + statId
-                        ...kpi,
-                        //stat full name stands alone without needing the dataset name before it
-                        name:stat.fullNameShort,
-                        longName:stat.fullNameLong,
-                        unit:stat.unit,
-                        barsData,
-                        handlesData,
-                        numbersData,
-                        bands:bands.map(band => ({ ...band, min:+band.min, max:+band.max })),
-                        min,
-                        max,
-                        start,
-                        end,
-                        standards:standards.map(standard => ({ ...standard, value:+standard.value })),
-                        //3 date-value objects for previous, current and target values
-                        previous,
-                        current:{ date: currentDatapoint.date, value: currentValue },
-                        target: targetDatapoint ? { date: targetDatapoint.date, value: targetValue } : undefined,
-                        expectedCurrent,
-                        actualDatapoints:actualDatapoints.map(d => ({ date:d.date, value:d.values.find(v => v.measure === statId).value }))
-                    }
-                })
             }
         });
     }
@@ -150,21 +72,6 @@ export default function profileCardsLayout(){
         if (!arguments.length) { return format; }
         //new value may be undefined in which case dont update it
         if(value){ format = value; }
-        return update;
-    };
-    update.timeScale = function (value) {
-        if (!arguments.length) { return timeScale; }
-        timeScale = value;
-        return update;
-    };
-    update.yScale = function (value) {
-        if (!arguments.length) { return yScale; }
-        yScale = value;
-        return update;
-    };
-    update.currentZoom = function (value) {
-        if (!arguments.length) { return currentZoom; }
-        currentZoom = value;
         return update;
     };
     update.datasets = function (value) {
