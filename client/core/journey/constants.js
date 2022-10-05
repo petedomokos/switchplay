@@ -60,8 +60,15 @@ export const DIMNS = {
         }
     },
     milestonesBar:{
-        height:500,
+        height:600,
         margin:{ left:0, right:0, top:0, bottom:0 },
+        list:{
+            height:480
+        },
+        ctrls:{
+            width:160,
+            height:80
+        },
         profile:{
             width:300,
             height:450,

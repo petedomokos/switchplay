@@ -9,7 +9,6 @@ import Button from '@material-ui/core/Button'
 import auth from '../auth/auth-helper'
 import {Link, withRouter} from 'react-router-dom'
 import { slide as ElasticMenu } from 'react-burger-menu'
-import MenuIcon from '@material-ui/icons/Menu'
 
 const isActive = (history, path) => {
   if (history.location.pathname == path)

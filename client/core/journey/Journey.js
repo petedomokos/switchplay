@@ -71,7 +71,7 @@ const useStyles = makeStyles((theme) => ({
     marginBottom:DIMNS.journey.margin.bottom
   },
   overlay:{
-    position:"absolute",
+    //position:"absolute",
     background:grey10(9),
     border:"solid",
     width:"100%",
@@ -227,7 +227,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
     const overlayDiv = d3.select(overlayRef.current)
       .style("display", shouldShowOverlay ? "flex" : "none")
     d3.select(containerRef.current)
-      .attr("opacity", shouldShowOverlay ? 0 : 1)
+      .attr("display", shouldShowOverlay ? "none" : "initial");
   }, [shouldShowOverlay])
 
  //init journey
