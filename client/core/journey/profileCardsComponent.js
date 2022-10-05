@@ -78,7 +78,7 @@ export default function profileCardsComponent() {
         selection.each(function (data) {
             updateDimns();
             if(log){
-                console.log("profileCards update", data)
+                //console.log("profileCards update", data)
             }
             //console.log("profileCards update", data)
             //plan - dont update dom twice for name form
@@ -387,12 +387,9 @@ export default function profileCardsComponent() {
         return profileCards;
     };
     profileCards.xScale = function (value, key) {
-        console.log("xScale....................", key)
         if (!arguments.length) { return xScale; }
         xScale = value;
-        if(key) { 
-            console.log("setting xkey.................")
-            xKey = key; }
+        if(key) { xKey = key; }
         return profileCards;
     };
     profileCards.onClick = function (value) {

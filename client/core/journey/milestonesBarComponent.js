@@ -76,11 +76,14 @@ export default function milestonesBarComponent() {
             function update(){
                 contentsG.attr("transform", `translate(${margin.left},${margin.right})`);
                 const xOffset = -d3.sum(data.filter(m => m.nr < slidePosition), m => milestoneWidth(m));
+
                 if(xOffset !== currentXOffset){
                     milestonesG
                         .transition()
                             .duration(500)
                             .attr("transform", `translate(${xOffset},0)`);
+
+                    currentXOffset = xOffset;
                 }
                 
                 //SCALES
@@ -153,19 +156,11 @@ export default function milestonesBarComponent() {
                     }
                 }
 
-                //cant quite get the right pattern to call this from th ereact click handler
-                //console.log("setting s;idef")
                 slideForward = function(){
-                    //todo - impl this so it only slides if there are more milestones to show
-                    //const milestonesFromSlidePositionOnwards = data.filter(m => m.nr >= slidePosition);
-                    //const widthRequired = d3.sum(milestonesUpToSlidePosition, m => milestoneWidth(m))
-                    //const firstMilestoneIsinView = contentsWidth - widthRequired >= 0;
-                    //if(!firstMilestoneIsinView){
-                        //shift back
+                    if(slidePosition < data.length - 1){
                         slidePosition += 1;
                         update();
-                    //}
-
+                    }
                 }
 
             }
