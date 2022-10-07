@@ -53,14 +53,26 @@ export function updatePos(selection, pos={}, transition){
 // and size of shake (dx) an duration passed in as options
 export function Oscillator(options = {}) {
     let timer;
-    const start = (selection, dynamicOptions={}) => {
+    let origTransforms = {};
+    let selection;
+    //let origTransformOrigin;
+    const start = (_selection, dynamicOptions={}) => {
+        if(!selection){
+            selection = _selection;
+        }
         const allOptions = { ...options, ...dynamicOptions };
         // translate dx, x, y,  scale k
         const { interval = 20, k = 1.05, dx = 5, centre, nrOscillations } = allOptions;
         let i = 0;
         timer = d3.interval(() => {
             // get any existing transform on the selection
-            const { translate, scale } = parseTransform(selection.attr("transform"));
+            const currentTransformAttr = selection.attr("transform");
+            const currentTransform = parseTransform(currentTransformAttr);
+            const { translate, scale } = currentTransform;
+
+            if(!origTransforms[i]){
+                origTransforms[i] = currentTransformAttr;
+            }
             // scale may be an array and in that case just use x compooinent for now. Also use + to coerce.
             const currentScale = typeof scale === "string" ? +scale : +scale[0];
             const newK = currentScale * k;
@@ -86,7 +98,13 @@ export function Oscillator(options = {}) {
     const stop = () => {
         if(timer){
             timer.stop();
+            selection.each(function(d,i){
+                d3.select(this).attr("transform", origTransforms[i])
+            })
+            //clean up
+            selection = null;
             timer = null;
+            origTransforms = {};
         }
     }
 
