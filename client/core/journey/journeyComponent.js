@@ -160,6 +160,7 @@ export default function journeyComponent() {
     let measuresOpen;
     let journeysOpen;
     let menuBarHeight;
+    let kpiFormat;
 
     const widgetsX = 10;
     let widgetsY;
@@ -201,6 +202,9 @@ export default function journeyComponent() {
     let preEditZoom;
     let zoomViewLevel;
 
+    //updating react settings
+    let onSetKpiFormat = function(){};
+    let onClickKpi = function(){};
     //contracts
     let handleCreateContract = function(){};
     let onDeleteContract = function(){};
@@ -269,6 +273,7 @@ export default function journeyComponent() {
     let draggedWidget;
 
     function journey(selection) {
+        //console.log("update...", kpiFormat)
         updateDimns();
 
         selection.each(function (journeyData) {
@@ -452,7 +457,7 @@ export default function journeyComponent() {
             function updateProfileCardsData(format){
                 //note - planetsLayout was also taking in .selected for siSelected n planets, but not needed
                 myProfileCardsLayout
-                    .format(format)
+                    .format(kpiFormat)
                     .aligned(aligned)
                     .datasets(data.datasets)
                     .info(data.userInfo)
@@ -500,9 +505,7 @@ export default function journeyComponent() {
                     .yScale(zoomedYScale)
                     .width(DIMNS.contract.width * k)
                     .height(DIMNS.contract.height * k)
-                    .fontSizes({
-                        name:9 * k
-                    })
+                    .fontSizes(FONTSIZES.contract(k))
                     .onDragEnd(function(e,d){
                         const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                         const _contract = { 
@@ -538,25 +541,14 @@ export default function journeyComponent() {
                     .width(DIMNS.profile.width * k)
                     .height(DIMNS.profile.height * k)
                     .kpiHeight(10 * k)
-                    .fontSizes({
-                        info:{
-                            name:4 * k,
-                            age:6 * k,
-                            position: 3 * k,
-                            date:5 * k
-                        },
-                        kpis:{
-                            name:4 * k,
-                            values:4 * k
-                        }
-                    })
+                    .fontSizes(FONTSIZES.profile(k))
                     .xScale(zoomedTimeScale)
                     .yScale(zoomedYScale)
                     .onCtrlClick((e,d) => {
-                        //update format in layout and recalc layout
-                        updateProfileCardsData(d.key);
-                        //call all kpis components again
-                        updateProfileCards();
+                        onSetKpiFormat(d.key)
+                    })
+                    .onClickKpi((e,d) => {
+                        onClickKpi(d);
                     })
                     .onDragEnd(function(e,d){
                         const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
@@ -1400,6 +1392,25 @@ export default function journeyComponent() {
     journey.withCompletionPaths = function (value) {
         if (!arguments.length) { return withCompletionPaths; }
         withCompletionPaths = value;
+        return journey;
+    };
+    journey.kpiFormat = function (value) {
+        if (!arguments.length) { return kpiFormat; }
+        kpiFormat = value;
+        return journey;
+    };
+    journey.onSetKpiFormat = function (value) {
+        if (!arguments.length) { return onSetKpiFormat; }
+        if(typeof value === "function"){
+            onSetKpiFormat = value;
+        }
+        return journey;
+    };
+    journey.onClickKpi = function (value) {
+        if (!arguments.length) { return onClickKpi; }
+        if(typeof value === "function"){
+            onClickKpi = value;
+        }
         return journey;
     };
     journey.createJourney= function (value) {

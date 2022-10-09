@@ -10,7 +10,7 @@ export default function milestonesLayout(){
     let info = {};
 
     let aligned = false;
-    let format = "progress";
+    let format = "next-target";
 
     const myKpisLayout = kpisLayout();
 
@@ -28,13 +28,13 @@ export default function milestonesLayout(){
         //}
     }
 
-    const ctrlsData = [
-        { key: "progress", label:"Progress", isSelected:format === "progress" },
-        { key: "compare", label:"Compare", isSelected:format === "compare" }
-    ]
-
     function update(data){
-        //console.log("update milestones data")
+        //console.log("update milestones data", format)
+
+        const ctrlsData = [
+            { key: "next-target", label:"Next Target", isSelected:format === "next-target" },
+            { key: "long-term", label:"Long Term", isSelected:format === "long-term" }
+        ]    
         
         return data.map((milestone,i) => {
             const { date, dataType } = milestone;
@@ -42,6 +42,7 @@ export default function milestonesLayout(){
                 myKpisLayout
                     .date(date)
                     .prevCardDate(i === 0 ? undefined : data[i - 1])
+                    .milestoneId(milestone._id || milestone.id) //todo - remove one of these
                     .format(format)
                     .datasets(datasets);
 

@@ -3,8 +3,9 @@ import * as d3 from 'd3';
 export default function kpisLayout(){
     let date = new Date();
     let prevCardDate;
-    let format = "progress";
+    let format = "next-target";
     let datasets = [];
+    let milestoneId;
 
     //helper
     const statValue = (date, statId, datapoints, method="latest") => {
@@ -22,13 +23,14 @@ export default function kpisLayout(){
 
     function update(data){
         //console.log("update kpis layout", data)
-
-        const ctrlsData = [
-            { key: "progress", label:"Progress", isSelected:format === "progress" },
-            { key: "compare", label:"Compare", isSelected:format === "compare" }
-        ]
         
         return data.map((kpi,i) => {
+            //milestone && date can be specific to the kpi or general
+            const kpiMilestoneId = kpi.milestoneId || milestoneId
+            const kpiDate = kpi.date || date;
+            //if kpis have dates, we use these for previous, except for the first one which uses the prevCardDate setting
+            const prevKpiDate = i === 0 ? prevCardDate : data[i-1].date;
+            const prevDate = kpi.date ? prevKpiDate : prevCardDate;
             const { datasetId, statId } = kpi;
             const dataset = datasets.find(dset => dset._id === datasetId);
             const stat = dataset.measures.find(m => m._id === statId);
@@ -43,9 +45,9 @@ export default function kpisLayout(){
             //temp
             const defaultTarg = currentValue ? currentValue * 1.5 : min;
             const targetValue = targetDatapoint ? +targetDatapoint.values.find(v => v.measure === statId).value : defaultTarg;
-            const previous = statValue(prevCardDate, statId, actualDatapoints);
+            const previous = statValue(prevDate, statId, actualDatapoints);
             //for now, we manually seyt this to test it renders as red. But should be based on linear interpolation
-            const expectedCurrent = { date, value:currentValue * 1.3 };//calculateExpected(previous, target, date)
+            const expectedCurrent = { kpiDate, value:currentValue * 1.3 };//calculateExpected(previous, target, date)
             //bars
             const currentColour = "#696969";
             const colours = {
@@ -56,8 +58,8 @@ export default function kpisLayout(){
             }
 
             const isOnTrack = expectedCurrent.value <= currentValue;
-            const start = format === "compare" ? min : (previous?.value || min);
-            const end = format === "compare" ? max : targetValue;
+            const start = format === "long-term" ? min : (previous?.value || min);
+            const end = format === "long-term" ? max : targetValue;
 
             const rangeDatum = { id: "range", from:start, to:end, fill:"transparent", stroke:"grey" };
             const targetDatum = { id: "target", from:start, to:targetValue, fill:colours.target };
@@ -68,7 +70,7 @@ export default function kpisLayout(){
                 id: "previous", 
                 ...previous,
                 fill:colours.current,
-                pos:"below"
+                pos:"above"
             }
 
             const expectedHandleDatum = { 
@@ -76,14 +78,14 @@ export default function kpisLayout(){
                 value:expectedCurrent.value,
                 //@todo - handle decreasing datasets ie less is best
                 fill:isOnTrack ? colours.expectedAhead : colours.expectedBehind,
-                pos:"above"
+                pos:"below"
             }
-            const barsData = format === "compare" ? [rangeDatum, targetDatum, currentDatum] : [rangeDatum, currentDatum];
-            const handlesData = format === "compare" ? [prevHandleDatum, targetHandleDatum, expectedHandleDatum] : [expectedHandleDatum];
+            const barsData = format === "long-term" ? [rangeDatum, targetDatum, currentDatum] : [rangeDatum, currentDatum];
+            const handlesData = format === "long-term" ? [prevHandleDatum, targetHandleDatum, expectedHandleDatum] : [expectedHandleDatum];
 
             //@todo later - handle target === 0
             const pcCompletion = targetValue !== 0 ? ((currentValue/targetValue) * 100).toFixed(0) : 100;
-            const numbersData = format === "compare" ? 
+            const numbersData = format === "long-term" ? 
                 [ 
                     { id: "actual", value: currentValue, colour:colours.current } 
                 ]
@@ -97,8 +99,10 @@ export default function kpisLayout(){
             }
 
             return {
-                id:`kpi${i}`, // temp - in reality, each kpi unique id will come from datasetId + statId
+                id: kpiMilestoneId ? `milestone-${kpiMilestoneId}-kpi-${i}` : `kpi-${i}`, // temp - in reality, each kpi unique id will come from datasetId + statId
                 ...kpi,
+                date:kpiDate,
+                milestoneId:kpiMilestoneId, //may be undefined
                 //stat full name stands alone without needing the dataset name before it
                 name:stat.fullNameShort,
                 longName:stat.fullNameLong,
@@ -130,6 +134,11 @@ export default function kpisLayout(){
     update.prevCardDate = function (value) {
         if (!arguments.length) { return prevCardDate; }
         prevCardDate = value;
+        return update;
+    };
+    update.milestoneId = function (value) {
+        if (!arguments.length) { return milestoneId; }
+        milestoneId = value;
         return update;
     };
     update.format = function (value) {

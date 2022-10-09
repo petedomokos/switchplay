@@ -45,6 +45,7 @@ export default function profileCardsComponent() {
     //API CALLBACKS
     let onClick = function(){};
     let onCtrlClick = () => {};
+    let onClickKpi = () => {};
 
     let onDblClick = function(){};
     let onDragStart = function() {};
@@ -80,7 +81,7 @@ export default function profileCardsComponent() {
             if(log){
                 //console.log("profileCards update", data)
             }
-            //console.log("profileCards update", data)
+            //console.log("profileCards update")
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
             containerG = d3.select(this);
@@ -139,7 +140,8 @@ export default function profileCardsComponent() {
                         .height(contentsHeight/2)
                         .kpiHeight(kpiHeight)
                         .fontSizes(fontSizes.kpis)
-                        .onCtrlClick(onCtrlClick);
+                        .onCtrlClick(onCtrlClick)
+                        .onClickKpi(onClickKpi);
 
                     //ENTER AND UPDATE
                     const contentsG = d3.select(this).select("g.contents")
@@ -395,6 +397,13 @@ export default function profileCardsComponent() {
     profileCards.onClick = function (value) {
         if (!arguments.length) { return onClick; }
         onClick = value;
+        return profileCards;
+    };
+    profileCards.onClickKpi = function (value) {
+        if (!arguments.length) { return onClickKpi; }
+        if(typeof value === "function"){
+            onClickKpi = value;
+        }
         return profileCards;
     };
     profileCards.onCtrlClick = function (value) {

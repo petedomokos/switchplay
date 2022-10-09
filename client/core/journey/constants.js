@@ -38,6 +38,24 @@ export const FONTSIZES = {
 
         target:8
     },
+    contract:k => ({
+        club:8 * k,
+        wage:9 * k,
+        wageUnit:6 * k
+    }),
+    profile:k => ({
+        info:{
+            name:4 * k,
+            age:6 * k,
+            position: 3 * k,
+            date:5 * k
+        },
+        kpis:{
+            name:4 * k,
+            values:4 * k,
+            ctrls:5 * k
+        }
+    }),
     menuBar:{
         title:12,
         subtitle:8

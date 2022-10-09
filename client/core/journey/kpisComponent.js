@@ -27,6 +27,7 @@ export default function kpisComponent() {
     let kpiHeight;
     let gapBetweenKpis;
 
+    let kpiNameWidth;
     let kpiNameHeight;
     let kpiNameMargin;
 
@@ -43,47 +44,68 @@ export default function kpisComponent() {
     let numbersContentsWidth;
     let numbersContentsHeight;
 
-    function updateDimns(nrOfNumberValues, nrCtrlsButtons){
-        margin = { left: width * 0.1, right: width * 0.1, top:height * 0.1, bottom: height * 0.05 };
+    let handleWidth;
+    let handleHeight;
+    let tooltipWidth;
+    let tooltipHeight;
+    let tooltipSpaceAboveHeight;
+    let tooltipSpaceBelowHeight;
+    let selectedKpiHeight;
+
+    function updateDimns(nrOfNumberValues, nrCtrlsButtons=0){
+        margin = { left: width * 0, right: width * 0, top:height * 0.1, bottom: height * 0.05 };
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
-        ctrlsHeight = contentsHeight * 0.15;
+        ctrlsHeight = nrCtrlsButtons !== 0 ? contentsHeight * 0.15 : 0;
         listHeight = contentsHeight - ctrlsHeight;
 
-        ctrlsMargin = { left: contentsWidth * 0.2, right: contentsWidth * 0.2, top: ctrlsHeight * 0.1, bottom: ctrlsHeight * 0.1 };
+        ctrlsMargin = { left: contentsWidth * 0.1, right: contentsWidth * 0.1, top: ctrlsHeight * 0.1, bottom: ctrlsHeight * 0.1 };
         ctrlsContentsWidth = contentsWidth - ctrlsMargin.left - ctrlsMargin.right;
         ctrlsContentsHeight = ctrlsHeight - ctrlsMargin.top - ctrlsMargin.bottom;
         btnWidth = ctrlsContentsWidth / nrCtrlsButtons;
         btnHeight = ctrlsContentsHeight;
-        btnFontSize = btnWidth / 5;
 
         const numbersPCWidth = nrOfNumberValues === 2 ? 0.4 : (nrOfNumberValues === 1 ? 0.3 : 0);
         numbersWidth = contentsWidth * numbersPCWidth;
         barWidth = contentsWidth - numbersWidth;
+        //todo - calculate name width based on text length
+        kpiNameWidth = barWidth * 0.8;
         //todo - reduce kpiHeight and place kpi name above each bar 
         gapBetweenKpis = kpiHeight * 0.3;
-        kpiNameHeight = kpiHeight * 0.4;
-        barHeight = kpiHeight * 0.6;
+        kpiNameHeight = kpiHeight * 0.6;
+        barHeight = kpiHeight * 0.4;
         kpiNameMargin = { left: 0, right: 0, top: kpiNameHeight * 0.1, bottom: kpiNameHeight * 0.1 };
         barMargin = { left: 0, right: 0, top: barHeight * 0.15, bottom: barHeight * 0.15 };
         barContentsWidth = barWidth - barMargin.left - barMargin.right;
         barContentsHeight = barHeight - barMargin.top - barMargin.bottom; 
 
+        handleHeight = barContentsHeight * 0.6;
+        handleWidth = handleHeight * 0.6;
+
+        tooltipHeight = barContentsHeight * 1.5;
+        tooltipWidth = tooltipHeight * 1.2;
+        tooltipSpaceAboveHeight = tooltipHeight * 2;
+        tooltipSpaceBelowHeight = tooltipHeight;
+        selectedKpiHeight = kpiNameHeight + tooltipSpaceAboveHeight + handleHeight + barHeight + handleHeight + tooltipSpaceBelowHeight;
+
         numbersHeight = kpiHeight;
         numbersMargin = { left:numbersWidth * 0.1, right:numbersWidth * 0.1, top:numbersHeight * 0.1, bottom: numbersHeight * 0.1 };
         numbersContentsWidth = numbersWidth - numbersMargin.left - numbersMargin.right;
         numbersContentsHeight = numbersHeight - numbersMargin.top - numbersMargin.bottom;
+
     }
 
     let fontSizes = {
-        name:12
     };
 
     let selected;
+    let isSelected = d => false;
+    let getName = d => d.name;
 
     //API CALLBACKS
     let onClick = function(){};
+    let onClickKpi = function(){};
     let onDblClick = function(){};
     let onDragStart = function() {};
     let onDrag = function() {};
@@ -108,11 +130,12 @@ export default function kpisComponent() {
     let containerG;
 
     function kpis(selection, options={}) {
-        const { transitionEnter=true, transitionUpdate=true } = options;
+        const { transitionEnter=true, transitionUpdate=true, log} = options;
         // expression elements
         selection.each(function (data) {
             //console.log("kpis update", data)
-            const { kpisData, ctrlsData } = data;
+            const kpisData = data.kpisData || data;
+            const ctrlsData = data.ctrlsData || [];
             const nrOfNumberValues = kpisData[0] ? kpisData[0].numbersData.length : 0;
             const nrOfCtrlsButtons = ctrlsData?.length;
             updateDimns(nrOfNumberValues, nrOfCtrlsButtons);
@@ -182,12 +205,23 @@ export default function kpisComponent() {
 
                                 const kpiG = d3.select(this);
                                 kpiG.append("rect")
-                                    .attr("class", "kpi-bg");
+                                    .attr("class", "kpi-bg")
+                                    .attr("fill", "none")
+                                    .attr("stroke", "none")
+                                    .attr("stroke-width", 0.3) 
+                                    .attr("stroke", "white");
 
-                                kpiG.append("g")
-                                        .attr("class", "name")
-                                            .append("text")
-                                                .attr("dominant-baseline", "central");
+                                const nameG = kpiG.append("g")
+                                    .attr("class", "name")
+                                        .style("cursor", "pointer")
+                                        .on("click", onClickKpi);
+
+                                nameG.append("rect")
+                                    .attr("fill", "transparent")
+                                    .attr("stroke", "none");
+
+                                nameG.append("text")
+                                    .attr("dominant-baseline", "central");
 
                                 kpiG.append("g").attr("class", "bars");
 
@@ -202,29 +236,36 @@ export default function kpisComponent() {
                             })
                             .style("cursor", "grab")
                             .merge(kpiG)
-                            .attr("transform", (d,i) =>  `translate(0,${i * (kpiHeight + gapBetweenKpis)})`)
+                            .attr("transform", (d,i) => {
+                                const extraSpaceForSelected = selectedKpiHeight - kpiHeight;
+                                const selectedKpiBefore = kpisData
+                                    .slice(0, i)
+                                    .find(kpi => isSelected(kpi));
+                                const vertShift = i * (kpiHeight + gapBetweenKpis) +(selectedKpiBefore ? extraSpaceForSelected : 0)
+                                return `translate(0,${vertShift})`
+                            })
                             .each(function(d){
-                                //console.log("update--------", kpiHeight)
-                                const { start, end, name } = d;
+                                const { start, end } = d;
                                 const kpiG = d3.select(this);
                                 kpiG.select("rect.kpi-bg")
                                     .attr("width", contentsWidth)
-                                    .attr("height", kpiHeight)
-                                    .attr("fill", "none")
-                                    .attr("stroke", "none")
-                                    .attr("stroke-width", 0.3)  
+                                    .attr("height", isSelected(d) ? selectedKpiHeight : kpiHeight) 
                                 
-                                const nameG = kpiG.select("g.name")
-                                    .attr("transform", `translate(0, ${kpiNameHeight/2})`);
+                                const nameG = kpiG.select("g.name");
+                                nameG.select("rect")
+                                    .attr("width", kpiNameWidth)
+                                    .attr("height", kpiNameHeight);
                                 
                                 nameG.select("text")
+                                    .attr("y", kpiNameHeight/2)
                                     .attr("font-size", fontSizes.name)
-                                    .text(name)
+                                    .text(getName(d))
                         
                                 const scale = scales[d.id].domain([start, end]).range([0, barContentsWidth])
 
                                 const barsG = kpiG.select("g.bars")
                                     .attr("transform", `translate(${barMargin.left}, ${kpiNameHeight +barMargin.top})`)
+
                                 
                                 const barRect = barsG.selectAll("rect.bar").data(d.barsData, d => d.id)
                                 barRect.enter()
@@ -249,13 +290,11 @@ export default function kpisComponent() {
                                     }
                                 })
 
-                                const handleHeight = barContentsHeight * 0.6;
-                                const handleWidth = handleHeight * 0.6;
                                 const handlePathD = (w, h, pos) =>  {
                                     if(pos === "below"){
-                                        return `M0 0 l ${-w/2} ${-h} h ${w} l ${-w/2} ${h}`;
+                                        return `M0 0 l ${-w/2} ${h} h ${w} l ${-w/2} ${-h}`;
                                     }
-                                    return `M0 0 l ${-w/2} ${-h} h ${w} l ${-w/2} ${h}`;
+                                    return `M0 0 l ${-w/2} ${-h} h ${w} l ${-w/2} ${h}`;  
                                 }
 
                                 const handleG = barsG.selectAll("g.handle").data(d.handlesData, d => d.id)
@@ -267,7 +306,7 @@ export default function kpisComponent() {
                                                 .attr("fill", hd => hd.fill)
                                         })
                                         .merge(handleG)
-                                        .attr("transform", h => `translate(${scale(h.value)}, ${0})`)
+                                        .attr("transform", h => `translate(${scale(h.value)}, ${h.pos === "below" ? barContentsHeight : 0})`)
                                         .each(function(hd){
                                             d3.select(this).select("path")
                                                 .attr("d", handlePathD(handleWidth, handleHeight, hd.pos))
@@ -405,7 +444,7 @@ export default function kpisComponent() {
                                         .attr("fill", d => d.isSelected ? "white" : "grey")
                                         .attr("stroke", d => d.isSelected ? "white" : "grey")
                                         .attr("opacity", d => d.isSelected ? 1 : 0.6)
-                                        .attr("font-size", btnFontSize)
+                                        .attr("font-size", fontSizes.ctrls)
                                         .attr("stroke-width", 0.1)
                                         .text(d => d.label)
 
@@ -543,6 +582,14 @@ export default function kpisComponent() {
     kpis.selected = function (value) {
         if (!arguments.length) { return selected; }
         selected = value;
+        isSelected = d => d.id === selected;
+        return kpis;
+    };
+    kpis.getName = function (value) {
+        if (!arguments.length) { return getName; }
+        if(typeof value === "function"){
+            getName = value;
+        }
         return kpis;
     };
     kpis.longpressed = function (value) {
@@ -558,6 +605,13 @@ export default function kpisComponent() {
     kpis.onCtrlClick = function (value) {
         if (!arguments.length) { return onCtrlClick; }
         onCtrlClick = value;
+        return kpis;
+    };
+    kpis.onClickKpi = function (value) {
+        if (!arguments.length) { return onClickKpi; }
+        if(typeof value === "function"){
+            onClickKpi = value;
+        }
         return kpis;
     };
     kpis.onDblClick = function (value) {

@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS } from "./constants";
+import { DIMNS, FONTSIZES } from "./constants";
 import dragEnhancements from './enhancedDragHandler';
 // import menuComponent from './menuComponent';
 import { Oscillator } from './domHelpers';
@@ -21,9 +21,7 @@ export default function contractsComponent() {
         contentsHeight = height - margin.top - margin.bottom;
     }
 
-    let fontSizes = {
-        name:9
-    };
+    let fontSizes = FONTSIZES.contract(1);
 
     let xScale = x => 0;
     let xKey = "date";
@@ -126,7 +124,7 @@ export default function contractsComponent() {
                    
                     //title
                     contentsG.select("text.name")
-                        .attr("font-size", fontSizes.name)
+                        .attr("font-size", fontSizes.club)
                         .text(d.name || "Contract")
 
                     //targ

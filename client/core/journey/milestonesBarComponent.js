@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import { initial } from 'lodash';
-import { DIMNS } from "./constants";
+import { DIMNS, FONTSIZES } from "./constants";
 import contractsComponent from './contractsComponent';
 import profileCardsComponent from './profileCardsComponent';
 /*
@@ -28,6 +28,9 @@ export default function milestonesBarComponent() {
     let xScale = x => 0;
     let selected;
 
+    let kpiFormat;
+    let onSetKpiFormat = function(){};
+
     let containerG;
     let contentsG;
     let milestonesG;
@@ -36,7 +39,8 @@ export default function milestonesBarComponent() {
 
     //components
     const contracts = contractsComponent();
-    const profiles = profileCardsComponent();
+    const profiles = profileCardsComponent()
+        .onCtrlClick((e,d) => { onSetKpiFormat(d.key) });
 
     let slidePosition = 0;
     let slideBack;
@@ -98,12 +102,14 @@ export default function milestonesBarComponent() {
                 const y = () => height/2;
 
                 //call profileCsrds abd contarcts comps, passing in a yscale that centres each one
+                /*
                 contractsG
                     .datum(data.filter(m => m.dataType === "contract"))
                     .call(contracts
                         .width(DIMNS.milestonesBar.contract.width)
                         .height(DIMNS.milestonesBar.contract.height)
                         .margin(DIMNS.milestonesBar.contract.margin)
+                        .fontSizes(FONTSIZES.contract(3))
                         .xScale(x, "nr")
                         .yScale(y), { log:true });
 
@@ -113,40 +119,11 @@ export default function milestonesBarComponent() {
                         .width(DIMNS.milestonesBar.profile.width)
                         .height(DIMNS.milestonesBar.profile.height)
                         .margin(DIMNS.milestonesBar.profile.margin)
+                        .fontSizes(FONTSIZES.profile(3))
                         .kpiHeight(30)
                         .xScale(x, "nr")
                         .yScale(y), { log:true });
-
-                const milestoneG = containerG.selectAll("g.milestone").data(data, d => d.id);
-                milestoneG.enter()
-                    .append("g")
-                    .attr("class", d => "milestone milestone-"+d.id)
-                    .each(function(d,i){
-                    
-                    })
-                    .style("cursor", "grab")
-                    //.call(transform, { x: d => adjX(timeScale(d.targetDate)), y:d => d.y })
-                    //.call(transform, { x: d => d.x, y:d => d.y }, transitionEnter && transitionsOn)
-                    .merge(milestoneG)
-                    .attr("transform", d =>  "translate(" +xScale(d.date) +"," +height/2 +")")
-                    .each(function(d){
-                    })
-                    .each(function(d){
-    
-                    })
-    
-                //EXIT
-                milestoneG.exit().each(function(d){
-                    //will be multiple exits because of the delay in removing
-                    if(!d3.select(this).attr("class").includes("exiting")){
-                        d3.select(this)
-                            .classed("exiting", true)
-                            .transition()
-                                .duration(200)
-                                .attr("opacity", 0)
-                                .on("end", function() { d3.select(this).remove(); });
-                    }
-                })
+                        */
 
                 //functions
                 slideBack = function(){
@@ -206,6 +183,19 @@ export default function milestonesBarComponent() {
         milestoneHeight = value;
         return milestonesBar;
     };
+    milestonesBar.kpiFormat = function (value) {
+        if (!arguments.length) { return kpiFormat; }
+        kpiFormat = value;
+        return milestonesBar;
+    };
+    milestonesBar.onSetKpiFormat = function (value) {
+        if (!arguments.length) { return onSetKpiFormat; }
+        if(typeof value === "function"){
+            onSetKpiFormat = value;
+        }
+        return milestonesBar;
+    };
+
     milestonesBar.slideBack = function(){ slideBack() };
     milestonesBar.slideForward = function(){ slideForward() };
     return milestonesBar;

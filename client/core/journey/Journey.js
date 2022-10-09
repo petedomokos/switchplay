@@ -12,6 +12,7 @@ import TargetForm from './form/TargetForm';
 import Form from "./form/Form";
 import ImportMeasures from './ImportMeasures';
 import MilestonesBar from './MilestonesBar';
+import KpiView from './KpiView';
 import { DIMNS, FONTSIZES, grey10 } from './constants';
 
 const mockMeasures = [
@@ -147,7 +148,26 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
   const [aligned, setAligned] = useState(false);
   const [modalData, setModalData] = useState(undefined);
   const [displayedBar, setDisplayedBar] = useState("");
-  const shouldShowOverlay = displayedBar === "profiles";
+  const [kpiFormat, setKpiFormat] = useState("next-target");
+  const selectedKpi = typeof displayedBar === "object" && displayedBar.kpi ? displayedBar.kpi : null;
+  const shouldShowOverlay = displayedBar === "milestones" || selectedKpi;
+
+  //kpiViewData is based on selectedKpi, profiles and userKpis
+  //todo - finish this - needs the datasetId and the measureId from the kpi. kaybe just grab it from the first profile
+  const kpiName = kpi => {
+    const { datasetId, statId } = kpi;
+    const dataset = datasets.find(dset => dset._id === datasetId);
+    const stat = dataset?.measures.find(m => m._id === statId);
+    return stat?.fullNameLong
+  }
+  //need to know which date/profile is selected too -
+  // this also comes from teh kpi that is passed through, as it will have that date
+  const kpiViewData = !selectedKpi ? null : profiles.map(p => ({
+      date:p.date,
+      milestoneId:p._id || p.id,
+      datasetId:selectedKpi.datasetId,
+      statId:selectedKpi.statId,
+    }));
 
   const shouldD3UpdateRef = useRef(true);
 
@@ -275,9 +295,14 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
         .menuBarData(menuBarData)
         .measuresOpen(displayedBar === "measures" ? measures : undefined)
         .modalData(modalData)
+        .kpiFormat(kpiFormat)
+        .onSetKpiFormat(setKpiFormat)
         .createJourney(() => {
           setDisplayedBar("");
           save(newJourney, false); //dont persist until user actually does something. atm , its temp
+        })
+        .onClickKpi((kpi) => {
+          setDisplayedBar({kpi}) 
         })
         .setActiveJourney(setActive)
         .updateState(updates => {
@@ -421,7 +446,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
       //.datum({ canvas, aims, planets, links, channels, measures })
       .call(journey)
 
-  }, [JSON.stringify(data), journey, aligned, withCompletionPaths, displayedBar, modalData, width, height, screen ])
+  }, [JSON.stringify(data), journey, aligned, withCompletionPaths, displayedBar, modalData, kpiFormat, width, height, screen ])
 
   const toggleCompletion = () => {
       setWithCompletionPath(prevState => !prevState);
@@ -441,8 +466,8 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
       setDisplayedBar(prevState => prevState === "journeys" ? "" : "journeys");
   }, [JSON.stringify(data)]);
 
-  const toggleProfilesOpen = useCallback(() => {
-    setDisplayedBar(prevState => prevState === "profiles" ? "" : "profiles");
+  const toggleMilestonesOpen = useCallback(() => {
+    setDisplayedBar(prevState => prevState === "milestones" ? "" : "milestones");
   }, [JSON.stringify(data)]);
 
   //for now, we just open or close all measures
@@ -536,8 +561,11 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
   return (
     <div className={classes.root}>
         <div className={`${classes.overlay} overlay`} ref={overlayRef}>
-          <MilestonesBar profiles={profiles} contracts={contracts} datasets={datasets}
-            userInfo={userInfo} kpiFormat="progress" kpis={userKpis} />
+          {displayedBar === "milestones" && <MilestonesBar profiles={profiles} contracts={contracts} datasets={datasets}
+            userInfo={userInfo} kpis={userKpis} 
+            kpiFormat={kpiFormat} setKpiFormat={setKpiFormat} />}
+          {selectedKpi && <KpiView name={kpiName(selectedKpi)} data={kpiViewData} initSelectedId={selectedKpi.id} datasets={datasets} 
+            width={width * 0.9} height={height * 0.9} format={kpiFormat} />}
         </div>
         <svg className={classes.svg} ref={containerRef}></svg>
         <div className={classes.ctrls}>
@@ -546,8 +574,8 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
                   {displayedBar === "measures" ?"Close Measures" : "Measures"}</Button>
                 <Button className={classes.btn} color="primary" variant="contained" onClick={toggleJourneysOpen} >
                   {displayedBar === "journeys" ?"Close Journeys" : "Journeys"}</Button>
-                <Button className={classes.btn} color="primary" variant="contained" onClick={toggleProfilesOpen} >
-                  {displayedBar === "profiles" ?"Close Profiles" : "Profiles"}</Button>
+                <Button className={classes.btn} color="primary" variant="contained" onClick={toggleMilestonesOpen} >
+                  {displayedBar === "milestones" ?"Close Milestones" : "Milestones"}</Button>
             </div>
             <div className={classes.rightCtrls}>
                 <Button className={classes.btn} color="primary" variant="contained" onClick={toggleAligned} >
