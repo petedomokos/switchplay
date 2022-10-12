@@ -13,6 +13,7 @@ import Form from "./form/Form";
 import ImportMeasures from './ImportMeasures';
 import MilestonesBar from './MilestonesBar';
 import KpiView from './KpiView';
+import { hydrateJourneyData } from "./hydrate";
 import { DIMNS, FONTSIZES, grey10 } from './constants';
 
 const mockMeasures = [
@@ -141,7 +142,8 @@ const initChannels = d3.range(numberMonths)
 const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog }) => {
   //console.log("Journey data", data)
   //console.log("Journey avail", availableJourneys)
-  const { _id, userId, name, contracts, profiles, aims, goals, links, measures } = data;
+  const hydratedData = hydrateJourneyData(data, userKpis, datasets);
+  const { _id, userId, name, contracts, profiles, aims, goals, links, measures } = hydratedData;
   const [journey, setJourney] = useState(null);
   const [channels, setChannels] = useState(initChannels);
   const [withCompletionPaths, setWithCompletionPath] = useState(false);
@@ -162,12 +164,9 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
   }
   //need to know which date/profile is selected too -
   // this also comes from teh kpi that is passed through, as it will have that date
-  const kpiViewData = !selectedKpi ? null : profiles.map(p => ({
-      date:p.date,
-      milestoneId:p._id || p.id,
-      datasetId:selectedKpi.datasetId,
-      statId:selectedKpi.statId,
-    }));
+  const kpiViewData = !selectedKpi ? null : profiles.map(p =>  {
+    return p.kpis.find(kpi => kpi.kpiSetId === selectedKpi.kpiSetId)
+  });
 
   const shouldD3UpdateRef = useRef(true);
 
@@ -244,10 +243,12 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
   //overlay
   useEffect(() => {
     if(!overlayRef.current){return; }
-    const overlayDiv = d3.select(overlayRef.current)
-      .style("display", shouldShowOverlay ? "flex" : "none")
+    d3.select(overlayRef.current)
+      .style("display", shouldShowOverlay ? "flex" : "none");
+
     d3.select(containerRef.current)
       .attr("display", shouldShowOverlay ? "none" : "initial");
+
   }, [shouldShowOverlay])
 
  //init journey
@@ -314,7 +315,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
             const _goals = goals.map(g => ({ ...g, ...(updates.goals?.find(goal => goal.id === g.id) || {} ) }))
             const _links = links.map(l => ({ ...l, ...(updates.links?.find(link => link.id === l.id) || {} ) }))
             const _measures = measures.map(m => ({ ...m, ...(updates.measures?.find(meas => meas.id === m.id) || {} ) }))
-            save({ ...data, contracts:_contracts, profiles:_profiles, aims:_aims, goals:_goals, links:_links, measures:_measures })
+            save({ ...hydratedData, contracts:_contracts, profiles:_profiles, aims:_aims, goals:_goals, links:_links, measures:_measures })
             //@todo - make createId handle prefixes so all ids are unique
         })
         .handleCreateContract(function(contract){
@@ -322,13 +323,13 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
           const colour = "orange";
           //updates
           const _contracts = [ ...contracts, { id , colour, dataType:"contract", ...contract }];
-          save({ ...data, contracts:_contracts });
+          save({ ...hydratedData, contracts:_contracts });
         })
         .handleCreateProfile(function(profile){
           const id = createId(profiles.map(p => p.id));
           const colour = "orange";
           const _profiles = [ ...profiles, { id , userId, colour, dataType:"profile", ...profile }];
-          save({ ...data, profiles:_profiles });
+          save({ ...hydratedData, profiles:_profiles });
         })
         .handleCreateAim(function(aim, planetIds){
           const id = createId(aims.map(a => a.id));
@@ -338,7 +339,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
           const _goals = goals.map(p => planetIds.includes(p.id) ? { ...p, aimId: id } : p);
           //setAims(prevState => ([ ...prevState, { id , colour, dataType:"aim", ...aim }]))
           //setPlanets(prevState => prevState.map(p => planetIds.includes(p.id) ? { ...p, aimId: id } : p))
-          save({ ...data, aims:_aims, goals:_goals });
+          save({ ...hydratedData, aims:_aims, goals:_goals });
         })
         .createPlanet((targetDate, yPC, aimId) => {
           const newGoal = {
@@ -356,8 +357,8 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
           //ie if a planet is selected, then updateSelected if not set as selected
           //the below approach may cause an issue if planets hasnt updated yet from the setPlanets call above
           //updates
-          const _goals = [ ...data.goals,  newGoal];
-          save({ ...data, goals:_goals });
+          const _goals = [ ...hydratedData.goals,  newGoal];
+          save({ ...hydratedData, goals:_goals });
 
           journey.selected(newGoal.id);
           //setNrPlanetsCreated(prevState => prevState + 1);
@@ -367,7 +368,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
           if(!shouldD3Update){ shouldD3UpdateRef.current = shouldD3Update; }
           //updates
           const _goals = updatedState(goals, props);
-          save({ ...data, goals:_goals });
+          save({ ...hydratedData, goals:_goals });
         })
         .updatePlanets((planetsToUpdate, shouldD3Update=true) => {
           if(!shouldD3Update){ shouldD3UpdateRef.current = shouldD3Update; }
@@ -376,25 +377,25 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
               const propsToUpdate = planetsToUpdate.find(planet => planet.id === p.id) || {};
               return { ...p, ...propsToUpdate }
           });
-          save({ ...data, goals:_goals });
+          save({ ...hydratedData, goals:_goals });
         })
         .updateAim((props, shouldD3Update=true) => {
           if(!shouldD3Update){ shouldD3UpdateRef.current = shouldD3Update; }
           //updates
           const _aims = updatedState(aims, props);
-          save({ ...data, aims:_aims });
+          save({ ...hydratedData, aims:_aims });
         })
         .onDeleteContract(id => {
           setModalData(undefined);
           //must delete link first, but when state is put together this wont matter
           const _contracts = contracts.filter(p => p.id !== id);
-          save({ ...data, contracts:_contracts });
+          save({ ...hydratedData, contracts:_contracts });
         })
         .onDeleteProfile(id => {
           setModalData(undefined);
           //must delete link first, but when state is put together this wont matter
           const _profiles = profiles.filter(p => p.id !== id);
-          save({ ...data, profiles:_profiles });
+          save({ ...hydratedData, profiles:_profiles });
         })
        .onDeleteAim(aimId => {
           //this doesnt work - it deltes a planet instead!
@@ -402,14 +403,14 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
           setModalData(undefined);
           const _aims = aims.filter(a => a.id !== aimId);
           const _goals = goals.map(p => ({ ...p, aimId: p.aimId === aimId ? undefined : p.aimId }));
-          save({ ...data, aims:_aims, goals:_goals });
+          save({ ...hydratedData, aims:_aims, goals:_goals });
        })
         .deletePlanet(id => {
           setModalData(undefined);
           //must delete link first, but when state is put together this wont matter
           const _links = links.filter(l => l.src !== id && l.targ !== id);
           const _goals = goals.filter(p => p.id !== id);
-          save({ ...data, goals:_goals, links:_links });
+          save({ ...hydratedData, goals:_goals, links:_links });
         })
         .onAddLink(props => {
           const newLink = {
@@ -418,11 +419,11 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
             dataType:"link"
           }
           const _links = [ ...links, newLink];
-          save({ ...data, links:_links });
+          save({ ...hydratedData, links:_links });
         })
         .deleteLink(id => {
           const _links = links.filter(l => l.id !== id);
-          save({ ...data, links:_links });
+          save({ ...hydratedData, links:_links });
         })
         .updateChannel(props => {
           setChannels(prevState => updatedState(prevState, props, (other, updated) => other.nr < updated.nr))
@@ -430,7 +431,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
         .setModalData((newModalData) => {
           if(modalData && !newModalData){
             //save data to server - changes have already been added to state on change
-            save(data);
+            save(hydratedData);
           }
           setModalData(newModalData)
         })
@@ -442,11 +443,11 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
         })
 
     d3.select(containerRef.current)
-      .datum({ ...data, channels, userInfo, userKpis, datasets })
+      .datum({ ...hydratedData, profiles, channels, userInfo, userKpis, datasets })
       //.datum({ canvas, aims, planets, links, channels, measures })
       .call(journey)
 
-  }, [JSON.stringify(data), journey, aligned, withCompletionPaths, displayedBar, modalData, kpiFormat, width, height, screen ])
+  }, [JSON.stringify(hydratedData), journey, aligned, withCompletionPaths, displayedBar, modalData, kpiFormat, width, height, screen ])
 
   const toggleCompletion = () => {
       setWithCompletionPath(prevState => !prevState);
@@ -459,23 +460,23 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
   //for now, we just open or close all measures
   const toggleMeasuresOpen = useCallback((planetId) => {
         setDisplayedBar(prevState => prevState === "measures" ? "" : "measures");
-  }, [JSON.stringify(data)]);
+  }, [JSON.stringify(hydratedData)]);
 
   //for now, we just open or close all user's journeys
   const toggleJourneysOpen = useCallback(() => {
       setDisplayedBar(prevState => prevState === "journeys" ? "" : "journeys");
-  }, [JSON.stringify(data)]);
+  }, [JSON.stringify(hydratedData)]);
 
   const toggleMilestonesOpen = useCallback(() => {
     setDisplayedBar(prevState => prevState === "milestones" ? "" : "milestones");
-  }, [JSON.stringify(data)]);
+  }, [JSON.stringify(hydratedData)]);
 
   //for now, we just open or close all measures
   const openNewJourney = useCallback((planetId) => {
       //create a new journey, immediately save it to store and it will become the activeJourney
       // (but not to server yet until first change),
       setDisplayedBar("");
-  }, [JSON.stringify(data)]);
+  }, [JSON.stringify(hydratedData)]);
 
   const onUpdatePlanetForm = modalType => (name, value) => {
       //console.log("updatePlanetForm")
@@ -490,7 +491,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
       }
       const _goals = updatedState(goals, props);
       //dont persist yet until closed
-      save({ ...data, goals:_goals }, false);
+      save({ ...hydratedData, goals:_goals }, false);
   }
 
   const onUpdateAimForm = (name, value) => {
@@ -498,11 +499,11 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
       const { d } = modalData;
       if(d.id === "main"){
         //dont want to persist name change to db yet
-        save({ ...data, [name]: value }, false)
+        save({ ...hydratedData, [name]: value }, false)
       }else{
         const props = { id:d.id, [name]: value };
         const _aims = updatedState(aims, props)
-        save({ ...data, aims:_aims }, false);
+        save({ ...hydratedData, aims:_aims }, false);
       }
   }
 
@@ -513,7 +514,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
         setDisplayedBar("measures");
       }else{
         const _measures = updatedState(measures, details)
-        save({ ...data, measures:_measures })
+        save({ ...hydratedData, measures:_measures })
       }
       () => setModalData(undefined);
   }
@@ -522,7 +523,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
       journey.endEditPlanet();
       setModalData(undefined);
       //now we want it to persist the changes that have been made
-      save(data);
+      save(hydratedData);
   }
 
   const onCloseAimForm = () => {
@@ -530,15 +531,15 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
       //@todo - journey.endEditAim();
       setModalData(undefined);
       //now we want it to persist the changes that have been made
-      save(data);
+      save(hydratedData);
   }
 
   const addNewMeasure = (details, /*planetId*/) => {
       const { name, desc } = details;
       const newMeasureId = createId(measures.map(m => m.id));
       //name and desc are same for all planets where this measure is used
-      const _measures = [ ...data.measures, { id: newMeasureId, name, desc }]
-      save({ ...data, measures:_measures })
+      const _measures = [ ...hydratedData.measures, { id: newMeasureId, name, desc }]
+      save({ ...hydratedData, measures:_measures })
       /*
       //@todo - use this
       if(planetId){
@@ -562,7 +563,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
     <div className={classes.root}>
         <div className={`${classes.overlay} overlay`} ref={overlayRef}>
           {displayedBar === "milestones" && <MilestonesBar profiles={profiles} contracts={contracts} datasets={datasets}
-            userInfo={userInfo} kpis={userKpis} 
+            userInfo={userInfo} kpis={userKpis} onClickKpi={kpi => setDisplayedBar({kpi})}
             kpiFormat={kpiFormat} setKpiFormat={setKpiFormat} />}
           {selectedKpi && <KpiView name={kpiName(selectedKpi)} data={kpiViewData} initSelectedId={selectedKpi.id} datasets={datasets} 
             width={width * 0.9} height={height * 0.9} format={kpiFormat} />}

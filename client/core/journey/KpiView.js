@@ -35,7 +35,8 @@ const layout = kpisLayout();
 const kpis = kpisComponent();
 
 const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, format }) => {
-    // console.log("kpiView", initSelectedId)
+    console.log("kpiView initSelected", initSelectedId)
+    console.log("data", data)
     const headerHeight = d3.min([height * 0.15, 45]);
     const svgWidth = d3.min([width, 600]);
     const svgHeight = height - headerHeight;
@@ -63,7 +64,7 @@ const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, fo
               .selected(selectedId)
               //todo - use d3 date format
               .getName(d => dateFormat(d.date))
-              .onClickKpi((e, d) => { setSelectedId(d.id); }))
+              .onClickKpi((e, d) => { setSelectedId(d.id); }), { log:true })
     })
 
     return (

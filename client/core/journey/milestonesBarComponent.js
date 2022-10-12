@@ -30,6 +30,7 @@ export default function milestonesBarComponent() {
 
     let kpiFormat;
     let onSetKpiFormat = function(){};
+    let onClickKpi = function(){};
 
     let containerG;
     let contentsG;
@@ -102,7 +103,6 @@ export default function milestonesBarComponent() {
                 const y = () => height/2;
 
                 //call profileCsrds abd contarcts comps, passing in a yscale that centres each one
-                /*
                 contractsG
                     .datum(data.filter(m => m.dataType === "contract"))
                     .call(contracts
@@ -122,8 +122,8 @@ export default function milestonesBarComponent() {
                         .fontSizes(FONTSIZES.profile(3))
                         .kpiHeight(30)
                         .xScale(x, "nr")
-                        .yScale(y), { log:true });
-                        */
+                        .yScale(y)
+                        .onClickKpi(onClickKpi), { log:true });
 
                 //functions
                 slideBack = function(){
@@ -192,6 +192,13 @@ export default function milestonesBarComponent() {
         if (!arguments.length) { return onSetKpiFormat; }
         if(typeof value === "function"){
             onSetKpiFormat = value;
+        }
+        return milestonesBar;
+    };
+    milestonesBar.onClickKpi = function (value) {
+        if (!arguments.length) { return onClickKpi; }
+        if(typeof value === "function"){
+            onClickKpi = value;
         }
         return milestonesBar;
     };

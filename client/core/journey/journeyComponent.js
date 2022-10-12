@@ -273,11 +273,11 @@ export default function journeyComponent() {
     let draggedWidget;
 
     function journey(selection) {
-        //console.log("update...", kpiFormat)
         updateDimns();
 
         selection.each(function (journeyData) {
             data = journeyData;
+            console.log("journey update...", data)
             if(!svg){
                 //enter
                 init.call(this);
@@ -460,11 +460,10 @@ export default function journeyComponent() {
                     .format(kpiFormat)
                     .aligned(aligned)
                     .datasets(data.datasets)
-                    .info(data.userInfo)
-                    .kpis(data.userKpis);
+                    .info(data.userInfo);
                 
                 profileCardsData = myProfileCardsLayout(data.profiles);
-                //console.log("profileCardsData",profilesData);
+                //console.log("profileCardsData",profileCardsData);
             }
 
             function updateAimsData(){

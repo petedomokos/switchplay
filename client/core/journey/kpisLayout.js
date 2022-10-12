@@ -5,7 +5,6 @@ export default function kpisLayout(){
     let prevCardDate;
     let format = "next-target";
     let datasets = [];
-    let milestoneId;
 
     //helper
     const statValue = (date, statId, datapoints, method="latest") => {
@@ -25,8 +24,7 @@ export default function kpisLayout(){
         //console.log("update kpis layout", data)
         
         return data.map((kpi,i) => {
-            //milestone && date can be specific to the kpi or general
-            const kpiMilestoneId = kpi.milestoneId || milestoneId
+            //console.log("kpi", kpi)
             const kpiDate = kpi.date || date;
             //if kpis have dates, we use these for previous, except for the first one which uses the prevCardDate setting
             const prevKpiDate = i === 0 ? prevCardDate : data[i-1].date;
@@ -99,10 +97,8 @@ export default function kpisLayout(){
             }
 
             return {
-                id: kpiMilestoneId ? `milestone-${kpiMilestoneId}-kpi-${i}` : `kpi-${i}`, // temp - in reality, each kpi unique id will come from datasetId + statId
                 ...kpi,
                 date:kpiDate,
-                milestoneId:kpiMilestoneId, //may be undefined
                 //stat full name stands alone without needing the dataset name before it
                 name:stat.fullNameShort,
                 longName:stat.fullNameLong,
@@ -134,11 +130,6 @@ export default function kpisLayout(){
     update.prevCardDate = function (value) {
         if (!arguments.length) { return prevCardDate; }
         prevCardDate = value;
-        return update;
-    };
-    update.milestoneId = function (value) {
-        if (!arguments.length) { return milestoneId; }
-        milestoneId = value;
         return update;
     };
     update.format = function (value) {

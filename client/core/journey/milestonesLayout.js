@@ -6,7 +6,6 @@ export default function milestonesLayout(){
     let yScale = x => 0;
     let currentZoom = d3.zoomIdentity;
     let datasets = [];
-    let kpis = [];
     let info = {};
 
     let aligned = false;
@@ -37,12 +36,11 @@ export default function milestonesLayout(){
         ]    
         
         return data.map((milestone,i) => {
-            const { date, dataType } = milestone;
+            const { date, dataType, kpis } = milestone;
             if(dataType === "profile"){
                 myKpisLayout
                     .date(date)
                     .prevCardDate(i === 0 ? undefined : data[i - 1])
-                    .milestoneId(milestone._id || milestone.id) //todo - remove one of these
                     .format(format)
                     .datasets(datasets);
 
@@ -78,11 +76,6 @@ export default function milestonesLayout(){
     update.datasets = function (value) {
         if (!arguments.length) { return datasets; }
         datasets = value;
-        return update;
-    };
-    update.kpis = function (value) {
-        if (!arguments.length) { return kpis; }
-        kpis = value;
         return update;
     };
     update.info = function (value) {

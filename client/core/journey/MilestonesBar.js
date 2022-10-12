@@ -52,7 +52,7 @@ const sortAscending = (data, accessor =  d => d) => {
 const layout = milestonesLayout();
 const milestonesBar = milestonesBarComponent();
 
-const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, kpis, setKpiFormat }) => {
+const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, setKpiFormat, onClickKpi }) => {
   //console.log("Milestones", profiles)
   const milestones = [...contracts]
   let styleProps = {}
@@ -75,8 +75,7 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, kpi
     layout
       .format(kpiFormat)
       .datasets(datasets)
-      .info(userInfo)
-      .kpis(kpis);
+      .info(userInfo);
 
     //profiles go before contarcts of same date
     const orderedData = sortAscending([ ...profiles, ...contracts ], d => d.date);
@@ -86,21 +85,22 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, kpi
       .call(milestonesBar
           .height(DIMNS.milestonesBar.list.height)
           .milestoneWidth(milestoneWidth)
-          .onSetKpiFormat(setKpiFormat))
+          .onSetKpiFormat(setKpiFormat)
+          .onClickKpi((e,kpi) => { onClickKpi(kpi); }))
   })
 
   return (
     <div className={classes.root}>
         <svg className={classes.svg} ref={containerRef} width="100%" height={DIMNS.milestonesBar.list.height}></svg>
         <div className={classes.ctrls}>
-          <IconButton className={classes.iconBtn}
+          <IconButton className={classes.iconBtn} onClick={milestonesBar.slideBack}
               aria-label="Home" >
-              <ArrowBackIosIcon onClick={milestonesBar.slideBack}
+              <ArrowBackIosIcon 
                   className={classes.icon}/>
           </IconButton>
-          <IconButton className={classes.iconBtn}
+          <IconButton className={classes.iconBtn} onClick={milestonesBar.slideForward}
               aria-label="Home" >
-              <ArrowForwardIosIcon onClick={milestonesBar.slideForward}
+              <ArrowForwardIosIcon
                   className={classes.icon}/>
           </IconButton>
         </div>

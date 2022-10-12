@@ -237,6 +237,12 @@ export default function kpisComponent() {
                             .style("cursor", "grab")
                             .merge(kpiG)
                             .attr("transform", (d,i) => {
+                                if(log){
+                                    console.log("d", d.id)
+                                    if(isSelected(d)){
+                                        console.log("is selected!!!!!!!!!!!!!!!!!!", d)
+                                    };
+                                }
                                 const extraSpaceForSelected = selectedKpiHeight - kpiHeight;
                                 const selectedKpiBefore = kpisData
                                     .slice(0, i)
@@ -581,6 +587,7 @@ export default function kpisComponent() {
     };
     kpis.selected = function (value) {
         if (!arguments.length) { return selected; }
+        console.log("set selected to.... ", value)
         selected = value;
         isSelected = d => d.id === selected;
         return kpis;
