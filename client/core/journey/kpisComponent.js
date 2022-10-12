@@ -237,12 +237,6 @@ export default function kpisComponent() {
                             .style("cursor", "grab")
                             .merge(kpiG)
                             .attr("transform", (d,i) => {
-                                if(log){
-                                    console.log("d", d.id)
-                                    if(isSelected(d)){
-                                        console.log("is selected!!!!!!!!!!!!!!!!!!", d)
-                                    };
-                                }
                                 const extraSpaceForSelected = selectedKpiHeight - kpiHeight;
                                 const selectedKpiBefore = kpisData
                                     .slice(0, i)
@@ -460,7 +454,7 @@ export default function kpisComponent() {
 
 
             function dragStart(e , d){
-                console.log("dragStart", d.x)
+                //console.log("dragStart", d.x)
                 d3.select(this).raise();
 
                 onDragStart.call(this, e, d)
@@ -479,7 +473,7 @@ export default function kpisComponent() {
     
             //note: newX and Y should be stored as d.x and d.y
             function dragEnd(e, d){
-                console.log("dragEnd", d.x)
+                //console.log("dragEnd", d.x)
                 //on next update, we want aim dimns/pos to transition
                 //shouldTransitionAim = true;
     
@@ -587,7 +581,6 @@ export default function kpisComponent() {
     };
     kpis.selected = function (value) {
         if (!arguments.length) { return selected; }
-        console.log("set selected to.... ", value)
         selected = value;
         isSelected = d => d.id === selected;
         return kpis;

@@ -13,16 +13,19 @@ const mockPlayer = {
 }
 
 const mapStateToProps = (state, ownProps) => {
+	//console.log("Container.................")
     //const { journeyId }  = ownProps.match.params;state,
 	const { journeys=[], homeJourney } = state.user;
 	const journeyId = state.system.activeJourney || homeJourney;
 	const data = journeys.find(j => j._id === journeyId) || journeys[0];
+
+	const player = mockPlayer; //@todo - use state.user if its a player that is signed in, or activePlayer if its a coach 
 	//todo - if its a different user to the signedin user (eg a coach looking at a player). then may need to load the user
 	const userInfo = {
 		//for now assume its same player as signed in
-		firstName:state.user?.firstName || mockPlayer.firstName,
-		surname:state.user?.surname || mockPlayer.surname,
-		position:state.user?.position || mockPlayer.position,
+		firstName:player.firstName,
+		surname:player.surname,
+		position:player.position,
 		age:21,
 		photos:[{label:"main"}]
 	}

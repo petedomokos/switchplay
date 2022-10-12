@@ -5,7 +5,7 @@ import IconButton from '@material-ui/core/IconButton'
 import CloseIcon from '@material-ui/icons/Close'
 import kpisLayout from "./kpisLayout";
 import kpisComponent from "./kpisComponent";
-import { DIMNS, FONTSIZES, grey10 } from './constants';
+import { grey10 } from './constants';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -15,7 +15,9 @@ const useStyles = makeStyles((theme) => ({
     display:"flex",
     flexDirection:"column",
     justifyContent:"center",
-    alignItems:"center"
+    alignItems:"center",
+    position:"relative",
+    overflow:"scroll"
   },
   header:{
     width:"100%",
@@ -45,13 +47,15 @@ const dateFormat = d3.timeFormat("%_d %b, %y")
 
 const layout = kpisLayout();
 const kpis = kpisComponent();
+const KPI_HEIGHT = 80;
 
 const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, format, onClose }) => {
-    //console.log("kpiView initSelected", initSelectedId)
-    //console.log("data", data)
     const headerHeight = d3.min([height * 0.15, 45]);
     const svgWidth = d3.min([width, 600]);
     const svgHeight = height - headerHeight;
+    //this determines if overflow scroll is needed here - 180 is an estimate
+    const actualKpisHeight = d3.max([svgHeight, data.length * 180])
+
     let styleProps = { width, svgHeight, headerHeight }
     const classes = useStyles(styleProps) 
     const containerRef = useRef(null);
@@ -72,7 +76,7 @@ const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, fo
           .call(kpis
               .width(svgWidth)
               .height(svgHeight)
-              .kpiHeight(80)
+              .kpiHeight(KPI_HEIGHT)
               .selected(selectedId)
               //todo - use d3 date format
               .getName(d => dateFormat(d.date))
@@ -87,7 +91,7 @@ const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, fo
                 <CloseIcon className={classes.closeIcon}/>
               </IconButton>
             </div>
-            <svg className={classes.svg} ref={containerRef} width={svgWidth} height={svgHeight}></svg>
+            <svg className={classes.svg} ref={containerRef} width={svgWidth} height={actualKpisHeight}></svg>
         </div>
     )
 }
