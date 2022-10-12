@@ -277,7 +277,7 @@ export default function journeyComponent() {
 
         selection.each(function (journeyData) {
             data = journeyData;
-            console.log("journey update...", data)
+            // console.log("journey update...", data)
             if(!svg){
                 //enter
                 init.call(this);

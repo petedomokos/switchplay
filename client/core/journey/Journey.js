@@ -563,10 +563,10 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
     <div className={classes.root}>
         <div className={`${classes.overlay} overlay`} ref={overlayRef}>
           {displayedBar === "milestones" && <MilestonesBar profiles={profiles} contracts={contracts} datasets={datasets}
-            userInfo={userInfo} kpis={userKpis} onClickKpi={kpi => setDisplayedBar({kpi})}
+            userInfo={userInfo} kpis={userKpis} onClickKpi={kpi => setDisplayedBar({kpi, prev:"milestones"})}
             kpiFormat={kpiFormat} setKpiFormat={setKpiFormat} />}
           {selectedKpi && <KpiView name={kpiName(selectedKpi)} data={kpiViewData} initSelectedId={selectedKpi.id} datasets={datasets} 
-            width={width * 0.9} height={height * 0.9} format={kpiFormat} />}
+            width={width * 0.95} height={height * 0.9} format={kpiFormat} onClose={() => setDisplayedBar(displayedBar.prev || "")} />}
         </div>
         <svg className={classes.svg} ref={containerRef}></svg>
         <div className={classes.ctrls}>

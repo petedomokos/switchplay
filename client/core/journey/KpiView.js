@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import * as d3 from 'd3';
 import { makeStyles } from '@material-ui/core/styles'
+import IconButton from '@material-ui/core/IconButton'
+import CloseIcon from '@material-ui/icons/Close'
 import kpisLayout from "./kpisLayout";
 import kpisComponent from "./kpisComponent";
 import { DIMNS, FONTSIZES, grey10 } from './constants';
@@ -17,10 +19,20 @@ const useStyles = makeStyles((theme) => ({
   },
   header:{
     width:"100%",
-    height:props => props.headerHeight
+    height:props => props.headerHeight,
+    padding:"0px 10px 0px 10px",
+    display:"flex",
+    justifyContent:"space-between",
+    alignItems:"center"
   },
   svg:{
     //position:"absolute"
+  },
+  name:{
+    color:grey10(2)
+  },
+  closeIcon:{
+    color:grey10(2)
   }
 }))
 
@@ -34,9 +46,9 @@ const dateFormat = d3.timeFormat("%_d %b, %y")
 const layout = kpisLayout();
 const kpis = kpisComponent();
 
-const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, format }) => {
-    console.log("kpiView initSelected", initSelectedId)
-    console.log("data", data)
+const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, format, onClose }) => {
+    //console.log("kpiView initSelected", initSelectedId)
+    //console.log("data", data)
     const headerHeight = d3.min([height * 0.15, 45]);
     const svgWidth = d3.min([width, 600]);
     const svgHeight = height - headerHeight;
@@ -69,7 +81,12 @@ const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, fo
 
     return (
         <div className={classes.root}>
-            <div className={classes.header}></div>
+            <div className={classes.header}>
+              <div className={classes.name}>{name}</div>
+              <IconButton aria-label="Close" onClick={onClose}>
+                <CloseIcon className={classes.closeIcon}/>
+              </IconButton>
+            </div>
             <svg className={classes.svg} ref={containerRef} width={svgWidth} height={svgHeight}></svg>
         </div>
     )
