@@ -28,7 +28,17 @@ export default function milestonesLayout(){
     }
 
     function update(data){
-        //console.log("update milestones data", format)
+        const now = new Date();
+        const activeProfileId = data
+            .filter(m => m.dataType === "profile")
+            .find(p => p.date > now)
+            ?.id;
+        const activeContractId = data
+            .filter(m => m.dataType === "contract")
+            .find(c => c.date > now)
+            ?.id;
+        
+        const isActive = m => m.dataType === "profile" ? m.id === activeProfileId : m.id === activeContractId;
 
         const ctrlsData = [
             { key: "target-completion", label:"Target Completion", isSelected:format === "target-completion" },
@@ -37,16 +47,23 @@ export default function milestonesLayout(){
         
         return data.map((milestone,i) => {
             const { date, dataType, kpis } = milestone;
+
+            const generalProps = {
+                nr:i,
+                isActive:isActive(milestone)
+            }
+
             if(dataType === "profile"){
                 myKpisLayout
                     .date(date)
                     .prevCardDate(i === 0 ? undefined : data[i - 1])
                     .format(format)
-                    .datasets(datasets);
+                    .datasets(datasets)
+                    .allKpisActive(generalProps.isActive);
 
                 return {
-                    nr:i,
                     ...milestone,
+                    ...generalProps,
                     ctrlsData,
                     info,
                     kpis:myKpisLayout(kpis),
@@ -54,8 +71,8 @@ export default function milestonesLayout(){
             }else{
                 //must be a contract
                 return {
-                    nr:i,
-                    ...milestone
+                    ...milestone,
+                    ...generalProps,
                 }
 
             }

@@ -149,7 +149,7 @@ export default function kpisComponent() {
 
         // expression elements
         selection.each(function (data) {
-            console.log("kpis update", data)
+            //console.log("kpis update", data)
             const kpisData = data.kpisData || data;
             const ctrlsData = data.ctrlsData || [];
             const nrOfNumberValues = kpisData[0] ? kpisData[0].numbersData.length : 0;

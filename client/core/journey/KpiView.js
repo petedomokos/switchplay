@@ -38,11 +38,6 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const sortAscending = (data, accessor =  d => d) => {
-    const dataCopy = data.map(d => d);
-    return dataCopy.sort((a, b) => d3.ascending(accessor(a), accessor(b)))
-};
-
 const dateFormat = d3.timeFormat("%_d %b, %y")
 
 const layout = kpisLayout();
@@ -50,6 +45,7 @@ const kpis = kpisComponent();
 const KPI_HEIGHT = 80;
 
 const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, format, onClose }) => {
+    //console.log("KpiView data", data)
     const headerHeight = d3.min([height * 0.15, 45]);
     const svgWidth = d3.min([width, 600]);
     const svgHeight = height - headerHeight;
@@ -67,12 +63,13 @@ const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, fo
     
         layout
           .format(format)
-          .datasets(datasets)
+          .datasets(datasets);
 
-        const orderedData = sortAscending(data, d => d.date);
+        const d = layout(data);
+        console.log("d", d)
 
         d3.select(containerRef.current)
-          .datum(layout(orderedData))
+          .datum(layout(data))
           .call(kpis
               .width(svgWidth)
               .height(svgHeight)

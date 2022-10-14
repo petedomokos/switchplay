@@ -9,6 +9,8 @@ export default function kpisLayout(){
     let format = "target-completion";
     let datasets = [];
     let withDeficitBar = false;
+    let allKpisActive = false;
+    let noKpisActive = false;
 
     //helper
     const statValue = (date, statId, datapoints, method="latest") => {
@@ -26,14 +28,25 @@ export default function kpisLayout(){
 
     const parse = valueObject => valueObject ? ({ ...valueObject, value: +valueObject.value }) : undefined;
 
+    const sortAscending = (data, accessor =  d => d) => {
+        const dataCopy = data.map(d => d);
+        return dataCopy.sort((a, b) => d3.ascending(accessor(a), accessor(b)))
+    };
+
     function update(data){
         //console.log("update kpis layout", data)
-        
-        return data.map((kpi,i) => {
+        const now = new Date();
+        const orderedData = sortAscending(data, d => d.date);
+        const nextKpi = orderedData.find(kpi => kpi.date > new Date());
+       
+        return orderedData.map((kpi,i) => {
             const kpiDate = kpi.date || date;
             //if kpis have dates, we use these for previous, except for the first one which uses the prevCardDate setting
             const prevKpiDate = i === 0 ? prevCardDate : data[i-1].date;
             const prevDate = kpi.date ? prevKpiDate : prevCardDate;
+            //can set all kpis to be active eg for an active profile card that doesnt have access to all data
+            const isActive = allKpisActive || (kpi.id === nextKpi?.id && !noKpisActive);
+            const isFuture = kpi.date > now;
             const { datasetId, statId } = kpi;
             const dataset = datasets.find(dset => dset._id === datasetId);
             const stat = dataset.measures.find(m => m._id === statId);
@@ -44,7 +57,6 @@ export default function kpisLayout(){
             const targetDatapoints = dataset.datapoints.filter(d => d.isTarget);
             const currentDatapoint = d3.greatest(actualDatapoints, d => d.date);
             const targetDatapoint = d3.greatest(targetDatapoints, d => d.date);
-            const now = new Date();
             const current = parse(currentDatapoint?.values.find(v => v.measure === statId)) || { date:now, value: min };
             //temp
             const defaultTargValue = current?.value ? current.value * 1.5 : min;
@@ -52,6 +64,7 @@ export default function kpisLayout(){
             const target = parse(targetDatapoint?.values.find(v => v.measure === statId)) || defaultTarg;
             //const pcCompletion = (value) => target.value !== 0 ? +(((+value/+target.value) * 100).toFixed(0)) : 100;
             //for now, if no previous, we default it to 50% of targ
+            const achieved = statValue(kpiDate, statId, actualDatapoints) || { value: d3.max([target.value * 0.5, min]) };
             const previous = statValue(prevDate, statId, actualDatapoints) || { value: d3.max([target.value * 0.5, min]) };
             
             const _pcCompletionValue = pcCompletion(previous.value, target.value, current.value);
@@ -120,9 +133,13 @@ export default function kpisLayout(){
             let handlesData = [];
             if(formatIsActual) {
                 if(previous){ handlesData.push(prevHandleDatum);}
-                handlesData.push(currentHandleDatum, targetHandleDatum, expectedHandleDatum);
+                handlesData.push(currentHandleDatum, targetHandleDatum);
             }else{
-                handlesData.push(currentHandleDatum, expectedHandleDatum);
+                handlesData.push(currentHandleDatum);
+                //only show expected handle on next future profile, not past or other future ones
+            }
+            if(isActive){
+                handlesData.push(expectedHandleDatum);
             }
             
            
@@ -146,6 +163,7 @@ export default function kpisLayout(){
                 value:{ fill:"white", stroke: grey10(7)}
             }
             let tooltipsData = [];
+            
             if(formatIsActual){
                 if(previous){
                     tooltipsData.push({ 
@@ -159,53 +177,71 @@ export default function kpisLayout(){
                         styles:tooltipStyles
                     });
                 }
-                tooltipsData.push(
-                    { 
-                        key: "current", 
-                        title:"Current",
-                        ...current,
+                /*if(!isFuture){
+                    //todo - finish all this...its a past kpi - just show the achieved datapoint
+                    //but also show target
+                    tooltipsData.push({ 
+                        key: "achieved", 
+                        title:"Achieved",
+                        ...achieved,
                         location:"above",
                         row:0, // just above bar
                         styles:tooltipStyles
                         
-                    },
-                    { 
-                        key: "expected",
-                        title:"Expected",
-                        desc: "...",
-                        ...expectedCurrent,
-                        location:"below",
-                        row:0, // just below bar
-                        styles:tooltipStyles
-                    },
-                    { 
-                        key: "target",
-                        title: "Target",
-                        desc: "...",
-                        ...target,
-                        location:"above",
-                        row:1, // very top,
-                        styles:tooltipStyles
+                    })
+                }else{*/
+                    //its a future kpi
+                    tooltipsData.push(
+                        { 
+                            key: "current", 
+                            title:"Current",
+                            ...current,
+                            location:"above",
+                            row:0, // just above bar
+                            styles:tooltipStyles
+                            
+                        },
+                        { 
+                            key: "target",
+                            title: "Target",
+                            desc: "...",
+                            ...target,
+                            location:"above",
+                            row:1, // very top,
+                            styles:tooltipStyles
+                        }
+                    );
+                    if(isActive){
+                        tooltipsData.push({ 
+                            key: "expected",
+                            title:"Expected",
+                            desc: "...",
+                            ...expectedCurrent,
+                            location:"below",
+                            row:0, // just below bar
+                            styles:tooltipStyles
+                        });
                     }
-                )
+                //}
+                
             }else{
-                tooltipsData.push(
-                    {
-                        key: "current", 
-                        title:"Current",
-                        desc: "...",
-                        format:'pc',
-                        ...current,
-                        actualValue:current.value,
-                        //override value with pc
-                        //value: pcCompletion(current.value),
-                        pcValue: _pcCompletionValue,
-                        //units:"%",
-                        location:"above",
-                        row:0, // just above bar,
-                        styles:tooltipStyles
-                    },
-                    { 
+                tooltipsData.push({
+                    key: "current", 
+                    title:"Current",
+                    desc: "...",
+                    format:'pc',
+                    ...current,
+                    actualValue:current.value,
+                    //override value with pc
+                    //value: pcCompletion(current.value),
+                    pcValue: _pcCompletionValue,
+                    //units:"%",
+                    location:"above",
+                    row:0, // just above bar,
+                    styles:tooltipStyles
+                });
+                if(isActive){
+                    tooltipsData.push({ 
                         key: "expected",
                         title:"Expected",
                         desc: "...",
@@ -219,13 +255,15 @@ export default function kpisLayout(){
                         location:"below",
                         row:0, // very top
                         styles:tooltipStyles
-                    },
-                )
+                    });
+                }
             }
 
             return {
                 ...kpi,
                 date:kpiDate,
+                isActive,
+                isFuture,
                 //stat full name stands alone without needing the dataset name before it
                 name:stat.fullNameShort,
                 longName:stat.fullNameLong,
@@ -269,6 +307,21 @@ export default function kpisLayout(){
     update.withDeficitBar = function (value) {
         if (!arguments.length) { return withDeficitBar; }
         withDeficitBar = value;
+        return update;
+    };
+    update.allKpisActive = function (value) {
+        if (!arguments.length) { return allKpisActive; }
+        allKpisActive = value;
+        return update;
+    };
+    update.noKpisActive = function (value) {
+        if (!arguments.length) { return noKpisActive; }
+        noKpisActive = value;
+        return update;
+    };
+    update.datasets = function (value) {
+        if (!arguments.length) { return datasets; }
+        datasets = value;
         return update;
     };
     update.datasets = function (value) {

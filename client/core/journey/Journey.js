@@ -164,9 +164,10 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
   }
   //need to know which date/profile is selected too -
   // this also comes from teh kpi that is passed through, as it will have that date
-  const kpiViewData = !selectedKpi ? null : profiles.map(p =>  {
-    return p.kpis.find(kpi => kpi.kpiSetId === selectedKpi.kpiSetId)
-  });
+  const kpiViewData = !selectedKpi ? null : profiles.map(p =>  ({
+    ...p.kpis.find(kpi => kpi.kpiSetId === selectedKpi.kpiSetId),
+    date:p.date
+  }));
 
   const shouldD3UpdateRef = useRef(true);
 
