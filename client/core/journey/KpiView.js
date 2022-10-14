@@ -77,6 +77,18 @@ const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, fo
               .width(svgWidth)
               .height(svgHeight)
               .kpiHeight(KPI_HEIGHT)
+              .styles({ 
+                kpi:{ 
+                    name: { 
+                      stroke:grey10(3)
+                    },
+                    bars:{
+                      target:{
+                        opacity:0.1
+                      }
+                    }
+                }
+              })
               .selected(selectedId)
               //todo - use d3 date format
               .getName(d => dateFormat(d.date))

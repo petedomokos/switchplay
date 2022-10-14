@@ -9,7 +9,7 @@ export default function milestonesLayout(){
     let info = {};
 
     let aligned = false;
-    let format = "next-target";
+    let format = "target-completion";
 
     const myKpisLayout = kpisLayout();
 
@@ -31,8 +31,8 @@ export default function milestonesLayout(){
         //console.log("update milestones data", format)
 
         const ctrlsData = [
-            { key: "next-target", label:"Next Target", isSelected:format === "next-target" },
-            { key: "long-term", label:"Long Term", isSelected:format === "long-term" }
+            { key: "target-completion", label:"Target Completion", isSelected:format === "target-completion" },
+            { key: "actual-value", label:"Actual Value", isSelected:format === "actual-value" }
         ]    
         
         return data.map((milestone,i) => {

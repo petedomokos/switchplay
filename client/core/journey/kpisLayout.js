@@ -1,10 +1,14 @@
 import * as d3 from 'd3';
+import { addWeeks } from "../../util/TimeHelpers"
+import { pcCompletion } from "../../util/NumberHelpers"
+import { grey10 } from './constants';
 
 export default function kpisLayout(){
     let date = new Date();
     let prevCardDate;
-    let format = "next-target";
+    let format = "target-completion";
     let datasets = [];
+    let withDeficitBar = false;
 
     //helper
     const statValue = (date, statId, datapoints, method="latest") => {
@@ -20,11 +24,12 @@ export default function kpisLayout(){
         //}
     }
 
+    const parse = valueObject => valueObject ? ({ ...valueObject, value: +valueObject.value }) : undefined;
+
     function update(data){
         //console.log("update kpis layout", data)
         
         return data.map((kpi,i) => {
-            //console.log("kpi", kpi)
             const kpiDate = kpi.date || date;
             //if kpis have dates, we use these for previous, except for the first one which uses the prevCardDate setting
             const prevKpiDate = i === 0 ? prevCardDate : data[i-1].date;
@@ -39,13 +44,19 @@ export default function kpisLayout(){
             const targetDatapoints = dataset.datapoints.filter(d => d.isTarget);
             const currentDatapoint = d3.greatest(actualDatapoints, d => d.date);
             const targetDatapoint = d3.greatest(targetDatapoints, d => d.date);
-            const currentValue = currentDatapoint ? +currentDatapoint.values.find(v => v.measure === statId).value : min;
+            const now = new Date();
+            const current = parse(currentDatapoint?.values.find(v => v.measure === statId)) || { date:now, value: min };
             //temp
-            const defaultTarg = currentValue ? currentValue * 1.5 : min;
-            const targetValue = targetDatapoint ? +targetDatapoint.values.find(v => v.measure === statId).value : defaultTarg;
-            const previous = statValue(prevDate, statId, actualDatapoints);
+            const defaultTargValue = current?.value ? current.value * 1.5 : min;
+            const defaultTarg = { date:addWeeks(4, now), value: defaultTargValue };
+            const target = parse(targetDatapoint?.values.find(v => v.measure === statId)) || defaultTarg;
+            //const pcCompletion = (value) => target.value !== 0 ? +(((+value/+target.value) * 100).toFixed(0)) : 100;
+            //for now, if no previous, we default it to 50% of targ
+            const previous = statValue(prevDate, statId, actualDatapoints) || { value: d3.max([target.value * 0.5, min]) };
+            
+            const _pcCompletionValue = pcCompletion(previous.value, target.value, current.value);
             //for now, we manually seyt this to test it renders as red. But should be based on linear interpolation
-            const expectedCurrent = { kpiDate, value:currentValue * 1.3 };//calculateExpected(previous, target, date)
+            const expectedCurrent = { date: kpiDate, value:(current?.value ? current.value * 1.3 : 0) };//calculateExpected(previous, target, date)
             //bars
             const currentColour = "#696969";
             const colours = {
@@ -55,45 +66,161 @@ export default function kpisLayout(){
                 expectedAhead:currentColour
             }
 
-            const isOnTrack = expectedCurrent.value <= currentValue;
-            const start = format === "long-term" ? min : (previous?.value || min);
-            const end = format === "long-term" ? max : targetValue;
+            //@todo - change formats to 3 types: 'Target Completion', 'Actual Score', and 'Standardised Score'
+            const formatIsActual = format === "actual-value";
+            const isOnTrack = expectedCurrent.value <= current.value;
+            const start = format === "actual-value" ? min : (d3.min([previous?.value, current?.value]) || min);
+            //console.log("previous", previous)
+            //console.log("current", current)
+            //console.log("min", min)
+            const end = format === "actual-value" ? max : target.value;
 
             const rangeDatum = { id: "range", from:start, to:end, fill:"transparent", stroke:"grey" };
-            const targetDatum = { id: "target", from:start, to:targetValue, fill:colours.target };
-            const currentDatum = { id: "current", from:start, to:currentValue, fill:colours.current };
-            const targetHandleDatum = { ...targetDatum, value:targetDatum.to, pos:"above" }
+            const targetDatum = { id: "target", from:start, to:target.value, fill:colours.target };
+            const currentDatum = { id: "current", from:start, to:current.value, fill:colours.current };
+            const targetHandleDatum = { 
+                ...targetDatum, 
+                handleType:"triangle", 
+                value:targetDatum.to, 
+                pos:"above"
+            }
 
             const prevHandleDatum = { 
-                id: "previous", 
+                id: "previous",
+                handleType:"line",
+                stroke:"white",
+                strokeWidth:0.5,
+                strokeDasharray:4,
                 ...previous,
                 fill:colours.current,
                 pos:"above"
             }
 
             const expectedHandleDatum = { 
-                id: "expected", 
+                id: "expected",
+                handleType:"triangle",
                 value:expectedCurrent.value,
                 //@todo - handle decreasing datasets ie less is best
                 fill:isOnTrack ? colours.expectedAhead : colours.expectedBehind,
                 pos:"below"
             }
-            const barsData = format === "long-term" ? [rangeDatum, targetDatum, currentDatum] : [rangeDatum, currentDatum];
-            const handlesData = format === "long-term" ? [prevHandleDatum, targetHandleDatum, expectedHandleDatum] : [expectedHandleDatum];
 
-            //@todo later - handle target === 0
-            const pcCompletion = targetValue !== 0 ? ((currentValue/targetValue) * 100).toFixed(0) : 100;
-            const numbersData = format === "long-term" ? 
+            const currentHandleDatum = {
+                id:'current',
+                handleType:"rect",
+                fill:"transparent",
+                stroke:"white",
+                strokeWidth:0.2,
+                ...current,
+                pcValue:_pcCompletionValue,
+                format:formatIsActual ? "actual" : "pc"
+            }
+            const barsData = formatIsActual ? [rangeDatum, targetDatum, currentDatum] : [rangeDatum, currentDatum];
+
+            let handlesData = [];
+            if(formatIsActual) {
+                if(previous){ handlesData.push(prevHandleDatum);}
+                handlesData.push(currentHandleDatum, targetHandleDatum, expectedHandleDatum);
+            }else{
+                handlesData.push(currentHandleDatum, expectedHandleDatum);
+            }
+            
+           
+            const numbersData = formatIsActual ? 
                 [ 
-                    { id: "actual", value: currentValue, colour:colours.current } 
+                    { id: "actual", value: current?.value, colour:colours.current } 
                 ]
                 :
                 [
-                    { id: "pc", value: `${pcCompletion}%`, colour:isOnTrack ? colours.current : "red" },
-                    { id: "actual", value: `${currentValue}`, colour:colours.current }
+                    { id: "pc", value: `${_pcCompletionValue}%`, colour:isOnTrack ? colours.current : "red" },
+                    { id: "actual", value: `${current?.value}`, colour:colours.current }
                 ]
-            if(currentValue < expectedCurrent.value){
-                barsData.push({ id:"deficit", from:currentValue, to:expectedCurrent.value, fill:"red" })
+
+            if(withDeficitBar && current?.value < expectedCurrent.value){
+                barsData.push({ id:"deficit", from:current?.value, to:expectedCurrent.value, fill:"red" })
+            }
+
+            const tooltipStyles = {
+                bg:{ fill: "none" },
+                title:{ stroke: "white" },
+                value:{ fill:"white", stroke: grey10(7)}
+            }
+            let tooltipsData = [];
+            if(formatIsActual){
+                if(previous){
+                    tooltipsData.push({ 
+                        key: "previous",
+                        title:"Previous",
+                        desc: "...",
+                        ...previous,
+                        location:"above",
+                        row:1, // very top
+                        labelPos:"below",
+                        styles:tooltipStyles
+                    });
+                }
+                tooltipsData.push(
+                    { 
+                        key: "current", 
+                        title:"Current",
+                        ...current,
+                        location:"above",
+                        row:0, // just above bar
+                        styles:tooltipStyles
+                        
+                    },
+                    { 
+                        key: "expected",
+                        title:"Expected",
+                        desc: "...",
+                        ...expectedCurrent,
+                        location:"below",
+                        row:0, // just below bar
+                        styles:tooltipStyles
+                    },
+                    { 
+                        key: "target",
+                        title: "Target",
+                        desc: "...",
+                        ...target,
+                        location:"above",
+                        row:1, // very top,
+                        styles:tooltipStyles
+                    }
+                )
+            }else{
+                tooltipsData.push(
+                    {
+                        key: "current", 
+                        title:"Current",
+                        desc: "...",
+                        format:'pc',
+                        ...current,
+                        actualValue:current.value,
+                        //override value with pc
+                        //value: pcCompletion(current.value),
+                        pcValue: _pcCompletionValue,
+                        //units:"%",
+                        location:"above",
+                        row:0, // just above bar,
+                        styles:tooltipStyles
+                    },
+                    { 
+                        key: "expected",
+                        title:"Expected",
+                        desc: "...",
+                        format:"pc",
+                        ...expectedCurrent,
+                        actualValue:expectedCurrent.value,
+                        //override value with pc
+                        // value: pcCompletion(expectedCurrent.value),
+                        pcValue: _pcCompletionValue,
+                        //units:"%",
+                        location:"below",
+                        row:0, // very top
+                        styles:tooltipStyles
+                    },
+                )
             }
 
             return {
@@ -105,6 +232,7 @@ export default function kpisLayout(){
                 unit:stat.unit,
                 barsData,
                 handlesData,
+                tooltipsData,
                 numbersData,
                 bands:bands.map(band => ({ ...band, min:+band.min, max:+band.max })),
                 min,
@@ -114,8 +242,8 @@ export default function kpisLayout(){
                 standards:standards.map(standard => ({ ...standard, value:+standard.value })),
                 //3 date-value objects for previous, current and target values
                 previous,
-                current:{ date: currentDatapoint.date, value: currentValue },
-                target: targetDatapoint ? { date: targetDatapoint.date, value: targetValue } : undefined,
+                current:{ date: currentDatapoint.date, value: current.value },
+                target: targetDatapoint ? { date: targetDatapoint.date, value: target.value } : undefined,
                 expectedCurrent,
                 actualDatapoints:actualDatapoints.map(d => ({ date:d.date, value:d.values.find(v => v.measure === statId).value }))
             }
@@ -136,6 +264,11 @@ export default function kpisLayout(){
         if (!arguments.length) { return format; }
         //new value may be undefined in which case dont update it
         if(value){ format = value; }
+        return update;
+    };
+    update.withDeficitBar = function (value) {
+        if (!arguments.length) { return withDeficitBar; }
+        withDeficitBar = value;
         return update;
     };
     update.datasets = function (value) {

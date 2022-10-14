@@ -46,7 +46,7 @@ const mockDatasets = [
         values:[
           { 
             measure:"606b6aef720202523cc3589e", 
-            value:"33" ,
+            value:"38" ,
             key:"reps"
           }
         ]
@@ -150,7 +150,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
   const [aligned, setAligned] = useState(false);
   const [modalData, setModalData] = useState(undefined);
   const [displayedBar, setDisplayedBar] = useState("");
-  const [kpiFormat, setKpiFormat] = useState("next-target");
+  const [kpiFormat, setKpiFormat] = useState("target-completion");
   const selectedKpi = typeof displayedBar === "object" && displayedBar.kpi ? displayedBar.kpi : null;
   const shouldShowOverlay = displayedBar === "milestones" || selectedKpi;
 
