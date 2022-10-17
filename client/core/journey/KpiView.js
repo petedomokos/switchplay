@@ -5,30 +5,34 @@ import IconButton from '@material-ui/core/IconButton'
 import CloseIcon from '@material-ui/icons/Close'
 import kpisLayout from "./kpisLayout";
 import kpisComponent from "./kpisComponent";
-import { grey10 } from './constants';
+import { grey10, STYLES, KPI_CTRLS } from './constants';
 
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width:props => props.width,
-    height:props => props.height,
     display:"flex",
     flexDirection:"column",
-    justifyContent:"center",
+    //justifyContent:"center",
     alignItems:"center",
     position:"relative",
-    overflow:"scroll"
+    overflow:"scroll",
   },
   header:{
     width:"100%",
     height:props => props.headerHeight,
-    padding:"0px 10px 0px 10px",
+    padding:"0px 10px 0px 40px",
     display:"flex",
     justifyContent:"space-between",
     alignItems:"center"
   },
   svg:{
-    //position:"absolute"
+  },
+  footer:{
+    width:"100%",
+    height:props => props.footerHeight,
+    padding:"0px 10px 0px 10px",
+    display:"flex",
+    justifyContent:"space-between",
   },
   name:{
     color:grey10(2)
@@ -45,14 +49,20 @@ const kpis = kpisComponent();
 const KPI_HEIGHT = 80;
 
 const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, format, onClose }) => {
-    //console.log("KpiView data", data)
+  //console.log("KpiView height", height)
+  /*
+  todo - sort height/overflow out so svgCont is a div with fixed height, and teh 
+  svg scrolls within that, but footer is fixed to bottom 
+  part of screen with kpi ctrls
+  alternatively, just use d3 zoom to make kpisCompinent scrollable
+  //note - we can set the d3 zoom to do specific actions on mousewheel, so it just pans
+  as long as zoom is set on something lower than teh drag stuff in kpis. so if we set zoom
+  on kpis listG tehn that should be the right one, perhaps with a bg rect
+    */
     const headerHeight = d3.min([height * 0.15, 45]);
-    const svgWidth = d3.min([width, 600]);
-    const svgHeight = height - headerHeight;
-    //this determines if overflow scroll is needed here - 180 is an estimate
-    const actualKpisHeight = d3.max([svgHeight, data.length * 180])
+    const footerHeight = d3.min([height * 0.15, 45]);
 
-    let styleProps = { width, svgHeight, headerHeight }
+    let styleProps = { headerHeight, footerHeight }
     const classes = useStyles(styleProps) 
     const containerRef = useRef(null);
     const [selectedId, setSelectedId] = useState(initSelectedId);
@@ -60,32 +70,24 @@ const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, fo
     //init
     useEffect(() => {
         if(!containerRef.current){return; }
+
+        const svgWidth = d3.min([width, 600]);
+        const svgHeight = height - headerHeight - footerHeight;
     
         layout
           .format(format)
           .datasets(datasets);
 
-        const d = layout(data);
-        console.log("d", d)
-
         d3.select(containerRef.current)
+          .attr("width", svgWidth)
+          .attr("height", svgHeight)
           .datum(layout(data))
           .call(kpis
               .width(svgWidth)
               .height(svgHeight)
               .kpiHeight(KPI_HEIGHT)
-              .styles({ 
-                kpi:{ 
-                    name: { 
-                      stroke:grey10(3)
-                    },
-                    bars:{
-                      target:{
-                        opacity:0.1
-                      }
-                    }
-                }
-              })
+              .styles(STYLES.kpiView.kpis)
+              .editable(true)
               .selected(selectedId)
               //todo - use d3 date format
               .getName(d => dateFormat(d.date))
@@ -100,7 +102,8 @@ const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, fo
                 <CloseIcon className={classes.closeIcon}/>
               </IconButton>
             </div>
-            <svg className={classes.svg} ref={containerRef} width={svgWidth} height={actualKpisHeight}></svg>
+            <svg className={classes.svg} ref={containerRef}></svg>
+            <div className={classes.footer}></div>
         </div>
     )
 }

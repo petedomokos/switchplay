@@ -24,6 +24,22 @@ const userKpis = {
       { 
          datasetId: "606b6aef720202523cc3589d", 
          statId: "606b6aef720202523cc3589e",
+      },
+      { 
+         datasetId: "606b6aef720202523cc3589d", 
+         statId: "606b6aef720202523cc3589e",
+      },
+      { 
+         datasetId: "606b6aef720202523cc3589d", 
+         statId: "606b6aef720202523cc3589e",
+      },
+      { 
+         datasetId: "606b6aef720202523cc3589d", 
+         statId: "606b6aef720202523cc3589e",
+      },
+      { 
+         datasetId: "606b6aef720202523cc3589d", 
+         statId: "606b6aef720202523cc3589e",
       }
    ]
 }

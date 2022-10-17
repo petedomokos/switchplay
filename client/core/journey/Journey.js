@@ -140,7 +140,7 @@ const initChannels = d3.range(numberMonths)
 
 //width and height may be full screen, but may not be
 const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog }) => {
-  //console.log("Journey data", data)
+  // console.log("Journey screen", screen)
   //console.log("Journey avail", availableJourneys)
   const hydratedData = hydrateJourneyData(data, userKpis, datasets);
   const { _id, userId, name, contracts, profiles, aims, goals, links, measures } = hydratedData;
@@ -567,7 +567,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
             userInfo={userInfo} kpis={userKpis} onClickKpi={kpi => setDisplayedBar({kpi, prev:"milestones"})}
             kpiFormat={kpiFormat} setKpiFormat={setKpiFormat} />}
           {selectedKpi && <KpiView name={kpiName(selectedKpi)} data={kpiViewData} initSelectedId={selectedKpi.id} datasets={datasets} 
-            width={width * 0.95} height={height * 0.9} format={kpiFormat} onClose={() => setDisplayedBar(displayedBar.prev || "")} />}
+            width={screen.width * 0.95} height={screen.height} format={kpiFormat} onClose={() => setDisplayedBar(displayedBar.prev || "")} />}
         </div>
         <svg className={classes.svg} ref={containerRef}></svg>
         <div className={classes.ctrls}>

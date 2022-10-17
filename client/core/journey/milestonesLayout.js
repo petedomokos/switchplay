@@ -38,12 +38,7 @@ export default function milestonesLayout(){
             .find(c => c.date > now)
             ?.id;
         
-        const isActive = m => m.dataType === "profile" ? m.id === activeProfileId : m.id === activeContractId;
-
-        const ctrlsData = [
-            { key: "target-completion", label:"Target Completion", isSelected:format === "target-completion" },
-            { key: "actual-value", label:"Actual Value", isSelected:format === "actual-value" }
-        ]    
+        const isActive = m => m.dataType === "profile" ? m.id === activeProfileId : m.id === activeContractId; 
         
         return data.map((milestone,i) => {
             const { date, dataType, kpis } = milestone;
@@ -64,7 +59,6 @@ export default function milestonesLayout(){
                 return {
                     ...milestone,
                     ...generalProps,
-                    ctrlsData,
                     info,
                     kpis:myKpisLayout(kpis),
                 }

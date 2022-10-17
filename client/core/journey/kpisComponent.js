@@ -1,8 +1,11 @@
 import * as d3 from 'd3';
 import { DIMNS, grey10 } from "./constants";
 import dragEnhancements from './enhancedDragHandler';
+import { pcCompletion } from "../../util/NumberHelpers"
 import { Oscillator } from './domHelpers';
+import { getTransformationFromTrans } from './helpers';
 import tooltipsComponent from './tooltipsComponent';
+import { svgParent } from './domHelpers';
 
 /*
 
@@ -16,7 +19,9 @@ export default function kpisComponent() {
     let contentsWidth;
     let contentsHeight;
 
+    let listWidth;
     let listHeight;
+    let ctrlsWidth;
     let ctrlsHeight;
 
     let ctrlsMargin;
@@ -26,10 +31,11 @@ export default function kpisComponent() {
     let btnHeight;
     let btnFontSize;
 
+    let kpiWidth;
     let kpiHeight = 100;
     let gapBetweenKpis;
 
-    let kpiNameWidth;
+    let kpiNameCharWidth;
     let kpiNameHeight;
     let kpiNameMargin;
 
@@ -62,17 +68,21 @@ export default function kpisComponent() {
         handleWidth = handleHeight * 0.6;
         topHandleHeight = handlesAreAbove ? handleHeight : 0;
         bottomHandleHeight = handlesAreBelow ? handleHeight : 0;
-
-        const horizMargin = withTooltips ? tooltipWidth/2 : 0;
+        const defaultHorizMargin = width * 0.1;
+        const horizMargin = withTooltips ? d3.max([tooltipWidth/2, defaultHorizMargin]) : defaultHorizMargin;
         margin = { left: horizMargin, right: horizMargin, top:height * 0.1, bottom: height * 0.05 };
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
+        ctrlsWidth = contentsWidth;
         ctrlsHeight = nrCtrlsButtons !== 0 ? contentsHeight * 0.15 : 0;
+        listWidth = contentsWidth;
         listHeight = contentsHeight - ctrlsHeight;
 
+        let kpiWidth = contentsWidth;
+
         ctrlsMargin = { left: contentsWidth * 0.1, right: contentsWidth * 0.1, top: ctrlsHeight * 0.1, bottom: ctrlsHeight * 0.1 };
-        ctrlsContentsWidth = contentsWidth - ctrlsMargin.left - ctrlsMargin.right;
+        ctrlsContentsWidth = ctrlsWidth - ctrlsMargin.left - ctrlsMargin.right;
         ctrlsContentsHeight = ctrlsHeight - ctrlsMargin.top - ctrlsMargin.bottom;
         btnWidth = ctrlsContentsWidth / nrCtrlsButtons;
         btnHeight = ctrlsContentsHeight;
@@ -81,7 +91,7 @@ export default function kpisComponent() {
         numbersWidth = contentsWidth * numbersPCWidth;
         barWidth = contentsWidth - numbersWidth;
         //todo - calculate name width based on text length
-        kpiNameWidth = barWidth * 0.8;
+        kpiNameCharWidth = barWidth * 0.04;
         //todo - reduce kpiHeight and place kpi name above each bar 
         //kpi margin
         gapBetweenKpis = kpiHeight * 0.3;
@@ -113,9 +123,12 @@ export default function kpisComponent() {
     let styles = {}
 
     let withTooltips = true;
+    let withCtrls = true;
     let selected;
     let isSelected = d => false;
     let getName = d => d.name;
+
+    let editable = false;
 
     //API CALLBACKS
     let onClick = function(){};
@@ -134,10 +147,8 @@ export default function kpisComponent() {
 
     const enhancedDrag = dragEnhancements();
     const tooltips = tooltipsComponent();
-    //@todo - find out why k=1.05 makes such a big increase in size
-    const oscillator = Oscillator({k:1});
 
-    let longpressed;
+    const listScrollZoom = d3.zoom();
 
     let scales = {};
 
@@ -149,15 +160,16 @@ export default function kpisComponent() {
 
         // expression elements
         selection.each(function (data) {
-            //console.log("kpis update", data)
-            const kpisData = data.kpisData || data;
-            const ctrlsData = data.ctrlsData || [];
+            const { id, kpisData } = data;
+            const ctrlsData = withCtrls ? data.ctrlsData : [];
+
             const nrOfNumberValues = kpisData[0] ? kpisData[0].numbersData.length : 0;
             const nrOfCtrlsButtons = ctrlsData?.length;
 
             //grab the first kpi to check wht handles there are
-            const handlesAreAbove = data[0] ? data[0].handlesData?.filter(h => h.position === "above") !== 0 : false;
-            const handlesAreBelow = data[0] ? data[0].handlesData?.filter(h => h.position === "below") !== 0 : false;
+            const handlesAreAbove = kpisData[0] ? kpisData[0].handlesData?.filter(h => h.position === "above") !== 0 : false;
+            const handlesAreBelow = kpisData[0] ? kpisData[0].handlesData?.filter(h => h.position === "below") !== 0 : false;
+            
             updateDimns(nrOfNumberValues, nrOfCtrlsButtons, handlesAreAbove, handlesAreBelow);
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
@@ -170,7 +182,11 @@ export default function kpisComponent() {
                 .onLongpressDragged(longpressDragged)
                 .onLongpressEnd(longpressEnd);
 
-            const drag = d3.drag()
+            
+            //todo - drag number changes in numbers and in tooltips - scaling not working yet
+            // may be bnest to sort out the datums first in layout
+
+            const handleDrag = !editable ? () => {} : d3.drag()
                 .on("start", enhancedDrag(dragStart))
                 .on("drag", enhancedDrag(dragged))
                 .on("end", enhancedDrag(dragEnd));
@@ -180,7 +196,7 @@ export default function kpisComponent() {
                 .append("g")
                     .attr("class", "contents")
                     .each(function(){
-                        const contentsG = d3.select(this)
+                        const contentsG = d3.select(this);
 
                         contentsG
                             .append("rect")
@@ -188,13 +204,26 @@ export default function kpisComponent() {
                                 .attr("fill", "transparent")
                                 .attr("stroke", "none");
 
-                        contentsG.append("g").attr("class", "kpis-list")
+                        const listG = contentsG.append("g").attr("class", "kpis-list");
+                        listG
                             .append("rect")
-                                .attr("class", "list-bg");
+                                .attr("class", "list-bg")
+                                .attr("fill", "transparent")
+                                .attr("stroke", "none");
+
+                        listG.append("g").attr("class", "list-contents");
+
+                        listG
+                            .append("defs")
+                                .append('clipPath')
+                                    .attr('id', "clip")
+                                        .append('rect')
 
                         contentsG.append("g").attr("class", "kpis-ctrls")
                             .append("rect")
-                                .attr("class", "ctrls-bg");;
+                                .attr("class", "ctrls-bg");
+
+
                     })
                     .merge(contentsG)
                     .attr("transform", d =>  `translate(${margin.left},${margin.top})`)
@@ -206,17 +235,41 @@ export default function kpisComponent() {
                             .attr("height", contentsHeight)
 
                         //kpi list
-                        const listG = contentsG.select("g.kpis-list");
+                        //sctool
+                        //todo - 1. put clipPath in place
+                        //2. put extent in place so it doesnt scroll beyond the start and end 
+
+                        listScrollZoom.on('zoom', handleListScrollZoom)
+                        const listG = contentsG.select("g.kpis-list")
+                            .attr('clip-path', "url(#clip)")
+                            .call(listScrollZoom);
+
+                        const clipRect = listG.select("clipPath#clip").select('rect');
+                        clipRect
+                                .attr('width', listWidth)
+                                .attr('height', listHeight)
+                                .attr('x', 0)
+                                .attr('y', 0);
+
+
+                        const listContentsG = listG.select("g.list-contents");
+                        
+                        function handleListScrollZoom(e){
+                            // @todo - if on laptop or pc, then remove option to pan by dragging,
+                            // so only way to pan is mousewheel. this mimmick normal
+                            // scroll behaviour. then we can reverse it on mac, passing in
+                            // -transform.y so it goes up as expected and down as expected
+                            listContentsG.attr("transform", `translate(0, ${e.transform.y})`)
+                        }
+
                         listG.select("rect.list-bg")
-                            .attr("width", contentsWidth)
-                            .attr("height", listHeight)
-                            .attr("fill", "transparent")
-                            .attr("stroke", "none")
+                            .attr("width", listWidth)
+                            .attr("height", listHeight);
 
                         //todo - get liust bg showing
                         //make kpi bar width font size etc based on listHeight
 
-                        const kpiG = listG.selectAll("g.kpi").data(kpisData, d => d.id);
+                        const kpiG = listContentsG.selectAll("g.kpi").data(kpisData, d => d.id);
                         kpiG.enter()
                             .append("g")
                             .attr("class", d => "kpi kpi-"+d.id)
@@ -253,7 +306,6 @@ export default function kpisComponent() {
                                                         .attr("stroke", "none");
             
                             })
-                            .style("cursor", "grab")
                             .merge(kpiG)
                             .attr("transform", (d,i) => {
                                 const extraSpaceForSelected = selectedKpiHeight - kpiHeight;
@@ -269,12 +321,12 @@ export default function kpisComponent() {
 
                                 const kpiG = d3.select(this);
                                 kpiG.select("rect.kpi-bg")
-                                    .attr("width", contentsWidth)
+                                    .attr("width", kpiWidth)
                                     .attr("height", isSelected(d) ? selectedKpiHeight : kpiHeight) 
                                 
                                 const nameG = kpiG.select("g.name");
                                 nameG.select("rect")
-                                    .attr("width", kpiNameWidth)
+                                    .attr("width", kpiNameCharWidth * getName(d).length)
                                     .attr("height", kpiNameHeight);
                                 
                                 nameG.select("text")
@@ -292,17 +344,17 @@ export default function kpisComponent() {
                                 const barsG = kpiG.select("g.bars")
                                     .attr("transform", `translate(${barMargin.left}, ${barsY + barMargin.top})`)
 
-                                const barRect = barsG.selectAll("rect.bar").data(d.barsData, d => d.id)
+                                const barRect = barsG.selectAll("rect.bar").data(d.barsData, d => d.key)
                                 barRect.enter()
                                     .append("rect")
-                                        .attr("class", b => "bar bar-"+b.id)
+                                        .attr("class", b => "bar bar-"+b.key)
                                         .attr("fill", b => b.fill || "none")
                                         .attr("stroke", b => b.stroke || "none")
                                         .attr("opacity", b => {
                                             //parent comp may have set an overide for opacity
                                             //this is temp way to reduce opacity in KpiView due to bg fill
-                                            const stylesObj = styles.kpi?.bars ? styles.kpi.bars[b.id] : null;
-                                            return stylesObj?.opacity || (b.id === "target" ? 0.5 : 1);
+                                            const stylesObj = styles.kpi?.bars ? styles.kpi.bars[b.key] : null;
+                                            return stylesObj?.opacity || (b.key === "target" ? 0.5 : 1);
                                         })
                                         .merge(barRect)
                                         .attr("x", b => scale(b.from))
@@ -329,10 +381,11 @@ export default function kpisComponent() {
                                 }
 
                                 //console.log("handlesData", d.handlesData)
-                                const handleG = barsG.selectAll("g.handle").data(d.handlesData, d => d.id)
+                                const handleG = barsG.selectAll("g.handle").data(d.handlesData, hd => hd.key)
                                 handleG.enter()
                                     .append("g")
-                                        .attr("class", "handle")
+                                        .attr("class", hd => `handle handle-${hd.key}`)
+                                        .style("cursor", editable ? "pointer" : "default")
                                         .each(function(hd){
                                             const handleG = d3.select(this);
                                             switch(hd.handleType){
@@ -385,6 +438,7 @@ export default function kpisComponent() {
                                                 .attr("stroke-width", hd => hd.strokeWidth || null)
                                                 .attr("stroke-dasharray", hd => hd.strokeDasharray || null);
                                         })
+                                        .call(handleDrag)
 
                                 handleG.exit().each(function(d){
                                     //will be multiple exits because of the delay in removing
@@ -407,10 +461,10 @@ export default function kpisComponent() {
                                     return barHeight + t.row * tooltipHeight + (handlesAreBelow ? handleHeight : 0);
                                 }
                                 const tooltipsData = isSelected(d) ? d.tooltipsData : [];
-                                const tooltipG = barsG.selectAll("g.tooltip").data(tooltipsData, d => d.key);
+                                const tooltipG = barsG.selectAll("g.tooltip").data(tooltipsData, t => t.key);
                                 tooltipG.enter()
                                     .append("g")
-                                        .attr("class", "tooltip")
+                                        .attr("class", t => `tooltip tooltip-${t.key}`)
                                         .merge(tooltipG)
                                         .attr("transform", t => `translate(${scale(t.value) - tooltipWidth/2}, ${tooltipY(t)})`)
                                         .call(tooltips
@@ -450,10 +504,10 @@ export default function kpisComponent() {
                                     .attr("width", numbersContentsWidth)
                                     .attr("height", numbersContentsHeight);
                                 
-                                const numberG = numbersContentsG.selectAll("g.number").data(d.numbersData, n => n.id);
+                                const numberG = numbersContentsG.selectAll("g.number").data(d.numbersData, n => n.key);
                                 numberG.enter()
                                     .append("g")
-                                        .attr("class", "number")
+                                        .attr("class", n => `number number-${n.key}`)
                                         .each(function(){
                                             d3.select(this)
                                                 .append("rect")
@@ -562,107 +616,146 @@ export default function kpisComponent() {
                     })
 
 
+            //flags
+            let boundAlreadyReached = false;
             function dragStart(e , d){
-                //console.log("dragStart", d.x)
-                d3.select(this).raise();
-
+                //console.log("dragstart", d)
                 onDragStart.call(this, e, d)
             }
             function dragged(e , d){
-                //controlled components
-                d.x += e.dx;
-                d.y += e.dy;
-                d3.select(this)
-                    .attr("transform", "translate(" + d.x +"," + d.y +")")
-                    //.call(updateTransform, { x: d => d.displayX })
-        
-                //onDrag does nothing
-                onDrag.call(this, e, d)
+                const kpiG = d3.select(this.parentNode.parentNode)
+                const scale = scales[kpiG.datum().id];
+                const domain = scale.domain();
+                const newValue = +scale.invert(e.x).toFixed(0);
+                const newPCCompletion = pcCompletion(d.previousValue, d.targetValue, newValue);
+                const newValueIsAtBound = newValue <= domain[0] || newValue >= domain[1];
+                if(newValueIsAtBound && boundAlreadyReached){
+                    return;
+                }
+
+                const draggedHandleG = d3.select(this);
+                const draggedBarRect = d3.select(this.parentNode).select(`rect.bar-${d.key}`);
+                const draggedTooltipG = d3.select(this.parentNode).select(`g.tooltip-${d.key}`);
+                //todo - need to grab pcCompletion and actual, as one or both may exist
+                /*
+                const actualNumberG = d3.select(this.parentNode.parentNode).select(`g.number-${d.key}-actual`)
+                const completionNumberG = d3.select(this.parentNode.parentNode).select(`g.number-${d.key}-completion`)
+                */
+                const actualNumberG = kpiG.select(`g.number-${d.key}-actual`)
+                const completionNumberG = kpiG.select(`g.number-${d.key}-completion`)
+                
+                //just transform its position thats all
+                //handle
+                const currHandleTrans = getTransformationFromTrans(draggedHandleG.attr("transform"));
+                const currHandleX = +currHandleTrans.translateX;
+                const currHandleY = +currHandleTrans.translateY;
+                draggedHandleG.attr("transform", `translate(${currHandleX + e.dx},${currHandleY})`);
+                //bar if it exists
+                if(!draggedBarRect.empty()){
+                    const currBarWidth = +draggedBarRect.attr("width")
+                    draggedBarRect.attr("width", currBarWidth + e.dx);
+                    //draggedBarRect.attr("width", e.x);
+                }
+               
+                //tooltip if it exists
+                if(!draggedTooltipG.empty()){
+                    const currTooltipTrans = getTransformationFromTrans(draggedTooltipG.attr("transform"));
+                    const currTooltipX = +currTooltipTrans.translateX;
+                    const currTooltipY = +currTooltipTrans.translateY;
+                    draggedTooltipG.attr("transform", `translate(${currTooltipX + e.dx},${currTooltipY})`);
+                    if(d.format === "completion"){
+                        //console.log("format is completion")
+                        draggedTooltipG.select("text.value").text(newPCCompletion);
+                    }else{
+                        //console.log("format is actual")
+                        draggedTooltipG.select("text.value").text(newValue);
+                    }
+                }
+                
+                if(!actualNumberG.empty()){
+                    actualNumberG.select("text").text(newValue);
+                }
+                if(!completionNumberG.empty()){
+                    completionNumberG.select("text").text(newPCCompletion);
+                }
+
+                //flag
+                if(newValueIsAtBound){
+                    boundAlreadyReached = true;
+                }else{
+                    boundAlreadyReached = false;
+                }
+                
+                /*
+                switch(d.id){
+                    case "current":{ currentDragged.call(this, e, d) }
+                    case "expected":{ expectedDragged.call(this, e, d) }
+                    case "target":{ targetDragged.call(this, e, d) }
+                    default:() => {}
+                }
+                */
+                //todo - finish handling, and decide do we dispatch here or in the specific funcs below?
+                //onDrag.call(this, e, d)
             }
-    
-            //note: newX and Y should be stored as d.x and d.y
             function dragEnd(e, d){
-                //console.log("dragEnd", d.x)
-                //on next update, we want aim dimns/pos to transition
-                //shouldTransitionAim = true;
-    
+                //cleanup
+                boundAlreadyReached = false;
                 if(enhancedDrag.isClick()) { return; }
-    
                 onDragEnd.call(this, e, d);
             }
 
-            //DELETION
-            let deleted = false;
-            const svg = d3.select("svg");
+            function currentDragged(e, d){
+                /*
+                const draggedHandleG = d3.select(this);
+                const draggedBarRect = d3.select(this.parentNode).select(`rect.bar-${d.id}`);
+                const draggedTooltipG = d3.select(this.parentNode.parentNode)//.select(`rect.bar-${d.id}`);
+                console.log("par par", draggedTooltipG.node())
+                //just transform its position thats all
+                //handle
+                const currHandleTrans = getTransformationFromTrans(draggedHandleG.attr("transform"));
+                const currHandleX = +currHandleTrans.translateX;
+                const currHandleY = +currHandleTrans.translateY;
+                draggedHandleG.attr("transform", `translate(${currHandleX + e.dx},${currHandleY})`);
+                //bar if it exists
+                if(!draggedBarRect.empty()){
+                    const currBarWidth = +draggedBarRect.attr("width")
+                    draggedBarRect.attr("width", currBarWidth + e.dx);
+                }
+                */
+                //tooltip if it exists
+
+
+            }
+            function expectedDragged(e, d){
+                
+            }
+            function targetDragged(e, d){
+                
+            }
+
+            function currentDragEnd(e, d){
+                //convert new position in to a new value and save
+
+            }
+            function expectedDragEnd(e, d){
+                
+            }
+            function targetDragEnd(e, d){
+                
+            }
 
             //longpress
             function longpressStart(e, d) {
-                //todo - check defs appended, and use them here, then longopressDrag should trigger the delete of a goal
-                //then do same for aims and links
-                /*
-                svg.select("defs").select("filter").select("feDropShadow")
-                    .attr("flood-opacity", 0.6)
-                    .attr("stdDeviation", 10)
-                    .attr("dy", 10);
-                */
-
-                d3.select(this).select("rect.bg")
-                    //.style("filter", "url(#drop-shadow)")
-                    .call(oscillator.start);
-
-                longpressed = d;
-                containerG.call(kpis);
-
                 onLongpressStart.call(this, e, d)
             };
             function longpressDragged(e, d) {
-                if(deleted) { return; }
-
-                if(enhancedDrag.distanceDragged() > 200 && enhancedDrag.avgSpeed() > 0.08){
-                    d3.select(this)
-                        //.style("filter", "url(#drop-shadow)")
-                        .call(oscillator.stop);
-
-                    deleted = true;
-                    d3.select(this)
-                        .transition()
-                        .duration(50)
-                            .attr("opacity", 0)
-                            .on("end", () => {
-                                onDelete(d.id)
-                            })
-                }else{
-                    dragged.call(this, e, d)
-                }
-
                 onLongpressDragged.call(this, e, d)
             };
 
             function longpressEnd(e, d) {
-                if(deleted){ 
-                    deleted = false;
-                    return; 
-                }
-                /*
-                svg.select("defs").select("filter").select("feDropShadow")
-                    .transition("filter-transition")
-                    .duration(300)
-                        .attr("flood-opacity", 0)
-                        .attr("stdDeviation", 0)
-                        .attr("dy", 0)
-                        .on("end", () => {
-                            d3.select(this).style("filter", null);
-                        });*/
-
-                d3.select(this)
-                    //.style("filter", "url(#drop-shadow)")
-                    .call(oscillator.stop);
-                
                 onLongpressEnd.call(this, e, d)
             };
         })
-        //remove one-off settings
-        longpressed = null;
 
         return selection;
     }
@@ -698,6 +791,21 @@ export default function kpisComponent() {
         withTooltips = value;
         return kpis;
     };
+    kpis.withCtrls = function (value) {
+        if (!arguments.length) { return withCtrls; }
+        withCtrls = value;
+        return kpis;
+    };
+    kpis.editable = function (value) {
+        if (!arguments.length) { return editable; }
+        editable = value;
+        return kpis;
+    };
+    kpis.onDblClick = function (value) {
+        if (!arguments.length) { return onDblClick; }
+        onDblClick = value;
+        return kpis;
+    };
     kpis.selected = function (value) {
         if (!arguments.length) { return selected; }
         selected = value;
@@ -709,11 +817,6 @@ export default function kpisComponent() {
         if(typeof value === "function"){
             getName = value;
         }
-        return kpis;
-    };
-    kpis.longpressed = function (value) {
-        if (!arguments.length) { return longpressed; }
-        longpressed = value;
         return kpis;
     };
     kpis.onClick = function (value) {

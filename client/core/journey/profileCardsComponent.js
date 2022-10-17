@@ -41,6 +41,7 @@ export default function profileCardsComponent() {
     let yScale = x => 0;
 
     let selected;
+    let editable;
 
     //API CALLBACKS
     let onClick = function(){};
@@ -93,7 +94,7 @@ export default function profileCardsComponent() {
                 .onLongpressDragged(longpressDragged)
                 .onLongpressEnd(longpressEnd);
 
-            const drag = d3.drag()
+            const drag = editable ? () => {} : d3.drag()
                 .on("start", enhancedDrag(dragStart))
                 .on("drag", enhancedDrag(dragged))
                 .on("end", enhancedDrag(dragEnd));
@@ -123,7 +124,7 @@ export default function profileCardsComponent() {
                     contentsG.append("g").attr("class", "kpis")
                 
                 })
-                .style("cursor", "grab")
+                .style("cursor", editable ? "default" : "grab")
                 //.call(transform, { x: d => adjX(xScale(d.targetDate)), y:d => d.y })
                 //.call(transform, { x: d => d.x, y:d => d.y }, transitionEnter && transitionsOn)
                 .merge(profileCardG)
@@ -133,13 +134,15 @@ export default function profileCardsComponent() {
                     const profileInfo = profileInfoComponents[d.id]
                         .width(contentsWidth)
                         .height(contentsHeight/2)
-                        .fontSizes(fontSizes.info);
+                        .fontSizes(fontSizes.info)
+                        .editable(editable);
 
                     const kpis = kpisComponents[d.id]
                         .width(contentsWidth)
                         .height(contentsHeight/2)
                         .kpiHeight(kpiHeight)
                         .fontSizes(fontSizes.kpis)
+                        .editable(editable)
                         .onCtrlClick(onCtrlClick)
                         .onClickKpi(onClickKpi);
 
@@ -160,7 +163,7 @@ export default function profileCardsComponent() {
                     
                     contentsG.selectAll("g.kpis")
                         .attr("transform", "translate(0," +(contentsHeight/2) +")")
-                        .datum({ kpisData: d.kpis, ctrlsData:d.ctrlsData })
+                        .datum(d.kpis)
                         .call(kpis)
 
                     //targ
@@ -245,6 +248,7 @@ export default function profileCardsComponent() {
             })
 
             function dragStart(e , d){
+                console.log("profile drag start")
                 d3.select(this).raise();
 
                 onDragStart.call(this, e, d)
@@ -371,6 +375,11 @@ export default function profileCardsComponent() {
     profileCards.fontSizes = function (values) {
         if (!arguments.length) { return fontSizes; }
         fontSizes = { ...fontSizes, ...values };
+        return profileCards;
+    };
+    profileCards.editable = function (value) {
+        if (!arguments.length) { return editable; }
+        editable = value;
         return profileCards;
     };
     profileCards.selected = function (value) {

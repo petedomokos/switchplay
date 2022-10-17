@@ -121,6 +121,7 @@ export default function milestonesBarComponent() {
                         .margin(DIMNS.milestonesBar.profile.margin)
                         .fontSizes(FONTSIZES.profile(3))
                         .kpiHeight(30)
+                        .editable(true)
                         .xScale(x, "nr")
                         .yScale(y)
                         .onClickKpi(onClickKpi), { log:true });

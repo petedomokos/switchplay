@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { addWeeks } from "../../util/TimeHelpers"
 import { pcCompletion } from "../../util/NumberHelpers"
-import { grey10 } from './constants';
+import { grey10, KPI_CTRLS } from './constants';
 
 export default function kpisLayout(){
     let date = new Date();
@@ -39,7 +39,7 @@ export default function kpisLayout(){
         const orderedData = sortAscending(data, d => d.date);
         const nextKpi = orderedData.find(kpi => kpi.date > new Date());
        
-        return orderedData.map((kpi,i) => {
+        const kpisData = orderedData.map((kpi,i) => {
             const kpiDate = kpi.date || date;
             //if kpis have dates, we use these for previous, except for the first one which uses the prevCardDate setting
             const prevKpiDate = i === 0 ? prevCardDate : data[i-1].date;
@@ -70,6 +70,7 @@ export default function kpisLayout(){
             const _pcCompletionValue = pcCompletion(previous.value, target.value, current.value);
             //for now, we manually seyt this to test it renders as red. But should be based on linear interpolation
             const expectedCurrent = { date: kpiDate, value:(current?.value ? current.value * 1.3 : 0) };//calculateExpected(previous, target, date)
+            const _pcCompletionExpectedValue = pcCompletion(previous.value, target.value, expectedCurrent.value);
             //bars
             const currentColour = "#696969";
             const colours = {
@@ -88,9 +89,9 @@ export default function kpisLayout(){
             //console.log("min", min)
             const end = format === "actual-value" ? max : target.value;
 
-            const rangeDatum = { id: "range", from:start, to:end, fill:"transparent", stroke:"grey" };
-            const targetDatum = { id: "target", from:start, to:target.value, fill:colours.target };
-            const currentDatum = { id: "current", from:start, to:current.value, fill:colours.current };
+            const rangeDatum = { key: "range", from:start, to:end, fill:"transparent", stroke:"grey" };
+            const targetDatum = { key: "target", from:start, to:target.value, fill:colours.target };
+            const currentDatum = { key: "current", from:start, to:current.value, fill:colours.current };
             const targetHandleDatum = { 
                 ...targetDatum, 
                 handleType:"triangle", 
@@ -99,34 +100,39 @@ export default function kpisLayout(){
             }
 
             const prevHandleDatum = { 
-                id: "previous",
+                ...previous,
+                key: "previous",
                 handleType:"line",
                 stroke:"white",
                 strokeWidth:0.5,
                 strokeDasharray:4,
-                ...previous,
                 fill:colours.current,
                 pos:"above"
             }
 
             const expectedHandleDatum = { 
-                id: "expected",
+                key: "expected",
                 handleType:"triangle",
                 value:expectedCurrent.value,
+                previousValue:previous.value,
+                targetValue:target.value,
                 //@todo - handle decreasing datasets ie less is best
                 fill:isOnTrack ? colours.expectedAhead : colours.expectedBehind,
-                pos:"below"
+                pos:"below",
+                format:formatIsActual ? "actual" : "completion"
             }
 
             const currentHandleDatum = {
-                id:'current',
+                ...current,
+                key:'current',
                 handleType:"rect",
                 fill:"transparent",
                 stroke:"white",
                 strokeWidth:0.2,
-                ...current,
                 pcValue:_pcCompletionValue,
-                format:formatIsActual ? "actual" : "pc"
+                previousValue:previous.value,
+                targetValue:target.value,
+                format:formatIsActual ? "actual" : "completion"
             }
             const barsData = formatIsActual ? [rangeDatum, targetDatum, currentDatum] : [rangeDatum, currentDatum];
 
@@ -145,16 +151,22 @@ export default function kpisLayout(){
            
             const numbersData = formatIsActual ? 
                 [ 
-                    { id: "actual", value: current?.value, colour:colours.current } 
+                    { key: "current-actual", value: current?.value, colour:colours.current } 
                 ]
                 :
                 [
-                    { id: "pc", value: `${_pcCompletionValue}%`, colour:isOnTrack ? colours.current : "red" },
-                    { id: "actual", value: `${current?.value}`, colour:colours.current }
+                    { 
+                        key: "current-completion", 
+                        value: `${_pcCompletionValue}%`,
+                        previousValue:previous.value,
+                        targetValue:target.value,
+                        colour:isOnTrack ? colours.current : "red",
+                    },
+                    { key: "current-actual", value: `${current?.value}`, colour:colours.current }
                 ]
 
             if(withDeficitBar && current?.value < expectedCurrent.value){
-                barsData.push({ id:"deficit", from:current?.value, to:expectedCurrent.value, fill:"red" })
+                barsData.push({ key:"deficit", from:current?.value, to:expectedCurrent.value, fill:"red" })
             }
 
             const tooltipStyles = {
@@ -167,10 +179,10 @@ export default function kpisLayout(){
             if(formatIsActual){
                 if(previous){
                     tooltipsData.push({ 
+                        ...previous,
                         key: "previous",
                         title:"Previous",
                         desc: "...",
-                        ...previous,
                         location:"above",
                         row:1, // very top
                         labelPos:"below",
@@ -193,30 +205,32 @@ export default function kpisLayout(){
                     //its a future kpi
                     tooltipsData.push(
                         { 
+                            ...current,
                             key: "current", 
                             title:"Current",
-                            ...current,
                             location:"above",
                             row:0, // just above bar
                             styles:tooltipStyles
                             
                         },
                         { 
+                            ...target,
                             key: "target",
                             title: "Target",
                             desc: "...",
-                            ...target,
                             location:"above",
                             row:1, // very top,
                             styles:tooltipStyles
                         }
                     );
                     if(isActive){
-                        tooltipsData.push({ 
+                        tooltipsData.push({
+                            ...expectedCurrent,
+                            previousValue:previous.value,
+                            targetValue:target.value,
                             key: "expected",
                             title:"Expected",
                             desc: "...",
-                            ...expectedCurrent,
                             location:"below",
                             row:0, // just below bar
                             styles:tooltipStyles
@@ -226,11 +240,13 @@ export default function kpisLayout(){
                 
             }else{
                 tooltipsData.push({
+                    ...current,
                     key: "current", 
                     title:"Current",
                     desc: "...",
                     format:'pc',
-                    ...current,
+                    previousValue:previous.value,
+                    targetValue:target.value,
                     actualValue:current.value,
                     //override value with pc
                     //value: pcCompletion(current.value),
@@ -242,15 +258,17 @@ export default function kpisLayout(){
                 });
                 if(isActive){
                     tooltipsData.push({ 
+                        ...expectedCurrent,
                         key: "expected",
                         title:"Expected",
                         desc: "...",
                         format:"pc",
-                        ...expectedCurrent,
+                        previousValue:previous.value,
+                        targetValue:target.value,
                         actualValue:expectedCurrent.value,
                         //override value with pc
                         // value: pcCompletion(expectedCurrent.value),
-                        pcValue: _pcCompletionValue,
+                        pcValue: _pcCompletionExpectedValue,
                         //units:"%",
                         location:"below",
                         row:0, // very top
@@ -286,6 +304,10 @@ export default function kpisLayout(){
                 actualDatapoints:actualDatapoints.map(d => ({ date:d.date, value:d.values.find(v => v.measure === statId).value }))
             }
         })
+
+        const ctrlsData = KPI_CTRLS(format); 
+
+        return { kpisData, ctrlsData }
     }
 
     update.date = function (value) {

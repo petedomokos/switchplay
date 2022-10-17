@@ -25,6 +25,8 @@ export default function profileInfoComponent() {
         date:9
     };
 
+    let editable;
+
     //API CALLBACKS
     let onClick = function(){};
     let onDblClick = function(){};
@@ -198,6 +200,11 @@ export default function profileInfoComponent() {
     profileInfo.fontSizes = function (values) {
         if (!arguments.length) { return fontSizes; }
         fontSizes = { ...fontSizes, ...values };
+        return profileInfo;
+    };
+    profileInfo.editable = function (value) {
+        if (!arguments.length) { return editable; }
+        editable = value;
         return profileInfo;
     };
     profileInfo.onClick = function (value) {
