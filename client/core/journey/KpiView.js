@@ -48,8 +48,8 @@ const layout = kpisLayout();
 const kpis = kpisComponent();
 const KPI_HEIGHT = 80;
 
-const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, format, onClose }) => {
-  //console.log("KpiView height", height)
+const KpiView = ({ name, desc, data, datasets, initSelectedKey, width, height, format, onClose }) => {
+  //console.log("KpiView data", data)
   /*
   todo - sort height/overflow out so svgCont is a div with fixed height, and teh 
   svg scrolls within that, but footer is fixed to bottom 
@@ -65,7 +65,8 @@ const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, fo
     let styleProps = { headerHeight, footerHeight }
     const classes = useStyles(styleProps) 
     const containerRef = useRef(null);
-    const [selectedId, setSelectedId] = useState(initSelectedId);
+    //note - keys are kpiSets here
+    const [selectedKey, setSelectedKey] = useState(initSelectedKey);
 
     //init
     useEffect(() => {
@@ -88,10 +89,15 @@ const KpiView = ({ name, desc, data, datasets, initSelectedId, width, height, fo
               .kpiHeight(KPI_HEIGHT)
               .styles(STYLES.kpiView.kpis)
               .editable(true)
-              .selected(selectedId)
+              .selected(selectedKey)
               //todo - use d3 date format
               .getName(d => dateFormat(d.date))
-              .onClickKpi((e, d) => { setSelectedId(d.id); }), { log:true })
+              .onClickKpi((e, kpi) => {
+                kpis.selected(kpi.key, true);
+              })
+              .onDblClickKpi((e, d) => { 
+                setSelectedId(d.id); 
+              }), { log:true })
     })
 
     return (

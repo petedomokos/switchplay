@@ -52,7 +52,7 @@ const sortAscending = (data, accessor =  d => d) => {
 const layout = milestonesLayout();
 const milestonesBar = milestonesBarComponent();
 
-const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, setKpiFormat, onClickKpi }) => {
+const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, setKpiFormat, onSelectKpiSet }) => {
   //console.log("Milestones", profiles)
   const milestones = [...contracts]
   let styleProps = {}
@@ -86,7 +86,7 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
           .height(DIMNS.milestonesBar.list.height)
           .milestoneWidth(milestoneWidth)
           .onSetKpiFormat(setKpiFormat)
-          .onClickKpi((e,kpi) => { onClickKpi(kpi); }))
+          .onSelectKpiSet((e,kpi) => { onSelectKpiSet(kpi); }))
   })
 
   return (

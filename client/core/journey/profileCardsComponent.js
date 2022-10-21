@@ -47,6 +47,7 @@ export default function profileCardsComponent() {
     let onClick = function(){};
     let onCtrlClick = () => {};
     let onClickKpi = () => {};
+    let onDblClickKpi = function(){};
 
     let onDblClick = function(){};
     let onDragStart = function() {};
@@ -144,7 +145,19 @@ export default function profileCardsComponent() {
                         .fontSizes(fontSizes.kpis)
                         .editable(editable)
                         .onCtrlClick(onCtrlClick)
-                        .onClickKpi(onClickKpi);
+                        .onListScrollZoom(function(e){
+                            data.filter(p => p.id !== d.id).forEach(p => {
+                                kpisComponents[p.id].handleListScrollZoom(e)
+                           })
+                        })
+                        .onClickKpi((e,kpi) => {
+                            //update selected KPI in all profile cards
+                            data.filter(p => p.id !== d.id).forEach(p => {
+                            //data.forEach(profile => {
+                                 kpisComponents[p.id].selected(kpi.key, true);
+                            })
+                        })
+                        .onDblClickKpi(onDblClickKpi);
 
                     //ENTER AND UPDATE
                     const contentsG = d3.select(this).select("g.contents")
@@ -248,7 +261,6 @@ export default function profileCardsComponent() {
             })
 
             function dragStart(e , d){
-                console.log("profile drag start")
                 d3.select(this).raise();
 
                 onDragStart.call(this, e, d)
@@ -413,6 +425,11 @@ export default function profileCardsComponent() {
         if(typeof value === "function"){
             onClickKpi = value;
         }
+        return profileCards;
+    };
+    profileCards.onDblClickKpi = function (value) {
+        if (!arguments.length) { return onDblClickKpi; }
+        onDblClickKpi = value;
         return profileCards;
     };
     profileCards.onCtrlClick = function (value) {

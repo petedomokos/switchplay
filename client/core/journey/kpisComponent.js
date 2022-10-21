@@ -130,36 +130,43 @@ export default function kpisComponent() {
 
     let editable = false;
 
+
     //API CALLBACKS
-    let onClick = function(){};
     let onClickKpi = function(){};
-    let onDblClick = function(){};
-    let onDragStart = function() {};
+    let onDblClickKpi = function(){};
+    let onDragStart = function(){};
     let onDrag = function() {};
     let onDragEnd = function() {};
-    let onLongpressStart = function() {};
-    let onLongpressDragged = function() {};
-    let onLongpressEnd = function() {};
+    let onLongpressStart = function(){};
+    let onLongpressDragged = function(){};
+    let onLongpressEnd = function(){};
     let onMouseover = function(){};
     let onMouseout = function(){};
-    let onDelete = function() {};
+    let onDelete = function(){};
     let onCtrlClick = () => {};
 
-    const enhancedDrag = dragEnhancements();
-    const tooltips = tooltipsComponent();
+    let onListScrollZoom = function(){};
+    let handleListScrollZoom = function(){};
 
+    const enhancedKpiDrag = dragEnhancements();
+    const enhancedHandleDrag = dragEnhancements();
+    const tooltips = tooltipsComponent();
     const listScrollZoom = d3.zoom();
 
     let scales = {};
+
+    let prevData = [];
 
     //dom
     let containerG;
 
     function kpis(selection, options={}) {
+        //console.log("kpis update sel", selected)
         const { transitionEnter=true, transitionUpdate=true, log} = options;
 
         // expression elements
         selection.each(function (data) {
+            prevData = data;
             const { id, kpisData } = data;
             const ctrlsData = withCtrls ? data.ctrlsData : [];
 
@@ -174,22 +181,37 @@ export default function kpisComponent() {
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
             containerG = d3.select(this);
+
+            enhancedKpiDrag
+                .onDblClick(onDblClickKpi)
+                .onClick(function(e,d){
+                    updateSelected(d.key, data, true);
+                    onClickKpi.call(this, e, d);
+                });
+
+        
+            //todo - drag number changes in numbers and in tooltips - scaling not working yet
+            // may be bnest to sort out the datums first in layout
+
+            const kpiDrag = d3.drag()
+                .on("start", enhancedKpiDrag())
+                .on("drag", enhancedKpiDrag())
+                .on("end", enhancedKpiDrag());
+
+
             //can use same enhancements object for outer and inner as click is same for both
-            enhancedDrag
-                .onDblClick(onDblClick)
-                .onClick(onClick)
-                .onLongpressStart(longpressStart)
-                .onLongpressDragged(longpressDragged)
-                .onLongpressEnd(longpressEnd);
+            enhancedHandleDrag
+                //.onDblClick(onDblClickKpi)
+                //.onClick(onClickKpi);
 
             
             //todo - drag number changes in numbers and in tooltips - scaling not working yet
             // may be bnest to sort out the datums first in layout
 
             const handleDrag = !editable ? () => {} : d3.drag()
-                .on("start", enhancedDrag(dragStart))
-                .on("drag", enhancedDrag(dragged))
-                .on("end", enhancedDrag(dragEnd));
+                .on("start", enhancedHandleDrag(handleDragStart))
+                .on("drag", enhancedHandleDrag(handleDragged))
+                .on("end", enhancedHandleDrag(handleDragEnd));
 
             const contentsG = containerG.selectAll("g.contents").data([1]);
             contentsG.enter()
@@ -211,7 +233,11 @@ export default function kpisComponent() {
                                 .attr("fill", "transparent")
                                 .attr("stroke", "none");
 
-                        listG.append("g").attr("class", "list-contents");
+                        //const y = calculateListY(selected, data.kpisData, kpiHeight, 1);
+                        //console.log("y", y)
+                        //const extraGap = kpiHeight * 0.75;
+                        listG.append("g").attr("class", "kpis-list-contents")
+                            //.call(listScrollZoom.translateTo, 0, -extraGap, [0,y])
 
                         listG
                             .append("defs")
@@ -239,7 +265,6 @@ export default function kpisComponent() {
                         //todo - 1. put clipPath in place
                         //2. put extent in place so it doesnt scroll beyond the start and end 
 
-                        listScrollZoom.on('zoom', handleListScrollZoom)
                         const listG = contentsG.select("g.kpis-list")
                             .attr('clip-path', "url(#clip)")
                             .call(listScrollZoom);
@@ -251,16 +276,20 @@ export default function kpisComponent() {
                                 .attr('x', 0)
                                 .attr('y', 0);
 
-
-                        const listContentsG = listG.select("g.list-contents");
+                        //const y = calculateListY(selected, data.kpisData, kpiHeight, 1);
+                        //console.log("update...y", y)
+                        //const extraGap = kpiHeight * 0.75;
+                        const listContentsG = listG.select("g.kpis-list-contents")
+                        //this line causes a random scroll when 2nd profile is created in journey
+                            //.call(listScrollZoom.translateTo, 0, -extraGap, [0,y]);
                         
-                        function handleListScrollZoom(e){
-                            // @todo - if on laptop or pc, then remove option to pan by dragging,
-                            // so only way to pan is mousewheel. this mimmick normal
-                            // scroll behaviour. then we can reverse it on mac, passing in
-                            // -transform.y so it goes up as expected and down as expected
-                            listContentsG.attr("transform", `translate(0, ${e.transform.y})`)
-                        }
+                        listScrollZoom.on('zoom', function(e){
+                            handleListScrollZoom.call(this, e);
+                            //only pass to the callback if its a zoom event, not a programmatic zoom
+                            if(e.sourceEvent){
+                                onListScrollZoom.call(this, e)
+                            }
+                        })
 
                         listG.select("rect.list-bg")
                             .attr("width", listWidth)
@@ -285,8 +314,7 @@ export default function kpisComponent() {
 
                                 const nameG = kpiG.append("g")
                                     .attr("class", "name")
-                                        .style("cursor", "pointer")
-                                        .on("click", onClickKpi);
+                                        .style("cursor", "pointer");
 
                                 nameG.append("rect")
                                     .attr("fill", "transparent")
@@ -315,7 +343,7 @@ export default function kpisComponent() {
                                 const vertShift = i * (kpiHeight + gapBetweenKpis) +(selectedKpiBefore ? extraSpaceForSelected : 0)
                                 return `translate(0,${vertShift})`
                             })
-                            .each(function(d){
+                            .each(function(d,i){
                                 //console.log("kpi", d)
                                 const { start, end } = d;
 
@@ -335,7 +363,7 @@ export default function kpisComponent() {
                                     .attr("stroke", styles.kpi?.name?.stroke || grey10(8))
                                     .attr("fill", styles.kpi?.name?.stroke || grey10(8))
                                     .attr("stroke-width", styles.kpi?.name?.strokeWidth || 0.2)
-                                    .text(getName(d))
+                                    .text(getName(d) +" " +i)
                         
                                 const scale = scales[d.id].domain([start, end]).range([0, barContentsWidth])
 
@@ -550,6 +578,7 @@ export default function kpisComponent() {
                                 })
                 
                             })
+                            .call(kpiDrag)
 
                         //EXIT
                         kpiG.exit().each(function(d){
@@ -618,11 +647,11 @@ export default function kpisComponent() {
 
             //flags
             let boundAlreadyReached = false;
-            function dragStart(e , d){
+            function handleDragStart(e , d){
                 //console.log("dragstart", d)
                 onDragStart.call(this, e, d)
             }
-            function dragged(e , d){
+            function handleDragged(e , d){
                 const kpiG = d3.select(this.parentNode.parentNode)
                 const scale = scales[kpiG.datum().id];
                 const domain = scale.domain();
@@ -633,9 +662,9 @@ export default function kpisComponent() {
                     return;
                 }
 
-                const draggedHandleG = d3.select(this);
-                const draggedBarRect = d3.select(this.parentNode).select(`rect.bar-${d.key}`);
-                const draggedTooltipG = d3.select(this.parentNode).select(`g.tooltip-${d.key}`);
+                const handleDraggedHandleG = d3.select(this);
+                const handleDraggedBarRect = d3.select(this.parentNode).select(`rect.bar-${d.key}`);
+                const handleDraggedTooltipG = d3.select(this.parentNode).select(`g.tooltip-${d.key}`);
                 //todo - need to grab pcCompletion and actual, as one or both may exist
                 /*
                 const actualNumberG = d3.select(this.parentNode.parentNode).select(`g.number-${d.key}-actual`)
@@ -646,29 +675,29 @@ export default function kpisComponent() {
                 
                 //just transform its position thats all
                 //handle
-                const currHandleTrans = getTransformationFromTrans(draggedHandleG.attr("transform"));
+                const currHandleTrans = getTransformationFromTrans(handleDraggedHandleG.attr("transform"));
                 const currHandleX = +currHandleTrans.translateX;
                 const currHandleY = +currHandleTrans.translateY;
-                draggedHandleG.attr("transform", `translate(${currHandleX + e.dx},${currHandleY})`);
+                handleDraggedHandleG.attr("transform", `translate(${currHandleX + e.dx},${currHandleY})`);
                 //bar if it exists
-                if(!draggedBarRect.empty()){
-                    const currBarWidth = +draggedBarRect.attr("width")
-                    draggedBarRect.attr("width", currBarWidth + e.dx);
-                    //draggedBarRect.attr("width", e.x);
+                if(!handleDraggedBarRect.empty()){
+                    const currBarWidth = +handleDraggedBarRect.attr("width")
+                    handleDraggedBarRect.attr("width", currBarWidth + e.dx);
+                    //handleDraggedBarRect.attr("width", e.x);
                 }
                
                 //tooltip if it exists
-                if(!draggedTooltipG.empty()){
-                    const currTooltipTrans = getTransformationFromTrans(draggedTooltipG.attr("transform"));
+                if(!handleDraggedTooltipG.empty()){
+                    const currTooltipTrans = getTransformationFromTrans(handleDraggedTooltipG.attr("transform"));
                     const currTooltipX = +currTooltipTrans.translateX;
                     const currTooltipY = +currTooltipTrans.translateY;
-                    draggedTooltipG.attr("transform", `translate(${currTooltipX + e.dx},${currTooltipY})`);
+                    handleDraggedTooltipG.attr("transform", `translate(${currTooltipX + e.dx},${currTooltipY})`);
                     if(d.format === "completion"){
                         //console.log("format is completion")
-                        draggedTooltipG.select("text.value").text(newPCCompletion);
+                        handleDraggedTooltipG.select("text.value").text(newPCCompletion);
                     }else{
                         //console.log("format is actual")
-                        draggedTooltipG.select("text.value").text(newValue);
+                        handleDraggedTooltipG.select("text.value").text(newValue);
                     }
                 }
                 
@@ -697,54 +726,15 @@ export default function kpisComponent() {
                 //todo - finish handling, and decide do we dispatch here or in the specific funcs below?
                 //onDrag.call(this, e, d)
             }
-            function dragEnd(e, d){
+            function handleDragEnd(e, d){
                 //cleanup
                 boundAlreadyReached = false;
-                if(enhancedDrag.isClick()) { return; }
+                if(enhancedHandleDrag.isClick()) { return; }
                 onDragEnd.call(this, e, d);
             }
 
-            function currentDragged(e, d){
-                /*
-                const draggedHandleG = d3.select(this);
-                const draggedBarRect = d3.select(this.parentNode).select(`rect.bar-${d.id}`);
-                const draggedTooltipG = d3.select(this.parentNode.parentNode)//.select(`rect.bar-${d.id}`);
-                console.log("par par", draggedTooltipG.node())
-                //just transform its position thats all
-                //handle
-                const currHandleTrans = getTransformationFromTrans(draggedHandleG.attr("transform"));
-                const currHandleX = +currHandleTrans.translateX;
-                const currHandleY = +currHandleTrans.translateY;
-                draggedHandleG.attr("transform", `translate(${currHandleX + e.dx},${currHandleY})`);
-                //bar if it exists
-                if(!draggedBarRect.empty()){
-                    const currBarWidth = +draggedBarRect.attr("width")
-                    draggedBarRect.attr("width", currBarWidth + e.dx);
-                }
-                */
-                //tooltip if it exists
-
-
-            }
-            function expectedDragged(e, d){
-                
-            }
-            function targetDragged(e, d){
-                
-            }
-
-            function currentDragEnd(e, d){
-                //convert new position in to a new value and save
-
-            }
-            function expectedDragEnd(e, d){
-                
-            }
-            function targetDragEnd(e, d){
-                
-            }
-
             //longpress
+            /*
             function longpressStart(e, d) {
                 onLongpressStart.call(this, e, d)
             };
@@ -755,9 +745,70 @@ export default function kpisComponent() {
             function longpressEnd(e, d) {
                 onLongpressEnd.call(this, e, d)
             };
+            */
         })
 
+        handleListScrollZoom = function(e){
+            containerG.select("g.kpis-list-contents")
+                .attr("transform", `translate(0, ${e.transform.y})`);
+        }
+
         return selection;
+    }
+
+    /*
+    function transform(selection, transform={}, transition, onEnd = () => {}){
+        const { x, y, k = d => 1 } = transform;
+        selection.each(function(d){
+            const selection = d3.select(this);
+            //translate is undefined when we drag a planet into an aim and release
+            const { translateX, translateY } = getTransformationFromTrans(selection.attr("transform"));
+            
+            const _x = x ? x : d => translateX;
+            const _y = y ? y : d => translateY;
+            //on call from enter, there will be no translate so deltas are 0 so no transition
+            //but then transform is called again on entered planets after merge with update
+            const deltaX = typeof translateX === "number" ? Math.abs(translateX - _x(d)) : 0;
+            const deltaY = typeof translateY === "number" ? Math.abs(translateY - _y(d)) : 0;
+            if(transition && (deltaX > 0.1 || deltaY > 0.1)){
+                const newY = _y(d);
+                selection
+                    .transition()
+                        .delay(transition.delay || 0)
+                        .duration(transition.duration || 200)
+                        .attr("transform", "translate("+ _x(d) +"," + newY +") scale("+k(d) +")")
+                        .on("end", onEnd);
+
+            }else{
+                selection.attr("transform", "translate("+ _x(d) +"," + _y(d) +") scale("+k(d) +")");
+                onEnd();
+            }
+        })
+    }
+    */
+
+    //requires each listItem to have an index i
+    function calculateListY(selectedKey, data, itemHeight, nrItemsToShowBefore = 0){
+        const selectedIndex = data.findIndex((d,j) => d.key === selectedKey);
+        return -itemHeight * (selectedIndex + 1 - nrItemsToShowBefore);
+    }
+
+    function updateSelected(key, data, shouldUpdateDom){
+        selected = key;
+        isSelected = d => d.key === selected;
+        if(shouldUpdateDom){
+            const y = calculateListY(selected, data.kpisData, kpiHeight, 1);
+            //@todo - find out why we need this - is it some kind of margin?
+            //without it, the first few kpis are positioned too high
+            const extraGap = kpiHeight * 0.75;
+            containerG.select("g.kpis-list-contents")
+               .transition()
+                    .duration(500)
+                    //point 0,-gap will appear at point 0,y 
+                    //so if y neg, then its shifted up so 0,-gap is up at 0,y
+                    .call(listScrollZoom.translateTo, 0, -extraGap, [0,y])
+                    .on("end", () => { containerG.call(kpis) }); 
+        }
     }
     
     //api
@@ -801,15 +852,12 @@ export default function kpisComponent() {
         editable = value;
         return kpis;
     };
-    kpis.onDblClick = function (value) {
-        if (!arguments.length) { return onDblClick; }
-        onDblClick = value;
-        return kpis;
-    };
-    kpis.selected = function (value) {
+    // todo - kpiClick not working in KpiView
+    //todo - fix below in journey and milestonesBar versions of kpisComponent so it renders properly,
+    //ie the tooltips etc
+    kpis.selected = function (value, shouldUpdateDom) {
         if (!arguments.length) { return selected; }
-        selected = value;
-        isSelected = d => d.id === selected;
+        updateSelected(value, prevData, shouldUpdateDom);
         return kpis;
     };
     kpis.getName = function (value) {
@@ -819,9 +867,9 @@ export default function kpisComponent() {
         }
         return kpis;
     };
-    kpis.onClick = function (value) {
-        if (!arguments.length) { return onClick; }
-        onClick = value;
+    kpis.onClickKpi = function (value) {
+        if (!arguments.length) { return onClickKpi; }
+        onClickKpi = value;
         return kpis;
     };
     kpis.onCtrlClick = function (value) {
@@ -829,16 +877,16 @@ export default function kpisComponent() {
         onCtrlClick = value;
         return kpis;
     };
-    kpis.onClickKpi = function (value) {
-        if (!arguments.length) { return onClickKpi; }
-        if(typeof value === "function"){
-            onClickKpi = value;
-        }
+    kpis.onDblClickKpi = function (value) {
+        if (!arguments.length) { return onDblClickKpi; }
+        onDblClickKpi = value;
         return kpis;
     };
-    kpis.onDblClick = function (value) {
-        if (!arguments.length) { return onDblClick; }
-        onDblClick = value;
+    kpis.onListScrollZoom = function (value) {
+        if (!arguments.length) { return onListScrollZoom; }
+        if(typeof value === "function"){
+            onListScrollZoom = value;
+        }
         return kpis;
     };
     kpis.onDragStart = function (value) {
@@ -904,5 +952,6 @@ export default function kpisComponent() {
         }
         return kpis;
     };
+    kpis.handleListScrollZoom = function(e){ handleListScrollZoom.call(this, e) };
     return kpis;
 }

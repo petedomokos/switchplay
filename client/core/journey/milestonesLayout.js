@@ -49,6 +49,8 @@ export default function milestonesLayout(){
             }
 
             if(dataType === "profile"){
+                //the key will determine if selected - we want this the same across all profile cards
+                const keyedKpis = kpis.map(kpi => ({ ...kpi, key:kpi.kpiSetId }));
                 myKpisLayout
                     .date(date)
                     .prevCardDate(i === 0 ? undefined : data[i - 1])
@@ -60,7 +62,7 @@ export default function milestonesLayout(){
                     ...milestone,
                     ...generalProps,
                     info,
-                    kpis:myKpisLayout(kpis),
+                    kpis:myKpisLayout(keyedKpis),
                 }
             }else{
                 //must be a contract

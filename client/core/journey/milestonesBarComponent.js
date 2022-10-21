@@ -30,7 +30,7 @@ export default function milestonesBarComponent() {
 
     let kpiFormat;
     let onSetKpiFormat = function(){};
-    let onClickKpi = function(){};
+    let onSelectKpiSet = function(){};
 
     let containerG;
     let contentsG;
@@ -124,7 +124,11 @@ export default function milestonesBarComponent() {
                         .editable(true)
                         .xScale(x, "nr")
                         .yScale(y)
-                        .onClickKpi(onClickKpi), { log:true });
+                        .onClickKpi(onSelectKpiSet)
+                        .onDblClickKpi((e,d) => {
+                            console.log("dbl click kpi", d)
+                            onSelectKpiSet(d);
+                        }), { log:true });
 
                 //functions
                 slideBack = function(){
@@ -196,10 +200,10 @@ export default function milestonesBarComponent() {
         }
         return milestonesBar;
     };
-    milestonesBar.onClickKpi = function (value) {
-        if (!arguments.length) { return onClickKpi; }
+    milestonesBar.onSelectKpiSet = function (value) {
+        if (!arguments.length) { return onSelectKpiSet; }
         if(typeof value === "function"){
-            onClickKpi = value;
+            onSelectKpiSet = value;
         }
         return milestonesBar;
     };
