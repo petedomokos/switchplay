@@ -27,14 +27,6 @@ import { getTransformationFromTrans } from './helpers';
 
     
     DOING NOW/NEXT
-    1.  if we .call the zoom on enter/update we get a random scroll when 2nd profile created
-    2. bug - scroll kpis after selecting one jumps ie the zoom is not coordinated
-    3. bug - init loading of KpiView doesnt scroll to initSelected Kpi properly
-    4. going from milestone bar back o profile, the scroll needs to be re-run so it adjusts to smaller card
-     -  manual scroll in journey profiles for kpis not coordinated
-
-
-
 
     new bigs since store
      - new measure form isnt up-to-date ( problem existed before store change)

@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import kpisLayout from "./kpisLayout";
+import kpisLayout from "./kpis/kpisLayout";
 
 export default function milestonesLayout(){
     let timeScale = x => 0;

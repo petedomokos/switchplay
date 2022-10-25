@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
-import { addWeeks } from "../../util/TimeHelpers"
-import { pcCompletion } from "../../util/NumberHelpers"
-import { grey10, KPI_CTRLS } from './constants';
+import { addWeeks } from "../../../util/TimeHelpers"
+import { pcCompletion } from "../../../util/NumberHelpers"
+import { grey10, KPI_CTRLS } from '../constants';
 
 export default function kpisLayout(){
     let date = new Date();
@@ -134,7 +134,7 @@ export default function kpisLayout(){
                 targetValue:target.value,
                 format:formatIsActual ? "actual" : "completion"
             }
-            const barsData = formatIsActual ? [rangeDatum, targetDatum, currentDatum] : [rangeDatum, currentDatum];
+            const barData = formatIsActual ? [rangeDatum, targetDatum, currentDatum] : [rangeDatum, currentDatum];
 
             let handlesData = [];
             if(formatIsActual) {
@@ -166,7 +166,7 @@ export default function kpisLayout(){
                 ]
 
             if(withDeficitBar && current?.value < expectedCurrent.value){
-                barsData.push({ key:"deficit", from:current?.value, to:expectedCurrent.value, fill:"red" })
+                barData.push({ key:"deficit", from:current?.value, to:expectedCurrent.value, fill:"red" })
             }
 
             const tooltipStyles = {
@@ -182,6 +182,7 @@ export default function kpisLayout(){
                         ...previous,
                         key: "previous",
                         title:"Previous",
+                        shortTitle:"Prev",
                         desc: "...",
                         location:"above",
                         row:1, // very top
@@ -195,6 +196,7 @@ export default function kpisLayout(){
                     tooltipsData.push({ 
                         key: "achieved", 
                         title:"Achieved",
+                        shortTitle:"Ach",
                         ...achieved,
                         location:"above",
                         row:0, // just above bar
@@ -208,6 +210,7 @@ export default function kpisLayout(){
                             ...current,
                             key: "current", 
                             title:"Current",
+                            shortTitle:"Curr",
                             location:"above",
                             row:0, // just above bar
                             styles:tooltipStyles
@@ -217,6 +220,7 @@ export default function kpisLayout(){
                             ...target,
                             key: "target",
                             title: "Target",
+                            shortTitle:"Targ",
                             desc: "...",
                             location:"above",
                             row:1, // very top,
@@ -230,6 +234,7 @@ export default function kpisLayout(){
                             targetValue:target.value,
                             key: "expected",
                             title:"Expected",
+                            shortTitle:"Exp",
                             desc: "...",
                             location:"below",
                             row:0, // just below bar
@@ -243,6 +248,7 @@ export default function kpisLayout(){
                     ...current,
                     key: "current", 
                     title:"Current",
+                    shortTitle:"Curr",
                     desc: "...",
                     format:'pc',
                     previousValue:previous.value,
@@ -261,6 +267,7 @@ export default function kpisLayout(){
                         ...expectedCurrent,
                         key: "expected",
                         title:"Expected",
+                        shortTitle:"Exp",
                         desc: "...",
                         format:"pc",
                         previousValue:previous.value,
@@ -286,7 +293,7 @@ export default function kpisLayout(){
                 name:stat.fullNameShort,
                 longName:stat.fullNameLong,
                 unit:stat.unit,
-                barsData,
+                barData,
                 handlesData,
                 tooltipsData,
                 numbersData,

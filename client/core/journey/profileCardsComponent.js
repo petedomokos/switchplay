@@ -3,7 +3,7 @@ import { DIMNS } from "./constants";
 import dragEnhancements from './enhancedDragHandler';
 // import menuComponent from './menuComponent';
 import profileInfoComponent from './profileInfoComponent';
-import kpisComponent from './kpisComponent';
+import kpisComponent from './kpis/kpisComponent';
 import { Oscillator } from './domHelpers';
 import { getTransformationFromTrans } from './helpers';
 /*

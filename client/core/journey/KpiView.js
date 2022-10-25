@@ -3,8 +3,8 @@ import * as d3 from 'd3';
 import { makeStyles } from '@material-ui/core/styles'
 import IconButton from '@material-ui/core/IconButton'
 import CloseIcon from '@material-ui/icons/Close'
-import kpisLayout from "./kpisLayout";
-import kpisComponent from "./kpisComponent";
+import kpisLayout from "./kpis/kpisLayout";
+import kpisComponent from "./kpis/kpisComponent";
 import { grey10, STYLES, KPI_CTRLS } from './constants';
 
 
@@ -91,12 +91,13 @@ const KpiView = ({ name, desc, data, datasets, initSelectedKey, width, height, f
               .editable(true)
               .selected(selectedKey)
               //todo - use d3 date format
+              //need to pass getName into layout and the set name instead as a property in kpiLayout
               .getName(d => dateFormat(d.date))
+              //also, turn updateDimns etc into a funciton that is dynamic, turn
+              //all settings like width into functions od d, and make kpiComponent
+              //able to tae mulitple kpis
               .onClickKpi((e, kpi) => {
                 kpis.selected(kpi.key, true);
-              })
-              .onDblClickKpi((e, d) => { 
-                setSelectedId(d.id); 
               }), { log:true })
     })
 
