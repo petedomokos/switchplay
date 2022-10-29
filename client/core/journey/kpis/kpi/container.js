@@ -8,7 +8,10 @@ export default function container() {
     let parentSelector = "";
     let parent = function(){ return d3.select(this); };
     // dimensions
-    let margin = { left: 0, right:0, top: 0, bottom: 0 };
+    let DEFAULT_MARGIN = { left: 0, right: 0, top: 0, bottom: 0 };
+    let _margin = () => DEFAULT_MARGIN;
+    let _transform = () => null;
+
     let className = "";
 
     //API CALLBACKS
@@ -38,12 +41,14 @@ export default function container() {
 
         // expression elements
         selection
-            .each(function(){
+            .each(function(d, i){
+                //const margin = _margin(d,i)
                 const parentG = parent.call(this, parent);
                 parentG.selectAll(`g.${className}`).data([1])
                     .join("g")
                         .attr("class", `${className}`)
-                        .attr("transform", `translate(${margin.left},${margin.top})`)
+                        //.attr("transform", `translate(${margin.left},${margin.top})`)
+                        .attr("transform", _transform(d,i))
             })
             //.call(drag)
 
@@ -57,9 +62,14 @@ export default function container() {
         className = value;
         return _container;
     };
-    _container.margin = function (value) {
-        if (!arguments.length) { return margin; }
-        margin = { ...margin, ...value };
+    _container.margin = function (func) {
+        if (!arguments.length) { return _margin; }
+        _margin = (d,i) => ({ ...DEFAULT_MARGIN, ...func(d,i) })
+        return _container;
+    };
+    _container.transform = function (func) {
+        if (!arguments.length) { return _transform; }
+        _transform = func;
         return _container;
     };
     _container.parent = function (value) {

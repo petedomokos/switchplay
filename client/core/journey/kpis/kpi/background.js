@@ -11,8 +11,10 @@ export default function background() {
     let parentSelector = "";
     let parent = function(){ return d3.select(this); };
     // dimensions
-    let width = 0;
-    let height = 0;
+    let DEFAULT_WIDTH = 0;
+    let DEFAULT_HEIGHT = 0;
+    let _width = () => DEFAULT_WIDTH;
+    let _height = () => DEFAULT_HEIGHT;
 
     const defaultStyles = {
         stroke:null,
@@ -43,7 +45,10 @@ export default function background() {
         // expression elements
         selection.each(function (data, i) {
             const parentG = parent.call(this, parent);
+
             const styles = _styles(data, i);
+            const width = _width(data, i);
+            const height = _height(data, i);
 
             /*
             const drag = d3.drag()
@@ -83,13 +88,13 @@ export default function background() {
         return _background;
     };
     _background.width = function (value) {
-        if (!arguments.length) { return width; }
-        width = value;
+        if (!arguments.length) { return _width; }
+        _width = value;
         return _background;
     };
     _background.height = function (value) {
-        if (!arguments.length) { return height; }
-        height = value;
+        if (!arguments.length) { return _height; }
+        _height = value;
         return _background;
     };
     _background.styles = function (func) {

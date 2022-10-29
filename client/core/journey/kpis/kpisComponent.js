@@ -234,17 +234,17 @@ export default function kpisComponent() {
                             })
                             .style("cursor", d => isSelected(d) ? "default" : "pointer")
                             .call(kpi
-                                .width(kpiWidth)
-                                .height(kpiHeight)
-                                .expandedHeight(selectedKpiHeight)
-                                .isExpanded(d => isSelected(d))
-                                .margin({
+                                .width(() => kpiWidth)
+                                .height((d) => isSelected(d) ? selectedKpiHeight : kpiHeight)
+                                //.expandedHeight(selectedKpiHeight)
+                                .withTooltips(d => isSelected(d))
+                                .margin(() => ({
                                     //note: left an right will be set in kpiComponent, if withtooltips then 
                                     //it will accomodate them at teh edges, even if not selected
                                     // or will just have a separate space for tooltips
                                     top:gapBetweenKpis/2, bottom:gapBetweenKpis/2
-                                })
-                                .getStyles(d => ({
+                                }))
+                                .styles(d => ({
                                     bg:{
                                         fill:isSelected(d) ? "#FF8C00" : "transparent"
                                     },
@@ -253,7 +253,6 @@ export default function kpisComponent() {
                                 }))
                                 .onDblClick(onDblClickKpi)
                                 .onClick(function(e,d){
-                                    console.log("clicked", d)
                                     updateSelected(d.key, data, true);
                                     onClickKpi.call(this, e, d);
                                 }));

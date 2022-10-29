@@ -10,15 +10,25 @@ export default function titleComponent() {
     let parentSelector = "";
     let parent = function(){ return d3.select(this); };
     // dimensions
-    let width = 100;
-    let height = 30;
-    let margin = { left: 0, right:0, top: 0, bottom: 0 };
+    let DEFAULT_WIDTH = 100;
+    let DEFAULT_HEIGHT = 30;
+    let DEFAULT_MARGIN = { left: 0, right:0, top: 0, bottom: 0 };
     let contentsWidth;
     let contentsHeight;
+    let _width = () => DEFAULT_WIDTH;
+    let _height = () => DEFAULT_HEIGHT;
+    let _margin = () => DEFAULT_MARGIN;
 
-    function updateDimns(){
-        contentsWidth = width - margin.left - margin.right;
-        contentsHeight = height - margin.top - margin.bottom;
+    function getDimns(d, i, data){
+        const width = _width(d,i);
+        const height = _height(d,i);
+        const margin = _margin(d,i);
+        const contentsWidth = width - margin.left - margin.right;
+        const contentsHeight = height - margin.top - margin.bottom;
+
+        return {
+            width, height, margin, contentsWidth, contentsHeight,
+        }
     }
 
     const defaultStyles = {
@@ -33,7 +43,9 @@ export default function titleComponent() {
     let _styles = () => defaultStyles;
     let transform = () => null;
 
-    let getName = d => d.name;
+    let _name = d => d.name;
+
+    let withInteraction = false;
 
 
     //API CALLBACKS
@@ -52,23 +64,26 @@ export default function titleComponent() {
     function title(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
 
-        updateDimns();
-
         // expression elements
         selection.each(function (data, i) {
             //console.log("title", data)
             const { key } = data;
             const parentG = parent.call(this, parent);
+
             const styles = _styles(data, i);
+            const { margin, contentsWidth, contentsHeight }= getDimns(data, i);
 
             enhancedDrag
                 .onClick(onNameClick)
                 .onDblClick(onNameDblClick);
                 
-            const drag = d3.drag()
+            const d3Drag = d3.drag()
                 .on("start", enhancedDrag())
                 .on("drag", enhancedDrag())
                 .on("end", enhancedDrag());
+
+            //todo - need to actually remove drag too if necc - check out expBuilder how i did it there - for now, just dont use
+            const drag = withInteraction ? d3Drag : function(){};
 
             const titleG = parentG.selectAll("g.title").data([data]);
             titleG.enter()
@@ -106,7 +121,7 @@ export default function titleComponent() {
                         .attr("fill", "red")
                     
                     //nameG.select("rect")
-                        //.attr("width", nameCharWidth * getName(data).length)
+                        //.attr("width", nameCharWidth * _name(data).length)
                         //.attr("height", nameHeight);
 
                     const nameTextAnchor = styles.name.textAnchor;
@@ -123,10 +138,10 @@ export default function titleComponent() {
                         .attr("stroke", styles.name.stroke)
                         .attr("fill", styles.name.fill)
                         .attr("stroke-width", styles.name.strokeWidth)
-                        .text(getName(d) +" " +i) //temp add i so they different 
+                        .text(_name(d) +" " +i) //temp add i so they different 
     
                 })
-                .call(drag)
+                //.call(drag)
 
             //EXIT
             titleG.exit().each(function(d){
@@ -157,18 +172,18 @@ export default function titleComponent() {
         return title;
     };
     title.width = function (value) {
-        if (!arguments.length) { return width; }
-        width = value;
+        if (!arguments.length) { return _width; }
+        _width = value;
         return title;
     };
     title.height = function (value) {
-        if (!arguments.length) { return height; }
-        height = value;
+        if (!arguments.length) { return _height; }
+        _height = value;
         return title;
     };
-    title.margin = function (value) {
-        if (!arguments.length) { return margin; }
-        margin = { ...margin, ...value };
+    title.margin = function (func) {
+        if (!arguments.length) { return _margin; }
+        _margin = (d,i) => ({ ...DEFAULT_MARGIN, ...func(d,i) })
         return title;
     };
     title.transform = function (value) {
@@ -189,10 +204,10 @@ export default function titleComponent() {
         };
         return title;
     };
-    title.getName = function (value) {
-        if (!arguments.length) { return getName; }
+    title._name = function (value) {
+        if (!arguments.length) { return _name; }
         if(typeof value === "function"){
-            getName = value;
+            _name = value;
         }
         return title;
     };
