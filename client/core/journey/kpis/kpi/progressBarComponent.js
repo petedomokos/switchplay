@@ -2,6 +2,9 @@ import * as d3 from 'd3';
 import { DIMNS, grey10 } from "../../constants";
 import dragEnhancements from '../../enhancedDragHandler';
 import tooltipsComponent from '../../tooltipsComponent';
+import barComponent from './barComponent';
+import container from './container';
+import background from './background';
 
 /*
 
@@ -37,7 +40,7 @@ export default function progressBarComponent() {
         }
     };
     let _styles = () => defaultStyles;
-    let transform = () => null;
+    let _transform = () => null;
 
 
     //API CALLBACKS
@@ -53,20 +56,43 @@ export default function progressBarComponent() {
 
     const enhancedDrag = dragEnhancements();
     const tooltips = tooltipsComponent();
+    const bar = barComponent();
 
     function progressBar(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
 
         // expression elements
         selection
+            .call(container()
+                .parent(parent)
+                .className("progress-bar")
+                .transform((d,i) => _transform(d,i))
+            )
+            .call(container()
+                .parent("g.progress-bar")
+                .className("progress-bar-contents")
+                .transform((d,i) => `translate(${_margin(d,i).left},${_margin(d,i).top})`)
+            )
+            .call(bar
+                .parent("g.progress-bar-contents")
+                .transform((d,i) => `translate(${0},${0})`)
+            )
+            /*
             .each(function (data, i) {
                 //console.log("Bar i", i)
                 const margin = _margin(data, i);
-                //console.log("PB margin", margin)
-                const parentG = parent.call(this, parent)
-                    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+                const progressBarG = d3.select(this).selectAll("g.progess-bar").data([1])
+                progressBarG.enter()
+                    .append("g")
+                        .attr("class", "progress-bar")
+                        .merge(progressBarG)
+                        .call(container()
+                            .className("progress-bar-contents")
+                            .attr("transform", `translate(${margin.left},${margin.top})`)
+                        )
+                        .
                 //console.log("progressBar parent", parentG.node())
-                /*
                 const { key } = data;
 
                 const styles = _styles(data, i);
@@ -80,9 +106,9 @@ export default function progressBarComponent() {
                     .on("start", enhancedDrag())
                     .on("drag", enhancedDrag())
                     .on("end", enhancedDrag());
-                */
 
             })
+            */
             //.call(container().className("tooltip-contents").margin((d,i) => dimns[i].tooltipsMargin))
             //tooltips component will remove all tool
             //.call(tooltips)
@@ -117,9 +143,9 @@ export default function progressBarComponent() {
         return progressBar;
     };
     progressBar.transform = function (value) {
-        if (!arguments.length) { return transform; }
+        if (!arguments.length) { return _transform; }
         if(typeof value === "function"){
-            transform = value;
+            _transform = value;
         }
         return progressBar;
     };

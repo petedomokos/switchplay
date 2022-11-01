@@ -108,21 +108,29 @@ export default function kpiComponent() {
         selection
             .call(container()
                 .className("kpi-contents")
-                .transform((d, i) => `translate(${dimns[i].margin.left},${dimns[i].margin.top})`)
+                .transform((d, i) => {
+                    console.log("trans", i, dimns[i].margin.top)
+                    return `translate(${dimns[i].margin.left},${dimns[i].margin.top})`
+                })
             )
             //could apply other contentshere too eg 
+            /*
             .call(container()
                 .parent("g.kpi-contents")
                 .className("progress-bar-contents")
                 .transform((d, i) => `translate(${dimns[i].progressBarMargin.left},${dimns[i].progressBarMargin.top})`)
             )
+            */
             //.call(container().parent("g.kpi-contents").className("numbers-contents").margin(numbersMargin))
             //but probably best to do that as part of teh components, as happens with titleCompoennt
             //can ice these components a className let which is accessible from outside and can be overridden eg className = numbers
             .call(background()
                 .parent("g.kpi-contents")
                 .width((d,i) => dimns[i].contentsWidth)
-                .height((d,i) => dimns[i].contentsHeight)
+                .height((d,i) => {
+                    console.log("bg", i, dimns[i].contentsHeight)
+                    return dimns[i].contentsHeight
+                })
                 .styles((d, i) => ({
                     fill:i % 2 === 0 ? "blue" : "aqua"
                 }))
@@ -140,7 +148,8 @@ export default function kpiComponent() {
                     }
                 })))
             .call(progressBar
-                .parent("g.progress-bar-contents")
+                .parent("g.kpi-contents")
+                .transform((d, i) => `translate(0,${dimns[i].titleHeight})`)
                 .width((d,i) => dimns[i].progressBarWidth)
                 .height((d,i) => dimns[i].progressBarHeight)
                 .margin((d,i) => dimns[i].progressBarMargin)

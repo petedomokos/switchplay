@@ -12,7 +12,7 @@ export default function container() {
     let _margin = () => DEFAULT_MARGIN;
     let _transform = () => null;
 
-    let className = "";
+    let _className = (d,i) => "";
 
     //API CALLBACKS
     /*
@@ -42,11 +42,16 @@ export default function container() {
         // expression elements
         selection
             .each(function(d, i){
+                console.log("container this", this)
                 //const margin = _margin(d,i)
+                const className = _className(d,i);
+                console.log("class", className)
+
                 const parentG = parent.call(this, parent);
+                console.log("container parentNode", parentG.node())
                 parentG.selectAll(`g.${className}`).data([1])
                     .join("g")
-                        .attr("class", `${className}`)
+                        .attr("class", className)
                         //.attr("transform", `translate(${margin.left},${margin.top})`)
                         .attr("transform", _transform(d,i))
             })
@@ -58,8 +63,12 @@ export default function container() {
     
     //api
     _container.className = function (value) {
-        if (!arguments.length) { return className; }
-        className = value;
+        if (!arguments.length) { return _className; }
+        if(typeof value === "string"){
+            _className = () => value;
+        }else{
+            _className = value;
+        }
         return _container;
     };
     _container.margin = function (func) {
@@ -76,7 +85,10 @@ export default function container() {
         if (!arguments.length) { return parent; }
         if(typeof value === "string"){
             parentSelector = value;
-            parent = function(){ return d3.select(this).select(parentSelector); }
+            parent = function(){ 
+                console.log("parent func this", this)
+                console.log("selector", parentSelector)
+                return d3.select(this).select(parentSelector); }
         }else {
             parent = value;
         }

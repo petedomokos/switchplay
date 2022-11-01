@@ -65,13 +65,13 @@ export default function titleComponent() {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
 
         // expression elements
-        selection.each(function (data, i) {
+        selection.each(function (d, i) {
             //console.log("title", data)
-            const { key } = data;
+            const { key } = d;
             const parentG = parent.call(this, parent);
 
-            const styles = _styles(data, i);
-            const { margin, contentsWidth, contentsHeight }= getDimns(data, i);
+            const styles = _styles(d, i);
+            const { margin, contentsWidth, contentsHeight }= getDimns(d, i);
 
             enhancedDrag
                 .onClick(onNameClick)
@@ -85,12 +85,12 @@ export default function titleComponent() {
             //todo - need to actually remove drag too if necc - check out expBuilder how i did it there - for now, just dont use
             const drag = withInteraction ? d3Drag : function(){};
 
-            const titleG = parentG.selectAll("g.title").data([data]);
+            const titleG = parentG.selectAll("g.title").data([1]);
             titleG.enter()
                 .append("g")
                 .attr("class", `title title-${key}`)
                 .style("cursor", "pointer")
-                .each(function(d, i){
+                .each(function(){
                     const contentsG = d3.select(this).append("g").attr("class", "title-contents");
 
                     contentsG
@@ -107,8 +107,8 @@ export default function titleComponent() {
 
                 })
                 .merge(titleG)
-                .attr("transform", (d,i) => transform(d, i))
-                .each(function(d, i){
+                .attr("transform", transform(d, i))
+                .each(function(){
                     //console.log("d", d)
                     //console.log("i", i)
                     const contentsG = d3.select(this).select("g.title-contents")
@@ -144,7 +144,7 @@ export default function titleComponent() {
                 //.call(drag)
 
             //EXIT
-            titleG.exit().each(function(d){
+            titleG.exit().each(function(){
                 //will be multiple exits because of the delay in removing
                 if(!d3.select(this).attr("class").includes("exiting")){
                     d3.select(this)

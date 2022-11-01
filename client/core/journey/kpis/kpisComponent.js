@@ -34,8 +34,10 @@ export default function kpisComponent() {
     let selectedKpiHeight;
 
     function updateDimns(nrCtrlsButtons=0, nrTooltipRows=0){
+        console.log("updateDimns fixedselH", fixedSelectedKpiHeight, nrTooltipRows, kpiHeight)
         //selectedKpi must expand for tooltip rows, by 0.75 of kpiHeight per tooltip
         selectedKpiHeight = fixedSelectedKpiHeight || kpiHeight + (0.75 * kpiHeight * nrTooltipRows);
+        console.log("selecetedKpiHeight", selectedKpiHeight)
 
         margin = { left: width * 0.1, right: width * 0.1, top:height * 0.1, bottom: height * 0.05 };
         contentsWidth = width - margin.left - margin.right;
@@ -109,7 +111,9 @@ export default function kpisComponent() {
 
             const nrOfCtrlsButtons = ctrlsData?.length;
             const nrTooltipRowsAbove = kpisData[0] ? d3.max(kpisData[0].tooltipsData.filter(t => t.location === "above"), d => d.row + 1) : 0;
+            console.log("rowsAb", nrTooltipRowsAbove)
             const nrTooltipRowsBelow = kpisData[0] ? d3.max(kpisData[0].tooltipsData.filter(t => t.location === "below"), d => d.row + 1) : 0;
+            console.log("rowsbe", nrTooltipRowsBelow)
             const nrTooltipRows = nrTooltipRowsAbove + nrTooltipRowsBelow;
             updateDimns(nrOfCtrlsButtons, nrTooltipRows);
             //plan - dont update dom twice for name form
@@ -136,17 +140,9 @@ export default function kpisComponent() {
                                 .attr("fill", "transparent")
                                 .attr("stroke", "none");
 
-                        /*const y = calculateListY(selected, data.kpisData, kpiHeight, 1);
-                        const extraGap = kpiHeight * 0.75;
-                        if(log){
-                            console.log("data", data)
-                            console.log("selected", selected)
-                            console.log("extra gap", extraGap)
-                            console.log("y", y)
-                        }
-                        */
+                        const y = calculateListY(selected, data.kpisData, kpiHeight, 1);
                         listG.append("g").attr("class", "kpis-list-contents")
-                            //.call(listScrollZoom.translateTo, 0, -extraGap, [0,y])
+                            .call(listScrollZoom.translateTo, 0, y, [0,0])
 
                         listG
                             .append("defs")
@@ -186,14 +182,14 @@ export default function kpisComponent() {
                                 .attr('y', 0);
 
                         //const listItemsHeight = data.kpisData.length * kpiHeight + (selected ? 3 * tooltipHeight : 0)
-                        const y = calculateListY(selected, data.kpisData, kpiHeight, 1);
-                        const extraGap = selected ? kpiHeight * 0.75 : 0;
+                        //const y = calculateListY(selected, data.kpisData, kpiHeight, 1);
+                        //const extraGap = selected ? kpiHeight * 0.75 : 0;
                         const listContentsG = listG.select("g.kpis-list-contents")
                         //this line causes a random scroll when 2nd profile is created in journey
 
                         //if(selected){
-                        listContentsG
-                            .call(listScrollZoom.translateTo, 0, -extraGap, [0,y]);
+                        //listContentsG
+                            //.call(listScrollZoom.translateTo, 0, -extraGap, [0,y]);
                         //}
                         listScrollZoom
                             //.translateExtent([[0, 0], [0, 10]])
@@ -225,11 +221,15 @@ export default function kpisComponent() {
                             .attr("class", d => "kpi kpi-"+d.id)
                             .merge(kpiG)
                             .attr("transform", (d,i) => {
+                                console.log("trans kpi i", i, selectedKpiHeight, kpiHeight)
                                 const extraSpaceForSelected = selectedKpiHeight - kpiHeight;
+                                console.log("extraspace", extraSpaceForSelected)
                                 const selectedKpiBefore = kpisData
                                     .slice(0, i)
                                     .find(kpi => isSelected(kpi));
+                                console.log("sel before", selectedKpiBefore)
                                 const vertShift = i * kpiHeight +(selectedKpiBefore ? extraSpaceForSelected : 0)
+                                console.log("vertShift", vertShift)
                                 return `translate(0,${vertShift})`
                             })
                             .style("cursor", d => isSelected(d) ? "default" : "pointer")
@@ -258,7 +258,7 @@ export default function kpisComponent() {
                                 }));
 
                         //EXIT
-                        kpiG.exit().each(function(d){
+                        kpiG.exit().each(function(){
                             //will be multiple exits because of the delay in removing
                             if(!d3.select(this).attr("class").includes("exiting")){
                                 d3.select(this)
@@ -365,8 +365,10 @@ export default function kpisComponent() {
     //requires each listItem to have an index i
     function calculateListY(selectedKey, data, itemHeight, nrItemsToShowBefore = 0){
         const selectedIndex = data.findIndex(d => d.key === selectedKey);
-        if(!selectedKey || selectedIndex === 0){ return 0; }
-        return -itemHeight * (selectedIndex + 1 - nrItemsToShowBefore);
+        if(!selectedKey){ return 0; }
+        const actualNrToShowBefore = d3.min([selectedIndex, nrItemsToShowBefore]);
+        console.log("listY", itemHeight * (selectedIndex - actualNrToShowBefore))
+        return itemHeight * (selectedIndex - actualNrToShowBefore);
     }
 
     function updateSelected(key, data, shouldUpdateDom){
@@ -374,15 +376,10 @@ export default function kpisComponent() {
         isSelected = d => d.key === selected;
         if(shouldUpdateDom){
             const y = calculateListY(selected, data.kpisData, kpiHeight, 1);
-            //@todo - find out why we need this - is it some kind of margin?
-            //without it, the first few kpis are positioned too high
-            const extraGap = kpiHeight * 0.75;
             containerG.select("g.kpis-list-contents")
                .transition()
                     .duration(500)
-                    //point 0,-gap will appear at point 0,y 
-                    //so if y neg, then its shifted up so 0,-gap is up at 0,y
-                    .call(listScrollZoom.translateTo, 0, -extraGap, [0,y])
+                    .call(listScrollZoom.translateTo, 0, y, [0,0])
                     .on("end", () => { containerG.call(kpis) }); 
         }
     }
