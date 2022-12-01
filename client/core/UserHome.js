@@ -67,10 +67,13 @@ const UserHome = ({screen, user, loading, loadingError}) => {
     {label:"Add datapoint", to:"/datapoints/new"}
   ]
 
+  console.log("UserHome user", user)
+
   return (
     <div className={classes.root}>
       {user._id && 
         <>
+          Welcome {user.firstname}!
           {/**
           <div className={classes.topRow} >
               <UserProfile profile={user} />
