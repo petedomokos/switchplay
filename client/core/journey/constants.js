@@ -58,7 +58,7 @@ export const FONTSIZES = {
         kpis:{
             name:4 * k,
             values:4 * k,
-            ctrls:5 * k
+            ctrls:4 * k
         }
     }),
     menuBar:{
@@ -103,7 +103,8 @@ export const DIMNS = {
         height:600,
         margin:{ left:20, right:20, top:0, bottom:0 },
         list:{
-            height:480
+            height:480,
+            margin:{ left:20, right:20, top:0, bottom:0 },
         },
         ctrls:{
             width:160,

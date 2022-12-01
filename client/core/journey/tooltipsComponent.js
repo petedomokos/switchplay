@@ -7,18 +7,19 @@ import { grey10 } from './constants';
 */
 export default function tooltipsComponent() {
     // dimensions
-    let margin = { left:5, right:5, top: 5, bottom:5};
+    let margin;
     let width = 100;
     let height = 60;
     let contentsWidth;
     let contentsHeight;
-    let nameHeight;
+    let titleHeight;
     let valueHeight;
 
     function updateDimns(){
+        margin = { left: width * 0.05, right: width * 0.05, top:height * 0.05, bottom:height * 0.05 };
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
-        nameHeight = contentsHeight * 0.35;
+        titleHeight = contentsHeight * 0.35;
         valueHeight = contentsHeight * 0.65;
     };
 
@@ -26,7 +27,7 @@ export default function tooltipsComponent() {
     let styles = {};
     //dom
 
-    const nameWrap = textWrap();
+    //const titleWrap = textWrap();
     
     function tooltips(selection, options) {
         const { log } = options;
@@ -68,7 +69,7 @@ export default function tooltipsComponent() {
                             .append("text")
                                 .attr("class", "title")
                                 .attr("x", contentsWidth/2)
-                                .attr("y", nameHeight/2)
+                                .attr("y", titleHeight/2)
                                 .attr("text-anchor", "middle")
                                 .attr("dominant-baseline", "central")
 
@@ -85,7 +86,10 @@ export default function tooltipsComponent() {
             }
 
             function update(){
-                //console.log("update tooltip ", d)
+                console.log("update tooltip styles", styles)
+                console.log("contentsHeight", contentsHeight)
+                console.log("titleHeight", titleHeight)
+                console.log("valueHeight", valueHeight)
                 containerG.select("rect.bg")
                     .attr("width", width)
                     .attr("height", height)
@@ -96,21 +100,21 @@ export default function tooltipsComponent() {
 
                 contentsG.select("g.title").select("text.title")
                     .attr("x", contentsWidth/2)
-                    .attr("y", nameHeight/2)
+                    .attr("y", titleHeight/2)
                     .attr("font-size", styles.title?.fontSize || 9)
                     .attr("stroke", styles.title?.stroke || "white")
                     .attr("fill", styles.title?.stroke || "white")
                     .attr("stroke-width", styles.title?.strokeWidth || 0.3)
-                    .text(d.title || d.label || d.name || "")
+                    .text((contentsWidth < 40 && d.shortTitle) ? d.shortTitle : (d.title || d.label || d.name || ""))
                     
 
                 const valueG = contentsG.select("g.value")
-                    .attr("transform", "translate(0," +nameHeight +")");
+                    .attr("transform", "translate(0," +titleHeight +")");
 
                 valueG.select("rect")
                     .attr("width", contentsWidth)
                     .attr("height", valueHeight)
-                    .attr("fill", styles.value?.fill || "white")
+                    .attr("fill", styles.value?.fill || "none")
                 
                 valueG.select("text.value")
                     .attr("x", contentsWidth/2)

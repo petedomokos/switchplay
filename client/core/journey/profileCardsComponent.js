@@ -3,7 +3,7 @@ import { DIMNS } from "./constants";
 import dragEnhancements from './enhancedDragHandler';
 // import menuComponent from './menuComponent';
 import profileInfoComponent from './profileInfoComponent';
-import kpisComponent from './kpisComponent';
+import kpisComponent from './kpis/kpisComponent';
 import { Oscillator } from './domHelpers';
 import { getTransformationFromTrans } from './helpers';
 /*
@@ -22,7 +22,7 @@ export default function profileCardsComponent() {
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
     }
-    let kpiHeight = 10;
+    let kpiHeight = 100;
 
     let fontSizes = {
         info:{
@@ -32,7 +32,8 @@ export default function profileCardsComponent() {
         },
         kpis:{
             name:9,
-            values:9
+            values:9,
+            ctrls:8
         }
     };
 
@@ -47,6 +48,7 @@ export default function profileCardsComponent() {
     let onClick = function(){};
     let onCtrlClick = () => {};
     let onClickKpi = () => {};
+    let onDblClickKpi = function(){};
 
     let onDblClick = function(){};
     let onDragStart = function() {};
@@ -144,7 +146,19 @@ export default function profileCardsComponent() {
                         .fontSizes(fontSizes.kpis)
                         .editable(editable)
                         .onCtrlClick(onCtrlClick)
-                        .onClickKpi(onClickKpi);
+                        .onListScrollZoom(function(e){
+                            data.filter(p => p.id !== d.id).forEach(p => {
+                                kpisComponents[p.id].handleListScrollZoom(e)
+                           })
+                        })
+                        .onClickKpi((e,kpi) => {
+                            //update selected KPI in all profile cards
+                            data.filter(p => p.id !== d.id).forEach(p => {
+                            //data.forEach(profile => {
+                                 kpisComponents[p.id].selected(kpi.key, true);
+                            })
+                        })
+                        .onDblClickKpi(onDblClickKpi);
 
                     //ENTER AND UPDATE
                     const contentsG = d3.select(this).select("g.contents")
@@ -248,7 +262,6 @@ export default function profileCardsComponent() {
             })
 
             function dragStart(e , d){
-                console.log("profile drag start")
                 d3.select(this).raise();
 
                 onDragStart.call(this, e, d)
@@ -413,6 +426,11 @@ export default function profileCardsComponent() {
         if(typeof value === "function"){
             onClickKpi = value;
         }
+        return profileCards;
+    };
+    profileCards.onDblClickKpi = function (value) {
+        if (!arguments.length) { return onDblClickKpi; }
+        onDblClickKpi = value;
         return profileCards;
     };
     profileCards.onCtrlClick = function (value) {

@@ -1,5 +1,4 @@
 import * as d3 from 'd3';
-import { initial } from 'lodash';
 import { DIMNS, FONTSIZES } from "./constants";
 import contractsComponent from './contractsComponent';
 import profileCardsComponent from './profileCardsComponent';
@@ -10,8 +9,8 @@ export default function milestonesBarComponent() {
     //API SETTINGS
     // dimensions
     let width;
-    let height = DIMNS.milestonesBar.height
-    let margin = DIMNS.milestonesBar.margin;
+    let height = DIMNS.milestonesBar.list.height
+    let margin = DIMNS.milestonesBar.list.margin;
     let contentsWidth;
     let contentsHeight;
 
@@ -19,18 +18,37 @@ export default function milestonesBarComponent() {
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
     }
-    const profileCardDimns = DIMNS.milestonesBar.profile;
-    const contractDimns = DIMNS.milestonesBar.contract;
-    const barHeight = DIMNS.milestonesBar.height;
-    let milestoneWidth = (milestone) => 50;
-    let milestoneHeight = (milestone) => 100;
+    let profileCardDimns = DIMNS.milestonesBar.profile;
+    let contractDimns = DIMNS.milestonesBar.contract;
+
+    let fontSizes = {
+        profile: FONTSIZES.profile(1),
+        contract: FONTSIZES.contract(1)
+    }
+    //@todo - replace fontsizes with styles only
+    let DEFAULT_STYLES = {
+        profiles:{
+            info:{
+                date:{
+                    fontSize:9
+                }
+            },
+            kpis:{
+    
+            }
+        },
+        contracts:{
+
+        }
+    }
+    let _styles = () => DEFAULT_STYLES;
 
     let xScale = x => 0;
     let selected;
 
     let kpiFormat;
     let onSetKpiFormat = function(){};
-    let onClickKpi = function(){};
+    let onSelectKpiSet = function(){};
 
     let containerG;
     let contentsG;
@@ -79,6 +97,8 @@ export default function milestonesBarComponent() {
             }
 
             function update(){
+                //helper
+                const milestoneWidth = m => m.dataType === "profile" ? profileCardDimns.width: contractDimns.width;
                 contentsG.attr("transform", `translate(${margin.left},${margin.right})`);
                 const xOffset = -d3.sum(data.filter(m => m.nr < slidePosition), m => milestoneWidth(m));
 
@@ -106,25 +126,29 @@ export default function milestonesBarComponent() {
                 contractsG
                     .datum(data.filter(m => m.dataType === "contract"))
                     .call(contracts
-                        .width(DIMNS.milestonesBar.contract.width)
-                        .height(DIMNS.milestonesBar.contract.height)
-                        .margin(DIMNS.milestonesBar.contract.margin)
-                        .fontSizes(FONTSIZES.contract(3))
+                        .width(contractDimns.width)
+                        .height(contractDimns.height)
+                        .margin(contractDimns.margin)
+                        .fontSizes(fontSizes.contract)
                         .xScale(x, "nr")
                         .yScale(y), { log:true });
 
                 profilesG
                     .datum(data.filter(m => m.dataType === "profile"))
                     .call(profiles
-                        .width(DIMNS.milestonesBar.profile.width)
-                        .height(DIMNS.milestonesBar.profile.height)
-                        .margin(DIMNS.milestonesBar.profile.margin)
-                        .fontSizes(FONTSIZES.profile(3))
-                        .kpiHeight(30)
+                        .width(profileCardDimns.width)
+                        .height(profileCardDimns.height)
+                        .margin(profileCardDimns.margin)
+                        .fontSizes(fontSizes.profile)
+                        .kpiHeight(50)
                         .editable(true)
                         .xScale(x, "nr")
                         .yScale(y)
-                        .onClickKpi(onClickKpi), { log:true });
+                        .onClickKpi(onSelectKpiSet)
+                        .onDblClickKpi((e,d) => {
+                            console.log("dbl click kpi", d)
+                            onSelectKpiSet(d);
+                        }), { log:true });
 
                 //functions
                 slideBack = function(){
@@ -157,6 +181,31 @@ export default function milestonesBarComponent() {
     milestonesBar.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
+        return milestonesBar;
+    };
+    milestonesBar.contractDimns = function (value) {
+        if (!arguments.length) { return width; }
+        contractDimns = value;
+        return milestonesBar;
+    };
+    milestonesBar.profileCardDimns = function (value) {
+        if (!arguments.length) { return width; }
+        profileCardDimns = value;
+        return milestonesBar;
+    };
+    milestonesBar.styles = function (value) {
+        if (!arguments.length) { return _styles; }
+        if(typeof value === "function"){
+            _styles = (d,i) => ({ ...DEFAULT_STYLES, ...value(d,i) });
+        }else{
+            _styles = (d,i) => ({ ...DEFAULT_STYLES, ...value });
+        }
+        
+        return milestonesBar;
+    };
+    milestonesBar.fontSizes = function (value) {
+        if (!arguments.length) { return _styles; }
+        fontSizes = { ...fontSizes, ...value };
         return milestonesBar;
     };
     milestonesBar.selected = function (value) {
@@ -196,10 +245,10 @@ export default function milestonesBarComponent() {
         }
         return milestonesBar;
     };
-    milestonesBar.onClickKpi = function (value) {
-        if (!arguments.length) { return onClickKpi; }
+    milestonesBar.onSelectKpiSet = function (value) {
+        if (!arguments.length) { return onSelectKpiSet; }
         if(typeof value === "function"){
-            onClickKpi = value;
+            onSelectKpiSet = value;
         }
         return milestonesBar;
     };

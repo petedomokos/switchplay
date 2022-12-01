@@ -24,19 +24,9 @@ import { getTransformationFromTrans } from './helpers';
     *** = needed for Brian to test the basic design of a canvas (no measures, just planets, aims, and links)
     ** = needed for Brian to test assignment of measures and targs meaningfully (ie user sees targets in nice visuals) (but not hooked up to dataset measures)
     * = needed to 
+
     
     DOING NOW/NEXT
-    1. delete all journeys
-    2. save to server (new and existing)
-    3. load journeys from server (could be more than 1)
-
-    4. user selects which journey to see
-    5. user ids for all 5
-    6. deploy
-    7. mobile friendly
-
-
-
 
     new bigs since store
      - new measure form isnt up-to-date ( problem existed before store change)
@@ -204,7 +194,7 @@ export default function journeyComponent() {
 
     //updating react settings
     let onSetKpiFormat = function(){};
-    let onClickKpi = function(){};
+    let onSelectKpiSet = function(){};
     //contracts
     let handleCreateContract = function(){};
     let onDeleteContract = function(){};
@@ -539,15 +529,16 @@ export default function journeyComponent() {
                 profileCards
                     .width(DIMNS.profile.width * k)
                     .height(DIMNS.profile.height * k)
-                    .kpiHeight(10 * k)
+                    .kpiHeight(15 * k)
                     .fontSizes(FONTSIZES.profile(k))
                     .xScale(zoomedTimeScale)
                     .yScale(zoomedYScale)
                     .onCtrlClick((e,d) => {
                         onSetKpiFormat(d.key)
                     })
-                    .onClickKpi((e,d) => {
-                        onClickKpi(d);
+                    .onDblClickKpi((e,d) => {
+                        console.log("dbl click kpi", d)
+                        onSelectKpiSet(d);
                     })
                     .onDragEnd(function(e,d){
                         const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
@@ -1405,10 +1396,10 @@ export default function journeyComponent() {
         }
         return journey;
     };
-    journey.onClickKpi = function (value) {
-        if (!arguments.length) { return onClickKpi; }
+    journey.onSelectKpiSet = function (value) {
+        if (!arguments.length) { return onSelectKpiSet; }
         if(typeof value === "function"){
-            onClickKpi = value;
+            onSelectKpiSet = value;
         }
         return journey;
     };

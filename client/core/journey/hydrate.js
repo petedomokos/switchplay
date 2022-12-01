@@ -12,13 +12,16 @@ function hydrateProfiles(profiles, userKpis, datasets){
         return {
             ...p,
             id:milestoneId,
-            kpis:userKpis.map(kpi => {
-                const kpiSetId = `dset-${kpi.datasetId}-stat-${kpi.statId}`;
+            kpis:userKpis.map((kpi,i) => {
+                //temp - for now give extra index so we can use same dataset more than once
+                const kpiSet = `dset-${kpi.datasetId}-stat-${kpi.statId}`;
+                const kpiSetId = `${kpiSet}-${i}`;
                 return {
                     ...kpi,
                     id:`milestone-${milestoneId}-${kpiSetId}`,
                     milestoneId,
-                    kpiSetId
+                    kpiSetId,
+                    kpiSet
                 }
             })
         }

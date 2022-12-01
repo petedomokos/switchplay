@@ -16,7 +16,7 @@ import { DIMNS, FONTSIZES, grey10 } from './constants';
 const useStyles = makeStyles((theme) => ({
   root: {
     width:"100%",
-    height:DIMNS.milestonesBar.height,
+    height:props => props.height,
     display:"flex",
     flexDirection:"column",
     //marginLeft:DIMNS.profiles.margin.left, 
@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
     alignSelf:"center",
     display:"flex",
     justifyContent:"space-between",
-    alignItems:"center"
+    alignItems:"center",
   },
   iconBtn:{
     color:grey10(2),
@@ -44,30 +44,39 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
+//helpers
 const sortAscending = (data, accessor =  d => d) => {
   const dataCopy = data.map(d => d);
   return dataCopy.sort((a, b) => d3.ascending(accessor(a), accessor(b)))
 };
+const scaleDimn = (dimn, k) => dimn * k;
+const scaleDimns = (dimns, k) => ({
+    width:dimns.width * k,
+    height:dimns.height * k,
+    margin:{
+        left:dimns.margin.left * k,
+        right:dimns.margin.left * k,
+        top:dimns.margin.left * k,
+        bottom:dimns.margin.left * k
+    }
+})
 
 const layout = milestonesLayout();
 const milestonesBar = milestonesBarComponent();
 
-const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, setKpiFormat, onClickKpi }) => {
-  //console.log("Milestones", profiles)
-  const milestones = [...contracts]
-  let styleProps = {}
+const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, setKpiFormat, onSelectKpiSet, screen }) => {
+  const bottomCtrlsBarHeight = 100;
+  const height = d3.min([DIMNS.milestonesBar.height, screen.height - bottomCtrlsBarHeight])
+  let styleProps = { height };
   const classes = useStyles(styleProps) 
   const containerRef = useRef(null);
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
 
-  const profileCardDimns = DIMNS.milestonesBar.profile;
-  const contractDimns = DIMNS.milestonesBar.contract;
-  const barHeight = DIMNS.milestonesBar.height;
-  const milestoneWidth = milestone => milestone.dataType === "profile" ? profileCardDimns.width: contractDimns.width;
-  const milestoneHeight = milestone => milestone.dataType === "profile" ? profileCardDimns.height: contractDimns.height;
-
-  //need to remove teh journey svg as I think it is sitting on top of this and stopping hover and click events
-  //set display to none for journey
+  const k = height / DIMNS.milestonesBar.height;
+  const scale = dimns => scaleDimns(dimns, k);
+  const contractDimns = scale(DIMNS.milestonesBar.contract);
+  const profileCardDimns = scale(DIMNS.milestonesBar.profile);
+  const kpiListHeight = scaleDimn(DIMNS.milestonesBar.list.height, k);
   //init
   useEffect(() => {
     if(!containerRef.current){return; }
@@ -83,15 +92,21 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
     d3.select(containerRef.current)
       .datum(layout(orderedData))
       .call(milestonesBar
-          .height(DIMNS.milestonesBar.list.height)
-          .milestoneWidth(milestoneWidth)
+          .height(kpiListHeight)
+          .profileCardDimns(profileCardDimns)
+          .contractDimns(contractDimns)
+          .fontSizes({
+            //@todo - replace with styles, and fix so we dont have to increase k by 2.5
+            profile: FONTSIZES.profile(k * 2.5),
+            contract: FONTSIZES.contract(k * 2.5)
+          })
           .onSetKpiFormat(setKpiFormat)
-          .onClickKpi((e,kpi) => { onClickKpi(kpi); }))
+          .onSelectKpiSet((e,kpi) => { onSelectKpiSet(kpi); }))
   })
 
   return (
     <div className={classes.root}>
-        <svg className={classes.svg} ref={containerRef} width="100%" height={DIMNS.milestonesBar.list.height}></svg>
+        <svg className={classes.svg} ref={containerRef} width="100%" height={kpiListHeight}></svg>
         <div className={classes.ctrls}>
           <IconButton className={classes.iconBtn} onClick={milestonesBar.slideBack}
               aria-label="Home" >

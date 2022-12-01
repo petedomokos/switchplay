@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
-import { addWeeks } from "../../util/TimeHelpers"
-import { pcCompletion } from "../../util/NumberHelpers"
-import { grey10, KPI_CTRLS } from './constants';
+import { addWeeks } from "../../../util/TimeHelpers"
+import { pcCompletion } from "../../../util/NumberHelpers"
+import { grey10, KPI_CTRLS } from '../constants';
 
 export default function kpisLayout(){
     let date = new Date();
@@ -89,66 +89,78 @@ export default function kpisLayout(){
             //console.log("min", min)
             const end = format === "actual-value" ? max : target.value;
 
-            const rangeDatum = { key: "range", from:start, to:end, fill:"transparent", stroke:"grey" };
-            const targetDatum = { key: "target", from:start, to:target.value, fill:colours.target };
-            const currentDatum = { key: "current", from:start, to:current.value, fill:colours.current };
-            const targetHandleDatum = { 
-                ...targetDatum, 
-                handleType:"triangle", 
-                value:targetDatum.to, 
-                pos:"above"
-            }
-
-            const prevHandleDatum = { 
-                ...previous,
-                key: "previous",
-                handleType:"line",
-                stroke:"white",
-                strokeWidth:0.5,
-                strokeDasharray:4,
+            //const rangeDatum = { key: "range", from:start, to:end, fill:"transparent", stroke:"grey" };
+            const targetDatum = { 
+                key: "target", 
+                from:start, 
+                to:target.value, 
+                fill:colours.target,
+                handle:{
+                    handleType:"triangle",  
+                    pos:"above",
+                    key: "target",
+                    colour:colours.target
+                }
+            };
+            const currentDatum = { 
+                key: "current", 
+                from:start, 
+                to:current.value, 
                 fill:colours.current,
-                pos:"above"
-            }
-
-            const expectedHandleDatum = { 
-                key: "expected",
-                handleType:"triangle",
-                value:expectedCurrent.value,
-                previousValue:previous.value,
-                targetValue:target.value,
-                //@todo - handle decreasing datasets ie less is best
-                fill:isOnTrack ? colours.expectedAhead : colours.expectedBehind,
-                pos:"below",
-                format:formatIsActual ? "actual" : "completion"
-            }
-
-            const currentHandleDatum = {
-                ...current,
-                key:'current',
-                handleType:"rect",
-                fill:"transparent",
-                stroke:"white",
-                strokeWidth:0.2,
                 pcValue:_pcCompletionValue,
                 previousValue:previous.value,
                 targetValue:target.value,
+                format:formatIsActual ? "actual" : "completion",
+                handle:{
+                    handleType:"rect",
+                    pos:"over",
+                    key: "current",
+                    colour:colours.current
+                    //fill:"transparent",
+                    //stroke:"white",
+                    //strokeWidth:0.2,
+                }
+            };
+            const expectedDatum = {
+                key: "expected",
+                handle:{
+                    handleType:"triangle",
+                    pos:"below",
+                    key: "expected",
+                    colour:isOnTrack ? colours.expectedAhead : colours.expectedBehind
+                },
+                value:expectedCurrent.value,
+                previousValue:previous.value,
+                targetValue:target.value,
+                from:start, 
+                to:expectedCurrent.value,
+                //@todo - handle decreasing datasets ie less is best
+                fill:isOnTrack ? colours.expectedAhead : colours.expectedBehind,
                 format:formatIsActual ? "actual" : "completion"
             }
-            const barsData = formatIsActual ? [rangeDatum, targetDatum, currentDatum] : [rangeDatum, currentDatum];
 
-            let handlesData = [];
-            if(formatIsActual) {
-                if(previous){ handlesData.push(prevHandleDatum);}
-                handlesData.push(currentHandleDatum, targetHandleDatum);
-            }else{
-                handlesData.push(currentHandleDatum);
-                //only show expected handle on next future profile, not past or other future ones
+            const prevDatum = {
+                key: "previous",
+                handle:{
+                    handleType:"line",
+                    pos:"over",
+                    key: "previous",
+                    colour:"white",
+                    strokeWidth:0.5,
+                    strokeDasharray:2,
+                },
+                value:expectedCurrent.value,
+                from:start, 
+                to:previous.value,
+                //@todo - handle decreasing datasets ie less is best
+                fill:"none",
+                format:formatIsActual ? "actual" : "completion"
             }
-            if(isActive){
-                handlesData.push(expectedHandleDatum);
-            }
+
+            const barData = formatIsActual ? [targetDatum, expectedDatum, currentDatum, prevDatum] : [expectedDatum, currentDatum];
+            barData.start = start;
+            barData.end = end;
             
-           
             const numbersData = formatIsActual ? 
                 [ 
                     { key: "current-actual", value: current?.value, colour:colours.current } 
@@ -166,7 +178,7 @@ export default function kpisLayout(){
                 ]
 
             if(withDeficitBar && current?.value < expectedCurrent.value){
-                barsData.push({ key:"deficit", from:current?.value, to:expectedCurrent.value, fill:"red" })
+                barData.push({ key:"deficit", from:current?.value, to:expectedCurrent.value, fill:"red" })
             }
 
             const tooltipStyles = {
@@ -182,6 +194,7 @@ export default function kpisLayout(){
                         ...previous,
                         key: "previous",
                         title:"Previous",
+                        shortTitle:"Prev",
                         desc: "...",
                         location:"above",
                         row:1, // very top
@@ -195,6 +208,7 @@ export default function kpisLayout(){
                     tooltipsData.push({ 
                         key: "achieved", 
                         title:"Achieved",
+                        shortTitle:"Ach",
                         ...achieved,
                         location:"above",
                         row:0, // just above bar
@@ -208,6 +222,7 @@ export default function kpisLayout(){
                             ...current,
                             key: "current", 
                             title:"Current",
+                            shortTitle:"Curr",
                             location:"above",
                             row:0, // just above bar
                             styles:tooltipStyles
@@ -217,6 +232,7 @@ export default function kpisLayout(){
                             ...target,
                             key: "target",
                             title: "Target",
+                            shortTitle:"Targ",
                             desc: "...",
                             location:"above",
                             row:1, // very top,
@@ -230,6 +246,7 @@ export default function kpisLayout(){
                             targetValue:target.value,
                             key: "expected",
                             title:"Expected",
+                            shortTitle:"Exp",
                             desc: "...",
                             location:"below",
                             row:0, // just below bar
@@ -243,6 +260,7 @@ export default function kpisLayout(){
                     ...current,
                     key: "current", 
                     title:"Current",
+                    shortTitle:"Curr",
                     desc: "...",
                     format:'pc',
                     previousValue:previous.value,
@@ -261,6 +279,7 @@ export default function kpisLayout(){
                         ...expectedCurrent,
                         key: "expected",
                         title:"Expected",
+                        shortTitle:"Exp",
                         desc: "...",
                         format:"pc",
                         previousValue:previous.value,
@@ -286,8 +305,7 @@ export default function kpisLayout(){
                 name:stat.fullNameShort,
                 longName:stat.fullNameLong,
                 unit:stat.unit,
-                barsData,
-                handlesData,
+                barData,
                 tooltipsData,
                 numbersData,
                 bands:bands.map(band => ({ ...band, min:+band.min, max:+band.max })),
