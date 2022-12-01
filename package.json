@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "engines": {
     "node": "12.x",
-    "npm": "6.9.0"
+    "npm": "6.10.0"
   },
   "main": "./dist/server.generated.js",
   "license": "MIT",
