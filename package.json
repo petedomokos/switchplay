@@ -25,14 +25,14 @@
     "@babel/preset-react": "7.9.4",
     "babel-loader": "8.1.0",
     "file-loader": "^6.0.0",
-    "nodemon": "2.0.2",
+    "nodemon": "2.0.2"
+  },
+  "dependencies": {
     "webpack": "4.42.1",
     "webpack-cli": "3.3.11",
     "webpack-dev-middleware": "3.7.2",
     "webpack-hot-middleware": "2.25.0",
-    "webpack-node-externals": "1.7.2"
-  },
-  "dependencies": {
+    "webpack-node-externals": "1.7.2",
     "@babel/plugin-proposal-optional-chaining": "^7.16.0",
     "@date-io/moment": "^2.10.8",
     "@hot-loader/react-dom": "16.13.0",
