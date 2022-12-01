@@ -23,16 +23,37 @@ export default function progressBarComponent() {
     let _height = () => DEFAULT_HEIGHT;
     let _margin = () => DEFAULT_MARGIN;
 
-    function getDimns(d, i, data){
-        const width = _width(d,i);
+    let _upperTooltipsHeight = () => 0;
+
+    let dimns = [];
+
+    /*
+    function _dimns(d, i, data){
+        const width = _width(d,i)
         const height = _height(d,i);
         const margin = _margin(d,i);
         const contentsWidth = width - margin.left - margin.right;
         const contentsHeight = height - margin.top - margin.bottom;
-
         return {
             width, height, margin, contentsWidth, contentsHeight,
         }
+    }
+    */
+
+    //per datum
+    function updateDimns(data){
+        dimns = [];
+        return data.forEach((d,i) => {
+            const width = _width(d,i)
+            const height = _height(d,i);
+            const margin = _margin(d,i);
+            const contentsWidth = width - margin.left - margin.right;
+            const contentsHeight = height - margin.top - margin.bottom;
+ 
+            dimns.push({
+                width, height, margin, contentsWidth, contentsHeight
+            })
+        })
     }
 
     const defaultStyles = {
@@ -41,6 +62,9 @@ export default function progressBarComponent() {
     };
     let _styles = () => defaultStyles;
     let _transform = () => null;
+
+    let fixedDomain = [0,100]
+    let _domain;
 
 
     //API CALLBACKS
@@ -60,57 +84,34 @@ export default function progressBarComponent() {
 
     function progressBar(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
+        updateDimns(selection.data());
 
-        // expression elements
         selection
             .call(container()
-                .parent(parent)
-                .className("progress-bar")
-                .transform((d,i) => _transform(d,i))
-            )
-            .call(container()
-                .parent("g.progress-bar")
                 .className("progress-bar-contents")
+                .transform((d,i) => `translate(${dimns[i].margin.left},${dimns[i].margin.top})`)
+            )
+        
+        selection.select("g.progress-bar-contents")
+            /*
+            .call(container()
+                .className("tooltips")
                 .transform((d,i) => `translate(${_margin(d,i).left},${_margin(d,i).top})`)
             )
-            .call(bar
-                .parent("g.progress-bar-contents")
-                .transform((d,i) => `translate(${0},${0})`)
-            )
-            /*
-            .each(function (data, i) {
-                //console.log("Bar i", i)
-                const margin = _margin(data, i);
-
-                const progressBarG = d3.select(this).selectAll("g.progess-bar").data([1])
-                progressBarG.enter()
-                    .append("g")
-                        .attr("class", "progress-bar")
-                        .merge(progressBarG)
-                        .call(container()
-                            .className("progress-bar-contents")
-                            .attr("transform", `translate(${margin.left},${margin.top})`)
-                        )
-                        .
-                //console.log("progressBar parent", parentG.node())
-                const { key } = data;
-
-                const styles = _styles(data, i);
-                const { margin, contentsWidth, contentsHeight }= getDimns(data, i);
-
-                enhancedDrag
-                    .onClick(onBarClick)
-                    .onDblClick(onBarDblClick);
-                    
-                const drag = d3.drag()
-                    .on("start", enhancedDrag())
-                    .on("drag", enhancedDrag())
-                    .on("end", enhancedDrag());
-
-            })
             */
-            //.call(container().className("tooltip-contents").margin((d,i) => dimns[i].tooltipsMargin))
-            //tooltips component will remove all tool
+            .call(container()
+                .className("bar-area")
+                //.transform((d,i) => `translate(0,${_upperTooltipsHeight(d,i)})`)
+            )
+        
+        selection.select("g.bar-area")
+            //.data(selection.data().map(d => d.barData))
+            .call(bar
+                .width((d,i) => dimns[i].contentsWidth)
+                .height((d,i) => dimns[i].contentsHeight)
+                .editable(true)
+            )
+        //selection.select("g.tooltips")
             //.call(tooltips)
 
         return selection;
@@ -164,6 +165,16 @@ export default function progressBarComponent() {
         if (!arguments.length) { return _name; }
         if(typeof value === "function"){
             _name = value;
+        }s
+        return progressBar;
+    };
+    progressBar.domain = function (value) {
+        if (!arguments.length) { return fixedDomain || _domain; }
+        if(typeof value === "function"){
+            _domain = value;
+            fixedDomain = null;
+        }else{
+            fixedDomain = value;
         }
         return progressBar;
     };

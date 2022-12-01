@@ -6,9 +6,9 @@ import { Oscillator } from '../../domHelpers';
 import { getTransformationFromTrans } from '../../helpers';
 import titleComponent from './titleComponent';
 import progressBarComponent from './progressBarComponent';
-//import numbersComponent from './numbersComponent';
 import container from './container';
 import background from './background';
+
 
 /*
 
@@ -42,17 +42,16 @@ export default function kpiComponent() {
             const contentsHeight = height - margin.top - margin.bottom;
 
             const titleWidth = contentsWidth * 0.5;
-            const titleHeight = d3.min([contentsHeight * 0.5, 10]);
-            const titleMargin = { left: 0, right: 0, top: titleHeight * 0.1, bottom: titleHeight * 0.1 };
+            //instead of min name font, its better just not to display name if very small
+            const titleHeight = d3.min([contentsHeight * 0.3, 10]) 
+            //instead of mins, its better just not to display name if very small
+            const titleMargin = { top: titleHeight * 0.1, bottom: titleHeight * 0.1 };
 
             //progressBar is bar, handles and tooltips
             const progressBarWidth = contentsWidth;
             const progressBarHeight = contentsHeight - titleHeight;
-            const progressBarMargin = { 
-                left: progressBarWidth * 0.1, right: progressBarWidth * 0.1, 
-                top: progressBarHeight * 0.1, bottom: progressBarHeight * 0.1 
-            };
- 
+            const progressBarMargin = { top: progressBarHeight * 0.1, bottom: progressBarHeight * 0.1 };
+
             dimns.push({
                 width, height, margin, contentsWidth, contentsHeight,
                 titleWidth, titleHeight, titleMargin,
@@ -91,9 +90,6 @@ export default function kpiComponent() {
     //const background = backgroundComponent();
     const title = titleComponent();
     const progressBar = progressBarComponent();
-    //const numbers = numbersComponent();
-
-    //dom
 
     function kpi(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
@@ -109,56 +105,57 @@ export default function kpiComponent() {
             .call(container()
                 .className("kpi-contents")
                 .transform((d, i) => {
-                    console.log("trans", i, dimns[i].margin.top)
+                    //console.log("trans", i, dimns[i].margin.top)
                     return `translate(${dimns[i].margin.left},${dimns[i].margin.top})`
                 })
             )
-            //could apply other contentshere too eg 
-            /*
-            .call(container()
-                .parent("g.kpi-contents")
-                .className("progress-bar-contents")
-                .transform((d, i) => `translate(${dimns[i].progressBarMargin.left},${dimns[i].progressBarMargin.top})`)
-            )
-            */
-            //.call(container().parent("g.kpi-contents").className("numbers-contents").margin(numbersMargin))
-            //but probably best to do that as part of teh components, as happens with titleCompoennt
-            //can ice these components a className let which is accessible from outside and can be overridden eg className = numbers
+        const kpiContents = selection.select("g.kpi-contents");
+        kpiContents
             .call(background()
-                .parent("g.kpi-contents")
                 .width((d,i) => dimns[i].contentsWidth)
                 .height((d,i) => {
-                    console.log("bg", i, dimns[i].contentsHeight)
+                    if(i === 0){
+                        //console.log("kpiContents...bg", i, dimns[i])
+                    }
                     return dimns[i].contentsHeight
                 })
                 .styles((d, i) => ({
-                    fill:i % 2 === 0 ? "blue" : "aqua"
-                }))
-            )
+                    stroke:"blue"
+                })))
+            .call(container()
+                .className("name"))
+            .call(container()
+                .className("progress-bar")
+                .transform((d, i) => `translate(0,${dimns[i].titleHeight})`))
+            .call(drag)
+        
+        kpiContents.select("g.name")
             .call(title
-                .parent("g.kpi-contents")
                 .width((d,i) => dimns[i].titleWidth)
                 .height((d,i) => dimns[i].titleHeight)
                 .margin((d,i) => dimns[i].titleMargin)
                 .styles((d,i) => ({
                     name:{ 
-                        fontSize:dimns[i].titleHeight * 0.8,
+                        fontSize:dimns[i].titleHeight,
                         strokeWidth:0.2,
                         dominantBaseline:"central",
                     }
                 })))
+        
+        kpiContents.select("g.progress-bar")
             .call(progressBar
-                .parent("g.kpi-contents")
-                .transform((d, i) => `translate(0,${dimns[i].titleHeight})`)
                 .width((d,i) => dimns[i].progressBarWidth)
                 .height((d,i) => dimns[i].progressBarHeight)
-                .margin((d,i) => dimns[i].progressBarMargin)
-            )
-            /*
+                .margin((d,i) => dimns[i].progressBarMargin))
+        
+        /*kpiContents.select("g.numbers")
+            .data(selection.data().map(d => d.numbersData))
             .call(numbers
-                .transform(() => `translate(${barWrapperWidth},0)`) //numbersY should be centred on bar
+                .width((d,i) => dimns[i].numbersWidth)
+                .height((d,i) => dimns[i].numbersHeight)
+                .margin((d,i) => dimns[i].numbersMargin)
             )*/
-            .call(drag)
+            //.call(drag)
 
 
         return selection;

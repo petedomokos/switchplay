@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { DIMNS, grey10 } from "../../constants";
 import dragEnhancements from '../../enhancedDragHandler';
+import container from './container';
 
 /*
 
@@ -32,6 +33,10 @@ export default function titleComponent() {
     }
 
     const defaultStyles = {
+        bg:{
+            fill:"none",
+            stroke:"none"
+        },
         name:{
             fontSize:9,
             stroke:grey10(8),
@@ -43,7 +48,7 @@ export default function titleComponent() {
     let _styles = () => defaultStyles;
     let transform = () => null;
 
-    let _name = d => d.name;
+    let _primaryText = d => d.name;
 
     let withInteraction = false;
 
@@ -65,33 +70,13 @@ export default function titleComponent() {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
 
         // expression elements
-        selection.each(function (d, i) {
-            //console.log("title", data)
-            const { key } = d;
-            const parentG = parent.call(this, parent);
-
-            const styles = _styles(d, i);
-            const { margin, contentsWidth, contentsHeight }= getDimns(d, i);
-
-            enhancedDrag
-                .onClick(onNameClick)
-                .onDblClick(onNameDblClick);
-                
-            const d3Drag = d3.drag()
-                .on("start", enhancedDrag())
-                .on("drag", enhancedDrag())
-                .on("end", enhancedDrag());
-
-            //todo - need to actually remove drag too if necc - check out expBuilder how i did it there - for now, just dont use
-            const drag = withInteraction ? d3Drag : function(){};
-
-            const titleG = parentG.selectAll("g.title").data([1]);
-            titleG.enter()
-                .append("g")
-                .attr("class", `title title-${key}`)
-                .style("cursor", "pointer")
-                .each(function(){
-                    const contentsG = d3.select(this).append("g").attr("class", "title-contents");
+        selection
+            .style("cursor", "pointer")
+            .call(container()
+                .className("title-contents")
+                .transform((d, i) => `translate(${_margin(d,i).left}, ${_margin(d,i).top})`)
+                .enter(function(d,i){
+                    const contentsG = d3.select(this);
 
                     contentsG
                         .append("rect")
@@ -106,22 +91,32 @@ export default function titleComponent() {
                                 .append("text");
 
                 })
-                .merge(titleG)
-                .attr("transform", transform(d, i))
-                .each(function(){
-                    //console.log("d", d)
-                    //console.log("i", i)
-                    const contentsG = d3.select(this).select("g.title-contents")
-                        .attr("transform", `translate(${margin.left},${margin.top})`);
+                .update(function(d,i){
+                    const styles = _styles(d, i);
+                    const { contentsWidth, contentsHeight }= getDimns(d, i);
+
+                    enhancedDrag
+                        .onClick(onNameClick)
+                        .onDblClick(onNameDblClick);
+                        
+                    const d3Drag = d3.drag()
+                        .on("start", enhancedDrag())
+                        .on("drag", enhancedDrag())
+                        .on("end", enhancedDrag());
+
+                    //todo - need to actually remove drag too if necc - check out expBuilder how i did it there - for now, just dont use
+                    const drag = withInteraction ? d3Drag : function(){};
+
+                    const contentsG = d3.select(this);
 
                     contentsG.select("rect.title-bg")
                         .attr("width", contentsWidth)
                         .attr("height", contentsHeight)
-                        .attr("fill", styles.bg?.fill || null)
-                        .attr("fill", "red")
+                        .attr("fill", styles.bg.fill)
+                        .attr("stroke", styles.bg.stroke)
                     
                     //nameG.select("rect")
-                        //.attr("width", nameCharWidth * _name(data).length)
+                        //.attr("width", nameCharWidth * _primaryText(data).length)
                         //.attr("height", nameHeight);
 
                     const nameTextAnchor = styles.name.textAnchor;
@@ -138,24 +133,21 @@ export default function titleComponent() {
                         .attr("stroke", styles.name.stroke)
                         .attr("fill", styles.name.fill)
                         .attr("stroke-width", styles.name.strokeWidth)
-                        .text(_name(d) +" " +i) //temp add i so they different 
+                        .text(_primaryText(d) +" " +i) //temp add i so they different 
     
                 })
+                .exit(function(){
+                    //will be multiple exits because of the delay in removing
+                    if(!d3.select(this).attr("class").includes("exiting")){
+                        d3.select(this)
+                            .classed("exiting", true)
+                            .transition()
+                                .duration(200)
+                                .attr("opacity", 0)
+                                .on("end", function() { d3.select(this).remove(); });
+                    }
+                }))
                 //.call(drag)
-
-            //EXIT
-            titleG.exit().each(function(){
-                //will be multiple exits because of the delay in removing
-                if(!d3.select(this).attr("class").includes("exiting")){
-                    d3.select(this)
-                        .classed("exiting", true)
-                        .transition()
-                            .duration(200)
-                            .attr("opacity", 0)
-                            .on("end", function() { d3.select(this).remove(); });
-                }
-            })
-        })
 
         return selection;
     }
@@ -199,15 +191,16 @@ export default function titleComponent() {
             const requiredStyles = func(d,i);
             return {
                 name:{ ...defaultStyles.name, ...requiredStyles.name },
+                bg:{ ...defaultStyles.bg, ...requiredStyles.bg }
                 //others here
             }
         };
         return title;
     };
-    title._name = function (value) {
-        if (!arguments.length) { return _name; }
+    title.primaryText = function (value) {
+        if (!arguments.length) { return _primaryText; }
         if(typeof value === "function"){
-            _name = value;
+            _primaryText = value;
         }
         return title;
     };

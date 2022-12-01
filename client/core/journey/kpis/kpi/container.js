@@ -10,9 +10,18 @@ export default function container() {
     // dimensions
     let DEFAULT_MARGIN = { left: 0, right: 0, top: 0, bottom: 0 };
     let _margin = () => DEFAULT_MARGIN;
+    let _transformEnter = () => null;
     let _transform = () => null;
 
-    let _className = (d,i) => "";
+    let _enter = function(){};
+    let _update = function(){};
+    let _updateOnly = function(){};
+    let _exit = function(){};
+
+    let sharedClassName = "container";
+    let _className;
+
+    let returnOriginalSelection = false;
 
     //API CALLBACKS
     /*
@@ -42,30 +51,37 @@ export default function container() {
         // expression elements
         selection
             .each(function(d, i){
-                console.log("container this", this)
-                //const margin = _margin(d,i)
-                const className = _className(d,i);
-                console.log("class", className)
+                //pass through the corect index to enter/update/exit
+                const enter = function() { _enter.call(this, d, i) }
+                const update = function() { _update.call(this, d, i) }
+                const updateOnly = function() { _updateOnly.call(this, d, i) }
+                const exit = function() { _exit.call(this, d, i) }
 
+                //const margin = _margin(d,i)
+                const className = _className ? `${_className(d,i)} ${sharedClassName}` : sharedClassName;
                 const parentG = parent.call(this, parent);
-                console.log("container parentNode", parentG.node())
-                parentG.selectAll(`g.${className}`).data([1])
-                    .join("g")
+                const contG = parentG.selectAll(`g.${sharedClassName}`).data([d])
+                contG.enter()
+                    .append("g")
                         .attr("class", className)
-                        //.attr("transform", `translate(${margin.left},${margin.top})`)
+                        .attr("transform", _transformEnter(d,i))
+                        .each(enter)
+                        .merge(contG)
                         .attr("transform", _transform(d,i))
+                        .each(update)
+                
+                contG.each(updateOnly);
+
+                contG.exit().each(exit)
             })
             //.call(drag)
-
-
-        return selection;
     }
     
     //api
     _container.className = function (value) {
         if (!arguments.length) { return _className; }
         if(typeof value === "string"){
-            _className = () => value;
+            sharedClassName = value;
         }else{
             _className = value;
         }
@@ -76,9 +92,38 @@ export default function container() {
         _margin = (d,i) => ({ ...DEFAULT_MARGIN, ...func(d,i) })
         return _container;
     };
-    _container.transform = function (func) {
+    _container.transformEnter = function (func) {
+        if (!arguments.length) { return _transformEnter; }
+        _transformEnter = func;
+        return _container;
+    };
+    _container.transform = function (value) {
         if (!arguments.length) { return _transform; }
-        _transform = func;
+        if(typeof value === "string"){
+            _transform = () => value;
+        }else{
+            _transform = value;
+        }
+        return _container;
+    };
+    _container.enter = function (func) {
+        if (!arguments.length) { return _enter; }
+        _enter = func;
+        return _container;
+    };
+    _container.update = function (func) {
+        if (!arguments.length) { return _update; }
+        _update = func;
+        return _container;
+    };
+    _container.updateOnly = function (func) {
+        if (!arguments.length) { return _updateOnly; }
+        _updateOnly = func;
+        return _container;
+    };
+    _container.exit = function (func) {
+        if (!arguments.length) { return _exit; }
+        _exit = func;
         return _container;
     };
     _container.parent = function (value) {
@@ -86,8 +131,6 @@ export default function container() {
         if(typeof value === "string"){
             parentSelector = value;
             parent = function(){ 
-                console.log("parent func this", this)
-                console.log("selector", parentSelector)
                 return d3.select(this).select(parentSelector); }
         }else {
             parent = value;

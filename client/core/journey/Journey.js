@@ -576,7 +576,8 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
               kpis={userKpis} 
               onSelectKpiSet={kpi => setDisplayedBar({kpi, prev:"milestones"})}
               kpiFormat={kpiFormat} 
-              setKpiFormat={setKpiFormat} 
+              setKpiFormat={setKpiFormat}
+              screen={screen} 
             />
           }
           {selectedKpiSet && 

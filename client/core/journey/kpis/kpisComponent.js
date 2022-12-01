@@ -34,10 +34,10 @@ export default function kpisComponent() {
     let selectedKpiHeight;
 
     function updateDimns(nrCtrlsButtons=0, nrTooltipRows=0){
-        console.log("updateDimns fixedselH", fixedSelectedKpiHeight, nrTooltipRows, kpiHeight)
+        //console.log("updateDimns fixedselH", fixedSelectedKpiHeight, nrTooltipRows, kpiHeight)
         //selectedKpi must expand for tooltip rows, by 0.75 of kpiHeight per tooltip
         selectedKpiHeight = fixedSelectedKpiHeight || kpiHeight + (0.75 * kpiHeight * nrTooltipRows);
-        console.log("selecetedKpiHeight", selectedKpiHeight)
+        //console.log("selecetedKpiHeight", selectedKpiHeight)
 
         margin = { left: width * 0.1, right: width * 0.1, top:height * 0.1, bottom: height * 0.05 };
         contentsWidth = width - margin.left - margin.right;
@@ -71,7 +71,6 @@ export default function kpisComponent() {
 
     let editable = false;
 
-
     //API CALLBACKS
     let onClickKpi = function(){};
     let onDblClickKpi = function(){};
@@ -104,16 +103,17 @@ export default function kpisComponent() {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
 
         // expression elements
-        selection.each(function (data) {
+        selection.each(function (data,i) {
             prevData = data;
             const { kpisData } = data;
+            console.log("kpis",this.parentNode.parentNode, data)
             const ctrlsData = withCtrls ? data.ctrlsData : [];
 
             const nrOfCtrlsButtons = ctrlsData?.length;
             const nrTooltipRowsAbove = kpisData[0] ? d3.max(kpisData[0].tooltipsData.filter(t => t.location === "above"), d => d.row + 1) : 0;
-            console.log("rowsAb", nrTooltipRowsAbove)
+            //console.log("rowsAb", nrTooltipRowsAbove)
             const nrTooltipRowsBelow = kpisData[0] ? d3.max(kpisData[0].tooltipsData.filter(t => t.location === "below"), d => d.row + 1) : 0;
-            console.log("rowsbe", nrTooltipRowsBelow)
+            //console.log("rowsbe", nrTooltipRowsBelow)
             const nrTooltipRows = nrTooltipRowsAbove + nrTooltipRowsBelow;
             updateDimns(nrOfCtrlsButtons, nrTooltipRows);
             //plan - dont update dom twice for name form
@@ -157,7 +157,7 @@ export default function kpisComponent() {
 
                     })
                     .merge(contentsG)
-                    .attr("transform", d =>  `translate(${margin.left},${margin.top})`)
+                    .attr("transform", `translate(${margin.left},${margin.top})`)
                     .each(function(){
                         const contentsG = d3.select(this);
 
@@ -209,27 +209,26 @@ export default function kpisComponent() {
 
                         listG.select("rect.list-bg")
                             .attr("width", listWidth)
-                            .attr("height", listHeight)
-                            .attr("stroke", "black");
+                            .attr("height", listHeight);
 
                         //todo - get liust bg showing
                         //make kpi bar width font size etc based on listHeight
-
                         const kpiG = listContentsG.selectAll("g.kpi").data(kpisData, d => d.id);
                         kpiG.enter()
                             .append("g")
                             .attr("class", d => "kpi kpi-"+d.id)
                             .merge(kpiG)
                             .attr("transform", (d,i) => {
-                                console.log("trans kpi i", i, selectedKpiHeight, kpiHeight)
+                                if(isSelected(d))
+                                console.log("trans kpis i", i, d)
                                 const extraSpaceForSelected = selectedKpiHeight - kpiHeight;
-                                console.log("extraspace", extraSpaceForSelected)
+                                //console.log("extraspace", extraSpaceForSelected)
                                 const selectedKpiBefore = kpisData
                                     .slice(0, i)
                                     .find(kpi => isSelected(kpi));
-                                console.log("sel before", selectedKpiBefore)
+                                //console.log("sel before", selectedKpiBefore)
                                 const vertShift = i * kpiHeight +(selectedKpiBefore ? extraSpaceForSelected : 0)
-                                console.log("vertShift", vertShift)
+                                //console.log("vertShift", vertShift)
                                 return `translate(0,${vertShift})`
                             })
                             .style("cursor", d => isSelected(d) ? "default" : "pointer")
@@ -239,9 +238,9 @@ export default function kpisComponent() {
                                 //.expandedHeight(selectedKpiHeight)
                                 .withTooltips(d => isSelected(d))
                                 .margin(() => ({
-                                    //note: left an right will be set in kpiComponent, if withtooltips then 
-                                    //it will accomodate them at teh edges, even if not selected
-                                    // or will just have a separate space for tooltips
+                                    //todo - make sure margin is at least big enough for
+                                    //half tooltipWidth, if tooltipsData exists
+                                    //left:kpiWidth * 0.1, right: kpiWidth * 0.1,
                                     top:gapBetweenKpis/2, bottom:gapBetweenKpis/2
                                 }))
                                 .styles(d => ({
@@ -306,7 +305,7 @@ export default function kpisComponent() {
                                         .attr("height", btnHeight)
                                         .attr("fill", "transparent")
                                         .attr("stroke", "none")
-
+                                        
                                     btnG.select("text.name")
                                         .attr("x", btnWidth/2)
                                         .attr("y", btnHeight/2)
@@ -367,7 +366,7 @@ export default function kpisComponent() {
         const selectedIndex = data.findIndex(d => d.key === selectedKey);
         if(!selectedKey){ return 0; }
         const actualNrToShowBefore = d3.min([selectedIndex, nrItemsToShowBefore]);
-        console.log("listY", itemHeight * (selectedIndex - actualNrToShowBefore))
+        //console.log("listY", itemHeight * (selectedIndex - actualNrToShowBefore))
         return itemHeight * (selectedIndex - actualNrToShowBefore);
     }
 

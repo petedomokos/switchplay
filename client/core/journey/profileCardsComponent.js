@@ -22,7 +22,7 @@ export default function profileCardsComponent() {
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
     }
-    let kpiHeight = 10;
+    let kpiHeight = 100;
 
     let fontSizes = {
         info:{
@@ -32,7 +32,8 @@ export default function profileCardsComponent() {
         },
         kpis:{
             name:9,
-            values:9
+            values:9,
+            ctrls:8
         }
     };
 

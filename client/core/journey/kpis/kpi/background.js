@@ -13,12 +13,15 @@ export default function background() {
     // dimensions
     let DEFAULT_WIDTH = 0;
     let DEFAULT_HEIGHT = 0;
+    let fixedWidth;
+    let fixedHeight;
     let _width = () => DEFAULT_WIDTH;
-    let _height = () => DEFAULT_HEIGHT;
+    let _height =() => DEFAULT_HEIGHT;
 
     const defaultStyles = {
-        stroke:null,
-        fill:null,
+        stroke:"none",
+        strokeWidth:0.3,
+        fill:"none",
     };
     let _styles = () => defaultStyles;
 
@@ -47,8 +50,8 @@ export default function background() {
             const parentG = parent.call(this, parent);
 
             const styles = _styles(data, i);
-            const width = _width(data, i);
-            const height = _height(data, i);
+            const width = fixedWidth || _width(data, i) || DEFAULT_WIDTH;
+            const height = fixedHeight || _height(data, i) || DEFAULT_HEIGHT;
 
             /*
             const drag = d3.drag()
@@ -58,13 +61,28 @@ export default function background() {
                 */
 
             // expression elements
-            parentG.selectAll(`rect.${key}-bg`).data([1])
+            /*
+            //for some reason, this seems to be appending a new one each time or something
+            parentG.selectAll("rect.bg").data([1])
                 .join("rect")
-                    .attr("class", `bg ${key}-bg`)
+                    .attr("class", "bg")
                     .attr("width", width)
                     .attr("height", height)
                     .attr("fill", styles.fill)
-                    .attr("stroke", styles.stroke);
+                    .attr("stroke", styles.stroke)
+                    .attr("stroke-width", styles.strokeWidth);
+                    //.call(drag)
+            */
+            const rect = parentG.selectAll("rect.bg").data([1])
+            rect.enter()
+                .append("rect")
+                    .attr("class", key ? `bg ${key}-bg` : "bg")
+                    .merge(rect)
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr("fill", styles.fill)
+                    .attr("stroke", styles.stroke)
+                    .attr("stroke-width", styles.strokeWidth);
                     //.call(drag)
         })
 
@@ -88,19 +106,30 @@ export default function background() {
         return _background;
     };
     _background.width = function (value) {
-        if (!arguments.length) { return _width; }
-        _width = value;
+        if (!arguments.length) { return getWidth; }
+        if(typeof value === "number"){
+            fixedWidth = value;
+        }else{
+            fixedWidth = null;
+            _width = value; 
+        }
         return _background;
     };
     _background.height = function (value) {
         if (!arguments.length) { return _height; }
-        _height = value;
+        if(typeof value === "number"){
+            fixedHeight = value;
+        }else{
+            fixedHeight = null;
+            _height = value; 
+        }
         return _background;
     };
-    _background.styles = function (func) {
+    _background.styles = function (value) {
         if (!arguments.length) { return _styles; }
         _styles = (d,i) => {
-            return { ...defaultStyles, ...func(d,i) };
+            const stylesToAdd = typeof value === "function" ? value(d,i) : value;
+            return { ...defaultStyles, ...stylesToAdd };
         };
         return _background;
     };
