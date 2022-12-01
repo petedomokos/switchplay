@@ -30,32 +30,6 @@ export const user = (state=InitialState.user, act) =>{
 			//this doesnt update administered users or groups, just basic details eg name, email,...
 			return { ...state, ...act.user };
 		}
-		case C.SAVE_JOURNEY:{
-			const { journey } = act;
-			const currentJourney = state.journeys.find(j => j._id === journey._id);
-			if(!currentJourney){
-				//_id will be 'temp' here until saved on server
-				return {
-					...state,
-					journeys:[journey, ...state.journeys],
-				}
-			}
-			return {
-				...state,
-				journeys:state.journeys.map(j => j._id === journey._id ? journey : j)
-			}
-		}
-		case C.SAVE_NEW_JOURNEY_ID:{
-			//note - atm, we auto update homeJourney to be the latest new journey
-			//console.log("reducer saveNewJourneyId")
-			const { _id } = act;
-			return {
-				...state,
-				journeys:state.journeys.map(j => j._id === "temp" ? { ...j, _id } : j),
-				//if homeJoureny is temp, its this one so update with actual id
-				homeJourney:homeJourney === "temp" ? _id : homeJourney
-			}
-		}
 		//OTHER USERS AND GROUPS
 		//CREATE
 		case C.CREATE_NEW_ADMINISTERED_USER:{
@@ -511,36 +485,6 @@ export const system = (state={}, act) => {
 			return {
 				...state,
 				screen
-			}
-		}
-		case C.SAVE_ADHOC_JOURNEY:{
-			//@todo - abstract this as it is repeated in SAVE_ADHOC_JOURNEY
-			//console.log("reducer saveAdhocJourney", act)
-			return {
-				...state,
-				journey:{ ...act.journey, measures:mockMeasures },
-			}
-		}
-		case C.SAVE_NEW_JOURNEY_ID:{
-			const { _id } = act;
-			//if temp, then it is this journey so update with its actual id
-			return {
-				...state,
-				activeJourney:activeJourney === "temp" ? _id : activeJourney
-			}
-		}
-		case C.SAVE_JOURNEY:{
-			const { journey } = act;
-			//newly saved jurney in store becomes active
-			return {
-				...state,
-				activeJourney:journey._id
-			}
-		}
-		case C.SET_ACTIVE_JOURNEY:{
-			return {
-				...state,
-				activeJourney:act._id
 			}
 		}
 		default:

@@ -3,13 +3,10 @@ import { status, parseResponse, logError,
 	fetchStart, fetchEnd, fetchThenDispatch} from './CommonActions'
 import auth from '../auth/auth-helper'
 import { signout } from './AuthActions.js';
-import { transformJourneyForClient } from "./JourneyActions"
 
 export const transformUserForClient = serverUser => {
-	const { journeys } = serverUser;
 	return {
 		...serverUser,
-		journeys:journeys.map(j => transformJourneyForClient(j))
 	}
 }
 

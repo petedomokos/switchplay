@@ -131,49 +131,6 @@ const PlayerDashboard = ({player, datasets}) => {
 
   //we provide a datapointValue accessor, which says how to get the value from each d for each dset
   //and a sumnary function, which tells it how to summarise those ds into one value
-  
-  /*
-
-  THIS IS FOR A SUPERDATASET TO SHOW DIFFERENT LEVELS OF A DRILL PROGRESSION ON SAME CHART
-  ie if a drill progresses in difficulty over time, then we recalibrate the scoring system so that it shows these progressions
-  on the same chart as previous drill, but shows that it is a harder drill so chart scores still increase
-  hence we need to recalibrate the scores of the ds eg maybve the level can be a multiplier eg newValue = value * level
-  To achieve this, we pass in a datapointValue accessor, which is a HOF which first recieves the dataset
-
-  datasets can optionally have a level attached to them. Therefore, they can b combined with other datasets to make a series
-
-  typically, the series datasets will have teh same key, other than the level, whihc is part of the key
-  But key may also include a custom descriptor tag
-
-  eg name='Pressups' level=1 custom=""  => key = toCamelCase(name) +(level ? "-" +level : "")+(custom ? "-" +toCamelCase(custom) : "") => pressups-1
-
-  or a custom may be eg "With 10KG" and a level="2" then => then key = 'pressups-2-with10Kg'
-
-  for these kind of super datasets, we have 1 yaxis that calculates the positions, but we hide it and instead show a series of yaxes for each level, or each dataset
-  
-  OR simpler, just use diffrent yaxis but shift them up by there level and across too. so maybe dont even use the superdataset structure
-
-  on phone, just show them as a series of small multiples in the horizontal direction, user swipes left or right to move between them
-  so they tell a story together of the journey
-
-  BEST IS MAKE IT SAME DATASET, BUT EACH DATASET CAN ALSO HAVE A LEVELS OBJECT WHICH PROVIDES LEVEL NUMBERS, DESCRIPTORS, ETC
-  THEN EACH DATAPOINT ALSO HAS A LEVEL
-  then when calculating projections, the range of dates can be for a specifc level, and we will probably wnat to hide projectionjs 
-  by default for each level and user can turn them on, or just ds can be filtered by levele before applying projections 
-
-
-  const valueAccessor = dataset => datapoint => {
-    const datasetLevel = dataset.level || 1;
-    return datapoint.value * datasetLevel
-  }
-  const overallDatasetGenerator = superDataset()
-      .datapointValue(valueAccessor)
-      .summary(max) //need the target on track value - based on next targ and start date
-      .datasetName("Overall");
-
-  const overallDataset = overallDatasetGenerator(datasets);
-  console.log("overallDataset", overallDataset)
-  */
 
   const datasetsWithTargetCompletion = datasets.map(dset =>{
       const allMeasures = [...dset.derivedMeasures, ...dset.measures];

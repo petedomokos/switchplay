@@ -21,7 +21,6 @@ import Expression from "./expression/Expression"
 import Games from "./games/Games"
 //styles
 import './assets/styles/main.css'
-import JourneyContainer from './core/journey/JourneyContainer'
 
 const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
   //console.log("MainRouter", userId)
@@ -75,9 +74,6 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
             <Route exact path="/" component={UserHomeContainer} />
             :
             <>
-              <div>
-                <JourneyContainer />
-              </div>
               <Route exact path="/" component={NonUserHome}/>
             </>
           }

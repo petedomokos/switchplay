@@ -8,7 +8,6 @@ const signin = async (req, res) => {
   try {
     let user = await User.findOne({ "email": req.body.email})
       .populate('admin', '_id username firstname surname created')
-      .populate('journeys', '_id name aims goals links measures created')
       .populate('administeredUsers', '_id username firstname surname photo created')
       .populate({ 
         path: 'administeredGroups', 

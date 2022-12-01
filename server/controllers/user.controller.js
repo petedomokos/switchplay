@@ -1,5 +1,4 @@
 import User from '../models/user.model'
-import Journey from '../models/journey/journey.model'
 import extend from 'lodash/extend'
 import errorHandler from './../helpers/dbErrorHandler'
 import formidable from 'formidable'
@@ -42,7 +41,6 @@ const userByID = async (req, res, next, id) => {
   try {
     let user = await User.findById(id)
       .populate('admin', '_id username firstname surname created')
-      .populate('journeys', '_id name contracts profiles aims goals links measures created')
       .populate('administeredUsers', '_id username firstname surname photo created')
       .populate({ 
         path: 'administeredGroups', 

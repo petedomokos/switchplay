@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import {Switch, Link, Route } from 'react-router-dom'
-//import PrivateRoute from '../auth/PrivateRoute' - use this if i have a param /:journeyId
 import { makeStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
 //children
@@ -8,7 +7,6 @@ import UserProfile from '../user/UserProfile'
 import UsersContainer from '../user/containers/UsersContainer'
 import GroupsContainer from '../group/containers/GroupsContainer'
 import DatasetsContainer from '../dataset/containers/DatasetsContainer'
-import JourneyContainer from "./journey/JourneyContainer"
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -73,10 +71,6 @@ const UserHome = ({screen, user, loading, loadingError}) => {
     <div className={classes.root}>
       {user._id && 
         <>
-            <div className={classes.mainVis}>
-              <Route path="/" component={JourneyContainer} />
-            </div>
-          
           {/**
           <div className={classes.topRow} >
               <UserProfile profile={user} />

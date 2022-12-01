@@ -7,7 +7,6 @@ import cors from 'cors'
 import helmet from 'helmet'
 import template from './../template'
 import userRoutes from './routes/user.routes'
-import journeyRoutes from './routes/journey.routes'
 import groupRoutes from './routes/group.routes'
 import datasetRoutes from './routes/dataset.routes'
 import authRoutes from './routes/auth.routes'
@@ -38,7 +37,6 @@ app.use('/dist', express.static(path.join(CURRENT_WORKING_DIR, 'dist')))
 
 // mount routes
 app.use('/', userRoutes)
-app.use('/', journeyRoutes)
 app.use('/', groupRoutes)
 app.use('/', datasetRoutes)
 app.use('/', authRoutes)
