@@ -63,7 +63,12 @@ export default withRouter(function Signin(props) {
       error: ''
   })
 
-  if(auth.isAuthenticated()){ return <Redirect to='/'/> }
+  const jwt = auth.isAuthenticated()
+  alert("signin")
+  if(auth.isAuthenticated()){
+    console.log("jwt user", jwt.user?.email)
+    alert("redirecting")
+    return <Redirect to='/'/> }
 
   const clickSubmit = () => {
     const user = {
