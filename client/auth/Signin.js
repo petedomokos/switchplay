@@ -64,7 +64,7 @@ export default withRouter(function Signin(props) {
   })
 
   const jwt = auth.isAuthenticated()
-  alert("signin")
+  alert("signin- " + jwt?.user?.email)
   if(auth.isAuthenticated()){
     console.log("jwt user", jwt.user?.email)
     alert("redirecting")
