@@ -43,6 +43,8 @@ export const fetchUser = id => dispatch => {
 				const jwt = auth.isAuthenticated();
 				//may be reloading the signed in user
 				if(jwt.user._id === data._id){
+					//need to replicate this logic on the signin page too somehow, or point it to here
+					//first - 
 					console.log('siging in to store again', data.username)
 					return { type:C.SIGN_IN, user:transformUserForClient(data) };
 				}

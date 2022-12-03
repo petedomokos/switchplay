@@ -56,19 +56,15 @@ const useStyles = makeStyles(theme => ({
 }))
 
 export default withRouter(function Signin(props) {
+  console.log("Signin", auth.isAuthenticated())
   const classes = useStyles()
   const [values, setValues] = useState({
       email: '',
       password: '',
       error: ''
   })
-
-  const jwt = auth.isAuthenticated()
-  alert("signin- " + jwt?.user?.email)
-  if(auth.isAuthenticated()){
-    console.log("jwt user", jwt.user?.email)
-    alert("redirecting")
-    return <Redirect to='/'/> }
+  
+  if(auth.isAuthenticated()){ return <Redirect to='/'/> }
 
   const clickSubmit = () => {
     const user = {

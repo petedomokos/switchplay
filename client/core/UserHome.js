@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import {Switch, Link, Route } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
+import auth from '../auth/auth-helper'
 //children
 import UserProfile from '../user/UserProfile'
 import UsersContainer from '../user/containers/UsersContainer'
@@ -52,6 +53,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const UserHome = ({screen, user, loading, loadingError}) => {
+  console.log("UserHome ", auth.isAuthenticated())
   const topBarHeight = screen.isLarge ? 90 : 20; //still need a bit of height even if no top bar
   const styleProps = { 
     availWidth: screen?.width || 0,
@@ -67,7 +69,7 @@ const UserHome = ({screen, user, loading, loadingError}) => {
     {label:"Add datapoint", to:"/datapoints/new"}
   ]
 
-  console.log("UserHome user", user)
+  console.log("UserHome user", user.firstname)
 
   return (
     <div className={classes.root}>

@@ -11,6 +11,7 @@ export const signin = (user, history, redirectTo) => dispatch =>{
 			method:'POST',
 			body: JSON.stringify(user),
 			nextAction: data => {
+				console.log("signin next action....", data)
 				//save to session storage
 				//we will store anything here which is to do with site settings or authentication ( as opposed to data, whihc is in the redux store )
 				const userCredentials = {email:data.user.email, _id:data.user._id, isSystemAdmin:data.user.isSystemAdmin, isPlayer:data.user.isPlayer}
