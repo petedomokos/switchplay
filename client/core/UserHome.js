@@ -75,7 +75,6 @@ const UserHome = ({screen, user, loading, loadingError}) => {
     <div className={classes.root}>
       {user._id && 
         <>
-          Welcome {user.firstname}!
           {/**
           <div className={classes.topRow} >
               <UserProfile profile={user} />

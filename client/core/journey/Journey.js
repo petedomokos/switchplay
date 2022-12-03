@@ -564,6 +564,8 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
       setModalData(undefined);
   }
 
+  console.log("Journey")
+
   return (
     <div className={classes.root}>
       Journey
