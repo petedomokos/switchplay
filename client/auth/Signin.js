@@ -64,7 +64,7 @@ export default withRouter(function Signin({ onSignin, serverErrorMesg, location,
   console.log("Signin", auth.isAuthenticated())
   const classes = useStyles()
   const [values, setValues] = useState({
-      email: '',
+      emailOrUsername: '',
       password: '',
       error: ''
   })
@@ -73,7 +73,7 @@ export default withRouter(function Signin({ onSignin, serverErrorMesg, location,
 
   const clickSubmit = () => {
     const user = {
-      email: values.email || undefined,
+      emailOrUsername: values.emailOrUsername || undefined,
       password: values.password || undefined
     }
     //console.log('loc state', location)
@@ -89,6 +89,7 @@ export default withRouter(function Signin({ onSignin, serverErrorMesg, location,
     setValues({ ...values, [name]: event.target.value })
   }
 
+  console.log("serverErrmesg", serverErrorMesg)
   const serverErrorUserMesg = serverErrorMesg === "Unauthorized" ? "Could not sign you in. Please check your username/email and password." : "";
 
   return (
@@ -98,10 +99,10 @@ export default withRouter(function Signin({ onSignin, serverErrorMesg, location,
             Sign In
           </Typography>
           <TextField 
-              id="email" type="email" label="Email" 
+              id="emailOrUsername" type="emailOrUsername" label="Email Or Username" 
               className={classes.textField} 
-              value={values.email} 
-              onChange={handleChange('email')} 
+              value={values.emailOrUsername} 
+              onChange={handleChange('emailOrUsername')} 
               margin="normal"
               InputProps={{
                 classes: {
@@ -128,7 +129,7 @@ export default withRouter(function Signin({ onSignin, serverErrorMesg, location,
           }
           {
             serverErrorMesg &&
-              <Typography component="p" color="error" variant="h7" >
+              <Typography component="p" color="error" variant="subtitle2" >
                 <Icon color="error" className={classes.error}></Icon>
                 {serverErrorUserMesg}
               </Typography>

@@ -5,28 +5,52 @@ import config from './../../config/config'
 
 const signin = async (req, res) => {
   console.log('signin......', req.body)
+  //@todo - find a cleaner way to replicate the code below where we split based on email or username
+  //but still populate it the same
+  const adminPopulationStr = '_id username firstname surname created';
+  const administeredUsersPopulationStr = '_id username firstname surname photo created';
+  const administeredGroupsPopulationObj = { 
+    path: 'administeredGroups', 
+    select: '_id name desc photo groupType created datasets',
+    populate: {
+      path:'datasets',
+      select:'_id name desc'
+    } 
+  };
+
+  const groupsMemberOfPopulationObj = { 
+    path: 'groupsMemberOf', 
+    select: '_id name desc photo groupType created datasets',
+    populate: {
+      path:'datasets',
+      select:'_id name desc'
+    } 
+  };
+  const administeredDatasetsPopulationStr = '_id name desc created measures';
+  const datasetsMemberOfPopulationStr = '_id name desc created';
+
   try {
-    let user = await User.findOne({ "email": req.body.email})
-      .populate('admin', '_id username firstname surname created')
-      .populate('administeredUsers', '_id username firstname surname photo created')
-      .populate({ 
-        path: 'administeredGroups', 
-        select: '_id name desc photo groupType created datasets',
-        populate: {
-          path:'datasets',
-          select:'_id name desc'
-        } 
-      })
-      .populate({ 
-        path: 'groupsMemberOf', 
-        select: '_id name desc photo groupType created datasets',
-        populate: {
-          path:'datasets',
-          select:'_id name desc'
-        } 
-      })
-      .populate('administeredDatasets', '_id name desc created measures')
-      .populate('datasetsMemberOf', '_id name desc created')
+    let user;
+    if(req.body.emailOrUsername.includes("@")){
+      console.log("signing in by email")
+      user = await User.findOne({ "email" : req.body.emailOrUsername })
+        .populate('admin', adminPopulationStr)
+        .populate('administeredUsers', administeredUsersPopulationStr)
+        .populate(administeredGroupsPopulationObj)
+        .populate(groupsMemberOfPopulationObj)
+        .populate('administeredDatasets', administeredDatasetsPopulationStr)
+        .populate('datasetsMemberOf', datasetsMemberOfPopulationStr);
+
+    }else{
+      console.log("signing in by username")
+      user = await User.findOne({ "username" : req.body.emailOrUsername })
+        .populate('admin', adminPopulationStr)
+        .populate('administeredUsers', administeredUsersPopulationStr)
+        .populate(administeredGroupsPopulationObj)
+        .populate(groupsMemberOfPopulationObj)
+        .populate('administeredDatasets', administeredDatasetsPopulationStr)
+        .populate('datasetsMemberOf', datasetsMemberOfPopulationStr)
+    }
 
     if (!user){
       return res.status('401').json({

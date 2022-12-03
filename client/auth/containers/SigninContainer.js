@@ -12,6 +12,7 @@ const mapStateToProps = state => {
 }
 const mapDispatchToProps = dispatch => ({
 	onSignin(user, history, from){
+		console.log("dispatching signin user", user)
 		dispatch(signin(user, history, from))
 	}
 })
