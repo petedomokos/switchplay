@@ -69,30 +69,30 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
       <MenuContainer />
       <Route path="/signup" component={CreateUserContainer}/>
       <Route path="/signin" component={SigninContainer}/>
-      {(!jwt || userId) && <Switch>
+      <Switch>
           <Route path="/profile" component={Profile}/>
           {jwt ?
             <Route exact path="/" component={UserHomeContainer} />
             :
             <>
-              <div>
+              {/**<div>
                 <JourneyContainer />
-              </div>
+              </div>*/}
               <Route exact path="/" component={NonUserHome}/>
             </>
           }
-          <Route path="/expression" component={Expression}/>
-          <Route path="/games" component={Games}/>
-          <PrivateRoute path="/user/edit/:userId" component={EditUserProfileContainer}/>
-          <PrivateRoute path="/dataset/edit/:datasetId" component={EditDatasetProfileContainer}/>
-          <PrivateRoute path="/users/new" component={CreateUserContainer}/>
-          <PrivateRoute path="/groups/new" component={CreateGroupContainer}/>
-          <PrivateRoute path="/datasets/new" component={CreateDatasetContainer}/>
-          <PrivateRoute path="/datapoints/new" component={CreateDatapointContainer}/>
-          {userId && <Route path="/user/:userId" component={UserContainer}/>}
-          {userId && <Route path="/group/:groupId" component={GroupContainer}/>}
-          {userId && <Route path="/dataset/:datasetId" component={DatasetContainer}/>}
-      </Switch>}
+          {/**
+            <PrivateRoute path="/user/edit/:userId" component={EditUserProfileContainer}/>
+            <PrivateRoute path="/dataset/edit/:datasetId" component={EditDatasetProfileContainer}/>
+            <PrivateRoute path="/users/new" component={CreateUserContainer}/>
+            <PrivateRoute path="/groups/new" component={CreateGroupContainer}/>
+            <PrivateRoute path="/datasets/new" component={CreateDatasetContainer}/>
+            <PrivateRoute path="/datapoints/new" component={CreateDatapointContainer}/>
+          */}
+          {/**userId && <Route path="/user/:userId" component={UserContainer}/>*/}
+          {/**userId && <Route path="/group/:groupId" component={GroupContainer}/>*/}
+          {/**userId && <Route path="/dataset/:datasetId" component={DatasetContainer}/>*/}
+      </Switch>
     </div>
     )
 }

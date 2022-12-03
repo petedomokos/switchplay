@@ -566,8 +566,9 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
 
   return (
     <div className={classes.root}>
+      Journey
         <div className={`${classes.overlay} overlay`} ref={overlayRef}>
-          {displayedBar === "milestones" && 
+          {/**displayedBar === "milestones" && 
             <MilestonesBar 
               profiles={profiles} 
               contracts={contracts} 
@@ -579,8 +580,8 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
               setKpiFormat={setKpiFormat}
               screen={screen} 
             />
-          }
-          {selectedKpiSet && 
+          */}
+          {/**selectedKpiSet && 
             <KpiView 
               name={kpiSetName(selectedKpi)} 
               data={kpiViewData} 
@@ -591,9 +592,10 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
               format={kpiFormat} 
               onClose={() => setDisplayedBar(displayedBar.prev || "")} 
             />
-          }
+          */}
         </div>
-        <svg className={classes.svg} ref={containerRef}></svg>
+        {/**<svg className={classes.svg} ref={containerRef}></svg>*/}
+        {/**
         <div className={classes.ctrls}>
             <div className={classes.leftCtrls}>
                 <Button className={classes.btn} color="primary" variant="contained" onClick={toggleMeasuresOpen} >
@@ -606,10 +608,11 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
             <div className={classes.rightCtrls}>
                 <Button className={classes.btn} color="primary" variant="contained" onClick={toggleAligned} >
                   {aligned ?"Unalign goals" : "Align goals"}</Button>
-                {/**<Button className={classes.btn} color="primary" variant="contained" onClick={toggleCompletion} >completion</Button>**/}
+                <Button className={classes.btn} color="primary" variant="contained" onClick={toggleCompletion} >completion</Button>
             </div>
         </div>
-        {modalData && 
+        */}
+        {/**modalData && 
           <div ref={modalRef} className={classes.modal}>
              {modalData.d.dataType === "aim" && modalData.nameOnly && 
               <NameForm data={{ 
@@ -645,7 +648,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
                   availableMeasures={measures}
                   addNewMeasure={addNewMeasure} />}
           </div>
-        }
+        */}
     </div>
   )
 }
