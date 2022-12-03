@@ -7,6 +7,11 @@ import Button from '@material-ui/core/Button'
 import TextField from '@material-ui/core/TextField'
 import Typography from '@material-ui/core/Typography'
 import Icon from '@material-ui/core/Icon'
+import Dialog from '@material-ui/core/Dialog'
+import DialogActions from '@material-ui/core/DialogActions'
+import DialogContent from '@material-ui/core/DialogContent'
+import DialogContentText from '@material-ui/core/DialogContentText'
+import DialogTitle from '@material-ui/core/DialogTitle'
 import { makeStyles } from '@material-ui/core/styles'
 import auth from './auth-helper'
 
@@ -55,7 +60,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-export default withRouter(function Signin(props) {
+export default withRouter(function Signin({ onSignin, serverErrorMesg, location, history }) {
   console.log("Signin", auth.isAuthenticated())
   const classes = useStyles()
   const [values, setValues] = useState({
@@ -71,18 +76,20 @@ export default withRouter(function Signin(props) {
       email: values.email || undefined,
       password: values.password || undefined
     }
-    //console.log('loc state', props.location)
+    //console.log('loc state', location)
     //get referrer for redirect
     const from  = '/'
-    /*const {from} = props.location.state || {
+    /*const {from} = location.state || {
       from: { pathname: '/' }
     }*/
-    props.onSignin(user, props.history, from)
+    onSignin(user, history, from)
 
   }
   const handleChange = name => event => {
     setValues({ ...values, [name]: event.target.value })
   }
+
+  const serverErrorUserMesg = serverErrorMesg === "Unauthorized" ? "Could not sign you in. Please check your username/email and password." : "";
 
   return (
       <Card className={classes.card}>
@@ -113,10 +120,18 @@ export default withRouter(function Signin(props) {
               }}
           />
           <br/> {
-            values.error && (<Typography component="p" color="error">
-              <Icon color="error" className={classes.error}>error</Icon>
-              {values.error}
-            </Typography>)
+            values.error && 
+              <Typography component="p" color="error">
+                <Icon color="error" className={classes.error}>error</Icon>
+                {values.error}
+              </Typography>
+          }
+          {
+            serverErrorMesg &&
+              <Typography component="p" color="error" variant="h7" >
+                <Icon color="error" className={classes.error}></Icon>
+                {serverErrorUserMesg}
+              </Typography>
           }
         </CardContent>
         <CardActions>

@@ -54,6 +54,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
   }, []);
 
   useEffect(() => {
+    //check if user signed in already but state is not loaded eg page refresh
     if(jwt && !userId && !loadingUser){
       loadUser(jwt.user._id)
     }

@@ -196,29 +196,6 @@ function CreateDataset({ user, availableMeasures, creating, error, success, open
         <Button color="primary" variant="contained" onClick={clickSubmit} className={classes.submit}>Submit</Button>
       </CardActions>
     </Card>
-    <Dialog open={open} disableBackdropClick={true}>
-      <DialogTitle>New Dataset</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-          New dataset successfully created.
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={reset} color="primary" autoFocus="autoFocus" variant="contained">
-        Create another
-        </Button>
-        {savedDataset && <Link to={"/dataset/"+savedDataset._id} >
-            <Button color="primary" autoFocus="autoFocus" variant="contained">
-            Go to dataset
-            </Button>
-      </Link>}
-        <Link to={"/"} >
-            <Button color="primary" autoFocus="autoFocus" variant="contained">
-            Return home
-            </Button>
-        </Link>
-      </DialogActions>
-      </Dialog>
   </div>
   )
 }
