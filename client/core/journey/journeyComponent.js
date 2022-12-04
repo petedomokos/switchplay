@@ -16,7 +16,7 @@ import { updatePos } from "./domHelpers"
 //import { COLOURS, DIMNS } from "./constants";
 import { addWeeks } from "../../util/TimeHelpers"
 import { zoomLevel, DEFAULT_D3_TICK_SIZE, WIDGET_WIDTH, WIDGET_HEIGHT, WIDGET_MARGIN, COLOURS, FONTSIZES, DIMNS, AVAILABLE_GOAL_MULTIPLIER, grey10 } from "./constants";
-import { pointIsInRect, distanceBetweenPoints, } from './geometryHelpers';
+import { pointIsInRect, distanceBetweenPoints, } from './screenGeometryHelpers';
 import dragEnhancements from './enhancedDragHandler';
 import { getTransformationFromTrans } from './helpers';
 

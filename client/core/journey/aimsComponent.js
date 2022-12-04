@@ -4,7 +4,7 @@ import { grey10, COLOURS, DIMNS, WIDGET_WIDTH, WIDGET_HEIGHT } from "./constants
 import dragEnhancements from './enhancedDragHandler';
 import menuComponent from './menuComponent';
 import planetsComponent from './planetsComponent';
-import { pointIsInRect } from "./geometryHelpers";
+import { pointIsInRect } from "./screenGeometryHelpers";
 import nameComponent from "./nameComponent";
 import { calcLinkPos } from './linksLayout';
 /*

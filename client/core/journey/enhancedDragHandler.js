@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { distanceBetweenPoints } from "./geometryHelpers.js";
+import { distanceBetweenPoints } from "./screenGeometryHelpers.js";
 import { getClientPoint } from "./domHelpers.js";
 // todo - look into whetehr its possible to enhance d3.drag itself rather than have to enhance each drag handler
 export default function dragEnhancements() {

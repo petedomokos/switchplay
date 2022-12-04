@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 //import "d3-selection-multi";
 import { grey10 } from "./constants";
-import { distanceBetweenPoints } from './geometryHelpers';
+import { distanceBetweenPoints } from './screenGeometryHelpers';
 import { updatePos } from "./domHelpers"
 import menuComponent from './menuComponent';
 //import openedLinkComponent from './openedLinkComponent';

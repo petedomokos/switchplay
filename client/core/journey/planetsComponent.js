@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import { calcAdjX, findPointChannel, findDateChannel, findNearestChannelByEndDate, getTransformationFromTrans } from './helpers';
 //import { ellipse } from "./ellipse";
 import { grey10, COLOURS, DIMNS, AVAILABLE_GOAL_MULTIPLIER } from "./constants";
-import { findNearestPlanet, distanceBetweenPoints, channelContainsPoint, channelContainsDate } from './geometryHelpers';
+import { findNearestPlanet, distanceBetweenPoints, channelContainsPoint, channelContainsDate } from './screenGeometryHelpers';
 import dragEnhancements from './enhancedDragHandler';
 import menuComponent from './menuComponent';
 import { Oscillator } from './domHelpers';

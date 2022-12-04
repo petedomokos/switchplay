@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import { OPEN_CHANNEL_EXT_WIDTH } from './constants';
-import { channelContainsPoint, channelContainsDate } from './geometryHelpers';
+import { channelContainsPoint, channelContainsDate } from './screenGeometryHelpers';
 
 export function calcPlanetHeight(svgHeight){
     return d3.min([svgHeight * 0.2, 100]);
