@@ -54,12 +54,14 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const UserHome = ({screen, user, loading, loadingError}) => {
-  const topBarHeight = screen.isLarge ? 90 : 20; //still need a bit of height even if no top bar
+  console.log("UserHome", screen)
+  const topBarHeight = screen.isLarge ? 70 : 0;
   const styleProps = { 
     availWidth: screen?.width || 0,
-    availHeight:screen.height || 0,
+    availHeight:screen.height - topBarHeight,
     topBarHeight
   };
+  console.log("styleprops", styleProps)
   const classes = useStyles(styleProps)
 
   //for now, keep it simple for page refreshes - until user reloads, dont render the children.

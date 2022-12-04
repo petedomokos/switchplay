@@ -66,11 +66,15 @@ const newJourney = { _id:"temp", contracts:[], profiles:[], aims:[], goals:[], l
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    width:"100%",
+    height:"100%",
     position:"relative",
     marginLeft:DIMNS.journey.margin.left, 
     marginRight:DIMNS.journey.margin.right,
     marginTop:DIMNS.journey.margin.top, 
-    marginBottom:DIMNS.journey.margin.bottom
+    marginBottom:DIMNS.journey.margin.bottom,
+    border:"solid",
+    borderColor:"red"
   },
   overlay:{
     //position:"absolute",
@@ -140,7 +144,7 @@ const initChannels = d3.range(numberMonths)
 
 //width and height may be full screen, but may not be
 const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog }) => {
-  //console.log("Journey data", data)
+  // console.log("Journey data", data)
   //console.log("Journey avail", availableJourneys)
   const hydratedData = hydrateJourneyData(data, userKpis, datasets);
   const { _id, userId, name, contracts, profiles, aims, goals, links, measures } = hydratedData;
@@ -149,7 +153,9 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
   const [withCompletionPaths, setWithCompletionPath] = useState(false);
   const [aligned, setAligned] = useState(false);
   const [modalData, setModalData] = useState(undefined);
-  const [displayedBar, setDisplayedBar] = useState("");
+  //for now, displayedBar is always milestones
+  const [displayedBar, setDisplayedBar] = useState("milestones");
+  //const [displayedBar, setDisplayedBar] = useState("");
   const [kpiFormat, setKpiFormat] = useState("target-completion");
   const selectedKpi = typeof displayedBar === "object" && displayedBar.kpi ? displayedBar.kpi : null;
   //KpiView will display an entire kpiSet, keyed by milestoneId
@@ -175,7 +181,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
 
   const shouldD3UpdateRef = useRef(true);
 
-  const ctrlsHeight = 10;
+  const ctrlsHeight = 0;//10;
   const journeyWidth = width - DIMNS.journey.margin.left - DIMNS.journey.margin.right
   const journeyHeight = height - DIMNS.journey.margin.top - DIMNS.journey.margin.bottom - ctrlsHeight;
   let styleProps = {}
@@ -567,8 +573,8 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
   return (
     <div className={classes.root}>
       Journey
-        <div className={`${classes.overlay} overlay`} ref={overlayRef}>
-          {/**displayedBar === "milestones" && 
+        {/**<div className={`${classes.overlay} overlay`} ref={overlayRef}>
+          {displayedBar === "milestones" &&
             <MilestonesBar 
               profiles={profiles} 
               contracts={contracts} 
@@ -580,8 +586,8 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
               setKpiFormat={setKpiFormat}
               screen={screen} 
             />
-          */}
-          {/**selectedKpiSet && 
+          }
+          {selectedKpiSet && 
             <KpiView 
               name={kpiSetName(selectedKpi)} 
               data={kpiViewData} 
@@ -592,8 +598,8 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
               format={kpiFormat} 
               onClose={() => setDisplayedBar(displayedBar.prev || "")} 
             />
-          */}
-        </div>
+          }
+        </div>*/}
         {/**<svg className={classes.svg} ref={containerRef}></svg>*/}
         {/**
         <div className={classes.ctrls}>

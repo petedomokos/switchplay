@@ -65,6 +65,7 @@ const layout = milestonesLayout();
 const milestonesBar = milestonesBarComponent();
 
 const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, setKpiFormat, onSelectKpiSet, screen }) => {
+  console.log("MBar", profiles)
   const bottomCtrlsBarHeight = 100;
   const height = d3.min([DIMNS.milestonesBar.height, screen.height - bottomCtrlsBarHeight])
   let styleProps = { height };
