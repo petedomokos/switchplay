@@ -1,4 +1,4 @@
-import { TextBox } from "d3Plus-text";
+import { TextBox } from "d3plus-text";
 
 export default function textWrap() {
     const SMALL_FONT = 5;
