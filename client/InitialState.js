@@ -16,6 +16,8 @@ export const InitialState = {
 			groups:'',
 			datasets:''
 		},
+		journeys:[],
+		homeJourney:""
 	},
 	asyncProcesses:{
 		error:{
@@ -60,6 +62,16 @@ export const InitialState = {
 			size:"l",
 			width:0,
 			height:0
-		}
+		},
+		activeJourney:"",
+		adhocJourney:{
+			id:"adhoc",
+			contracts:[],
+			profiles:[],
+			aims:[],
+			goals:[],
+			links:[],
+			measures:[]
+		},
 	}
 }
