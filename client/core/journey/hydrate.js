@@ -1,14 +1,12 @@
 import * as d3 from 'd3';
 
-export function hydrateJourneyData(data, userKpis, datasets){
+export function hydrateJourneyData(data, userKpis=[], datasets=[]){
     return {
         ...data,
         profiles:hydrateProfiles(data.profiles, userKpis, datasets)
     }
 }
-function hydrateProfiles(profiles, userKpis, datasets){
-    console.log("profiles", profiles)
-    console.log("userKpis", userKpis)
+function hydrateProfiles(profiles=[], userKpis, datasets){
     return profiles.map(p => {
         const milestoneId = p._id || p.id;
         return {
