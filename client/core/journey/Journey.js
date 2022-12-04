@@ -69,12 +69,10 @@ const useStyles = makeStyles((theme) => ({
     width:"100%",
     height:"100%",
     position:"relative",
-    marginLeft:DIMNS.journey.margin.left, 
-    marginRight:DIMNS.journey.margin.right,
-    marginTop:DIMNS.journey.margin.top, 
-    marginBottom:DIMNS.journey.margin.bottom,
-    border:"solid",
-    borderColor:"red"
+    //marginLeft:DIMNS.journey.margin.left, 
+    //marginRight:DIMNS.journey.margin.right,
+    //marginTop:DIMNS.journey.margin.top, 
+    //marginBottom:DIMNS.journey.margin.bottom,
   },
   overlay:{
     //position:"absolute",
@@ -572,8 +570,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
 
   return (
     <div className={classes.root}>
-      Journey
-        {/**<div className={`${classes.overlay} overlay`} ref={overlayRef}>
+        <div className={`${classes.overlay} overlay`} ref={overlayRef}>
           {displayedBar === "milestones" &&
             <MilestonesBar 
               profiles={profiles} 
@@ -587,7 +584,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
               screen={screen} 
             />
           }
-          {selectedKpiSet && 
+          {/**selectedKpiSet && 
             <KpiView 
               name={kpiSetName(selectedKpi)} 
               data={kpiViewData} 
@@ -598,8 +595,8 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
               format={kpiFormat} 
               onClose={() => setDisplayedBar(displayedBar.prev || "")} 
             />
-          }
-        </div>*/}
+          */}
+        </div>
         {/**<svg className={classes.svg} ref={containerRef}></svg>*/}
         {/**
         <div className={classes.ctrls}>

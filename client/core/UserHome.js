@@ -9,6 +9,9 @@ import UsersContainer from '../user/containers/UsersContainer'
 import GroupsContainer from '../group/containers/GroupsContainer'
 import DatasetsContainer from '../dataset/containers/DatasetsContainer'
 import JourneyContainer from "./journey/JourneyContainer"
+import C from "../Constants"
+
+const { URL_BAR_HEIGHT } = C;
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -16,21 +19,12 @@ const useStyles = makeStyles((theme) => ({
     display:'flex',
     alignItems:'flex-start', //note - when removing this, it makes item stretch more
     flexDirection:'column',
-    background:"red",
     width:"100%",
     height:"100%"
   },
-  mainVis:{
-    //height:"100vh",//props => props.availHeight,// - props.topBarHeight,
-    background:"orange",
+  fullScreen:{
     width:"100%",
-    height:"100vh",
-    width:props => props.availWidth
-  },
-  inside:{
-    background:"blue",
-    width:"100%",
-    height:"calc(100vh - 70px)",
+    height:props => props.screen.isLarge ? "100vh" : `calc(100vh - ${URL_BAR_HEIGHT}px)`,
   },
   topRow: {
     //padding:`${theme.spacing(3)}px ${theme.spacing(2.5)}px ${theme.spacing(2)}px`,
@@ -65,14 +59,9 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const UserHome = ({screen, user, loading, loadingError}) => {
-  console.log("UserHome", screen)
-  const topBarHeight = screen.isLarge ? 70 : 0;
-  const styleProps = { 
-    availWidth: screen?.width || 0,
-    availHeight:screen.height,// - topBarHeight,
-    topBarHeight
+  const styleProps = {
+    screen
   };
-  console.log("styleprops", styleProps)
   const classes = useStyles(styleProps)
 
   //for now, keep it simple for page refreshes - until user reloads, dont render the children.
@@ -86,11 +75,9 @@ const UserHome = ({screen, user, loading, loadingError}) => {
     <div className={classes.root}>
       {user._id && 
         <>
-            <div className={classes.mainVis}>
-              <div className={classes.inside}>inside</div>
-              {/**<Route path="/" component={JourneyContainer} />*/}
-            </div>
-          
+          <div className={classes.fullScreen}>
+            <Route path="/" component={JourneyContainer} />
+          </div>
           {/**
           <div className={classes.topRow} >
               <UserProfile profile={user} />

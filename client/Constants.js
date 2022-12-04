@@ -1,4 +1,6 @@
 const Constants = {
+	HEADER_HEIGHT:70,
+	URL_BAR_HEIGHT:70,
 	//SIGNED IN USER
 	SIGN_UP:"SIGN_UP",
 	SIGN_IN:"SIGN_IN",
