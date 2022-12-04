@@ -17,10 +17,9 @@ import PrivateRoute from './auth/PrivateRoute'
 import MenuContainer from './core/containers/MenuContainer'
 import Profile from './core/profile/Profile'
 import auth from './auth/auth-helper'
-import Expression from "./expression/Expression"
-import Games from "./games/Games"
 //styles
 import './assets/styles/main.css'
+import JourneyContainer from './core/journey/JourneyContainer'
 
 const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
   //console.log("MainRouter", userId)
@@ -54,7 +53,6 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
   }, []);
 
   useEffect(() => {
-    //check if user signed in already but state is not loaded eg page refresh
     if(jwt && !userId && !loadingUser){
       loadUser(jwt.user._id)
     }

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import {Switch, Link, Route } from 'react-router-dom'
+//import PrivateRoute from '../auth/PrivateRoute' - use this if i have a param /:journeyId
 import { makeStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
-import auth from '../auth/auth-helper'
 //children
 import UserProfile from '../user/UserProfile'
 import UsersContainer from '../user/containers/UsersContainer'
 import GroupsContainer from '../group/containers/GroupsContainer'
 import DatasetsContainer from '../dataset/containers/DatasetsContainer'
+import JourneyContainer from "./journey/JourneyContainer"
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -53,7 +54,6 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const UserHome = ({screen, user, loading, loadingError}) => {
-  console.log("UserHome ", auth.isAuthenticated())
   const topBarHeight = screen.isLarge ? 90 : 20; //still need a bit of height even if no top bar
   const styleProps = { 
     availWidth: screen?.width || 0,
@@ -69,12 +69,14 @@ const UserHome = ({screen, user, loading, loadingError}) => {
     {label:"Add datapoint", to:"/datapoints/new"}
   ]
 
-  console.log("UserHome user", user.firstname)
-
   return (
     <div className={classes.root}>
       {user._id && 
         <>
+            <div className={classes.mainVis}>
+              <Route path="/" component={JourneyContainer} />
+            </div>
+          
           {/**
           <div className={classes.topRow} >
               <UserProfile profile={user} />

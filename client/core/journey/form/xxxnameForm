@@ -1,0 +1,425 @@
+import { svgParent, show, hide, wrap, shiftTranslate } from "../../../lib/domHelpers.js";
+import { PLANET_NAME_FORM_INPUT_HEIGHT, CLUSTER_NAME_FORM_INPUT_HEIGHT } from "../../../lib/constants.js";
+
+const mockDescription = "Lorem ipsum dolor sit amet, est et nibh posse putent, dolore vocibus scriptorem sit ad, mutat ius ex. Pro quot docendi disputationi ex.";
+
+export function openPlanet(selection, zoom, updatePlanet /* dispatch */) {
+    const svg = d3.select(svgParent(selection.node()));
+    const svgDimensions = [svg.attr("width"), svg.attr("height")];
+    const d = selection.datum();
+    const { radius } = d;
+    const diameter = radius * 2;
+    const scale = 1;
+
+    // ADJUST THE PLANET AND BACKGROUND
+    zoom.zoomToPlanet(d, { scale });
+    zoom.disable();
+    selection.raise();
+    svg.select("g.planet-layer").raise();
+
+    const coreG = selection.select("g.core");
+    // scale up the circle
+    coreG.select("path.planet-background")
+        .transition()
+        .duration(800)
+        .style("fill", "#F5F5F5"); // rough paths have style fill
+
+    // hide core except background
+    coreG.select("g")
+        .attr("display", "none")
+        .attr("opacity", 0);
+
+    // HIDE ELEMENTS
+    const transitionSettings = { delay: 300, duration: 800 };
+    // @TODO - discuss - is it wise to have opacity set in css stylesheet as a style, AND manipulated here too?
+    // assign const as we will refer to it further down
+    const nameFormG = selection.select("g.nameForm");
+    //hide(nameFormG, transitionSettings);
+    // hide all other layers so background can be clicked to close
+    hide(svg.select("g.gesture-layer"), transitionSettings);
+    hide(svg.select("g.cluster-layer"), transitionSettings);
+    hide(svg.select("g.label-layer"), transitionSettings);
+    // pass in finalOpacity=0.5
+    hide(svg.select("g.relationship-layer"), { ...transitionSettings, finalOpacity: 0.3 });
+    //hide(selection.select("g.name"))
+    // remove pointer-events from planet
+    //selection.attr("pointer-events", "none");
+
+    // NAME
+    // reduce font size as it is scaled up
+    const openNameOptions = {
+        fontMin: 5,
+        fontMax: 8,
+    };
+    // hide name, then move up, then show
+
+    // move nameForm too in case it is clicked
+    const nameFormWidth = Number(selection.select("g.nameForm").select("foreignObject").attr("width").slice(0, -2));
+    nameFormG
+        .transition()
+        .delay(1000)
+        //.attr("transform", "scale(0.2) " +shiftTranslate(0, -radius * 0.5, nameFormG.attr("transform")));
+        .attr("transform", "scale(0.2) translate(-" +nameFormWidth/2 +", "+(-radius *0.8 * 5) + ")");
+        //.attr("transform", "scale(0.2) translate(0,-500)");
+
+    nameFormG.select("form").select("input")
+        .style("background", "transparent")
+        .style("border", "none")
+
+    // @TODO - click behaviour - if name clicked, then g.nameForm is displayed and g.name is hidden
+
+    // FOREIGN OBJECT FOR HTML
+    const currentScale = zoom.currentTransform().scale;
+
+    // we make the container larger than it should be, then scale down using a transform
+    // This means that all content will be the correct size, as the zoom scales it up so we must scale down
+
+    const fObject = selection
+        .append("foreignObject")
+        .attr("class", "open-planet-f-obj")
+        .attr("x", "0")
+        .attr("y", "0")
+        .style("border", "solid")
+        .attr("width", `${diameter * 0.7 * currentScale}px`)
+        .attr("height", `${diameter * 0.6 * currentScale}px`)
+        .style("overflow-y", "auto")
+        .attr("transform", `translate(${-radius * 0.7},${-radius * 0.5}) scale(${1 / currentScale})`);
+
+    fObject
+        .attr("opacity", 0)
+        .transition()
+        .delay(1000)
+        .duration(800)
+        .attr("opacity", 1);
+
+    fObject.append("xhtml:div")
+        .style("margin", "15px 5px 5px 5px")
+        .html("Description...");
+
+    fObject.append("xhtml:div")
+        .attr("class", "open-planet-desc")
+        .style("width", "96%")
+        .style("height", "100px")
+        .style("padding", "2%")
+        .style("overflow-y", "auto")
+        .html(mockDescription);
+
+    // @TODO - build content
+
+    // TRAY (transition out from planet, with delay)
+    // selection.call(appendTray, d.radius, svgDimensions, zoom);
+
+    // UPDATE STATE
+    updatePlanet({ ...d, isOpen: true });
+
+}
+
+export function deselectAndClosePlanets(svg, galaxySettings, updatePlanets, updatePlanet) {
+    // we call show on all layers, even though planet may be closed already
+    show(svg.select("g.gesture-layer"));
+    show(svg.select("g.cluster-layer"));
+    show(svg.select("g.label-layer"));
+    show(svg.select("g.relationship-layer"));
+
+    const planetGs = svg.selectAll("g.planet")
+        .each(function (d) {
+            if(d.name === "Enhancements"){
+                console.log("d", d)
+            }
+            if (d.isOpen) {
+                // close - dont pass updatePlanet function to it so we only update all planets together
+                closePlanet(d3.select(this), galaxySettings, updatePlanet);
+            }
+            else if(d.isSelected){
+                d3.select(this).select("g.nameForm").attr("display", "none")
+            }
+        });
+    // update state
+    updatePlanets(planetGs.data().map((d) => ({ ...d, isOpen: false, isSelected: false })));
+}
+
+export function closePlanet(selection, galaxySettings, updatePlanet) {
+    const { zoom } = galaxySettings;
+    const svg = d3.select(svgParent(selection.node()));
+    const d = selection.datum();
+    zoom.enable();
+    zoom.zoomToAll(1000);
+
+    // raise label-layer
+    svg.select("g.label-layer").raise();
+    const coreG = selection.select("g.core");
+
+    //add pointer-events to planet
+    selection.attr("pointer-events", "all");
+    // scale up the circle
+    coreG.select("path.planet-background")
+        .transition()
+        .duration(1000)
+        .attr("transform", "scale(1)")
+        .attr("fill", "white");
+
+    // show core except background
+    coreG.select("g")
+        .attr("display", "inline")
+        .transition()
+        .delay(700)
+        .duration(300)
+        .attr("opacity", 1);
+
+    const hideTransformSettings = { delay: 300, duration: 800, onEnd: "remove" };
+    // transform name and nameForm back to centre
+    hide(selection.select(".open-planet-f-obj"), hideTransformSettings);
+    hide(selection.select("g.open-name"), hideTransformSettings)
+
+    show(selection.select("g.name"))
+    /*selection.select("g.name")
+        .transition("moveName")
+        .delay(300)
+        .duration(800)
+        .attr("transform", "translate(0,0)");
+        */
+
+    // todo - must shift up by half height and left by half width
+    const nameFormWidth = Number(selection.select("g.nameForm").select("foreignObject").attr("width").slice(0, -2));
+    selection
+        .select("g.nameForm")
+        .attr("transform", `translate(${-nameFormWidth / 2},${-PLANET_NAME_FORM_INPUT_HEIGHT / 2})`);
+
+    // set nameForm 'opacity' back to 1 ('display' attr is update in nameForm function update)
+    selection.select("g.nameForm").attr("opacity", 1).style("opacity", 1);
+
+
+
+    // remove trayG (transition out from planet, with delay)
+    selection.call(removeTray, d.radius);
+
+    // set state isOpen = true and update (in rough planets core, we need to transition planet size as in default)
+    // only update state if update functin is passed through ie only closing 1 planet
+    if (updatePlanet) {
+        updatePlanet({ ...d, isOpen: false, isSelected: false });
+    }
+}
+
+// need zoom transform so we can invert
+function appendTray(selection, radius, svgDimensions, zoom) {
+    const { invertScale, currentTransform } = zoom;
+    const diameter = 2 * radius;
+    const startTrayWidth = diameter;
+    const startTrayHeight = diameter;
+    const endTrayWidth = invertScale(svgDimensions[0] * 0.5);
+    const endTrayHeight = invertScale(svgDimensions[1] - 20);
+    const extraVertShift = -3;
+
+    const trayG = selection
+        .append("g")
+        .attr("class", "tray");
+
+    trayG
+        .attr("transform", `translate(${radius * 0.5},${-startTrayHeight / 2})`)
+        .attr("opacity", 0)
+        .transition("slide-in")
+        .delay(300)
+        .duration(800)
+        .attr("transform", `translate(${radius * 0.8},${(-endTrayHeight / 2) + extraVertShift})`)
+        .attr("opacity", 1);
+
+    trayG.append("rect")
+        .attr("width", `${startTrayWidth}px`)
+        .attr("height", `${startTrayHeight}px`)
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("fill", "#E8E8E8")
+        .transition("rect-size")
+        .delay(300)
+        .duration(800)
+        .attr("width", `${endTrayWidth}px`)
+        .attr("height", `${endTrayHeight}px`);
+
+    const currentScale = currentTransform().scale;
+    // we make the container larger than it should be, then scale down using a transform
+    // This means that all content will be the correct size, as the zoom scales it up so we must scale down
+    const fObject = trayG
+        .append("foreignObject")
+        .attr("x", "0")
+        .attr("y", "0")
+        .attr("width", `${endTrayWidth * currentScale}px`)
+        .attr("height", `${endTrayHeight * currentScale}px`)
+        .style("overflow-y", "auto")
+        .style("transform", `scale(${1 / currentScale})`);
+
+    const container = fObject.append("xhtml:div")
+        .attr("class", "property-tray-content");
+
+    container.append("xhtml:div")
+        .attr("class", "property-tray-title")
+        .html("Properties");
+
+    container.append("xhtml:div")
+        .attr("class", "property-card")
+        .html("Property 1");
+
+    container.append("xhtml:div")
+        .attr("class", "property-card")
+        .html("Property 2");
+
+    container.append("xhtml:div")
+        .attr("class", "property-card")
+        .html("Property 3");
+
+    // @TODO - build content
+
+}
+
+function removeTray(selection, radius) {
+    const diameter = 2 * radius;
+    const trayHeight = diameter;
+
+    const trayG = selection.select("g.tray");
+
+    trayG
+        .transition("fade-slide-out")
+        // .delay(700)
+        .duration(800)
+        .attr("transform", `translate(${radius * 0.5},${-trayHeight / 2})`)
+        .attr("opacity", 0)
+        .on("end", function () {
+            d3.select(this).remove();
+        });
+}
+
+/*
+    A function to render and update a name form html element on a single g selection
+*/
+
+export const planetNameForm = (updateName) => {
+    function update(selection) {
+        const d = selection.datum();
+        // name form
+        const radius = (planet) => planet.radius;
+        const diameter = (planet) => radius(planet) * 2;
+        const formDimensions = {
+            width: diameter(d) * 1.5,
+            height: radius(d),
+            inputHeight: PLANET_NAME_FORM_INPUT_HEIGHT,
+        };
+
+        // Display or hide the default non-editable name text element
+        //selection.select("g.name")
+            //.attr("display", d.isSelected ? "none" : "inline");
+
+        // Render the form element
+        // BIND - bind the d to a form g, or return empty if not editable
+        const nameFormG = selection.selectAll("g.nameForm").data([d]);
+        // ENTER / UPDATE
+        nameFormG
+            .enter()
+            .append("g")
+            .attr("class", "nameForm")
+            .attr("transform", `translate(${-formDimensions.width / 2}, ${-formDimensions.inputHeight / 2})`)
+            .call(htmlFormInSvg, formDimensions, updateName)
+            .attr("display", "none")
+            .merge(nameFormG)
+            //.attr("display", d.isSelected ? "inline" : "none")
+            .select("input")
+            .attr("value", d.name);
+
+        return selection;
+    }
+    return update;
+
+};
+
+/*
+    A function to render and update a label name form html element on a single g selection
+*/
+
+export const labelNameForm = (updateName) => {
+    function update(selection) {
+        const d = selection.datum();
+        // name form
+        const formDimensions = {
+            width: 700,
+            height: 120,
+            inputHeight: CLUSTER_NAME_FORM_INPUT_HEIGHT,
+        };
+
+        // Display or hide the default non-editable name text element
+        //selection.select("rect.label-hit-area")
+            //.attr("display", d.isSelected ? "none" : "inline");
+        //selection.select("text.label")
+            //.attr("display", d.isSelected ? "none" : "inline");
+
+        // Render the form element
+        // BIND - bind the d to a form g, or return empty if not editable
+        const nameFormG = selection.selectAll("g.nameForm").data([d]);
+        // ENTER / UPDATE
+
+        nameFormG
+            .enter()
+            .append("g")
+            .attr("class", "nameForm")
+            .attr("transform", `translate(${-formDimensions.width / 2}, ${-formDimensions.inputHeight / 2})`)
+            .call(htmlFormInSvg, formDimensions, updateName)
+            .attr("display", "none")
+            .merge(nameFormG)
+            .select("input")
+            .attr("value", d.name);
+
+        return selection;
+    }
+    return update;
+
+};
+/*
+    A generic, reusable htmlForm for a selected svg element or elements, uses htmlForm
+    */
+function htmlFormInSvg(selection, dimensions, updateName) {
+    // Use selection.each to handle the case of no name form and to grab the data
+    return selection.each(function () {
+        const formG = d3.select(this);
+        const fObject = formG
+            .append("foreignObject")
+            .attr("x", "0")
+            .attr("y", "0")
+            .attr("width", `${dimensions.width}px`)
+            .attr("height", `${dimensions.height}px`);
+
+        return htmlForm(fObject, dimensions, updateName);
+    });
+}
+
+/*
+    A generic, reusable htmlForm for a selected html element or elements
+    */
+// @TODO - add a settings api, passing in width and height settings, and input requirements
+// @TODO - give focus to name input
+function htmlForm(htmlSelection, dimensions, updateName) {
+    const { inputHeight } = dimensions;
+    htmlSelection.each(function (data, i) {
+        const form = htmlSelection.append("xhtml:form")
+            .attr("width", "100%")
+            .attr("height", "100%")
+            .style("display", "flex")
+            .style("flex-direction", "column")
+            .style("alignItems", "center")
+            .on("submit", function (e) {
+                // for now, update is handled by single input element
+                e.preventDefault();
+            });
+
+        form.append("xhtml:label")
+            .attr("for", "name");
+
+        form.append("xhtml:input")
+            .attr("type", "text")
+            .attr("id", `name-${data.id || i}`) // default to i if data doesnt have an id
+            .attr("class", "name input")
+            .attr("name", "name")
+            .style("height", `${(inputHeight || PLANET_NAME_FORM_INPUT_HEIGHT || 80)}px`)
+            .on("change", function () {
+                updateName(data, this.value);
+            });
+
+    });
+    return htmlSelection;
+}

@@ -4,7 +4,7 @@ import expressJwt from 'express-jwt'
 import config from './../../config/config'
 
 const signin = async (req, res) => {
-  console.log('signin......', req.body)
+  console.log('signin...', req.body)
   //@todo - find a cleaner way to replicate the code below where we split based on email or username
   //but still populate it the same
   const adminPopulationStr = '_id username firstname surname created';
