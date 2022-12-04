@@ -7,6 +7,7 @@ import { transformJourneyForClient } from "./JourneyActions"
 
 export const transformUserForClient = serverUser => {
 	console.log("serverUser", serverUser)
+	const { journeys } = serverUser;
 	return {
 		...serverUser,
 		journeys:journeys.map(j => transformJourneyForClient(j))

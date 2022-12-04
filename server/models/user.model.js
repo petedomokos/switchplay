@@ -42,6 +42,9 @@ const UserSchema = new mongoose.Schema({
   administeredDatasets:[{type:mongoose.Schema.ObjectId, ref:'Dataset'}],
   groupsMemberOf:[{type:mongoose.Schema.ObjectId, ref:'Group'}],
   datasetsMemberOf:[{type:mongoose.Schema.ObjectId, ref:'Dataset'}],
+  journeys:[{type:mongoose.Schema.ObjectId, ref:'Journey'}],
+  readOnlyJourneys:[{type:mongoose.Schema.ObjectId, ref:'Journey'}],
+  homeJourney:{type:mongoose.Schema.ObjectId, ref:'Journey'},
 
   isSystemAdmin:{type:Boolean,default:false},
   hashed_password: {type: String,required: "Password is required"},
