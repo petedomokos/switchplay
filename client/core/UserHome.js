@@ -15,10 +15,13 @@ const useStyles = makeStyles((theme) => ({
     //margin: theme.spacing(2),
     display:'flex',
     alignItems:'flex-start', //note - when removing this, it makes item stretch more
-    flexDirection:'column'
+    flexDirection:'column',
+    background:"yellow",
+    width:"100%",
+    height:"100%"
   },
   mainVis:{
-    height:props => props.availHeight,// - props.topBarHeight,
+    height:"100vh",//props => props.availHeight,// - props.topBarHeight,
     width:props => props.availWidth
   },
   topRow: {
@@ -58,7 +61,7 @@ const UserHome = ({screen, user, loading, loadingError}) => {
   const topBarHeight = screen.isLarge ? 70 : 0;
   const styleProps = { 
     availWidth: screen?.width || 0,
-    availHeight:screen.height - topBarHeight,
+    availHeight:screen.height,// - topBarHeight,
     topBarHeight
   };
   console.log("styleprops", styleProps)

@@ -62,7 +62,7 @@ const Menu = withRouter(({ history, signingOut, screenSize, onSignout }) => {
   //when  menu item is clicked. 
   return (
     <>
-      {["s", "m"].includes(screenSize)  ?
+      {["s", "m", "l", "xl"].includes(screenSize)  ?
         <>
           {/**<MenuIcon onClick = {() => setIsOpen(true)}
             style={{ position:"absolute", left:200, top:100, zIndex:1000}}/>*/}

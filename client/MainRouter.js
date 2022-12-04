@@ -19,7 +19,7 @@ import Profile from './core/profile/Profile'
 import auth from './auth/auth-helper'
 //styles
 import './assets/styles/main.css'
-import JourneyContainer from './core/journey/JourneyContainer'
+// import JourneyContainer from './core/journey/JourneyContainer'
 
 const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
   //console.log("MainRouter", userId)
@@ -63,7 +63,6 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
  // <Route exact path="/" render={() => <UserHomeContainer screen={screen} />} />
   return (
     <div>
-      <div style={{height:0.05}}></div>
       <MenuContainer />
       <Route path="/signup" component={CreateUserContainer}/>
       <Route path="/signin" component={SigninContainer}/>
