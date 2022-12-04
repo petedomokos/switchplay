@@ -16,13 +16,21 @@ const useStyles = makeStyles((theme) => ({
     display:'flex',
     alignItems:'flex-start', //note - when removing this, it makes item stretch more
     flexDirection:'column',
-    background:"yellow",
+    background:"red",
     width:"100%",
     height:"100%"
   },
   mainVis:{
-    height:"100vh",//props => props.availHeight,// - props.topBarHeight,
+    //height:"100vh",//props => props.availHeight,// - props.topBarHeight,
+    background:"orange",
+    width:"100%",
+    height:"100vh",
     width:props => props.availWidth
+  },
+  inside:{
+    background:"blue",
+    width:"100%",
+    height:"calc(100vh - 70px)",
   },
   topRow: {
     //padding:`${theme.spacing(3)}px ${theme.spacing(2.5)}px ${theme.spacing(2)}px`,
@@ -79,7 +87,8 @@ const UserHome = ({screen, user, loading, loadingError}) => {
       {user._id && 
         <>
             <div className={classes.mainVis}>
-              <Route path="/" component={JourneyContainer} />
+              <div className={classes.inside}>inside</div>
+              {/**<Route path="/" component={JourneyContainer} />*/}
             </div>
           
           {/**
