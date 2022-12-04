@@ -8,6 +8,7 @@ const signin = async (req, res) => {
   //@todo - find a cleaner way to replicate the code below where we split based on email or username
   //but still populate it the same
   const adminPopulationStr = '_id username firstname surname created';
+  const journeysPopulationStr = '_id name aims goals links measures created';
   const administeredUsersPopulationStr = '_id username firstname surname photo created';
   const administeredGroupsPopulationObj = { 
     path: 'administeredGroups', 
@@ -35,6 +36,7 @@ const signin = async (req, res) => {
       console.log("signing in by email")
       user = await User.findOne({ "email" : req.body.emailOrUsername })
         .populate('admin', adminPopulationStr)
+        .populate('journeys', journeysPopulationStr)
         .populate('administeredUsers', administeredUsersPopulationStr)
         .populate(administeredGroupsPopulationObj)
         .populate(groupsMemberOfPopulationObj)
@@ -45,6 +47,7 @@ const signin = async (req, res) => {
       console.log("signing in by username")
       user = await User.findOne({ "username" : req.body.emailOrUsername })
         .populate('admin', adminPopulationStr)
+        .populate('journeys', journeysPopulationStr)
         .populate('administeredUsers', administeredUsersPopulationStr)
         .populate(administeredGroupsPopulationObj)
         .populate(groupsMemberOfPopulationObj)
