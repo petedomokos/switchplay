@@ -102,6 +102,7 @@ export const DIMNS = {
     milestonesBar:{
         height:600,
         margin:{ left:20, right:20, top:0, bottom:0 },
+        PHASE_GAP_MULTIPLE: 0.15,
         list:{
             height:480,
             margin:{ left:20, right:20, top:0, bottom:0 },
@@ -110,15 +111,18 @@ export const DIMNS = {
             width:160,
             height:80
         },
+        timeCategory:{
+            height:30
+        },
         profile:{
             width:300,
             height:450,
-            margin:{ top:0, bottom:0, left:10, right: 0}
+            margin:{ top:0, bottom:0, left:5, right: 5}
         },
         contract:{
             width:200,
             height:250,
-            margin:{ top:0, bottom:0, left:10, right: 0}
+            margin:{ top:0, bottom:0, left:5, right: 5}
         }
     },
     ctrls:{

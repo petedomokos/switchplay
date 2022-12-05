@@ -45,7 +45,8 @@ export default function milestonesLayout(){
 
             const generalProps = {
                 nr:i,
-                isActive:isActive(milestone)
+                isActive:isActive(milestone),
+                datePhase:milestone.isCurrent ? "current" : (date < now ? "past" : "future")
             }
 
             if(dataType === "profile"){

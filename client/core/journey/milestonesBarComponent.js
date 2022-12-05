@@ -13,13 +13,53 @@ export default function milestonesBarComponent() {
     let margin = DIMNS.milestonesBar.list.margin;
     let contentsWidth;
     let contentsHeight;
-
-    function updateDimns(){
-        contentsWidth = width - margin.left - margin.right;
-        contentsHeight = height - margin.top - margin.bottom;
-    }
+    let phaseLabelsHeight;
+    let milestonesHeight;
+    //api to determine widths of milestones based on type
+    let milestoneWidth = m => 100;
     let profileCardDimns = DIMNS.milestonesBar.profile;
     let contractDimns = DIMNS.milestonesBar.contract;
+
+    let phaseGap;
+
+    //special points
+    let endOfLastPastCard;
+    let middleOfCurrentCard;
+    let startOfFirstFutureCard;
+
+
+    function updateDimns(data){
+        phaseGap = DIMNS.milestonesBar.PHASE_GAP_MULTIPLE * profileCardDimns.width;
+        //first, calc width based on number of milestones and their widths
+        contentsWidth = d3.sum(data, m => milestoneWidth(m)) + 2 * phaseGap;
+        width = contentsWidth + margin.left + margin.right;
+        //height is passed in so calc contentsHeight in the usual way
+        /*
+        contentsHeight = height - margin.top - margin.bottom;
+        phaseLabelsHeight = d3.min([20, contentsHeight * 0.1]);
+        console.log("phaseh", phaseLabelsHeight)
+        milestonesHeight = contentsHeight - phaseLabelsHeight;
+        */
+        milestonesHeight = profileCardDimns.height; //this is the largest type of milestone
+        phaseLabelsHeight = d3.min([20, milestonesHeight * 0.1]);
+        contentsHeight = milestonesHeight + phaseLabelsHeight;
+        height = contentsHeight + margin.top + margin.bottom;
+
+        //special points
+        const pastCards = data.filter(m => m.datePhase === "past");
+        const currentCard = data.find(m => m.datePhase === "current")
+        //note - will also be extra space for gap 'pastCurrentGap' and 'currentFutureGap'
+        const labelMarginHoz = profileCardDimns.width * 0.1;
+        endOfLastPastCard = d3.sum(pastCards, m => milestoneWidth(m)) - labelMarginHoz;
+        middleOfCurrentCard = d3.sum(pastCards, m => milestoneWidth(m)) + phaseGap + milestoneWidth(currentCard)/2;
+        startOfFirstFutureCard = d3.sum([...pastCards, currentCard], m => milestoneWidth(m)) /* +margin*/ + 2 * phaseGap + labelMarginHoz;
+        
+        datePhasesData = [
+            { label:"Past", x:endOfLastPastCard, textAnchor:"end" },
+            { label: "Current", x:middleOfCurrentCard, textAnchor:"middle" },
+            { label: "Future", x:startOfFirstFutureCard, textAnchor:"start" }
+        ]
+    }
 
     let fontSizes = {
         profile: FONTSIZES.profile(1),
@@ -52,6 +92,8 @@ export default function milestonesBarComponent() {
 
     let containerG;
     let contentsG;
+    let milestonesWrapperG;
+    let phaseLabelsG;
     let milestonesG;
     let contractsG;
     let profilesG;
@@ -65,6 +107,8 @@ export default function milestonesBarComponent() {
     let slideBack;
     let slideForward;
     let currentXOffset = 0;
+
+    let datePhasesData;
 
     function milestonesBar(selection, options={}) {
 
@@ -80,7 +124,8 @@ export default function milestonesBarComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            //console.log("milestones bar update", data)
+            updateDimns(data);
+            console.log("milestones bar update", data);
             containerG = d3.select(this);
             //why not empty>??
             if(containerG.select("g").empty()){
@@ -90,37 +135,87 @@ export default function milestonesBarComponent() {
             update();
             function init(){
                 contentsG = containerG.append("g").attr("class", "milestone-bar-contents");
-                milestonesG = contentsG.append("g").attr("class", "milestones")
+                contentsG.append("rect")
+                    .attr("class", "milestones-bar-bg")
+                    .attr("fill", "blue");
+
+                milestonesWrapperG = contentsG.append("g").attr("class", "milestones-wrapper")
                     .attr("transform", `translate(0,0)`);
+
+                phaseLabelsG = milestonesWrapperG.append("g").attr("class", "phase-labels")
+                milestonesG = milestonesWrapperG.append("g").attr("class", "milestones")
+
+                phaseLabelsG.append("rect")
+                    .attr("class", "phase-labels-bg")
+                    .attr("fill", "black")
+                    .attr("stroke", "black");
+                milestonesG.append("rect")
+                    .attr("class", "milestones-bg")
+                    .attr("fill", "none")
+                    .attr("stroke", "pink");
+
                 contractsG = milestonesG.append("g").attr("class", "contracts");
                 profilesG = milestonesG.append("g").attr("class", "profiles");
             }
 
             function update(){
-                //helper
-                const milestoneWidth = m => m.dataType === "profile" ? profileCardDimns.width: contractDimns.width;
-                contentsG.attr("transform", `translate(${margin.left},${margin.right})`);
+                contentsG.attr("transform", `translate(${margin.left},${margin.top})`);
                 const xOffset = -d3.sum(data.filter(m => m.nr < slidePosition), m => milestoneWidth(m));
 
                 if(xOffset !== currentXOffset){
-                    milestonesG
+                    console.log("setting milestones translate")
+                    milestonesWrapperG
                         .transition()
                             .duration(500)
                             .attr("transform", `translate(${xOffset},0)`);
 
                     currentXOffset = xOffset;
+                }else{
+                    milestonesWrapperG
+                        .attr("transform", `translate(${xOffset},0)`);
                 }
+
+                contentsG.select("rect.milestones-bar-bg")
+                    .attr("width", contentsWidth)
+                    .attr("height", contentsHeight)
+
+                milestonesG.attr("transform", `translate(0,${phaseLabelsHeight})`);
+                    
+                
+                phaseLabelsG.select("rect.phase-labels-bg")
+                    .attr("width", contentsWidth)
+                    .attr("height", phaseLabelsHeight)
+                milestonesG.select("rect.milestones-bg")
+                    .attr("width", contentsWidth)
+                    .attr("height", milestonesHeight)
+                
+            
+                //phase labels
+                phaseLabelsG.selectAll("text").data(datePhasesData, d => d.label)
+                    .join("text")
+                        .attr("x", d => d.x)
+                        .attr("y", phaseLabelsHeight/2)
+                        .attr("text-anchor", d => d.textAnchor)
+                        .attr("dominant-baseline", "central")
+                        .attr("stroke", "white")
+                        .attr("fill", "white")
+                        .attr("stroke-width", 0.3)
+                        .attr("font-size", 12)
+                        .text(d => d.label)
                 
                 //SCALES
                 //normally, xScale domain is a date but here the children pass through i aswell
                 const x = (nr) => {
                     const milestone = data[nr];
+                    const { datePhase } = milestone;
                     const previousMilestonesData = data.filter((m,i) => i < nr);
-                    return d3.sum(previousMilestonesData, d => milestoneWidth(d)) + milestoneWidth(milestone)/2;
+                    
+                    const extraGaps = datePhase === "future" ? phaseGap * 2 : (datePhase === "current" ? phaseGap : 0)
+                    return d3.sum(previousMilestonesData, d => milestoneWidth(d)) + milestoneWidth(milestone)/2 + extraGaps;
                 }
 
                 //y is just the middle of the bar for all
-                const y = () => height/2;
+                const y = () => milestonesHeight/2;
 
                 //call profileCsrds abd contarcts comps, passing in a yscale that centres each one
                 contractsG
@@ -186,11 +281,15 @@ export default function milestonesBarComponent() {
     milestonesBar.contractDimns = function (value) {
         if (!arguments.length) { return width; }
         contractDimns = value;
+        //helper
+        milestoneWidth = m => m.dataType === "profile" ? profileCardDimns.width: contractDimns.width;
         return milestonesBar;
     };
     milestonesBar.profileCardDimns = function (value) {
         if (!arguments.length) { return width; }
         profileCardDimns = value;
+        //helper
+        milestoneWidth = m => m.dataType === "profile" ? profileCardDimns.width: contractDimns.width;
         return milestonesBar;
     };
     milestonesBar.styles = function (value) {

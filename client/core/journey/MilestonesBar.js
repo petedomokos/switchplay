@@ -88,7 +88,7 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
       .info(userInfo);
 
     //profiles go before contarcts of same date
-    const orderedData = sortAscending([ ...profiles, ...contracts ], d => d.date);
+    const orderedData = sortAscending([ ...profiles/*, ...contracts*/], d => d.date);
 
     d3.select(containerRef.current)
       .datum(layout(orderedData))
@@ -103,11 +103,15 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
           })
           .onSetKpiFormat(setKpiFormat)
           .onSelectKpiSet((e,kpi) => { onSelectKpiSet(kpi); }))
+
   })
 
+  console.log("kpiListH", kpiListHeight)
   return (
     <div className={classes.root}>
-        <svg className={classes.svg} ref={containerRef} width="100%" height={kpiListHeight}></svg>
+        <div style={{background:"black" }}>
+          <svg className={classes.svg} ref={containerRef} width="100%" height={kpiListHeight}></svg>
+        </div>
         <div className={classes.ctrls}>
           <IconButton className={classes.iconBtn} onClick={milestonesBar.slideBack}
               aria-label="Home" >

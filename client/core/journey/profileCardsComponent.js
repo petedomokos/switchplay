@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS } from "./constants";
+import { DIMNS, grey10 } from "./constants";
 import dragEnhancements from './enhancedDragHandler';
 // import menuComponent from './menuComponent';
 import profileInfoComponent from './profileInfoComponent';
@@ -118,7 +118,7 @@ export default function profileCardsComponent() {
                             .attr("class", "bg")
                             .attr("rx", 3)
                             .attr("ry", 3)
-                            .attr("fill", "orange");
+                            .attr("fill", d.isCurrent ? grey10(2) :"orange");
 
                     contentsG.append("g").attr("class", "info")
                     contentsG.append("g").attr("class", "kpis")

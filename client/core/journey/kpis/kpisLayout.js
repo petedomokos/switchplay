@@ -157,15 +157,12 @@ export default function kpisLayout(){
                 format:formatIsActual ? "actual" : "completion"
             }
 
-            const barData = formatIsActual ? [targetDatum, expectedDatum, currentDatum, prevDatum] : [expectedDatum, currentDatum];
+            const barData = kpi.isCurrent ? [currentDatum] :(formatIsActual ? [targetDatum, expectedDatum, currentDatum, prevDatum] : [expectedDatum, currentDatum]);
             barData.start = start;
             barData.end = end;
             
-            const numbersData = formatIsActual ? 
-                [ 
-                    { key: "current-actual", value: current?.value, colour:colours.current } 
-                ]
-                :
+            const currentActualNumberDatum = { key: "current-actual", value: current?.value, colour:colours.current }
+            const numbersData = kpi.isCurrent || formatIsActual ? currentActualNumberDatum :
                 [
                     { 
                         key: "current-completion", 
@@ -174,10 +171,10 @@ export default function kpisLayout(){
                         targetValue:target.value,
                         colour:isOnTrack ? colours.current : "red",
                     },
-                    { key: "current-actual", value: `${current?.value}`, colour:colours.current }
+                    currentActualNumberDatum
                 ]
 
-            if(withDeficitBar && current?.value < expectedCurrent.value){
+            if(withDeficitBar && !kpi.isCurrent && current?.value < expectedCurrent.value){
                 barData.push({ key:"deficit", from:current?.value, to:expectedCurrent.value, fill:"red" })
             }
 
@@ -187,112 +184,122 @@ export default function kpisLayout(){
                 value:{ fill:"white", stroke: grey10(7)}
             }
             let tooltipsData = [];
-            
-            if(formatIsActual){
-                if(previous){
-                    tooltipsData.push({ 
-                        ...previous,
-                        key: "previous",
-                        title:"Previous",
-                        shortTitle:"Prev",
-                        desc: "...",
-                        location:"above",
-                        row:1, // very top
-                        labelPos:"below",
-                        styles:tooltipStyles
-                    });
-                }
-                /*if(!isFuture){
-                    //todo - finish all this...its a past kpi - just show the achieved datapoint
-                    //but also show target
-                    tooltipsData.push({ 
-                        key: "achieved", 
-                        title:"Achieved",
-                        shortTitle:"Ach",
-                        ...achieved,
-                        location:"above",
-                        row:0, // just above bar
-                        styles:tooltipStyles
-                        
-                    })
-                }else{*/
-                    //its a future kpi
-                    tooltipsData.push(
-                        { 
-                            ...current,
-                            key: "current", 
-                            title:"Current",
-                            shortTitle:"Curr",
-                            location:"above",
-                            row:0, // just above bar
-                            styles:tooltipStyles
-                            
-                        },
-                        { 
-                            ...target,
-                            key: "target",
-                            title: "Target",
-                            shortTitle:"Targ",
-                            desc: "...",
-                            location:"above",
-                            row:1, // very top,
-                            styles:tooltipStyles
-                        }
-                    );
-                    if(isActive){
-                        tooltipsData.push({
-                            ...expectedCurrent,
-                            previousValue:previous.value,
-                            targetValue:target.value,
-                            key: "expected",
-                            title:"Expected",
-                            shortTitle:"Exp",
-                            desc: "...",
-                            location:"below",
-                            row:0, // just below bar
-                            styles:tooltipStyles
-                        });
-                    }
-                //}
-                
-            }else{
+            if(kpi.isCurrent){
                 tooltipsData.push({
                     ...current,
                     key: "current", 
                     title:"Current",
                     shortTitle:"Curr",
-                    desc: "...",
-                    format:'pc',
-                    previousValue:previous.value,
-                    targetValue:target.value,
-                    actualValue:current.value,
-                    //override value with pc
-                    //value: pcCompletion(current.value),
-                    pcValue: _pcCompletionValue,
-                    //units:"%",
                     location:"above",
-                    row:0, // just above bar,
+                    row:0, // just above bar
                     styles:tooltipStyles
-                });
-                if(isActive){
-                    tooltipsData.push({ 
-                        ...expectedCurrent,
-                        key: "expected",
-                        title:"Expected",
-                        shortTitle:"Exp",
+                        
+                })
+            } else {
+                if(formatIsActual){
+                    if(previous){
+                        tooltipsData.push({ 
+                            ...previous,
+                            key: "previous",
+                            title:"Previous",
+                            shortTitle:"Prev",
+                            desc: "...",
+                            location:"above",
+                            row:1, // very top
+                            labelPos:"below",
+                            styles:tooltipStyles
+                        });
+                    }
+                    /*if(!isFuture){
+                        //todo - finish all this...its a past kpi - just show the achieved datapoint
+                        //but also show target
+                        tooltipsData.push({ 
+                            key: "achieved", 
+                            title:"Achieved",
+                            shortTitle:"Ach",
+                            ...achieved,
+                            location:"above",
+                            row:0, // just above bar
+                            styles:tooltipStyles
+                            
+                        })
+                    }else{*/
+                        //its a future kpi
+                        tooltipsData.push(
+                            { 
+                                ...current,
+                                key: "current", 
+                                title:"Current",
+                                shortTitle:"Curr",
+                                location:"above",
+                                row:0, // just above bar
+                                styles:tooltipStyles
+                                
+                            },
+                            { 
+                                ...target,
+                                key: "target",
+                                title: "Target",
+                                shortTitle:"Targ",
+                                desc: "...",
+                                location:"above",
+                                row:1, // very top,
+                                styles:tooltipStyles
+                            }
+                        );
+                        if(isActive){
+                            tooltipsData.push({
+                                ...expectedCurrent,
+                                previousValue:previous.value,
+                                targetValue:target.value,
+                                key: "expected",
+                                title:"Expected",
+                                shortTitle:"Exp",
+                                desc: "...",
+                                location:"below",
+                                row:0, // just below bar
+                                styles:tooltipStyles
+                            });
+                        }
+                }else{
+                    tooltipsData.push({
+                        ...current,
+                        key: "current", 
+                        title:"Current",
+                        shortTitle:"Curr",
                         desc: "...",
-                        format:"pc",
+                        format:'pc',
                         previousValue:previous.value,
                         targetValue:target.value,
-                        actualValue:expectedCurrent.value,
+                        actualValue:current.value,
                         //override value with pc
-                        // value: pcCompletion(expectedCurrent.value),
-                        pcValue: _pcCompletionExpectedValue,
+                        //value: pcCompletion(current.value),
+                        pcValue: _pcCompletionValue,
                         //units:"%",
-                        location:"below",
-                        row:0, // very top
+                        location:"above",
+                        row:0, // just above bar,
                         styles:tooltipStyles
                     });
+                    if(isActive){
+                        tooltipsData.push({ 
+                            ...expectedCurrent,
+                            key: "expected",
+                            title:"Expected",
+                            shortTitle:"Exp",
+                            desc: "...",
+                            format:"pc",
+                            previousValue:previous.value,
+                            targetValue:target.value,
+                            actualValue:expectedCurrent.value,
+                            //override value with pc
+                            // value: pcCompletion(expectedCurrent.value),
+                            pcValue: _pcCompletionExpectedValue,
+                            //units:"%",
+                            location:"below",
+                            row:0, // very top
+                            styles:tooltipStyles
+                        });
+                    }
                 }
             }
 

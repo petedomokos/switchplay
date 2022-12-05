@@ -13,7 +13,7 @@ import Form from "./form/Form";
 import ImportMeasures from './ImportMeasures';
 import MilestonesBar from './MilestonesBar';
 import KpiView from './KpiView';
-import { hydrateJourneyData } from "./hydrate";
+import { hydrateJourneyData, createCurrentProfile } from "./hydrate";
 import { DIMNS, FONTSIZES, grey10 } from './constants';
 
 const mockMeasures = [
@@ -147,6 +147,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
   const hydratedData = hydrateJourneyData(data, userKpis, datasets);
   //console.log("hydratedData", hydratedData)
   const { _id, userId, name, contracts, profiles, aims, goals, links, measures } = hydratedData;
+  const currentProfile = createCurrentProfile(userKpis);
   const [journey, setJourney] = useState(null);
   const [channels, setChannels] = useState(initChannels);
   const [withCompletionPaths, setWithCompletionPath] = useState(false);
@@ -574,7 +575,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
         <div className={`${classes.overlay} overlay`} ref={overlayRef}>
           {displayedBar === "milestones" &&
             <MilestonesBar 
-              profiles={profiles} 
+              profiles={[...profiles, currentProfile]} 
               contracts={contracts} 
               datasets={datasets}
               userInfo={userInfo} 
