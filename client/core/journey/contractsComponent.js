@@ -55,9 +55,7 @@ export default function contractsComponent() {
         const { transitionEnter=true, transitionUpdate=true, log } = options;
         // expression elements
         selection.each(function (data) {
-            if(log){
-                //console.log("contracts update", data)
-            }
+            console.log("contracts update", data);
             updateDimns();
             //console.log("contracts update", data)
             //plan - dont update dom twice for name form

@@ -116,7 +116,7 @@ export default function barComponent() {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
 
         const allData = selection.data();
-        console.log("Bar data", allData)
+        //console.log("Bar data", allData)
 
         updateDimns(selection.data());
         // expression elements

@@ -80,7 +80,7 @@ export default function milestonesBarComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            // console.log("milestones bar update", data)
+            //console.log("milestones bar update", data)
             containerG = d3.select(this);
             //why not empty>??
             if(containerG.select("g").empty()){

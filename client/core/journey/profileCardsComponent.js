@@ -81,9 +81,7 @@ export default function profileCardsComponent() {
         // expression elements
         selection.each(function (data) {
             updateDimns();
-            if(log){
-                //console.log("profileCards update", data)
-            }
+            console.log("profileCards update", data)
             //console.log("profileCards update")
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag

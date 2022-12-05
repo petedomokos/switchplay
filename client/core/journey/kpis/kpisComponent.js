@@ -106,7 +106,7 @@ export default function kpisComponent() {
         selection.each(function (data,i) {
             prevData = data;
             const { kpisData } = data;
-            console.log("kpis",this.parentNode.parentNode, data)
+            //console.log("kpis",this.parentNode.parentNode, data)
             const ctrlsData = withCtrls ? data.ctrlsData : [];
 
             const nrOfCtrlsButtons = ctrlsData?.length;
