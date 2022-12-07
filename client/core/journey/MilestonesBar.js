@@ -55,12 +55,6 @@ const scaleDimn = (dimn, k) => dimn * k;
 const scaleDimns = (dimns, k) => ({
     width:dimns.width * k,
     height:dimns.height * k,
-    margin:{
-        left:dimns.margin.left * k,
-        right:dimns.margin.left * k,
-        top:dimns.margin.left * k,
-        bottom:dimns.margin.left * k
-    }
 })
 
 const layout = milestonesLayout();

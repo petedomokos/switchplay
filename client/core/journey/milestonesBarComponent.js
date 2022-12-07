@@ -102,7 +102,7 @@ export default function milestonesBarComponent() {
     const profiles = profileCardsComponent()
         .onCtrlClick((e,d) => { onSetKpiFormat(d.key) });
 
-    let sliderPosition = 0;
+    let sliderPosition;
     let slideBack;
     let slideForward;
     let slideTo;
@@ -114,7 +114,7 @@ export default function milestonesBarComponent() {
 
     //helper
     //data is passed in here, so we can call this function with other data too eg with placeholder
-    const calcMilestoneX = (data, phaseGap) => (nr) => {
+    const calcMilestoneX = data => nr => {
         const milestone = data.find(m => m.nr === nr);
         const { datePhase, i } = milestone;
         const previousMilestonesData = data.filter(m => m.nr < nr);
@@ -122,19 +122,47 @@ export default function milestonesBarComponent() {
         return endHitSpace + (i * hitSpace) + d3.sum(previousMilestonesData, d => d.width) + milestone.width/2 + extraGaps;
     }
 
+    const calcSliderOffsetX = positionedData => sliderPosition => {
+        if(Number.isInteger(sliderPosition)){
+            return contentsWidth/2 - positionedData.find(m => m.nr === sliderPosition)?.x || 0;
+        }
+        //it halfway between
+        const prev = positionedData.find(m => m.nr === Math.floor(sliderPosition));
+        const next = positionedData.find(m => m.nr === Math.ceil(sliderPosition));
+        if(prev && next){
+            let extraGaps;
+            if(prev.isPast && next.isPast){
+                    extraGaps = 0;
+            }else if(prev.isPast && next.isCurrent){
+                extraGaps = phaseGap/2;
+            }else if(prev.isCurrent){
+                extraGaps = phaseGap * 3/2;
+            }else{
+                //both future
+                extraGaps = 2 * phaseGap
+            }
+            return contentsWidth/2 - prev.x - prev.width/2 - hitSpace/2 - extraGaps;
+        }
+        if(prev){
+            //show at end - prev.x may contain the extraGaps already
+            //prev must be at least current because there is no next
+            let extraGaps;
+            if(prev.isFuture){
+                //prev.x has the gaps
+                    extraGaps = 0;
+            }else {
+                //prev is current...prev.x has one of the gaps
+                extraGaps = phaseGap;
+            }
+            return contentsWidth/2 - prev.x - prev.width/2 - extraGaps - endHitSpace/2;
+        }
+        //show at start
+        return contentsWidth/2 - endHitSpace/2;
+    }
+
     const transformTransition = { update: { duration: 1000 } };
 
     function milestonesBar(selection, options={}) {
-
-        //todo 
-        //make kpiHeight higher for milestones bar to allow easy adjusting
-        //- horizontal scrollimg in div - not working for some reason -> 
-           //soln is instead to use d3 drag - take up teh whole overlay size with teh svg, and put a d3 drag on teh svg
-           //or on a rect above and below the milestoneBar. when this is dragged, 
-           //simply update the transform x positon of the milestoneG.
-           //OR... JUST ADD TWO ARROWS AT BOTTOM OR SIDES < AND >, AND MOVE IT ALONG BY 1 milestone EACH PRESS
-        //- kpi bars bug - 2nd card doesnt seem to have all the bars
-
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (_data) {
@@ -180,13 +208,30 @@ export default function milestonesBarComponent() {
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
             function update(data){
                 //console.log("milestones bar update", data);
+
                 //milestone positioning
-                const calcX = calcMilestoneX(data, phaseGap);
+                const calcX = calcMilestoneX(data);
                 const positionedData = data.map(m => ({ 
                     ...m, 
                     x: calcX(m.nr), 
                     y: milestonesHeight/2
                 }));
+
+                const calcOffsetX = calcSliderOffsetX(positionedData)
+                const initOffset = calcOffsetX(0);
+                const next = calcOffsetX(-0.5);
+                console.log("init next", initOffset, next)
+
+                slideTo = function(nr, onEnd=() => {}){
+                    if(sliderPosition === nr) { return; }
+
+                    milestonesWrapperG.call(updateTransform, {
+                        x: () => calcOffsetX(nr),
+                        y: () => 0,
+                        transition:{ duration:500 },
+                        cb:onEnd
+                    });
+                }
 
                 //console.log("positionedData", positionedData)
 
@@ -199,55 +244,8 @@ export default function milestonesBarComponent() {
                         
                 //POSITIONING
                 //offsetting due to slide
-                let xOffset;
-                if(Number.isInteger(sliderPosition)){
-                    xOffset = contentsWidth/2 - positionedData.find(m => m.nr === sliderPosition)?.x || 0;
-                }else{
-                    //it halfway between
-                    const prev = positionedData.find(m => m.nr === Math.floor(sliderPosition));
-                    const next = positionedData.find(m => m.nr === Math.ceil(sliderPosition));
-                    if(prev && next){
-                        let extraGaps;
-                        if(prev.isPast && next.isPast){
-                             extraGaps = 0;
-                        }else if(prev.isPast && next.isCurrent){
-                            extraGaps = phaseGap/2;
-                        }else if(prev.isCurrent){
-                            extraGaps = phaseGap * 3/2;
-                        }else{
-                            //both future
-                            extraGaps = 2 * phaseGap
-                        }
-                        xOffset = contentsWidth/2 - prev.x - prev.width/2 - hitSpace/2 - extraGaps;
-                    }else if(prev){
-                        //show at end - prev.x may contain the extraGaps already
-                        //prev must be at least current because there is no next
-                        let extraGaps;
-                        if(prev.isFuture){
-                            //prev.x has the gaps
-                             extraGaps = 0;
-                        }else {
-                            //prev is current...prev.x has one of the gaps
-                            extraGaps = phaseGap;
-                        }
-                        xOffset = contentsWidth/2 - prev.x - prev.width/2 - extraGaps - endHitSpace/2;
-
-                    }else{
-                        //show at start
-                        xOffset = contentsWidth/2 - endHitSpace/2;
-                    }
-                }
-                if(xOffset !== currentXOffset){
-                    milestonesWrapperG
-                        .transition()
-                            .duration(500)
-                            .attr("transform", `translate(${xOffset},0)`);
-
-                    currentXOffset = xOffset;
-                }else{
-                    milestonesWrapperG
-                        .attr("transform", `translate(${xOffset},0)`);
-                }
+                slideTo(0);
+                sliderPosition = 0;
 
                 const prevCard = x => d3.greatest(positionedData.filter(m => m.x < x), m => m.x);
                 const nextCard = x => d3.least(positionedData.filter(m => m.x > x), m => m.x);
@@ -263,7 +261,29 @@ export default function milestonesBarComponent() {
                     //slider position
                     //@todo - only slide if the space is not on screen, and only side a little so its on screen
                     if(prevCard && nextCard){
-                        slideTo(prevCard.nr + 0.5);
+                        const tempSliderPosition = prevCard.nr + 0.5;
+                        //we dont set sliderPosition in state because this is a temp change 
+                        //- we will go back to the position that is in state after if its cancelled
+                        slideTo(tempSliderPosition, () => {
+                            //todo next
+                            //slide every profile itself, the ones before it to the left,
+                            //and the ones after to the right
+                            //do this but adding or subtract from there current x values
+
+                            //then make placeholder appear
+
+                            milestonesG.select("g.profiles").attr("display", "none")
+                        });
+                        /*
+                        const tempOffsetX = calcOffsetX(tempSlidePosition);
+                        console.log("tempX", tempOffsetX, milestonesWrapperG.node())
+                        milestonesWrapperG
+                            .transition()
+                                .duration(500)
+                                .attr("transform", `translate(${tempOffsetX},0)`);
+                                //on end, slide both sides out to make space*/
+
+                        //slideTo(prevCard.nr + 0.5);
                     }else if(prevCard){
                         slideToAfterEnd();
                         //slideTo(d3.min(data, d => d.nr) - 0.5);
@@ -273,6 +293,9 @@ export default function milestonesBarComponent() {
                     }
 
                     //remove helper functions and create another for extraGaps calc
+                    //can remove sliderPositon from state as it is passed through instead
+                    //unless we use it to determine when we need to slide, in which case
+                    //we dont need to store currentOffsetX
 
                     //apply transition
 
@@ -315,24 +338,24 @@ export default function milestonesBarComponent() {
                         .call(bgDrag)
                 
             
-        //phase labels
-        const lastPastCard = d3.greatest(positionedData.filter(m => m.datePhase === "past"), d => d.x);
-        const firstFutureCard = d3.least(positionedData.filter(m => m.datePhase === "future"), d => d.x);
-        console.log("lastPastcard", lastPastCard)
-        const currentCard = positionedData.find(m => m.datePhase === "current")
-        //note - will also be extra space for gap 'pastCurrentGap' and 'currentFutureGap'
-        const endOfLastPastCard = currentCard.x - currentCard.width/2 - phaseGap - hitSpace - labelMarginHoz;
-        // lastPastCard.x + lastPastCard.width/2 - labelMarginHoz;
-        console.log("end", endOfLastPastCard)
-        const middleOfCurrentCard = currentCard.x;
-        console.log("mid", middleOfCurrentCard)
-        const startOfFirstFutureCard = currentCard.x + currentCard.width/2 + phaseGap + hitSpace + labelMarginHoz;
-        
-        datePhasesData = [
-            { label:"Past", x:endOfLastPastCard, textAnchor:"end" },
-            { label: "Current", x:middleOfCurrentCard, textAnchor:"middle" },
-            { label: "Future", x:startOfFirstFutureCard, textAnchor:"start" }
-        ]
+                //phase labels
+                const lastPastCard = d3.greatest(positionedData.filter(m => m.datePhase === "past"), d => d.x);
+                const firstFutureCard = d3.least(positionedData.filter(m => m.datePhase === "future"), d => d.x);
+                console.log("lastPastcard", lastPastCard)
+                const currentCard = positionedData.find(m => m.datePhase === "current")
+                //note - will also be extra space for gap 'pastCurrentGap' and 'currentFutureGap'
+                const endOfLastPastCard = currentCard.x - currentCard.width/2 - phaseGap - hitSpace - labelMarginHoz;
+                // lastPastCard.x + lastPastCard.width/2 - labelMarginHoz;
+                console.log("end", endOfLastPastCard)
+                const middleOfCurrentCard = currentCard.x;
+                console.log("mid", middleOfCurrentCard)
+                const startOfFirstFutureCard = currentCard.x + currentCard.width/2 + phaseGap + hitSpace + labelMarginHoz;
+                
+                datePhasesData = [
+                    { label:"Past", x:endOfLastPastCard, textAnchor:"end" },
+                    { label: "Current", x:middleOfCurrentCard, textAnchor:"middle" },
+                    { label: "Future", x:startOfFirstFutureCard, textAnchor:"start" }
+                ]
                 phaseLabelsG.selectAll("text").data(datePhasesData, d => d.label)
                     .join("text")
                         .attr("x", d => d.x)
@@ -369,6 +392,25 @@ export default function milestonesBarComponent() {
                         .transformTransition(transformTransition));
 
                 //functions
+                function updateTransform(selection, options={}){
+                    console.log("uT", selection)
+                    const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
+                    selection.each(function(d){
+                        if(transition){
+                            d3.select(this)
+                                .transition()
+                                .duration(200)
+                                    .attr("transform", "translate("+x(d) +"," +y(d) +")")
+                                    .on("end", cb);
+                        }else{
+                            d3.select(this)
+                                .attr("transform", "translate("+x(d) +"," +y(d) +")");
+                            
+                            cb.call(this);
+                        }
+                    })
+                }
+
                 slideBack = function(){
                     if(sliderPosition > d3.min(data, d => d.nr)){
                         sliderPosition -= 1;
@@ -382,11 +424,12 @@ export default function milestonesBarComponent() {
                         update(data);
                     }
                 }
-
-                slideTo = function(nr){
+                /*
+                slideTo = function(nr, onEnd=() => {}){
                     sliderPosition = nr;
                     update(data);
                 }
+                */
                 slideToBeforeStart = function(){
                     slideTo(d3.min(data, d => d.nr) - 0.5);
                 }

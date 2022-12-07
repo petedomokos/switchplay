@@ -118,12 +118,10 @@ export const DIMNS = {
         profile:{
             width:300,
             height:450,
-            margin:{ top:0, bottom:0, left:5, right: 5}
         },
         contract:{
             width:200,
             height:250,
-            margin:{ top:0, bottom:0, left:5, right: 5}
         }
     },
     ctrls:{
