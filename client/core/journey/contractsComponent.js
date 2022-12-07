@@ -23,6 +23,8 @@ export default function contractsComponent() {
 
     let fontSizes = FONTSIZES.contract(1);
 
+    let transformTransition = { enter: null, update: null };
+
     let xScale = x => 0;
     let xKey = "date";
     let yScale = x => 0;
@@ -55,7 +57,7 @@ export default function contractsComponent() {
         const { transitionEnter=true, transitionUpdate=true, log } = options;
         // expression elements
         selection.each(function (data) {
-            console.log("contracts update", data);
+            //console.log("contracts update", data);
             updateDimns();
             //console.log("contracts update", data)
             //plan - dont update dom twice for name form
@@ -339,6 +341,14 @@ export default function contractsComponent() {
     contracts.longpressed = function (value) {
         if (!arguments.length) { return longpressed; }
         longpressed = value;
+        return contracts;
+    };
+    contracts.transformTransition = function (value) {
+        if (!arguments.length) { return transformTransition; }
+        transformTransition = { 
+            enter:value.enter || transformTransition.enter,
+            update:value.update || transformTransition.update
+        }
         return contracts;
     };
     contracts.yScale = function (value) {

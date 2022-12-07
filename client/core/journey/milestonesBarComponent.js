@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { DIMNS, FONTSIZES } from "./constants";
 import contractsComponent from './contractsComponent';
 import profileCardsComponent from './profileCardsComponent';
+import dragEnhancements from './enhancedDragHandler';
 /*
 
 */
@@ -9,56 +10,43 @@ export default function milestonesBarComponent() {
     //API SETTINGS
     // dimensions
     let width;
-    let height = DIMNS.milestonesBar.list.height
-    let margin = DIMNS.milestonesBar.list.margin;
+    let minWidth = 0;
+    let height = DIMNS.milestonesBar.height
+    let margin = DIMNS.milestonesBar.margin;
     let contentsWidth;
+    let milestonesWrapperWidth;
     let contentsHeight;
     let phaseLabelsHeight;
     let milestonesHeight;
     //api to determine widths of milestones based on type
-    let milestoneWidth = m => 100;
     let profileCardDimns = DIMNS.milestonesBar.profile;
     let contractDimns = DIMNS.milestonesBar.contract;
+    let milestoneDimns = m => m.dataType === "profile" || m.dataType === "placeholder" ? profileCardDimns: contractDimns;
 
     let phaseGap;
-
-    //special points
-    let endOfLastPastCard;
-    let middleOfCurrentCard;
-    let startOfFirstFutureCard;
-
+    let hitSpace;
+    let endHitSpace;
+    let labelMarginHoz;
 
     function updateDimns(data){
-        phaseGap = DIMNS.milestonesBar.PHASE_GAP_MULTIPLE * profileCardDimns.width;
+        //base other spacings on the profile card width to keep proportions reasonable
+        phaseGap = 0.075 * profileCardDimns.width;
+        hitSpace = d3.max([40,profileCardDimns.width * 0.1]);
+        endHitSpace = profileCardDimns.width;
+        labelMarginHoz = profileCardDimns.width * 0.025;
         //first, calc width based on number of milestones and their widths
-        contentsWidth = d3.sum(data, m => milestoneWidth(m)) + 2 * phaseGap;
-        width = contentsWidth + margin.left + margin.right;
+        //contentsWidth = d3.max([minWidth - margin.left - margin.right, d3.sum(data, m => m.width) + 2 * phaseGap ]);
+        //contentsWidth = 2 * endHitSpace + d3.sum(data, m => m.width) + 2 * phaseGap;
+        contentsWidth = width - margin.left - margin.right;
+        milestonesWrapperWidth = 2 * endHitSpace + (data.length - 1) * hitSpace + d3.sum(data, m => m.width) + 2 * phaseGap;
         //height is passed in so calc contentsHeight in the usual way
-        /*
+        //milestonesHeight = profileCardDimns.height; //this is the largest type of milestone
+        //phaseLabelsHeight = d3.min([20, milestonesHeight * 0.1]);
+        //contentsHeight = milestonesHeight + phaseLabelsHeight;
         contentsHeight = height - margin.top - margin.bottom;
-        phaseLabelsHeight = d3.min([20, contentsHeight * 0.1]);
-        console.log("phaseh", phaseLabelsHeight)
-        milestonesHeight = contentsHeight - phaseLabelsHeight;
-        */
-        milestonesHeight = profileCardDimns.height; //this is the largest type of milestone
-        phaseLabelsHeight = d3.min([20, milestonesHeight * 0.1]);
-        contentsHeight = milestonesHeight + phaseLabelsHeight;
-        height = contentsHeight + margin.top + margin.bottom;
+        milestonesHeight = profileCardDimns.height;
+        phaseLabelsHeight = contentsHeight - milestonesHeight;
 
-        //special points
-        const pastCards = data.filter(m => m.datePhase === "past");
-        const currentCard = data.find(m => m.datePhase === "current")
-        //note - will also be extra space for gap 'pastCurrentGap' and 'currentFutureGap'
-        const labelMarginHoz = profileCardDimns.width * 0.1;
-        endOfLastPastCard = d3.sum(pastCards, m => milestoneWidth(m)) - labelMarginHoz;
-        middleOfCurrentCard = d3.sum(pastCards, m => milestoneWidth(m)) + phaseGap + milestoneWidth(currentCard)/2;
-        startOfFirstFutureCard = d3.sum([...pastCards, currentCard], m => milestoneWidth(m)) /* +margin*/ + 2 * phaseGap + labelMarginHoz;
-        
-        datePhasesData = [
-            { label:"Past", x:endOfLastPastCard, textAnchor:"end" },
-            { label: "Current", x:middleOfCurrentCard, textAnchor:"middle" },
-            { label: "Future", x:startOfFirstFutureCard, textAnchor:"start" }
-        ]
     }
 
     let fontSizes = {
@@ -89,6 +77,17 @@ export default function milestonesBarComponent() {
     let kpiFormat;
     let onSetKpiFormat = function(){};
     let onSelectKpiSet = function(){};
+    let onToggleSliderEnabled = function(){};
+
+    let onCreateMilestone = () => {};
+
+    let enhancedBgDrag = dragEnhancements();
+
+    let onClick = function(){};
+    let onDblClick = function(){};
+    let onLongpress = function(){};
+    let onMouseover = function(){};
+    let onMouseout = function(){};
 
     let containerG;
     let contentsG;
@@ -103,12 +102,27 @@ export default function milestonesBarComponent() {
     const profiles = profileCardsComponent()
         .onCtrlClick((e,d) => { onSetKpiFormat(d.key) });
 
-    let slidePosition = 0;
+    let sliderPosition = 0;
     let slideBack;
     let slideForward;
+    let slideTo;
+    let slideToBeforeStart;
+    let slideToAfterEnd;
     let currentXOffset = 0;
 
     let datePhasesData;
+
+    //helper
+    //data is passed in here, so we can call this function with other data too eg with placeholder
+    const calcMilestoneX = (data, phaseGap) => (nr) => {
+        const milestone = data.find(m => m.nr === nr);
+        const { datePhase, i } = milestone;
+        const previousMilestonesData = data.filter(m => m.nr < nr);
+        const extraGaps = datePhase === "future" ? phaseGap * 2 : (datePhase === "current" ? phaseGap : 0)
+        return endHitSpace + (i * hitSpace) + d3.sum(previousMilestonesData, d => d.width) + milestone.width/2 + extraGaps;
+    }
+
+    const transformTransition = { update: { duration: 1000 } };
 
     function milestonesBar(selection, options={}) {
 
@@ -123,16 +137,16 @@ export default function milestonesBarComponent() {
 
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
-        selection.each(function (data) {
-            updateDimns(data);
-            console.log("milestones bar update", data);
+        selection.each(function (_data) {
             containerG = d3.select(this);
-            //why not empty>??
+            //dimns is needed for init too
+            const dataWithDimns = _data.map(m => ({ ...m, ...milestoneDimns(m) }));
+            updateDimns(dataWithDimns);
             if(containerG.select("g").empty()){
                 init();
             }
 
-            update();
+            update(dataWithDimns);
             function init(){
                 contentsG = containerG.append("g").attr("class", "milestone-bar-contents");
                 contentsG.append("rect")
@@ -143,27 +157,87 @@ export default function milestonesBarComponent() {
                     .attr("transform", `translate(0,0)`);
 
                 phaseLabelsG = milestonesWrapperG.append("g").attr("class", "phase-labels")
-                milestonesG = milestonesWrapperG.append("g").attr("class", "milestones")
+                milestonesG = milestonesWrapperG
+                    .append("g")
+                    .attr("class", "milestones")
+                    .style("cursor", "pointer")
 
-                phaseLabelsG.append("rect")
-                    .attr("class", "phase-labels-bg")
-                    .attr("fill", "black")
-                    .attr("stroke", "black");
                 milestonesG.append("rect")
                     .attr("class", "milestones-bg")
-                    .attr("fill", "none")
-                    .attr("stroke", "pink");
+                    .call(updateRectDimns, { 
+                        width: () => milestonesWrapperWidth, 
+                        height:() => milestonesHeight,
+                        transition:transformTransition
+                    })
+                    .attr("fill", "pink")
+                    .attr("stroke", "pink")
+                    .attr("opacity", 0.7);
 
                 contractsG = milestonesG.append("g").attr("class", "contracts");
                 profilesG = milestonesG.append("g").attr("class", "profiles");
             }
 
-            function update(){
-                contentsG.attr("transform", `translate(${margin.left},${margin.top})`);
-                const xOffset = -d3.sum(data.filter(m => m.nr < slidePosition), m => milestoneWidth(m));
+            //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
+            function update(data){
+                //console.log("milestones bar update", data);
+                //milestone positioning
+                const calcX = calcMilestoneX(data, phaseGap);
+                const positionedData = data.map(m => ({ 
+                    ...m, 
+                    x: calcX(m.nr), 
+                    y: milestonesHeight/2
+                }));
 
+                //console.log("positionedData", positionedData)
+
+                contentsG
+                    .attr("transform", `translate(${margin.left},${margin.top})`)
+                    .select("rect.milestones-bar-bg")
+                        .attr("width", contentsWidth)
+                        .attr("height", contentsHeight);
+
+                        
+                //POSITIONING
+                //offsetting due to slide
+                let xOffset;
+                if(Number.isInteger(sliderPosition)){
+                    xOffset = contentsWidth/2 - positionedData.find(m => m.nr === sliderPosition)?.x || 0;
+                }else{
+                    //it halfway between
+                    const prev = positionedData.find(m => m.nr === Math.floor(sliderPosition));
+                    const next = positionedData.find(m => m.nr === Math.ceil(sliderPosition));
+                    if(prev && next){
+                        let extraGaps;
+                        if(prev.isPast && next.isPast){
+                             extraGaps = 0;
+                        }else if(prev.isPast && next.isCurrent){
+                            extraGaps = phaseGap/2;
+                        }else if(prev.isCurrent){
+                            extraGaps = phaseGap * 3/2;
+                        }else{
+                            //both future
+                            extraGaps = 2 * phaseGap
+                        }
+                        xOffset = contentsWidth/2 - prev.x - prev.width/2 - hitSpace/2 - extraGaps;
+                    }else if(prev){
+                        //show at end - prev.x may contain the extraGaps already
+                        //prev must be at least current because there is no next
+                        let extraGaps;
+                        if(prev.isFuture){
+                            //prev.x has the gaps
+                             extraGaps = 0;
+                        }else {
+                            //prev is current...prev.x has one of the gaps
+                            extraGaps = phaseGap;
+                        }
+                        xOffset = contentsWidth/2 - prev.x - prev.width/2 - extraGaps - endHitSpace/2;
+
+                    }else{
+                        //show at start
+                        xOffset = contentsWidth/2 - endHitSpace/2;
+                    }
+                }
                 if(xOffset !== currentXOffset){
-                    console.log("setting milestones translate")
                     milestonesWrapperG
                         .transition()
                             .duration(500)
@@ -175,22 +249,90 @@ export default function milestonesBarComponent() {
                         .attr("transform", `translate(${xOffset},0)`);
                 }
 
-                contentsG.select("rect.milestones-bar-bg")
-                    .attr("width", contentsWidth)
-                    .attr("height", contentsHeight)
+                const prevCard = x => d3.greatest(positionedData.filter(m => m.x < x), m => m.x);
+                const nextCard = x => d3.least(positionedData.filter(m => m.x > x), m => m.x);
 
-                milestonesG.attr("transform", `translate(0,${phaseLabelsHeight})`);
-                    
+                enhancedBgDrag.onLongpressStart(e => {
+                    createMilestonePlaceholder(prevCard(e.x), nextCard(e.x))
+                });
+
+                let prevSliderPosition;
+                const createMilestonePlaceholder = (prevCard, nextCard) => {
+                    //store pos to go back to if cancelled
+                    prevSliderPosition = sliderPosition;
+                    //slider position
+                    //@todo - only slide if the space is not on screen, and only side a little so its on screen
+                    if(prevCard && nextCard){
+                        slideTo(prevCard.nr + 0.5);
+                    }else if(prevCard){
+                        slideToAfterEnd();
+                        //slideTo(d3.min(data, d => d.nr) - 0.5);
+                    }else{
+                        //next card but no previous
+                        slideToBeforeStart();
+                    }
+
+                    //remove helper functions and create another for extraGaps calc
+
+                    //apply transition
+
+                    //fade-in placeholder with 3 opts: Profile, Contract, Cancel
+
+                    //disable the slider
+                    //onToggleSliderEnabled();
+                }
+                const removeMilestonePlaceholder = (wasCancelled) => {
+                    //remove
+
+                    //re-enabled slider
+                    //onToggleSliderEnabled();
+
+                    //make sliderPositon equal to new profile (if it wasnt cancelled)
+
+                    //re-position if cancelled
+                    if(wasCancelled){
+                        slideTo(prevSliderPosition);
+                        prevSliderPosition = null;
+                    }
+                }
                 
-                phaseLabelsG.select("rect.phase-labels-bg")
-                    .attr("width", contentsWidth)
-                    .attr("height", phaseLabelsHeight)
-                milestonesG.select("rect.milestones-bg")
-                    .attr("width", contentsWidth)
-                    .attr("height", milestonesHeight)
+
+                const bgDrag = d3.drag()
+                    .on("start", enhancedBgDrag())
+                    .on("drag", enhancedBgDrag())
+                    .on("end", enhancedBgDrag())
+                    
+                milestonesG
+                    .attr("transform", `translate(0,${phaseLabelsHeight})`)
+                    .select("rect.milestones-bg")
+                        .call(updateRectDimns, { 
+                            width: () => milestonesWrapperWidth, 
+                            height:() => milestonesHeight,
+                            transition:transformTransition
+                        })
+                        .on("mouseover", onMouseover)
+                        .on("mouseout", onMouseout)
+                        .call(bgDrag)
                 
             
-                //phase labels
+        //phase labels
+        const lastPastCard = d3.greatest(positionedData.filter(m => m.datePhase === "past"), d => d.x);
+        const firstFutureCard = d3.least(positionedData.filter(m => m.datePhase === "future"), d => d.x);
+        console.log("lastPastcard", lastPastCard)
+        const currentCard = positionedData.find(m => m.datePhase === "current")
+        //note - will also be extra space for gap 'pastCurrentGap' and 'currentFutureGap'
+        const endOfLastPastCard = currentCard.x - currentCard.width/2 - phaseGap - hitSpace - labelMarginHoz;
+        // lastPastCard.x + lastPastCard.width/2 - labelMarginHoz;
+        console.log("end", endOfLastPastCard)
+        const middleOfCurrentCard = currentCard.x;
+        console.log("mid", middleOfCurrentCard)
+        const startOfFirstFutureCard = currentCard.x + currentCard.width/2 + phaseGap + hitSpace + labelMarginHoz;
+        
+        datePhasesData = [
+            { label:"Past", x:endOfLastPastCard, textAnchor:"end" },
+            { label: "Current", x:middleOfCurrentCard, textAnchor:"middle" },
+            { label: "Future", x:startOfFirstFutureCard, textAnchor:"start" }
+        ]
                 phaseLabelsG.selectAll("text").data(datePhasesData, d => d.label)
                     .join("text")
                         .attr("x", d => d.x)
@@ -202,64 +344,75 @@ export default function milestonesBarComponent() {
                         .attr("stroke-width", 0.3)
                         .attr("font-size", 12)
                         .text(d => d.label)
-                
-                //SCALES
-                //normally, xScale domain is a date but here the children pass through i aswell
-                const x = (nr) => {
-                    const milestone = data[nr];
-                    const { datePhase } = milestone;
-                    const previousMilestonesData = data.filter((m,i) => i < nr);
-                    
-                    const extraGaps = datePhase === "future" ? phaseGap * 2 : (datePhase === "current" ? phaseGap : 0)
-                    return d3.sum(previousMilestonesData, d => milestoneWidth(d)) + milestoneWidth(milestone)/2 + extraGaps;
-                }
-
-                //y is just the middle of the bar for all
-                const y = () => milestonesHeight/2;
 
                 //call profileCsrds abd contarcts comps, passing in a yscale that centres each one
                 contractsG
-                    .datum(data.filter(m => m.dataType === "contract"))
+                    .datum(positionedData.filter(m => m.dataType === "contract"))
                     .call(contracts
                         .width(contractDimns.width)
                         .height(contractDimns.height)
-                        .margin(contractDimns.margin)
                         .fontSizes(fontSizes.contract)
-                        .xScale(x, "nr")
-                        .yScale(y), { log:true });
+                        .transformTransition(transformTransition));
 
                 profilesG
-                    .datum(data.filter(m => m.dataType === "profile"))
+                    .datum(positionedData.filter(m => m.dataType === "profile"))
                     .call(profiles
                         .width(profileCardDimns.width)
                         .height(profileCardDimns.height)
-                        .margin(profileCardDimns.margin)
                         .fontSizes(fontSizes.profile)
                         .kpiHeight(50)
                         .editable(true)
-                        .xScale(x, "nr")
-                        .yScale(y)
                         .onClickKpi(onSelectKpiSet)
                         .onDblClickKpi((e,d) => {
-                            console.log("dbl click kpi", d)
                             onSelectKpiSet(d);
-                        }), { log:true });
+                        })
+                        .transformTransition(transformTransition));
 
                 //functions
                 slideBack = function(){
-                    if(slidePosition > 0){
-                        slidePosition -= 1;
-                        update();
+                    if(sliderPosition > d3.min(data, d => d.nr)){
+                        sliderPosition -= 1;
+                        update(data);
                     }
                 }
 
                 slideForward = function(){
-                    if(slidePosition < data.length - 1){
-                        slidePosition += 1;
-                        update();
+                    if(sliderPosition < d3.max(data, d => d.nr)){
+                        sliderPosition += 1;
+                        update(data);
                     }
                 }
 
+                slideTo = function(nr){
+                    sliderPosition = nr;
+                    update(data);
+                }
+                slideToBeforeStart = function(){
+                    slideTo(d3.min(data, d => d.nr) - 0.5);
+                }
+                slideToAfterEnd = function(){
+                    slideTo(d3.max(data, d => d.nr) + 0.5);
+                }
+            }
+
+            function updateRectDimns(selection, options={}){
+                const { width = d => d.width, height = d => d.height, transition, cb = () => {} } = options;
+                selection.each(function(d){
+                    if(transition){
+                        d3.select(this)
+                            .transition()
+                            .duration(200)
+                                .attr("width", width(d))
+                                .attr("height", height(d))
+                                .on("end", cb);
+                    }else{
+                        d3.select(this)
+                            .attr("width", width(d))
+                            .attr("height", height(d));
+                        
+                        cb.call(this);
+                    }
+                })
             }
 
         })
@@ -273,6 +426,11 @@ export default function milestonesBarComponent() {
         width = value;
         return milestonesBar;
     };
+    milestonesBar.minWidth = function (value) {
+        if (!arguments.length) { return minWidth; }
+        minWidth = value;
+        return milestonesBar;
+    };
     milestonesBar.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
@@ -282,14 +440,14 @@ export default function milestonesBarComponent() {
         if (!arguments.length) { return width; }
         contractDimns = value;
         //helper
-        milestoneWidth = m => m.dataType === "profile" ? profileCardDimns.width: contractDimns.width;
+        milestoneDimns = m => m.dataType === "profile" || m.dataType === "placeholder" ? profileCardDimns: contractDimns;
         return milestonesBar;
     };
     milestonesBar.profileCardDimns = function (value) {
         if (!arguments.length) { return width; }
         profileCardDimns = value;
         //helper
-        milestoneWidth = m => m.dataType === "profile" ? profileCardDimns.width: contractDimns.width;
+        milestoneDimns = m => m.dataType === "profile" || m.dataType === "placeholder" ? profileCardDimns: contractDimns;
         return milestonesBar;
     };
     milestonesBar.styles = function (value) {
@@ -322,16 +480,6 @@ export default function milestonesBarComponent() {
         xScale = value;
         return milestonesBar;
     };
-    milestonesBar.milestoneWidth = function (value) {
-        if (!arguments.length) { return milestoneWidth; }
-        milestoneWidth = value;
-        return milestonesBar;
-    };
-    milestonesBar.milestoneHeight = function (value) {
-        if (!arguments.length) { return milestoneHeight; }
-        milestoneHeight = value;
-        return milestonesBar;
-    };
     milestonesBar.kpiFormat = function (value) {
         if (!arguments.length) { return kpiFormat; }
         kpiFormat = value;
@@ -351,8 +499,52 @@ export default function milestonesBarComponent() {
         }
         return milestonesBar;
     };
+    milestonesBar.onCreateMilestone = function (value) {
+        if (!arguments.length) { return onCreateMilestone; }
+        if(typeof value === "function"){
+            onCreateMilestone = value;
+        }
+        return milestonesBar;
+    };
+    milestonesBar.onToggleSliderEnabled = function (value) {
+        if (!arguments.length) { return onToggleSliderEnabled; }
+        if(typeof value === "function"){
+            onToggleSliderEnabled = value;
+        }
+        return milestonesBar;
+    };
+    milestonesBar.onClick = function (value) {
+        if (!arguments.length) { return onClick; }
+        onClick = value;
+        return milestonesBar;
+    };
+    milestonesBar.onDblClick = function (value) {
+        if (!arguments.length) { return onDblClick; }
+        onDblClick = value;
+        return milestonesBar;
+    };
+    milestonesBar.onLongpress = function (value) {
+        if (!arguments.length) { return onLongpress; }
+        onLongpress = value;
+        return milestonesBar;
+    };
+    milestonesBar.onMouseover = function (value) {
+        if (!arguments.length) { return onMouseover; }
+        if(typeof value === "function"){
+            onMouseover = value;
+        }
+        return milestonesBar;
+    };
+    milestonesBar.onMouseout = function (value) {
+        if (!arguments.length) { return onMouseout; }
+        if(typeof value === "function"){
+            onMouseout = value;
+        }
+        return milestonesBar;
+    };
 
     milestonesBar.slideBack = function(){ slideBack() };
     milestonesBar.slideForward = function(){ slideForward() };
+    milestonesBar.slideTo = function(){ slideTo() };
     return milestonesBar;
 }

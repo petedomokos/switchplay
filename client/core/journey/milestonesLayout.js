@@ -28,6 +28,7 @@ export default function milestonesLayout(){
     }
 
     function update(data){
+        console.log("data", data)
         const now = new Date();
         const activeProfileId = data
             .filter(m => m.dataType === "profile")
@@ -40,14 +41,25 @@ export default function milestonesLayout(){
         
         const isActive = m => m.dataType === "profile" ? m.id === activeProfileId : m.id === activeContractId; 
         
-        return data.map((milestone,i) => {
-            const { date, dataType, kpis } = milestone;
-
-            const generalProps = {
-                nr:i,
-                isActive:isActive(milestone),
-                datePhase:milestone.isCurrent ? "current" : (date < now ? "past" : "future")
+        const phasedData = data.map((m,i) => {
+            const datePhase = m.isCurrent ? "current" : (m.date < now ? "past" : "future");
+            return {
+                ...m,
+                datePhase,
+                isPast:datePhase === "past",
+                isFuture:datePhase === "future",
+                isActive:isActive(m)
             }
+        });
+        const pastData = phasedData.filter(m => m.datePhase === "past");
+        const futureData = phasedData.filter(m => m.datePhase === "future");
+        const numberedPastData = pastData.map((m,i) => ({ ...m, nr:i - pastData.length }));
+        const numberedFutureData = futureData.map((m,i) => ({ ...m, nr:i + 1 }));
+        const numberedCurrent = { ...phasedData.find(m => m.isCurrent), nr:0 };
+        const numberedData = [...numberedPastData, numberedCurrent, ...numberedFutureData];
+
+        return numberedData.map((m,i) => {
+            const { date, dataType, kpis } = m;
 
             if(dataType === "profile"){
                 //the key will determine if selected - we want this the same across all profile cards
@@ -57,21 +69,17 @@ export default function milestonesLayout(){
                     .prevCardDate(i === 0 ? undefined : data[i - 1])
                     .format(format)
                     .datasets(datasets)
-                    .allKpisActive(generalProps.isActive);
+                    .allKpisActive(m.isActive);
 
                 return {
-                    ...milestone,
-                    ...generalProps,
+                    ...m,
+                    i,
                     info,
                     kpis:myKpisLayout(keyedKpis),
                 }
             }else{
                 //must be a contract
-                return {
-                    ...milestone,
-                    ...generalProps,
-                }
-
+                return m;
             }
         });
     }

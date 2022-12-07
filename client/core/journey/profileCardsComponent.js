@@ -21,6 +21,7 @@ export default function profileCardsComponent() {
     function updateDimns(){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
+        console.log("prof width", width, contentsWidth)
     }
     let kpiHeight = 100;
 
@@ -37,9 +38,14 @@ export default function profileCardsComponent() {
         }
     };
 
+    let transformTransition = { enter: null, update: null };
+
     let xScale = x => 0;
     let xKey = "date";
     let yScale = x => 0;
+    let yKey = "yPC";
+    let calcX = d => typeof d.x === "number" ? d.x : xScale(d[xKey]);
+    let calcY = d => typeof d.y === "number" ? d.y : yScale(d[yKey]);
 
     let selected;
     let editable;
@@ -81,7 +87,7 @@ export default function profileCardsComponent() {
         // expression elements
         selection.each(function (data) {
             updateDimns();
-            console.log("profileCards update", data)
+            //console.log("profileCards update", data)
             //console.log("profileCards update")
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
@@ -97,7 +103,7 @@ export default function profileCardsComponent() {
             const drag = editable ? () => {} : d3.drag()
                 .on("start", enhancedDrag(dragStart))
                 .on("drag", enhancedDrag(dragged))
-                .on("end", enhancedDrag(dragEnd));
+                .on("end", enhancedDrag(dragEnd)); 
 
             const profileCardG = containerG.selectAll("g.profile-card").data(data, d => d.id);
             profileCardG.enter()
@@ -125,11 +131,10 @@ export default function profileCardsComponent() {
                 
                 })
                 .style("cursor", editable ? "default" : "grab")
-                //.call(transform, { x: d => adjX(xScale(d.targetDate)), y:d => d.y })
                 //.call(transform, { x: d => d.x, y:d => d.y }, transitionEnter && transitionsOn)
+                .call(updateTransform, { x:calcX, y:calcY, transition:transformTransition.enter })
                 .merge(profileCardG)
-                 //note - unusually, the scale also passes through i in case the view is a list
-                .attr("transform", (d) => "translate(" +xScale(d[xKey]) +"," +yScale(d.yPC) +")")
+                .call(updateTransform, { x:calcX, y:calcY, transition:transformTransition.update })
                 .each(function(d){
                     const profileInfo = profileInfoComponents[d.id]
                         .width(contentsWidth)
@@ -221,7 +226,44 @@ export default function profileCardsComponent() {
 
                 })
 
-            /*
+            function updateTransform(selection, options={}){
+                //console.log("uRD options", options)
+                const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
+                selection.each(function(d){
+                    if(transition){
+                        d3.select(this)
+                            .transition()
+                            .duration(200)
+                                .attr("transform", "translate("+x(d) +"," +y(d) +")")
+                                .on("end", cb);
+                    }else{
+                        d3.select(this)
+                            .attr("transform", "translate("+x(d) +"," +y(d) +")");
+                        
+                        cb.call(this);
+                    }
+                })
+            }
+
+            function updatePosition(selection, options={}){
+                //console.log("uRD options", options)
+                const { x = d => d.x || 0, y = d => d.y || 0, transition, cb = () => {} } = options;
+                selection.each(function(d){
+                    if(transition){
+                        d3.select(this)
+                            .transition()
+                            .duration(200)
+                                .attr("x", x(d))
+                                .on("end", cb);
+                    }else{
+                        d3.select(this)
+                            .attr("transform", y(d));
+                        
+                        cb.call(this);
+                    }
+                })
+            }
+                /*
             function transform(selection, transform={}, transition){
                 const { x = d => 0, y = d => 0, k = d => 1 } = transform;
                 selection.each(function(d){
@@ -403,15 +445,28 @@ export default function profileCardsComponent() {
         longpressed = value;
         return profileCards;
     };
-    profileCards.yScale = function (value) {
+    profileCards.transformTransition = function (value) {
+        if (!arguments.length) { return transformTransition; }
+        transformTransition = { 
+            enter:value.enter || transformTransition.enter,
+            update:value.update || transformTransition.update
+        }
+        return profileCards;
+    };
+    profileCards.yScale = function (value, key) {
         if (!arguments.length) { return yScale; }
         yScale = value;
+        if(key) { yKey = key; }
+        calcY = y => typeof d.y === "number" ? d.y : yScale(d[yKey]);
+
         return profileCards;
     };
     profileCards.xScale = function (value, key) {
         if (!arguments.length) { return xScale; }
         xScale = value;
         if(key) { xKey = key; }
+        calcX = x => typeof d.x === "number" ? d.x : xScale(d[xKey]);
+
         return profileCards;
     };
     profileCards.onClick = function (value) {

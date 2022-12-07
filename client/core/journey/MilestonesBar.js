@@ -28,15 +28,17 @@ const useStyles = makeStyles((theme) => ({
     //position:"absolute"
   },
   ctrls:{
-    width:DIMNS.milestonesBar.ctrls.width,
+    width:"100%",//DIMNS.milestonesBar.ctrls.width,
     height:DIMNS.milestonesBar.ctrls.height,
     alignSelf:"center",
-    display:"flex",
-    justifyContent:"space-between",
+    display:props => props.sliderEnabled ? "flex" : "none",
+    justifyContent:"center",
     alignItems:"center",
   },
   iconBtn:{
     color:grey10(2),
+    marginLeft:"10px",
+    marginRight:"10px"
   },
   icon:{
     width:40,
@@ -66,12 +68,16 @@ const milestonesBar = milestonesBarComponent();
 
 const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, setKpiFormat, onSelectKpiSet, screen }) => {
   console.log("MBar", contracts, profiles)
+  //local state
+  const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
+  const [bgMenuLocation, setBgMenuLocation] = useState("");
+  const [sliderEnabled, setSliderEnabled] = useState(true);
+
   const bottomCtrlsBarHeight = 100;
   const height = d3.min([DIMNS.milestonesBar.height, screen.height - bottomCtrlsBarHeight])
-  let styleProps = { height };
-  const classes = useStyles(styleProps) 
+  let styleProps = { height, sliderEnabled };
+  const classes = useStyles(styleProps) ;
   const containerRef = useRef(null);
-  const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
 
   const k = height / DIMNS.milestonesBar.height;
   const scale = dimns => scaleDimns(dimns, k);
@@ -93,6 +99,7 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
     d3.select(containerRef.current)
       .datum(layout(orderedData))
       .call(milestonesBar
+          .width(screen.width)
           .height(kpiListHeight)
           .profileCardDimns(profileCardDimns)
           .contractDimns(contractDimns)
@@ -102,7 +109,23 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
             contract: FONTSIZES.contract(k * 2.5)
           })
           .onSetKpiFormat(setKpiFormat)
-          .onSelectKpiSet((e,kpi) => { onSelectKpiSet(kpi); }))
+          .onSelectKpiSet((e,kpi) => { onSelectKpiSet(kpi); })
+          .onToggleSliderEnabled(() => setSliderEnabled(prevState => !prevState))
+          .onCreateMilestone(function(e,d){
+            /*console.log("placeholder", e, d)
+            if(!bgMenuLocation){
+              setBgMenuLocation(e.x);
+            }else{
+              //get the two dates either side of it, and find middle
+              //addProfile
+            }*/
+          })
+          .onMouseover(function(e,d){
+            //console.log("mover")
+          })
+          .onMouseout(function(e,d){
+            //console.log("mout")
+          }))
 
   })
 
@@ -115,13 +138,11 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
         <div className={classes.ctrls}>
           <IconButton className={classes.iconBtn} onClick={milestonesBar.slideBack}
               aria-label="Home" >
-              <ArrowBackIosIcon 
-                  className={classes.icon}/>
+              <ArrowBackIosIcon className={classes.icon}/>
           </IconButton>
           <IconButton className={classes.iconBtn} onClick={milestonesBar.slideForward}
               aria-label="Home" >
-              <ArrowForwardIosIcon
-                  className={classes.icon}/>
+              <ArrowForwardIosIcon className={classes.icon}/>
           </IconButton>
         </div>
     </div>

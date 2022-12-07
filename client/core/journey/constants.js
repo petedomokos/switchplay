@@ -101,11 +101,12 @@ export const DIMNS = {
     },
     milestonesBar:{
         height:600,
+        //@todo - margins left and right should be 20
         margin:{ left:20, right:20, top:0, bottom:0 },
         PHASE_GAP_MULTIPLE: 0.15,
         list:{
             height:480,
-            margin:{ left:20, right:20, top:0, bottom:0 },
+            margin:{ left:0, right:0, top:0, bottom:0 },
         },
         ctrls:{
             width:160,
