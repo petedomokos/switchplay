@@ -99,6 +99,7 @@ const create = async (req, res) => {
     let journey = req.journey;
     //console.log("req journey", journey)
     //console.log("body", req.body)
+    /*
     journey = extend(journey, req.body);
     //console.log("extended journey", journey)
     try {
@@ -109,6 +110,7 @@ const create = async (req, res) => {
         error: errorHandler.getErrorMessage(err)
       })
     }
+    */
   }
   
   const read = (req, res) => {

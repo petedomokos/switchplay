@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, FONTSIZES } from "./constants";
+import { DIMNS, FONTSIZES, grey10 } from "./constants";
 import contractsComponent from './contractsComponent';
 import profileCardsComponent from './profileCardsComponent';
 import dragEnhancements from './enhancedDragHandler';
@@ -80,6 +80,7 @@ export default function milestonesBarComponent() {
     let onToggleSliderEnabled = function(){};
 
     let onCreateMilestone = () => {};
+    let onDeleteMilestone = () => {};
 
     let enhancedBgDrag = dragEnhancements();
 
@@ -102,7 +103,8 @@ export default function milestonesBarComponent() {
     const profiles = profileCardsComponent()
         .onCtrlClick((e,d) => { onSetKpiFormat(d.key) });
 
-    let sliderPosition;
+    let requiredSliderPosition = 0;
+    let currentSliderPosition;
     let slideBack;
     let slideForward;
     let slideTo;
@@ -218,19 +220,19 @@ export default function milestonesBarComponent() {
                 }));
 
                 const calcOffsetX = calcSliderOffsetX(positionedData)
-                const initOffset = calcOffsetX(0);
-                const next = calcOffsetX(-0.5);
-                console.log("init next", initOffset, next)
 
-                slideTo = function(nr, onEnd=() => {}){
-                    if(sliderPosition === nr) { return; }
+                slideTo = function(position, onEnd=() => {}){
+                    if(currentSliderPosition === position) { return; }
 
                     milestonesWrapperG.call(updateTransform, {
-                        x: () => calcOffsetX(nr),
+                        x: () => calcOffsetX(position),
                         y: () => 0,
                         transition:{ duration:500 },
                         cb:onEnd
                     });
+                    //set state before end of slide, to prevent another slide if an update is 
+                    //called again before this slide has ended
+                    currentSliderPosition = position
                 }
 
                 //console.log("positionedData", positionedData)
@@ -244,8 +246,7 @@ export default function milestonesBarComponent() {
                         
                 //POSITIONING
                 //offsetting due to slide
-                slideTo(0);
-                sliderPosition = 0;
+                slideTo(requiredSliderPosition);
 
                 const prevCard = x => d3.greatest(positionedData.filter(m => m.x < x), m => m.x);
                 const nextCard = x => d3.least(positionedData.filter(m => m.x > x), m => m.x);
@@ -254,14 +255,22 @@ export default function milestonesBarComponent() {
                     createMilestonePlaceholder(prevCard(e.x), nextCard(e.x))
                 });
 
-                let prevSliderPosition;
-                const createMilestonePlaceholder = (prevCard, nextCard) => {
-                    //store pos to go back to if cancelled
-                    prevSliderPosition = sliderPosition;
-                    //slider position
+                const placeholderDimns = profileCardDimns;
+
+                let placeholderG;
+                const createMilestonePlaceholder = (prev, next) => {
                     //@todo - only slide if the space is not on screen, and only side a little so its on screen
-                    if(prevCard && nextCard){
-                        const tempSliderPosition = prevCard.nr + 0.5;
+                    if(prev && next){
+                        //todo
+                        //instead of tempsliderpos, just slide all profiles from next onwards up
+                        //and only adjust the slider if next is not on screen eg on mobile portrait
+                        //or on far right hand side of larger screen
+                        //or alternatively, in this case, we could slide all the prev cards to teh left
+
+                        //OR MAYBE KEEP WITH TEH IDEA OF SLIDING IT INTO MIDDLE,
+                        //BUT JUST DONT OFFSET TEH PROFILE CARDS IN BTH DIRECTIONS,
+                        //JUST SLIDE TO NEXT.NR, AND OFFSET TEH NEXT AND ONWARDS CARS BY FULL WIDTH
+                        const tempSliderPosition = prev.nr + 0.5;
                         //we dont set sliderPosition in state because this is a temp change 
                         //- we will go back to the position that is in state after if its cancelled
                         slideTo(tempSliderPosition, () => {
@@ -271,8 +280,108 @@ export default function milestonesBarComponent() {
                             //do this but adding or subtract from there current x values
 
                             //then make placeholder appear
+                            milestonesG.selectAll("g.profile-card")
+                                .call(updateTransform, { 
+                                    x:d => d.x + (placeholderDimns.width/2 * (d.nr >= next.nr ? 1 : -1)),
+                                    y:d => d.y,
+                                    transition:{ duration: 1000 }
+                                });
+                            //todo - extraGap occurs if between a phase change only!!
+                            const extraGap = phaseGap;
+                            const placeholderX = next.x - next.width/2 - hitSpace/2 - extraGap/2 - placeholderDimns.width/2;
 
-                            milestonesG.select("g.profiles").attr("display", "none")
+                            placeholderG = milestonesG.append("g")
+                                .attr("class", "placeholder")
+                                .attr("transform", `translate(${placeholderX}, 0)`)
+                                .attr("opacity", 0);
+                            
+                            placeholderG
+                                .append("rect")
+                                    .attr("class", "placeholder-bg")
+                                    .attr("width", placeholderDimns.width)
+                                    .attr("height", placeholderDimns.height)
+                                    .attr("fill", grey10(3))
+                            
+                            const placeholderMargin = { 
+                                left: placeholderDimns.width * 0.1,
+                                right: placeholderDimns.width * 0.1,
+                                top: placeholderDimns.height * 0.2,
+                                bottom: placeholderDimns.height * 0.2
+                            }
+                            const placeholderContentsWidth = placeholderDimns.width - placeholderMargin.left - placeholderMargin.right;
+                            const placeholderContentsHeight = placeholderDimns.height - placeholderMargin.top - placeholderMargin.bottom;
+                            const btnWidth = placeholderContentsWidth;
+                            const btnHeight = placeholderContentsHeight * 0.25;
+                            const btnGap = placeholderContentsHeight * 0.125;
+                            
+                            const btnData = [
+                                { key:"profile", label: "PROFILE" },
+                                { key:"contract", label: "CONTRACT" },
+                                { key:"cancel", label: "CANCEL" }
+                            ]
+
+                            const placeholderContentsG = placeholderG
+                                .append("g")
+                                    .attr("transform", `translate(${placeholderMargin.left}, ${placeholderMargin.top})`)
+
+                            const btnG = placeholderContentsG.selectAll("g.btn").data(btnData, d => d.key);
+                            btnG.enter()
+                                .append("g")
+                                    .attr("class", "placeholder-btn")
+                                    .each(function(){
+                                        const btnG = d3.select(this);
+                                        btnG
+                                            .append("rect")
+                                            .attr("rx", 5)
+                                            .attr("ry", 5);
+                                        btnG
+                                            .append("text")
+                                                .attr("text-anchor", "middle")
+                                                .attr("dominant-baseline", "central")
+                                                .attr("stroke", "white")
+                                                .attr("fill", "white")
+                                                .attr("stroke-width", 0.3)
+                                    })
+                                    .merge(btnG)
+                                    .attr("transform",(d,i) => `translate(0, ${i * (btnHeight + btnGap)})`)
+                                    .each(function(d){
+                                        const btnG = d3.select(this);
+                                        btnG.select("rect")
+                                            .attr("width", btnWidth)
+                                            .attr("height", btnHeight)
+                                            .attr("fill", grey10(5))
+                                            .attr("stroke", "none")
+
+                                        btnG.select("text")
+                                            .attr("x", btnWidth/2)
+                                            .attr("y", btnHeight/2)
+                                            .attr("font-size", btnHeight * 0.4)
+                                            .text(d => d.label)
+                                    })
+                                    .on("mouseover", function(){ 
+                                        d3.select(this).select("rect").attr("stroke", "white") 
+                                    })
+                                    .on("mouseout", function(){ 
+                                        d3.select(this).select("rect").attr("stroke", "none") 
+                                    })
+                                    .on("click", (e,d) => {
+                                        if(d.key === "cancel"){ 
+                                            handleCancelMilestone(); 
+                                        }else{
+                                            //interpolate dates to get new date
+                                            const interpolator = d3.interpolateDate(prev.date, next.date);
+                                            handleCreateMilestone(d.key, interpolator(0.5));
+                                            //set slider position
+                                            requiredSliderPosition = calcNewMilestoneNr(prev, next)
+                                        }
+                                    })
+
+                            placeholderG
+                                .transition()
+                                //.delay(1000)
+                                .duration(500)
+                                        .attr("opacity", 1);
+                            
                         });
                         /*
                         const tempOffsetX = calcOffsetX(tempSlidePosition);
@@ -283,8 +392,8 @@ export default function milestonesBarComponent() {
                                 .attr("transform", `translate(${tempOffsetX},0)`);
                                 //on end, slide both sides out to make space*/
 
-                        //slideTo(prevCard.nr + 0.5);
-                    }else if(prevCard){
+                        //slideTo(prev.nr + 0.5);
+                    }else if(prev){
                         slideToAfterEnd();
                         //slideTo(d3.min(data, d => d.nr) - 0.5);
                     }else{
@@ -304,7 +413,68 @@ export default function milestonesBarComponent() {
                     //disable the slider
                     //onToggleSliderEnabled();
                 }
-                const removeMilestonePlaceholder = (wasCancelled) => {
+
+                //this function is just for purposes of setting requiredSliderPos
+                //the actual nrs are added to the milestones in layout
+                function calcNewMilestoneNr(prev, next){
+                    if(prev){
+                        if(prev.isPast){ return prev.nr };
+                        if(prev.isFuture){ return prev.nr + 1; }
+                        //prev must be current so new is first future
+                        return 1;
+                    }else{
+                        //if no prev, then next must be either past or current
+                        return next.nr - 1;
+                    }
+                }
+                function handleCreateMilestone(dataType, date, nr){
+                    //assume profile for now
+
+                    //immediately remove placeholder (no trans)
+                    placeholderG.remove();
+                    placeholderG = null;
+                    //must set sliderPosition to the new one
+                    requiredSliderPosition = nr;
+
+                    //milestonesG.selectAll("g.profile-card")
+                        //.call(updateTransform, { x:d => d.x, y:d => d.y });
+
+                    //update will be auto-tiggered by react state update
+
+                    onCreateMilestone(dataType, date)
+
+                    //immediately update with the new profile created, and with slider set to new nr
+                    //the currentSliderPosition is out of sync with requiredSliderPosition
+                    //because we slid to the tempSliderPosition, so the update
+                    //will call slideTo to bring it back to the previous position, and will reset profile-card positions
+                    //update(data);
+                    //problem - milestoneWrapper offset is not being re-calculated, or it is staying as it is instead
+                    //of going back to 0
+
+                    //also, need to use sliderPos correctly, atm it always resets to 0 on update
+
+
+                }
+                function handleCancelMilestone(){
+                    placeholderG
+                        .transition()
+                        //.delay(1000)
+                        .duration(500)
+                                .attr("opacity", 0)
+                                    .on("end", function(){ 
+                                        d3.select(this).remove();
+                                        placeholderG = null;
+                                        milestonesG.selectAll("g.profile-card")
+                                        .call(updateTransform, { 
+                                            x:d => d.x,
+                                            y:d => d.y,
+                                            transition:{ duration: 1000 },
+                                            cb:() => { update(data); }
+                                        });
+                                    });
+                    
+                }
+                function removeMilestonePlaceholder(wasCancelled){
                     //remove
 
                     //re-enabled slider
@@ -339,16 +509,9 @@ export default function milestonesBarComponent() {
                 
             
                 //phase labels
-                const lastPastCard = d3.greatest(positionedData.filter(m => m.datePhase === "past"), d => d.x);
-                const firstFutureCard = d3.least(positionedData.filter(m => m.datePhase === "future"), d => d.x);
-                console.log("lastPastcard", lastPastCard)
                 const currentCard = positionedData.find(m => m.datePhase === "current")
-                //note - will also be extra space for gap 'pastCurrentGap' and 'currentFutureGap'
                 const endOfLastPastCard = currentCard.x - currentCard.width/2 - phaseGap - hitSpace - labelMarginHoz;
-                // lastPastCard.x + lastPastCard.width/2 - labelMarginHoz;
-                console.log("end", endOfLastPastCard)
                 const middleOfCurrentCard = currentCard.x;
-                console.log("mid", middleOfCurrentCard)
                 const startOfFirstFutureCard = currentCard.x + currentCard.width/2 + phaseGap + hitSpace + labelMarginHoz;
                 
                 datePhasesData = [
@@ -389,11 +552,13 @@ export default function milestonesBarComponent() {
                         .onDblClickKpi((e,d) => {
                             onSelectKpiSet(d);
                         })
+                        .onLongpressStart((e,d) => {
+                            console.log("lp ", e, d)
+                        })
                         .transformTransition(transformTransition));
 
                 //functions
                 function updateTransform(selection, options={}){
-                    console.log("uT", selection)
                     const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
                     selection.each(function(d){
                         if(transition){
@@ -412,15 +577,15 @@ export default function milestonesBarComponent() {
                 }
 
                 slideBack = function(){
-                    if(sliderPosition > d3.min(data, d => d.nr)){
-                        sliderPosition -= 1;
+                    if(currentSliderPosition > d3.min(data, d => d.nr)){
+                        requiredSliderPosition -= 1;
                         update(data);
                     }
                 }
 
                 slideForward = function(){
-                    if(sliderPosition < d3.max(data, d => d.nr)){
-                        sliderPosition += 1;
+                    if(currentSliderPosition < d3.max(data, d => d.nr)){
+                        requiredSliderPosition += 1;
                         update(data);
                     }
                 }
@@ -546,6 +711,13 @@ export default function milestonesBarComponent() {
         if (!arguments.length) { return onCreateMilestone; }
         if(typeof value === "function"){
             onCreateMilestone = value;
+        }
+        return milestonesBar;
+    };
+    milestonesBar.onDeleteMilestone = function (value) {
+        if (!arguments.length) { return onDeleteMilestone; }
+        if(typeof value === "function"){
+            onDeleteMilestone = value;
         }
         return milestonesBar;
     };

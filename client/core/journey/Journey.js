@@ -236,9 +236,60 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
   const modalRef = useRef(null);
   const modalDimnsRef = useRef({ width:500, height:700 });
 
-
   //@todo - make a more robust id function - see my exp builder code
   const nrGoalsCreated = useRef(goals.length);
+
+  const handleCreateProfile = useCallback((props) => {
+    const profile = {
+      //put in some default values in case not specified
+      yPC:50,
+      dataType:"profile",
+      colour:"orange",
+      id:createId(profiles.map(p => p.id)),
+      userId,
+      ...props
+    }
+    const _profiles = [ ...profiles, profile];
+    console.log("saving new profile", profile)
+    save({ ...hydratedData, profiles:_profiles });
+    
+  }, [JSON.stringify(hydratedData), userId]);
+
+  const handleCreateContract = useCallback((props) => {
+    const contract = {
+      //put in some default values in case not specified
+      yPC:50,
+      dataType:"contract",
+      id:createId(contracts.map(c => c.id)),
+      userId,
+      ...props
+    }
+    const _contracts = [ ...contracts, contract];
+    save({ ...hydratedData, contracts:_contracts });
+    
+  }, [JSON.stringify(hydratedData), userId]);
+
+  const handleCreateMilestone = useCallback((dataType, date) => {
+    if(dataType === "profile"){
+      handleCreateProfile({ date });
+    }else{
+      handleCreateContract({ date });
+    }
+  }, [JSON.stringify(hydratedData), userId]);
+
+  const handleDeleteProfile = useCallback((id) => {
+    //todo - must delete link first, but when state is put together this wont matter
+    const _profiles = profiles.filter(p => p.id !== id);
+    save({ ...hydratedData, profiles:_profiles });
+  }, [JSON.stringify(hydratedData)]);
+
+  const handleDeleteMilestone = useCallback((dataType, id) => {
+    if(dataType === "profile"){
+      handleDeleteProfile(id);
+    }else{
+      //handleDeleteContract(id);
+    }
+  }, [JSON.stringify(hydratedData)]);
 
   useEffect(() => {
     const width = d3.min([journeyWidth * 0.725, 500]);
@@ -329,19 +380,8 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
             save({ ...hydratedData, contracts:_contracts, profiles:_profiles, aims:_aims, goals:_goals, links:_links, measures:_measures })
             //@todo - make createId handle prefixes so all ids are unique
         })
-        .handleCreateContract(function(contract){
-          const id = createId(contracts.map(p => p.id));
-          const colour = "orange";
-          //updates
-          const _contracts = [ ...contracts, { id , colour, dataType:"contract", ...contract }];
-          save({ ...hydratedData, contracts:_contracts });
-        })
-        .handleCreateProfile(function(profile){
-          const id = createId(profiles.map(p => p.id));
-          const colour = "orange";
-          const _profiles = [ ...profiles, { id , userId, colour, dataType:"profile", ...profile }];
-          save({ ...hydratedData, profiles:_profiles });
-        })
+        .handleCreateContract(handleCreateContract)
+        .handleCreateProfile(handleCreateProfile)
         .handleCreateAim(function(aim, planetIds){
           const id = createId(aims.map(a => a.id));
           const colour = createColour(aims.length);
@@ -583,6 +623,8 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
               onSelectKpiSet={kpi => setDisplayedBar({kpi, prev:"milestones"})}
               kpiFormat={kpiFormat} 
               setKpiFormat={setKpiFormat}
+              onCreateMilestone={handleCreateMilestone}
+              onDeleteMilestone={handleDeleteMilestone}
               screen={screen} 
             />
           }

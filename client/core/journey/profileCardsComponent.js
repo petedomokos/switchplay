@@ -21,7 +21,6 @@ export default function profileCardsComponent() {
     function updateDimns(){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
-        console.log("prof width", width, contentsWidth)
     }
     let kpiHeight = 100;
 
@@ -334,6 +333,7 @@ export default function profileCardsComponent() {
 
             //longpress
             function longpressStart(e, d) {
+                console.log("lp start")
                 //todo - check defs appended, and use them here, then longopressDrag should trigger the delete of a goal
                 //then do same for aims and links
                 /*

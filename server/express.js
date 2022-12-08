@@ -9,6 +9,7 @@ import template from './../template'
 import userRoutes from './routes/user.routes'
 import groupRoutes from './routes/group.routes'
 import datasetRoutes from './routes/dataset.routes'
+import journeyRoutes from './routes/journey.routes'
 import authRoutes from './routes/auth.routes'
 
 //comment out before building for production
@@ -39,7 +40,9 @@ app.use('/dist', express.static(path.join(CURRENT_WORKING_DIR, 'dist')))
 app.use('/', userRoutes)
 app.use('/', groupRoutes)
 app.use('/', datasetRoutes)
+app.use('/', journeyRoutes)
 app.use('/', authRoutes)
+app.use('/', journeyRoutes)
 
 app.get('*', (req, res) => {
   res.status(200).send(template())

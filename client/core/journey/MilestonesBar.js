@@ -60,7 +60,7 @@ const scaleDimns = (dimns, k) => ({
 const layout = milestonesLayout();
 const milestonesBar = milestonesBarComponent();
 
-const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, setKpiFormat, onSelectKpiSet, screen }) => {
+const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, screen }) => {
   console.log("MBar", contracts, profiles)
   //local state
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
@@ -105,15 +105,17 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
           .onSetKpiFormat(setKpiFormat)
           .onSelectKpiSet((e,kpi) => { onSelectKpiSet(kpi); })
           .onToggleSliderEnabled(() => setSliderEnabled(prevState => !prevState))
-          .onCreateMilestone(function(e,d){
+          .onCreateMilestone(onCreateMilestone)
+          .onDeleteMilestone(onDeleteMilestone)
+          /*.onCreateMilestone(function(e,d){
             /*console.log("placeholder", e, d)
             if(!bgMenuLocation){
               setBgMenuLocation(e.x);
             }else{
               //get the two dates either side of it, and find middle
               //addProfile
-            }*/
-          })
+            }
+          })*/
           .onMouseover(function(e,d){
             //console.log("mover")
           })
