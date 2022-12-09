@@ -226,7 +226,7 @@ export default function profileCardsComponent() {
                 })
 
             function updateTransform(selection, options={}){
-                //console.log("uRD options", options)
+                console.log("updateTransform profileCards", options.transition)
                 const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
                 selection.each(function(d){
                     if(transition){
@@ -447,10 +447,12 @@ export default function profileCardsComponent() {
     };
     profileCards.transformTransition = function (value) {
         if (!arguments.length) { return transformTransition; }
+        console.log("setting trans...", value)
         transformTransition = { 
-            enter:value.enter || transformTransition.enter,
-            update:value.update || transformTransition.update
+            enter:value.enter,// || transformTransition.enter,
+            update:value.update// || transformTransition.update
         }
+        console.log("Trans is now", transformTransition)
         return profileCards;
     };
     profileCards.yScale = function (value, key) {

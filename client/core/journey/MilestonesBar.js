@@ -81,6 +81,8 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
   //init
   useEffect(() => {
     if(!containerRef.current){return; }
+
+    console.log("updating milsestonesBarComponent--------------------------------------------------")
   
     layout
       .format(kpiFormat)
@@ -123,7 +125,7 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
             //console.log("mout")
           }))
 
-  })
+  }, [profiles.length/*JSON.stringify(contracts), JSON.stringify(profiles), JSON.stringify(datasets), userInfo, kpiFormat, screen*/])
 
   console.log("kpiListH", kpiListHeight)
   return (

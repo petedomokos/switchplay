@@ -142,7 +142,7 @@ const initChannels = d3.range(numberMonths)
 
 //width and height may be full screen, but may not be
 const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog }) => {
-  console.log("Journey data", data)
+  console.log("Journey data........................................", data)
   //console.log("Journey avail", availableJourneys)
   const hydratedData = hydrateJourneyData(data, userKpis, datasets);
   //console.log("hydratedData", hydratedData)
@@ -250,7 +250,7 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
       ...props
     }
     const _profiles = [ ...profiles, profile];
-    console.log("saving new profile", profile)
+    console.log("saving new profile------------------------", profile)
     save({ ...hydratedData, profiles:_profiles });
     
   }, [JSON.stringify(hydratedData), userId]);
