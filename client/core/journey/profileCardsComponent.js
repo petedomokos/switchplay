@@ -226,7 +226,7 @@ export default function profileCardsComponent() {
                 })
 
             function updateTransform(selection, options={}){
-                console.log("updateTransform profileCards", options.transition)
+                //console.log("updateTransform profileCards", options.transition)
                 const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
                 selection.each(function(d){
                     if(transition){
@@ -333,7 +333,7 @@ export default function profileCardsComponent() {
 
             //longpress
             function longpressStart(e, d) {
-                console.log("lp start")
+                //console.log("lp start")
                 //todo - check defs appended, and use them here, then longopressDrag should trigger the delete of a goal
                 //then do same for aims and links
                 /*
@@ -447,12 +447,12 @@ export default function profileCardsComponent() {
     };
     profileCards.transformTransition = function (value) {
         if (!arguments.length) { return transformTransition; }
-        console.log("setting trans...", value)
+        //console.log("setting trans...", value)
         transformTransition = { 
             enter:value.enter,// || transformTransition.enter,
             update:value.update// || transformTransition.update
         }
-        console.log("Trans is now", transformTransition)
+        //console.log("Trans is now", transformTransition)
         return profileCards;
     };
     profileCards.yScale = function (value, key) {

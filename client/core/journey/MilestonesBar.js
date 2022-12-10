@@ -61,7 +61,7 @@ const layout = milestonesLayout();
 const milestonesBar = milestonesBarComponent();
 
 const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, screen }) => {
-  console.log("MBar", contracts, profiles)
+  //console.log("MBar", contracts, profiles)
   //local state
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
   const [bgMenuLocation, setBgMenuLocation] = useState("");
@@ -81,8 +81,6 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
   //init
   useEffect(() => {
     if(!containerRef.current){return; }
-
-    console.log("updating milsestonesBarComponent--------------------------------------------------")
   
     layout
       .format(kpiFormat)
@@ -127,7 +125,6 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
 
   }, [profiles.length/*JSON.stringify(contracts), JSON.stringify(profiles), JSON.stringify(datasets), userInfo, kpiFormat, screen*/])
 
-  console.log("kpiListH", kpiListHeight)
   return (
     <div className={classes.root}>
         <div style={{background:"black" }}>

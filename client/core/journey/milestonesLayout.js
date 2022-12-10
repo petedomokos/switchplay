@@ -28,7 +28,7 @@ export default function milestonesLayout(){
     }
 
     function update(data){
-        console.log("data", data)
+        //console.log("data", data)
         const now = new Date();
         const activeProfileId = data
             .filter(m => m.dataType === "profile")

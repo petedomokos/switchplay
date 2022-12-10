@@ -221,17 +221,15 @@ export default function milestonesBarComponent() {
                     y: milestonesHeight/2
                 }));
 
-                console.log("positionedData", positionedData)
-                console.log("requiredSP", requiredSliderPosition)
-                console.log("currentSP", currentSliderPosition)
+                // console.log("positionedData", positionedData)
 
                 const calcOffsetX = calcSliderOffsetX(positionedData)
 
                 slideTo = function(position, options={} ){
                     if(currentSliderPosition === position) { return; }
                     const { transition = { duration: 500 }, cb } = options;
+                    //console.log("slideTo..... transitionON?", transitionOn, transition)
 
-                    console.log("sliding transitionOn?", transitionOn)
                     milestonesWrapperG.call(updateTransform, {
                         x: () => calcOffsetX(position),
                         y: () => 0,
@@ -268,6 +266,7 @@ export default function milestonesBarComponent() {
                 let placeholderG;
                 const createMilestonePlaceholder = (prev, next) => {
                     //@todo - only slide if the space is not on screen, and only side a little so its on screen
+                    const neighbourPhases = { prev: prev?.datePhase, next: next?.datePhase };
                     if(prev && next){
                         //todo
                         //instead of tempsliderpos, just slide all profiles from next onwards up
@@ -288,22 +287,66 @@ export default function milestonesBarComponent() {
                             //do this but adding or subtract from there current x values
 
                             //then make placeholder appear
-                            const cardsBeforeXOffset = -placeholderDimns.width/2 - hitSpace/2;
-                            const cardsAfterXOffset = placeholderDimns.width/2 + hitSpace/2 + phaseGap/2;
+                            const calcOffsetForCardsBefore = () => {
+                                if(neighbourPhases.prev === "past" && neighbourPhases.next === "current"){
+                                    return -placeholderDimns.width/2 - hitSpace/2;
+                                }
+                                if(neighbourPhases.prev === "current" && neighbourPhases.next === "future"){
+                                    return -placeholderDimns.width/2 - hitSpace/2// - phaseGap/2; //we are subtracting too much
+                                }
+                                if(neighbourPhases.prev === "past" && neighbourPhases.next === "past"){
+                                    return -placeholderDimns.width/2 - hitSpace/2;
+                                }
+                                if(neighbourPhases.prev === "future" && neighbourPhases.next === "future"){
+                                    //minus half the new hitspace plus all of the previous hitspace
+                                    return -placeholderDimns.width/2 - hitSpace/2 + hitSpace;
+                                }
+                                return 0;
+                            }
+                            const calcOffsetForCardsAfter = () => {
+                                if(neighbourPhases.prev === "past" && neighbourPhases.next === "current"){
+                                    return placeholderDimns.width/2 + hitSpace/2 + phaseGap/2;
+                                }
+                                if(neighbourPhases.prev === "current" && neighbourPhases.next === "future"){
+                                    return placeholderDimns.width/2 + hitSpace/2;// + phaseGap/2;
+                                }
+                                if(neighbourPhases.prev === "past" && neighbourPhases.next === "past"){
+                                    return placeholderDimns.width/2 + hitSpace/2;
+                                }
+                                if(neighbourPhases.prev === "future" && neighbourPhases.next === "future"){
+                                     //add half the new hitspace plus all of the previous hitspace
+                                    return placeholderDimns.width/2 + hitSpace/2 + hitSpace;
+                                }
+                                return 0;
+                            }
+                            const calcPlaceholderX = () => {
+                                if(neighbourPhases.prev === "past" && neighbourPhases.next === "current"){
+                                    return next.x - next.width/2 - hitSpace/2 - phaseGap - placeholderDimns.width/2;
+                                }
+                                if(neighbourPhases.prev === "current" && neighbourPhases.next === "future"){
+                                    return next.x - next.width/2 - hitSpace/2 - placeholderDimns.width/2 + phaseGap/2;
+                                }
+                                if(neighbourPhases.prev === "past" && neighbourPhases.next === "past"){
+                                    return next.x - next.width/2 - hitSpace/2 - placeholderDimns.width/2;
+                                }
+                                if(neighbourPhases.prev === "future" && neighbourPhases.next === "future"){
+                                    return next.x - next.width/2 + hitSpace/2 - placeholderDimns.width/2;
+                                }
+                                return 0;
+
+                            }
+                            const xOffsetForCardsBefore = calcOffsetForCardsBefore();
+                            const xOffsetForCardsAfter = calcOffsetForCardsAfter();
                             milestonesG.selectAll("g.profile-card")
                                 .call(updateTransform, { 
                                     //for those after, we add the phaseGap and the new hitspace that will be created from new milestone
                                     //x:d => d.x + (placeholderDimns.width/2 * (d.nr >= next.nr ? 1 : -1)) +(d.nr >= next.nr ? (phaseGap +hitSpace) : 0),
-                                    x:d => d.x +(d.nr >= next.nr ? cardsAfterXOffset :  cardsBeforeXOffset),
+                                    x:d => d.x +(d.nr >= next.nr ? xOffsetForCardsAfter :  xOffsetForCardsBefore),
                                     y:d => d.y,
-                                    transition:{ duration: 1000 }
+                                    transition:{ duration: 200 }
                                 });
-                            //todo - extraGap occurs if between a phase change only!!
-                            //todo - phaseGap shuldnt be split, as this causes a jump when milestone is added
-                            //so phase gap must go onto the side where it will be
-                            const extraGap = phaseGap;
                             //subtract whole phaseGap as its to the right of new milestone
-                            const placeholderX = next.x - next.width/2 - hitSpace/2 - extraGap - placeholderDimns.width/2;
+                            let placeholderX = calcPlaceholderX();
 
                             placeholderG = milestonesG.append("g")
                                 .attr("class", "placeholder")
@@ -480,7 +523,7 @@ export default function milestonesBarComponent() {
                                         .call(updateTransform, { 
                                             x:d => d.x,
                                             y:d => d.y,
-                                            transition:{ duration: 1000 },
+                                            transition:{ duration: 200 },
                                             cb:() => { update(data); }
                                         });
                                     });
@@ -574,13 +617,14 @@ export default function milestonesBarComponent() {
                     const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
                     selection.each(function(d){
                         if(transition){
+                            //console.log("transitioning update", transition)
                             d3.select(this)
                                 .transition()
-                                .duration(200)
+                                .duration(transition.duration || 200)
                                     .attr("transform", "translate("+x(d) +"," +y(d) +")")
                                     .on("end", cb);
                         }else{
-                            console.log("no transition update............")
+                            //console.log("no transition update............")
                             d3.select(this)
                                 .attr("transform", "translate("+x(d) +"," +y(d) +")");
                             

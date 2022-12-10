@@ -153,7 +153,6 @@ export const saveJourney = (journey, shouldPersist=true)  => dispatch => {
 	}
 	//console.log("id is", serverJourney._id)
 	const url = '/api/users/'+jwt.user._id+'/journey' +(serverJourney._id ? "/"+serverJourney._id : "")
-	console.log("fetch...", url)
 	fetchThenDispatch(dispatch, 
 		'saving.journey',
 		{
@@ -164,11 +163,11 @@ export const saveJourney = (journey, shouldPersist=true)  => dispatch => {
 			requireAuth:true,
 			//this action will also set dialog.createUser = true
 			nextAction: data => {
-				console.log("saveJourney response", data)
-				console.log("auth?", !!jwt)
-				console.log("new journey?", journeyIsNew)
+				//console.log("saveJourney response", data)
+				//console.log("auth?", !!jwt)
+				//console.log("new journey?", journeyIsNew)
 				if(jwt && journeyIsNew){
-					console.log("next: user is authenticated && journey is new")
+					//console.log("next: user is authenticated && journey is new")
 					//in this case, we need the new user and the sign up mesg
 					return { type:C.SAVE_NEW_JOURNEY_ID, mesg:data.mesg, userId:data.userId, _id:data.journey._id };
 				}

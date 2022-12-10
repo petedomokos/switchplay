@@ -12,13 +12,36 @@ const mockPlayer = {
 	age:21
 }
 
+const mockProfiles = [
+	{
+	  	date:new Date("2022-09-16"),
+	  	id:"mock1", _id:"mock1", kpiStats:[], yPC:50,
+	},
+	{
+	  	date:new Date("2022-10-16"),
+	  	id:"mock2", _id:"mock2", kpiStats:[], yPC:50,
+	},
+	{
+	  	date:new Date("2023-02-16"),
+		id:"mock3", _id:"mock3", kpiStats:[], yPC:50,
+	},
+	{
+		date:new Date("2023-04-16"),
+		id:"mock4", _id:"mock4", kpiStats:[], yPC:50,
+	}
+]
+
 const mapStateToProps = (state, ownProps) => {
 	//console.log("Container.................", state)
     //const { journeyId }  = ownProps.match.params;state,
 	const { journeys=[], homeJourney } = state.user;
 	const journeyId = state.system.activeJourney || homeJourney;
-	const data = journeys.find(j => j._id === journeyId) || journeys[0];
-	// console.log("JourneyContainer", data)
+	const _data = journeys.find(j => j._id === journeyId) || journeys[0];
+	//console.log("JourneyContainer", _data)
+	//add mock profiles the first time only (note - these must be turnd off before
+	//we enabled server-side persitance again)
+	const mocksAdded = !!_data.profiles.find(p => p.id.includes("mock"));
+	const data = mocksAdded ? _data : { ..._data, profiles:[..._data.profiles, ...mockProfiles] };
 
 	const player = mockPlayer; //@todo - use state.user if its a player that is signed in, or activePlayer if its a coach 
 	//todo - if its a different user to the signedin user (eg a coach looking at a player). then may need to load the user
