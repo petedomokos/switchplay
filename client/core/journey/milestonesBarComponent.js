@@ -3,6 +3,8 @@ import { DIMNS, FONTSIZES, grey10 } from "./constants";
 import contractsComponent from './contractsComponent';
 import profileCardsComponent from './profileCardsComponent';
 import dragEnhancements from './enhancedDragHandler';
+import { calculateOffsetForCardsBeforePlaceholder, calculateOffsetForCardsAfterPlaceholder, calculatePlaceholderX, calcNewMilestoneNr } from "./milestonesBarHelpers";
+import { addMilestonePlaceholderContents, removeMilestonePlaceholderContents } from './milestonePlaceholder';
 /*
 
 */
@@ -126,7 +128,7 @@ export default function milestonesBarComponent() {
         return endHitSpace + (i * hitSpace) + d3.sum(previousMilestonesData, d => d.width) + milestone.width/2 + extraGaps;
     }
 
-    const calcSliderOffsetX = positionedData => sliderPosition => {
+    const calculateOffsetX = positionedData => sliderPosition => {
         if(Number.isInteger(sliderPosition)){
             return contentsWidth/2 - positionedData.find(m => m.nr === sliderPosition)?.x || 0;
         }
@@ -223,7 +225,7 @@ export default function milestonesBarComponent() {
 
                 // console.log("positionedData", positionedData)
 
-                const calcOffsetX = calcSliderOffsetX(positionedData)
+                const calcOffsetX = calculateOffsetX(positionedData)
 
                 slideTo = function(position, options={} ){
                     if(currentSliderPosition === position) { return; }
@@ -262,81 +264,38 @@ export default function milestonesBarComponent() {
                 });
 
                 const placeholderDimns = profileCardDimns;
-
-                let placeholderG;
                 const createMilestonePlaceholder = (prev, next) => {
+                    //positioning
+                    const xOffsetForCardsBefore = calculateOffsetForCardsBeforePlaceholder(placeholderDimns, hitSpace)(prev, next);
+                    const xOffsetForCardsAfter = calculateOffsetForCardsAfterPlaceholder(placeholderDimns, hitSpace, phaseGap)(prev, next);
+                    const placeholderX = calculatePlaceholderX(placeholderDimns, hitSpace, phaseGap)(prev, next);
+                    //helper
+                    const addPlaceholder = () => {
+                        const handlePlaceholderBtnClick = key => {
+                            if(key === "cancel"){ 
+                                handleCancelMilestone(); 
+                            }else{
+                                //interpolate dates to get new date
+                                const interpolator = d3.interpolateDate(prev.date, next.date);
+                                handleCreateMilestone(key, interpolator(0.5), calcNewMilestoneNr(prev, next));
+                            }
+                        }
+
+                        milestonesG
+                            .append("g")
+                                .attr("class", "placeholder")
+                                .attr("transform", `translate(${placeholderX}, 0)`)
+                                .attr("opacity", 0)
+                                .call(addMilestonePlaceholderContents, placeholderDimns, handlePlaceholderBtnClick)
+                                    .transition()
+                                    .duration(500)
+                                        .attr("opacity", 1);
+
+                    }
                     //@todo - only slide if the space is not on screen, and only side a little so its on screen
-                    const neighbourPhases = { prev: prev?.datePhase, next: next?.datePhase };
                     if(prev && next){
-                        //todo
-                        //instead of tempsliderpos, just slide all profiles from next onwards up
-                        //and only adjust the slider if next is not on screen eg on mobile portrait
-                        //or on far right hand side of larger screen
-                        //or alternatively, in this case, we could slide all the prev cards to teh left
-
-                        //OR MAYBE KEEP WITH TEH IDEA OF SLIDING IT INTO MIDDLE,
-                        //BUT JUST DONT OFFSET TEH PROFILE CARDS IN BTH DIRECTIONS,
-                        //JUST SLIDE TO NEXT.NR, AND OFFSET TEH NEXT AND ONWARDS CARS BY FULL WIDTH
                         const tempSliderPosition = prev.nr + 0.5;
-                        //we dont set sliderPosition in state because this is a temp change 
-                        //- we will go back to the position that is in state after if its cancelled
                         slideTo(tempSliderPosition, {cb:() => {
-                            //todo next
-                            //slide every profile itself, the ones before it to the left,
-                            //and the ones after to the right
-                            //do this but adding or subtract from there current x values
-
-                            //then make placeholder appear
-                            const calcOffsetForCardsBefore = () => {
-                                if(neighbourPhases.prev === "past" && neighbourPhases.next === "current"){
-                                    return -placeholderDimns.width/2 - hitSpace/2;
-                                }
-                                if(neighbourPhases.prev === "current" && neighbourPhases.next === "future"){
-                                    return -placeholderDimns.width/2 - hitSpace/2// - phaseGap/2; //we are subtracting too much
-                                }
-                                if(neighbourPhases.prev === "past" && neighbourPhases.next === "past"){
-                                    return -placeholderDimns.width/2 - hitSpace/2;
-                                }
-                                if(neighbourPhases.prev === "future" && neighbourPhases.next === "future"){
-                                    //minus half the new hitspace plus all of the previous hitspace
-                                    return -placeholderDimns.width/2 - hitSpace/2 + hitSpace;
-                                }
-                                return 0;
-                            }
-                            const calcOffsetForCardsAfter = () => {
-                                if(neighbourPhases.prev === "past" && neighbourPhases.next === "current"){
-                                    return placeholderDimns.width/2 + hitSpace/2 + phaseGap/2;
-                                }
-                                if(neighbourPhases.prev === "current" && neighbourPhases.next === "future"){
-                                    return placeholderDimns.width/2 + hitSpace/2;// + phaseGap/2;
-                                }
-                                if(neighbourPhases.prev === "past" && neighbourPhases.next === "past"){
-                                    return placeholderDimns.width/2 + hitSpace/2;
-                                }
-                                if(neighbourPhases.prev === "future" && neighbourPhases.next === "future"){
-                                     //add half the new hitspace plus all of the previous hitspace
-                                    return placeholderDimns.width/2 + hitSpace/2 + hitSpace;
-                                }
-                                return 0;
-                            }
-                            const calcPlaceholderX = () => {
-                                if(neighbourPhases.prev === "past" && neighbourPhases.next === "current"){
-                                    return next.x - next.width/2 - hitSpace/2 - phaseGap - placeholderDimns.width/2;
-                                }
-                                if(neighbourPhases.prev === "current" && neighbourPhases.next === "future"){
-                                    return next.x - next.width/2 - hitSpace/2 - placeholderDimns.width/2 + phaseGap/2;
-                                }
-                                if(neighbourPhases.prev === "past" && neighbourPhases.next === "past"){
-                                    return next.x - next.width/2 - hitSpace/2 - placeholderDimns.width/2;
-                                }
-                                if(neighbourPhases.prev === "future" && neighbourPhases.next === "future"){
-                                    return next.x - next.width/2 + hitSpace/2 - placeholderDimns.width/2;
-                                }
-                                return 0;
-
-                            }
-                            const xOffsetForCardsBefore = calcOffsetForCardsBefore();
-                            const xOffsetForCardsAfter = calcOffsetForCardsAfter();
                             milestonesG.selectAll("g.profile-card")
                                 .call(updateTransform, { 
                                     //for those after, we add the phaseGap and the new hitspace that will be created from new milestone
@@ -345,150 +304,26 @@ export default function milestonesBarComponent() {
                                     y:d => d.y,
                                     transition:{ duration: 200 }
                                 });
-                            //subtract whole phaseGap as its to the right of new milestone
-                            let placeholderX = calcPlaceholderX();
-
-                            placeholderG = milestonesG.append("g")
-                                .attr("class", "placeholder")
-                                .attr("transform", `translate(${placeholderX}, 0)`)
-                                .attr("opacity", 0);
-                            
-                            placeholderG
-                                .append("rect")
-                                    .attr("class", "placeholder-bg")
-                                    .attr("width", placeholderDimns.width)
-                                    .attr("height", placeholderDimns.height)
-                                    .attr("fill", grey10(3))
-                            
-                            const placeholderMargin = { 
-                                left: placeholderDimns.width * 0.1,
-                                right: placeholderDimns.width * 0.1,
-                                top: placeholderDimns.height * 0.2,
-                                bottom: placeholderDimns.height * 0.2
-                            }
-                            const placeholderContentsWidth = placeholderDimns.width - placeholderMargin.left - placeholderMargin.right;
-                            const placeholderContentsHeight = placeholderDimns.height - placeholderMargin.top - placeholderMargin.bottom;
-                            const btnWidth = placeholderContentsWidth;
-                            const btnHeight = placeholderContentsHeight * 0.25;
-                            const btnGap = placeholderContentsHeight * 0.125;
-                            
-                            const btnData = [
-                                { key:"profile", label: "PROFILE" },
-                                { key:"contract", label: "CONTRACT" },
-                                { key:"cancel", label: "CANCEL" }
-                            ]
-
-                            const placeholderContentsG = placeholderG
-                                .append("g")
-                                    .attr("transform", `translate(${placeholderMargin.left}, ${placeholderMargin.top})`)
-
-                            const btnG = placeholderContentsG.selectAll("g.btn").data(btnData, d => d.key);
-                            btnG.enter()
-                                .append("g")
-                                    .attr("class", "placeholder-btn")
-                                    .each(function(){
-                                        const btnG = d3.select(this);
-                                        btnG
-                                            .append("rect")
-                                            .attr("rx", 5)
-                                            .attr("ry", 5);
-                                        btnG
-                                            .append("text")
-                                                .attr("text-anchor", "middle")
-                                                .attr("dominant-baseline", "central")
-                                                .attr("stroke", "white")
-                                                .attr("fill", "white")
-                                                .attr("stroke-width", 0.3)
-                                    })
-                                    .merge(btnG)
-                                    .attr("transform",(d,i) => `translate(0, ${i * (btnHeight + btnGap)})`)
-                                    .each(function(d){
-                                        const btnG = d3.select(this);
-                                        btnG.select("rect")
-                                            .attr("width", btnWidth)
-                                            .attr("height", btnHeight)
-                                            .attr("fill", grey10(5))
-                                            .attr("stroke", "none")
-
-                                        btnG.select("text")
-                                            .attr("x", btnWidth/2)
-                                            .attr("y", btnHeight/2)
-                                            .attr("font-size", btnHeight * 0.4)
-                                            .text(d => d.label)
-                                    })
-                                    .on("mouseover", function(){ 
-                                        d3.select(this).select("rect").attr("stroke", "white") 
-                                    })
-                                    .on("mouseout", function(){ 
-                                        d3.select(this).select("rect").attr("stroke", "none") 
-                                    })
-                                    .on("click", (e,d) => {
-                                        if(d.key === "cancel"){ 
-                                            handleCancelMilestone(); 
-                                        }else{
-                                            //interpolate dates to get new date
-                                            const interpolator = d3.interpolateDate(prev.date, next.date);
-                                            handleCreateMilestone(d.key, interpolator(0.5), calcNewMilestoneNr(prev, next));
-                                        }
-                                    })
-
-                            placeholderG
-                                .transition()
-                                //.delay(1000)
-                                .duration(500)
-                                        .attr("opacity", 1);
-                            
+                            addPlaceholder();
                         }});
-                        /*
-                        const tempOffsetX = calcOffsetX(tempSlidePosition);
-                        console.log("tempX", tempOffsetX, milestonesWrapperG.node())
-                        milestonesWrapperG
-                            .transition()
-                                .duration(500)
-                                .attr("transform", `translate(${tempOffsetX},0)`);
-                                //on end, slide both sides out to make space*/
-
-                        //slideTo(prev.nr + 0.5);
                     }else if(prev){
                         slideToAfterEnd();
+                        //todo - work this out and next
+
+
                         //slideTo(d3.min(data, d => d.nr) - 0.5);
                     }else{
                         //next card but no previous
                         slideToBeforeStart();
                     }
 
-                    //remove helper functions and create another for extraGaps calc
-                    //can remove sliderPositon from state as it is passed through instead
-                    //unless we use it to determine when we need to slide, in which case
-                    //we dont need to store currentOffsetX
-
-                    //apply transition
-
-                    //fade-in placeholder with 3 opts: Profile, Contract, Cancel
-
                     //disable the slider
-                    //onToggleSliderEnabled();
+                    onToggleSliderEnabled();
                 }
 
-                //this function is just for purposes of setting requiredSliderPos
-                //the actual nrs are added to the milestones in layout
-                function calcNewMilestoneNr(prev, next){
-                    if(prev){
-                        if(prev.isPast){ return prev.nr };
-                        if(prev.isFuture){ return prev.nr + 1; }
-                        //prev must be current so new is first future
-                        return 1;
-                    }else{
-                        //if no prev, then next must be either past or current
-                        return next.nr - 1;
-                    }
-                }
                 function handleCreateMilestone(dataType, date, newMilestoneNr){
-                    //assume profile for now
-
                     //immediately remove placeholder (no trans)
-                    placeholderG.remove();
-                    placeholderG = null;
+                    removeMilestonePlaceholder();
 
                     milestonesG.selectAll("g.profile-card")
                         .attr("transform", d => `translate(${d.x},${d.y})`)
@@ -511,14 +346,13 @@ export default function milestonesBarComponent() {
 
                 }
                 function handleCancelMilestone(){
-                    placeholderG
+                    milestonesG.select("g.placeholder")
                         .transition()
                         //.delay(1000)
                         .duration(500)
                                 .attr("opacity", 0)
                                     .on("end", function(){ 
                                         d3.select(this).remove();
-                                        placeholderG = null;
                                         milestonesG.selectAll("g.profile-card")
                                         .call(updateTransform, { 
                                             x:d => d.x,
@@ -526,14 +360,16 @@ export default function milestonesBarComponent() {
                                             transition:{ duration: 200 },
                                             cb:() => { update(data); }
                                         });
+
+                                        //re-enabled slider
+                                        onToggleSliderEnabled();
                                     });
                     
                 }
                 function removeMilestonePlaceholder(wasCancelled){
-                    //remove
-
+                    milestonesG.select("g.placeholder").remove();
                     //re-enabled slider
-                    //onToggleSliderEnabled();
+                    onToggleSliderEnabled();
 
                     //make sliderPositon equal to new profile (if it wasnt cancelled)
 
