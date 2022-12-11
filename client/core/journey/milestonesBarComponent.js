@@ -9,6 +9,11 @@ import { addMonths } from '../../util/TimeHelpers';
 /*
 
 */
+
+const EASE_IN = d3.easeCubicIn;
+const EASE_OUT = d3.easeCubicOut;
+const EASE_IN_OUT = d3.easeCubicInOut;
+
 export default function milestonesBarComponent() {
     //API SETTINGS
     // dimensions
@@ -208,8 +213,8 @@ export default function milestonesBarComponent() {
             }
 
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
-            function update(data){
-                //console.log("milestones bar update", data);
+            function update(data, options={}){
+                const { transition } = options;
 
                 //milestone positioning
                 const calcX = calcMilestoneX(data);
@@ -219,13 +224,11 @@ export default function milestonesBarComponent() {
                     y: milestonesHeight/2
                 }));
 
-                // console.log("positionedData", positionedData)
-
                 const calcOffsetX = calculateOffsetX(positionedData)
 
                 slideTo = function(position, options={} ){
                     if(currentSliderPosition === position) { return; }
-                    const { transition = { duration: 500 }, cb } = options;
+                    const { transition = { duration: 200 }, cb } = options;
 
                     //helper
                     const convertToNumber = wordPosition => {
@@ -233,7 +236,6 @@ export default function milestonesBarComponent() {
                         if(wordPosition === "afterEnd") { return d3.max(data, d => d.nr) + 0.5; }
                         return 0;
                     }
-                    //console.log("slideTo..... transitionON?", transitionOn, transition)
 
                     const numericalPosition = typeof position === "number" ? position : convertToNumber(position);
                     milestonesWrapperG.call(updateTransform, {
@@ -258,7 +260,7 @@ export default function milestonesBarComponent() {
                         
                 //POSITIONING
                 //offsetting due to slide
-                slideTo(requiredSliderPosition);
+                slideTo(requiredSliderPosition, { transition });
 
                 const prevCard = x => d3.greatest(positionedData.filter(m => m.x < x), m => m.x);
                 const nextCard = x => d3.least(positionedData.filter(m => m.x > x), m => m.x);
@@ -294,29 +296,32 @@ export default function milestonesBarComponent() {
                                 .attr("opacity", 0)
                                 .call(addMilestonePlaceholderContents, placeholderDimns, handlePlaceholderBtnClick)
                                     .transition()
-                                    .duration(500)
+                                    .duration(300)
                                         .attr("opacity", 0.5);
 
                     }
                     //@todo - only slide if the space is not on screen, and only side a little so its on screen
                     //slide to between prev and next cards, unless its an the start or end
                     const tempSliderPosition = prev && next ? prev.nr + 0.5 :(prev ? "afterEnd" : "beforeStart");
-                    slideTo(tempSliderPosition, {cb:() => {
-                        if(prev && next){
-                            //in this case, must slide cards out either side to create space
-                            milestonesG.selectAll("g.profile-card")
-                                .call(updateTransform, { 
-                                    //for those after, we add the phaseGap and the new hitspace that will be created from new milestone
-                                    //x:d => d.x + (placeholderDimns.width/2 * (d.nr >= next.nr ? 1 : -1)) +(d.nr >= next.nr ? (phaseGap +hitSpace) : 0),
-                                    x:d => d.x +(d.nr >= next.nr ? xOffsetForCardsAfter :  xOffsetForCardsBefore),
-                                    y:d => d.y,
-                                    transition:{ duration: 200 }
-                                });
+                    slideTo(tempSliderPosition, {
+                        transition:{ duration: 300, ease:EASE_IN_OUT },
+                        cb:() => {
+                            if(prev && next){
+                                //in this case, must slide cards out either side to create space
+                                milestonesG.selectAll("g.profile-card")
+                                    .call(updateTransform, { 
+                                        //for those after, we add the phaseGap and the new hitspace that will be created from new milestone
+                                        //x:d => d.x + (placeholderDimns.width/2 * (d.nr >= next.nr ? 1 : -1)) +(d.nr >= next.nr ? (phaseGap +hitSpace) : 0),
+                                        x:d => d.x +(d.nr >= next.nr ? xOffsetForCardsAfter :  xOffsetForCardsBefore),
+                                        y:d => d.y,
+                                        transition:{ duration: 300, ease:EASE_IN_OUT }
+                                    });
+                            }
+                            addPlaceholder();
+                            //disable the slider
+                            onToggleSliderEnabled();
                         }
-                        addPlaceholder();
-                        //disable the slider
-                        onToggleSliderEnabled();
-                    }});
+                    });
                 }
 
                 function handleCreateMilestone(dataType, date, newMilestoneNr){
@@ -347,17 +352,19 @@ export default function milestonesBarComponent() {
                     milestonesG.select("g.placeholder")
                         .transition()
                         //.delay(1000)
-                        .duration(500)
+                        .duration(300)
                                 .attr("opacity", 0)
                                     .on("end", function(){ 
                                         d3.select(this).remove();
                                         milestonesG.selectAll("g.profile-card")
-                                        .call(updateTransform, { 
-                                            x:d => d.x,
-                                            y:d => d.y,
-                                            transition:{ duration: 200 },
-                                            cb:() => { update(data); }
-                                        });
+                                            .call(updateTransform, { 
+                                                x:d => d.x,
+                                                y:d => d.y,
+                                                transition:{ duration: 300, ease:EASE_IN_OUT },
+                                                cb:() => {
+                                                    update(data, { transition:{ duration:300, ease: EASE_IN } }); 
+                                                }
+                                            });
 
                                         //re-enabled slider
                                         onToggleSliderEnabled();
@@ -441,9 +448,7 @@ export default function milestonesBarComponent() {
                         .onDblClickKpi((e,d) => {
                             onSelectKpiSet(d);
                         })
-                        .onLongpressStart((e,d) => {
-                            console.log("lp ", e, d)
-                        })
+                        .onLongpressStart((e,d) => { })
                         .transformTransition(transitionOn ? transformTransition : { update:null }));
 
                 //functions
@@ -451,14 +456,13 @@ export default function milestonesBarComponent() {
                     const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
                     selection.each(function(d){
                         if(transition){
-                            //console.log("transitioning update", transition)
                             d3.select(this)
                                 .transition()
+                                .ease(transition.ease || d3.easeLinear)
                                 .duration(transition.duration || 200)
                                     .attr("transform", "translate("+x(d) +"," +y(d) +")")
                                     .on("end", cb);
                         }else{
-                            //console.log("no transition update............")
                             d3.select(this)
                                 .attr("transform", "translate("+x(d) +"," +y(d) +")");
                             
