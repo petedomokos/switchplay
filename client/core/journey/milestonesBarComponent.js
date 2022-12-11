@@ -116,8 +116,6 @@ export default function milestonesBarComponent() {
 
     let datePhasesData;
 
-    let transitionOn = true;
-
     //helper
     //data is passed in here, so we can call this function with other data too eg with placeholder
     const calcMilestoneX = data => nr => {
@@ -167,9 +165,12 @@ export default function milestonesBarComponent() {
         return contentsWidth/2 - placeholderDimns.width/2;
     }
 
+    let transitionOn = true;
+    const slideTransition = { duration: 200 };
     const transformTransition = { update: { duration: 1000 } };
 
     function milestonesBar(selection, options={}) {
+        console.log("milestonesBar update")
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (_data) {
@@ -181,7 +182,7 @@ export default function milestonesBarComponent() {
                 init();
             }
 
-            update(dataWithDimns);
+            update(dataWithDimns, { slideTransition });
             function init(){
                 contentsG = containerG.append("g").attr("class", "milestone-bar-contents");
                 contentsG.append("rect")
@@ -214,7 +215,7 @@ export default function milestonesBarComponent() {
 
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
             function update(data, options={}){
-                const { transition } = options;
+                const { slideTransition } = options;
 
                 //milestone positioning
                 const calcX = calcMilestoneX(data);
@@ -228,7 +229,7 @@ export default function milestonesBarComponent() {
 
                 slideTo = function(position, options={} ){
                     if(currentSliderPosition === position) { return; }
-                    const { transition = { duration: 200 }, cb } = options;
+                    const { transition, cb } = options;
 
                     //helper
                     const convertToNumber = wordPosition => {
@@ -241,7 +242,7 @@ export default function milestonesBarComponent() {
                     milestonesWrapperG.call(updateTransform, {
                         x: () => calcOffsetX(numericalPosition),
                         y: () => 0,
-                        transition : transitionOn ? transition : null,
+                        transition:transitionOn ? transition : null,
                         cb
                     });
                     //set state before end of slide, to prevent another slide if an update is 
@@ -260,7 +261,8 @@ export default function milestonesBarComponent() {
                         
                 //POSITIONING
                 //offsetting due to slide
-                slideTo(requiredSliderPosition, { transition });
+                console.log("update", slideTransition)
+                slideTo(requiredSliderPosition, { transition:slideTransition });
 
                 const prevCard = x => d3.greatest(positionedData.filter(m => m.x < x), m => m.x);
                 const nextCard = x => d3.least(positionedData.filter(m => m.x > x), m => m.x);
@@ -337,12 +339,13 @@ export default function milestonesBarComponent() {
                     //slideTo(newMilestoneNr, { transition: null })
                     //ensure it doesnt try to slide on next update
                     requiredSliderPosition = newMilestoneNr;
-                    //disable transition for next update
+
+                    //disable transition for the next update
                     transitionOn = false;
 
                     //simplest soln to jerkiness is to have a fade out an din on th eplaceholder
                     //and the new milestone, until the position is sorted.
-                    onCreateMilestone(dataType, date)
+                    onCreateMilestone(dataType, date);
                 
                     //set slider position
                     //requiredSliderPosition = newMilestoneNr
@@ -362,7 +365,7 @@ export default function milestonesBarComponent() {
                                                 y:d => d.y,
                                                 transition:{ duration: 300, ease:EASE_IN_OUT },
                                                 cb:() => {
-                                                    update(data, { transition:{ duration:300, ease: EASE_IN } }); 
+                                                    update(data, { slideTransition:{ duration:300, ease: EASE_IN } }); 
                                                 }
                                             });
 
@@ -460,6 +463,7 @@ export default function milestonesBarComponent() {
                                 .transition()
                                 .ease(transition.ease || d3.easeLinear)
                                 .duration(transition.duration || 200)
+                                //add delay option here
                                     .attr("transform", "translate("+x(d) +"," +y(d) +")")
                                     .on("end", cb);
                         }else{
@@ -474,14 +478,14 @@ export default function milestonesBarComponent() {
                 slideBack = function(){
                     if(currentSliderPosition > d3.min(data, d => d.nr)){
                         requiredSliderPosition -= 1;
-                        update(data);
+                        update(data, { slideTransition });
                     }
                 }
 
                 slideForward = function(){
                     if(currentSliderPosition < d3.max(data, d => d.nr)){
                         requiredSliderPosition += 1;
-                        update(data);
+                        update(data, { slideTransition });
                     }
                 }
                 /*
@@ -520,7 +524,7 @@ export default function milestonesBarComponent() {
 
         })
 
-        //reset once-only settings
+        //reset one-time only settings
         transitionOn = true;
 
         return selection;
