@@ -1,52 +1,103 @@
 export const calculateOffsetForCardsBeforePlaceholder = (placeholderDimns, hitSpace) => (prev, next) => {
-    const neighbourPhases = { prev: prev?.datePhase, next: next?.datePhase };
-    if(neighbourPhases.prev === "past" && neighbourPhases.next === "current"){
+    //between past & current
+    if(prev?.isPast && next?.isCurrent){
         return -placeholderDimns.width/2 - hitSpace/2;
     }
-    if(neighbourPhases.prev === "current" && neighbourPhases.next === "future"){
+    //between current and future
+    if(prev?.isCurrent && next?.isFuture){
         return -placeholderDimns.width/2 - hitSpace/2// - phaseGap/2; //we are subtracting too much
     }
-    if(neighbourPhases.prev === "past" && neighbourPhases.next === "past"){
+    //between past and past
+    if(prev?.isPast && next?.isPast){
         return -placeholderDimns.width/2 - hitSpace/2;
     }
-    if(neighbourPhases.prev === "future" && neighbourPhases.next === "future"){
+    //between future and future
+    if(prev?.isFuture && next?.isFuture){
         //minus half the new hitspace plus all of the previous hitspace
         return -placeholderDimns.width/2 - hitSpace/2 + hitSpace;
+    }
+    //2 cases for adding card at the start
+    if(!prev && next?.isCurrent){
+        return 0;
+    }
+    if(!prev && next?.isPast){
+        return 0;
+    }
+    //2 cases for adding card at the end
+    if(prev?.isCurrent && !next){
+        return 0;
+    }
+    if(prev?.isFuture && !next){
+        return 0;
     }
     return 0;
 }
 
 export const calculateOffsetForCardsAfterPlaceholder = (placeholderDimns, hitSpace, phaseGap) => (prev, next) => {
-    const neighbourPhases = { prev: prev?.datePhase, next: next?.datePhase };
-    if(neighbourPhases.prev === "past" && neighbourPhases.next === "current"){
+    //between past & current
+    if(prev?.isPast && next?.isCurrent){
         return placeholderDimns.width/2 + hitSpace/2 + phaseGap/2;
     }
-    if(neighbourPhases.prev === "current" && neighbourPhases.next === "future"){
+    //between current and future
+    if(prev?.isCurrent && next?.isFuture){
         return placeholderDimns.width/2 + hitSpace/2;// + phaseGap/2;
     }
-    if(neighbourPhases.prev === "past" && neighbourPhases.next === "past"){
+    //between past and past
+    if(prev?.isPast && next?.isPast){
         return placeholderDimns.width/2 + hitSpace/2;
     }
-    if(neighbourPhases.prev === "future" && neighbourPhases.next === "future"){
+    //between future and future
+    if(prev?.isFuture && next?.isFuture){
          //add half the new hitspace plus all of the previous hitspace
         return placeholderDimns.width/2 + hitSpace/2 + hitSpace;
+    }
+    //2 cases for adding card at the start
+    if(!prev && next?.isCurrent){
+        return 0;
+    }
+    if(!prev && next?.isPast){
+        return 0;
+    }
+    //2 cases for adding card at the end
+    if(prev?.isCurrent && !next){
+        return 0;
+    }
+    if(prev?.isFuture && !next){
+        return 0;
     }
     return 0;
 }
 
 export const calculatePlaceholderX = (placeholderDimns, hitSpace, phaseGap) => (prev, next) => {
-    const neighbourPhases = { prev: prev?.datePhase, next: next?.datePhase };
-    if(neighbourPhases.prev === "past" && neighbourPhases.next === "current"){
+    //between past & current
+    if(prev?.isPast && next?.isCurrent){
         return next.x - next.width/2 - hitSpace/2 - phaseGap - placeholderDimns.width/2;
     }
-    if(neighbourPhases.prev === "current" && neighbourPhases.next === "future"){
+    //between current and future
+    if(prev?.isCurrent && next?.isFuture){
         return next.x - next.width/2 - hitSpace/2 - placeholderDimns.width/2 + phaseGap/2;
     }
-    if(neighbourPhases.prev === "past" && neighbourPhases.next === "past"){
+    //between past and past
+    if(prev?.isPast && next?.isPast){
         return next.x - next.width/2 - hitSpace/2 - placeholderDimns.width/2;
     }
-    if(neighbourPhases.prev === "future" && neighbourPhases.next === "future"){
+    //between future and future
+    if(prev?.isFuture && next?.isFuture){
         return next.x - next.width/2 + hitSpace/2 - placeholderDimns.width/2;
+    }
+    //2 cases for adding card at the start
+    if(!prev && next?.isCurrent){
+        return next.x - next.width/2 - phaseGap - hitSpace - placeholderDimns.width;
+    }
+    if(!prev && next?.isPast){
+        return next.x - next.width/2 - hitSpace - placeholderDimns.width;
+    }
+    //2 cases for adding card at the end
+    if(prev?.isCurrent && !next){
+        return prev.x + prev.width/2 + hitSpace;
+    }
+    if(prev?.isFuture && !next){
+        return prev.x + prev.width/2 + hitSpace;
     }
     return 0;
 

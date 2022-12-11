@@ -5,6 +5,7 @@ import profileCardsComponent from './profileCardsComponent';
 import dragEnhancements from './enhancedDragHandler';
 import { calculateOffsetForCardsBeforePlaceholder, calculateOffsetForCardsAfterPlaceholder, calculatePlaceholderX, calcNewMilestoneNr } from "./milestonesBarHelpers";
 import { addMilestonePlaceholderContents, removeMilestonePlaceholderContents } from './milestonePlaceholder';
+import { addMonths } from '../../util/TimeHelpers';
 /*
 
 */
@@ -23,28 +24,22 @@ export default function milestonesBarComponent() {
     //api to determine widths of milestones based on type
     let profileCardDimns = DIMNS.milestonesBar.profile;
     let contractDimns = DIMNS.milestonesBar.contract;
+    let placeholderDimns;
     let milestoneDimns = m => m.dataType === "profile" || m.dataType === "placeholder" ? profileCardDimns: contractDimns;
 
     let phaseGap;
     let hitSpace;
-    let endHitSpace;
     let labelMarginHoz;
 
     function updateDimns(data){
+        placeholderDimns = profileCardDimns;
         //base other spacings on the profile card width to keep proportions reasonable
         phaseGap = 0.075 * profileCardDimns.width;
         hitSpace = d3.max([40,profileCardDimns.width * 0.1]);
-        endHitSpace = profileCardDimns.width;
         labelMarginHoz = profileCardDimns.width * 0.025;
-        //first, calc width based on number of milestones and their widths
-        //contentsWidth = d3.max([minWidth - margin.left - margin.right, d3.sum(data, m => m.width) + 2 * phaseGap ]);
-        //contentsWidth = 2 * endHitSpace + d3.sum(data, m => m.width) + 2 * phaseGap;
         contentsWidth = width - margin.left - margin.right;
-        milestonesWrapperWidth = 2 * endHitSpace + (data.length - 1) * hitSpace + d3.sum(data, m => m.width) + 2 * phaseGap;
-        //height is passed in so calc contentsHeight in the usual way
-        //milestonesHeight = profileCardDimns.height; //this is the largest type of milestone
-        //phaseLabelsHeight = d3.min([20, milestonesHeight * 0.1]);
-        //contentsHeight = milestonesHeight + phaseLabelsHeight;
+        //we add two extra normal hitspaces for the placeholder spaces at the ends. So in total it (data.length + 1)* hitspace
+        milestonesWrapperWidth = 2 * placeholderDimns.width + (data.length + 1) * hitSpace + d3.sum(data, m => m.width) + 2 * phaseGap;
         contentsHeight = height - margin.top - margin.bottom;
         milestonesHeight = profileCardDimns.height;
         phaseLabelsHeight = contentsHeight - milestonesHeight;
@@ -125,7 +120,8 @@ export default function milestonesBarComponent() {
         const { datePhase, i } = milestone;
         const previousMilestonesData = data.filter(m => m.nr < nr);
         const extraGaps = datePhase === "future" ? phaseGap * 2 : (datePhase === "current" ? phaseGap : 0)
-        return endHitSpace + (i * hitSpace) + d3.sum(previousMilestonesData, d => d.width) + milestone.width/2 + extraGaps;
+        //add one extra hit-space for the placeholder space at start
+        return placeholderDimns.width + ((i + 1) * hitSpace) + d3.sum(previousMilestonesData, d => d.width) + milestone.width/2 + extraGaps;
     }
 
     const calculateOffsetX = positionedData => sliderPosition => {
@@ -160,10 +156,10 @@ export default function milestonesBarComponent() {
                 //prev is current...prev.x has one of the gaps
                 extraGaps = phaseGap;
             }
-            return contentsWidth/2 - prev.x - prev.width/2 - extraGaps - endHitSpace/2;
+            return contentsWidth/2 - prev.x - prev.width/2 - extraGaps - placeholderDimns.width/2;
         }
         //show at start
-        return contentsWidth/2 - endHitSpace/2;
+        return contentsWidth/2 - placeholderDimns.width/2;
     }
 
     const transformTransition = { update: { duration: 1000 } };
@@ -230,10 +226,18 @@ export default function milestonesBarComponent() {
                 slideTo = function(position, options={} ){
                     if(currentSliderPosition === position) { return; }
                     const { transition = { duration: 500 }, cb } = options;
+
+                    //helper
+                    const convertToNumber = wordPosition => {
+                        if(wordPosition === "beforeStart"){ return d3.min(data, d => d.nr) - 0.5 }
+                        if(wordPosition === "afterEnd") { return d3.max(data, d => d.nr) + 0.5; }
+                        return 0;
+                    }
                     //console.log("slideTo..... transitionON?", transitionOn, transition)
 
+                    const numericalPosition = typeof position === "number" ? position : convertToNumber(position);
                     milestonesWrapperG.call(updateTransform, {
-                        x: () => calcOffsetX(position),
+                        x: () => calcOffsetX(numericalPosition),
                         y: () => 0,
                         transition : transitionOn ? transition : null,
                         cb
@@ -263,21 +267,23 @@ export default function milestonesBarComponent() {
                     createMilestonePlaceholder(prevCard(e.x), nextCard(e.x))
                 });
 
-                const placeholderDimns = profileCardDimns;
                 const createMilestonePlaceholder = (prev, next) => {
                     //positioning
                     const xOffsetForCardsBefore = calculateOffsetForCardsBeforePlaceholder(placeholderDimns, hitSpace)(prev, next);
                     const xOffsetForCardsAfter = calculateOffsetForCardsAfterPlaceholder(placeholderDimns, hitSpace, phaseGap)(prev, next);
                     const placeholderX = calculatePlaceholderX(placeholderDimns, hitSpace, phaseGap)(prev, next);
-                    //helper
+                    //helpers
                     const addPlaceholder = () => {
                         const handlePlaceholderBtnClick = key => {
                             if(key === "cancel"){ 
                                 handleCancelMilestone(); 
                             }else{
-                                //interpolate dates to get new date
-                                const interpolator = d3.interpolateDate(prev.date, next.date);
-                                handleCreateMilestone(key, interpolator(0.5), calcNewMilestoneNr(prev, next));
+                                //interpolate dates to get new date, or adds/subtracts one month if its at an end
+                                const interpolator = d3.interpolateDate(prev?.date, next?.date);
+                                const newDate = prev && next ? interpolator(0.5) :
+                                    (prev ? addMonths(1, prev.date) : addMonths(-1, next.date))
+
+                                handleCreateMilestone(key, newDate, calcNewMilestoneNr(prev, next));
                             }
                         }
 
@@ -289,13 +295,15 @@ export default function milestonesBarComponent() {
                                 .call(addMilestonePlaceholderContents, placeholderDimns, handlePlaceholderBtnClick)
                                     .transition()
                                     .duration(500)
-                                        .attr("opacity", 1);
+                                        .attr("opacity", 0.5);
 
                     }
                     //@todo - only slide if the space is not on screen, and only side a little so its on screen
-                    if(prev && next){
-                        const tempSliderPosition = prev.nr + 0.5;
-                        slideTo(tempSliderPosition, {cb:() => {
+                    //slide to between prev and next cards, unless its an the start or end
+                    const tempSliderPosition = prev && next ? prev.nr + 0.5 :(prev ? "afterEnd" : "beforeStart");
+                    slideTo(tempSliderPosition, {cb:() => {
+                        if(prev && next){
+                            //in this case, must slide cards out either side to create space
                             milestonesG.selectAll("g.profile-card")
                                 .call(updateTransform, { 
                                     //for those after, we add the phaseGap and the new hitspace that will be created from new milestone
@@ -304,21 +312,11 @@ export default function milestonesBarComponent() {
                                     y:d => d.y,
                                     transition:{ duration: 200 }
                                 });
-                            addPlaceholder();
-                        }});
-                    }else if(prev){
-                        slideToAfterEnd();
-                        //todo - work this out and next
-
-
-                        //slideTo(d3.min(data, d => d.nr) - 0.5);
-                    }else{
-                        //next card but no previous
-                        slideToBeforeStart();
-                    }
-
-                    //disable the slider
-                    onToggleSliderEnabled();
+                        }
+                        addPlaceholder();
+                        //disable the slider
+                        onToggleSliderEnabled();
+                    }});
                 }
 
                 function handleCreateMilestone(dataType, date, newMilestoneNr){

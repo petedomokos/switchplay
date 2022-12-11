@@ -250,7 +250,6 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
       ...props
     }
     const _profiles = [ ...profiles, profile];
-    console.log("saving new profile------------------------", profile)
     save({ ...hydratedData, profiles:_profiles });
     
   }, [JSON.stringify(hydratedData), userId]);
