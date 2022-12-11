@@ -13,6 +13,7 @@ const mockPlayer = {
 }
 
 const mockProfiles = [
+	/*
 	{
 	  	date:new Date("2022-09-16"),
 	  	id:"mock1", _id:"mock1", kpiStats:[], yPC:50,
@@ -29,6 +30,7 @@ const mockProfiles = [
 		date:new Date("2023-04-16"),
 		id:"mock4", _id:"mock4", kpiStats:[], yPC:50,
 	}
+	*/
 ]
 
 const mapStateToProps = (state, ownProps) => {

@@ -94,7 +94,7 @@ export const calculatePlaceholderX = (placeholderDimns, hitSpace, phaseGap) => (
     }
     //2 cases for adding card at the end
     if(prev?.isCurrent && !next){
-        return prev.x + prev.width/2 + hitSpace;
+        return prev.x + prev.width/2 + phaseGap + hitSpace;
     }
     if(prev?.isFuture && !next){
         return prev.x + prev.width/2 + hitSpace;
