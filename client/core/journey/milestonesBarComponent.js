@@ -170,7 +170,6 @@ export default function milestonesBarComponent() {
     const transformTransition = { update: { duration: 1000 } };
 
     function milestonesBar(selection, options={}) {
-        console.log("milestonesBar update")
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (_data) {
@@ -250,8 +249,6 @@ export default function milestonesBarComponent() {
                     currentSliderPosition = position
                 }
 
-                //console.log("positionedData", positionedData)
-
                 contentsG
                     .attr("transform", `translate(${margin.left},${margin.top})`)
                     .select("rect.milestones-bar-bg")
@@ -261,7 +258,6 @@ export default function milestonesBarComponent() {
                         
                 //POSITIONING
                 //offsetting due to slide
-                console.log("update", slideTransition)
                 slideTo(requiredSliderPosition, { transition:slideTransition });
 
                 const prevCard = x => d3.greatest(positionedData.filter(m => m.x < x), m => m.x);
@@ -272,6 +268,11 @@ export default function milestonesBarComponent() {
                 });
 
                 const createMilestonePlaceholder = (prev, next) => {
+                    //remove datephase labels and navigation ctrls
+                    //@todo - datephase labels could remain but would need to slide wth profile-cards
+                    //disable the slider
+                    onToggleSliderEnabled();
+                    containerG.select("g.phase-labels").attr("display", "none");
                     //positioning
                     const xOffsetForCardsBefore = calculateOffsetForCardsBeforePlaceholder(placeholderDimns, hitSpace)(prev, next);
                     const xOffsetForCardsAfter = calculateOffsetForCardsAfterPlaceholder(placeholderDimns, hitSpace, phaseGap)(prev, next);
@@ -320,8 +321,6 @@ export default function milestonesBarComponent() {
                                     });
                             }
                             addPlaceholder();
-                            //disable the slider
-                            onToggleSliderEnabled();
                         }
                     });
                 }
@@ -369,8 +368,9 @@ export default function milestonesBarComponent() {
                                                 }
                                             });
 
-                                        //re-enabled slider
+                                        //re-enabled slider and phase labels
                                         onToggleSliderEnabled();
+                                        containerG.select("g.phase-labels").attr("display", null)
                                     });
                     
                 }
@@ -378,6 +378,7 @@ export default function milestonesBarComponent() {
                     milestonesG.select("g.placeholder").remove();
                     //re-enabled slider
                     onToggleSliderEnabled();
+                    containerG.select("g.phase-labels").attr("display", null)
 
                     //make sliderPositon equal to new profile (if it wasnt cancelled)
 
