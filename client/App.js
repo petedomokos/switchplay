@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import MainRouterContainer from './MainRouterContainer'
 import {BrowserRouter} from 'react-router-dom'
 import { ThemeProvider } from '@material-ui/styles'
@@ -20,6 +20,18 @@ const store = createStore(combineReducers(
 
 const App = () => {
   
+  useEffect(() => {
+    //global listeners and settings
+    /*
+
+    note may need to add this css to template.js to work on ios
+      body { -webkit-touch-callout: none !important; }
+      a { -webkit-user-select: none !important; }
+    */
+    window.addEventListener("contextmenu", function(e) { 
+      e.preventDefault(); 
+    })
+  })
   return (
   <BrowserRouter>
       <ThemeProvider theme={theme}>
