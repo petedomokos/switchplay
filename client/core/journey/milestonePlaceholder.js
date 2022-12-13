@@ -4,8 +4,13 @@ import { grey10 } from "./constants";
 
 export function addMilestonePlaceholderContents(selection, width, height, onClick){
     selection.each(function(){
-        const placeholderG = d3.select(this);
-        placeholderG
+        //use contentsG to reposition from centre to top-left, with no margin
+        const placeholderContentsG = d3.select(this)
+            .append("g")
+                .attr("class", "placeholder-contents")
+                .attr("transform", `translate(${-width/2}, ${-height/2})`)
+
+        placeholderContentsG
             .append("rect")
                 .attr("class", "placeholder-bg")
                 .attr("width", width)
@@ -20,7 +25,7 @@ export function addMilestonePlaceholderContents(selection, width, height, onClic
             { key:"cancel", label: "CANCEL" }
         ]
 
-        placeholderG
+        placeholderContentsG
             .datum({ btnData })
             .call(ctrlsComponent()
                 .width(width)

@@ -433,7 +433,7 @@ export default function milestonesBarComponent() {
                         milestonesG
                             .append("g")
                                 .attr("class", "placeholder")
-                                .attr("transform", `translate(${placeholderX}, 0)`)
+                                .attr("transform", `translate(${placeholderX}, ${milestonesHeight/2})`)
                                 .attr("opacity", 0)
                                 .call(addMilestonePlaceholderContents, placeholderWidth, placeholderHeight, handlePlaceholderBtnClick)
                                     .transition()
@@ -556,7 +556,6 @@ export default function milestonesBarComponent() {
                             .text(d => d.label)
 
                 //call profileCsrds abd contarcts comps, passing in a yscale that centres each one
-
                 contractsG
                     .datum(positionedData.filter(m => m.dataType === "contract"))
                     .call(contracts

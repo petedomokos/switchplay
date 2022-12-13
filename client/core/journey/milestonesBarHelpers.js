@@ -68,36 +68,37 @@ export const calculateOffsetForCardsAfterPlaceholder = (placeholderWidth, hitSpa
     return 0;
 }
 
+//position it in centre of card, same as milestones
 export const calculatePlaceholderX = (placeholderWidth, hitSpace, phaseGap) => (prev, next) => {
     //between past & current
     if(prev?.isPast && next?.isCurrent){
-        return next.x - next.width/2 - hitSpace/2 - phaseGap - placeholderWidth/2;
+        return next.x - next.width/2 - hitSpace/2 - phaseGap;
     }
     //between current and future
     if(prev?.isCurrent && next?.isFuture){
-        return next.x - next.width/2 - hitSpace/2 - placeholderWidth/2 + phaseGap/2;
+        return next.x - next.width/2 - hitSpace/2 + phaseGap/2;
     }
     //between past and past
     if(prev?.isPast && next?.isPast){
-        return next.x - next.width/2 - hitSpace/2 - placeholderWidth/2;
+        return next.x - next.width/2 - hitSpace/2;
     }
     //between future and future
     if(prev?.isFuture && next?.isFuture){
-        return next.x - next.width/2 + hitSpace/2 - placeholderWidth/2;
+        return next.x - next.width/2 + hitSpace/2;
     }
     //2 cases for adding card at the start
     if(!prev && next?.isCurrent){
-        return next.x - next.width/2 - phaseGap - hitSpace - placeholderWidth;
+        return next.x - next.width/2 - phaseGap - hitSpace - placeholderWidth/2;
     }
     if(!prev && next?.isPast){
-        return next.x - next.width/2 - hitSpace - placeholderWidth;
+        return next.x - next.width/2 - hitSpace - placeholderWidth/2;
     }
     //2 cases for adding card at the end
     if(prev?.isCurrent && !next){
-        return prev.x + prev.width/2 + phaseGap + hitSpace;
+        return prev.x + prev.width/2 + phaseGap + hitSpace + placeholderWidth/2;
     }
     if(prev?.isFuture && !next){
-        return prev.x + prev.width/2 + hitSpace;
+        return prev.x + prev.width/2 + hitSpace + placeholderWidth/2;
     }
     return 0;
 
