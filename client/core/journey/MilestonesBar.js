@@ -86,6 +86,7 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
       .call(milestonesBar
           .width(width)
           .height(height)
+          .swipable(!screen.isLarge)
           .styles({
             phaseLabel:{
 
@@ -131,7 +132,7 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
         <div>
           <svg className={classes.svg} ref={containerRef} width="100%" height={height}></svg>
         </div>
-        {/**<div className={classes.ctrls}>
+        <div className={classes.ctrls}>
           <IconButton className={classes.iconBtn} onClick={milestonesBar.slideBack}
               aria-label="Home" >
               <ArrowBackIosIcon className={classes.icon}/>
@@ -140,7 +141,7 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
               aria-label="Home" >
               <ArrowForwardIosIcon className={classes.icon}/>
           </IconButton>
-        </div>*/}
+        </div>
     </div>
   )
 }

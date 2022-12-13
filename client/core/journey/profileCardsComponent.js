@@ -445,6 +445,11 @@ export default function profileCardsComponent() {
         editable = value;
         return profileCards;
     };
+    profileCards.scrollable = function (value) {
+        if (!arguments.length) { return scrollable; }
+        scrollable = value;
+        return profileCards;
+    };
     profileCards.movable = function (value) {
         if (!arguments.length) { return movable; }
         movable = value;

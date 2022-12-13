@@ -47,7 +47,7 @@ export default function milestonesBarComponent() {
     function updateDimns(data){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
-        topBarHeight = d3.min([100, contentsHeight * 0.1]);
+        topBarHeight = d3.min([30, contentsHeight * 0.1]);
         milestonesHeight = contentsHeight - topBarHeight;
         //todo - add space either side for creating new milestones
         //also space at top
@@ -113,6 +113,8 @@ export default function milestonesBarComponent() {
     }
     let _styles = () => DEFAULT_STYLES;
 
+    let swipable = true;
+
     let xScale = x => 0;
     let selected;
 
@@ -126,7 +128,6 @@ export default function milestonesBarComponent() {
 
     const drag = d3.drag();
     const enhancedDrag = dragEnhancements();
-    const enhancedBgDrag = dragEnhancements();
 
     let onClick = function(){};
     let onDblClick = function(){};
@@ -141,7 +142,6 @@ export default function milestonesBarComponent() {
     let milestonesG;
     let contractsG;
     let profilesG;
-    let dragOverlayRect;
 
     //components
     const contracts = contractsComponent();
@@ -257,13 +257,8 @@ export default function milestonesBarComponent() {
                 milestonesG.append("g").attr("class", "phase-labels");
 
                 contractsG = milestonesG.append("g").attr("class", "contracts");
-                profilesG = milestonesG.append("g").attr("class", "profiles").attr("pointer-events", "none");
+                profilesG = milestonesG.append("g").attr("class", "profiles");
 
-                dragOverlayRect = contentsG
-                    .append("g")
-                        .attr("class", "drag-overlay")
-                            .append("rect")
-                                .attr("opacity", 0);
             }
 
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
@@ -370,9 +365,9 @@ export default function milestonesBarComponent() {
                         }
                     })
                 drag
-                    .on("start", enhancedDrag(dragStart))
-                    .on("drag", enhancedDrag(dragged))
-                    .on("end", enhancedDrag(dragEnd));
+                    .on("start", swipable ? enhancedDrag(dragStart) : null)
+                    .on("drag", swipable ? enhancedDrag(dragged) : null)
+                    .on("end", swipable ? enhancedDrag(dragEnd) : null);
                 
                 let dragStartX;
                 function dragStart(e,d){
@@ -392,11 +387,7 @@ export default function milestonesBarComponent() {
                 }
 
                 milestonesWrapperG.call(drag)
-
-                //dragOverlayRect
-                    //.attr("width", contentsWidth)
-                    //.attr("height", contentsHeight)
-                    //.call(drag)
+                profilesG.attr("pointer-events", swipable ? "none" : null)
 
                 //POSITIONING
                 //offsetting due to slide
@@ -571,7 +562,8 @@ export default function milestonesBarComponent() {
                         .height(profileHeight)
                         .fontSizes(fontSizes.profile)
                         .kpiHeight(50)
-                        .editable(false)
+                        .editable(swipable ? false : true)
+                        .scrollable(swipable ? false : true)
                         .onClick(() => { console.log("handler: profile card clicked")})
                         .onClickKpi(onSelectKpiSet)
                         .onDblClickKpi((e,d) => {
@@ -674,6 +666,11 @@ export default function milestonesBarComponent() {
             _styles = (d,i) => ({ ...DEFAULT_STYLES, ...value });
         }
         
+        return milestonesBar;
+    };
+    milestonesBar.swipable = function (value) {
+        if (!arguments.length) { return swipable; }
+        swipable = value;
         return milestonesBar;
     };
     milestonesBar.selected = function (value) {

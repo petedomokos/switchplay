@@ -174,8 +174,11 @@ export default function kpisComponent() {
                         const listG = contentsG.select("g.kpis-list")
                             .attr('clip-path', "url(#clip)")
                         if(scrollable){
+                            console.log("adding scroll!!!!!!!!!!!")
                             //this is a temp fix - we need to be able to toggle it 
                             listG.call(listScrollZoom);
+                        }else{
+                            console.log("not scrollable!!!!")
                         }
 
                         const clipRect = listG.select("clipPath#clip").select('rect');
