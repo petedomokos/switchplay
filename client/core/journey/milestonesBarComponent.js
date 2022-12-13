@@ -151,6 +151,8 @@ export default function milestonesBarComponent() {
     let requiredSliderPosition = 0;
     let currentSliderPosition;
     let currentSliderOffset;
+    let canSlideForward;
+    let canSlideBack;
     let slideBack;
     let slideForward;
     let slideTo;
@@ -302,6 +304,8 @@ export default function milestonesBarComponent() {
                     //called again before this slide has ended
                     currentSliderPosition = position;
                     currentSliderOffset = offset;
+                    canSlideBack = currentSliderPosition === null || currentSliderPosition > positionedData[0].nr;
+                    canSlideForward = currentSliderPosition === null || currentSliderPosition < positionedData[positionedData.length - 1].nr;
                 }
 
                 slideToOffset = function(offset, options={} ){
@@ -316,6 +320,8 @@ export default function milestonesBarComponent() {
                     });
                     currentSliderOffset = offset;
                     currentSliderPosition = null;
+                    canSlideForward = true;
+                    canSlideBack = true;
                 }
 
                 containerG.select("rect.container-bg")
@@ -371,10 +377,11 @@ export default function milestonesBarComponent() {
                 
                 let dragStartX;
                 function dragStart(e,d){
+                    //check pos
                     dragStartX = e.x;
-                    console.log("ds", e, d)
                 }
                 function dragged(e,d){
+                    if((e.dx > 0 && !canSlideBack) || (e.dx < 0 && !canSlideForward)){ return; }
                     slideToOffset(currentSliderOffset + e.dx)
                 }
                 function dragEnd(e,d){
@@ -593,14 +600,14 @@ export default function milestonesBarComponent() {
                 }
 
                 slideBack = function(){
-                    if(currentSliderPosition > d3.min(data, d => d.nr)){
+                    if(canSlideBack){
                         requiredSliderPosition -= 1;
                         update(data, { slideTransition });
                     }
                 }
 
                 slideForward = function(){
-                    if(currentSliderPosition < d3.max(data, d => d.nr)){
+                    if(canSlideForward){
                         requiredSliderPosition += 1;
                         update(data, { slideTransition });
                     }
