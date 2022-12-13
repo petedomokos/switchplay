@@ -79,7 +79,7 @@ export default function contractsComponent() {
             const contractG = containerG.selectAll("g.contract").data(data, d => d.id);
             contractG.enter()
                 .append("g")
-                .attr("class", d => "contract contract-"+d.id)
+                .attr("class", d => "milestone contract contract-"+d.id)
                 .each(function(d,i){
                     //console.log("entering", d)
                     //ENTER

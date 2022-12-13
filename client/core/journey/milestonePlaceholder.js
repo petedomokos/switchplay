@@ -2,8 +2,7 @@ import * as d3 from 'd3';
 import ctrlsComponent from './ctrlsComponent';
 import { grey10 } from "./constants";
 
-export function addMilestonePlaceholderContents(selection, dimns, onClick){
-    const { width, height } = dimns;
+export function addMilestonePlaceholderContents(selection, width, height, onClick){
     selection.each(function(){
         const placeholderG = d3.select(this);
         placeholderG

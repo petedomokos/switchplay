@@ -75,13 +75,12 @@ const useStyles = makeStyles((theme) => ({
     //marginBottom:DIMNS.journey.margin.bottom,
   },
   overlay:{
-    //position:"absolute",
+    position:"absolute",
     background:grey10(9),
-    border:"solid",
     width:"100%",
     height:"100%",
     flexDirection:"column",
-    justifyContent:"center",
+    //justifyContent:"center",
     alignItems:"center",
   },
   svg:{
@@ -624,7 +623,9 @@ const Journey = ({ data, userInfo, userKpis, datasets, availableJourneys, screen
               setKpiFormat={setKpiFormat}
               onCreateMilestone={handleCreateMilestone}
               onDeleteMilestone={handleDeleteMilestone}
-              screen={screen} 
+              screen={screen}
+              availWidth={width}
+              availHeight={height}
             />
           }
           {/**selectedKpiSet && 

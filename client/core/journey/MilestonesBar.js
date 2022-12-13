@@ -29,9 +29,9 @@ const useStyles = makeStyles((theme) => ({
   },
   ctrls:{
     width:"100%",//DIMNS.milestonesBar.ctrls.width,
-    height:DIMNS.milestonesBar.ctrls.height,
+    height:props => props.bottomCtrlsBarHeight,
     alignSelf:"center",
-    display:props => props.sliderEnabled ? "flex" : "none",
+    display:props => props.sliderEnabled && props.bottomCtrlsBarHeight !== 0 ? "flex" : "none",
     justifyContent:"center",
     alignItems:"center",
   },
@@ -51,33 +51,24 @@ const sortAscending = (data, accessor =  d => d) => {
   const dataCopy = data.map(d => d);
   return dataCopy.sort((a, b) => d3.ascending(accessor(a), accessor(b)))
 };
-const scaleDimn = (dimn, k) => dimn * k;
-const scaleDimns = (dimns, k) => ({
-    width:dimns.width * k,
-    height:dimns.height * k,
-})
 
 const layout = milestonesLayout();
 const milestonesBar = milestonesBarComponent();
 
-const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, screen }) => {
+const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, screen, availWidth, availHeight }) => {
   //console.log("MBar", contracts, profiles)
   //local state
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
   const [bgMenuLocation, setBgMenuLocation] = useState("");
   const [sliderEnabled, setSliderEnabled] = useState(true);
 
-  const bottomCtrlsBarHeight = 100;
-  const height = d3.min([DIMNS.milestonesBar.height, screen.height - bottomCtrlsBarHeight])
-  let styleProps = { height, sliderEnabled };
+  const width = availWidth;
+  const bottomCtrlsBarHeight = screen.isLarge ? DIMNS.milestonesBar.ctrls.height : 0;
+  const height = d3.min([DIMNS.milestonesBar.maxHeight, availHeight - bottomCtrlsBarHeight])
+  let styleProps = { bottomCtrlsBarHeight, height, sliderEnabled };
   const classes = useStyles(styleProps) ;
   const containerRef = useRef(null);
 
-  const k = height / DIMNS.milestonesBar.height;
-  const scale = dimns => scaleDimns(dimns, k);
-  const contractDimns = scale(DIMNS.milestonesBar.contract);
-  const profileCardDimns = scale(DIMNS.milestonesBar.profile);
-  const kpiListHeight = scaleDimn(DIMNS.milestonesBar.list.height, k);
   //init
   useEffect(() => {
     if(!containerRef.current){return; }
@@ -93,17 +84,27 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
     d3.select(containerRef.current)
       .datum(layout(orderedData))
       .call(milestonesBar
-          .width(screen.width)
-          .height(kpiListHeight)
-          .profileCardDimns(profileCardDimns)
-          .contractDimns(contractDimns)
-          .fontSizes({
-            //@todo - replace with styles, and fix so we dont have to increase k by 2.5
-            profile: FONTSIZES.profile(k * 2.5),
-            contract: FONTSIZES.contract(k * 2.5)
+          .width(width)
+          .height(height)
+          .styles({
+            phaseLabel:{
+
+            },
+            profile:{
+              
+            },
+            contract:{
+
+            }
           })
+          //.height(kpiListHeight)
+          //.profileCardDimns(profileCardDimns)
+          //.contractDimns(contractDimns)
           .onSetKpiFormat(setKpiFormat)
-          .onSelectKpiSet((e,kpi) => { onSelectKpiSet(kpi); })
+          .onSelectKpiSet((e,kpi) => { 
+            console.log("select kpi set")
+            onSelectKpiSet(kpi); 
+          })
           .onToggleSliderEnabled(() => setSliderEnabled(prevState => !prevState))
           .onCreateMilestone(onCreateMilestone)
           .onDeleteMilestone(onDeleteMilestone)
@@ -127,10 +128,10 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
 
   return (
     <div className={classes.root}>
-        <div style={{background:"black" }}>
-          <svg className={classes.svg} ref={containerRef} width="100%" height={kpiListHeight}></svg>
+        <div>
+          <svg className={classes.svg} ref={containerRef} width="100%" height={height}></svg>
         </div>
-        <div className={classes.ctrls}>
+        {/**<div className={classes.ctrls}>
           <IconButton className={classes.iconBtn} onClick={milestonesBar.slideBack}
               aria-label="Home" >
               <ArrowBackIosIcon className={classes.icon}/>
@@ -139,7 +140,7 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
               aria-label="Home" >
               <ArrowForwardIosIcon className={classes.icon}/>
           </IconButton>
-        </div>
+        </div>*/}
     </div>
   )
 }

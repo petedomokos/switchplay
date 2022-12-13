@@ -100,7 +100,7 @@ export const DIMNS = {
         }
     },
     milestonesBar:{
-        height:600,
+        maxHeight:800,
         //@todo - margins left and right should be 20
         margin:{ left:20, right:20, top:0, bottom:0 },
         PHASE_GAP_MULTIPLE: 0.15,
@@ -115,14 +115,6 @@ export const DIMNS = {
         timeCategory:{
             height:30
         },
-        profile:{
-            width:300,
-            height:450,
-        },
-        contract:{
-            width:200,
-            height:250,
-        }
     },
     ctrls:{
         btnWidth:130,
@@ -163,8 +155,8 @@ export const DIMNS = {
 
     },
     contract:{
-        width:50,
-        height:70
+        width:60,
+        height:75
     },
     profile:{
         width:100,

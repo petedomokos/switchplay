@@ -1,3 +1,24 @@
+
+export function ptIsOnMilestone(pt, milestone){
+    const _x = pt.x || pt[0];
+    const _y = pt.y || pt[1];
+    const { x, y, width, height } = milestone;
+    const horizExtent = [x - width/2, x + width/2];
+    const vertExtent = [y - height/2, y + height/2];
+    const isInHorizRange = _x >= horizExtent[0] && _x <= horizExtent[1];
+    const isInVertRange = _y >= vertExtent[0] && _y <= vertExtent[1];
+    return isInHorizRange && isInVertRange;
+}
+
+export function milestoneContainingPt(pt, milestones=[]){
+    return milestones.find(m => ptIsOnMilestone(pt, m))
+}
+
+export function ptIsOnAMilestone(pt, milestones){
+    return !!milestoneContainingPt(pt, milestones);
+}
+
+
 export function pointIsInRect(pt, rect){
     const { x, y, width, height } = rect;
     return pt.x > x && pt.x < (x + width) && pt.y > y && pt.y < (y + height);

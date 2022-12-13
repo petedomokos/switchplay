@@ -47,7 +47,9 @@ export default function profileCardsComponent() {
     let calcY = d => typeof d.y === "number" ? d.y : yScale(d[yKey]);
 
     let selected;
-    let editable;
+    let editable = false;
+    let movable = true;
+    let scrollable = false;
 
     //API CALLBACKS
     let onClick = function(){};
@@ -86,8 +88,6 @@ export default function profileCardsComponent() {
         // expression elements
         selection.each(function (data) {
             updateDimns();
-            //console.log("profileCards update", data)
-            //console.log("profileCards update")
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
             containerG = d3.select(this);
@@ -102,12 +102,16 @@ export default function profileCardsComponent() {
             const drag = editable ? () => {} : d3.drag()
                 .on("start", enhancedDrag(dragStart))
                 .on("drag", enhancedDrag(dragged))
-                .on("end", enhancedDrag(dragEnd)); 
+                .on("end", enhancedDrag(dragEnd))
+                /*.container(function(){
+                    console.log("this p p", this.parentNode.parentNode.parentNode)
+                    return this.parentNode.parentNode.parentNode
+                });*/ 
 
             const profileCardG = containerG.selectAll("g.profile-card").data(data, d => d.id);
             profileCardG.enter()
                 .append("g")
-                .attr("class", d => "profile-card profile-card-"+d.id)
+                .attr("class", d => "milestone profile-card profile-card-"+d.id)
                 .each(function(d,i){
                     profileInfoComponents[d.id] = profileInfoComponent();
                     kpisComponents[d.id] = kpisComponent();
@@ -133,6 +137,8 @@ export default function profileCardsComponent() {
                 //.call(transform, { x: d => d.x, y:d => d.y }, transitionEnter && transitionsOn)
                 .call(updateTransform, { x:calcX, y:calcY, transition:transformTransition.enter })
                 .merge(profileCardG)
+                //.on("click", () => { console.log("prof card click native")})
+                .call(drag)
                 .call(updateTransform, { x:calcX, y:calcY, transition:transformTransition.update })
                 .each(function(d){
                     const profileInfo = profileInfoComponents[d.id]
@@ -147,6 +153,7 @@ export default function profileCardsComponent() {
                         .kpiHeight(kpiHeight)
                         .fontSizes(fontSizes.kpis)
                         .editable(editable)
+                        .scrollable(scrollable)
                         .onCtrlClick(onCtrlClick)
                         .onListScrollZoom(function(e){
                             data.filter(p => p.id !== d.id).forEach(p => {
@@ -180,7 +187,7 @@ export default function profileCardsComponent() {
                     contentsG.selectAll("g.kpis")
                         .attr("transform", "translate(0," +(contentsHeight/2) +")")
                         .datum(d.kpis)
-                        .call(kpis)
+                        .call(kpis);
 
                     //targ
                     /*
@@ -220,7 +227,7 @@ export default function profileCardsComponent() {
                             
                 })
                 //.call(updateHighlighted)
-                .call(drag)
+                //.call(drag)
                 .each(function(d){
 
                 })
@@ -301,16 +308,19 @@ export default function profileCardsComponent() {
             })
 
             function dragStart(e , d){
-                d3.select(this).raise();
-
+                if(movable){
+                    d3.select(this).raise();
+                }
                 onDragStart.call(this, e, d)
             }
             function dragged(e , d){
                 //controlled components
-                const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
-                d3.select(this)
-                    .attr("transform", "translate(" + (translateX +e.dx) +"," + (translateY + e.dy) +")")
-                    //.call(updateTransform, { x: d => d.displayX })
+                if(movable){
+                    const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
+                    d3.select(this)
+                        .attr("transform", "translate(" + (translateX +e.dx) +"," + (translateY + e.dy) +")")
+                        //.call(updateTransform, { x: d => d.displayX })
+                }
         
                 //onDrag does nothing
                 onDrag.call(this, e, d)
@@ -333,7 +343,7 @@ export default function profileCardsComponent() {
 
             //longpress
             function longpressStart(e, d) {
-                //console.log("lp start")
+                console.log("lp start")
                 //todo - check defs appended, and use them here, then longopressDrag should trigger the delete of a goal
                 //then do same for aims and links
                 /*
@@ -433,6 +443,11 @@ export default function profileCardsComponent() {
     profileCards.editable = function (value) {
         if (!arguments.length) { return editable; }
         editable = value;
+        return profileCards;
+    };
+    profileCards.movable = function (value) {
+        if (!arguments.length) { return movable; }
+        movable = value;
         return profileCards;
     };
     profileCards.selected = function (value) {

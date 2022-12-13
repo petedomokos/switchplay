@@ -70,6 +70,7 @@ export default function kpisComponent() {
     let isSelected = d => false;
 
     let editable = false;
+    let scrollable = false;
 
     //API CALLBACKS
     let onClickKpi = function(){};
@@ -172,7 +173,10 @@ export default function kpisComponent() {
 
                         const listG = contentsG.select("g.kpis-list")
                             .attr('clip-path', "url(#clip)")
-                            .call(listScrollZoom);
+                        if(scrollable){
+                            //this is a temp fix - we need to be able to toggle it 
+                            listG.call(listScrollZoom);
+                        }
 
                         const clipRect = listG.select("clipPath#clip").select('rect');
                         clipRect
@@ -199,13 +203,12 @@ export default function kpisComponent() {
                             //.translateExtent([[0, -listItemsHeight],[0, listItemsHeight]])
                             //.translateExtent([[0, 0], [0, 1]])
                             .on('zoom', function(e){
-                            //console.log("zoom", e)
-                            handleListScrollZoom.call(this, e);
-                            //only pass to the callback if its a zoom event, not a programmatic zoom
-                            if(e.sourceEvent){
-                                onListScrollZoom.call(this, e)
-                            }
-                        })
+                                handleListScrollZoom.call(this, e);
+                                //only pass to the callback if its a zoom event, not a programmatic zoom
+                                if(e.sourceEvent){
+                                    onListScrollZoom.call(this, e)
+                                }
+                            })
 
                         listG.select("rect.list-bg")
                             .attr("width", listWidth)
@@ -427,6 +430,11 @@ export default function kpisComponent() {
     kpis.editable = function (value) {
         if (!arguments.length) { return editable; }
         editable = value;
+        return kpis;
+    };
+    kpis.scrollable = function (value) {
+        if (!arguments.length) { return scrollable; }
+        scrollable = value;
         return kpis;
     };
     // todo - kpiClick not working in KpiView
