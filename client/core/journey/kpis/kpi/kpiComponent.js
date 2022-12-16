@@ -104,21 +104,13 @@ export default function kpiComponent() {
         selection
             .call(container()
                 .className("kpi-contents")
-                .transform((d, i) => {
-                    //console.log("trans", i, dimns[i].margin.top)
-                    return `translate(${dimns[i].margin.left},${dimns[i].margin.top})`
-                })
+                .transform((d, i) => `translate(${dimns[i].margin.left},${dimns[i].margin.top})`)
             )
         const kpiContents = selection.select("g.kpi-contents");
         kpiContents
             .call(background()
                 .width((d,i) => dimns[i].contentsWidth)
-                .height((d,i) => {
-                    if(i === 0){
-                        //console.log("kpiContents...bg", i, dimns[i])
-                    }
-                    return dimns[i].contentsHeight
-                })
+                .height((d,i) => dimns[i].contentsHeight)
                 .styles((d, i) => ({
                     stroke:"blue"
                 })))

@@ -27,7 +27,9 @@ export default function kpisComponent() {
     let btnFontSize;
 
     let kpiWidth;
-    let kpiHeight = 100;
+
+    let fixedKpiHeight;
+    let kpiHeight;
     let gapBetweenKpis;
 
     let fixedSelectedKpiHeight;
@@ -51,10 +53,14 @@ export default function kpisComponent() {
         btnWidth = ctrlsContentsWidth / nrCtrlsButtons;
         btnHeight = ctrlsContentsHeight;
         
+        //width
         listWidth = contentsWidth;
-        listHeight = contentsHeight - ctrlsHeight;
-
         kpiWidth = contentsWidth;
+
+        //height
+        listHeight = contentsHeight - ctrlsHeight;
+        kpiHeight = fixedKpiHeight || listHeight/5;
+
         //kpi margin
         gapBetweenKpis = kpiHeight * 0.3;
 
@@ -174,11 +180,8 @@ export default function kpisComponent() {
                         const listG = contentsG.select("g.kpis-list")
                             .attr('clip-path', "url(#clip)")
                         if(scrollable){
-                            console.log("adding scroll!!!!!!!!!!!")
                             //this is a temp fix - we need to be able to toggle it 
                             listG.call(listScrollZoom);
-                        }else{
-                            console.log("not scrollable!!!!")
                         }
 
                         const clipRect = listG.select("clipPath#clip").select('rect');
@@ -401,8 +404,8 @@ export default function kpisComponent() {
         return kpis;
     };
     kpis.kpiHeight = function (value) {
-        if (!arguments.length) { return kpiHeight; }
-        kpiHeight = value;
+        if (!arguments.length) { return fixedKpiHeight; }
+        fixedKpiHeight = value;
         return kpis;
     };
     kpis.selectedKpiHeight = function (value) {

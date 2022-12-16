@@ -6,6 +6,7 @@ import profileInfoComponent from './profileInfoComponent';
 import kpisComponent from './kpis/kpisComponent';
 import { Oscillator } from './domHelpers';
 import { getTransformationFromTrans } from './helpers';
+const noop = () => {};
 /*
 
 */
@@ -18,11 +19,17 @@ export default function profileCardsComponent() {
     let contentsWidth;
     let contentsHeight;
 
+    let infoHeight;
+    let kpisHeight;
+
+    let kpiHeight;
+
     function updateDimns(){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
+        infoHeight = contentsHeight/2;
+        kpisHeight = contentsHeight/2;
     }
-    let kpiHeight = 100;
 
     let fontSizes = {
         info:{
@@ -37,6 +44,16 @@ export default function profileCardsComponent() {
         }
     };
 
+    //each ctrl should have a label, icon a handler
+    let topRightCtrls = [];
+
+    //state
+    let expanded = [];
+    let selected;
+    let editable = false;
+    let movable = true;
+    let scrollable = false;
+
     let transformTransition = { enter: null, update: null };
 
     let xScale = x => 0;
@@ -45,11 +62,6 @@ export default function profileCardsComponent() {
     let yKey = "yPC";
     let calcX = d => typeof d.x === "number" ? d.x : xScale(d[xKey]);
     let calcY = d => typeof d.y === "number" ? d.y : yScale(d[yKey]);
-
-    let selected;
-    let editable = false;
-    let movable = true;
-    let scrollable = false;
 
     //API CALLBACKS
     let onClick = function(){};
@@ -84,6 +96,7 @@ export default function profileCardsComponent() {
 
 
     function profileCards(selection, options={}) {
+        //console.log("update profCards expanded", expanded)
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
         // expression elements
         selection.each(function (data) {
@@ -131,26 +144,38 @@ export default function profileCardsComponent() {
 
                     contentsG.append("g").attr("class", "info")
                     contentsG.append("g").attr("class", "kpis")
+
+                    contentsG.append("g").attr("class", "top-right-ctrls")
                 
                 })
                 .style("cursor", editable ? "default" : "grab")
                 //.call(transform, { x: d => d.x, y:d => d.y }, transitionEnter && transitionsOn)
-                .call(updateTransform, { x:calcX, y:calcY, transition:transformTransition.enter })
+                .call(updateTransform, { 
+                    x:calcX, 
+                    y:calcY, 
+                    scale:d => expanded.find(m => m.id === d.id)?.k || 1,
+                    transition:transformTransition.enter 
+                })
                 .merge(profileCardG)
                 //.on("click", () => { console.log("prof card click native")})
-                .call(drag)
-                .call(updateTransform, { x:calcX, y:calcY, transition:transformTransition.update })
+                //.call(drag)
+                .call(updateTransform, { 
+                    x:calcX, 
+                    y:calcY,
+                    scale:d => expanded.find(m => m.id === d.id)?.k || 1,
+                    transition:transformTransition.update 
+                })
                 .each(function(d){
                     const profileInfo = profileInfoComponents[d.id]
                         .width(contentsWidth)
-                        .height(contentsHeight/2)
+                        .height(infoHeight)
                         .fontSizes(fontSizes.info)
                         .editable(editable);
 
                     const kpis = kpisComponents[d.id]
                         .width(contentsWidth)
-                        .height(contentsHeight/2)
-                        .kpiHeight(kpiHeight)
+                        .height(kpisHeight)
+                        .kpiHeight(kpiHeight) //may be undefined
                         .fontSizes(fontSizes.kpis)
                         .editable(editable)
                         .scrollable(scrollable)
@@ -189,6 +214,42 @@ export default function profileCardsComponent() {
                         .datum(d.kpis)
                         .call(kpis);
 
+                    let btnWidth = 25;
+                    let btnHeight = 25;
+
+                    const topRightBtnG = contentsG.select("g.top-right-ctrls")
+                        .attr("transform", `translate(${contentsWidth * 0.98}, ${contentsHeight * 0.02})`)
+                        .selectAll("g.top-right-btn")
+                        .data(topRightCtrls, d => d.label)
+                    
+                    topRightBtnG.enter()
+                        .append("g")
+                            .attr("class", "top-right-btn")
+                            .each(function(d){
+                                d3.select(this)
+                                    .append("rect")
+                                        .attr("fill", "transparent");
+
+                                d3.select(this)
+                                    .append("path")
+                                        .attr("fill", grey10(3))
+                                        .attr("stroke", grey10(3))
+                            })
+                            .merge(topRightBtnG)
+                            .attr("transform", (d,i) => `translate(${-(i + 1) * btnWidth})`)
+                            .each(function(d){
+                                d3.select(this).select("rect")
+                                    .attr("width", btnWidth)
+                                    .attr("height", btnHeight)
+
+                                d3.select(this).select("path")
+                                    .attr("d", d.icon.d)
+                            })
+                            .on("click",(e,d) => { if(d.onClick){ d.onClick(d)} })
+                            .on("mouseover", (e,d) => { if(d.onMouseover){ d.onMouseover(d)} })
+                            .on("mouseout", (e,d) => { if(d.onMouseout){ d.onMouseout(d)} })
+
+                    topRightBtnG.exit().remove();
                     //targ
                     /*
                     let kpiData = [];
@@ -234,17 +295,17 @@ export default function profileCardsComponent() {
 
             function updateTransform(selection, options={}){
                 //console.log("updateTransform profileCards", options.transition)
-                const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
+                const { x = d => d.x, y = d => d.y, scale = d => 1, transition, cb = () => {} } = options;
                 selection.each(function(d){
                     if(transition){
                         d3.select(this)
                             .transition()
                             .duration(200)
-                                .attr("transform", "translate("+x(d) +"," +y(d) +")")
+                                .attr("transform", `translate(${x(d)} , ${y(d)}) scale(${scale(d)})`)
                                 .on("end", cb);
                     }else{
                         d3.select(this)
-                            .attr("transform", "translate("+x(d) +"," +y(d) +")");
+                            .attr("transform", `translate(${x(d)} , ${y(d)}) scale(${scale(d)})`);
                         
                         cb.call(this);
                     }
@@ -431,13 +492,18 @@ export default function profileCardsComponent() {
         return profileCards;
     };
     profileCards.kpiHeight = function (value) {
-        if (!arguments.length) { return kpiHeight; }
+        if (!arguments.length) { return fixedKpiHeight; }
         kpiHeight = value;
         return profileCards;
     };
     profileCards.fontSizes = function (values) {
         if (!arguments.length) { return fontSizes; }
         fontSizes = { ...fontSizes, ...values };
+        return profileCards;
+    };
+    profileCards.expanded = function (value) {
+        if (!arguments.length) { return expanded; }
+        expanded = value;
         return profileCards;
     };
     profileCards.editable = function (value) {
@@ -458,6 +524,11 @@ export default function profileCardsComponent() {
     profileCards.selected = function (value) {
         if (!arguments.length) { return selected; }
         selected = value;
+        return profileCards;
+    };
+    profileCards.topRightCtrls = function (value) {
+        if (!arguments.length) { return topRightCtrls; }
+        topRightCtrls = value;
         return profileCards;
     };
     profileCards.longpressed = function (value) {

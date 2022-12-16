@@ -6,7 +6,8 @@ import dragEnhancements from './enhancedDragHandler';
 import { calculateOffsetForCardsBeforePlaceholder, calculateOffsetForCardsAfterPlaceholder, calculatePlaceholderX, calcNewMilestoneNr } from "./milestonesBarHelpers";
 import { addMilestonePlaceholderContents, removeMilestonePlaceholderContents } from './milestonePlaceholder';
 import { addMonths } from '../../util/TimeHelpers';
-import { pointIsOnAMilestone, ptIsOnAMilestone } from "./screenGeometryHelpers";
+import { milestoneContainingPt } from "./screenGeometryHelpers";
+import { icons } from '../../util/icons';
 /*
 
 */
@@ -116,6 +117,8 @@ export default function milestonesBarComponent() {
     let swipable = true;
 
     let xScale = x => 0;
+
+    //state
     let selected;
 
     let kpiFormat;
@@ -265,7 +268,7 @@ export default function milestonesBarComponent() {
 
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
             function update(data, options={}){
-                const { slideTransition } = options;
+                const { slideTransition, milestoneTransition } = options;
 
                 //milestone positioning
                 const calcX = calcMilestoneX(data);
@@ -351,29 +354,35 @@ export default function milestonesBarComponent() {
                 const adjustPtForData = pt => ({ x: pt.x - currentSliderOffset, y: pt.y - topBarHeight })
                 enhancedDrag
                     .onClick(function(e, d){
+                        /*
                         console.log("clicked.....")
-                        if(ptIsOnAMilestone(adjustPtForData(e), positionedData)){
+                        const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
+                        if(milestone){
                         }else{
                         }
+                        */
                     })
                     .onDblClick(function(e,d){
-                        console.log("dblClick.....")
-                        if(ptIsOnAMilestone(adjustPtForData(e), positionedData)){
-                        }else{
+                        const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
+                        if(milestone){
+                            selected = milestone.id;
+                            update(data, { milestoneTransition:{ update:{ duration:2000 }}});
                         }
                     })
                     .onLongpressStart(function(e, d){
                         const pt = adjustPtForData(e);
-                        if(ptIsOnAMilestone(pt, positionedData)){
+                        const milestone = milestoneContainingPt(pt, positionedData);
+                        console.log("m", milestone)
+                        if(milestone){
                             console.log("remove animation")
                         }else{
                             createMilestonePlaceholder(prevCard(pt.x), nextCard(pt.x))
                         }
                     })
                 drag
-                    .on("start", swipable ? enhancedDrag(dragStart) : null)
-                    .on("drag", swipable ? enhancedDrag(dragged) : null)
-                    .on("end", swipable ? enhancedDrag(dragEnd) : null);
+                    .on("start", swipable && !selected ? enhancedDrag(dragStart) : null)
+                    .on("drag", swipable && !selected ? enhancedDrag(dragged) : null)
+                    .on("end", swipable && !selected ? enhancedDrag(dragEnd) : null);
                 
                 let dragStartX;
                 function dragStart(e,d){
@@ -394,7 +403,7 @@ export default function milestonesBarComponent() {
                 }
 
                 milestonesWrapperG.call(drag)
-                profilesG.attr("pointer-events", swipable ? "none" : null)
+                profilesG.attr("pointer-events", swipable && !selected ? "none" : null)
 
                 //POSITIONING
                 //offsetting due to slide
@@ -523,6 +532,7 @@ export default function milestonesBarComponent() {
                         prevSliderPosition = null;
                     }
                 }
+                //console.log("data", positionedData)
 
                 //phase labels
                 const currentCard = positionedData.find(m => m.datePhase === "current")
@@ -560,7 +570,7 @@ export default function milestonesBarComponent() {
                         .width(contractWidth)
                         .height(contractHeight)
                         .fontSizes(fontSizes.contract)
-                        .transformTransition(transformTransition));
+                        .transformTransition(milestoneTransition || (transitionOn ? transformTransition : { update:null })));
 
                 profilesG
                     .datum(positionedData.filter(m => m.dataType === "profile"))
@@ -568,15 +578,27 @@ export default function milestonesBarComponent() {
                         .width(profileWidth)
                         .height(profileHeight)
                         .fontSizes(fontSizes.profile)
-                        .kpiHeight(50)
+                        .expanded([{id:selected, k:(profileWidth + (2 * hitSpace)) / profileWidth }])
+                        //.kpiHeight(30) //if we want to fix the kpiheIght
                         .editable(swipable ? false : true)
                         .scrollable(swipable ? false : true)
+                        .topRightCtrls(selected ? [
+                            //todo - toggle between expand and reduce for now, its just reduce
+                            { 
+                                label:"collapse", 
+                                icon:{ iconType:"path", d:icons.collapse.d },
+                                onClick:d => {
+                                    selected = null;
+                                    update(data, { milestoneTransition:{ update:{ duration:2000 }} })
+                                }
+                            }
+                        ] : [])
                         .onClick(() => { console.log("handler: profile card clicked")})
                         .onClickKpi(onSelectKpiSet)
                         .onDblClickKpi((e,d) => {
                             onSelectKpiSet(d);
                         })
-                        .transformTransition(transitionOn ? transformTransition : { update:null }));
+                        .transformTransition(milestoneTransition || (transitionOn ? transformTransition : { update:null })));
 
                 //functions
                 function updateTransform(selection, options={}){
