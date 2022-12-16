@@ -44,8 +44,7 @@ export default function profileCardsComponent() {
         }
     };
 
-    //each ctrl should have a label, icon a handler
-    let topRightCtrls = [];
+    let topRightCtrls = d => [];
 
     //state
     let expanded = [];
@@ -214,18 +213,19 @@ export default function profileCardsComponent() {
                         .datum(d.kpis)
                         .call(kpis);
 
+                    //top right ctrls (dependent on each card)
                     let btnWidth = 25;
                     let btnHeight = 25;
 
                     const topRightBtnG = contentsG.select("g.top-right-ctrls")
                         .attr("transform", `translate(${contentsWidth * 0.98}, ${contentsHeight * 0.02})`)
                         .selectAll("g.top-right-btn")
-                        .data(topRightCtrls, d => d.label)
+                        .data(topRightCtrls(d), b => b.label)
                     
                     topRightBtnG.enter()
                         .append("g")
                             .attr("class", "top-right-btn")
-                            .each(function(d){
+                            .each(function(){
                                 d3.select(this)
                                     .append("rect")
                                         .attr("fill", "transparent");
@@ -236,18 +236,19 @@ export default function profileCardsComponent() {
                                         .attr("stroke", grey10(3))
                             })
                             .merge(topRightBtnG)
-                            .attr("transform", (d,i) => `translate(${-(i + 1) * btnWidth})`)
-                            .each(function(d){
+                            .attr("transform", (b,i) => `translate(${-(i + 1) * btnWidth})`)
+                            .each(function(b){
                                 d3.select(this).select("rect")
                                     .attr("width", btnWidth)
                                     .attr("height", btnHeight)
 
                                 d3.select(this).select("path")
-                                    .attr("d", d.icon.d)
+                                    .attr("d", b.icon.d)
                             })
-                            .on("click",(e,d) => { if(d.onClick){ d.onClick(d)} })
-                            .on("mouseover", (e,d) => { if(d.onMouseover){ d.onMouseover(d)} })
-                            .on("mouseout", (e,d) => { if(d.onMouseout){ d.onMouseout(d)} })
+                            .style("cursor", "pointer")
+                            .on("click",(e,b) => { if(b.onClick){ b.onClick(b)} })
+                            .on("mouseover", (e,b) => { if(b.onMouseover){ b.onMouseover(b)} })
+                            .on("mouseout", (e,b) => { if(b.onMouseout){ b.onMouseout(b)} })
 
                     topRightBtnG.exit().remove();
                     //targ

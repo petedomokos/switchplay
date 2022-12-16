@@ -32,12 +32,16 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
 
   const getScreenInfo = () => {
     const size = calcScreenSize(window.innerWidth);
-    return { 
+    const screen =  { 
       width: window.innerWidth, 
       height: window.innerHeight, 
+      orientation:window.screen.orientation.type.includes("landscape") ? "landscape" : "portrait",
       size,
-      isLarge:["l", "xl"].includes(size)
+      isLarge:["l", "xl"].includes(size),
+      isSmall:["s", "xs"].includes(size),
     }
+    window._screen = screen;
+    return screen;
   }
 
   useEffect(() => {

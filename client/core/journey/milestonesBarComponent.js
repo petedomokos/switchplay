@@ -572,17 +572,25 @@ export default function milestonesBarComponent() {
                         .fontSizes(fontSizes.contract)
                         .transformTransition(milestoneTransition || (transitionOn ? transformTransition : { update:null })));
 
+                const { _screen } = window;
+                //helper
+                const horizScale = (profileWidth + (2 * hitSpace)) / profileWidth;
+                const vertScale = (milestonesHeight + topBarHeight) / profileHeight;
                 profilesG
                     .datum(positionedData.filter(m => m.dataType === "profile"))
                     .call(profiles
                         .width(profileWidth)
                         .height(profileHeight)
                         .fontSizes(fontSizes.profile)
-                        .expanded([{id:selected, k:(profileWidth + (2 * hitSpace)) / profileWidth }])
+                        .expanded([{
+                            id:selected,
+                            //if landscape, then vert space is less so we scale according to that 
+                            k: _screen.orientation === "landscape" ? vertScale : horizScale
+                        }])
                         //.kpiHeight(30) //if we want to fix the kpiheIght
                         .editable(swipable ? false : true)
                         .scrollable(swipable ? false : true)
-                        .topRightCtrls(selected ? [
+                        .topRightCtrls(d => selected === d.id ? [
                             //todo - toggle between expand and reduce for now, its just reduce
                             { 
                                 label:"collapse", 
