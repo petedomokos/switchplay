@@ -12,7 +12,7 @@ export default new mongoose.Schema({
   notes:{type:String, default:""},
   surface:String,
   fatigueLevel:String,
-  isTarget:Boolean,
+  isTarget:{type:Boolean, default:false},
   updated: Date
 })
 

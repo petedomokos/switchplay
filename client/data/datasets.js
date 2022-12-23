@@ -1,53 +1,62 @@
 import { getGoals, getStartDate } from "./goals";
-import { derivedMeasures } from './measures';
+import { getDerivedMeasures, hydrateMeasure } from './measures';
 import { mean, median, percentage, sum, difference } from "./Calculations"
 
+export function hydrateDatasets(datasets){
+    console.log("hydrate-----------------------------------", datasets)
+    return datasets.map(dset => hydrateDataset(dset))
+}
+//may be shallow or deep
 export function hydrateDataset(dataset){
-    const startDate = getStartDate(dataset);
-    const derivedMeasures = getDerivedMeasures(dataset);
-    const rawMeasures = dataset.measures.map(m => hydrateMeasure(m))
-    const datapoints = dataset.datapoints.map(d => {
+    const isDeep = !!dataset.datapoints;
+    console.log("hydratedset", isDeep, dataset)
+    //key - legacy - some dsets have no key
+    const key = dataset.key || toCamelCase(dataset.name);
+    console.log("adding key", key)
+    //owner - legacy - some dsets dont have owner
+    const owner = dataset.owner || dataset.admin[0];
+
+    //we dont bother with some properties if its a shallow version eg no datapoints or measures
+    const startDate = isDeep ? getStartDate(dataset) : null;
+    const derivedMeasures = isDeep ? getDerivedMeasures(key) : null;
+    const rawMeasures = isDeep ? dataset.measures.map(m => hydrateMeasure(m)) : null;
+    console.log("raw", rawMeasures)
+    const datapoints = isDeep ? dataset.datapoints.map(d => {
+        console.log("datapoint", d)
         //add measure key to rawMeasure values (server stores the measure id instead - need to change)
         const rawValues = d.values.map(v => {
-            //v.measure is measure _id
-            const measure = rawMeasures.find(m => m._id === v.measure);
+            console.log("value", v)
+            //v.measure is measure _id - we convert it to its key
             return {
-                ...v,
-                key:measure.key
+                key:rawMeasures.find(m => m._id === v.measure).key,
+                value:v.value
             }
         })
         //derivedValues need a measure key to access the rawValues
         const dWithValueKeys = { ...d, values:rawValues };
         return{
             ...d,
+            date:new Date(d.date),
             //values:[...d.values, ...getDerivedValues(dWithValueKeys, derivedMeasures)]
             values:[...rawValues, ...getDerivedValues(dWithValueKeys, derivedMeasures)]
         }
-    });
+    }) : null;
     return {
         ...dataset,
+        key,
+        owner,
         startDate, 
         rawMeasures, 
         derivedMeasures,
+        stats: isDeep ? [...rawMeasures, ...derivedMeasures] : null,
         datapoints
     }
 }
 
-
-export function getDerivedMeasures(dataset){
-    const measureSchemas = derivedMeasures[dataset._id];
-    if(!measureSchemas){
-        return [];
-    }
-    return measureSchemas.map(schema => hydrateMeasure(schema));
-}
-
 export function getDerivedValues(datapoint, derivedMeasures=[]){
     return derivedMeasures.map(derivedMeasure => ({
-        measure:derivedMeasure._id,
+        key:derivedMeasure.key,
         value:calcDerivedValue(datapoint, derivedMeasure.formula),
-        //fake an id - probably dont need anyway - > @TODO - move to using only key for measures and values in dataviz
-        _id:new Date().getTime() + ""
     }))
 }
 
@@ -65,7 +74,7 @@ function calcDerivedValue(datapoint, formula){
                 return valueDescription;
             }
             //must be an inner formula itself
-            console.log("its a formula", valueDescription)
+            // console.log("its a formula", valueDescription)
             return calcDerivedValue(datapoint, valueDescription);
         })
         .map(value => Number(value))
@@ -84,12 +93,10 @@ function calcDerivedValue(datapoint, formula){
 export const toCamelCase = str =>{
     if(str.length === 0) {return str; };
     return str.split(" ").map((word,i) => {
-        if(i === 0){
-            return str.toLowerCase();
-        }
-        return str[0].toUpperCase() + str.substring(1);
+        if(i === 0){ return word.toLowerCase();}
+        return word[0].toUpperCase()+ word.substring(1);
     })
-    .join("")
+    .join("");
 }
 
 const capitalize = str => {
@@ -104,20 +111,4 @@ const capitalizeAndSpace = str => {
 
 const space = str => str ? str + " " : "";
 
-export function hydrateMeasure(measure){
-    const { name, key, side, nr, custom } = measure;
-    const newKey = [key, side, nr, custom]
-        .filter(part => part)
-        .join("-");
-
-    const newName = side || nr || custom ? name + " - " +capitalizeAndSpace(side) +space(nr) + capitalize(custom) : name;
-
-    return {
-        ...measure,
-        key:newKey,
-        name:newName,
-        //use key for id for derived measures (raw measures have _id set on server)
-        _id:measure._id || newKey
-    }
-}
 

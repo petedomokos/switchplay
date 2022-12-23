@@ -11,6 +11,7 @@ import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import milestonesLayout from "./milestonesLayout";
 import milestonesBarComponent from "./milestonesBarComponent";
 import { DIMNS, FONTSIZES, grey10 } from './constants';
+import { sortAscending } from '../../util/ArrayHelpers';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -46,17 +47,12 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-//helpers
-const sortAscending = (data, accessor =  d => d) => {
-  const dataCopy = data.map(d => d);
-  return dataCopy.sort((a, b) => d3.ascending(accessor(a), accessor(b)))
-};
-
 const layout = milestonesLayout();
 const milestonesBar = milestonesBarComponent();
 
-const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, screen, availWidth, availHeight }) => {
-  //console.log("MBar", contracts, profiles)
+const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, screen, availWidth, availHeight }) => {
+  const { player, profiles, contracts } = data;
+  console.log("MBar profiles", profiles)
   //local state
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
   const [bgMenuLocation, setBgMenuLocation] = useState("");
@@ -76,11 +72,15 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
     layout
       .format(kpiFormat)
       .datasets(datasets)
-      .info(userInfo);
+      .info(player);
 
     //profiles go before contarcts of same date
     const orderedData = sortAscending([ ...profiles/*, ...contracts*/], d => d.date);
+    console.log("ordered", orderedData)
 
+    const processedData = layout(orderedData);
+    console.log("processedData", processedData);
+    /*
     d3.select(containerRef.current)
       .datum(layout(orderedData))
       .call(milestonesBar
@@ -103,29 +103,27 @@ const MilestonesBar = ({ contracts, profiles, datasets, userInfo, kpiFormat, set
           //.contractDimns(contractDimns)
           .onSetKpiFormat(setKpiFormat)
           .onSelectKpiSet((e,kpi) => { 
-            console.log("select kpi set")
             onSelectKpiSet(kpi); 
           })
           .onToggleSliderEnabled(() => setSliderEnabled(prevState => !prevState))
           .onCreateMilestone(onCreateMilestone)
           .onDeleteMilestone(onDeleteMilestone)
-          /*.onCreateMilestone(function(e,d){
-            /*console.log("placeholder", e, d)
-            if(!bgMenuLocation){
-              setBgMenuLocation(e.x);
-            }else{
+          //.onCreateMilestone(function(e,d){
+            //if(!bgMenuLocation){
+             // setBgMenuLocation(e.x);
+            //}else{
               //get the two dates either side of it, and find middle
               //addProfile
-            }
-          })*/
+            //}
+          //})
           .onMouseover(function(e,d){
             //console.log("mover")
           })
           .onMouseout(function(e,d){
             //console.log("mout")
-          }))
+          }))*/
 
-  }, [profiles.length/*JSON.stringify(contracts), JSON.stringify(profiles), JSON.stringify(datasets), userInfo, kpiFormat, screen*/])
+  }, [profiles.length/*JSON.stringify(contracts), JSON.stringify(profiles), JSON.stringify(datasets), player, kpiFormat, screen*/])
 
   return (
     <div className={classes.root}>

@@ -17,12 +17,12 @@ import PrivateRoute from './auth/PrivateRoute'
 import MenuContainer from './core/containers/MenuContainer'
 import Profile from './core/profile/Profile'
 import auth from './auth/auth-helper'
-//styles
+import ImportDataContainer from './data/ImportDataContainer'
 import './assets/styles/main.css'
 // import JourneyContainer from './core/journey/JourneyContainer'
 
 const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
-  //console.log("MainRouter", userId)
+  console.log("MainRouter", userId)
   //load user if page is refreshed. MainRouter is under the store so can 
   //trigger re-render once loaded
   const jwt = auth.isAuthenticated();
@@ -44,7 +44,14 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
     return screen;
   }
 
+  //SCREEN
+  //first time must load screen before rendering children
+  if(!window._screen){
+    updateScreen(getScreenInfo())
+  }
+
   useEffect(() => {
+      console.log("useEff.....")
       const handleResize = () => {
         updateScreen(getScreenInfo())
       };
@@ -72,6 +79,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
       <Route path="/signin" component={SigninContainer}/>
       <Switch>
           <Route path="/profile" component={Profile}/>
+          <PrivateRoute path="/import" component={ImportDataContainer} />
           {jwt ?
             <Route exact path="/" component={UserHomeContainer} />
             :

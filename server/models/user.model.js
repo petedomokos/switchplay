@@ -1,5 +1,7 @@
 import mongoose from 'mongoose'
 import crypto from 'crypto'
+import StatValueSchema from './journey/stat-value.model'
+
 const UserSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -25,6 +27,7 @@ const UserSchema = new mongoose.Schema({
     data:Buffer,
     contentType:String
   },
+  dob: Date,
   email: {
     type: String,
     trim: true,
@@ -45,6 +48,8 @@ const UserSchema = new mongoose.Schema({
   journeys:[{type:mongoose.Schema.ObjectId, ref:'Journey'}],
   readOnlyJourneys:[{type:mongoose.Schema.ObjectId, ref:'Journey'}],
   homeJourney:{type:mongoose.Schema.ObjectId, ref:'Journey'},
+
+  manualValues:[StatValueSchema],
 
   isSystemAdmin:{type:Boolean,default:false},
   hashed_password: {type: String,required: "Password is required"},

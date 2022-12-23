@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import kpisLayout from "./kpis/kpisLayout";
+import { getTargets } from "../../data/targets";
 
 export default function milestonesLayout(){
     let timeScale = x => 0;
@@ -28,7 +29,7 @@ export default function milestonesLayout(){
     }
 
     function update(data){
-        //console.log("data", data)
+        console.log("update milestonesLayout data----------------------------", data)
         const now = new Date();
         const activeProfileId = data
             .filter(m => m.dataType === "profile")
@@ -59,11 +60,12 @@ export default function milestonesLayout(){
         const numberedData = [...numberedPastData, numberedCurrent, ...numberedFutureData];
 
         return numberedData.map((m,i) => {
+            console.log("milestone-----", i, m)
             const { date, dataType, kpis } = m;
 
             if(dataType === "profile"){
                 //the key will determine if selected - we want this the same across all profile cards
-                const keyedKpis = kpis.map(kpi => ({ ...kpi, key:kpi.kpiSetId }));
+                //const keyedKpis = kpis.map(kpi => ({ ...kpi, key:kpi.kpiSetId }));
                 myKpisLayout
                     .date(date)
                     .prevCardDate(i === 0 ? undefined : data[i - 1])
@@ -75,7 +77,7 @@ export default function milestonesLayout(){
                     ...m,
                     i,
                     info,
-                    kpis:myKpisLayout(keyedKpis),
+                    kpis:myKpisLayout(kpis),
                 }
             }else{
                 //must be a contract

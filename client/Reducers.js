@@ -3,8 +3,8 @@ import _ from 'lodash'
 import * as cloneDeep from 'lodash/cloneDeep'
 import { isIn, isNotIn, isSame, filterUniqueById, filterUniqueByProperty } from './util/ArrayHelpers'
 import { InitialState } from './InitialState'
-import { getGoals } from "./data/goals";
-import { hydrateDataset } from "./data/datasets";
+import { hydrateDataset, hydrateDatasets } from "./data/datasets";
+import { hydrateUser, hydrateUsers } from './user/userHelpers';
 //HELPERS
 
 //STORE
@@ -12,13 +12,27 @@ export const user = (state=InitialState.user, act) =>{
 	switch(act.type){
 		//SIGNED IN USER
 		case C.SIGN_IN:{
-			const { admin, administeredUsers, administeredGroups, administeredDatasets, groupsMemberOf, datasetsMemberOf } = act.user;
+			console.log("signin!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			const { _id, admin, administeredUsers, administeredGroups, groupsMemberOf, journeys } = act.user;
+			
+			//HYDRATION
+			//note - we will need to re-hydrate when the deep versions are loaded too
+			//1. datasets
+			const administeredDatasets = hydrateDatasets(act.user.administeredDatasets);
+			const datasetsMemberOf = hydrateDatasets(act.user.datasetsMemberOf);
+			//2. users todo
+			//3. groups todo
+			
 			return { 
 				...state, 
-				...act.user,
-				goals:getGoals(act.user._id),
+				...hydrateUser(act.user),
+				//we hydrate them here and in loaded, but this doesnt repeat w
+				administeredDatasets,
+				datasetsMemberOf,
+				//temp- add playerid to journeys
+				journeys:journeys.map(j => ({ ...j, playerId: j.playerId || _id })),
 				//store the deeper objects here in one place
-				loadedUsers:filterUniqueById([...admin, ...administeredUsers]), //later iterations will have following etc
+				loadedUsers:filterUniqueById([...hydrateUsers(admin), ...hydrateUsers(administeredUsers)]), //later iterations will have following etc
 				loadedGroups:filterUniqueById([...administeredGroups, ...groupsMemberOf]),
 				loadedDatasets:filterUniqueById([...administeredDatasets, ...datasetsMemberOf])
 			}
@@ -31,7 +45,9 @@ export const user = (state=InitialState.user, act) =>{
 			return { ...state, ...act.user };
 		}
 		case C.SAVE_JOURNEY:{
-			const { journey } = act;
+			//const { journey } = act;
+			//temp - for now, we fake playerid here,a dn it is always userId
+			const journey = { ...act.journey, playerId:act.journey.playerId || state.user._id }
 			const currentJourney = state.journeys.find(j => j._id === journey._id);
 			if(!currentJourney){
 				//_id will be 'temp' here until saved on server
@@ -79,8 +95,36 @@ export const user = (state=InitialState.user, act) =>{
 				loadedDatasets:[...state.loadedDatasets, act.dataset]
 			}
 		}
+		//all datapoints must be from same dataset
+		case C.CREATE_NEW_DATAPOINTS:{
+			console.log("create new ds reducer................", act.datapoints)
+			if(act.datapoints.length === 0) { return state; }
+			//note - we can assume all are from same dataset
+
+			//add player info to datapoint (we only really need firstname and surname)
+			const datapointsToAdd = act.datapoints.map(d => ({
+				...d,
+				player:state.loadedUsers.find(u => u._id === d.player)
+			}))
+			console.log("dstoadd", datapointsToAdd)
+			const datasetToUpdate = state.loadedDatasets.find(dset => dset._id === act.datasetId);
+			console.log("datasetToUp", datasetToUpdate)
+			//may have not loaded deep dataset 
+			if(!datasetToUpdate?.datapoints) { 
+				console.log("no need to update ds as dont have deep!!!!!!!!!!!!!")
+				return state; }
+				console.log("updating ds in dataset!!!!!!!!!!!")
+			const updatedDataset = {
+				...datasetToUpdate,
+				datapoints:[...datasetToUpdate.datapoints, ...datapointsToAdd]
+			};
+			return { 
+				...state, 
+				loadedDatasets:filterUniqueById([updatedDataset, ...state.loadedDatasets])
+			}
+		}
 		case C.CREATE_NEW_DATAPOINT:{
-			//add player info to datapoint (we only really need firstName and surname) 
+			//add player info to datapoint (we only really need firstname and surname)
 			const datapointToAdd = {
 				...act.datapoint,
 				player:state.loadedUsers.find(u => u._id === act.datapoint.player)
@@ -232,7 +276,16 @@ export const user = (state=InitialState.user, act) =>{
 		//Note 1 - this cannot be the signed in user - they are always loaded fully
 		//Note 2 - this will overwrite/enhance any existing objects rather than replace
 		case C.LOAD_USER:{
-			const { admin, administeredUsers, administeredGroups, administeredDatasets, groupsMemberOf, datasetsMemberOf } = act.user;
+			console.log("load user!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			const { admin, administeredUsers, administeredGroups, groupsMemberOf } = act.user;
+
+			//hydration
+			//note - we will need to re-hydrate when the deep versions are loaded too
+			//1. datasets
+			const administeredDatasets = hydrateDatasets(act.user.administeredDatasets);
+			const datasetsMemberOf = hydrateDatasets(act.user.datasetsMemberOf);
+			//2. users - todo
+			//3. groupd - todo
 
 			//TODO - sort these - do we need?
 			//All teh following groups come in from server in shallow form, not just flat ids.
@@ -259,21 +312,35 @@ export const user = (state=InitialState.user, act) =>{
 				//override any properties from server, but maintain any other properties
 				return { ...existingVersion, ...groupMemberOf }
 			})
-			const mergedDatasetsMemberOf = datasetsMemberOf.map(datasetMemberOf => {
-				const existingVersion = state.loadedGroups.find(us => us._id === datasetMemberOf._id) || {};
-				//override any properties from server, but maintain any other properties
-				return { ...existingVersion, ...datasetMemberOf }
-			})
+			const mergedDatasetsMemberOf = datasetsMemberOf
+				//.map(dset => hydrateDataset(dset))
+				.map(dataset => {
+					const existingVersion = state.loadedDatasets.find(dset => dset._id === dataset._id) || {};
+					//override any properties from server, but maintain any other properties
+					return { ...existingVersion, ...dataset }
+				})
+
+			const mergedAdministeredDatasets = administeredDatasets
+				//.map(dset => hydrateDataset(dset))
+				.map(dataset => {
+					const existingVersion = state.loadedDatasets.find(us => us._id === dataset._id) || {};
+					//override any properties from server, but maintain any other properties
+					return { ...existingVersion, ...dataset }
+				})
 
 			//@TODO - put this in a hydrateUser function
 
-			const user = {...act.user, goals: getGoals(act.user._id) }
+			const user = hydrateUser(act.user);
 
 			return { 
 				...state,
+				//replace items with hydrated versions
+				administeredDatasets,
+				administeredGroups,
+				administeredUsers,
 				//user is deep , so we overide any existing version
 				loadedUsers:[user, ...state.loadedUsers],
-				loadedDatasets:filterUniqueById([...mergedDatasetsMemberOf, ...state.loadedDatasets]), //??????????????????????????????
+				loadedDatasets:filterUniqueById([...mergedAdministeredDatasets, ...mergedDatasetsMemberOf, ...state.loadedDatasets]), //??????????????????????????????
 				loadedGroups:filterUniqueById([...mergedAdministeredGroups, ...mergedGroupsMemberOf, ...state.loadedGroups]) //?????????????????????
 			}
 		}
@@ -322,7 +389,7 @@ export const user = (state=InitialState.user, act) =>{
 			//for now, all users are sent first time
 			return { 
 				...state, 
-				loadedUsers:[...state.loadedUsers, ...usersNotLoadedBefore],
+				loadedUsers:[...state.loadedUsers, ...hydrateUsers(usersNotLoadedBefore)],
 				loadsComplete:{ ...state.loadsComplete, users:'complete' }
 			}
 		}
@@ -364,16 +431,12 @@ export const user = (state=InitialState.user, act) =>{
 		case C.LOAD_DEEP_DATASETS:{
 			//start date
 			const updatedDatasets = act.datasets
-				.map(dset => hydrateDataset(dset))
 				.map(dset => {
 					//merge new datapoints with any existing (eg from another previously viewed player)
 					const datasetToUpdate = state.loadedDatasets.find(dset => dset._id === dset._id) || {};
 					//these datapoints will already have been hydrated
 					const updatedDatapoints = datasetToUpdate.datapoints ? [...datasetToUpdate.datapoints, dset.datapoints] : dset.datapoints;
-					return { 
-						...dset, 
-						datapoints:updatedDatapoints,
-					}
+					return hydrateDataset({ ...dset, datapoints:updatedDatapoints })
 			    })
 
 			return { 

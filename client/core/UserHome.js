@@ -76,7 +76,9 @@ const UserHome = ({screen, user, loading, loadingError}) => {
       {user._id && 
         <>
           <div className={classes.fullScreen}>
-            <Route path="/" component={JourneyContainer} />
+            <Switch>
+              <Route path="/" component={JourneyContainer} />
+            </Switch>
           </div>
           {/**
           <div className={classes.topRow} >

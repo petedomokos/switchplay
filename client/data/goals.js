@@ -81,9 +81,14 @@ export const getStartDate = (dataset) => {
     if(overideDate){
         return overideDate;
     }
+    if(!dataset.datapoints){
+        //its a shallow copy so cant detect startDate
+        return null;
+    }
     if(dataset.datapoints[0]){
         return d3.min(dataset.datapoints, d => new Date(d.date))
     }
+    //no datapoints exist yet, so startDate is set to now
     return new Date().toString();
 }
 

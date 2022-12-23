@@ -1,8 +1,7 @@
 import C from '../Constants'
 //import { filterUniqueByProperty } from '../util/helpers/ArrayManipulators'
-import { status, parseResponse, logError, 
-	fetchStart, fetchEnd, fetchThenDispatch, resetStatus} from './CommonActions'
-
+import { status, parseResponse, logError, fetchStart, fetchEnd, fetchThenDispatch, resetStatus} from './CommonActions'
+import auth from '../auth/auth-helper'
 	
 export const createDatapoint = (datasetId, datapoint) => dispatch => {
     fetchThenDispatch(dispatch, 
@@ -15,6 +14,25 @@ export const createDatapoint = (datasetId, datapoint) => dispatch => {
 			//this action will also set dialog.createUser = true
 			nextAction: data => {
 				return {type:C.CREATE_NEW_DATAPOINT, mesg:data.mesg, datasetId:datasetId, datapoint:data }
+			}
+		})
+}
+
+export const createDatapoints = (datasetId, datapoints) => dispatch => {
+	console.log("Action createDatapoints", datasetId, datapoints)
+	const user = auth.isAuthenticated()?.user;
+	console.log("user", user)
+    fetchThenDispatch(dispatch, 
+		'creating.datapoints',
+		{
+			url: `/api/users/${user._id}/datasets/${datasetId}/datapoints/create`,
+			method: 'PUT',
+			body:JSON.stringify(datapoints),
+			requireAuth:true,
+			//this action will also set dialog.createUser = true
+			nextAction: data => {
+				console.log("next action.....")
+				return {type:C.CREATE_NEW_DATAPOINTS, mesg:data.mesg, datasetId:datasetId, datapoints:data }
 			}
 		})
 }

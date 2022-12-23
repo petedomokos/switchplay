@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import StatValueSchema from './stat-value.model'
 
 export default new mongoose.Schema({
   id:{
@@ -11,6 +12,7 @@ export default new mongoose.Schema({
   yPC:String,
   colour:String,
   kpiStats:[String],
+  targets:[StatValueSchema],
   updated: Date,
   created: {type: Date, default: Date.now}
 })

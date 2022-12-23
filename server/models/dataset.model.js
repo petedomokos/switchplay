@@ -3,7 +3,11 @@ import DatapointSchema from './datapoint.model'
 import DatasetMeasureSchema from './dataset-measure.model'
 import CalculationSchema from './calculation.model'
 
-const DatasetSchema = new mongoose.Schema({ 
+const DatasetSchema = new mongoose.Schema({
+  key:{
+    type: String,
+    trim: true,
+  },
   name:{
     type: String,
     trim: true,
@@ -19,6 +23,7 @@ const DatasetSchema = new mongoose.Schema({
   //datasetType:String,
   photo:{data:Buffer,contentType:String},
   //users who have admin rights over this dataset
+  owner:{type:mongoose.Schema.ObjectId, ref:'User'},
   admin:[{type:mongoose.Schema.ObjectId, ref:'User'}],
   measures:[{type:DatasetMeasureSchema}],
   //todo - addDerivedmeasures here and remove calculations and change measures to rawmeasures
@@ -35,8 +40,8 @@ const DatasetSchema = new mongoose.Schema({
   datapoints:[{type:DatapointSchema}],
   notes:{type: String, default:""},
   tags:[String],
+  created: {type: Date,default: Date.now},
   updated: Date,
-  created: {type: Date,default: Date.now}
 })
 
 //module.exports = {

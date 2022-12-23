@@ -1,6 +1,5 @@
 import C from '../Constants'
-import { status, parseResponse, logError, 
-	fetchStart, fetchEnd, fetchThenDispatch} from './CommonActions'
+import { status, parseResponse, logError, fetchStart, fetchEnd, fetchThenDispatch} from './CommonActions'
 import auth from '../auth/auth-helper'
 
 const transformJourneyForServer = journey => {

@@ -8,6 +8,10 @@ import JourneyMeasureSchema from './journey-measure.model';
 
 const JourneySchema = new mongoose.Schema({
   userId:{type:mongoose.Schema.ObjectId, ref:'User'},
+  //each journey either has a player, coach or team id, ie who the journey is about
+  playerId:{type:mongoose.Schema.ObjectId, ref:'User'},
+  coachId:{type:mongoose.Schema.ObjectId, ref:'User'},
+  groupId:{type:mongoose.Schema.ObjectId, ref:'Group'},
   //users who have admin rights over this journey
   admin:[{type:mongoose.Schema.ObjectId, ref:'User'}],
   //users who have read-only access

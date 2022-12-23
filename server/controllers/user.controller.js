@@ -4,6 +4,32 @@ import extend from 'lodash/extend'
 import errorHandler from './../helpers/dbErrorHandler'
 import formidable from 'formidable'
 
+
+/*
+add this below
+  populate: {
+    path:'owner', //used for identifying spreadsheets by owner username
+    select:'_id username' 
+  } 
+*/
+const administeredDatasetsPopulationObj = {
+  path:"administeredDatasets",
+  select:"_id name desc created admin measures", //note - replace admin with owner here
+  populate: {
+    path:'admin', //replace with owner - used for identifying spreadhseets by owner username
+    select:'_id username' 
+  } 
+}
+
+const datasetsMemberOfPopulationObj = {
+  path:"datasetsMemberOf",
+  select:"_id name desc notes photo admin created", //note - replace admin with owner here
+  populate: {
+    path:'admin', //replace with owner - used for identifying spreadhseets by owner username
+    select:'_id username' 
+  },
+}
+
 /*
 attempts to create a new user in in db. 
 */
@@ -60,8 +86,10 @@ const userByID = async (req, res, next, id) => {
           select:'_id name desc'
         } 
       })
-      .populate('administeredDatasets', '_id name desc notes photo admin created')
-      .populate('datasetsMemberOf', '_id name desc notes photo admin created')
+      .populate(administeredDatasetsPopulationObj)
+      .populate(datasetsMemberOfPopulationObj)
+      //.populate('administeredDatasets', '_id name desc notes photo admin created')
+      //.populate('datasetsMemberOf', '_id name desc notes photo admin created')
 
     // console.log('user in userById', user)
     if (!user)

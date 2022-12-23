@@ -1,3 +1,5 @@
+import * as d3 from 'd3';
+
 export function compareAlpha(obj1, obj2){
 	const getName = obj => obj.name || obj.surname || obj.username || ""
     if(getName(obj1) > getName(obj2)){
@@ -72,20 +74,20 @@ export const filterUniqueByProperty = (key, array) =>{
 export const filterUniqueById = items => filterUniqueByProperty('_id', items)
 
 export const elementsMatching = (elem1, elem2, keys) =>{
-	let matching = true
+	let matching = true;
 	keys.forEach(key => {
 		if(elem1[key] !== elem2[key])
 			matching = false
 	})
-	return matching
+	return matching;
 }
 
 export const filterUniqueByProperties= (keys, array) =>{
 	return array.filter((elem,i) =>{
 		const previousElems = array.slice(0,i)
 		if(previousElems.find(el => elementsMatching(el, elem, keys)))
-			return false
-		return true
+			return false;
+		return true;
 	})
 }
 
@@ -93,3 +95,9 @@ export const filterUniqueByProperties= (keys, array) =>{
 export const findById = (id, items) =>{
 	return items.find(item => item._id === id)
 }
+
+//helpers
+export const sortAscending = (data, accessor =  d => d) => {
+  const dataCopy = data.map(d => d);
+  return dataCopy.sort((a, b) => d3.ascending(accessor(a), accessor(b)))
+};

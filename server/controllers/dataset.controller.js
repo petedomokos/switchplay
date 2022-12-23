@@ -180,6 +180,46 @@ const remove = async (req, res) => {
   }
 }
 
+
+const createDatapoints = async (req, res) => {
+  console.log("createDatapoints...")
+  let { dataset, user } = req;
+  if(!user || !dataset){
+    return res.status(400);
+  }
+  const datapoints = req.body//.map(d => ({
+    //...d,
+    //createdBy:req.user._id
+  //}));
+
+  console.log("datapoints to add", datapoints)
+  console.log("current datapoints", dataset.datapoints)
+  dataset.datapoints = [...dataset.datapoints, ...datapoints]
+  console.log("new datapoints before save", dataset.datapoints)
+  dataset.updated = Date.now()
+  try {
+    console.log("trying to save")
+    const savedDataset = await dataset.save()
+   
+    /*const sortedMostRecentFirst = savedDataset.datapoints.sort((d1, d2) => {
+      const milli1 = new Date(d1.created).getTime()
+      const milli2 = new Date(d2.created).getTime()
+      return milli2 - milli1
+    })
+    const savedDatapoint = sortedMostRecentFirst[0];
+    console.log("saved datapoint", savedDatapoint)
+    //need to add these to datapoint that is returned*/
+    console.log("saved datapoints")
+    
+    res.json(datapoints);
+  } catch (err) {
+    return res.status(400).json({
+      error: errorHandler.getErrorMessage(err)
+    })
+  }
+}
+
+/*
 const createDatapoint = async (req, res) => {
   let { dataset } = req;
   const datapoint = req.body;
@@ -194,9 +234,7 @@ const createDatapoint = async (req, res) => {
     console.log("adding player to ref.................................................")
       addRefToUserArray(datapoint.player, "datasetsMemberOf", dataset._id)
   }
-   /*
-  NOTE - datapoint is an object that fits a schema. So it is not a model, so we do not create it with New Datapoint
-  */
+
   dataset.datapoints.push(datapoint)
   dataset.updated = Date.now()
   try {
@@ -219,6 +257,7 @@ const createDatapoint = async (req, res) => {
     })
   }
 }
+*/
 
 
 export default {
@@ -229,5 +268,6 @@ export default {
   list,
   remove,
   update,
-  createDatapoint
+  //createDatapoint,
+  createDatapoints
 }

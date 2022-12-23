@@ -109,7 +109,13 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
               className={classes.menuBtn}
               style={isActive(history, "/profile")}>Profile
             </Button>
-          </Link>
+        </Link>
+        {user && <Link to="/import">
+            <Button 
+              className={classes.menuBtn}
+              style={isActive(history, "/import")}>Import
+            </Button>
+        </Link>}
         {
           !user && (<span>
             <Link to="/signup">

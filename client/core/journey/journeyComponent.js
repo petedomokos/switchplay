@@ -450,7 +450,7 @@ export default function journeyComponent() {
                     .format(kpiFormat)
                     .aligned(aligned)
                     .datasets(data.datasets)
-                    .info(data.userInfo);
+                    .info(data.player);
                 
                 profileCardsData = myProfileCardsLayout(data.profiles);
                 //console.log("profileCardsData",profileCardsData);

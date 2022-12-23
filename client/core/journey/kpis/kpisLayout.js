@@ -2,21 +2,23 @@ import * as d3 from 'd3';
 import { addWeeks } from "../../../util/TimeHelpers"
 import { pcCompletion } from "../../../util/NumberHelpers"
 import { grey10, KPI_CTRLS } from '../constants';
+import { getBandsAndStandards } from "../../../data/bandsAndStandards";
 
 export default function kpisLayout(){
     let date = new Date();
     let prevCardDate;
     let format = "target-completion";
     let datasets = [];
+    let targets = [];
     let withDeficitBar = false;
     let allKpisActive = false;
     let noKpisActive = false;
 
     //helper
-    const statValue = (date, statId, datapoints, method="latest") => {
+    const statValue = (date, statKey, datapoints, method="latest") => {
         const relevantDatapoints = datapoints
             .filter(d => d.date <= date)
-            .map(d => ({ ...d, value:d.values.find(v => v.measure === statId)?.value }))
+            .map(d => ({ ...d, value:d.values.find(v => v.key === statKey)?.value }))
             .map(d => ({ ...d, value:d.value ? +d.value : undefined }))
             .filter(d => d);
 
@@ -34,42 +36,76 @@ export default function kpisLayout(){
     };
 
     function update(data){
-        //console.log("update kpis layout", data)
+        console.log("update kpisLayout...........", data)
+        console.log("datasets", datasets)
         const now = new Date();
         const orderedData = sortAscending(data, d => d.date);
         const nextKpi = orderedData.find(kpi => kpi.date > new Date());
        
+        //use kpiPoint for a value of a kpi at a particular point/date eg on a particular profile
+
+        //we remove the use of target datapoints. Instead, we store targets direclty on a profile, 
+        /*eg profile.targets = {
+            //we dont refer to kpis, as this allows non-kpi stat targets to be set too
+            //the actual target is the latest target that has been approved by at least one person
+            //the actual proposedTarget is teh latest target non-approved (if it is later than teh actual) or null
+
+            //note - UI needs a 'confirm' or 'save' button for whenever user drags values
+            statKey: [{dateCreated:"...", createdBy: userId, approvedBy: [userId], value:"..."}]
+            statKey:targetValue,
+            etc
+        }
+
+        */
+
+        // the current is the last actual datapoint before that date
+
+        //if these dont exist, then we dont use defaults. they system must be able to cope with no data or no targets
+
         const kpisData = orderedData.map((kpi,i) => {
-            const kpiDate = kpi.date || date;
-            //if kpis have dates, we use these for previous, except for the first one which uses the prevCardDate setting
-            const prevKpiDate = i === 0 ? prevCardDate : data[i-1].date;
-            const prevDate = kpi.date ? prevKpiDate : prevCardDate;
+            console.log("kpi",i, kpi)
+            const { datasetKey, statKey, startDate, date, target, proposedTarget } = kpi;
+            //const date = kpi.date || date;
             //can set all kpis to be active eg for an active profile card that doesnt have access to all data
             const isActive = allKpisActive || (kpi.id === nextKpi?.id && !noKpisActive);
-            const isFuture = kpi.date > now;
-            const { datasetId, statId } = kpi;
-            const dataset = datasets.find(dset => dset._id === datasetId);
-            const stat = dataset.measures.find(m => m._id === statId);
-            const { bands, standards } = stat;
-            const min = bands[0] ? +bands[0].min : undefined;
-            const max = bands[0] ? +bands[bands.length - 1].max : undefined;
-            const actualDatapoints = dataset.datapoints.filter(d => !d.isTarget);
-            const targetDatapoints = dataset.datapoints.filter(d => d.isTarget);
+            const isFuture = date > now;
+            const dataset = datasets.find(dset => dset.key === datasetKey);
+            console.log("dataset", dataset)
+            const stat = dataset?.stats.find(s => s.key === statKey);
+            console.log("stat", stat)
+            const { bands, standards } = getBandsAndStandards(datasetKey, statKey) || {};
+            console.log("bands standards", bands, standards);
+            const min = bands[0] ? bands[0].min : null;
+            const max = bands[0] ? bands[bands.length - 1].max : null;
+
+            const actualDatapoints = dataset?.datapoints
+                .filter(d => !d.isTarget)
+                .filter(d => d.date > startDate && d.date <= date);
+
             const currentDatapoint = d3.greatest(actualDatapoints, d => d.date);
-            const targetDatapoint = d3.greatest(targetDatapoints, d => d.date);
-            const current = parse(currentDatapoint?.values.find(v => v.measure === statId)) || { date:now, value: min };
+            //const target = kpi.target || findDefaultTarget(targets, datasetKey, statKey, date);
+    
+            //const current = parse(currentDatapoint?.values.find(v => v.key === statKey)) || { date:now, value: min };
+            console.log("actual ds", actualDatapoints)
+            console.log("currentD", currentDatapoint)
+            console.log("target", target);
+            console.log("proposedTarget", proposedTarget)
+            
             //temp
+            /*
             const defaultTargValue = current?.value ? current.value * 1.5 : min;
             const defaultTarg = { date:addWeeks(4, now), value: defaultTargValue };
-            const target = parse(targetDatapoint?.values.find(v => v.measure === statId)) || defaultTarg;
+            //need to hydrate datapoints so its values array objects each have a statKey, and also so we have
+            //an object for derivedMeasures too
+            const target = parse(targetDatapoint?.values.find(v => v.key === statKey)) || defaultTarg;
             //const pcCompletion = (value) => target.value !== 0 ? +(((+value/+target.value) * 100).toFixed(0)) : 100;
             //for now, if no previous, we default it to 50% of targ
-            const achieved = statValue(kpiDate, statId, actualDatapoints) || { value: d3.max([target.value * 0.5, min]) };
-            const previous = statValue(prevDate, statId, actualDatapoints) || { value: d3.max([target.value * 0.5, min]) };
+            const achieved = statValue(date, statKey, actualDatapoints) || { value: d3.max([target.value * 0.5, min]) };
+            const previous = statValue(prevDate, statKey, actualDatapoints) || { value: d3.max([target.value * 0.5, min]) };
             
             const _pcCompletionValue = pcCompletion(previous.value, target.value, current.value);
             //for now, we manually seyt this to test it renders as red. But should be based on linear interpolation
-            const expectedCurrent = { date: kpiDate, value:(current?.value ? current.value * 1.3 : 0) };//calculateExpected(previous, target, date)
+            const expectedCurrent = { date: date, value:(current?.value ? current.value * 1.3 : 0) };//calculateExpected(previous, target, date)
             const _pcCompletionExpectedValue = pcCompletion(previous.value, target.value, expectedCurrent.value);
             //bars
             const currentColour = "#696969";
@@ -90,6 +126,9 @@ export default function kpisLayout(){
             const end = format === "actual-value" ? max : target.value;
 
             //const rangeDatum = { key: "range", from:start, to:end, fill:"transparent", stroke:"grey" };
+
+            */
+            /*
             const targetDatum = { 
                 key: "target", 
                 from:start, 
@@ -210,20 +249,20 @@ export default function kpisLayout(){
                             styles:tooltipStyles
                         });
                     }
-                    /*if(!isFuture){
+                    //if(!isFuture){
                         //todo - finish all this...its a past kpi - just show the achieved datapoint
                         //but also show target
-                        tooltipsData.push({ 
-                            key: "achieved", 
-                            title:"Achieved",
-                            shortTitle:"Ach",
-                            ...achieved,
-                            location:"above",
-                            row:0, // just above bar
-                            styles:tooltipStyles
+                        //tooltipsData.push({ 
+                            //key: "achieved", 
+                            //title:"Achieved",
+                            //shortTitle:"Ach",
+                            //...achieved,
+                            //location:"above",
+                            //row:0, // just above bar
+                            //styles:tooltipStyles
                             
-                        })
-                    }else{*/
+                        //})
+                    //}else{
                         //its a future kpi
                         tooltipsData.push(
                             { 
@@ -302,31 +341,32 @@ export default function kpisLayout(){
                     }
                 }
             }
+            */
 
             return {
                 ...kpi,
-                date:kpiDate,
-                isActive,
-                isFuture,
+                //date,
+                //isActive,
+                //isFuture,
                 //stat full name stands alone without needing the dataset name before it
-                name:stat.fullNameShort,
-                longName:stat.fullNameLong,
-                unit:stat.unit,
-                barData,
-                tooltipsData,
-                numbersData,
-                bands:bands.map(band => ({ ...band, min:+band.min, max:+band.max })),
-                min,
-                max,
-                start,
-                end,
-                standards:standards.map(standard => ({ ...standard, value:+standard.value })),
+                //name:stat.fullNameShort,
+                //longName:stat.fullNameLong,
+                //unit:stat.unit,
+                //barData,
+                //tooltipsData,
+                //numbersData,
+                //bands:bands.map(band => ({ ...band, min:+band.min, max:+band.max })),
+                //min,
+                //max,
+                //start,
+                //end,
+                //standards:standards.map(standard => ({ ...standard, value:+standard.value })),
                 //3 date-value objects for previous, current and target values
-                previous,
-                current:{ date: currentDatapoint.date, value: current.value },
-                target: targetDatapoint ? { date: targetDatapoint.date, value: target.value } : undefined,
-                expectedCurrent,
-                actualDatapoints:actualDatapoints.map(d => ({ date:d.date, value:d.values.find(v => v.measure === statId).value }))
+                //previous,
+                //current:{ date: currentDatapoint.date, value: current.value },
+                //target: targetDatapoint ? { date: targetDatapoint.date, value: target.value } : undefined,
+                //expectedCurrent,
+                //actualDatapoints:actualDatapoints.map(d => ({ date:d.date, value:d.values.find(v => v.key === statKey).value }))
             }
         })
 
@@ -349,6 +389,12 @@ export default function kpisLayout(){
         if (!arguments.length) { return format; }
         //new value may be undefined in which case dont update it
         if(value){ format = value; }
+        return update;
+    };
+    update.targets = function (value) {
+        if (!arguments.length) { return targets; }
+        //if targets null, we want to replace any exiaiting with an empty array
+        targets = value || [];
         return update;
     };
     update.withDeficitBar = function (value) {

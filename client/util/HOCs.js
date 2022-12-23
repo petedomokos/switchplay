@@ -30,6 +30,7 @@ export function withLoader(ComponentWhenLoaded, propsToCheck=[], options={}){
         //console.log('HOC.................props', props)
         //note: we dont control the loading state here - it is contained in store as other components may also load this resource
         const {extraLoadArg, onLoad, loading, loadingError, ...passedThroughProps} = props;
+        console.log("loading???", loading)
         //1. CHECK IF PROPS MISSING
         //need to check props have all been loaded ( 0 and false are ok) every time in case page refreshed etc
         
@@ -75,7 +76,7 @@ export function withLoader(ComponentWhenLoaded, propsToCheck=[], options={}){
         const propsToLoad = propsToCheck.filter(propPath => !checkProp(propPath))
 
         //console.log('Loader propsTocheck', propsToCheck)
-        //console.log('Loader propsToload', propsToLoad)
+        console.log('Loader propsToload', propsToLoad)
         //console.log('loading?', loading)
         
         //2. ASYNC LOAD PROPS IF MISSING (AFTER RENDER)

@@ -213,10 +213,10 @@ const createMeasure = measureObject => { //.there is a better word than object t
 
 //note - if no tunit, it is worked out from the measures that it is derived from eg speed = m/s
 export const derivedMeasures = {
-    //long jump
-    "608c595b285a17514c8147bc":[
+    //datasetKey
+    "longJump":[ //id 608c595b285a17514c8147bc
         {
-            name:"Mean Score", side:"", nr:"", custom:"", unit:"points", label:"Score", desc:"", isMain:true,
+            name:"Mean Score", key:"mean", side:"", nr:"", custom:"", unit:"points", label:"Score", desc:"", isMain:true,
             formula:{
                 type:"mean",
                 of:[
@@ -436,20 +436,8 @@ export const derivedMeasures = {
     ]*/
 }
 
-export function hydrateDataset(dataset){
-    const derivedMeasures = getDerivedMeasures(dataset);
-    const datapoints = dataset.datapoints.map(d => ({
-        ...d,
-        values:[...d.values, getDerivedValues(d, derivedMeasures)]
-    }));
-    return 
-
-
-}
-
-
-export function getDerivedMeasures(dataset){
-    const measureSchemas = derivedMeasures[dataset._id];
+export function getDerivedMeasures(datasetKey){
+    const measureSchemas = derivedMeasures[datasetKey];
     if(!measureSchemas){
         return [];
     }
@@ -501,6 +489,7 @@ const capitalizeAndSpace = str => {
 const space = str => str ? str + " " : "";
 
 export function hydrateMeasure(measure){
+    //console.log("hydratemeasure", measure)
     const { name, key, side, nr, custom } = measure;
     const newKey = [key, side, nr, custom]
         .filter(part => part)

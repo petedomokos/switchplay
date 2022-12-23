@@ -22,7 +22,7 @@ export const createDataset = dataset => dispatch => {
 
 //to fetch a dataset in full
 export const fetchDataset = id => dispatch => {
-	console.log('fetchDataset', id)
+	//console.log('fetchDataset', id)
 	fetchThenDispatch(dispatch, 
 		'loading.dataset',
 		{
@@ -37,8 +37,8 @@ export const fetchDataset = id => dispatch => {
 //for now, use  a PUT with body, but should change to get with params
 //note - userId may not be the signed in user
 export const fetchMultipleFullDatasets = (datasetIds, playerId) => dispatch => {
-	console.log("fetchmultiple p", playerId)
-	console.log("fetchmultiple dsets", datasetIds)
+	//console.log("fetchmultiple p", playerId)
+	//console.log("fetchmultiple dsets", datasetIds)
 	fetchThenDispatch(dispatch, 
         'loading.datasets',
         {
