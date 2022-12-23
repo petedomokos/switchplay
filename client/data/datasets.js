@@ -3,16 +3,14 @@ import { getDerivedMeasures, hydrateMeasure } from './measures';
 import { mean, median, percentage, sum, difference } from "./Calculations"
 
 export function hydrateDatasets(datasets){
-    console.log("hydrate-----------------------------------", datasets)
+    //console.log("hydrate-----------------------------------", datasets)
     return datasets.map(dset => hydrateDataset(dset))
 }
 //may be shallow or deep
 export function hydrateDataset(dataset){
     const isDeep = !!dataset.datapoints;
-    console.log("hydratedset", isDeep, dataset)
     //key - legacy - some dsets have no key
     const key = dataset.key || toCamelCase(dataset.name);
-    console.log("adding key", key)
     //owner - legacy - some dsets dont have owner
     const owner = dataset.owner || dataset.admin[0];
 
@@ -20,12 +18,9 @@ export function hydrateDataset(dataset){
     const startDate = isDeep ? getStartDate(dataset) : null;
     const derivedMeasures = isDeep ? getDerivedMeasures(key) : null;
     const rawMeasures = isDeep ? dataset.measures.map(m => hydrateMeasure(m)) : null;
-    console.log("raw", rawMeasures)
     const datapoints = isDeep ? dataset.datapoints.map(d => {
-        console.log("datapoint", d)
         //add measure key to rawMeasure values (server stores the measure id instead - need to change)
         const rawValues = d.values.map(v => {
-            console.log("value", v)
             //v.measure is measure _id - we convert it to its key
             return {
                 key:rawMeasures.find(m => m._id === v.measure).key,

@@ -192,10 +192,10 @@ const createDatapoints = async (req, res) => {
     //createdBy:req.user._id
   //}));
 
-  console.log("datapoints to add", datapoints)
-  console.log("current datapoints", dataset.datapoints)
+  //console.log("datapoints to add", datapoints)
+  //console.log("current datapoints", dataset.datapoints)
   dataset.datapoints = [...dataset.datapoints, ...datapoints]
-  console.log("new datapoints before save", dataset.datapoints)
+  //console.log("new datapoints before save", dataset.datapoints)
   dataset.updated = Date.now()
   try {
     console.log("trying to save")
