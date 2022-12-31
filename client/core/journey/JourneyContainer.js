@@ -89,7 +89,7 @@ const mapStateToProps = (state, ownProps) => {
 	//console.log("JourneyContainer data", _data)
 	//add mock profiles the first time only (note - these must be turnd off before we enabled server-side persitance again)
 	const mocksAdded = !!_data.profiles.find(p => p.id.includes("mock"));
-	const data = { ..._data, profiles:[] };// mocksAdded ? _data : { ..._data, profiles:[..._data.profiles, ...mockProfiles] };
+	const data = mocksAdded ? _data : { ..._data, profiles:[..._data.profiles, ...mockProfiles] };
 	//const data = _data;
 	//const data = { ..._data, profiles:[] }
 

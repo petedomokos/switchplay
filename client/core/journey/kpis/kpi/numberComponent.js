@@ -114,7 +114,7 @@ export default function numberComponent() {
                         .attr("fill", styles.fill)
                         .attr("stroke", styles.stroke)
                         .attr("stroke-width", 0.1)// styles.strokeWidth)
-                        .text(d.value)
+                        .text(d.value || "")
 
                 }))
 

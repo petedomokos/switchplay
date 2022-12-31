@@ -96,11 +96,11 @@ export default function barComponent() {
                 .range([0, barWidth])
             
             //error mesg
-            if(typeof barData.start !== "number" || typeof barData.end !== "number"){
-                errorMesgs[i] = NO_MIN_MAX_ERROR_MESG;
-            }else if(!barData.find(d => d.key === "current").to){
+            if(!barData.find(d => d.key === "current").value){
                 //to undefined means no data
                 errorMesgs[i] = NO_DATA_ERROR_MESG;
+            }else if(typeof barData.start !== "number" || typeof barData.end !== "number"){
+                errorMesgs[i] = NO_MIN_MAX_ERROR_MESG;
             }else{
                 errorMesgs[i] = "";
             }
@@ -189,11 +189,11 @@ export default function barComponent() {
                                         .attr("pointer-events", "none");
                             })
                             .merge(barSectionG)
-                            .attr("transform", (d,i) => `translate(${scales[i](d.from)}, 0)`)
+                            .attr("transform", (d,i) => `translate(${scales[i](d.startValue)}, 0)`)
                             .each(function(d,i){
                                 console.log("d",i, d)
                                 console.log("domain", scale.domain())
-                                const sectionWidth = scale(d.to) - scale(d.from);
+                                const sectionWidth = scale(d.value) - scale(d.startValue);
                                 //adjust rect width to end - start
                                 d3.select(this).select("rect.bar-section")
                                     .attr("width", sectionWidth)

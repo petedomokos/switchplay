@@ -53,8 +53,8 @@ export default function kpisLayout(){
                 key:"current",
                 label: values.achieved ? "Achieved" : "Current",
                 isAchieved:!!values.achieved,
-                from:start, //may be undefined
-                to:current,
+                startValue:start, //may be undefined
+                value:current,
                 fill:colours.current,
                 format
             }
@@ -64,7 +64,7 @@ export default function kpisLayout(){
             barData.end = end;
 
             const tooltipsData = [];
-            const numbersData = [];
+            const numbersData = [currentDatum];
 
             return {
                 ...kpi,
