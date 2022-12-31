@@ -104,7 +104,7 @@ export default function numberComponent() {
                     d3.select(this).select("rect")
                         .attr("width", contentsWidth)
                         .attr("height", contentsHeight)
-                        .attr("fill", "red")// styles.bg.fill)
+                        .attr("fill", styles.bg.fill)
                         .attr("stroke", styles.bg.stroke)
 
                     d3.select(this).select("text")

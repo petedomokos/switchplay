@@ -85,7 +85,6 @@ export default function progressBarComponent() {
     function progressBar(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
         updateDimns(selection.data());
-        console.log("update ProgressBar", selection.data())
 
         selection
             .call(container("progress-bar-contents")

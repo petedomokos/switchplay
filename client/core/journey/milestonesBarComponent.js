@@ -233,18 +233,18 @@ export default function milestonesBarComponent() {
             update(data, { slideTransition });
             function init(){
                 containerG.append("rect").attr("class", "container-bg")
-                    .attr("fill", "orange")
+                    .attr("fill", "transparent")
                 contentsG = containerG.append("g").attr("class", "milestone-bar-contents");
                 contentsG.append("rect")
                     .attr("class", "milestones-bar-contents-bg")
-                    .attr("fill", "red");
+                    .attr("fill", "transparent");
 
                 milestonesWrapperG = contentsG.append("g").attr("class", "milestones-wrapper")
                     .attr("transform", `translate(0,0)`);
 
                 topBarG = milestonesWrapperG.append("g").attr("class", "top-bar")
 
-                topBarG.append("rect").attr("fill", "yellow")
+                topBarG.append("rect").attr("fill", "transparent")
 
                 milestonesG = milestonesWrapperG
                     .append("g")
@@ -258,7 +258,7 @@ export default function milestonesBarComponent() {
                         height:() => milestonesHeight,
                         transition:transformTransition
                     })
-                    .attr("fill", "green");
+                    .attr("fill", "transparent");
                 
                 milestonesG.append("g").attr("class", "phase-labels");
 
@@ -371,6 +371,7 @@ export default function milestonesBarComponent() {
                         }
                     })
                     .onLongpressStart(function(e, d){
+                        console.log("lp start")
                         const pt = adjustPtForData(e);
                         const milestone = milestoneContainingPt(pt, positionedData);
                         console.log("m", milestone)
@@ -380,21 +381,25 @@ export default function milestonesBarComponent() {
                             createMilestonePlaceholder(prevCard(pt.x), nextCard(pt.x))
                         }
                     })
+
                 drag
-                    .on("start", swipable && !selected ? enhancedDrag(dragStart) : null)
-                    .on("drag", swipable && !selected ? enhancedDrag(dragged) : null)
-                    .on("end", swipable && !selected ? enhancedDrag(dragEnd) : null);
+                    .on("start", selected ? null : enhancedDrag(dragStart))
+                    .on("drag", selected ? null : enhancedDrag(dragged))
+                    .on("end", selected ? null : enhancedDrag(dragEnd));
                 
                 let dragStartX;
                 function dragStart(e,d){
+                    if(!swipable) { return; }
                     //check pos
                     dragStartX = e.x;
                 }
                 function dragged(e,d){
+                    if(!swipable) { return; }
                     if((e.dx > 0 && !canSlideBack) || (e.dx < 0 && !canSlideForward)){ return; }
                     slideToOffset(currentSliderOffset + e.dx)
                 }
                 function dragEnd(e,d){
+                    if(!swipable) { return; }
                     if(e.x < dragStartX){
                         slideForward();
                     }else{

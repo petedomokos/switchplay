@@ -95,7 +95,7 @@ export default function numbersComponent() {
                     return dimns[i].contentsHeight
                 })
                 .styles((d, i) => ({
-                    fill:"yellow"
+                    fill:"transparent"
                 })))
             .each(function(d,i){
                 const { numberWidth, numberHeight, numberMargin, fontSize } = dimns[i];

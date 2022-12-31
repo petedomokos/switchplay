@@ -44,7 +44,6 @@ export default function barComponent() {
         dimns = []
         return data.forEach((d,i) => {
             const { barData, numbersData } = d;
-            console.log("updateDimns d", d)
             const width = _width(d,i)
             const height = _height(d,i);
             const margin = _margin(d,i);
@@ -130,7 +129,6 @@ export default function barComponent() {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
 
         const allData = selection.data();
-        console.log("Bar data", allData)
 
         updateDimns(selection.data());
         // expression elements
@@ -169,7 +167,6 @@ export default function barComponent() {
                 })))
             .each(function(data,i){
                 const { barData } = data;
-                console.log("i data", i, barData)
                 const { withHandles, handleHeight, handleWidth,contentsWidth, barWidth, barHeight } = dimns[i];
                 const scale = scales[i];
                 const styles = _styles(data,i);
@@ -191,8 +188,6 @@ export default function barComponent() {
                             .merge(barSectionG)
                             .attr("transform", (d,i) => `translate(${scales[i](d.startValue)}, 0)`)
                             .each(function(d,i){
-                                console.log("d",i, d)
-                                console.log("domain", scale.domain())
                                 const sectionWidth = scale(d.value) - scale(d.startValue);
                                 //adjust rect width to end - start
                                 d3.select(this).select("rect.bar-section")
@@ -231,8 +226,7 @@ export default function barComponent() {
 
                  //error mesg
                 const errorMesgData = errorMesgs[i] ? [errorMesgs[i]] : [];
-                console.log("errorMesgData", errorMesgData)
-                /*const errorMesgText = */barContentsG.selectAll("text.error-mesg").data(errorMesgData)
+                barContentsG.selectAll("text.error-mesg").data(errorMesgData)
                     .join("text")
                         .attr("class", "error-mesg")
                         .attr("text-anchor", "middle")
