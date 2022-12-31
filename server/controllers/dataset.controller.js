@@ -200,7 +200,12 @@ const createDatapoints = async (req, res) => {
   try {
     console.log("trying to save")
     const savedDataset = await dataset.save()
-   
+    //@todo - filter so that only the aved ds are returned. 
+    //We need to get them from the savedDataset so they have the default values too
+    const nrNewDs = datapoints.length;
+    const nrDs = savedDataset.datapoints.length;
+    const newDatapoints = savedDataset.datapoints.slice(nrDs - nrNewDs, nrDs);
+    console.log("saved...newDatapoints", newDatapoints)
     /*const sortedMostRecentFirst = savedDataset.datapoints.sort((d1, d2) => {
       const milli1 = new Date(d1.created).getTime()
       const milli2 = new Date(d2.created).getTime()
@@ -209,9 +214,8 @@ const createDatapoints = async (req, res) => {
     const savedDatapoint = sortedMostRecentFirst[0];
     console.log("saved datapoint", savedDatapoint)
     //need to add these to datapoint that is returned*/
-    console.log("saved datapoints")
-    
-    res.json(datapoints);
+    //@todo - need to send back these 
+    res.json(newDatapoints);
   } catch (err) {
     return res.status(400).json({
       error: errorHandler.getErrorMessage(err)

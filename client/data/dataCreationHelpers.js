@@ -14,6 +14,7 @@ export function createDatapointsFromData(data, dataset){
         let datapoint = {};
         // need the non value properties to remain at top-level
         nonValueCols.forEach(col => {
+            //if not defined, we must emit them so db will assign the default
             if(d[col]){
                 datapoint[col] = d[col];
             }

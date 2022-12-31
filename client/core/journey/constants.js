@@ -14,8 +14,8 @@ export const WIDGET_HEIGHT = 40;
 export const WIDGET_MARGIN = { left: 0, right: 0, top:5, bottom:5 }
 
 export const KPI_CTRLS = format => ([
-    { key: "target-completion", label:"Target Completion", isSelected:format === "target-completion" },
-    { key: "actual-value", label:"Actual Value", isSelected:format === "actual-value" }
+    { key: "completion", label:"Target Completion", isSelected:format === "completion" },
+    { key: "actual", label:"Actual Value", isSelected:format === "actual" }
 ]);
 
 export const FONTSIZES = {

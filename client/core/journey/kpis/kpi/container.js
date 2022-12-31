@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 /*
 
 */
-export default function container() {
+export default function container(initClassName) {
     //API SETTINGS
     let parentSelector = "";
     let parent = function(){ return d3.select(this); };
@@ -18,7 +18,7 @@ export default function container() {
     let _updateOnly = function(){};
     let _exit = function(){};
 
-    let sharedClassName = "container";
+    let sharedClassName = initClassName || "container";
     let _className;
 
     let returnOriginalSelection = false;

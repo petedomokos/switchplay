@@ -85,22 +85,20 @@ export default function progressBarComponent() {
     function progressBar(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
         updateDimns(selection.data());
+        console.log("update ProgressBar", selection.data())
 
         selection
-            .call(container()
-                .className("progress-bar-contents")
+            .call(container("progress-bar-contents")
                 .transform((d,i) => `translate(${dimns[i].margin.left},${dimns[i].margin.top})`)
             )
         
         selection.select("g.progress-bar-contents")
             /*
-            .call(container()
-                .className("tooltips")
+            .call(container("tooltips")
                 .transform((d,i) => `translate(${_margin(d,i).left},${_margin(d,i).top})`)
             )
             */
-            .call(container()
-                .className("bar-area")
+            .call(container("bar-area")
                 //.transform((d,i) => `translate(0,${_upperTooltipsHeight(d,i)})`)
             )
         

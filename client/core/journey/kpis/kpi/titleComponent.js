@@ -37,18 +37,24 @@ export default function titleComponent() {
             fill:"none",
             stroke:"none"
         },
-        name:{
+        primaryTitle:{
             fontSize:9,
             stroke:grey10(8),
             fill:grey10(8),
             textAnchor:null,
             dominantBaseline:null
+        },
+        secondaryTitle:{
+
         }
     };
     let _styles = () => defaultStyles;
     let transform = () => null;
 
-    let _primaryText = d => d.name;
+    let _primaryTitle = d => d.primaryTitle;
+    let _secondaryTitle = d => d.secondaryTitle;
+    let textDirection = "vertical";
+    let textAlignment = "start";
 
     let withInteraction = false;
 
@@ -116,24 +122,24 @@ export default function titleComponent() {
                         .attr("stroke", styles.bg.stroke)
                     
                     //nameG.select("rect")
-                        //.attr("width", nameCharWidth * _primaryText(data).length)
+                        //.attr("width", nameCharWidth * _primaryTitle(data).length)
                         //.attr("height", nameHeight);
 
-                    const nameTextAnchor = styles.name.textAnchor;
-                    const nameDomBaseline = styles.name.dominantBaseline;
+                    const nameTextAnchor = styles.primaryTitle.textAnchor;
+                    const nameDomBaseline = styles.primaryTitle.dominantBaseline;
                     const nameX = nameTextAnchor === "end" ? contentsWidth : (nameTextAnchor === "middle" ? contentsWidth/2 : 0);
                     const nameY = nameDomBaseline === "bottom" ? contentsHeight : (nameDomBaseline === "central" ? contentsHeight/2 : 0);
                     const nameG = contentsG.select("g.name")
                         .attr("transform", `translate(${nameX},${nameY})`);
 
                     nameG.select("text")
-                        .attr("text-anchor", styles.name.textAnchor)
-                        .attr("dominant-baseline", styles.name.dominantBaseline)
-                        .attr("font-size", styles.name.fontSize)
-                        .attr("stroke", styles.name.stroke)
-                        .attr("fill", styles.name.fill)
-                        .attr("stroke-width", styles.name.strokeWidth)
-                        .text(_primaryText(d) +" " +i) //temp add i so they different 
+                        .attr("text-anchor", styles.primaryTitle.textAnchor)
+                        .attr("dominant-baseline", styles.primaryTitle.dominantBaseline)
+                        .attr("font-size", styles.primaryTitle.fontSize)
+                        .attr("stroke", styles.primaryTitle.stroke)
+                        .attr("fill", styles.primaryTitle.fill)
+                        .attr("stroke-width", styles.primaryTitle.strokeWidth)
+                        .text(_primaryTitle(d))
     
                 })
                 .exit(function(){
@@ -190,18 +196,36 @@ export default function titleComponent() {
         _styles = (d,i) => {
             const requiredStyles = func(d,i);
             return {
-                name:{ ...defaultStyles.name, ...requiredStyles.name },
+                primaryTitle:{ ...defaultStyles.primaryTitle, ...requiredStyles.primaryTitle },
+                secondaryTitle:{ ...defaultStyles.secondaryTitle, ...requiredStyles.secondaryTitle },
                 bg:{ ...defaultStyles.bg, ...requiredStyles.bg }
                 //others here
             }
         };
         return title;
     };
-    title.primaryText = function (value) {
-        if (!arguments.length) { return _primaryText; }
+    title.primaryTitle = function (value) {
+        if (!arguments.length) { return _primaryTitle; }
         if(typeof value === "function"){
-            _primaryText = value;
+            _primaryTitle = value;
         }
+        return title;
+    };
+    title.secondaryTitle = function (value) {
+        if (!arguments.length) { return _secondaryTitle; }
+        if(typeof value === "function"){
+            _secondaryTitle = value;
+        }
+        return title;
+    };
+    title.textDirection = function (value) {
+        if (!arguments.length) { return textDirection; }
+        textDirection = value;
+        return title;
+    };
+    title.textAlignment = function (value) {
+        if (!arguments.length) { return textAlignment; }
+        textAlignment = value;
         return title;
     };
     title.onNameClick = function (value) {

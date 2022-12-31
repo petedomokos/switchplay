@@ -81,19 +81,25 @@ add this below
         .populate(datasetsMemberOfPopulationObj)
         //.populate('administeredDatasets', administeredDatasetsPopulationStr)
         //.populate('datasetsMemberOf', datasetsMemberOfPopulationStr)
+      
     }
+    console.log("find query complete")
 
     if (!user){
+      console.log("not found")
       return res.status('401').json({
         error: "User not found"
       })
     }
 
     if (!user.authenticate(req.body.password)) {
+      console.log("credentials dont match")
       return res.status('401').send({
         error: "Email and password don't match."
       })
     }
+
+    console.log("succesful sign in")
 
     const token = jwt.sign({
       _id: user._id

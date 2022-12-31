@@ -108,7 +108,7 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
   //for now, displayedBar is always milestones
   const [displayedBar, setDisplayedBar] = useState("milestones");
   //const [displayedBar, setDisplayedBar] = useState("");
-  const [kpiFormat, setKpiFormat] = useState("target-completion");
+  const [kpiFormat, setKpiFormat] = useState("actual");
   const selectedKpi = typeof displayedBar === "object" && displayedBar.kpi ? displayedBar.kpi : null;
   //KpiView will display an entire kpiSet, keyed by milestoneId
   const selectedKpiSet = selectedKpi?.kpiSet;

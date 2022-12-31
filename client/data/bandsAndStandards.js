@@ -9,7 +9,7 @@ export function getBandsAndStandards(datasetKey, statKey){
 const bandsAndStandards = {
     "pressUps":{
         "reps":{
-            bands:[ { min:0, max:100 } ],
+            bands:[ { min:0, max:120 } ],
             standards:[ { name:"minimum", value:20 }]
         }
     }

@@ -35,11 +35,16 @@ export default function barComponent() {
     let fixedDomain = [0,100]
     let _domain;
 
+    const NO_MIN_MAX_ERROR_MESG = "no min/max";
+    const NO_DATA_ERROR_MESG = "no data";
+    const NO_TARGET_ERROR_MESG = "no target";
+    let errorMesgs = {};
+
     function updateDimns(data, options ={}){
         dimns = []
         return data.forEach((d,i) => {
             const { barData, numbersData } = d;
-            //console.log("d", d)
+            console.log("updateDimns d", d)
             const width = _width(d,i)
             const height = _height(d,i);
             const margin = _margin(d,i);
@@ -85,12 +90,21 @@ export default function barComponent() {
                 scales[i] = d3.scaleLinear()
             }
 
-            const extent = [d.start || d3.min(barData, d => d.from), d.end || d3.max(barData, d => d.to)]
+            const extent = [barData.start, barData.end]
             scales[i]
                 .domain(extent)
                 .range([0, barWidth])
+            
+            //error mesg
+            if(typeof barData.start !== "number" || typeof barData.end !== "number"){
+                errorMesgs[i] = NO_MIN_MAX_ERROR_MESG;
+            }else if(!barData.find(d => d.key === "current").to){
+                //to undefined means no data
+                errorMesgs[i] = NO_DATA_ERROR_MESG;
+            }else{
+                errorMesgs[i] = "";
+            }
         })
-
     }
 
     const defaultStyles = {
@@ -116,23 +130,20 @@ export default function barComponent() {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
 
         const allData = selection.data();
-        //console.log("Bar data", allData)
+        console.log("Bar data", allData)
 
         updateDimns(selection.data());
         // expression elements
         selection
-            .call(container()
-                .className("bar-contents")
+            .call(container("bar-contents")
                 .transform((d,i) => {
                     const { margin, withTopHandles, handleHeight } = dimns[i];
                     return `translate(${margin.left},${margin.top + (withTopHandles ? handleHeight : 0)})`
                 }));
         
         selection.select("g.bar-contents")
-            .call(container()
-                .className("main-bar"))
-            .call(container()
-                .className("numbers")
+            .call(container("main-bar"))
+            .call(container("numbers")
                 .transform((d,i) => {
                     const { barWidth, withTopHandles, withBottomHandles, handleHeight } = dimns[i];
                     //shift numbers up for handles, and by half if there are only top or bot handles
@@ -158,11 +169,13 @@ export default function barComponent() {
                 })))
             .each(function(data,i){
                 const { barData } = data;
+                console.log("i data", i, barData)
                 const { withHandles, handleHeight, handleWidth,contentsWidth, barWidth, barHeight } = dimns[i];
                 const scale = scales[i];
                 const styles = _styles(data,i);
 
                 const barContentsG = d3.select(this);
+
                 //sections
                 const barSectionG = barContentsG.selectAll("g.bar-section").data(barData, d => d.key);
                 barSectionG.enter()
@@ -173,12 +186,13 @@ export default function barComponent() {
                                 d3.select(this)
                                     .append("rect")
                                         .attr("class", "bar-section")
-                                            .attr("pointer-events", "none");
+                                        .attr("pointer-events", "none");
                             })
                             .merge(barSectionG)
                             .attr("transform", (d,i) => `translate(${scales[i](d.from)}, 0)`)
                             .each(function(d,i){
-                                //console.log("d",i, d)
+                                console.log("d",i, d)
+                                console.log("domain", scale.domain())
                                 const sectionWidth = scale(d.to) - scale(d.from);
                                 //adjust rect width to end - start
                                 d3.select(this).select("rect.bar-section")
@@ -187,6 +201,7 @@ export default function barComponent() {
                                     .attr("fill", d.fill);
 
                                 //start in the middle if the handle is over the bar
+                                /*
                                 const { pos } = d.handle;
                                 const handleStartY = pos === "below" ? barHeight : (pos === "over" ? barHeight/2 : 0);
                                 const handleDimns = {
@@ -207,11 +222,26 @@ export default function barComponent() {
                                         .call(handle.update, handleDimns)
 
                                 handleG.exit().call(remove)
+                                */
                                 
 
                             })
 
                 barSectionG.exit().call(remove);
+
+                 //error mesg
+                const errorMesgData = errorMesgs[i] ? [errorMesgs[i]] : [];
+                console.log("errorMesgData", errorMesgData)
+                /*const errorMesgText = */barContentsG.selectAll("text.error-mesg").data(errorMesgData)
+                    .join("text")
+                        .attr("class", "error-mesg")
+                        .attr("text-anchor", "middle")
+                        .attr("dominant-baseline", "central")
+                        .attr("pointer-events", "none")
+                        .attr("x", barWidth/2)
+                        .attr("y", barHeight/2)
+                        .attr("font-size", barHeight * 0.7)
+                        .text(d => d);
 
             })
         //numbers

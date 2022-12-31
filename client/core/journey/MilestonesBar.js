@@ -52,7 +52,7 @@ const milestonesBar = milestonesBarComponent();
 
 const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, screen, availWidth, availHeight }) => {
   const { player, profiles, contracts } = data;
-  console.log("MBar profiles", profiles)
+  //console.log("MBar profiles", profiles)
   //local state
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
   const [bgMenuLocation, setBgMenuLocation] = useState("");
@@ -76,11 +76,10 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
 
     //profiles go before contarcts of same date
     const orderedData = sortAscending([ ...profiles/*, ...contracts*/], d => d.date);
-    console.log("ordered", orderedData)
+    //console.log("ordered", orderedData)
 
     const processedData = layout(orderedData);
-    console.log("processedData", processedData);
-    /*
+    //console.log("processedData", processedData);
     d3.select(containerRef.current)
       .datum(layout(orderedData))
       .call(milestonesBar
@@ -121,7 +120,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
           })
           .onMouseout(function(e,d){
             //console.log("mout")
-          }))*/
+          }))
 
   }, [profiles.length/*JSON.stringify(contracts), JSON.stringify(profiles), JSON.stringify(datasets), player, kpiFormat, screen*/])
 

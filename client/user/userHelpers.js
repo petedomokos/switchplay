@@ -20,7 +20,8 @@ function createPlayer(user){
     return {
         _id, firstname, surname, position,
         age:calcAge(dob),
-        group:groupsMemberOf[0] //for now, assume max 1 group per player
+        group:groupsMemberOf[0], //for now, assume max 1 group per player
+        photos:[{label:"main"}] //@todo - user should have this already
     }
 }
 
@@ -28,7 +29,8 @@ function createCoach(user){
     const { _id, firstname, surname, administeredGroups } = user;
     return {
         _id, firstname, surname,
-        group:administeredGroups[0] //for now, assume max 1 group per coach
+        group:administeredGroups[0], //for now, assume max 1 group per coach
+        photos:[{label:"main"}] //@todo - user should have this already
     }
 }
 

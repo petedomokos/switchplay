@@ -169,9 +169,9 @@ export default function milestonesBarComponent() {
     //data is passed in here, so we can call this function with other data too eg with placeholder
     const calcMilestoneX = data => nr => {
         const milestone = data.find(m => m.nr === nr);
-        const { datePhase, i } = milestone;
+        const { isPast, isCurrent, isFuture, i } = milestone;
         const previousMilestonesData = data.filter(m => m.nr < nr);
-        const extraGaps = datePhase === "future" ? phaseGap * 2 : (datePhase === "current" ? phaseGap : 0)
+        const extraGaps = isFuture ? phaseGap * 2 : (isCurrent ? phaseGap : 0)
         //add one extra hit-space for the placeholder space at start
         return placeholderWidth + ((i + 1) * hitSpace) + d3.sum(previousMilestonesData, d => getWidth(d)) + getWidth(milestone)/2 + extraGaps;
     }
@@ -222,6 +222,7 @@ export default function milestonesBarComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
+            console.log("updateMBar", data)
             containerG = d3.select(this);
             //dimns is needed for init too
             updateDimns(data);
@@ -535,18 +536,14 @@ export default function milestonesBarComponent() {
                 //console.log("data", positionedData)
 
                 //phase labels
-                const currentCard = positionedData.find(m => m.datePhase === "current")
-                const pastCards = positionedData.filter(m => m.isPast);
-                const lastPastCard = d3.greatest(pastCards, d => d.x);
-                const endOfLastPastCard = lastPastCard.x + lastPastCard.width/2 - labelMarginHoz;
-                const futureCards = positionedData.filter(m => m.isFuture);
-                const firstFutureCard = d3.least(futureCards, d => d.x);
-                const startOfFirstFutureCard = firstFutureCard.x - firstFutureCard.width/2 + labelMarginHoz;
-                //todo - add these separately in milestonea rather than in a separate g outide of it
+                const currentCard = positionedData.find(m => m.isCurrent);
+                const endOfLastPastCard = currentCard.x - currentCard.width/2 - phaseGap - hitSpace - labelMarginHoz;
+                const startOfFirstFutureCard = currentCard.x + currentCard.width/2 + phaseGap + hitSpace + labelMarginHoz;
+                const labelY = -currentCard.height/2 - 10;
                 datePhasesData = [
-                    { label:"<-- Past", x:endOfLastPastCard, textAnchor:"end", milestone: lastPastCard },
-                    { label: "Current", x:currentCard.x, textAnchor:"middle", milestone:currentCard },
-                    { label: "Future -->", x:startOfFirstFutureCard, textAnchor:"start", milestone:firstFutureCard }
+                    { label:"<-- Past", x:endOfLastPastCard, y:labelY, textAnchor:"end", },
+                    { label: "Current", x:currentCard.x, y:labelY, textAnchor:"middle"},
+                    { label: "Future -->", x:startOfFirstFutureCard, y:labelY, textAnchor:"start" }
                 ]
                 milestonesG.select("g.phase-labels")
                     .attr("transform", `translate(0, ${milestonesHeight/2})`)
@@ -554,7 +551,7 @@ export default function milestonesBarComponent() {
                     .data(datePhasesData, d => d.label)
                         .join("text")
                             .attr("x", d => d.x)
-                            .attr("y", d => -d.milestone.height/2 - 10)
+                            .attr("y", d => d.y)
                             .attr("text-anchor", d => d.textAnchor)
                             .attr("dominant-baseline", "auto")
                             .attr("stroke", grey10(5))

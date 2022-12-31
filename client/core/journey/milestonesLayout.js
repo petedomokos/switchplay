@@ -1,6 +1,9 @@
 import * as d3 from 'd3';
 import kpisLayout from "./kpis/kpisLayout";
 import { getTargets } from "../../data/targets";
+import { addDays, addWeeks } from "../../util/TimeHelpers"
+
+
 
 export default function milestonesLayout(){
     let timeScale = x => 0;
@@ -10,65 +13,33 @@ export default function milestonesLayout(){
     let info = {};
 
     let aligned = false;
-    let format = "target-completion";
+    let format = "actual";
 
     const myKpisLayout = kpisLayout();
 
-    //helper
-    const statValue = (date, statId, datapoints, method="latest") => {
-        const relevantDatapoints = datapoints
-            .filter(d => d.date <= date)
-            .map(d => ({ ...d, value:d.values.find(v => v.measure === statId)?.value }))
-            .map(d => ({ ...d, value:d.value ? +d.value : undefined }))
-            .filter(d => d);
-
-        //if(method === "latest"){
-        //for now, assume latest only
-        return d3.greatest(relevantDatapoints, d => d.date);
-        //}
-    }
-
     function update(data){
-        console.log("update milestonesLayout data----------------------------", data)
-        const now = new Date();
-        const activeProfileId = data
-            .filter(m => m.dataType === "profile")
-            .find(p => p.date > now)
-            ?.id;
-        const activeContractId = data
-            .filter(m => m.dataType === "contract")
-            .find(c => c.date > now)
-            ?.id;
-        
-        const isActive = m => m.dataType === "profile" ? m.id === activeProfileId : m.id === activeContractId; 
-        
-        const phasedData = data.map((m,i) => {
-            const datePhase = m.isCurrent ? "current" : (m.date < now ? "past" : "future");
-            return {
-                ...m,
-                datePhase,
-                isPast:datePhase === "past",
-                isFuture:datePhase === "future",
-                isActive:isActive(m)
-            }
-        });
-        const pastData = phasedData.filter(m => m.datePhase === "past");
-        const futureData = phasedData.filter(m => m.datePhase === "future");
+        //console.log("update milestonesLayout data----------------------------", data)
+        const pastData = data.filter(m => m.isPast);
+        const futureData = data.filter(m => m.isFuture);
         const numberedPastData = pastData.map((m,i) => ({ ...m, nr:i - pastData.length }));
         const numberedFutureData = futureData.map((m,i) => ({ ...m, nr:i + 1 }));
-        const numberedCurrent = { ...phasedData.find(m => m.isCurrent), nr:0 };
+        const numberedCurrent = { ...data.find(m => m.isCurrent), nr:0 };
         const numberedData = [...numberedPastData, numberedCurrent, ...numberedFutureData];
 
         return numberedData.map((m,i) => {
-            console.log("milestone-----", i, m)
-            const { date, dataType, kpis } = m;
+            //console.log("milestone------", i, m)
+            const { date, dataType } = m;
+
+            //add any profile properties onto kpis if required
+            const kpis = m.kpis.map(kpi => ({ 
+                ...kpi, /* what do we need? */ }));
 
             if(dataType === "profile"){
                 //the key will determine if selected - we want this the same across all profile cards
                 //const keyedKpis = kpis.map(kpi => ({ ...kpi, key:kpi.kpiSetId }));
                 myKpisLayout
                     .date(date)
-                    .prevCardDate(i === 0 ? undefined : data[i - 1])
+                    //.prevCardDate(i === 0 ? undefined : data[i - 1])
                     .format(format)
                     .datasets(datasets)
                     .allKpisActive(m.isActive);

@@ -127,12 +127,19 @@ export default function kpiComponent() {
                 .height((d,i) => dimns[i].titleHeight)
                 .margin((d,i) => dimns[i].titleMargin)
                 .styles((d,i) => ({
-                    name:{ 
+                    primaryTitle:{ 
                         fontSize:dimns[i].titleHeight,
                         strokeWidth:0.2,
                         dominantBaseline:"central",
+                    },
+                    secondaryTitle:{
+
                     }
-                })))
+                }))
+                .primaryTitle(d => `${d.datasetName} (${d.statName})`)
+                //@todo - make statName a sec title, and measure length of primaryTitle
+                //.secondaryTitle(d => d.statName)
+                .textDirection("horiz"))
         
         kpiContents.select("g.progress-bar")
             .call(progressBar

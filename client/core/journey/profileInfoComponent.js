@@ -44,8 +44,8 @@ export default function profileInfoComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            //console.log("data", data)
-            const { firstname, surname, age, position } = data;
+            //console.log("profileInfo data", data)
+            const { firstname, surname, age, position, photos } = data;
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
@@ -59,9 +59,8 @@ export default function profileInfoComponent() {
 
             // todo - append photo, name, age, pos
             //helper
-            const photoUrl = d => `/players/${firstname}_${surname}/${d.label}.png`
-            //note - need a quick way of getting a photo for each player
-            const photosG = containerG.selectAll("g.photos").data(data.photos, d => d.label);
+            const photoUrl = d => `/players/${firstname}_${surname}/${d.label}.png`;
+            const photosG = containerG.selectAll("g.photos").data(photos, d => d.label);
             photosG.enter()
                 .append("g")
                     .attr("class", "photos")
