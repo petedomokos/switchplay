@@ -23,6 +23,7 @@ import './assets/styles/main.css'
 
 const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
   console.log("MainRouter", userId)
+  console.log("window screen", window.screen)
   //load user if page is refreshed. MainRouter is under the store so can 
   //trigger re-render once loaded
   const jwt = auth.isAuthenticated();
@@ -32,10 +33,12 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
 
   const getScreenInfo = () => {
     const size = calcScreenSize(window.innerWidth);
+    const orientation = window.innerWidth < window.innerHeight ? "portrait" : "landscape";
+    console.log("orientation", orientation);
     const screen =  { 
       width: window.innerWidth, 
       height: window.innerHeight, 
-      orientation:window.screen.orientation.type.includes("landscape") ? "landscape" : "portrait",
+      orientation,
       size,
       isLarge:["l", "xl"].includes(size),
       isSmall:["s", "xs"].includes(size),
