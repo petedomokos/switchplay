@@ -53,7 +53,6 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
   }
 
   useEffect(() => {
-      console.log("useEff.....")
       const handleResize = () => {
         updateScreen(getScreenInfo())
       };

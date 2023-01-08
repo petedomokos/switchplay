@@ -35,7 +35,7 @@ export default function kpisLayout(){
             //bars
             const currentColour = "#696969";
             const colours = {
-                current: currentColour,
+                current: "yellow",// currentColour,
                 target: "#DCDCDC",
                 expectedBehind:"red",
                 expectedAhead:currentColour
