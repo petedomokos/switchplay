@@ -355,6 +355,7 @@ export default function milestonesBarComponent() {
                 const adjustPtForData = pt => ({ x: pt.x - currentSliderOffset, y: pt.y - topBarHeight })
                 enhancedDrag
                     .onClick(function(e, d){
+                        alert("click m")
                         /*
                         console.log("clicked.....")
                         const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
@@ -364,6 +365,7 @@ export default function milestonesBarComponent() {
                         */
                     })
                     .onDblClick(function(e,d){
+                        alert("dbl click m")
                         const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
                         if(milestone){
                             selected = milestone.id;
