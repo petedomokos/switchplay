@@ -371,12 +371,10 @@ export default function milestonesBarComponent() {
                         }
                     })
                     .onLongpressStart(function(e, d){
-                        console.log("lp start")
-                        alert("lp start")
                         const pt = adjustPtForData(e);
                         const milestone = milestoneContainingPt(pt, positionedData);
                         if(milestone){
-                            //console.log("remove animation")
+                            console.log("remove animation")
                         }else{
                             createMilestonePlaceholder(prevCard(pt.x), nextCard(pt.x))
                         }

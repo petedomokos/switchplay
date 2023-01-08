@@ -28,10 +28,9 @@ const App = () => {
       body { -webkit-touch-callout: none !important; }
       a { -webkit-user-select: none !important; }
     */
-    /*window.addEventListener("contextmenu", function(e) { 
-      alert("contextmenu")
+    window.addEventListener("contextmenu", function(e) { 
       e.preventDefault(); 
-    })*/
+    })
   })
   return (
   <BrowserRouter>
