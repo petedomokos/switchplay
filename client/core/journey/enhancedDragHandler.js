@@ -137,7 +137,9 @@ export default function dragEnhancements() {
                     if (isClick) {
                         console.log("isClick dblClickTimer", dblClickTimer)
                         const time = e.sourceEvent.timeStamp;
+                        console.log("time", time)
                         const diff = prevTime ? time - prevTime : null;
+                        //on chrome ios, timestamp is 100 times normal
                         console.log("diff", diff)
                         prevTime = time;
                         if(dblClickTimer){
@@ -152,7 +154,7 @@ export default function dragEnhancements() {
                                 console.log("timer expired..calling onClick")
                                 dblClickTimer = null;
                                 onClick.call(this, e, d);
-                            }, 200)
+                            }, 400)
                         }
                         reset();
                         break; 
