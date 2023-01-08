@@ -6,6 +6,11 @@ import dragEnhancements from './enhancedDragHandler';
 
 */
 export default function profileInfoComponent() {
+    d3.select("body").on("contextmenu", (e) => { 
+        console.log("body contextmenu event")
+        e.preventDefault(); 
+        alert("body contextmenu event")
+    })
     //API SETTINGS
     // dimensions
     let width = DIMNS.profile.width;
@@ -75,6 +80,10 @@ export default function profileInfoComponent() {
                             .attr("width", width)
                             //.attr("height", photoHeight)
 
+                    })
+                    .on("contextmenu", (e) => { 
+                        console.log("photo contextmenu event")
+                        e.preventDefault(); 
                     })
 
             const format = d3.timeFormat("%_d %b, %y");
