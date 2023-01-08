@@ -31,6 +31,15 @@ const App = () => {
     window.addEventListener("contextmenu", function(e) { 
       e.preventDefault(); 
     })
+    /*
+    window.addEventListener("dblclick", function(e) { 
+      alert("dblclick event")
+      e.preventDefault(); 
+    })
+    window.addEventListener("click", function(e) { 
+      alert("click event") 
+    })
+    */
   })
   return (
   <BrowserRouter>

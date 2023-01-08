@@ -354,27 +354,23 @@ export default function milestonesBarComponent() {
                 //helper removes offset and phase labels height so we can compare with data 
                 const adjustPtForData = pt => ({ x: pt.x - currentSliderOffset, y: pt.y - topBarHeight })
                 enhancedDrag
+                    .onClick(handleMilestoneClick)
+                    /*
+                    for when its differentiated from dbl-click on laptops and safari
                     .onClick(function(e, d){
                         //doing now - dbl click on chrome mobile comes thru as a click
                         //next - add a dar overly over whole screen inc burger menu so only the 
                         //selcted milestoen shows.
-                        alert("click m")
-                        /*
+                        //alert("click m")
                         console.log("clicked.....")
-                        const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
-                        if(milestone){
-                        }else{
-                        }
-                        */
+                        //const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
+                        //if(milestone){
+                        //}else{
+                        //}
+                        
                     })
-                    .onDblClick(function(e,d){
-                        alert("dbl click m")
-                        const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
-                        if(milestone){
-                            selected = milestone.id;
-                            update(data, { milestoneTransition:{ update:{ duration:2000 }}});
-                        }
-                    })
+                    */
+                    .onDblClick(handleMilestoneClick) //see note about chrome on mobile
                     .onLongpressStart(function(e, d){
                         const pt = adjustPtForData(e);
                         const milestone = milestoneContainingPt(pt, positionedData);
@@ -390,6 +386,23 @@ export default function milestonesBarComponent() {
                     .on("drag", selected ? null : enhancedDrag(dragged))
                     .on("end", selected ? null : enhancedDrag(dragEnd));
                 
+                //click and dbl-click 
+                //todo: chrome mobile had no dbl-click so currently no difference if no dbl-click
+                //but need a way of distinguisng this -eg on laptop we do want it differentiated
+                //but maybe best is to just make dbl-click teh same as two clicks , and 
+                //then ppl on chrome mobile just cant do two clicks in quick succession
+                function handleMilestoneClick(e,d){
+                    //if(selected){
+                        //treat it as a dbl-click => clicking a selected milestone zooms user in even further
+                        //or maybe this needs to be doen at next evel as drag is turned off when selected i think
+                    //}
+                    const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
+                    if(milestone){
+                        selected = milestone.id;
+                        update(data, { milestoneTransition:{ update:{ duration:2000 }}});
+                    }
+                }
+                //dragging
                 let dragStartX;
                 function dragStart(e,d){
                     if(!swipable) { return; }
