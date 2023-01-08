@@ -14,9 +14,6 @@ body{
   top: 10px;
   /*display:none;*/
 }
-.bt-burger-button.hidden { 
-  display: none; 
-}
 /* Color/shape of burger icon bars */
 .bm-burger-bars{
     background:grey;

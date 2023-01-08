@@ -50,6 +50,7 @@ export default function dragEnhancements() {
 
     function withEnhancements(cb = () => { }) {
         return function (e, d) {
+            console.log("ev", e)
             beforeAll.call(this, e, d);
             //programmatic zoom has no src ev
             if(!e.sourceEvent || e.sourceEvent.type === "wheel"){
@@ -133,12 +134,17 @@ export default function dragEnhancements() {
                         break;
                     }
                     if (isClick) {
+                        console.log("isClick dblClickTimer", dblClickTimer)
                         if(dblClickTimer){
+                            console.log("...calling onDblClick")
                             onDblClick.call(this, e, d)
                             dblClickTimer.stop();
                             dblClickTimer = null;
                         }else{
+                            console.log("setting dbl-click timer")
+                            //create a pause in which user can click again to make it a dbl-click
                             dblClickTimer = d3.timeout(() => {
+                                console.log("timer expired..calling onClick")
                                 dblClickTimer = null;
                                 onClick.call(this, e, d);
                             }, 200)

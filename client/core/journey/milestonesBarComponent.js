@@ -355,6 +355,9 @@ export default function milestonesBarComponent() {
                 const adjustPtForData = pt => ({ x: pt.x - currentSliderOffset, y: pt.y - topBarHeight })
                 enhancedDrag
                     .onClick(function(e, d){
+                        //doing now - dbl click on chrome mobile comes thru as a click
+                        //next - add a dar overly over whole screen inc burger menu so only the 
+                        //selcted milestoen shows.
                         alert("click m")
                         /*
                         console.log("clicked.....")
