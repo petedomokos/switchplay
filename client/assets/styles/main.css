@@ -1,6 +1,8 @@
 body{
   margin:0;
   padding:0;
+  -webkit-user-select: none;
+  user-select: none;
 }
 /*MAIN-BURGER-MENU------------------------------*/
 /* Position and sizing of burger button */
@@ -14,7 +16,7 @@ body{
 }
 /* Color/shape of burger icon bars */
 .bm-burger-bars{
-    background:grey;
+    background:red;
 }
 /* Color/shape of burger icon bars on hover*/
 .bm-burger-bars-hover {background: #a90000;}
