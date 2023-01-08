@@ -12,7 +12,6 @@ export const user = (state=InitialState.user, act) =>{
 	switch(act.type){
 		//SIGNED IN USER
 		case C.SIGN_IN:{
-			console.log("signin!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 			const { _id, admin, administeredUsers, administeredGroups, groupsMemberOf, journeys } = act.user;
 			
 			//HYDRATION
@@ -63,7 +62,6 @@ export const user = (state=InitialState.user, act) =>{
 		}
 		case C.SAVE_NEW_JOURNEY_ID:{
 			//note - atm, we auto update homeJourney to be the latest new journey
-			//console.log("reducer saveNewJourneyId")
 			const { _id } = act;
 			return {
 				...state,
@@ -97,7 +95,6 @@ export const user = (state=InitialState.user, act) =>{
 		}
 		//all datapoints must be from same dataset
 		case C.CREATE_NEW_DATAPOINTS:{
-			console.log("create new ds reducer................", act.datapoints)
 			if(act.datapoints.length === 0) { return state; }
 			//note - we can assume all are from same dataset
 
@@ -106,14 +103,9 @@ export const user = (state=InitialState.user, act) =>{
 				...d,
 				player:state.loadedUsers.find(u => u._id === d.player)
 			}))
-			console.log("dstoadd", datapointsToAdd)
 			const datasetToUpdate = state.loadedDatasets.find(dset => dset._id === act.datasetId);
-			console.log("datasetToUp", datasetToUpdate)
 			//may have not loaded deep dataset 
-			if(!datasetToUpdate?.datapoints) { 
-				console.log("no need to update ds as dont have deep!!!!!!!!!!!!!")
-				return state; }
-				console.log("updating ds in dataset!!!!!!!!!!!")
+			if(!datasetToUpdate?.datapoints) { return state; }
 			const updatedDataset = {
 				...datasetToUpdate,
 				datapoints:[...datasetToUpdate.datapoints, ...datapointsToAdd]
@@ -160,9 +152,7 @@ export const user = (state=InitialState.user, act) =>{
 			//adding and removing players -> add/remove groupId from affected players
 			if(!isSame(groupToUpdate.players, updatedGroup.players)){
 				const playersAdded = updatedGroup.players.filter(player => !isIn(groupToUpdate.players, player)).map(p => p._id)
-				console.log('playersAdded', playersAdded)
 				const playersRemoved = groupToUpdate.players.filter(player => !isIn(updatedGroup.players, player)).map(p => p._id)
-				console.log('playersRemoved', playersRemoved)
 				updatedLoadedUsers = state.loadedUsers.map(user =>{
 					//only add groupId to user if groupsMemberOf is loaded (ie deep version of user is loaded)
 					if(!user.groupsMemberOf){
@@ -276,7 +266,6 @@ export const user = (state=InitialState.user, act) =>{
 		//Note 1 - this cannot be the signed in user - they are always loaded fully
 		//Note 2 - this will overwrite/enhance any existing objects rather than replace
 		case C.LOAD_USER:{
-			console.log("load user!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 			const { admin, administeredUsers, administeredGroups, groupsMemberOf } = act.user;
 
 			//hydration
@@ -578,7 +567,6 @@ export const system = (state={}, act) => {
 		}
 		case C.SAVE_ADHOC_JOURNEY:{
 			//@todo - abstract this as it is repeated in SAVE_ADHOC_JOURNEY
-			//console.log("reducer saveAdhocJourney", act)
 			return {
 				...state,
 				journey:{ ...act.journey, measures:mockMeasures },

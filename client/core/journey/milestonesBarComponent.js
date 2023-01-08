@@ -222,7 +222,7 @@ export default function milestonesBarComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            console.log("updateMBar", data)
+            // console.log("updateMBar", data)
             containerG = d3.select(this);
             //dimns is needed for init too
             updateDimns(data);
@@ -374,9 +374,8 @@ export default function milestonesBarComponent() {
                         console.log("lp start")
                         const pt = adjustPtForData(e);
                         const milestone = milestoneContainingPt(pt, positionedData);
-                        console.log("m", milestone)
                         if(milestone){
-                            console.log("remove animation")
+                            //console.log("remove animation")
                         }else{
                             createMilestonePlaceholder(prevCard(pt.x), nextCard(pt.x))
                         }

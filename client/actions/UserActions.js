@@ -48,10 +48,10 @@ export const fetchUser = id => dispatch => {
 				if(jwt.user._id === data._id){
 					//need to replicate this logic on the signin page too somehow, or point it to here
 					//first - 
-					console.log('siging in to store again', data.username)
+					//console.log('siging in to store again', data.username)
 					return { type:C.SIGN_IN, user:transformUserForClient(data) };
 				}
-				console.log('loading another user into user', data.username)
+				//console.log('loading another user into user', data.username)
 				return { type:C.LOAD_USER, user:transformUserForClient(data) };
 			}
 		}) 

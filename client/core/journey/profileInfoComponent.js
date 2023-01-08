@@ -67,7 +67,7 @@ export default function profileInfoComponent() {
                     .each(function(d){
                         d3.select(this)
                             .insert("image","text")
-                            .attr("xlink:href", photoUrl(d))
+                            .attr("xlink:href", photoUrl(d)) 
                     })
                     .merge(photosG)
                     .each(function(d){

@@ -23,7 +23,7 @@ export default function kpisLayout(){
 
 
         const kpisData = data.map((kpi,i) => {
-            console.log("kpi---",i, kpi)
+            //console.log("kpi---",i, kpi)
             const { values } = kpi;
             //can set all kpis to be active eg for an active profile card that doesnt have access to all data
             const isActive = allKpisActive || kpi.isActive;

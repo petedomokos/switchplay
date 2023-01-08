@@ -228,8 +228,6 @@ export default function kpisComponent() {
                             .attr("class", d => "kpi kpi-"+d.id)
                             .merge(kpiG)
                             .attr("transform", (d,i) => {
-                                if(isSelected(d))
-                                console.log("trans kpis i", i, d)
                                 const extraSpaceForSelected = selectedKpiHeight - kpiHeight;
                                 //console.log("extraspace", extraSpaceForSelected)
                                 const selectedKpiBefore = kpisData

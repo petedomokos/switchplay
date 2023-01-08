@@ -29,6 +29,7 @@ const App = () => {
       a { -webkit-user-select: none !important; }
     */
     window.addEventListener("contextmenu", function(e) { 
+      alert("contextmenu")
       e.preventDefault(); 
     })
   })

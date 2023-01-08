@@ -12,7 +12,6 @@ const mapStateToProps = (state, ownProps) => {
 }
 const mapDispatchToProps = dispatch => ({
 	loadUser(userId){
-		console.log('calling fetchUser signin in again..............')
 		dispatch(fetchUser(userId))
 	},
 	updateScreen(screen){
