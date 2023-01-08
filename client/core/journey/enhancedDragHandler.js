@@ -147,12 +147,14 @@ export default function dragEnhancements() {
                             onDblClick.call(this, e, d)
                             dblClickTimer.stop();
                             dblClickTimer = null;
+                            prevtime = null;
                         }else{
                             console.log("setting dbl-click timer")
                             //create a pause in which user can click again to make it a dbl-click
                             dblClickTimer = d3.timeout(() => {
                                 console.log("timer expired..calling onClick")
                                 dblClickTimer = null;
+                                prevtime = null;
                                 onClick.call(this, e, d);
                             }, 400)
                         }
