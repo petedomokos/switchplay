@@ -47,6 +47,7 @@ export default function dragEnhancements() {
     //let prevClickTime;
     //let prevStart;
     let dblClickTimer;
+    let prevTime;
 
     function withEnhancements(cb = () => { }) {
         return function (e, d) {
@@ -135,6 +136,10 @@ export default function dragEnhancements() {
                     }
                     if (isClick) {
                         console.log("isClick dblClickTimer", dblClickTimer)
+                        const time = e.sourceEvent.timeStamp;
+                        const diff = prevTime ? time - prevTime : null;
+                        console.log("diff", diff)
+                        prevTime = time;
                         if(dblClickTimer){
                             console.log("...calling onDblClick")
                             onDblClick.call(this, e, d)

@@ -23,6 +23,7 @@ const useStyles = makeStyles((theme) => ({
     height:"100%"
   },
   fullScreen:{
+    border:"3px solid red",
     width:"100%",
     height:props => props.screen.isLarge ? "100vh" : `calc(100vh - ${URL_BAR_HEIGHT}px)`,
   },
