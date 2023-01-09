@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import * as d3 from 'd3';
 import { makeStyles } from '@material-ui/core/styles'
 import AppBar from '@material-ui/core/AppBar'
 import Toolbar from '@material-ui/core/Toolbar'
@@ -9,6 +10,7 @@ import Button from '@material-ui/core/Button'
 import auth from '../auth/auth-helper'
 import {Link, withRouter} from 'react-router-dom'
 import { slide as ElasticMenu } from 'react-burger-menu'
+import { show, hide } from './journey/domHelpers';
 
 const isActive = (history, path) => {
   if (history.location.pathname == path)
@@ -20,6 +22,7 @@ const isActive = (history, path) => {
 
 const useStyles = makeStyles(theme => ({
   root: {
+    display:props => props.isHidden ? "none" : null
   },
   items:{
     //flexDirection:props => ["s", "m"].includes(props.screenSize) ? "column" : "column"
@@ -53,13 +56,19 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const Menu = withRouter(({ history, signingOut, screenSize, onSignout }) => {
-  //const styleProps = { screenSize };
-  const classes = useStyles(/*styleProps*/) 
+const Menu = withRouter(({ history, isHidden, signingOut, screenSize, onSignout }) => {
+  const styleProps = { isHidden };
+  const classes = useStyles(styleProps) 
   const user = auth.isAuthenticated() ? auth.isAuthenticated().user : null;
   const [isOpen, setIsOpen] = useState(false)
    //@todo - remove burger bars, replace with my own so i can take control and make it close 
   //when  menu item is clicked. 
+
+  //control the burger bar in a useEffect
+  useEffect(() => { 
+    d3.select(".bm-burger-button").call(isHidden ? hide : show)
+  }, [isHidden])
+
   return (
     <>
       {["s", "m", "l", "xl"].includes(screenSize)  ?

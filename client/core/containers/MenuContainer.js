@@ -6,6 +6,7 @@ const mapStateToProps = (state, ownProps) => {
 	//console.log("menucont", state)
 	//pass signout and signingOut through to Menu from PageTemplateContainer
 	return{
+		isHidden:state.system.menusHidden,
 		signingOut:state.asyncProcesses.signingOut,
 		screenSize:state.system.screen.size
 	}

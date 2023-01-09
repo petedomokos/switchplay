@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
 const layout = milestonesLayout();
 const milestonesBar = milestonesBarComponent();
 
-const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, screen, availWidth, availHeight }) => {
+const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight }) => {
   const { player, profiles, contracts } = data;
   //console.log("MBar profiles", profiles)
   //local state
@@ -100,6 +100,8 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
           //.height(kpiListHeight)
           //.profileCardDimns(profileCardDimns)
           //.contractDimns(contractDimns)
+          .onTakeOverScreen(takeOverScreen)
+          .onReleaseScreen(releaseScreen)
           .onSetKpiFormat(setKpiFormat)
           .onSelectKpiSet((e,kpi) => { 
             onSelectKpiSet(kpi); 

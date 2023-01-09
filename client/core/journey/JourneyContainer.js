@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import Journey  from './Journey'
 import { saveJourney, setActive } from '../../actions/JourneyActions'
-import { closeDialog } from '../../actions/CommonActions'
+import { closeDialog, hideMenus, showMenus } from '../../actions/CommonActions'
 import { fetchMultipleFullDatasets } from '../../actions/DatasetActions'
 import { hydrateJourneyData } from "./hydrateJourney";
 
@@ -143,6 +143,12 @@ const mapDispatchToProps = dispatch => ({
 	},
 	setActive(journeyId){
 		dispatch(setActive(journeyId))
+	},
+	takeOverScreen(){
+		dispatch(hideMenus());
+	},
+	releaseScreen(){
+		dispatch(showMenus());
 	},
 	closeDialog(path){
 		//console.log('closing dialog', path)

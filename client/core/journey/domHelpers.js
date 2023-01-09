@@ -1,23 +1,25 @@
 import * as d3 from "d3";
+
+//@todo - move these out as also used by Menu
 export function hide(selection, options={}){
     const { delay, duration=200, onEnd, finalOpacity, startOpacity } = options;
     selection.each(function(){
         const element = d3.select(this);
         //check if already hidden or being hidden
-        if(element.attr("class").includes("hidden")){ return; }
+        if(element.style("class").includes("hidden")){ return; }
         //set init opacity if not set
-        if(!element.attr("opacity")){ element.attr("opacity", 1) }
+        if(!element.style("opacity")){ element.style("opacity", 1) }
         //store prev opacity/display, set class before transition to avoid duplicate transitions
         element
             .classed("hidden", true)
-            .attr("data-shown-display", element.attr("display"))
-            .attr("data-shown-opacity", element.attr("opacity"))
+            .attr("data-shown-display", element.style("display"))
+            .attr("data-shown-opacity", element.style("opacity"))
 
         element
             .transition()
             .duration(duration)
                 .attr("opacity", 0)
-                    .on("end", function(){ d3.select(this).attr("display", "none"); })
+                    .on("end", function(){ d3.select(this).style("display", "none"); })
     })
 }
 
@@ -33,9 +35,9 @@ export function show(selection, options={}){
         element
             .transition()
             .duration(duration)
-                .attr("opacity", element.attr("data-shown-opacity"))
+                .attr("opacity", element.style("data-shown-opacity"))
                     .on("end", function(){
-                        d3.select(this).attr("display", element.attr("data-shown-display"));
+                        d3.select(this).style("display", element.attr("data-shown-display"));
                     })
     })
 

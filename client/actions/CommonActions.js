@@ -89,3 +89,6 @@ export const updateScreen = screen => {
 		screen
 	}
 }
+
+export const hideMenus = () => ({ type:C.HIDE_MENUS })
+export const showMenus = () => ({ type:C.SHOW_MENUS })

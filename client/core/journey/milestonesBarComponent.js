@@ -130,6 +130,9 @@ export default function milestonesBarComponent() {
     let onCreateMilestone = () => {};
     let onDeleteMilestone = () => {};
 
+    let onTakeOverScreen = () => {};
+    let onReleaseScreen = () => {};
+
     const drag = d3.drag();
     const enhancedDrag = dragEnhancements();
 
@@ -394,6 +397,8 @@ export default function milestonesBarComponent() {
                 //then ppl on chrome mobile just cant do two clicks in quick succession
                 function handleMilestoneClick(e,d){
                     //hide phase labels
+                    //@todo - BUG - why is there a delay in removing the burger bars?
+                    onTakeOverScreen();
                     milestonesG.select("g.phase-labels").call(hide);
                     //if(selected){
                         //treat it as a dbl-click => clicking a selected milestone zooms user in even further
@@ -619,6 +624,7 @@ export default function milestonesBarComponent() {
                                 icon:{ iconType:"path", d:icons.collapse.d },
                                 onClick:d => {
                                     milestonesG.select("g.phase-labels").call(show);
+                                    onReleaseScreen();
                                     selected = null;
                                     update(data, { milestoneTransition:{ update:{ duration:2000 }} })
                                 }
@@ -786,6 +792,16 @@ export default function milestonesBarComponent() {
         if(typeof value === "function"){
             onToggleSliderEnabled = value;
         }
+        return milestonesBar;
+    };
+    milestonesBar.onTakeOverScreen = function (value) {
+        if (!arguments.length) { return onTakeOverScreen; }
+        onTakeOverScreen = value;
+        return milestonesBar;
+    };
+    milestonesBar.onReleaseScreen = function (value) {
+        if (!arguments.length) { return onReleaseScreen; }
+        onReleaseScreen = value;
         return milestonesBar;
     };
     milestonesBar.onClick = function (value) {

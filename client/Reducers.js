@@ -565,6 +565,8 @@ export const system = (state={}, act) => {
 				screen
 			}
 		}
+		case C.HIDE_MENUS:{ return { ...state, menusHidden: true } }
+		case C.SHOW_MENUS:{ return { ...state, menusHidden: false } }
 		case C.SAVE_ADHOC_JOURNEY:{
 			//@todo - abstract this as it is repeated in SAVE_ADHOC_JOURNEY
 			return {
