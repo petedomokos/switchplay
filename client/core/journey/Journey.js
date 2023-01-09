@@ -25,13 +25,13 @@ const useStyles = makeStyles((theme) => ({
     width:"100%",
     height:"100%",
     position:"relative",
-    border:"3px solid blue"
     //marginLeft:DIMNS.journey.margin.left, 
     //marginRight:DIMNS.journey.margin.right,
     //marginTop:DIMNS.journey.margin.top, 
     //marginBottom:DIMNS.journey.margin.bottom,
   },
   overlay:{
+    border:"3px solid red",
     position:"absolute",
     background:grey10(9),
     width:"100%",
@@ -98,7 +98,7 @@ const initChannels = d3.range(numberMonths)
 
 //width and height may be full screen, but may not be
 const Journey = ({ data, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog, takeOverScreen, releaseScreen }) => {
-  // console.log("Journey data...", data)
+  console.log("Journey height", height)
   //console.log("Journey avail", availableJourneys)
   const { _id, userId, name, contracts, profiles, aims, goals, links, measures, kpis } = data;
   const [journey, setJourney] = useState(null);
@@ -254,6 +254,23 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
     }
   }, [journeyWidth, journeyHeight])
 
+  function openFullscreen() {
+    const elem = d3.select(".journey-container").node();
+    console.log("openFullScreen on", elem)
+    if (elem.requestFullscreen) {
+      console.log("req full screen")
+      elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) { /* Safari */
+      console.log("safari req full screen")
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { /* IE11 */
+      console.log("IE11 req full screen")
+      elem.msRequestFullscreen();
+    } else {
+      console.log("no req full screen")
+    }
+  }
+  
   //overlay
   useEffect(() => {
     if(!overlayRef.current){return; }
@@ -569,21 +586,21 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
     let dt = e.dataTransfer
     let files = dt.files
     const input = files[0];
-    console.log("input", input)
+    //console.log("input", input)
     const reader = new FileReader();
     reader.onload = function (e) {
       var parsed = d3.csvParse(e.target.result);
-      console.log("parsed", parsed);
+      //console.log("parsed", parsed);
       if(input.name.includes("datasets")){
-        console.log("save datasets")
+        //console.log("save datasets")
       }else if(input.name.includes("datapoints")){
-        console.log("save datapoints")
+        //console.log("save datapoints")
       }
       else if(input.name.includes("users")){
-        console.log("save users")
+        //console.log("save users")
       }
       else if(input.name.includes("groups")){
-        console.log("save groups")
+        //console.log("save groups")
       }
   
       //identify what the fle is about,
@@ -612,9 +629,9 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
     .catch(() => { }) //error - handle and inform user
   }
   */
-
+  //@todo -  openFullScreen when user clicks to get into a journey
   return (
-    <div className={classes.root}>
+    <div className={`journey-container ${classes.root}`} onClick={openFullscreen}>
         <div className={`${classes.overlay} overlay`} ref={overlayRef}>
           {displayedBar === "milestones" &&
             <MilestonesBar 

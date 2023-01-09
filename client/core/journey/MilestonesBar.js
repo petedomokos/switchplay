@@ -16,8 +16,11 @@ import { sortAscending } from '../../util/ArrayHelpers';
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    //couldnt the height just be the full journey height always for now?
+    //until we allow a bar to be shown above the jorney canvas
+    border:"1px solid yellow",
     width:"100%",
-    height:props => props.height,
+    height:"285px",//props => props.height,
     display:"flex",
     flexDirection:"column",
     //marginLeft:DIMNS.profiles.margin.left, 
@@ -60,13 +63,18 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
 
   const width = availWidth;
   const bottomCtrlsBarHeight = screen.isLarge ? DIMNS.milestonesBar.ctrls.height : 0;
+  //console.log("maxh", DIMNS.milestonesBar.maxHeight)
+  //console.log("availH", availHeight)
+  //console.log("bottomCtrlH", bottomCtrlsBarHeight)
   const height = d3.min([DIMNS.milestonesBar.maxHeight, availHeight - bottomCtrlsBarHeight])
+  //console.log("height", height)
   let styleProps = { bottomCtrlsBarHeight, height, sliderEnabled };
   const classes = useStyles(styleProps) ;
   const containerRef = useRef(null);
 
   //init
   useEffect(() => {
+    return;
     if(!containerRef.current){return; }
   
     layout
@@ -77,9 +85,6 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
     //profiles go before contarcts of same date
     const orderedData = sortAscending([ ...profiles/*, ...contracts*/], d => d.date);
     //console.log("ordered", orderedData)
-
-    const processedData = layout(orderedData);
-    //console.log("processedData", processedData);
     d3.select(containerRef.current)
       .datum(layout(orderedData))
       .call(milestonesBar

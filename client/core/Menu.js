@@ -22,7 +22,6 @@ const isActive = (history, path) => {
 
 const useStyles = makeStyles(theme => ({
   root: {
-    display:props => props.isHidden ? "none" : null
   },
   items:{
     //flexDirection:props => ["s", "m"].includes(props.screenSize) ? "column" : "column"
@@ -57,7 +56,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const Menu = withRouter(({ history, isHidden, signingOut, screenSize, onSignout }) => {
-  const styleProps = { isHidden };
+  const styleProps = { };
   const classes = useStyles(styleProps) 
   const user = auth.isAuthenticated() ? auth.isAuthenticated().user : null;
   const [isOpen, setIsOpen] = useState(false)

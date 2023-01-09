@@ -36,12 +36,15 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
     const screen =  { 
       width: window.innerWidth, 
       height: window.innerHeight, 
+      
       orientation,
       size,
       isLarge:["l", "xl"].includes(size),
       isSmall:["s", "xs"].includes(size),
     }
-    //console.log("_screen", screen)
+    console.log("window innerH", window.innerHeight)
+    console.log("window screen", window.screen)
+    console.log("_screen", screen)
     window._screen = screen;
     return screen;
   }
