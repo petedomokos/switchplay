@@ -255,20 +255,28 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
   }, [journeyWidth, journeyHeight])
 
   function openFullscreen() {
-    const elem = d3.select(".journey-container").node();
-    console.log("openFullScreen on", elem)
+    //const elem = d3.select(".journey-container").node();
+    console.log("openFullScreen")
+    if (document.webkitFullscreenElement) {
+      document.webkitCancelFullScreen();
+    } else {
+      const el = document.documentElement;
+      el.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
+    /*
     if (elem.requestFullscreen) {
       console.log("req full screen")
       elem.requestFullscreen();
-    } else if (elem.webkitRequestFullscreen) { /* Safari */
+    } else if (elem.webkitRequestFullscreen) { // Safari
       console.log("safari req full screen")
       elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) { /* IE11 */
+    } else if (elem.msRequestFullscreen) { // IE11
       console.log("IE11 req full screen")
       elem.msRequestFullscreen();
     } else {
       console.log("no req full screen")
     }
+    */
   }
   
   //overlay
