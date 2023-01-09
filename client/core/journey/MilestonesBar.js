@@ -74,7 +74,6 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
 
   //init
   useEffect(() => {
-    return;
     if(!containerRef.current){return; }
   
     layout
