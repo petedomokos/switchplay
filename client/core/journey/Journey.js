@@ -25,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
     width:"100%",
     height:"100%",
     position:"relative",
+    border:"3px solid blue"
     //marginLeft:DIMNS.journey.margin.left, 
     //marginRight:DIMNS.journey.margin.right,
     //marginTop:DIMNS.journey.margin.top, 

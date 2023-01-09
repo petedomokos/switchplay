@@ -82,7 +82,10 @@ export default function kpiComponent() {
     let onDelete = function(){};
 
     const enhancedDrag = dragEnhancements()
-        .onClick((e,d) => { onClick.call(this, e, d); }) //todo - why do i have to write it out like this?
+        .onClick((e,d) => { 
+            console.log("kpi click")
+            //onClick.call(this, e, d); 
+        }) //todo - why do i have to write it out like this?
         //.onClick(onClick) not working
         .onDblClick(onDblClick);
 

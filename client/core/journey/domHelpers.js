@@ -1,5 +1,45 @@
 import * as d3 from "d3";
+export function hide(selection, options={}){
+    const { delay, duration=200, onEnd, finalOpacity, startOpacity } = options;
+    selection.each(function(){
+        const element = d3.select(this);
+        //check if already hidden or being hidden
+        if(element.attr("class").includes("hidden")){ return; }
+        //set init opacity if not set
+        if(!element.attr("opacity")){ element.attr("opacity", 1) }
+        //store prev opacity/display, set class before transition to avoid duplicate transitions
+        element
+            .classed("hidden", true)
+            .attr("data-shown-display", element.attr("display"))
+            .attr("data-shown-opacity", element.attr("opacity"))
 
+        element
+            .transition()
+            .duration(duration)
+                .attr("opacity", 0)
+                    .on("end", function(){ d3.select(this).attr("display", "none"); })
+    })
+}
+
+export function show(selection, options={}){
+    const { delay, duration=200, onEnd, finalOpacity, startOpacity } = options;
+    selection.each(function(){
+        const element = d3.select(this);
+        //check if already shown or being shown
+        if(!element.attr("class").includes("hidden")){ return; }
+        //remove class before transition to avoid duplicate transitions
+        element.classed("hidden", false);
+        //hide
+        element
+            .transition()
+            .duration(duration)
+                .attr("opacity", element.attr("data-shown-opacity"))
+                    .on("end", function(){
+                        d3.select(this).attr("display", element.attr("data-shown-display"));
+                    })
+    })
+
+}
 export function updatePos(selection, pos={}, transition){
     const { x, y, x1, y1, x2, y2} = pos;
     selection.each(function(d){
@@ -149,6 +189,7 @@ export function getParentByTagName(node, tag) {
 }
 
 // todo - pass in options instead of sep args, and include a string for what to do on end: remove or displayNone
+/*
 export const hide = (selectionToHide, settings = {}) => {
     const { delay, duration, onEnd, finalOpacity, startOpacity } = settings;
 
@@ -176,6 +217,7 @@ export const show = (selectionToShow, delay = 300, duration = 800, name = "trans
         .duration(duration)
         .attr("opacity", 1);
 };
+*/
 
 export function parseTransform(a) {
     // return the identity values if no translate defined

@@ -8,6 +8,7 @@ import { addMilestonePlaceholderContents, removeMilestonePlaceholderContents } f
 import { addMonths } from '../../util/TimeHelpers';
 import { milestoneContainingPt } from "./screenGeometryHelpers";
 import { icons } from '../../util/icons';
+import { hide, show } from './domHelpers';
 /*
 
 */
@@ -392,10 +393,13 @@ export default function milestonesBarComponent() {
                 //but maybe best is to just make dbl-click teh same as two clicks , and 
                 //then ppl on chrome mobile just cant do two clicks in quick succession
                 function handleMilestoneClick(e,d){
+                    //hide phase labels
+                    milestonesG.select("g.phase-labels").call(hide);
                     //if(selected){
                         //treat it as a dbl-click => clicking a selected milestone zooms user in even further
                         //or maybe this needs to be doen at next evel as drag is turned off when selected i think
                     //}
+                    //transition of sliding cards has stopped working!!!!
                     const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
                     if(milestone){
                         selected = milestone.id;
@@ -614,6 +618,7 @@ export default function milestonesBarComponent() {
                                 label:"collapse", 
                                 icon:{ iconType:"path", d:icons.collapse.d },
                                 onClick:d => {
+                                    milestonesG.select("g.phase-labels").call(show);
                                     selected = null;
                                     update(data, { milestoneTransition:{ update:{ duration:2000 }} })
                                 }

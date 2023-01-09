@@ -51,7 +51,7 @@ export default function dragEnhancements() {
 
     function withEnhancements(cb = () => { }) {
         return function (e, d) {
-            console.log("ev", e)
+            //console.log("ev", e)
             beforeAll.call(this, e, d);
             //programmatic zoom has no src ev
             if(!e.sourceEvent || e.sourceEvent.type === "wheel"){
@@ -149,7 +149,7 @@ export default function dragEnhancements() {
                             dblClickTimer = null;
                             prevTime = null;
                         }else{
-                            console.log("setting dbl-click timer")
+                            //console.log("setting dbl-click timer")
                             //create a pause in which user can click again to make it a dbl-click
                             dblClickTimer = d3.timeout(() => {
                                 //console.log("timer expired..calling onClick")
