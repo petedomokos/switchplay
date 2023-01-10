@@ -609,8 +609,11 @@ export default function milestonesBarComponent() {
                 console.log("scaleused", width > height ? "v" : "h")
                 const horizScale = width / profileWidth;
                 const vertScale = height / profileHeight;
+                const scale = d3.min([horizScale, vertScale]);
                 console.log("hscale", horizScale)
                 console.log("vscale", vertScale)
+                //also need to pass through max width and height to ensure not exceeded
+
                 // const horizScale = (profileWidth + (2 * hitSpace)) / profileWidth;
                 // const vertScale = (milestonesHeight + topBarHeight) / profileHeight;
                 profilesG
@@ -622,7 +625,7 @@ export default function milestonesBarComponent() {
                         .expanded([{
                             id:selected,
                             //if landscape, then vert space is less so we scale according to that 
-                            k: width > height ? vertScale : horizScale
+                            k: scale,// width > height ? vertScale : horizScale
                         }])
                         //.kpiHeight(30) //if we want to fix the kpiheIght
                         .editable(swipable ? false : true)
