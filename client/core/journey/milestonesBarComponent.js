@@ -170,6 +170,9 @@ export default function milestonesBarComponent() {
 
     let datePhasesData;
 
+    //temp settings
+    let ignoreNextClick = false;
+
     //helper
     //data is passed in here, so we can call this function with other data too eg with placeholder
     const calcMilestoneX = data => nr => {
@@ -401,6 +404,14 @@ export default function milestonesBarComponent() {
                 //but maybe best is to just make dbl-click teh same as two clicks , and 
                 //then ppl on chrome mobile just cant do two clicks in quick succession
                 function handleMilestoneClick(e,d){
+                    //this is a temp setting to save us having to turn drag off whilst creating a milestone
+                    //otherwise the confirm click would also trigger this.
+                    if(ignoreNextClick){
+                        ignoreNextClick = false;
+                        return;
+                    }
+                    //if click is to confirm a new milestone, ignore
+                    if(!milestonesG.select("g.placeholder").empty()){ return;}
                     //hide phase labels
                     //@todo - BUG - why is there a delay in removing the burger bars?
                     onTakeOverScreen();
@@ -460,6 +471,8 @@ export default function milestonesBarComponent() {
                     //helpers
                     const addPlaceholder = () => {
                         const handlePlaceholderBtnClick = key => {
+                            //temp fix to stop click selected a milestone. stopProagation doesnt work with d3.drag
+                            ignoreNextClick = true;
                             if(key === "cancel"){ 
                                 handleCancelMilestone(); 
                             }else{
