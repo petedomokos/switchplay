@@ -223,14 +223,14 @@ export default function milestonesBarComponent() {
     }
 
     let transitionOn = true;
-    const slideTransition = { duration: 200 };
+    const SLIDE_TRANSITION = { duration: 200 };
     const transformTransition = { update: { duration: 1000 } };
 
     function milestonesBar(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            //console.log("updateMBar------------height", height)
+            console.log("updateMBar")
             containerG = d3.select(this)
                 .attr("width", width)
                 .attr("height", height);
@@ -240,7 +240,7 @@ export default function milestonesBarComponent() {
                 init();
             }
 
-            update(data, { slideTransition });
+            update(data, { slideTransition:SLIDE_TRANSITION });
             function init(){
                 containerG.append("rect").attr("class", "container-bg")
                     .attr("fill", "transparent")
@@ -453,7 +453,8 @@ export default function milestonesBarComponent() {
 
                 //POSITIONING
                 //offsetting due to slide
-                slideTo(requiredSliderPosition, { transition:slideTransition });
+                //slideTo(requiredSliderPosition, { transition:slideTransition });
+                slideTo(requiredSliderPosition, { transition:SLIDE_TRANSITION });
 
                 const prevCard = x => d3.greatest(positionedData.filter(m => m.x < x), m => m.x);
                 const nextCard = x => d3.least(positionedData.filter(m => m.x > x), m => m.x);
@@ -697,14 +698,14 @@ export default function milestonesBarComponent() {
                 slideBack = function(){
                     if(canSlideBack){
                         requiredSliderPosition -= 1;
-                        update(data, { slideTransition });
+                        update(data, { slideTransition:SLIDE_TRANSITION });
                     }
                 }
 
                 slideForward = function(){
                     if(canSlideForward){
                         requiredSliderPosition += 1;
-                        update(data, { slideTransition });
+                        update(data, { slideTransition:SLIDE_TRANSITION });
                     }
                 }
                 /*
