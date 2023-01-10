@@ -35,11 +35,9 @@ export default function kpisComponent() {
     let fixedSelectedKpiHeight;
     let selectedKpiHeight;
 
-    function updateDimns(nrCtrlsButtons=0, nrTooltipRows=0){
-        //console.log("updateDimns fixedselH", fixedSelectedKpiHeight, nrTooltipRows, kpiHeight)
-        //selectedKpi must expand for tooltip rows, by 0.75 of kpiHeight per tooltip
-        selectedKpiHeight = fixedSelectedKpiHeight || kpiHeight + (0.75 * kpiHeight * nrTooltipRows);
-        //console.log("selecetedKpiHeight", selectedKpiHeight)
+    let scrollMax;
+
+    function updateDimns(nrCtrlsButtons=0, nrTooltipRows=0, nrKpis){
 
         margin = { left: width * 0.1, right: width * 0.1, top:height * 0.1, bottom: height * 0.05 };
         contentsWidth = width - margin.left - margin.right;
@@ -59,7 +57,20 @@ export default function kpisComponent() {
 
         //height
         listHeight = contentsHeight - ctrlsHeight;
+
         kpiHeight = fixedKpiHeight || listHeight/5;
+        console.log("updateDimns fixedselH", fixedSelectedKpiHeight, nrTooltipRows, kpiHeight)
+        //selectedKpi must expand for tooltip rows, by 0.75 of kpiHeight per tooltip
+
+        selectedKpiHeight = fixedSelectedKpiHeight || kpiHeight + (0.75 * kpiHeight * nrTooltipRows);
+        //console.log("selectedKpiHeight", selectedKpiHeight)
+        const extraHeightForSelected = selectedKpiHeight - kpiHeight;
+        //console.log("kpiH", kpiHeight)
+        //console.log("nrKpis", nrKpis)
+        //console.log("extra", extraHeightForSelected)
+        const kpisTotalHeight = kpiHeight * nrKpis;
+
+        scrollMax = kpisTotalHeight < listHeight ? 0 : kpisTotalHeight +(selected ? extraHeightForSelected : 0);
 
         //kpi margin
         gapBetweenKpis = kpiHeight * 0.3;
@@ -93,7 +104,9 @@ export default function kpisComponent() {
     let onCtrlClick = () => {};
 
     let onListScrollZoom = function(){};
+    let onListScrollZoomEnd = function(){};
     let handleListScrollZoom = function(){};
+    let handleListScrollZoomEnd = function(){};
 
     const listScrollZoom = d3.zoom();
 
@@ -121,8 +134,9 @@ export default function kpisComponent() {
             //console.log("rowsAb", nrTooltipRowsAbove)
             const nrTooltipRowsBelow = kpisData[0] ? d3.max(kpisData[0].tooltipsData.filter(t => t.location === "below"), d => d.row + 1) : 0;
             //console.log("rowsbe", nrTooltipRowsBelow)
-            const nrTooltipRows = nrTooltipRowsAbove + nrTooltipRowsBelow;
-            updateDimns(nrOfCtrlsButtons, nrTooltipRows);
+            const nrTooltipRows = nrTooltipRowsAbove + nrTooltipRowsBelow || 0;
+            const nrKpis = kpisData.length;
+            updateDimns(nrOfCtrlsButtons, nrTooltipRows, nrKpis);
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
             containerG = d3.select(this);
@@ -148,6 +162,7 @@ export default function kpisComponent() {
                                 .attr("stroke", "none");
 
                         const y = calculateListY(selected, data.kpisData, kpiHeight, 1);
+                        console.log("enter list init y", y)
                         listG.append("g").attr("class", "kpis-list-contents")
                             .call(listScrollZoom.translateTo, 0, y, [0,0])
 
@@ -210,9 +225,16 @@ export default function kpisComponent() {
                             //.translateExtent([[0, 0], [0, 1]])
                             .on('zoom', function(e){
                                 handleListScrollZoom.call(this, e);
+                                //the cb will call handleListScrollZoom for all other profiles
                                 //only pass to the callback if its a zoom event, not a programmatic zoom
                                 if(e.sourceEvent){
                                     onListScrollZoom.call(this, e)
+                                }
+                            })
+                            .on("end", function(e){
+                                handleListScrollZoomEnd.call(this, e);
+                                if(e.sourceEvent){
+                                    onListScrollZoomEnd.call(this, e)
                                 }
                             })
 
@@ -327,11 +349,21 @@ export default function kpisComponent() {
 
                     })
 
+            //console.log("scrollMax", scrollMax)
             handleListScrollZoom = function(e){
+                //console.log("e.trans.y", e.transform.y)
+                //keep translate within the bounds of the list
+                const y = d3.min([d3.max([0, e.transform.y]), scrollMax])
                 containerG.select("g.kpis-list-contents")
-                    .attr("transform", `translate(0, ${e.transform.y})`);
+                    .attr("transform", `translate(0, ${y})`);
             }
-
+            handleListScrollZoomEnd = function(e){
+                if(e.transform.y < 0){
+                    e.transform.y = 0;
+                }else if(e.transform.y > scrollMax){ //replace with max
+                    e.transform.y = scrollMax; //replace with max
+                }
+            }
         })
 
         return selection;
@@ -385,6 +417,7 @@ export default function kpisComponent() {
             containerG.select("g.kpis-list-contents")
                .transition()
                     .duration(500)
+                    //how does this work - we call the zoom func on a transition???
                     .call(listScrollZoom.translateTo, 0, y, [0,0])
                     .on("end", () => { containerG.call(kpis) }); 
         }
@@ -471,6 +504,13 @@ export default function kpisComponent() {
         }
         return kpis;
     };
+    kpis.onListScrollZoomEnd = function (value) {
+        if (!arguments.length) { return onListScrollZoomEnd; }
+        if(typeof value === "function"){
+            onListScrollZoomEnd = value;
+        }
+        return kpis;
+    };
     kpis.onDragStart = function (value) {
         if (!arguments.length) { return onDragStart; }
         if(typeof value === "function"){
@@ -535,5 +575,6 @@ export default function kpisComponent() {
         return kpis;
     };
     kpis.handleListScrollZoom = function(e){ handleListScrollZoom.call(this, e) };
+    kpis.handleListScrollZoomEnd = function(e){ handleListScrollZoomEnd.call(this, e) };
     return kpis;
 }

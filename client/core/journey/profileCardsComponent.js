@@ -181,9 +181,15 @@ export default function profileCardsComponent() {
                         .editable(editable)
                         .scrollable(scrollable)
                         .onCtrlClick(onCtrlClick)
+                        //pass scroll events on any kpiComponent to all other kpiComponents
                         .onListScrollZoom(function(e){
                             data.filter(p => p.id !== d.id).forEach(p => {
                                 kpisComponents[p.id].handleListScrollZoom(e)
+                           })
+                        })
+                        .onListScrollZoomEnd(function(e){
+                            data.filter(p => p.id !== d.id).forEach(p => {
+                                kpisComponents[p.id].handleListScrollZoomEnd(e)
                            })
                         })
                         .onClickKpi((e,kpi) => {
