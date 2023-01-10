@@ -281,3 +281,25 @@ export function calculateMeanVelocity(vectors, times, options) {
     return ds / dt;
 
 }
+
+export function openFullscreen(elem) {
+    //console.log("openFullScreen")
+    if (document.webkitFullscreenElement) {
+      document.webkitCancelFullScreen();
+    } else {
+      const el = document.documentElement;
+      el.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
+    if (elem.requestFullscreen) {
+      //console.log("req full screen")
+      elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) { // Safari
+      //console.log("safari req full screen")
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { // IE11
+      //console.log("IE11 req full screen")
+      elem.msRequestFullscreen();
+    } else {
+      //console.log("no req full screen")
+    }
+  }

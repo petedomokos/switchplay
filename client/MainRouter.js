@@ -46,6 +46,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
     console.log("window screen", window.screen)
     console.log("_screen", screen)
     window._screen = screen;
+    //note - we still save in store, as ReactNative wont hve window
     return screen;
   }
 

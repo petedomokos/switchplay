@@ -23,6 +23,7 @@ const useStyles = makeStyles((theme) => ({
     height:"100%"
   },
   fullScreen:{
+    //border:"3px solid blue",
     width:"100%",
     height:props => props.screen.isLarge ? "100vh" : `calc(100vh - ${URL_BAR_HEIGHT}px)`,
   },
@@ -59,6 +60,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const UserHome = ({screen, user, loading, loadingError}) => {
+  console.log("UserHome screen", screen)
   const styleProps = {
     screen
   };
@@ -80,6 +82,7 @@ const UserHome = ({screen, user, loading, loadingError}) => {
               <Route path="/" component={JourneyContainer} />
             </Switch>
           </div>
+          after full screen
           {/**
           <div className={classes.topRow} >
               <UserProfile profile={user} />

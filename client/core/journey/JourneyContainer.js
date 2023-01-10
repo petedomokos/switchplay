@@ -108,7 +108,8 @@ const mapStateToProps = (state, ownProps) => {
 	//console.log("hydratedData", hydratedData)
 
 
-
+console.log("window _screen", window._screen)
+console.log("system screen", state.system.screen)
 	return{
 		//@todo - use activeJourney instead of homeJourney. It defaults to homeJourney on home page but user can overide.
 		data:hydratedData,

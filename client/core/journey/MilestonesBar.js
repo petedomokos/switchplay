@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
     //until we allow a bar to be shown above the jorney canvas
     border:"1px solid yellow",
     width:"100%",
-    height:"285px",//props => props.height,
+    height:"100%",//props => props.height,
     display:"flex",
     flexDirection:"column",
     //marginLeft:DIMNS.profiles.margin.left, 
@@ -60,21 +60,40 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
   const [bgMenuLocation, setBgMenuLocation] = useState("");
   const [sliderEnabled, setSliderEnabled] = useState(true);
+  const [selectedMilestone, setSelectedMilestone] = useState("");
 
-  const width = availWidth;
-  const bottomCtrlsBarHeight = screen.isLarge ? DIMNS.milestonesBar.ctrls.height : 0;
-  //console.log("maxh", DIMNS.milestonesBar.maxHeight)
-  //console.log("availH", availHeight)
-  //console.log("bottomCtrlH", bottomCtrlsBarHeight)
-  const height = d3.min([DIMNS.milestonesBar.maxHeight, availHeight - bottomCtrlsBarHeight])
-  //console.log("height", height)
-  let styleProps = { bottomCtrlsBarHeight, height, sliderEnabled };
+  const bottomCtrlsBarHeight = screen.isLarge /*&& !selectedMilestone*/ ? DIMNS.milestonesBar.ctrls.height : 0;
+  let styleProps = { bottomCtrlsBarHeight, sliderEnabled };
   const classes = useStyles(styleProps) ;
   const containerRef = useRef(null);
 
   //init
   useEffect(() => {
     if(!containerRef.current){return; }
+
+    //remove all this and use margin convention in milestoneBarComponent
+    //just pass availwidth
+    /*
+    const width = availWidth;
+    console.log("maxh", DIMNS.milestonesBar.maxHeight)
+    console.log("availH", availHeight)
+    console.log("bottomCtrlH", bottomCtrlsBarHeight)
+    */
+    const totalAvailHeightStr = d3.select("div.milestone-bar-root").style("height");
+    const totalAvailHeight = totalAvailHeightStr.slice(0, totalAvailHeightStr.length - 2);
+    const height = d3.min([DIMNS.milestonesBar.maxHeight, totalAvailHeight])
+    console.log("totalAvailHeight", totalAvailHeight)
+    console.log("height", height)
+    /*const marginTop = selectedMilestone ? 0 : 0;
+    const marginBottom = selectedMilestone ? 0 : 20;
+    const _availHeight = totalAvailHeight - marginTop - marginBottom;
+    console.log("_av", _availHeight)
+    const height = d3.min([DIMNS.milestonesBar.maxHeight, _availHeight - bottomCtrlsBarHeight])
+    console.log("height", height)
+
+    const containerHeight = d3.select(containerRef.current).attr("height")
+    console.log("MBar containerHeight", containerHeight)
+    console.log("overlay h", d3.select("div.overlay").style("height"))*/
   
     layout
       .format(kpiFormat)
@@ -87,7 +106,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
     d3.select(containerRef.current)
       .datum(layout(orderedData))
       .call(milestonesBar
-          .width(width)
+          .width(availWidth)
           .height(height)
           .swipable(!screen.isLarge)
           .styles({
@@ -106,6 +125,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
           //.contractDimns(contractDimns)
           .onTakeOverScreen(takeOverScreen)
           .onReleaseScreen(releaseScreen)
+          .onSetSelectedMilestone(setSelectedMilestone)
           .onSetKpiFormat(setKpiFormat)
           .onSelectKpiSet((e,kpi) => { 
             onSelectKpiSet(kpi); 
@@ -131,10 +151,8 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   }, [profiles.length/*JSON.stringify(contracts), JSON.stringify(profiles), JSON.stringify(datasets), player, kpiFormat, screen*/])
 
   return (
-    <div className={classes.root}>
-        <div>
-          <svg className={classes.svg} ref={containerRef} width="100%" height={height}></svg>
-        </div>
+    <div className={`milestone-bar-root ${classes.root}`}>
+        <svg className={classes.svg} ref={containerRef}></svg>
         <div className={classes.ctrls}>
           <IconButton className={classes.iconBtn} onClick={milestonesBar.slideBack}
               aria-label="Home" >

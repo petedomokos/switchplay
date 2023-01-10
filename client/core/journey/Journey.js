@@ -17,6 +17,7 @@ import ImportMeasures from './ImportMeasures';
 import MilestonesBar from './MilestonesBar';
 import KpiView from './KpiView';
 import { DIMNS, FONTSIZES, grey10 } from './constants';
+//import { openFullScreen } from "./domHelpers"
 
 const newJourney = { _id:"temp", contracts:[], profiles:[], aims:[], goals:[], links:[], measures:[]}
 
@@ -253,31 +254,6 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
       top:((journeyHeight - height) / 2) + "px"
     }
   }, [journeyWidth, journeyHeight])
-
-  function openFullscreen() {
-    //const elem = d3.select(".journey-container").node();
-    console.log("openFullScreen")
-    if (document.webkitFullscreenElement) {
-      document.webkitCancelFullScreen();
-    } else {
-      const el = document.documentElement;
-      el.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-    }
-    /*
-    if (elem.requestFullscreen) {
-      console.log("req full screen")
-      elem.requestFullscreen();
-    } else if (elem.webkitRequestFullscreen) { // Safari
-      console.log("safari req full screen")
-      elem.webkitRequestFullscreen();
-    } else if (elem.msRequestFullscreen) { // IE11
-      console.log("IE11 req full screen")
-      elem.msRequestFullscreen();
-    } else {
-      console.log("no req full screen")
-    }
-    */
-  }
   
   //overlay
   useEffect(() => {
@@ -314,6 +290,9 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
     }else if(displayedBar === "measures"){
       menuBarData = { ...menuBarData, data: measures }
     }
+
+    //const containerHeight = d3.select(containerRef.current).attr("height")
+    //console.log("journey containerHeight", containerHeight)
 
     journey
         .width(journeyWidth)
@@ -639,7 +618,7 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
   */
   //@todo -  openFullScreen when user clicks to get into a journey
   return (
-    <div className={`journey-container ${classes.root}`} onClick={openFullscreen}>
+    <div className={classes.root}>
         <div className={`${classes.overlay} overlay`} ref={overlayRef}>
           {displayedBar === "milestones" &&
             <MilestonesBar 

@@ -22,7 +22,7 @@ export default function milestonesBarComponent() {
     // dimensions
     let width = 800;
     let height = DIMNS.milestonesBar.minHeight
-    let margin = DIMNS.milestonesBar.margin;
+    let margin = { left: 0, right: 0, top: 0, bottom: 20 };
     let contentsWidth;
     let contentsHeight;
 
@@ -60,7 +60,7 @@ export default function milestonesBarComponent() {
         const maxMilestoneHeight = milestonesHeight;
         //helper
         //maximise the width if possible
-        const calcDimns = (stdWidth, stdHeight) => {
+        const calcMilestoneDimns = (stdWidth, stdHeight) => {
             const aspectRatio = stdHeight / stdWidth;
             const _height = maxMilestoneWidth * aspectRatio;
             if(_height <= maxMilestoneHeight){
@@ -68,8 +68,8 @@ export default function milestonesBarComponent() {
             }
             return { width: maxMilestoneHeight / aspectRatio, height: maxMilestoneHeight }
         } 
-        const profileDimns = calcDimns(DIMNS.profile.width, DIMNS.profile.height);
-        const contractDimns = calcDimns(DIMNS.contract.width, DIMNS.contract.height);
+        const profileDimns = calcMilestoneDimns(DIMNS.profile.width, DIMNS.profile.height);
+        const contractDimns = calcMilestoneDimns(DIMNS.contract.width, DIMNS.contract.height);
         profileWidth = profileDimns.width;
         profileHeight = profileDimns.height;
         contractWidth = contractDimns.width;
@@ -123,6 +123,7 @@ export default function milestonesBarComponent() {
     let selected;
 
     let kpiFormat;
+    let onSetSelectedMilestone = function(){};
     let onSetKpiFormat = function(){};
     let onSelectKpiSet = function(){};
     let onToggleSliderEnabled = function(){};
@@ -226,8 +227,10 @@ export default function milestonesBarComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            // console.log("updateMBar", data)
-            containerG = d3.select(this);
+            console.log("updateMBar", height)
+            containerG = d3.select(this)
+                .attr("width", width)
+                .attr("height", height);
             //dimns is needed for init too
             updateDimns(data);
             if(containerG.select("g").empty()){
@@ -404,7 +407,6 @@ export default function milestonesBarComponent() {
                         //treat it as a dbl-click => clicking a selected milestone zooms user in even further
                         //or maybe this needs to be doen at next evel as drag is turned off when selected i think
                     //}
-                    //transition of sliding cards has stopped working!!!!
                     const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
                     if(milestone){
                         selected = milestone.id;
@@ -599,10 +601,18 @@ export default function milestonesBarComponent() {
                         .fontSizes(fontSizes.contract)
                         .transformTransition(milestoneTransition || (transitionOn ? transformTransition : { update:null })));
 
-                const { _screen } = window;
-                //helper
-                const horizScale = (profileWidth + (2 * hitSpace)) / profileWidth;
-                const vertScale = (milestonesHeight + topBarHeight) / profileHeight;
+                //scaling helpers - allows them to increase to full height or width including margin
+                console.log("height", height)
+                console.log("contentsH", contentsHeight)
+                console.log("milestonesh", milestonesHeight)
+                console.log("topBarH", topBarHeight)
+                console.log("scaleused", width > height ? "v" : "h")
+                const horizScale = width / profileWidth;
+                const vertScale = height / profileHeight;
+                console.log("hscale", horizScale)
+                console.log("vscale", vertScale)
+                // const horizScale = (profileWidth + (2 * hitSpace)) / profileWidth;
+                // const vertScale = (milestonesHeight + topBarHeight) / profileHeight;
                 profilesG
                     .datum(positionedData.filter(m => m.dataType === "profile"))
                     .call(profiles
@@ -612,7 +622,7 @@ export default function milestonesBarComponent() {
                         .expanded([{
                             id:selected,
                             //if landscape, then vert space is less so we scale according to that 
-                            k: _screen.orientation === "landscape" ? vertScale : horizScale
+                            k: width > height ? vertScale : horizScale
                         }])
                         //.kpiHeight(30) //if we want to fix the kpiheIght
                         .editable(swipable ? false : true)
@@ -625,6 +635,15 @@ export default function milestonesBarComponent() {
                                 onClick:d => {
                                     milestonesG.select("g.phase-labels").call(show);
                                     onReleaseScreen();
+                                    //problem - the line below will prompt an update, which will
+                                    //make the manulal call here useless. Either need to pass in a 
+                                    //2nd arg, shouldUpdate = false, or have a temp stting here so it transitions
+                                    //or dont send thru selectedMilestone, instead just maually change the height here.
+
+                                    //EVEN BETTER, WE SHOULDNT BE CURTAILING THE DISPLAY IN TEH PARENT CONTAINER AT ALL
+                                    //WE CAN JUST HABNLE IT HERE THRU THE STANDARD MARGIN CONVENTIO, AND THEN JUST CHANGE IT
+                                    //TO 0 WHEN SELECTED
+                                    onSetSelectedMilestone("");
                                     selected = null;
                                     update(data, { milestoneTransition:{ update:{ duration:2000 }} })
                                 }
@@ -763,6 +782,13 @@ export default function milestonesBarComponent() {
         if (!arguments.length) { return onSetKpiFormat; }
         if(typeof value === "function"){
             onSetKpiFormat = value;
+        }
+        return milestonesBar;
+    };
+    milestonesBar.onSetSelectedMilestone = function (value) {
+        if (!arguments.length) { return onSetSelectedMilestone; }
+        if(typeof value === "function"){
+            onSetSelectedMilestone = value;
         }
         return milestonesBar;
     };
