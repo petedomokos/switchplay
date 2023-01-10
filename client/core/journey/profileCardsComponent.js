@@ -139,7 +139,9 @@ export default function profileCardsComponent() {
                             .attr("class", "bg")
                             .attr("rx", 3)
                             .attr("ry", 3)
-                            .attr("fill", d.isCurrent ? grey10(2) :"orange");
+                            .attr("fill", d.isCurrent ? grey10(2) :"orange")
+                            //.attr("stroke", "red")
+                            //.attr("stroke-width", 5);
 
                     contentsG.append("g").attr("class", "info")
                     contentsG.append("g").attr("class", "kpis")

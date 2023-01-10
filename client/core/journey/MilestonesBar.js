@@ -62,7 +62,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   const [sliderEnabled, setSliderEnabled] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState("");
 
-  const bottomCtrlsBarHeight = screen.isLarge /*&& !selectedMilestone*/ ? DIMNS.milestonesBar.ctrls.height : 0;
+  const bottomCtrlsBarHeight = screen.isLarge ? DIMNS.milestonesBar.ctrls.height : 0;
   let styleProps = { bottomCtrlsBarHeight, sliderEnabled };
   const classes = useStyles(styleProps) ;
   const containerRef = useRef(null);
@@ -81,7 +81,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
     */
     const totalAvailHeightStr = d3.select("div.milestone-bar-root").style("height");
     const totalAvailHeight = totalAvailHeightStr.slice(0, totalAvailHeightStr.length - 2);
-    const height = d3.min([DIMNS.milestonesBar.maxHeight, totalAvailHeight])
+    const height = d3.min([DIMNS.milestonesBar.maxHeight, totalAvailHeight - bottomCtrlsBarHeight])
     //console.log("totalAvailHeight", totalAvailHeight)
     //console.log("height", height)
     /*const marginTop = selectedMilestone ? 0 : 0;

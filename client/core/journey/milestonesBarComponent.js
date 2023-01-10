@@ -227,7 +227,7 @@ export default function milestonesBarComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            //console.log("updateMBar", height)
+            //console.log("updateMBar------------height", height)
             containerG = d3.select(this)
                 .attr("width", width)
                 .attr("height", height);
@@ -617,6 +617,7 @@ export default function milestonesBarComponent() {
                 // const horizScale = (profileWidth + (2 * hitSpace)) / profileWidth;
                 // const vertScale = (milestonesHeight + topBarHeight) / profileHeight;
                 profilesG
+                    //.attr("transform", "translate(0, -20")
                     .datum(positionedData.filter(m => m.dataType === "profile"))
                     .call(profiles
                         .width(profileWidth)
