@@ -82,7 +82,6 @@ const UserHome = ({screen, user, loading, loadingError}) => {
               <Route path="/" component={JourneyContainer} />
             </Switch>
           </div>
-          after full screen
           {/**
           <div className={classes.topRow} >
               <UserProfile profile={user} />

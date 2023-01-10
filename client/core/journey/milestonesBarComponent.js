@@ -227,7 +227,7 @@ export default function milestonesBarComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            console.log("updateMBar", height)
+            //console.log("updateMBar", height)
             containerG = d3.select(this)
                 .attr("width", width)
                 .attr("height", height);
@@ -276,6 +276,7 @@ export default function milestonesBarComponent() {
 
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
             function update(data, options={}){
+                //console.log("updateMBarComponent......", currentSliderPosition)
                 const { slideTransition, milestoneTransition } = options;
 
                 //milestone positioning
@@ -292,7 +293,11 @@ export default function milestonesBarComponent() {
                 const calcOffsetX = calculateOffsetX(positionedData)
 
                 slideTo = function(position, options={} ){
-                    if(currentSliderPosition === position) { return; }
+                    //need to also check offset, incase slider pos hadnt changed but dimns have changed
+                    const numericalPosition = typeof position === "number" ? position : convertToNumber(position);
+                    const offset = calcOffsetX(numericalPosition);
+                    
+                    if(currentSliderPosition === position && offset === currentSliderOffset) { return; }
                     const { transition, cb } = options;
 
                     //helper
@@ -302,9 +307,6 @@ export default function milestonesBarComponent() {
                         return 0;
                     }
 
-
-                    const numericalPosition = typeof position === "number" ? position : convertToNumber(position);
-                    const offset = calcOffsetX(numericalPosition);
                     milestonesWrapperG.call(updateTransform, {
                         x: () => offset,
                         y: () => 0,
@@ -602,16 +604,14 @@ export default function milestonesBarComponent() {
                         .transformTransition(milestoneTransition || (transitionOn ? transformTransition : { update:null })));
 
                 //scaling helpers - allows them to increase to full height or width including margin
-                console.log("height", height)
+                /*console.log("height", height)
                 console.log("contentsH", contentsHeight)
                 console.log("milestonesh", milestonesHeight)
                 console.log("topBarH", topBarHeight)
-                console.log("scaleused", width > height ? "v" : "h")
+                console.log("scaleused", width > height ? "v" : "h")*/
                 const horizScale = width / profileWidth;
                 const vertScale = height / profileHeight;
                 const scale = d3.min([horizScale, vertScale]);
-                console.log("hscale", horizScale)
-                console.log("vscale", vertScale)
                 //also need to pass through max width and height to ensure not exceeded
 
                 // const horizScale = (profileWidth + (2 * hitSpace)) / profileWidth;

@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
     //marginBottom:DIMNS.journey.margin.bottom,
   },
   overlay:{
-    border:"3px solid red",
+    border:"1px solid #C0C0C0",
     position:"absolute",
     background:grey10(9),
     width:"100%",

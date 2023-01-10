@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
   root: {
     //couldnt the height just be the full journey height always for now?
     //until we allow a bar to be shown above the jorney canvas
-    border:"1px solid yellow",
+    border:"2px solid #C0C0C0",
     width:"100%",
     height:"100%",//props => props.height,
     display:"flex",
@@ -55,7 +55,7 @@ const milestonesBar = milestonesBarComponent();
 
 const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight }) => {
   const { player, profiles, contracts } = data;
-  //console.log("MBar profiles", profiles)
+  //console.log("MBar............................................")
   //local state
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
   const [bgMenuLocation, setBgMenuLocation] = useState("");
@@ -82,8 +82,8 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
     const totalAvailHeightStr = d3.select("div.milestone-bar-root").style("height");
     const totalAvailHeight = totalAvailHeightStr.slice(0, totalAvailHeightStr.length - 2);
     const height = d3.min([DIMNS.milestonesBar.maxHeight, totalAvailHeight])
-    console.log("totalAvailHeight", totalAvailHeight)
-    console.log("height", height)
+    //console.log("totalAvailHeight", totalAvailHeight)
+    //console.log("height", height)
     /*const marginTop = selectedMilestone ? 0 : 0;
     const marginBottom = selectedMilestone ? 0 : 20;
     const _availHeight = totalAvailHeight - marginTop - marginBottom;
@@ -148,7 +148,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
             //console.log("mout")
           }))
 
-  }, [profiles.length/*JSON.stringify(contracts), JSON.stringify(profiles), JSON.stringify(datasets), player, kpiFormat, screen*/])
+  }, [profiles.length, JSON.stringify(screen)/*JSON.stringify(contracts), JSON.stringify(profiles), JSON.stringify(datasets), player, kpiFormat, screen*/])
 
   return (
     <div className={`milestone-bar-root ${classes.root}`}>
