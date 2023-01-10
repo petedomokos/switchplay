@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const UserHome = ({screen, user, loading, loadingError}) => {
-  console.log("UserHome screen", screen)
+  //console.log("UserHome screen", screen)
   const styleProps = {
     screen
   };

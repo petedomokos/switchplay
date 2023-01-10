@@ -28,7 +28,9 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
   const jwt = auth.isAuthenticated();
 
   //480 - portrait phone, 768 - tablets,992 - laptop, 1200 - desktop or large laptop
-  const calcScreenSize = width => width <= 480 ? "s" : width <= 768 ? "m" : "l";
+  const phoneMaxWidth = 480;
+  const tabletMaxWidth = 1024; //ipad air
+  const calcScreenSize = width => width <= 480 ? "s" : width <= 1024 ? "m" : "l";
 
   const getScreenInfo = () => {
     const size = calcScreenSize(window.innerWidth);
@@ -42,9 +44,9 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
       isLarge:["l", "xl"].includes(size),
       isSmall:["s", "xs"].includes(size),
     }
-    console.log("window innerH", window.innerHeight)
-    console.log("window screen", window.screen)
-    console.log("_screen", screen)
+    //console.log("window.innerWidth", window.innerWidth)
+    //console.log("window.screen", window.screen)
+    //console.log("isLarge?", screen.isLarge)
     window._screen = screen;
     //note - we still save in store, as ReactNative wont hve window
     return screen;
