@@ -230,7 +230,7 @@ export default function milestonesBarComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            console.log("updateMBar")
+            //console.log("updateMBar")
             containerG = d3.select(this)
                 .attr("width", width)
                 .attr("height", height);

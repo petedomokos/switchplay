@@ -59,7 +59,6 @@ export default function kpisComponent() {
         listHeight = contentsHeight - ctrlsHeight;
 
         kpiHeight = fixedKpiHeight || listHeight/5;
-        console.log("updateDimns fixedselH", fixedSelectedKpiHeight, nrTooltipRows, kpiHeight)
         //selectedKpi must expand for tooltip rows, by 0.75 of kpiHeight per tooltip
 
         selectedKpiHeight = fixedSelectedKpiHeight || kpiHeight + (0.75 * kpiHeight * nrTooltipRows);
@@ -162,7 +161,6 @@ export default function kpisComponent() {
                                 .attr("stroke", "none");
 
                         const y = calculateListY(selected, data.kpisData, kpiHeight, 1);
-                        console.log("enter list init y", y)
                         listG.append("g").attr("class", "kpis-list-contents")
                             .call(listScrollZoom.translateTo, 0, y, [0,0])
 
