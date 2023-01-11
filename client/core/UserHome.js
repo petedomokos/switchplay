@@ -78,12 +78,8 @@ const UserHome = ({screen, user, loading, loadingError}) => {
       {user._id && 
         <>
           <div className={classes.fullScreen}>
-            <div style={{height:800, width:700, border:"3px solid red"}}>
-                <img src="/players/lewis_inglis/main.png" />
-                <img src="https://via.placeholder.com/150" />
-            </div>
             <Switch>
-              {/**<Route path="/" component={JourneyContainer} />*/}
+              <Route path="/" component={JourneyContainer} />
             </Switch>
           </div>
           {/**
