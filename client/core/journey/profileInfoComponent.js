@@ -59,7 +59,7 @@ export default function profileInfoComponent() {
 
             // todo - append photo, name, age, pos
             //helper
-            const photoUrl = d => `/players/${firstname}_${surname}/${d.label}.png`;
+            const photoUrl = d => (`/players/${firstname}_${surname}/${d.label}.png`).toLowerCase();
             const photosG = containerG.selectAll("g.photos").data(photos, d => d.label);
             photosG.enter()
                 .append("g")
