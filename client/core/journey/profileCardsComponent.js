@@ -158,7 +158,7 @@ export default function profileCardsComponent() {
                     transition:transformTransition.enter 
                 })
                 .merge(profileCardG)
-                //.on("click", () => { console.log("prof card click native")})
+                // .on("click", () => { console.log("prof card click native")})
                 //.call(drag)
                 .call(updateTransform, { 
                     x:calcX, 
@@ -193,6 +193,7 @@ export default function profileCardsComponent() {
                            })
                         })
                         .onClickKpi((e,kpi) => {
+                            console.log("profileCrad kpi.onClickKpi")
                             //update selected KPI in all profile cards
                             data.filter(p => p.id !== d.id).forEach(p => {
                             //data.forEach(profile => {

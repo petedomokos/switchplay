@@ -83,8 +83,7 @@ export default function kpiComponent() {
 
     const enhancedDrag = dragEnhancements()
         .onClick((e,d) => { 
-            console.log("kpi click")
-            //onClick.call(this, e, d); 
+            onClick.call(this, e, d); 
         }) //todo - why do i have to write it out like this?
         //.onClick(onClick) not working
         .onDblClick(onDblClick);
@@ -115,15 +114,17 @@ export default function kpiComponent() {
                 .width((d,i) => dimns[i].contentsWidth)
                 .height((d,i) => dimns[i].contentsHeight)
                 .styles((d, i) => ({
-                    stroke:"blue"
+                    stroke:"blue",
+                    fill:"transparent"
                 })))
             .call(container()
                 .className("name"))
             .call(container()
                 .className("progress-bar")
                 .transform((d, i) => `translate(0,${dimns[i].titleHeight})`))
+            //.on("click", () => { console.log("kpi contents clicked...")})
             .call(drag)
-        
+
         kpiContents.select("g.name")
             .call(title
                 .width((d,i) => dimns[i].titleWidth)

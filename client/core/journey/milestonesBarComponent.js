@@ -447,7 +447,7 @@ export default function milestonesBarComponent() {
                     dragStartX = null;
                 }
 
-                milestonesWrapperG.call(drag)
+                //milestonesWrapperG.call(drag)
                 profilesG.attr("pointer-events", swipable && !selected ? "none" : null)
 
                 //POSITIONING

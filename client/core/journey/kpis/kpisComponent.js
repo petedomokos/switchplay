@@ -174,7 +174,6 @@ export default function kpisComponent() {
                             .append("rect")
                                 .attr("class", "ctrls-bg");
 
-
                     })
                     .merge(contentsG)
                     .attr("transform", `translate(${margin.left},${margin.top})`)
@@ -189,12 +188,11 @@ export default function kpisComponent() {
                         //sctool
                         //todo - 1. put clipPath in place
                         //2. put extent in place so it doesnt scroll beyond the start and end 
-
                         const listG = contentsG.select("g.kpis-list")
                             .attr('clip-path', "url(#clip)")
                         if(scrollable){
                             //this is a temp fix - we need to be able to toggle it 
-                            listG.call(listScrollZoom);
+                            //listG.call(listScrollZoom);
                         }
 
                         const clipRect = listG.select("clipPath#clip").select('rect');
@@ -222,6 +220,7 @@ export default function kpisComponent() {
                             //.translateExtent([[0, -listItemsHeight],[0, listItemsHeight]])
                             //.translateExtent([[0, 0], [0, 1]])
                             .on('zoom', function(e){
+                                console.log("zoom ev")
                                 handleListScrollZoom.call(this, e);
                                 //the cb will call handleListScrollZoom for all other profiles
                                 //only pass to the callback if its a zoom event, not a programmatic zoom
@@ -238,7 +237,8 @@ export default function kpisComponent() {
 
                         listG.select("rect.list-bg")
                             .attr("width", listWidth)
-                            .attr("height", listHeight);
+                            .attr("height", listHeight)
+                            .on("click", () => { console.log("clk...")});;
 
                         //todo - get liust bg showing
                         //make kpi bar width font size etc based on listHeight
@@ -279,8 +279,9 @@ export default function kpisComponent() {
                                 }))
                                 .onDblClick(onDblClickKpi)
                                 .onClick(function(e,d){
-                                    updateSelected(d.key, data, true);
-                                    onClickKpi.call(this, e, d);
+                                    console.log("kpi.onClick")
+                                    //updateSelected(d.key, data, true);
+                                    //onClickKpi.call(this, e, d);
                                 }));
 
                         //EXIT
