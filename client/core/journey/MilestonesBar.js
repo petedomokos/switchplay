@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
   root: {
     //couldnt the height just be the full journey height always for now?
     //until we allow a bar to be shown above the jorney canvas
-    border:"2px solid #C0C0C0",
+    //border:"2px solid #C0C0C0",
     width:"100%",
     height:"100%",//props => props.height,
     display:"flex",
