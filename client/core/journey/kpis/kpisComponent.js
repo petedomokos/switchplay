@@ -69,7 +69,7 @@ export default function kpisComponent() {
         //console.log("extra", extraHeightForSelected)
         const kpisTotalHeight = kpiHeight * nrKpis;
 
-        scrollMax = kpisTotalHeight < listHeight ? 0 : kpisTotalHeight +(selected ? extraHeightForSelected : 0);
+        scrollMax = 1000;// kpisTotalHeight < listHeight ? 0 : kpisTotalHeight +(selected ? extraHeightForSelected : 0);
 
         //kpi margin
         gapBetweenKpis = kpiHeight * 0.3;

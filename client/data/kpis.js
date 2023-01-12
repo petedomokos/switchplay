@@ -20,7 +20,7 @@ const userKpis = {
    "606b2f1f3eecde47d8864798":[
       //press-ups in 1 min
       { datasetKey:"pressUps", statKey:"reps" },
-      { datasetKey:"shuttles", statKey:"time" }
+      { datasetKey:"shuttles", statKey:"time" },
    ]
 }
 

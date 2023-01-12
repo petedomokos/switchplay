@@ -61,6 +61,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   const [bgMenuLocation, setBgMenuLocation] = useState("");
   const [sliderEnabled, setSliderEnabled] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState("");
+  console.log("sel", selectedMilestone)
 
   const bottomCtrlsBarHeight = screen.isLarge ? DIMNS.milestonesBar.ctrls.height : 0;
   let styleProps = { bottomCtrlsBarHeight, sliderEnabled };
@@ -108,7 +109,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
       .call(milestonesBar
           .width(availWidth)
           .height(height)
-          .swipable(!screen.isLarge)
+          .swipable(!screen.isLarge && !selectedMilestone)
           .styles({
             phaseLabel:{
 
@@ -148,7 +149,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
             //console.log("mout")
           }))
 
-  }, [profiles.length, JSON.stringify(screen)/*JSON.stringify(contracts), JSON.stringify(profiles), JSON.stringify(datasets), player, kpiFormat, screen*/])
+  }, [profiles.length, JSON.stringify(screen), selectedMilestone/*JSON.stringify(contracts), JSON.stringify(profiles), JSON.stringify(datasets), player, kpiFormat, screen*/])
 
   return (
     <div className={`milestone-bar-root ${classes.root}`}>

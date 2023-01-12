@@ -279,7 +279,7 @@ export default function milestonesBarComponent() {
 
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
             function update(data, options={}){
-                //console.log("updateMBarComponent......", currentSliderPosition)
+                //console.log("updateMBarComponent......")
                 const { slideTransition, milestoneTransition } = options;
 
                 //milestone positioning
@@ -410,8 +410,6 @@ export default function milestonesBarComponent() {
                         ignoreNextClick = false;
                         return;
                     }
-                    //if click is to confirm a new milestone, ignore
-                    if(!milestonesG.select("g.placeholder").empty()){ return;}
                     //hide phase labels
                     //@todo - BUG - why is there a delay in removing the burger bars?
                     onTakeOverScreen();
@@ -423,7 +421,8 @@ export default function milestonesBarComponent() {
                     const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
                     if(milestone){
                         selected = milestone.id;
-                        update(data, { milestoneTransition:{ update:{ duration:2000 }}});
+                        //this triggers update
+                        onSetSelectedMilestone(milestone.id);
                     }
                 }
                 //dragging
