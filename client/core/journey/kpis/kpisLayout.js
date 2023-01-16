@@ -21,8 +21,13 @@ export default function kpisLayout(){
         //const orderedData = sortAscending(data, d => d.date);
         //console.log("ordered", orderedData)
 
-
-        const kpisData = data.map((kpi,i) => {
+        //temp to increase data
+        const _data = [...data, ...data, ...data, ...data]
+            .map((kpi,i) => {
+                if(i <= 1) { return kpi;}
+                return { ...kpi, key:`${i}-${kpi.key}`}
+            });
+        const kpisData = _data.map((kpi,i) => {
             //console.log("kpi---",i, kpi)
             const { values } = kpi;
             //can set all kpis to be active eg for an active profile card that doesnt have access to all data
@@ -314,7 +319,6 @@ export default function kpisLayout(){
             }
             */
         })
-
         const ctrlsData = KPI_CTRLS(format); 
 
         return { kpisData, ctrlsData }

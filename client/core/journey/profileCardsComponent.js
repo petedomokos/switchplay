@@ -182,22 +182,32 @@ export default function profileCardsComponent() {
                         .scrollable(scrollable)
                         .onCtrlClick(onCtrlClick)
                         //pass scroll events on any kpiComponent to all other kpiComponents
-                        .onListScrollZoom(function(e){
+                        .onZoomStart(function(e){
                             data.filter(p => p.id !== d.id).forEach(p => {
-                                kpisComponents[p.id].handleListScrollZoom(e)
+                                kpisComponents[p.id].handleZoomStart.call(this, e)
                            })
                         })
-                        .onListScrollZoomEnd(function(e){
+                        .onZoom(function(e){
+                            data.filter(p => p.id !== d.id).forEach((p,i) => {
+                                kpisComponents[p.id].handleZoom.call(this, e, i)
+                           })
+                        })
+                        .onZoomEnd(function(e){
                             data.filter(p => p.id !== d.id).forEach(p => {
-                                kpisComponents[p.id].handleListScrollZoomEnd(e)
+                                kpisComponents[p.id].handleZoomEnd.call(this, e)
                            })
                         })
                         .onClickKpi((e,kpi) => {
-                            console.log("profileCrad kpi.onClickKpi")
+                            console.log("profileCrad kpi.onClickKpi---------------------------------------------", kpi)
                             //update selected KPI in all profile cards
                             data.filter(p => p.id !== d.id).forEach(p => {
-                            //data.forEach(profile => {
-                                 kpisComponents[p.id].selected(kpi.key, true);
+                                console.log("p", p)
+                                //must sway the profile id from the key
+                                const keyParts = kpi.key.split("-");
+                                const keyWithoutProfileId = keyParts.slice(0, keyParts.length - 1).join("-");
+                                const kpiKeyInThisProfile = `${keyWithoutProfileId}-${p.id}`
+                                console.log("kpiKey", kpiKeyInThisProfile)
+                                kpisComponents[p.id].selected(kpiKeyInThisProfile, true);
                             })
                         })
                         .onDblClickKpi(onDblClickKpi);

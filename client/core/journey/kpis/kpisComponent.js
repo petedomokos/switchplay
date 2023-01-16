@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { DIMNS, grey10 } from "../constants";
 import kpiComponent from './kpi/kpiComponent';
+import { getTransformationFromTrans } from '../helpers';
 
 /*
 
@@ -35,9 +36,11 @@ export default function kpisComponent() {
     let fixedSelectedKpiHeight;
     let selectedKpiHeight;
 
+    let scrollMin;
     let scrollMax;
 
-    function updateDimns(nrCtrlsButtons=0, nrTooltipRows=0, nrKpis){
+    function updateDimns(nrCtrlsButtons=0, nrTooltipRows=0, kpisData){
+        const nrKpis = kpisData.length;
 
         margin = { left: width * 0.1, right: width * 0.1, top:height * 0.1, bottom: height * 0.05 };
         contentsWidth = width - margin.left - margin.right;
@@ -62,14 +65,9 @@ export default function kpisComponent() {
         //selectedKpi must expand for tooltip rows, by 0.75 of kpiHeight per tooltip
 
         selectedKpiHeight = fixedSelectedKpiHeight || kpiHeight + (0.75 * kpiHeight * nrTooltipRows);
-        //console.log("selectedKpiHeight", selectedKpiHeight)
-        const extraHeightForSelected = selectedKpiHeight - kpiHeight;
-        //console.log("kpiH", kpiHeight)
-        //console.log("nrKpis", nrKpis)
-        //console.log("extra", extraHeightForSelected)
-        const kpisTotalHeight = kpiHeight * nrKpis;
-
-        scrollMax = 1000;// kpisTotalHeight < listHeight ? 0 : kpisTotalHeight +(selected ? extraHeightForSelected : 0);
+        const kpiHeights = kpisData.map(kpi => selected === kpi.key ? selectedKpiHeight : kpiHeight);
+        scrollMin = -d3.sum(kpiHeights.slice(0, kpiHeights.length - 1)); //stop when last kpi is at top
+        scrollMax = 0;
 
         //kpi margin
         gapBetweenKpis = kpiHeight * 0.3;
@@ -102,12 +100,14 @@ export default function kpisComponent() {
     let onDelete = function(){};
     let onCtrlClick = () => {};
 
-    let onListScrollZoom = function(){};
-    let onListScrollZoomEnd = function(){};
-    let handleListScrollZoom = function(){};
-    let handleListScrollZoomEnd = function(){};
+    let onZoomStart = function(){};
+    let onZoom = function(){};
+    let onZoomEnd = function(){};
+    let handleZoomStart = function(){};
+    let handleZoom = function(){};
+    let handleZoomEnd = function(){};
 
-    const listScrollZoom = d3.zoom();
+    const zoom = d3.zoom();
 
     //d3 components
     let kpi = kpiComponent();
@@ -134,8 +134,7 @@ export default function kpisComponent() {
             const nrTooltipRowsBelow = kpisData[0] ? d3.max(kpisData[0].tooltipsData.filter(t => t.location === "below"), d => d.row + 1) : 0;
             //console.log("rowsbe", nrTooltipRowsBelow)
             const nrTooltipRows = nrTooltipRowsAbove + nrTooltipRowsBelow || 0;
-            const nrKpis = kpisData.length;
-            updateDimns(nrOfCtrlsButtons, nrTooltipRows, nrKpis);
+            updateDimns(nrOfCtrlsButtons, nrTooltipRows, kpisData);
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
             containerG = d3.select(this);
@@ -160,9 +159,16 @@ export default function kpisComponent() {
                                 .attr("fill", "transparent")
                                 .attr("stroke", "none");
 
+                        //container that the listG zoom transforms are applied to
+                        listG
+                            .append("g")
+                                .attr("class", "kpis-list-contents")
+
+                        //init zoom
                         const y = calculateListY(selected, data.kpisData, kpiHeight, 1);
-                        listG.append("g").attr("class", "kpis-list-contents")
-                            .call(listScrollZoom.translateTo, 0, y, [0,0])
+                        const transformState = d3.zoomTransform(listG.node());
+                        const newTransformState = transformState.translate(0, y);
+                        listG.call(zoom.transform, newTransformState)
 
                         listG
                             .append("defs")
@@ -185,14 +191,15 @@ export default function kpisComponent() {
                             .attr("height", contentsHeight)
 
                         //kpi list
-                        //sctool
+                        //scroll
                         //todo - 1. put clipPath in place
                         //2. put extent in place so it doesnt scroll beyond the start and end 
                         const listG = contentsG.select("g.kpis-list")
                             .attr('clip-path', "url(#clip)")
+
                         if(scrollable){
                             //this is a temp fix - we need to be able to toggle it 
-                            //listG.call(listScrollZoom);
+                            listG.call(zoom);
                         }
 
                         const clipRect = listG.select("clipPath#clip").select('rect');
@@ -202,36 +209,26 @@ export default function kpisComponent() {
                                 .attr('x', 0)
                                 .attr('y', 0);
 
-                        //const listItemsHeight = data.kpisData.length * kpiHeight + (selected ? 3 * tooltipHeight : 0)
-                        //const y = calculateListY(selected, data.kpisData, kpiHeight, 1);
-                        //const extraGap = selected ? kpiHeight * 0.75 : 0;
                         const listContentsG = listG.select("g.kpis-list-contents")
-                        //this line causes a random scroll when 2nd profile is created in journey
-
-                        //if(selected){
-                        //listContentsG
-                            //.call(listScrollZoom.translateTo, 0, -extraGap, [0,y]);
-                        //}
-                        listScrollZoom
-                            //.translateExtent([[0, 0], [0, 10]])
-                            //.translateExtent([[0,0],[0, listHeight]])
-                            //.translateExtent([[0,0],[0, listItemsHeight]])
-                            //.translateExtent([[0, -1000],[0, 1000]])
-                            //.translateExtent([[0, -listItemsHeight],[0, listItemsHeight]])
-                            //.translateExtent([[0, 0], [0, 1]])
-                            .on('zoom', function(e){
-                                console.log("zoom ev")
-                                handleListScrollZoom.call(this, e);
-                                //the cb will call handleListScrollZoom for all other profiles
+                        zoom
+                            .on('start', function(e){
+                                handleZoomStart.call(this, e);
+                                //the cb will call handleZoom for all other profiles
                                 //only pass to the callback if its a zoom event, not a programmatic zoom
                                 if(e.sourceEvent){
-                                    onListScrollZoom.call(this, e)
+                                    onZoomStart.call(this, e)
+                                }
+                            })
+                            .on('zoom', function(e){
+                                handleZoom.call(this, e);
+                                if(e.sourceEvent){
+                                    onZoom.call(this, e)
                                 }
                             })
                             .on("end", function(e){
-                                handleListScrollZoomEnd.call(this, e);
+                                handleZoomEnd.call(this, e);
                                 if(e.sourceEvent){
-                                    onListScrollZoomEnd.call(this, e)
+                                    onZoomEnd.call(this, e)
                                 }
                             })
 
@@ -280,8 +277,14 @@ export default function kpisComponent() {
                                 .onDblClick(onDblClickKpi)
                                 .onClick(function(e,d){
                                     console.log("kpi.onClick")
-                                    //updateSelected(d.key, data, true);
-                                    //onClickKpi.call(this, e, d);
+                                    //next - after clicking several kpis, the profiles dont 
+                                    //stay in sync with each other. it seems that teh ones called from externally,
+                                    //ie teh ones not actually scrolled, seem to jump back to 0 again, and go from there
+                                    //to teh correct place, so a continuation of yesterdays issue
+                                    //ie set kpi to be selected, but this wont change the height yet
+                                    //then do height next
+                                    updateSelected(d.key, data, true);
+                                    onClickKpi.call(this, e, d);
                                 }));
 
                         //EXIT
@@ -348,77 +351,39 @@ export default function kpisComponent() {
 
                     })
 
-            //console.log("scrollMax", scrollMax)
-            handleListScrollZoom = function(e){
-                //console.log("e.trans.y", e.transform.y)
-                //keep translate within the bounds of the list
-                const y = d3.min([d3.max([0, e.transform.y]), scrollMax])
+            handleZoom = function(e, i){
+                //scope to containerG instead of 'this' so can be called from outside
                 containerG.select("g.kpis-list-contents")
-                    .attr("transform", `translate(0, ${y})`);
-            }
-            handleListScrollZoomEnd = function(e){
-                if(e.transform.y < 0){
-                    e.transform.y = 0;
-                }else if(e.transform.y > scrollMax){ //replace with max
-                    e.transform.y = scrollMax; //replace with max
-                }
+                    .attr("transform", `translate(0, ${e.transform.y})`);
             }
         })
 
         return selection;
     }
 
-    /*
-    function transform(selection, transform={}, transition, onEnd = () => {}){
-        const { x, y, k = d => 1 } = transform;
-        selection.each(function(d){
-            const selection = d3.select(this);
-            //translate is undefined when we drag a planet into an aim and release
-            const { translateX, translateY } = getTransformationFromTrans(selection.attr("transform"));
-            
-            const _x = x ? x : d => translateX;
-            const _y = y ? y : d => translateY;
-            //on call from enter, there will be no translate so deltas are 0 so no transition
-            //but then transform is called again on entered planets after merge with update
-            const deltaX = typeof translateX === "number" ? Math.abs(translateX - _x(d)) : 0;
-            const deltaY = typeof translateY === "number" ? Math.abs(translateY - _y(d)) : 0;
-            if(transition && (deltaX > 0.1 || deltaY > 0.1)){
-                const newY = _y(d);
-                selection
-                    .transition()
-                        .delay(transition.delay || 0)
-                        .duration(transition.duration || 200)
-                        .attr("transform", "translate("+ _x(d) +"," + newY +") scale("+k(d) +")")
-                        .on("end", onEnd);
-
-            }else{
-                selection.attr("transform", "translate("+ _x(d) +"," + _y(d) +") scale("+k(d) +")");
-                onEnd();
-            }
-        })
-    }
-    */
-
     //requires each listItem to have an index i
     function calculateListY(selectedKey, data, itemHeight, nrItemsToShowBefore = 0){
         const selectedIndex = data.findIndex(d => d.key === selectedKey);
         if(!selectedKey){ return 0; }
         const actualNrToShowBefore = d3.min([selectedIndex, nrItemsToShowBefore]);
-        //console.log("listY", itemHeight * (selectedIndex - actualNrToShowBefore))
         return itemHeight * (selectedIndex - actualNrToShowBefore);
     }
 
     function updateSelected(key, data, shouldUpdateDom){
+        console.log("updateSelected....key, data", key, data)
         selected = key;
         isSelected = d => d.key === selected;
         if(shouldUpdateDom){
-            const y = calculateListY(selected, data.kpisData, kpiHeight, 1);
-            containerG.select("g.kpis-list-contents")
+            //@todo - for KpiView, we want to show one before because they are connected
+            const nrToShowBefore = 0;
+            const y = calculateListY(selected, data.kpisData, kpiHeight, nrToShowBefore);
+            console.log("y.........", y)
+            containerG.select("g.kpis-list")
                .transition()
                     .duration(500)
-                    //how does this work - we call the zoom func on a transition???
-                    .call(listScrollZoom.translateTo, 0, y, [0,0])
-                    .on("end", () => { containerG.call(kpis) }); 
+                    .call(zoom.translateTo, 0, y, [0,0])
+                    .on("end", () => { //containerG.call(kpis) 
+                    }); 
         }
     }
     
@@ -496,17 +461,24 @@ export default function kpisComponent() {
         onDblClickKpi = value;
         return kpis;
     };
-    kpis.onListScrollZoom = function (value) {
-        if (!arguments.length) { return onListScrollZoom; }
+    kpis.onZoomStart = function (value) {
+        if (!arguments.length) { return onZoomStart; }
         if(typeof value === "function"){
-            onListScrollZoom = value;
+            onZoomStart = value;
         }
         return kpis;
     };
-    kpis.onListScrollZoomEnd = function (value) {
-        if (!arguments.length) { return onListScrollZoomEnd; }
+    kpis.onZoom = function (value) {
+        if (!arguments.length) { return onZoom; }
         if(typeof value === "function"){
-            onListScrollZoomEnd = value;
+            onZoom = value;
+        }
+        return kpis;
+    };
+    kpis.onZoomEnd = function (value) {
+        if (!arguments.length) { return onZoomEnd; }
+        if(typeof value === "function"){
+            onZoomEnd = value;
         }
         return kpis;
     };
@@ -573,7 +545,41 @@ export default function kpisComponent() {
         }
         return kpis;
     };
-    kpis.handleListScrollZoom = function(e){ handleListScrollZoom.call(this, e) };
-    kpis.handleListScrollZoomEnd = function(e){ handleListScrollZoomEnd.call(this, e) };
+    kpis.handleZoomStart = function(e){ handleZoomStart.call(this, e) };
+    kpis.handleZoom = function(e, i){ handleZoom.call(this, e, i) };
+    kpis.handleZoomEnd = function(e){ handleZoomEnd.call(this, e) };
     return kpis;
 }
+
+
+
+    /*
+    function transform(selection, transform={}, transition, onEnd = () => {}){
+        const { x, y, k = d => 1 } = transform;
+        selection.each(function(d){
+            const selection = d3.select(this);
+            //translate is undefined when we drag a planet into an aim and release
+            const { translateX, translateY } = getTransformationFromTrans(selection.attr("transform"));
+            
+            const _x = x ? x : d => translateX;
+            const _y = y ? y : d => translateY;
+            //on call from enter, there will be no translate so deltas are 0 so no transition
+            //but then transform is called again on entered planets after merge with update
+            const deltaX = typeof translateX === "number" ? Math.abs(translateX - _x(d)) : 0;
+            const deltaY = typeof translateY === "number" ? Math.abs(translateY - _y(d)) : 0;
+            if(transition && (deltaX > 0.1 || deltaY > 0.1)){
+                const newY = _y(d);
+                selection
+                    .transition()
+                        .delay(transition.delay || 0)
+                        .duration(transition.duration || 200)
+                        .attr("transform", "translate("+ _x(d) +"," + newY +") scale("+k(d) +")")
+                        .on("end", onEnd);
+
+            }else{
+                selection.attr("transform", "translate("+ _x(d) +"," + _y(d) +") scale("+k(d) +")");
+                onEnd();
+            }
+        })
+    }
+    */

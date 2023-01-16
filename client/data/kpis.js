@@ -21,6 +21,13 @@ const userKpis = {
       //press-ups in 1 min
       { datasetKey:"pressUps", statKey:"reps" },
       { datasetKey:"shuttles", statKey:"time" },
+      /*
+      { datasetKey:"longJump", statKey:"distance-left" },
+      { datasetKey:"longJump", statKey:"distance-right" },
+      { datasetKey:"hurdleJumps1Min", statKey:"score" },
+      { datasetKey:"shootingRightFoot", statKey:"score" },
+      { datasetKey:"shootingLeftFoot", statKey:"score" },
+      { datasetKey:"game-Options", statKey:"score-1" },*/
    ]
 }
 

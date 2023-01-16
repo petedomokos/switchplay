@@ -61,7 +61,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   const [bgMenuLocation, setBgMenuLocation] = useState("");
   const [sliderEnabled, setSliderEnabled] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState("");
-  console.log("sel", selectedMilestone)
+  //console.log("sel", selectedMilestone)
 
   const bottomCtrlsBarHeight = screen.isLarge ? DIMNS.milestonesBar.ctrls.height : 0;
   let styleProps = { bottomCtrlsBarHeight, sliderEnabled };
@@ -69,32 +69,80 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   const containerRef = useRef(null);
 
   //init
+  //decide what needs to update on setSelectedMilestone, and only have that inteh depArray 
+  //or alternatively only have that processed in milestoneslayout/kpiLayout
+  //so we are not doing teh epensive operations each time
   useEffect(() => {
     if(!containerRef.current){return; }
 
-    //remove all this and use margin convention in milestoneBarComponent
-    //just pass availwidth
     /*
-    const width = availWidth;
-    console.log("maxh", DIMNS.milestonesBar.maxHeight)
-    console.log("availH", availHeight)
-    console.log("bottomCtrlH", bottomCtrlsBarHeight)
+    const zoom = d3.zoom()
+      .on("zoom", zoomed)
+
+    const contG = d3.select(containerRef.current).selectAll("g.cont").data([1]);
+    contG.enter()
+      .append("g")
+        .attr("class", "cont")
+        .attr("transform", "translate(50,50)")
+        .each(function(){
+          const contG = d3.select(this);
+          contG
+            .append("rect")
+              .attr("class", "bg")
+              .attr("width", "400px")
+              .attr("height", "100px")
+              .attr("fill", "blue")
+
+          contG
+            .append("circle")
+              .attr("r", "20")
+              .attr("fill", "silver")
+
+          contG.append("rect")
+            .attr("class", "btn")
+              .attr("transform", "translate(0,70)")
+              .attr("width", 30)
+              .attr("height", 30)
+              .attr("fill", "grey")
+              .on("click", () => {
+                //console.log("prog zoom clk", zoom)
+                const outerContG = d3.select(containerRef.current);
+                const contG = outerContG.select("g.cont");
+                //console.log("contG", contG.node())
+                const transform = d3.zoomTransform(contG.node())
+                console.log("onclick transform", transform)
+                //const newTransform = transform.translate(50, 0).scale(1);
+                //contG.call(zoom.transform, newTransform)
+                contG.call(zoom.translateBy, 50, 0)
+                //fixed my bug - Im calling it on listContentsG instead of listG
+              })
+
+          applyZoom();
+        })
+        .merge(contG)
+        .each(function(){
+          const contG = d3.select(this);
+
+        })
+
+        function applyZoom(){
+          const outerContG = d3.select(containerRef.current);
+          const contG = outerContG.select("g.cont");
+          contG.call(zoom);
+
+        }
+
+        function zoomed(e){
+          console.log("zmd e.srcEv", e.sourceEvent)
+          console.log("e.trans", e.transform)
+          d3.select(this).select("circle").attr("transform", `translate(${e.transform.x},0)`)
+
+        }
+
     */
     const totalAvailHeightStr = d3.select("div.milestone-bar-root").style("height");
     const totalAvailHeight = totalAvailHeightStr.slice(0, totalAvailHeightStr.length - 2);
     const height = d3.min([DIMNS.milestonesBar.maxHeight, totalAvailHeight - bottomCtrlsBarHeight])
-    //console.log("totalAvailHeight", totalAvailHeight)
-    //console.log("height", height)
-    /*const marginTop = selectedMilestone ? 0 : 0;
-    const marginBottom = selectedMilestone ? 0 : 20;
-    const _availHeight = totalAvailHeight - marginTop - marginBottom;
-    console.log("_av", _availHeight)
-    const height = d3.min([DIMNS.milestonesBar.maxHeight, _availHeight - bottomCtrlsBarHeight])
-    console.log("height", height)
-
-    const containerHeight = d3.select(containerRef.current).attr("height")
-    console.log("MBar containerHeight", containerHeight)
-    console.log("overlay h", d3.select("div.overlay").style("height"))*/
   
     layout
       .format(kpiFormat)
@@ -102,7 +150,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
       .info(player);
 
     //profiles go before contarcts of same date
-    const orderedData = sortAscending([ ...profiles/*, ...contracts*/], d => d.date);
+    const orderedData = sortAscending([ ...profiles, ...contracts], d => d.date);
     //console.log("ordered", orderedData)
     d3.select(containerRef.current)
       .datum(layout(orderedData))
@@ -149,7 +197,11 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
             //console.log("mout")
           }))
 
-  }, [profiles.length, JSON.stringify(screen), selectedMilestone/*JSON.stringify(contracts), JSON.stringify(profiles), JSON.stringify(datasets), player, kpiFormat, screen*/])
+  }, [profiles.length, JSON.stringify(screen),/*JSON.stringify(contracts), JSON.stringify(profiles), JSON.stringify(datasets), player, kpiFormat, screen*/])
+
+  //useEffect(() => {
+
+  //}, [selectedMilestone])
 
   return (
     <div className={`milestone-bar-root ${classes.root}`}>

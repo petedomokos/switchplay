@@ -18,7 +18,7 @@ export default function milestonesLayout(){
     const myKpisLayout = kpisLayout();
 
     function update(data){
-        //console.log("update milestonesLayout data----------------------------", data)
+        console.log("update milestonesLayout data----------------------------", data)
         const pastData = data.filter(m => m.isPast);
         const futureData = data.filter(m => m.isFuture);
         const numberedPastData = pastData.map((m,i) => ({ ...m, nr:i - pastData.length }));

@@ -227,6 +227,7 @@ export default function milestonesBarComponent() {
     const transformTransition = { update: { duration: 1000 } };
 
     function milestonesBar(selection, options={}) {
+        console.log("milestonesBar......")
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
@@ -279,7 +280,7 @@ export default function milestonesBarComponent() {
 
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
             function update(data, options={}){
-                //console.log("updateMBarComponent......")
+                console.log("MBarComponent update......")
                 const { slideTransition, milestoneTransition } = options;
 
                 //milestone positioning
@@ -366,7 +367,7 @@ export default function milestonesBarComponent() {
                 //helper removes offset and phase labels height so we can compare with data 
                 const adjustPtForData = pt => ({ x: pt.x - currentSliderOffset, y: pt.y - topBarHeight })
                 enhancedDrag
-                    .onClick(handleMilestoneClick)
+                    .onClick(handleMilestoneWrapperClick)
                     /*
                     for when its differentiated from dbl-click on laptops and safari
                     .onClick(function(e, d){
@@ -382,7 +383,7 @@ export default function milestonesBarComponent() {
                         
                     })
                     */
-                    .onDblClick(handleMilestoneClick) //see note about chrome on mobile
+                    .onDblClick(handleMilestoneWrapperClick) //see note about chrome on mobile
                     .onLongpressStart(function(e, d){
                         const pt = adjustPtForData(e);
                         const milestone = milestoneContainingPt(pt, positionedData);
@@ -403,27 +404,31 @@ export default function milestonesBarComponent() {
                 //but need a way of distinguisng this -eg on laptop we do want it differentiated
                 //but maybe best is to just make dbl-click teh same as two clicks , and 
                 //then ppl on chrome mobile just cant do two clicks in quick succession
-                function handleMilestoneClick(e,d){
+                function handleMilestoneWrapperClick(e,d){
                     //this is a temp setting to save us having to turn drag off whilst creating a milestone
                     //otherwise the confirm click would also trigger this.
                     if(ignoreNextClick){
                         ignoreNextClick = false;
                         return;
                     }
+                    const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
+                    if(!milestone) { return; }
+                    //@todo - BUG - why is there a delay in removing the burger bars? cut it out for now
+                    //onTakeOverScreen();
                     //hide phase labels
-                    //@todo - BUG - why is there a delay in removing the burger bars?
-                    onTakeOverScreen();
                     milestonesG.select("g.phase-labels").call(hide);
                     //if(selected){
                         //treat it as a dbl-click => clicking a selected milestone zooms user in even further
                         //or maybe this needs to be doen at next evel as drag is turned off when selected i think
                     //}
-                    const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
-                    if(milestone){
-                        selected = milestone.id;
-                        //this triggers update
-                        onSetSelectedMilestone(milestone.id);
-                    }
+                    //set selected
+                    selected = milestone.id;
+                    //this doesnt trigger an update here
+                    onSetSelectedMilestone(milestone.id);
+                    //trigger update here
+                    update(data);
+                    //hide any menu from paretn components (eg burger menu)
+
                 }
                 //dragging
                 let dragStartX;
@@ -447,7 +452,7 @@ export default function milestonesBarComponent() {
                     dragStartX = null;
                 }
 
-                //milestonesWrapperG.call(drag)
+                milestonesWrapperG.call(drag)
                 profilesG.attr("pointer-events", swipable && !selected ? "none" : null)
 
                 //POSITIONING
@@ -651,7 +656,10 @@ export default function milestonesBarComponent() {
                                 icon:{ iconType:"path", d:icons.collapse.d },
                                 onClick:d => {
                                     milestonesG.select("g.phase-labels").call(show);
-                                    onReleaseScreen();
+
+                                    //@todo - why is this so slow to update? had to cut it out for now
+                                    //onReleaseScreen();
+
                                     //problem - the line below will prompt an update, which will
                                     //make the manulal call here useless. Either need to pass in a 
                                     //2nd arg, shouldUpdate = false, or have a temp stting here so it transitions

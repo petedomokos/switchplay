@@ -1,4 +1,6 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import ReactPlayer from 'react-player'
+import * as d3 from 'd3';
 import { makeStyles } from '@material-ui/core/styles'
 import Card from '@material-ui/core/Card'
 import CardContent from '@material-ui/core/CardContent'
@@ -7,7 +9,9 @@ import Typography from '@material-ui/core/Typography'
 //children
 import SimpleList from '../util/SimpleList'
 import auth from '../auth/auth-helper'
-
+import { Button } from '@material-ui/core'
+import { grey10 } from "./journey/constants"
+import VideoApp from "./VideoApp"
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -20,7 +24,7 @@ const useStyles = makeStyles(theme => ({
     },
     [theme.breakpoints.up('lg')]: {
     },
-  }
+  } 
 }))
 
 export default function NonUserHome(){
@@ -30,6 +34,7 @@ export default function NonUserHome(){
         <Typography className={classes.strapline} type="body1" component="p">
           For players that dream and coaches that care
         </Typography>
+        {/**<VideoApp/>*/}
       </div>
   )
 }

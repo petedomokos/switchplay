@@ -139,7 +139,7 @@ export default function titleComponent() {
                         .attr("stroke", styles.primaryTitle.stroke)
                         .attr("fill", styles.primaryTitle.fill)
                         .attr("stroke-width", styles.primaryTitle.strokeWidth)
-                        .text(_primaryTitle(d))
+                        .text((i+1) + ". " +_primaryTitle(d))
     
                 })
                 .exit(function(){

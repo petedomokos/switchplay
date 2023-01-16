@@ -114,7 +114,7 @@ export default function kpiComponent() {
                 .width((d,i) => dimns[i].contentsWidth)
                 .height((d,i) => dimns[i].contentsHeight)
                 .styles((d, i) => ({
-                    stroke:"blue",
+                    stroke:"none",
                     fill:"transparent"
                 })))
             .call(container()
@@ -122,8 +122,8 @@ export default function kpiComponent() {
             .call(container()
                 .className("progress-bar")
                 .transform((d, i) => `translate(0,${dimns[i].titleHeight})`))
-            //.on("click", () => { console.log("kpi contents clicked...")})
-            .call(drag)
+            .on("click", onClick)
+            //.call(drag)
 
         kpiContents.select("g.name")
             .call(title

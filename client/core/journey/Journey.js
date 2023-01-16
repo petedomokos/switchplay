@@ -99,7 +99,7 @@ const initChannels = d3.range(numberMonths)
 
 //width and height may be full screen, but may not be
 const Journey = ({ data, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog, takeOverScreen, releaseScreen }) => {
-  //console.log("Journey isLarge", screen.isLarge)
+  //console.log("Journey.......")
   //console.log("Journey avail", availableJourneys)
   const { _id, userId, name, contracts, profiles, aims, goals, links, measures, kpis } = data;
   const [journey, setJourney] = useState(null);
@@ -126,12 +126,14 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
   }
   //need to know which date/profile is selected too -
   // this also comes from teh kpi that is passed through, as it will have that date
+  /*
   const kpiViewData = !selectedKpiSet ? null : profiles.map(p =>  ({
     ...p.kpis.find(kpi => kpi.kpiSet === selectedKpiSet),
     date:p.date,
     //key can just be the milestoneId in this case
     key:p.id,
   }));
+  */
 
   const shouldD3UpdateRef = useRef(true);
 
@@ -139,7 +141,7 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
   const journeyWidth = width - DIMNS.journey.margin.left - DIMNS.journey.margin.right
   const journeyHeight = height - DIMNS.journey.margin.top - DIMNS.journey.margin.bottom - ctrlsHeight;
   let styleProps = {}
-
+  /*
   if(modalData) {
       //todo - handle aim nameOnly case
       const { nameOnly, nameAndTargOnly, d } = modalData;
@@ -182,6 +184,7 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
             }
       }
   };
+  */
 
   //console.log("styleProps", styleProps)
   const classes = useStyles(styleProps) 
@@ -267,6 +270,7 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
   }, [shouldShowOverlay])
 
  //init journey
+ /*
   useEffect(() => {
     if(!containerRef.current){return; }
     const journey = journeyComponent();
@@ -445,6 +449,7 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
 
   }, [JSON.stringify(data), journey, aligned, withCompletionPaths, displayedBar, modalData, kpiFormat, width, height, screen ])
 
+  */
   const toggleCompletion = () => {
       setWithCompletionPath(prevState => !prevState);
   }
