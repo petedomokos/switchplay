@@ -126,7 +126,7 @@ export default function barComponent() {
     const numbers = numbersComponent();
 
     function bar(selection, options={}) {
-        const { transitionEnter=true, transitionUpdate=true, log} = options;
+        const { transitionEnter=false, transitionUpdate=false, log} = options;
 
         const allData = selection.data();
 
@@ -164,7 +164,8 @@ export default function barComponent() {
                 .styles((d, i) => ({
                     stroke:"grey",
                     strokeWidth:0.3
-                })))
+                })), { transitionEnter, transitionUpdate} 
+            )
             .each(function(data,i){
                 const { barData } = data;
                 const { withHandles, handleHeight, handleWidth,contentsWidth, barWidth, barHeight } = dimns[i];
@@ -179,11 +180,15 @@ export default function barComponent() {
                     .append("g")
                         .attr("class", "bar-section")
                             .each(function(d,i){
+                                const sectionWidth = scale(d.value) - scale(d.startValue);
                                 //append rect
                                 d3.select(this)
                                     .append("rect")
                                         .attr("class", "bar-section")
-                                        .attr("pointer-events", "none");
+                                        .attr("pointer-events", "none")
+                                        .attr("width", sectionWidth)
+                                        .attr("height", barHeight)
+                                        .attr("fill", d.fill);;
                             })
                             .merge(barSectionG)
                             .attr("transform", (d,i) =>{
@@ -194,9 +199,11 @@ export default function barComponent() {
                                 const sectionWidth = scale(d.value) - scale(d.startValue);
                                 //adjust rect width to end - start
                                 d3.select(this).select("rect.bar-section")
-                                    .attr("width", sectionWidth)
-                                    .attr("height", barHeight)
-                                    .attr("fill", d.fill);
+                                    .transition()
+                                    .duration(400)
+                                        .attr("width", sectionWidth)
+                                        .attr("height", barHeight)
+                                        .attr("fill", d.fill);
 
                                 //start in the middle if the handle is over the bar
                                 /*

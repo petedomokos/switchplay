@@ -18,6 +18,19 @@ export const KPI_CTRLS = format => ([
     { key: "actual", label:"Actual Value", isSelected:format === "actual" }
 ]);
 
+export const TRANSITIONS = {
+    KPI:{
+        FADE:{
+            DURATION:400
+        }
+    },
+    KPIS:{
+        AUTO_SCROLL:{
+            DURATION:300
+        }
+    }
+}
+
 export const FONTSIZES = {
     ctrls:{
         btn:10

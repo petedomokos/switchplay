@@ -42,6 +42,48 @@ export function show(selection, options={}){
     })
 
 }
+
+
+export function fadeIn(selection, options={}){
+    const { transition } = options;
+    selection.each(function(){
+        //will be multiple exits because of the delay in removing
+        if(!d3.select(this).attr("class").includes("fading-in")){
+            d3.select(this)
+                .attr("opacity", d3.select(this).attr("opacity") || 0)
+                .classed("fading-in", true)
+                .transition()
+                    .duration(transition?.duration || 400)
+                    .attr("opacity", 1)
+                    .on("end", function() { 
+                        //console.log("removed")
+                        d3.select(this).classed("fading-in", false); 
+                    });
+        }
+    })
+}
+
+export function remove(selection, options={}){
+    const { transition } = options;
+    selection.each(function(){
+        //will be multiple exits because of the delay in removing
+        if(!d3.select(this).attr("class").includes("exiting")){
+            //console.log("removing............................")
+            d3.select(this)
+                .classed("exiting", true)
+                .transition()
+                    .duration(transition?.duration || 400)
+                    .attr("opacity", 0)
+                    .on("end", function() { 
+                        //console.log("removed")
+                        d3.select(this).remove(); 
+                    });
+        }
+    })
+
+}
+
+
 export function updatePos(selection, pos={}, transition){
     const { x, y, x1, y1, x2, y2} = pos;
     selection.each(function(d){

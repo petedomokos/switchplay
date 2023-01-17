@@ -74,6 +74,7 @@ export default function kpisLayout(){
 
             return {
                 ...kpi,
+                nr:i,
                 barData,
                 tooltipsData,
                 numbersData

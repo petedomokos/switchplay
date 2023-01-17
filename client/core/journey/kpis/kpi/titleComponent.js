@@ -82,6 +82,7 @@ export default function titleComponent() {
                 .className("title-contents")
                 .transform((d, i) => `translate(${_margin(d,i).left}, ${_margin(d,i).top})`)
                 .enter(function(d,i){
+                    const styles = _styles(d, i);
                     const contentsG = d3.select(this);
 
                     contentsG
@@ -94,7 +95,7 @@ export default function titleComponent() {
                     contentsG
                         .append("g")
                             .attr("class", "name")
-                                .append("text");
+                                .append("text")
 
                 })
                 .update(function(d,i){
@@ -114,7 +115,6 @@ export default function titleComponent() {
                     const drag = withInteraction ? d3Drag : function(){};
 
                     const contentsG = d3.select(this);
-
                     contentsG.select("rect.title-bg")
                         .attr("width", contentsWidth)
                         .attr("height", contentsHeight)
@@ -139,7 +139,8 @@ export default function titleComponent() {
                         .attr("stroke", styles.primaryTitle.stroke)
                         .attr("fill", styles.primaryTitle.fill)
                         .attr("stroke-width", styles.primaryTitle.strokeWidth)
-                        .text((i+1) + ". " +_primaryTitle(d))
+                        
+                    nameG.select("text").text((i+1) + ". " +_primaryTitle(d))
     
                 })
                 .exit(function(){
@@ -154,6 +155,14 @@ export default function titleComponent() {
                     }
                 }))
                 //.call(drag)
+
+        selection.each(function(d,i){
+            d3.select(this).select("title-contents")
+                .transition()
+                    .duration(400)
+                    .delay(400)
+                    .attr("transform", (d, i) => `translate(${_margin(d,i).left}, ${_margin(d,i).top})`)
+        })
 
         return selection;
     }

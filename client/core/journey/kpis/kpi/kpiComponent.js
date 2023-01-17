@@ -1,13 +1,15 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10 } from "../../constants";
+import { DIMNS, grey10, TRANSITIONS } from "../../constants";
 import dragEnhancements from '../../enhancedDragHandler';
 import { pcCompletion } from "../../../../util/NumberHelpers"
-import { Oscillator } from '../../domHelpers';
+import { Oscillator, fadeIn, remove } from '../../domHelpers';
 import { getTransformationFromTrans } from '../../helpers';
 import titleComponent from './titleComponent';
 import progressBarComponent from './progressBarComponent';
 import container from './container';
 import background from './background';
+
+const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
 
 
 /*
@@ -20,10 +22,12 @@ export default function kpiComponent() {
     let DEFAULT_WIDTH = DIMNS.profile.width;
     let DEFAULT_HEIGHT = DIMNS.profile.height;
     let DEFAULT_MARGIN = { left: 0, right:0, top: 0, bottom: 0 };
+    let DEFAULT_TITLE_DIMNS = { width: 0, height:0, margin:{ left:0, right:0, top:0, bottom:0 }, fontSize:9 }
 
     let _width = () => DEFAULT_WIDTH;
     let _height = () => DEFAULT_HEIGHT;
     let _margin = () => DEFAULT_MARGIN;
+    let _titleDimns = () => DEFAULT_TITLE_DIMNS;
 
     let dimns = [];
 
@@ -40,21 +44,19 @@ export default function kpiComponent() {
             const margin = _margin(d,i);
             const contentsWidth = width - margin.left - margin.right;
             const contentsHeight = height - margin.top - margin.bottom;
+            //if(i == 2)
+            //console.log("kpiComp contentsH for ", i, height, margin, contentsHeight)
 
-            const titleWidth = contentsWidth * 0.5;
-            //instead of min name font, its better just not to display name if very small
-            const titleHeight = d3.min([contentsHeight * 0.3, 10]) 
-            //instead of mins, its better just not to display name if very small
-            const titleMargin = { top: titleHeight * 0.1, bottom: titleHeight * 0.1 };
-
+            const titleDimns = _titleDimns(d,i);
             //progressBar is bar, handles and tooltips
             const progressBarWidth = contentsWidth;
-            const progressBarHeight = contentsHeight - titleHeight;
+            const progressBarHeight = contentsHeight - titleDimns.height;
+            //console.log("prog bar height", progressBarHeight)
             const progressBarMargin = { top: progressBarHeight * 0.1, bottom: progressBarHeight * 0.1 };
 
             dimns.push({
                 width, height, margin, contentsWidth, contentsHeight,
-                titleWidth, titleHeight, titleMargin,
+                titleDimns,
                 progressBarWidth, progressBarHeight, progressBarMargin
             })
         })
@@ -64,12 +66,9 @@ export default function kpiComponent() {
     let _styles = () => DEFAULT_STYLES;
 
     let _name = d => d.name;
-    //let isOpen = d => false;
     let isEditable = () => false;
-    let isOpen = () => false;
     let withTooltips = () => false;
     let status = () => "closed";
-
 
     //API CALLBACKS
     let onClick = function(){};
@@ -97,7 +96,7 @@ export default function kpiComponent() {
     const progressBar = progressBarComponent();
 
     function kpi(selection, options={}) {
-        const { transitionEnter=true, transitionUpdate=true, log} = options;
+        const { transitionEnter=true, transitionUpdate=true, log } = options;
         updateDimns(selection.data());
 
         const drag = d3.drag()
@@ -112,13 +111,12 @@ export default function kpiComponent() {
                 .transform((d, i) => `translate(${dimns[i].margin.left},${dimns[i].margin.top})`)
             )
         const kpiContentsG = selection.select("g.kpi-contents");
-        //console.log("first kpicontentsG", kpiContentsG.node())
         kpiContentsG
             .call(background()
                 .width((d,i) => dimns[i].contentsWidth)
                 .height((d,i) => dimns[i].contentsHeight)
                 .styles((d, i) => ({
-                    stroke:"none",
+                    stroke:"blue",//"none",
                     fill:"transparent"//_styles(d).bg.fill
                 })))
             .call(container().className("name"))
@@ -127,15 +125,17 @@ export default function kpiComponent() {
             .on("click", onClick)
             //.call(drag)
 
+        //console.log("marginTop titleMarginTop titleHeight", dimns[2].margin.top, dimns[2].titleMargin.top, dimns[2].titleHeight)
         kpiContentsG.select("g.name")
             .call(title
-                .width((d,i) => dimns[i].titleWidth)
-                .height((d,i) => dimns[i].titleHeight)
-                .margin((d,i) => dimns[i].titleMargin)
+                .width((d,i) => dimns[i].titleDimns.width)
+                .height((d,i) => dimns[i].titleDimns.height)
+                .margin((d,i) => dimns[i].titleDimns.margin)
                 .styles((d,i) => ({
                     primaryTitle:{ 
-                        fontSize:dimns[i].titleHeight,
+                        fontSize:dimns[i].titleDimns.fontSize,
                         strokeWidth:0.2,
+                        ..._styles(d,i).name,
                         dominantBaseline:"central",
                     },
                     secondaryTitle:{
@@ -148,48 +148,55 @@ export default function kpiComponent() {
                 .textDirection("horiz"))
 
         kpiContentsG.each(function(d,i){
-            //console.log("kpiContents i,d ...stat ", i, d.key, status(d))
-            //console.log("isOpen????", isOpen(d))
+            //if(i == 2)
+            //console.log("kpiContents i,d, stat, progH ", i, d.key, status(d), dimns[i].progressBarHeight)
             const kpiContentsG = d3.select(this);
             //why is this being removed event though no exit defined??????
             //console.log("gs", d3.select(this).selectAll("g").nodes())
+            //console.log("kpiContents i d.key", i, d.key, status(d))
             const closedContentsG = d3.select(this).selectAll("g.closed-kpi-contents").data(status(d) === "closed" ? [d] : []);
             closedContentsG.enter()
                 .append("g")
                     .attr("class", "closed-kpi-contents")
-                    .attr("opacity", 1)
+                    .call(fadeIn)
+                    .merge(closedContentsG)
+                    .attr("transform", `translate(0,${dimns[i].titleDimns.height})`)
+                    .call(progressBar
+                        .width(() => dimns[i].progressBarWidth)
+                        .height(() => dimns[i].progressBarHeight)
+                        .margin(() => dimns[i].progressBarMargin)
+                    , { transitionEnter, transitionUpdate} )
+
+            closedContentsG.exit().call(remove, { transition:{ duration: CONTENT_FADE_DURATION }})
+
+            const openContentsG = d3.select(this).selectAll("g.open-kpi-contents").data(status(d) === "open" ? [d] : []);
+            openContentsG.enter()
+                .append("g")
+                    .attr("class", "open-kpi-contents")
+                    .call(fadeIn)
+                    .each(function(d, i){
+                        //console.log("enter open content-----------------------------", d) //its entering each time
+                        d3.select(this)//todo - fade in
+                            .append("text")
+                    })
+                    .merge(openContentsG)
+                    .attr("transform", `translate(0,${dimns[i].titleHeight})`)
                     .each(function(d, i){
                         //console.log("enter") //its entering each time
                         d3.select(this)//todo - fade in
+                            .select("text")
+                            .attr("x", 50)
+                            .attr("y", 50)
+                            .text("open content")
                     })
-                    .merge(closedContentsG)
-                    .attr("transform", `translate(0,${dimns[i].titleHeight})`)
-                    .call(progressBar
-                        .width((d,i) => dimns[i].progressBarWidth)
-                        .height((d,i) => dimns[i].progressBarHeight)
-                        .margin((d,i) => dimns[i].progressBarMargin))
+                    //.call(progressBar
+                        //.width((d,i) => dimns[i].progressBarWidth)
+                        //.height((d,i) => dimns[i].progressBarHeight)
+                        //.margin((d,i) => dimns[i].progressBarMargin))
 
-            closedContentsG.exit().each(function(){
-                //will be multiple exits because of the delay in removing
-                if(!d3.select(this).attr("class").includes("exiting")){
-                    //console.log("removing............................")
-                    d3.select(this)
-                        .classed("exiting", true)
-                        .transition()
-                            .duration(400)
-                            .attr("opacity", 0)
-                            .on("end", function() { 
-                                //console.log("removed")
-                                d3.select(this).remove(); });
-                }
-            })
+            openContentsG.exit().call(remove, { transition:{ duration: CONTENT_FADE_DURATION }});
+
         })
-
-        /*kpiContents.select("g.non-selected-progress-bar")
-            .call(progressBar
-                .width((d,i) => dimns[i].progressBarWidth)
-                .height((d,i) => dimns[i].progressBarHeight)
-                .margin((d,i) => dimns[i].progressBarMargin))*/
         
         //non-selected contents
         /*
@@ -245,6 +252,11 @@ export default function kpiComponent() {
         _margin = (d,i) => ({ ...DEFAULT_MARGIN, ...func(d,i) })
         return kpi;
     };
+    kpi.titleDimns = function (func) {
+        if (!arguments.length) { return _titleDimns; }
+        _titleDimns = (d,i) => ({ ...DEFAULT_TITLE_DIMNS, ...func(d,i) });
+        return kpi;
+    };
     kpi.withTooltips = function (value) {
         if (!arguments.length) { return withTooltips; }
         withTooltips = value;
@@ -271,15 +283,6 @@ export default function kpiComponent() {
             isEditable = value;
         }else{
             isEditable = () => value;
-        }
-        return kpi;
-    };
-    kpi.isOpen = function (value) {
-        if (!arguments.length) { return isOpen; }
-        if(typeof value === "function"){
-            isOpen = value;
-        }else{
-            isOpen = () => value;
         }
         return kpi;
     };

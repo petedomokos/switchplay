@@ -49,6 +49,7 @@ export default function progressBarComponent() {
             const margin = _margin(d,i);
             const contentsWidth = width - margin.left - margin.right;
             const contentsHeight = height - margin.top - margin.bottom;
+            //console.log("bar contentsH for ", i, contentsHeight)
  
             dimns.push({
                 width, height, margin, contentsWidth, contentsHeight
@@ -62,6 +63,7 @@ export default function progressBarComponent() {
     };
     let _styles = () => defaultStyles;
     let _transform = () => null;
+    let transitionUpdate = false;
 
     let fixedDomain = [0,100]
     let _domain;
@@ -106,9 +108,9 @@ export default function progressBarComponent() {
             //.data(selection.data().map(d => d.barData))
             .call(bar
                 .width((d,i) => dimns[i].contentsWidth)
-                .height((d,i) => dimns[i].contentsHeight)
+                .height((d,i) => d3.min([35, dimns[i].contentsHeight]))
                 .editable(true)
-            )
+            , { transitionEnter, transitionUpdate} )
         //selection.select("g.tooltips")
             //.call(tooltips)
 
@@ -139,6 +141,11 @@ export default function progressBarComponent() {
     progressBar.margin = function (func) {
         if (!arguments.length) { return _margin; }
         _margin = (d,i) => ({ ...DEFAULT_MARGIN, ...func(d,i) })
+        return progressBar;
+    };
+    progressBar.transitionUpdate = function (value) {
+        if (!arguments.length) { return transitionUpdate; }
+        transitionUpdate = value;
         return progressBar;
     };
     progressBar.transform = function (value) {

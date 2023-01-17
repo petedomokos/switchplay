@@ -1,8 +1,13 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10 } from "../constants";
+import { DIMNS, grey10, TRANSITIONS } from "../constants";
 import kpiComponent from './kpi/kpiComponent';
 import closeComponent from './kpi/closeComponent';
 import { getTransformationFromTrans } from '../helpers';
+
+const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
+const AUTO_SCROLL_DURATION = TRANSITIONS.KPIS.AUTO_SCROLL.DURATION;
+//faster speed than scroll to ensure it leaves page before scroll finishes
+const KPI_SLIDE_DURATION = AUTO_SCROLL_DURATION * 0.66;
 
 /*
 
@@ -29,6 +34,7 @@ export default function kpisComponent() {
     let btnFontSize;
 
     let kpiWidth;
+    let kpiMargin;
 
     let fixedKpiHeight;
     let kpiHeight;
@@ -68,12 +74,15 @@ export default function kpisComponent() {
         kpiHeight = fixedKpiHeight || listHeight/5;
         //selectedKpi must expand for tooltip rows, by 0.75 of kpiHeight per tooltip
         openKpiHeight = fixedSelectedKpiHeight || listHeight;//kpiHeight + (0.75 * kpiHeight * nrTooltipRows);
-        const kpiHeights = kpisData.map(kpi => selected === kpi.key ? openKpiHeight : kpiHeight);
+        const kpiHeights = kpisData
+            .map(kpi => status(kpi) === "open" || status(kpi) === "closing" ? openKpiHeight : kpiHeight);
+
         scrollMin = -d3.sum(kpiHeights.slice(0, kpiHeights.length - 1)); //stop when last kpi is at top
         scrollMax = 0;
 
         //kpi margin
         gapBetweenKpis = kpiHeight * 0.3;
+        kpiMargin = { top: gapBetweenKpis/2, bottom: gapBetweenKpis/2, left:0, right:0 }
 
         closeBtnWidth = contentsWidth * 0.1;
         closeBtnHeight = closeBtnWidth;
@@ -127,7 +136,7 @@ export default function kpisComponent() {
     let containerG;
 
     function kpis(selection, options={}) {
-        console.log("kpis update...........................")
+        //console.log("kpis update...........................")
         const { transitionEnter=true, transitionUpdate=true, log} = options;
 
         // expression elements
@@ -259,23 +268,20 @@ export default function kpisComponent() {
                             const extraSpaceForSelected = openKpiHeight - kpiHeight;
                             const isAfterOpenKpi = !!kpisData
                                 .slice(0, i)
-                                .find(kpi => status(kpi) === "opening" || status(kpi) === "open");
-                            const res = i * kpiHeight +(isAfterOpenKpi ? extraSpaceForSelected : 0)
-                            //console.log("calcY for ", i, res)
-                            return res;
+                                .find(kpi => status(kpi) === "open" || status(kpi) === "closing");
+                            return i * kpiHeight +(isAfterOpenKpi ? extraSpaceForSelected : 0)
                         }
-                        console.log("update!!!!!!!!!!!!!!!!!!!!!!!!")
+
+
                         const kpiG = listContentsG.selectAll("g.kpi").data(kpisData, d => d.key);
                         kpiG.enter()
                             .append("g")
-                            .attr("class", (d,i) => {
-                                console.log("enter", i)
-                                return "kpi kpi-"+d.key
-                            })
+                            .attr("class", d => "kpi kpi-"+d.key)
                             .call(updateTransform, { x: d => 0, y: calcY })
                             .merge(kpiG) 
                             /*
-                            .attr("transform", (d,i) => {
+                            .attr("transf
+                            orm", (d,i) => {
                                 //console.log("trans i, d", i, d)
                                 const extraSpaceForSelected = openKpiHeight - kpiHeight;
                                 //console.log("extraspace", extraSpaceForSelected)
@@ -291,17 +297,25 @@ export default function kpisComponent() {
                             .style("cursor", d => isSelected(d) ? "default" : "pointer")
                             .call(kpi
                                 .width(() => kpiWidth)
-                                .height((d) => status(d) === "open" ? openKpiHeight : kpiHeight)
+                                .height((d,i) => status(d) === "open" || status(d) === "closing" ? openKpiHeight : kpiHeight)
                                 //.expandedHeight(openKpiHeight)
                                 .status(d => status(d) || "closed")
                                 .withTooltips(d => isSelected(d))
-                                .margin(() => ({
-                                    //todo - make sure margin is at least big enough for
-                                    //half tooltipWidth, if tooltipsData exists
-                                    //left:kpiWidth * 0.1, right: kpiWidth * 0.1,
-                                    top:gapBetweenKpis/2, bottom:gapBetweenKpis/2
-                                }))
-                                .styles(d => ({
+                                .margin(() => kpiMargin)
+                                .titleDimns((d) => {
+                                    //need contentsWidth and Height to work out name dimns and fontsize so it doesnt change based on status in general update
+                                    const kpiContentsWidth = kpiWidth - kpiMargin.left - kpiMargin.right;
+                                    const kpiContentsHeight = kpiHeight - kpiMargin.top - kpiMargin.bottom;
+                                    const width = kpiContentsWidth * 0.5;
+                                    const height = d3.min([kpiContentsHeight * 0.35, 10]);
+                                    const margin = { top: height * 0.1, bottom: height * 0.1 };
+                                    const fontSize = height * 0.8;
+                                    //todo - if(status(d) === "open" || status(d) === "opening"){
+                                        //increase fontSize, not height
+                                    //}
+                                    return { width, height, margin, fontSize }
+                                })
+                                .styles((d,i) => ({
                                     bg:{
                                         fill:isSelected(d) ? grey10(1) : "transparent"
                                     },
@@ -333,7 +347,7 @@ export default function kpisComponent() {
                                         }));
                             })
                         //UPDATE ONLY
-                        kpiG.call(updateTransform, { x: d => 0, y: calcY, transition:{ duration:300 } })
+                        //kpiG.call(updateTransform, { x: d => 0, y: calcY, transition:{ duration:300, delay:400 } })
 
                         //EXIT
                         kpiG.exit().each(function(){
@@ -399,49 +413,6 @@ export default function kpisComponent() {
 
                     })
 
-                    function updateTransform(selection, options={}){
-                        console.log("updateTransform-----------------------", selection.nodes())
-                        const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
-                        console.log("transition", transition)
-                        selection.each(function(d, i){
-                            console.log("i d.key", i, d.key)
-                            //console.log("t", d3.select(this).attr("transform"))
-                            const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
-                            console.log("current transY", translateY)
-                            console.log("newy", y(d, i))
-                            if(Math.abs(translateX - x(d, i)) < 0.001 && Math.abs(translateY - y(d, i)) < 0.001){
-                                //already where it needs to be
-                                console.log("already in pos")
-                                return;
-                            }
-                            if(d3.select(this).attr("class").includes("transitioning")){
-                                //already in transition - so we ignore the new request
-                                console.log("already transitioning")
-                                return;
-                            }
-                            if(transition){
-                                console.log("withTrans............", x(d, i))
-                                d3.select(this)
-                                    .classed("transitioning", true)
-                                    .transition()
-                                    .ease(transition.ease || d3.easeLinear)
-                                    .duration(transition.duration || 200)
-                                    //add delay option here
-                                        .attr("transform", "translate("+x(d, i) +"," +y(d, i) +")")
-                                        .on("end", function(d,i){
-                                            d3.select(this).classed("transitioning", false);
-                                            cb.call(this, d, i);
-                                        });
-                            }else{
-                                console.log("no transxxxxxxx", x(d, i))
-                                d3.select(this)
-                                    .attr("transform", "translate("+x(d, i) +"," +y(d, i) +")");
-                                
-                                cb.call(this);
-                            }
-                        })
-                    }
-
             handleZoom = function(e, i){
                 //scope to containerG instead of 'this' so can be called from outside
                 containerG.select("g.kpis-list-contents")
@@ -461,57 +432,125 @@ export default function kpisComponent() {
     }
 
     function updateSelected(key, data, shouldUpdateScroll, shouldUpdateDom){
-        console.log("updateSel key", key)
+        const { kpisData } = data;
+        const newSelectedDatum = kpisData.find(d => d.key === key);
+        //console.log("updateSel key, d-------", key, newSelectedDatum)
+        //1. UPDATE STATUS TO OPENING/CLOSING
         if(selected === key) { return; }
         //todo next - check this works with statusses , once i implement it in chldren
         //if currently somethign is selected, we will deselct and close
-        if(selected){
+        let prevSelected;
+        if(selected && selected !== key){
+            prevSelected = selected;
+            //console.log("setting status to closing for", selected)
             statuses[selected] = "closing";
         }
         //start opening new one
         if(key){
             statuses[key] = "opening";
         }
-        //update helper accessor
+        //update accessors
         status = d => statuses[d.key] || "closed";
-        console.log("updateSelected....key, data", key, shouldUpdateDom)
         selected = key;
         isSelected = d => d.key === selected;
-        //todo next - make sure ttile font transitions smoothly, 
-        //and closed stuff fades out and no other changes (and open stuff doesnt fade in)
+        //2.GENERAL UPDATE TO REMOVE CLOSED/OPEN CONTENT
         if(shouldUpdateDom){ containerG.call(kpis) }
 
-
+        //3. AFTER DELAY TO ALLOW REMOVAL OF CONTENT, SLIDE THE KPIS BELOW DOWN/BACK UP
+        const calcY = (d,i) => {
+            const extraSpaceForSelected = openKpiHeight - kpiHeight;
+            //find the newly opening one, if it exists, otherwise its false for all kpis (note, it isnt 'open' yet)
+            const isAfterOpenKpi = !!kpisData
+                .slice(0, i)
+                .find(kpi => status(kpi) === "opening");
+            return i * kpiHeight +(isAfterOpenKpi ? extraSpaceForSelected : 0)
+        }
+        //faster speed than scroll to ensure it leaves page before scroll finishes
+        containerG.selectAll("g.kpi")
+            .call(updateTransform, { x: d => 0, y: calcY, 
+                transition:{ duration:KPI_SLIDE_DURATION, delay:CONTENT_FADE_DURATION } })
+        //4.AT THE SAME TIME, SCROLL TO TOP (ONLY IF OPENING)
         if(shouldUpdateScroll){
-            console.log("update scroll-------")
+            //console.log("update scroll-------")
             //@todo - for KpiView, we want to show one before because they are connected
             const nrToShowBefore = 0;
             const y = calculateListY(selected, data.kpisData, kpiHeight, nrToShowBefore);
-            console.log("y", y)
+            //console.log("y", y)
             containerG.select("g.kpis-list")
                .transition()
-                    //.delay(3000)
-                    .duration(400)
-                    //??????????this only works if we comment out teh update of dom before it above
-                    //something in teh update stops the scroll working - maybe its turned to null
+                    .delay(CONTENT_FADE_DURATION)
+                    .duration(AUTO_SCROLL_DURATION)
                     .call(zoom.translateTo, 0, y, [0,0])
                     .on("end", () => { 
-                        console.log("scroll end")
+                        //console.log("scroll end")
                         //kpi is now open so scroll should not be enabled
                         scrollEnabled = scrollable && !selected;
-                        if(shouldUpdateDom){ 
-                            statuses[key] = "open";
+                        if(shouldUpdateDom){
+                            //console.log("update after trans")
+                            if(key) { statuses[key] = "open"; }
+                            if(prevSelected) { statuses[prevSelected] = "closed";}
+                            status = d => statuses[d.key] || "closed";
                             //here the open stuff shopuld fade in
-                            //containerG.call(kpis) 
+                            containerG.call(kpis) 
                         }
                     }); 
         }else if(shouldUpdateDom){
+            //console.log("update no trans")
+            //still need slight delay to allow open cntent to close
             //kpi is now open so scroll should not be enabled
-            scrollEnabled = scrollable && !selected;
-            statuses[key] = "open"; 
-            //containerG.call(kpis) 
+            d3.timeout(() => {
+                scrollEnabled = scrollable && !selected;
+                if(key) { statuses[key] = "open"; }
+                if(prevSelected) { statuses[prevSelected] = "closed";}
+                status = d => statuses[d.key] || "closed";
+                containerG.call(kpis) 
+            }, CONTENT_FADE_DURATION + KPI_SLIDE_DURATION)
         }
     }
+
+    function updateTransform(selection, options={}){
+        //console.log("updateTransform-----------------------")
+        const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
+        //console.log("transition", transition)
+        selection.each(function(d, i){
+            //console.log("i d.key", i, d.key)
+            //console.log("t", d3.select(this).attr("transform"))
+            const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
+            //console.log("current transY", translateY)
+            if(Math.abs(translateX - x(d, i)) < 0.001 && Math.abs(translateY - y(d, i)) < 0.001){
+                //already where it needs to be
+                //console.log("already in pos")
+                return;
+            }
+            if(d3.select(this).attr("class").includes("transitioning")){
+                //already in transition - so we ignore the new request
+                //console.log("already transitioning")
+                return;
+            }
+            if(transition){
+                //console.log("updateTrans withTrans............", x(d, i))
+                d3.select(this)
+                    .classed("transitioning", true)
+                    .transition()
+                    .ease(transition.ease || d3.easeLinear)
+                    .delay(transition.delay || null)
+                    .duration(transition.duration || 200)
+                        .attr("transform", "translate("+x(d, i) +"," +y(d, i) +")")
+                        .on("end", function(d,i){
+                            d3.select(this).classed("transitioning", false);
+                            cb.call(this, d, i);
+                        });
+            }else{
+                //console.log("updateTrans no transxxxxxxx", x(d, i))
+                d3.select(this)
+                    .attr("transform", "translate("+x(d, i) +"," +y(d, i) +")");
+                
+                cb.call(this);
+            }
+        })
+    }
+
+    
     
     //api
     kpis.width = function (value) {
