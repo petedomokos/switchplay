@@ -88,10 +88,10 @@ const mapStateToProps = (state, ownProps) => {
 	const _data = journeys.find(j => j._id === journeyId) || journeys[0] || emptyJourney(state.user);
 	//console.log("JourneyContainer data", _data)
 	//add mock profiles the first time only (note - these must be turnd off before we enabled server-side persitance again)
-	const mocksAdded = !!_data.profiles.find(p => p.id.includes("mock"));
-	const data = mocksAdded ? _data : { ..._data, profiles:[..._data.profiles, ...mockProfiles] };
+	//const mocksAdded = !!_data.profiles.find(p => p.id.includes("mock"));
+	//const data = mocksAdded ? _data : { ..._data, profiles:[..._data.profiles, ...mockProfiles] };
 	//const data = _data;
-	//const data = { ..._data, profiles:[] }
+	const data = { ..._data, profiles:[] }
 
 	const datasets = datasetsMemberOf.map(dataset => loadedDatasets.find(ds => ds._id === dataset._id))
 	const fullyLoadedDatasets = datasets

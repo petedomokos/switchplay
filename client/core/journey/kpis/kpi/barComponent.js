@@ -186,7 +186,10 @@ export default function barComponent() {
                                         .attr("pointer-events", "none");
                             })
                             .merge(barSectionG)
-                            .attr("transform", (d,i) => `translate(${scales[i](d.startValue)}, 0)`)
+                            .attr("transform", (d,i) =>{
+                                //console.log("test ",i , d, scales[i])
+                                 return `translate(${scales[i](d.startValue)}, 0)`
+                            })
                             .each(function(d,i){
                                 const sectionWidth = scale(d.value) - scale(d.startValue);
                                 //adjust rect width to end - start

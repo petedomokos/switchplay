@@ -64,11 +64,9 @@ export default function kpiComponent() {
     let _styles = () => DEFAULT_STYLES;
 
     let _name = d => d.name;
-    //let isOpen = d => false;
+    //let isSelected = d => false;
     let isEditable = () => false;
-    let isOpen = () => false;
     let withTooltips = () => false;
-    let status = () => "closed";
 
 
     //API CALLBACKS
@@ -111,23 +109,22 @@ export default function kpiComponent() {
                 .className("kpi-contents")
                 .transform((d, i) => `translate(${dimns[i].margin.left},${dimns[i].margin.top})`)
             )
-        const kpiContentsG = selection.select("g.kpi-contents");
-        //console.log("first kpicontentsG", kpiContentsG.node())
-        kpiContentsG
+        const kpiContents = selection.select("g.kpi-contents");
+        kpiContents
             .call(background()
                 .width((d,i) => dimns[i].contentsWidth)
                 .height((d,i) => dimns[i].contentsHeight)
                 .styles((d, i) => ({
                     stroke:"none",
-                    fill:"transparent"//_styles(d).bg.fill
+                    fill:_styles(d).bg.fill
                 })))
             .call(container().className("name"))
-            //.call(container().className("non-selected-progress-bar")
-                //.transform((d, i) => `translate(0,${dimns[i].titleHeight})`))
+            .call(container().className("non-selected-progress-bar")
+                .transform((d, i) => `translate(0,${dimns[i].titleHeight})`))
             .on("click", onClick)
             //.call(drag)
 
-        kpiContentsG.select("g.name")
+        kpiContents.select("g.name")
             .call(title
                 .width((d,i) => dimns[i].titleWidth)
                 .height((d,i) => dimns[i].titleHeight)
@@ -147,49 +144,11 @@ export default function kpiComponent() {
                 //.secondaryTitle(d => d.statName)
                 .textDirection("horiz"))
 
-        kpiContentsG.each(function(d,i){
-            //console.log("kpiContents i,d ...stat ", i, d.key, status(d))
-            //console.log("isOpen????", isOpen(d))
-            const kpiContentsG = d3.select(this);
-            //why is this being removed event though no exit defined??????
-            //console.log("gs", d3.select(this).selectAll("g").nodes())
-            const closedContentsG = d3.select(this).selectAll("g.closed-kpi-contents").data(status(d) === "closed" ? [d] : []);
-            closedContentsG.enter()
-                .append("g")
-                    .attr("class", "closed-kpi-contents")
-                    .attr("opacity", 1)
-                    .each(function(d, i){
-                        //console.log("enter") //its entering each time
-                        d3.select(this)//todo - fade in
-                    })
-                    .merge(closedContentsG)
-                    .attr("transform", `translate(0,${dimns[i].titleHeight})`)
-                    .call(progressBar
-                        .width((d,i) => dimns[i].progressBarWidth)
-                        .height((d,i) => dimns[i].progressBarHeight)
-                        .margin((d,i) => dimns[i].progressBarMargin))
-
-            closedContentsG.exit().each(function(){
-                //will be multiple exits because of the delay in removing
-                if(!d3.select(this).attr("class").includes("exiting")){
-                    //console.log("removing............................")
-                    d3.select(this)
-                        .classed("exiting", true)
-                        .transition()
-                            .duration(400)
-                            .attr("opacity", 0)
-                            .on("end", function() { 
-                                //console.log("removed")
-                                d3.select(this).remove(); });
-                }
-            })
-        })
-
-        /*kpiContents.select("g.non-selected-progress-bar")
+        kpiContents.select("g.non-selected-progress-bar")
             .call(progressBar
                 .width((d,i) => dimns[i].progressBarWidth)
                 .height((d,i) => dimns[i].progressBarHeight)
-                .margin((d,i) => dimns[i].progressBarMargin))*/
+                .margin((d,i) => dimns[i].progressBarMargin))
         
         //non-selected contents
         /*
@@ -198,21 +157,21 @@ export default function kpiComponent() {
             const kpiContentsG = d3.select(this);
             const nonData = [d];
             console.log("nonData", nonData)
-            const closedContentsG = kpiContents.selectAll("g.closed-kpi-contents").data([1]);
-            closedContentsG.enter()
+            const nonSelectedContentsG = kpiContents.selectAll("g.non-selected-kpi-contents").data([1]);
+            nonSelectedContentsG.enter()
                 .append("g")
-                    .attr("class", "closed-kpi-contents")
+                    .attr("class", "non-selected-kpi-contents")
                     .each(function(d){
                         console.log("d...",i,  d)
                         d3.select(this)//todo - fade in
                     })
-                    .merge(closedContentsG)
+                    .merge(nonSelectedContentsG)
                     .call(progressBar
                         .width(() => dimns[i].progressBarWidth)
                         .height(() => dimns[i].progressBarHeight)
                         .margin(() => dimns[i].progressBarMargin))
 
-            closedContentsG.exit().remove();
+            nonSelectedContentsG.exit().remove();
         })
         */
         
@@ -250,11 +209,6 @@ export default function kpiComponent() {
         withTooltips = value;
         return kpi;
     };
-    kpi.status = function (value) {
-        if (!arguments.length) { return status; }
-        status = value;
-        return kpi;
-    };
     kpi.fontSizes = function (values) {
         if (!arguments.length) { return fontSizes; }
         fontSizes = { ...fontSizes, ...values };
@@ -274,15 +228,17 @@ export default function kpiComponent() {
         }
         return kpi;
     };
-    kpi.isOpen = function (value) {
-        if (!arguments.length) { return isOpen; }
+    /*
+    kpi.isSelected = function (value) {
+        if (!arguments.length) { return isSelected; }
         if(typeof value === "function"){
-            isOpen = value;
+            isSelected = value;
         }else{
-            isOpen = () => value;
+            isSelected = () => value;
         }
         return kpi;
     };
+    */
     kpi._name = function (value) {
         if (!arguments.length) { return _name; }
         if(typeof value === "function"){

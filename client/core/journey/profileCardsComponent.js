@@ -197,19 +197,18 @@ export default function profileCardsComponent() {
                                 kpisComponents[p.id].handleZoomEnd.call(this, e)
                            })
                         })
+                        /*
                         .onClickKpi((e,kpi) => {
-                            console.log("profileCrad kpi.onClickKpi---------------------------------------------", kpi)
+                            console.log("profileCrad kpi.onClickKpi---")
                             //update selected KPI in all profile cards
                             data.filter(p => p.id !== d.id).forEach(p => {
-                                console.log("p", p)
                                 //must sway the profile id from the key
                                 const keyParts = kpi.key.split("-");
                                 const keyWithoutProfileId = keyParts.slice(0, keyParts.length - 1).join("-");
                                 const kpiKeyInThisProfile = `${keyWithoutProfileId}-${p.id}`
-                                console.log("kpiKey", kpiKeyInThisProfile)
-                                kpisComponents[p.id].selected(kpiKeyInThisProfile, true);
+                                kpisComponents[p.id].selected(kpiKeyInThisProfile, true, true);
                             })
-                        })
+                        })*/
                         .onDblClickKpi(onDblClickKpi);
 
                     //ENTER AND UPDATE

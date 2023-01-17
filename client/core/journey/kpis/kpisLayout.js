@@ -27,6 +27,7 @@ export default function kpisLayout(){
                 if(i <= 1) { return kpi;}
                 return { ...kpi, key:`${i}-${kpi.key}`}
             });
+        //1 only...const _data = [data[0]]
         const kpisData = _data.map((kpi,i) => {
             //console.log("kpi---",i, kpi)
             const { values } = kpi;
@@ -68,7 +69,7 @@ export default function kpisLayout(){
             barData.start = start;
             barData.end = end;
 
-            const tooltipsData = [];
+            const tooltipsData = [{ rowNr:1 }, { rowNr:-1 }];
             const numbersData = [currentDatum];
 
             return {

@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { DIMNS, grey10 } from "../constants";
 import kpiComponent from './kpi/kpiComponent';
+import closeComponent from './kpi/closeComponent';
 import { getTransformationFromTrans } from '../helpers';
 
 /*
@@ -34,7 +35,10 @@ export default function kpisComponent() {
     let gapBetweenKpis;
 
     let fixedSelectedKpiHeight;
-    let selectedKpiHeight;
+    let openKpiHeight;
+
+    let closeBtnWidth;
+    let closeBtnHeight;
 
     let scrollMin;
     let scrollMax;
@@ -63,14 +67,16 @@ export default function kpisComponent() {
 
         kpiHeight = fixedKpiHeight || listHeight/5;
         //selectedKpi must expand for tooltip rows, by 0.75 of kpiHeight per tooltip
-
-        selectedKpiHeight = fixedSelectedKpiHeight || kpiHeight + (0.75 * kpiHeight * nrTooltipRows);
-        const kpiHeights = kpisData.map(kpi => selected === kpi.key ? selectedKpiHeight : kpiHeight);
+        openKpiHeight = fixedSelectedKpiHeight || listHeight;//kpiHeight + (0.75 * kpiHeight * nrTooltipRows);
+        const kpiHeights = kpisData.map(kpi => selected === kpi.key ? openKpiHeight : kpiHeight);
         scrollMin = -d3.sum(kpiHeights.slice(0, kpiHeights.length - 1)); //stop when last kpi is at top
         scrollMax = 0;
 
         //kpi margin
         gapBetweenKpis = kpiHeight * 0.3;
+
+        closeBtnWidth = contentsWidth * 0.1;
+        closeBtnHeight = closeBtnWidth;
 
     }
 
@@ -82,9 +88,12 @@ export default function kpisComponent() {
     let withCtrls = true;
     let selected;
     let isSelected = d => false;
+    let statuses = {}; //closing, open, opening
+    let status = d => statuses[d.key] || "closed";
 
     let editable = false;
     let scrollable = false;
+    let scrollEnabled = false;
 
     //API CALLBACKS
     let onClickKpi = function(){};
@@ -118,20 +127,21 @@ export default function kpisComponent() {
     let containerG;
 
     function kpis(selection, options={}) {
-        //console.log("kpis update sel", selected)
+        console.log("kpis update...........................")
         const { transitionEnter=true, transitionUpdate=true, log} = options;
 
         // expression elements
         selection.each(function (data,i) {
             prevData = data;
             const { kpisData } = data;
+            //console.log("kpisData", kpisData)
             //console.log("kpis",this.parentNode.parentNode, data)
             const ctrlsData = withCtrls ? data.ctrlsData : [];
 
             const nrOfCtrlsButtons = ctrlsData?.length;
-            const nrTooltipRowsAbove = kpisData[0] ? d3.max(kpisData[0].tooltipsData.filter(t => t.location === "above"), d => d.row + 1) : 0;
+            const nrTooltipRowsAbove = kpisData[0] ? d3.max(kpisData[0].tooltipsData, d => d.rowNr) : 0;
             //console.log("rowsAb", nrTooltipRowsAbove)
-            const nrTooltipRowsBelow = kpisData[0] ? d3.max(kpisData[0].tooltipsData.filter(t => t.location === "below"), d => d.row + 1) : 0;
+            const nrTooltipRowsBelow = kpisData[0] ? Math.abs(d3.max(kpisData[0].tooltipsData.filter(t => t.rowNr < 0), d => d.rowNr)) : 0;
             //console.log("rowsbe", nrTooltipRowsBelow)
             const nrTooltipRows = nrTooltipRowsAbove + nrTooltipRowsBelow || 0;
             updateDimns(nrOfCtrlsButtons, nrTooltipRows, kpisData);
@@ -166,6 +176,7 @@ export default function kpisComponent() {
 
                         //init zoom
                         const y = calculateListY(selected, data.kpisData, kpiHeight, 1);
+                        console.log("enter y--------------", y)
                         const transformState = d3.zoomTransform(listG.node());
                         const newTransformState = transformState.translate(0, y);
                         listG.call(zoom.transform, newTransformState)
@@ -197,7 +208,7 @@ export default function kpisComponent() {
                         const listG = contentsG.select("g.kpis-list")
                             .attr('clip-path', "url(#clip)")
 
-                        if(scrollable){
+                        if(scrollEnabled){
                             //this is a temp fix - we need to be able to toggle it 
                             listG.call(zoom);
                         }
@@ -211,6 +222,7 @@ export default function kpisComponent() {
 
                         const listContentsG = listG.select("g.kpis-list-contents")
                         zoom
+                            /*
                             .on('start', function(e){
                                 handleZoomStart.call(this, e);
                                 //the cb will call handleZoom for all other profiles
@@ -218,19 +230,20 @@ export default function kpisComponent() {
                                 if(e.sourceEvent){
                                     onZoomStart.call(this, e)
                                 }
-                            })
-                            .on('zoom', function(e){
+                            })*/
+                            .on('zoom', scrollEnabled ? function(e){
                                 handleZoom.call(this, e);
                                 if(e.sourceEvent){
                                     onZoom.call(this, e)
                                 }
-                            })
-                            .on("end", function(e){
+                            } : null)
+                            /*
+                            .on("end", scrollEnabled ? function(e){
                                 handleZoomEnd.call(this, e);
                                 if(e.sourceEvent){
                                     onZoomEnd.call(this, e)
                                 }
-                            })
+                            })*/
 
                         listG.select("rect.list-bg")
                             .attr("width", listWidth)
@@ -239,27 +252,48 @@ export default function kpisComponent() {
 
                         //todo - get liust bg showing
                         //make kpi bar width font size etc based on listHeight
-                        const kpiG = listContentsG.selectAll("g.kpi").data(kpisData, d => d.id);
+                        //console.log("statuses", statuses)
+                        //helper to get y pos
+                        const calcY = (d,i) => {
+
+                            const extraSpaceForSelected = openKpiHeight - kpiHeight;
+                            const isAfterOpenKpi = !!kpisData
+                                .slice(0, i)
+                                .find(kpi => status(kpi) === "opening" || status(kpi) === "open");
+                            const res = i * kpiHeight +(isAfterOpenKpi ? extraSpaceForSelected : 0)
+                            //console.log("calcY for ", i, res)
+                            return res;
+                        }
+                        console.log("update!!!!!!!!!!!!!!!!!!!!!!!!")
+                        const kpiG = listContentsG.selectAll("g.kpi").data(kpisData, d => d.key);
                         kpiG.enter()
                             .append("g")
-                            .attr("class", d => "kpi kpi-"+d.id)
-                            .merge(kpiG)
+                            .attr("class", (d,i) => {
+                                console.log("enter", i)
+                                return "kpi kpi-"+d.key
+                            })
+                            .call(updateTransform, { x: d => 0, y: calcY })
+                            .merge(kpiG) 
+                            /*
                             .attr("transform", (d,i) => {
-                                const extraSpaceForSelected = selectedKpiHeight - kpiHeight;
+                                //console.log("trans i, d", i, d)
+                                const extraSpaceForSelected = openKpiHeight - kpiHeight;
                                 //console.log("extraspace", extraSpaceForSelected)
-                                const selectedKpiBefore = kpisData
+                                const isAfterOpenKpi = kpisData
                                     .slice(0, i)
-                                    .find(kpi => isSelected(kpi));
-                                //console.log("sel before", selectedKpiBefore)
-                                const vertShift = i * kpiHeight +(selectedKpiBefore ? extraSpaceForSelected : 0)
+                                    .find(kpi => statuses[kpi] === "opening" || statuses[kpi] === "open");
+                                //console.log("isAfter Selcted", isAfterSelectedKpi)
+                                const vertShift = i * kpiHeight +(isAfterOpenKpi ? extraSpaceForSelected : 0)
                                 //console.log("vertShift", vertShift)
                                 return `translate(0,${vertShift})`
                             })
+                            */
                             .style("cursor", d => isSelected(d) ? "default" : "pointer")
                             .call(kpi
                                 .width(() => kpiWidth)
-                                .height((d) => isSelected(d) ? selectedKpiHeight : kpiHeight)
-                                //.expandedHeight(selectedKpiHeight)
+                                .height((d) => status(d) === "open" ? openKpiHeight : kpiHeight)
+                                //.expandedHeight(openKpiHeight)
+                                .status(d => status(d) || "closed")
                                 .withTooltips(d => isSelected(d))
                                 .margin(() => ({
                                     //todo - make sure margin is at least big enough for
@@ -269,7 +303,7 @@ export default function kpisComponent() {
                                 }))
                                 .styles(d => ({
                                     bg:{
-                                        fill:isSelected(d) ? "#FF8C00" : "transparent"
+                                        fill:isSelected(d) ? grey10(1) : "transparent"
                                     },
                                     name:{
                                     }
@@ -277,15 +311,29 @@ export default function kpisComponent() {
                                 .onDblClick(onDblClickKpi)
                                 .onClick(function(e,d){
                                     console.log("kpi.onClick")
-                                    //next - after clicking several kpis, the profiles dont 
+                                    //@todo - bug - after clicking several kpis, the profiles dont 
                                     //stay in sync with each other. it seems that teh ones called from externally,
                                     //ie teh ones not actually scrolled, seem to jump back to 0 again, and go from there
-                                    //to teh correct place, so a continuation of yesterdays issue
-                                    //ie set kpi to be selected, but this wont change the height yet
-                                    //then do height next
-                                    updateSelected(d.key, data, true);
-                                    onClickKpi.call(this, e, d);
-                                }));
+                                    updateSelected(d.key, data, true, true);
+                                    //onClickKpi.call(this, e, d);
+                                })
+                            )
+                            .each(function(d){
+                                //close btn component
+                                d3.select(this).selectAll("g.close").data(isSelected(d) ? [1] : [])
+                                    .join("g")
+                                    .call(closeComponent()
+                                        .transform(() => `translate(${kpiWidth - closeBtnWidth}, 0)`)
+                                        .width((d,i) => closeBtnWidth)
+                                        .height((d,i) => closeBtnHeight)
+                                        .text("X")
+                                        .onClick(() => {
+                                            //false flag ensures scroll stays where it is
+                                            updateSelected("", data, false, true);
+                                        }));
+                            })
+                        //UPDATE ONLY
+                        kpiG.call(updateTransform, { x: d => 0, y: calcY, transition:{ duration:300 } })
 
                         //EXIT
                         kpiG.exit().each(function(){
@@ -351,6 +399,49 @@ export default function kpisComponent() {
 
                     })
 
+                    function updateTransform(selection, options={}){
+                        console.log("updateTransform-----------------------", selection.nodes())
+                        const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
+                        console.log("transition", transition)
+                        selection.each(function(d, i){
+                            console.log("i d.key", i, d.key)
+                            //console.log("t", d3.select(this).attr("transform"))
+                            const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
+                            console.log("current transY", translateY)
+                            console.log("newy", y(d, i))
+                            if(Math.abs(translateX - x(d, i)) < 0.001 && Math.abs(translateY - y(d, i)) < 0.001){
+                                //already where it needs to be
+                                console.log("already in pos")
+                                return;
+                            }
+                            if(d3.select(this).attr("class").includes("transitioning")){
+                                //already in transition - so we ignore the new request
+                                console.log("already transitioning")
+                                return;
+                            }
+                            if(transition){
+                                console.log("withTrans............", x(d, i))
+                                d3.select(this)
+                                    .classed("transitioning", true)
+                                    .transition()
+                                    .ease(transition.ease || d3.easeLinear)
+                                    .duration(transition.duration || 200)
+                                    //add delay option here
+                                        .attr("transform", "translate("+x(d, i) +"," +y(d, i) +")")
+                                        .on("end", function(d,i){
+                                            d3.select(this).classed("transitioning", false);
+                                            cb.call(this, d, i);
+                                        });
+                            }else{
+                                console.log("no transxxxxxxx", x(d, i))
+                                d3.select(this)
+                                    .attr("transform", "translate("+x(d, i) +"," +y(d, i) +")");
+                                
+                                cb.call(this);
+                            }
+                        })
+                    }
+
             handleZoom = function(e, i){
                 //scope to containerG instead of 'this' so can be called from outside
                 containerG.select("g.kpis-list-contents")
@@ -369,21 +460,56 @@ export default function kpisComponent() {
         return itemHeight * (selectedIndex - actualNrToShowBefore);
     }
 
-    function updateSelected(key, data, shouldUpdateDom){
-        console.log("updateSelected....key, data", key, data)
+    function updateSelected(key, data, shouldUpdateScroll, shouldUpdateDom){
+        console.log("updateSel key", key)
+        if(selected === key) { return; }
+        //todo next - check this works with statusses , once i implement it in chldren
+        //if currently somethign is selected, we will deselct and close
+        if(selected){
+            statuses[selected] = "closing";
+        }
+        //start opening new one
+        if(key){
+            statuses[key] = "opening";
+        }
+        //update helper accessor
+        status = d => statuses[d.key] || "closed";
+        console.log("updateSelected....key, data", key, shouldUpdateDom)
         selected = key;
         isSelected = d => d.key === selected;
-        if(shouldUpdateDom){
+        //todo next - make sure ttile font transitions smoothly, 
+        //and closed stuff fades out and no other changes (and open stuff doesnt fade in)
+        if(shouldUpdateDom){ containerG.call(kpis) }
+
+
+        if(shouldUpdateScroll){
+            console.log("update scroll-------")
             //@todo - for KpiView, we want to show one before because they are connected
             const nrToShowBefore = 0;
             const y = calculateListY(selected, data.kpisData, kpiHeight, nrToShowBefore);
-            console.log("y.........", y)
+            console.log("y", y)
             containerG.select("g.kpis-list")
                .transition()
-                    .duration(500)
+                    //.delay(3000)
+                    .duration(400)
+                    //??????????this only works if we comment out teh update of dom before it above
+                    //something in teh update stops the scroll working - maybe its turned to null
                     .call(zoom.translateTo, 0, y, [0,0])
-                    .on("end", () => { //containerG.call(kpis) 
+                    .on("end", () => { 
+                        console.log("scroll end")
+                        //kpi is now open so scroll should not be enabled
+                        scrollEnabled = scrollable && !selected;
+                        if(shouldUpdateDom){ 
+                            statuses[key] = "open";
+                            //here the open stuff shopuld fade in
+                            //containerG.call(kpis) 
+                        }
                     }); 
+        }else if(shouldUpdateDom){
+            //kpi is now open so scroll should not be enabled
+            scrollEnabled = scrollable && !selected;
+            statuses[key] = "open"; 
+            //containerG.call(kpis) 
         }
     }
     
@@ -403,7 +529,7 @@ export default function kpisComponent() {
         fixedKpiHeight = value;
         return kpis;
     };
-    kpis.selectedKpiHeight = function (value) {
+    kpis.openKpiHeight = function (value) {
         if (!arguments.length) { return fixedSelectedKpiHeight; }
         fixedSelectedKpiHeight = value;
         return kpis;
@@ -436,14 +562,15 @@ export default function kpisComponent() {
     kpis.scrollable = function (value) {
         if (!arguments.length) { return scrollable; }
         scrollable = value;
+        scrollEnabled = scrollable && !selected;
         return kpis;
     };
     // todo - kpiClick not working in KpiView
     //todo - fix below in journey and milestonesBar versions of kpisComponent so it renders properly,
     //ie the tooltips etc
-    kpis.selected = function (value, shouldUpdateDom) {
+    kpis.selected = function (value, shouldUpdateScroll, shouldUpdateDom) {
         if (!arguments.length) { return selected; }
-        updateSelected(value, prevData, shouldUpdateDom);
+        updateSelected(value, prevData, shouldUpdateScroll, shouldUpdateDom);
         return kpis;
     };
     kpis.onClickKpi = function (value) {

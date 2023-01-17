@@ -120,7 +120,7 @@ export default function milestonesBarComponent() {
     let xScale = x => 0;
 
     //state
-    let selected;
+    let selectedMilestone;
 
     let kpiFormat;
     let onSetSelectedMilestone = function(){};
@@ -227,7 +227,7 @@ export default function milestonesBarComponent() {
     const transformTransition = { update: { duration: 1000 } };
 
     function milestonesBar(selection, options={}) {
-        console.log("milestonesBar......")
+        // console.log("milestonesBar......")
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
@@ -280,7 +280,7 @@ export default function milestonesBarComponent() {
 
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
             function update(data, options={}){
-                console.log("MBarComponent update......")
+                //console.log("MBarComponent update....swip ", swipable, data.length)
                 const { slideTransition, milestoneTransition } = options;
 
                 //milestone positioning
@@ -395,9 +395,9 @@ export default function milestonesBarComponent() {
                     })
 
                 drag
-                    .on("start", selected ? null : enhancedDrag(dragStart))
-                    .on("drag", selected ? null : enhancedDrag(dragged))
-                    .on("end", selected ? null : enhancedDrag(dragEnd));
+                    .on("start", selectedMilestone ? null : enhancedDrag(dragStart))
+                    .on("drag", selectedMilestone ? null : enhancedDrag(dragged))
+                    .on("end", selectedMilestone ? null : enhancedDrag(dragEnd));
                 
                 //click and dbl-click 
                 //todo: chrome mobile had no dbl-click so currently no difference if no dbl-click
@@ -411,6 +411,7 @@ export default function milestonesBarComponent() {
                         ignoreNextClick = false;
                         return;
                     }
+                    
                     const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
                     if(!milestone) { return; }
                     //@todo - BUG - why is there a delay in removing the burger bars? cut it out for now
@@ -422,11 +423,11 @@ export default function milestonesBarComponent() {
                         //or maybe this needs to be doen at next evel as drag is turned off when selected i think
                     //}
                     //set selected
-                    selected = milestone.id;
+                    selectedMilestone = milestone.id;
                     //this doesnt trigger an update here
                     onSetSelectedMilestone(milestone.id);
                     //trigger update here
-                    update(data);
+                    //update(data);
                     //hide any menu from paretn components (eg burger menu)
 
                 }
@@ -453,7 +454,7 @@ export default function milestonesBarComponent() {
                 }
 
                 milestonesWrapperG.call(drag)
-                profilesG.attr("pointer-events", swipable && !selected ? "none" : null)
+                profilesG.attr("pointer-events", swipable ? "none" : null)
 
                 //POSITIONING
                 //offsetting due to slide
@@ -642,14 +643,14 @@ export default function milestonesBarComponent() {
                         .height(profileHeight)
                         .fontSizes(fontSizes.profile)
                         .expanded([{
-                            id:selected,
+                            id:selectedMilestone,
                             //if landscape, then vert space is less so we scale according to that 
                             k: scale,// width > height ? vertScale : horizScale
                         }])
                         //.kpiHeight(30) //if we want to fix the kpiheIght
                         .editable(swipable ? false : true)
                         .scrollable(swipable ? false : true)
-                        .topRightCtrls(d => selected === d.id ? [
+                        .topRightCtrls(d => selectedMilestone === d.id ? [
                             //todo - toggle between expand and reduce for now, its just reduce
                             { 
                                 label:"collapse", 
@@ -669,7 +670,7 @@ export default function milestonesBarComponent() {
                                     //WE CAN JUST HABNLE IT HERE THRU THE STANDARD MARGIN CONVENTIO, AND THEN JUST CHANGE IT
                                     //TO 0 WHEN SELECTED
                                     onSetSelectedMilestone("");
-                                    selected = null;
+                                    selectedMilestone = null;
                                     update(data, { milestoneTransition:{ update:{ duration:2000 }} })
                                 }
                             }
@@ -783,9 +784,9 @@ export default function milestonesBarComponent() {
         swipable = value;
         return milestonesBar;
     };
-    milestonesBar.selected = function (value) {
-        if (!arguments.length) { return selected; }
-        selected = value;
+    milestonesBar.selectedMilestone = function (value) {
+        if (!arguments.length) { return selectedMilestone; }
+        selectedMilestone = value;
         return milestonesBar;
     };
     milestonesBar.xScale = function (value) {
