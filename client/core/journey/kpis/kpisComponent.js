@@ -3,6 +3,7 @@ import { DIMNS, grey10, TRANSITIONS } from "../constants";
 import kpiComponent from './kpi/kpiComponent';
 import closeComponent from './kpi/closeComponent';
 import { getTransformationFromTrans } from '../helpers';
+import { ContactSupportOutlined } from '@material-ui/icons';
 
 const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
 const AUTO_SCROLL_DURATION = TRANSITIONS.KPIS.AUTO_SCROLL.DURATION;
@@ -329,19 +330,24 @@ export default function kpisComponent() {
                                     //onClickKpi.call(this, e, d);
                                 })
                             )
-                            .each(function(d){
+                            .each(function(d,i){
                                 //close btn component
-                                d3.select(this).selectAll("g.close").data(isSelected(d) ? [1] : [])
+                                const closeData = status(d) === "open" || status(d) === "closing" ? [1] : []
+                                d3.select(this).selectAll("g.close").data(closeData)
                                     .join("g")
-                                    .call(closeComponent()
-                                        .transform(() => `translate(${kpiWidth - closeBtnWidth}, 0)`)
-                                        .width((d,i) => closeBtnWidth)
-                                        .height((d,i) => closeBtnHeight)
-                                        .text("X")
-                                        .onClick(() => {
-                                            //false flag ensures scroll stays where it is
-                                            updateSelected("", data, false, true);
-                                        }));
+                                        .attr("class", "close")
+                                        .each(function(){
+                                            console.log("close g", this)
+                                        })
+                                        .call(closeComponent()
+                                            .transform(() => `translate(${kpiWidth - closeBtnWidth}, 0)`)
+                                            .width((d,i) => closeBtnWidth)
+                                            .height((d,i) => closeBtnHeight)
+                                            .text("X")
+                                            .onClick(() => {
+                                                //false flag ensures scroll stays where it is
+                                                updateSelected("", data, false, true);
+                                            }));
                             })
                         //UPDATE ONLY
                         //kpiG.call(updateTransform, { x: d => 0, y: calcY, transition:{ duration:300, delay:400 } })
