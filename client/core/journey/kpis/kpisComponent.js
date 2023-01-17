@@ -309,10 +309,7 @@ export default function kpisComponent() {
                                     const width = kpiContentsWidth * 0.5;
                                     const height = d3.min([kpiContentsHeight * 0.35, 10]);
                                     const margin = { top: height * 0.1, bottom: height * 0.1 };
-                                    const fontSize = height * 0.8;
-                                    //todo - if(status(d) === "open" || status(d) === "opening"){
-                                        //increase fontSize, not height
-                                    //}
+                                    const fontSize = status(d) === "open" || status(d) === "opening" ? height : height * 0.8;
                                     return { width, height, margin, fontSize }
                                 })
                                 .styles((d,i) => ({

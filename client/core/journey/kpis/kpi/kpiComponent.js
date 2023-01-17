@@ -10,6 +10,7 @@ import container from './container';
 import background from './background';
 
 const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
+const AUTO_SCROLL_DURATION = TRANSITIONS.KPIS.AUTO_SCROLL.DURATION;
 
 
 /*
@@ -51,7 +52,6 @@ export default function kpiComponent() {
             //progressBar is bar, handles and tooltips
             const progressBarWidth = contentsWidth;
             const progressBarHeight = contentsHeight - titleDimns.height;
-            //console.log("prog bar height", progressBarHeight)
             const progressBarMargin = { top: progressBarHeight * 0.1, bottom: progressBarHeight * 0.1 };
 
             dimns.push({
@@ -145,8 +145,9 @@ export default function kpiComponent() {
                 .primaryTitle(d => `${d.datasetName} (${d.statName})`)
                 //@todo - make statName a sec title, and measure length of primaryTitle
                 //.secondaryTitle(d => d.statName)
-                .textDirection("horiz"))
-
+                .textDirection("horiz")
+                .fontSizeTransition({ delay:CONTENT_FADE_DURATION, duration: AUTO_SCROLL_DURATION}))
+    
         kpiContentsG.each(function(d,i){
             //if(i == 2)
             //console.log("kpiContents i,d, stat, progH ", i, d.key, status(d), dimns[i].progressBarHeight)
@@ -168,7 +169,7 @@ export default function kpiComponent() {
                     , { transitionEnter, transitionUpdate} )
 
             closedContentsG.exit().call(remove, { transition:{ duration: CONTENT_FADE_DURATION }})
-
+                
             const openContentsG = d3.select(this).selectAll("g.open-kpi-contents").data(status(d) === "open" ? [d] : []);
             openContentsG.enter()
                 .append("g")
@@ -180,7 +181,7 @@ export default function kpiComponent() {
                             .append("text")
                     })
                     .merge(openContentsG)
-                    .attr("transform", `translate(0,${dimns[i].titleHeight})`)
+                    .attr("transform", `translate(0,${dimns[i].titleDimns.height})`)
                     .each(function(d, i){
                         //console.log("enter") //its entering each time
                         d3.select(this)//todo - fade in
@@ -197,31 +198,6 @@ export default function kpiComponent() {
             openContentsG.exit().call(remove, { transition:{ duration: CONTENT_FADE_DURATION }});
 
         })
-        
-        //non-selected contents
-        /*
-        kpiContents.each(function(d,i){
-            console.log("kpiContents i,d ... ", i, d)
-            const kpiContentsG = d3.select(this);
-            const nonData = [d];
-            console.log("nonData", nonData)
-            const closedContentsG = kpiContents.selectAll("g.closed-kpi-contents").data([1]);
-            closedContentsG.enter()
-                .append("g")
-                    .attr("class", "closed-kpi-contents")
-                    .each(function(d){
-                        console.log("d...",i,  d)
-                        d3.select(this)//todo - fade in
-                    })
-                    .merge(closedContentsG)
-                    .call(progressBar
-                        .width(() => dimns[i].progressBarWidth)
-                        .height(() => dimns[i].progressBarHeight)
-                        .margin(() => dimns[i].progressBarMargin))
-
-            closedContentsG.exit().remove();
-        })
-        */
         
         /*kpiContents.select("g.numbers")
             .data(selection.data().map(d => d.numbersData))

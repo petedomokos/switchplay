@@ -20,6 +20,8 @@ export default function titleComponent() {
     let _height = () => DEFAULT_HEIGHT;
     let _margin = () => DEFAULT_MARGIN;
 
+    let fontSizeTransition = null;
+
     function getDimns(d, i, data){
         const width = _width(d,i);
         const height = _height(d,i);
@@ -96,6 +98,7 @@ export default function titleComponent() {
                         .append("g")
                             .attr("class", "name")
                                 .append("text")
+                                    .attr("font-size", styles.primaryTitle.fontSize) //init
 
                 })
                 .update(function(d,i){
@@ -135,12 +138,17 @@ export default function titleComponent() {
                     nameG.select("text")
                         .attr("text-anchor", styles.primaryTitle.textAnchor)
                         .attr("dominant-baseline", styles.primaryTitle.dominantBaseline)
-                        .attr("font-size", styles.primaryTitle.fontSize)
+                        //.attr("font-size", styles.primaryTitle.fontSize)
                         .attr("stroke", styles.primaryTitle.stroke)
                         .attr("fill", styles.primaryTitle.fill)
                         .attr("stroke-width", styles.primaryTitle.strokeWidth)
-                        
-                    nameG.select("text").text((i+1) + ". " +_primaryTitle(d))
+                        .text((i+1) + ". " +_primaryTitle(d))
+  
+                    nameG.select("text")
+                        .transition()
+                            .duration(fontSizeTransition?.duration || 0)
+                            .delay(fontSizeTransition?.delay || 0)
+                            .attr("font-size", styles.primaryTitle.fontSize)
     
                 })
                 .exit(function(){
@@ -154,15 +162,6 @@ export default function titleComponent() {
                                 .on("end", function() { d3.select(this).remove(); });
                     }
                 }))
-                //.call(drag)
-
-        selection.each(function(d,i){
-            d3.select(this).select("title-contents")
-                .transition()
-                    .duration(400)
-                    .delay(400)
-                    .attr("transform", (d, i) => `translate(${_margin(d,i).left}, ${_margin(d,i).top})`)
-        })
 
         return selection;
     }
@@ -191,6 +190,11 @@ export default function titleComponent() {
     title.margin = function (func) {
         if (!arguments.length) { return _margin; }
         _margin = (d,i) => ({ ...DEFAULT_MARGIN, ...func(d,i) })
+        return title;
+    };
+    title.fontSizeTransition = function (value) {
+        if (!arguments.length) { return fontSizeTransition; }
+        fontSizeTransition = value;
         return title;
     };
     title.transform = function (value) {
