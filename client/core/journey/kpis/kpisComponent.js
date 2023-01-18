@@ -3,7 +3,6 @@ import { DIMNS, grey10, TRANSITIONS } from "../constants";
 import kpiComponent from './kpi/kpiComponent';
 import closeComponent from './kpi/closeComponent';
 import { getTransformationFromTrans } from '../helpers';
-import { ContactSupportOutlined } from '@material-ui/icons';
 
 const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
 const AUTO_SCROLL_DURATION = TRANSITIONS.KPIS.AUTO_SCROLL.DURATION;
@@ -85,7 +84,7 @@ export default function kpisComponent() {
         gapBetweenKpis = kpiHeight * 0.3;
         kpiMargin = { top: gapBetweenKpis/2, bottom: gapBetweenKpis/2, left:0, right:0 }
 
-        closeBtnWidth = contentsWidth * 0.1;
+        closeBtnWidth = 20;// contentsWidth * 0.1;
         closeBtnHeight = closeBtnWidth;
 
     }
@@ -336,14 +335,10 @@ export default function kpisComponent() {
                                 d3.select(this).selectAll("g.close").data(closeData)
                                     .join("g")
                                         .attr("class", "close")
-                                        .each(function(){
-                                            console.log("close g", this)
-                                        })
                                         .call(closeComponent()
                                             .transform(() => `translate(${kpiWidth - closeBtnWidth}, 0)`)
                                             .width((d,i) => closeBtnWidth)
                                             .height((d,i) => closeBtnHeight)
-                                            .text("X")
                                             .onClick(() => {
                                                 //false flag ensures scroll stays where it is
                                                 updateSelected("", data, false, true);

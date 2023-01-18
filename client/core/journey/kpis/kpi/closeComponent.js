@@ -76,6 +76,13 @@ export default function closeComponent() {
                     //for now, just have one bg rect for the whole close
                     contentsG.append("text");
 
+                    contentsG.append("path")
+                        .attr("stroke", "#292929")
+                        .attr("stroke-width", "2.5")
+                        .attr("stroke-linecap", "round")
+                        .attr("stroke-linejoin", "round")
+                        .attr("d", "M7 7.00006L17 17.0001M7 17.0001L17 7.00006")
+
                 })
                 .update(function(d,i){
                     const styles = _styles(d, i);
@@ -88,7 +95,7 @@ export default function closeComponent() {
                         .attr("height", height)
                         .attr("fill", styles.bg.fill)
                         .attr("stroke", styles.bg.stroke)
-
+                    /*
                     contentsG.select("text")
                         .attr("x", width/2)
                         .attr("y", height/2)
@@ -98,7 +105,7 @@ export default function closeComponent() {
                         .attr("stroke", styles.text.stroke)
                         .attr("fill", styles.text.fill)
                         .attr("stroke-width", styles.text.strokeWidth)
-                        .text(text)
+                        .text(text)*/
 
                 })
                 .exit(function(){
