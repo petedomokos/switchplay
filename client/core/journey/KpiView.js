@@ -44,8 +44,8 @@ const useStyles = makeStyles((theme) => ({
 
 const dateFormat = d3.timeFormat("%_d %b, %y")
 
-const layout = kpisLayout();
-const kpis = kpisComponent();
+//const layout = kpisLayout();
+//const kpis = kpisComponent();
 const KPI_HEIGHT = 80;
 
 const KpiView = ({ name, desc, data, datasets, initSelectedKey, width, height, format, onClose }) => {

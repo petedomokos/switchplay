@@ -69,7 +69,10 @@ export default function kpisLayout(){
             barData.start = start;
             barData.end = end;
 
-            const tooltipsData = [{ rowNr:1 }, { rowNr:-1 }];
+            const tooltipsData = [
+                { key:"expected", x:expected, rowNr: 1, y: 1 },
+                { key:"target", x:current, rowNr: -1, y: -1 }
+            ];
             const numbersData = [currentDatum];
 
             return {

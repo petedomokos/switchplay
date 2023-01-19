@@ -31,10 +31,9 @@ export default function kpiComponent() {
     let _titleDimns = () => DEFAULT_TITLE_DIMNS;
 
     let dimns = [];
-
-    //common
-    function updateCommonDimns(data){
-    }
+    //components
+    let closedProgressBars = {};
+    let openProgressBars = {};
 
     //per datum
     function updateDimns(data){
@@ -45,14 +44,22 @@ export default function kpiComponent() {
             const margin = _margin(d,i);
             const contentsWidth = width - margin.left - margin.right;
             const contentsHeight = height - margin.top - margin.bottom;
-            //if(i == 2)
-            //console.log("kpiComp contentsH for ", i, height, margin, contentsHeight)
 
             const titleDimns = _titleDimns(d,i);
             //progressBar is bar, handles and tooltips
             const progressBarWidth = contentsWidth;
             const progressBarHeight = contentsHeight - titleDimns.height;
-            const progressBarMargin = { top: progressBarHeight * 0.1, bottom: progressBarHeight * 0.1 };
+            //todo - need to calc ALL kpi dimns together at start of kpisComponent
+            //so it can be passed down and accessed anywhere. for now we just manuall estimate
+            //teh margin needed on left to keep the tooltips in screen even when at the very end of bar
+            //const horizMarginSpaceForTooltips =
+            //@todo - only need left margin if expected is near bottom, or doesnt exist
+            const progressBarMargin = {
+                //base left margin on height, as that is what affects tooltips width
+                 //right has numbers anyway so no extra margin needed for tooltips as they are above numbers
+                left:progressBarHeight * 0.25, right:0,
+                top: progressBarHeight * 0.1, bottom: progressBarHeight * 0.1 
+            };
 
             dimns.push({
                 width, height, margin, contentsWidth, contentsHeight,
@@ -93,7 +100,10 @@ export default function kpiComponent() {
     //const contents = containerComponent();
     //const background = backgroundComponent();
     const title = titleComponent();
-    const progressBar = progressBarComponent();
+    //const openProgressBar = progressBarComponent()
+        //.editable(() => true);
+   //const closedProgressBar = progressBarComponent()
+        //.editable(() => false);
 
     function kpi(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log } = options;
@@ -116,8 +126,8 @@ export default function kpiComponent() {
                 .width((d,i) => dimns[i].contentsWidth)
                 .height((d,i) => dimns[i].contentsHeight)
                 .styles((d, i) => ({
-                    stroke:"blue",//"none",
-                    fill:"transparent"//_styles(d).bg.fill
+                    stroke:"blue",
+                    fill:/*_styles(d).bg.fill || */"transparent"
                 })))
             .call(container().className("name"))
             //.call(container().className("non-selected-progress-bar")
@@ -148,52 +158,64 @@ export default function kpiComponent() {
                 .textDirection("horiz")
                 .fontSizeTransition({ delay:CONTENT_FADE_DURATION, duration: AUTO_SCROLL_DURATION}))
     
-        kpiContentsG.each(function(d,i){
+        kpiContentsG.each(function(data,i){
+            const closedData = status(data) === "closed" ? [data] : [];
+            const openData = status(data) === "open" ? [data] : [];
+            //components
+            //const closedProgressBar = closedProgressBarComponents[data.key];
+            //const openProgressBar = openProgressBarComponents[data.key];
             //if(i == 2)
             //console.log("kpiContents i,d, stat, progH ", i, d.key, status(d), dimns[i].progressBarHeight)
             const kpiContentsG = d3.select(this);
-            //why is this being removed event though no exit defined??????
-            //console.log("gs", d3.select(this).selectAll("g").nodes())
-            //console.log("kpiContents i d.key", i, d.key, status(d))
-            const closedContentsG = d3.select(this).selectAll("g.closed-kpi-contents").data(status(d) === "closed" ? [d] : []);
+            const closedContentsG = kpiContentsG.selectAll("g.closed-kpi-contents").data(closedData, d => d.key);
             closedContentsG.enter()
                 .append("g")
                     .attr("class", "closed-kpi-contents")
                     .call(fadeIn)
+                    .each(d => {
+                        closedProgressBars[d.key] = progressBarComponent()
+                            .editable(() => false);
+                    })
                     .merge(closedContentsG)
                     .attr("transform", `translate(0,${dimns[i].titleDimns.height})`)
-                    .call(progressBar
-                        .width(() => dimns[i].progressBarWidth)
-                        .height(() => dimns[i].progressBarHeight)
-                        .margin(() => dimns[i].progressBarMargin)
-                    , { transitionEnter, transitionUpdate} )
+                    .each(function(d){
+                        d3.select(this)
+                            .call(closedProgressBars[d.key]
+                                    .width(() => dimns[i].progressBarWidth)
+                                    .height(() => dimns[i].progressBarHeight)
+                                    .margin(() => dimns[i].progressBarMargin)
+                                , { transitionEnter, transitionUpdate} )
+
+                    })
 
             closedContentsG.exit().call(remove, { transition:{ duration: CONTENT_FADE_DURATION }})
                 
-            const openContentsG = d3.select(this).selectAll("g.open-kpi-contents").data(status(d) === "open" ? [d] : []);
+            const openContentsG = kpiContentsG.selectAll("g.open-kpi-contents").data(openData, d => d.key);
             openContentsG.enter()
                 .append("g")
                     .attr("class", "open-kpi-contents")
                     .call(fadeIn)
-                    .each(function(d, i){
-                        //console.log("enter open content-----------------------------", d) //its entering each time
+                    .each(d => {
+                        openProgressBars[d.key] = progressBarComponent()
+                            .editable(() => true);
                         d3.select(this)//todo - fade in
                             .append("text")
                     })
                     .merge(openContentsG)
                     .attr("transform", `translate(0,${dimns[i].titleDimns.height})`)
-                    .each(function(d, i){
-                        //console.log("enter") //its entering each time
+                    .each(function(d, j){
                         d3.select(this)//todo - fade in
                             .select("text")
                             .attr("x", 50)
                             .attr("y", 50)
                             .text("open content")
+
+                        d3.select(this)
+                            .call(openProgressBars[d.key]
+                                .width((d) => dimns[i].progressBarWidth)
+                                .height((d) => dimns[i].progressBarHeight)
+                                .margin((d) => dimns[i].progressBarMargin))
                     })
-                    //.call(progressBar
-                        //.width((d,i) => dimns[i].progressBarWidth)
-                        //.height((d,i) => dimns[i].progressBarHeight)
-                        //.margin((d,i) => dimns[i].progressBarMargin))
 
             openContentsG.exit().call(remove, { transition:{ duration: CONTENT_FADE_DURATION }});
 

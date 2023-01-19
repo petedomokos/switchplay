@@ -26,6 +26,7 @@ export default function progressBarComponent() {
     let _upperTooltipsHeight = () => 0;
 
     let dimns = [];
+    let xScales = [];
 
     /*
     function _dimns(d, i, data){
@@ -44,16 +45,59 @@ export default function progressBarComponent() {
     function updateDimns(data){
         dimns = [];
         return data.forEach((d,i) => {
+            const { barData, numbersData, tooltipsData } = d;
+            const nrTooltips = tooltipsData?.length || 2; //@todo - change default to 0
+            const nrNumbers = numbersData.length
+            let nrNumberCols = nrNumbers;
+            if(nrNumbers > 3){
+                nrNumberCols = nrNumberCols % 3 === 0 ? 3 :(nrNumbers % 2 === 0 ? 2 : 1)
+            }
+
             const width = _width(d,i)
             const height = _height(d,i);
             const margin = _margin(d,i);
             const contentsWidth = width - margin.left - margin.right;
             const contentsHeight = height - margin.top - margin.bottom;
             //console.log("bar contentsH for ", i, contentsHeight)
- 
+            //todo - also subtract space for tooltips above and below
+            const barComponentHeight = d3.min([20, contentsHeight * 0.2]);
+            const tooltipsTotalHeight = contentsHeight - barComponentHeight;
+            const tooltipHeight = tooltipsTotalHeight/nrTooltips;
+
+            const barComponentWidth = contentsWidth;
+            const targetTooltipWidth = tooltipHeight * 1.3;
+            const expectedTooltipWidth = tooltipHeight;
+
+            //can assume barComponent has margin 0, so its contentswidth is same as its width
+            const barWidth = barComponentWidth * (0.8 - (nrNumberCols * 0.1));
+            //tooltips must use same scale as bar, so range is same
+            const tooltipsWidth = barWidth;
+            const targetTooltipDimns = { 
+                width:targetTooltipWidth, height:tooltipHeight,
+                contentsWidth: targetTooltipWidth * 0.8, contentsHeight:tooltipHeight * 0.8,
+            }
+            const expectedTooltipDimns = { 
+                width: expectedTooltipWidth, height:tooltipHeight,
+                contentsWidth:expectedTooltipWidth * 0.8, contentsHeight:tooltipHeight * 0.8
+            }
+            const tooltipDimns = { target: targetTooltipDimns, expected:expectedTooltipDimns };
             dimns.push({
-                width, height, margin, contentsWidth, contentsHeight
+                width, height, margin, contentsWidth, contentsHeight,
+                barComponentWidth, barComponentHeight,
+                barWidth,
+                tooltipDimns, tooltipHeight
             })
+            //SCALES
+            //xScale (ie bar scale) set here as it is used by tooltips too
+            //init
+            if(!xScales[i]){ xScales[i] = d3.scaleLinear(); }
+            //update
+            const extent = [barData.start, barData.end]
+            xScales[i]
+                .domain(extent)
+                .range([0, barWidth])
+
+            //yScale
         })
     }
 
@@ -67,6 +111,10 @@ export default function progressBarComponent() {
 
     let fixedDomain = [0,100]
     let _domain;
+
+    let editable = () => false;
+
+    let display = () => null;
 
 
     //API CALLBACKS
@@ -87,7 +135,6 @@ export default function progressBarComponent() {
     function progressBar(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
         updateDimns(selection.data());
-        //console.log("progressbar data", selection.data())
 
         selection
             .call(container("progress-bar-contents")
@@ -95,24 +142,43 @@ export default function progressBarComponent() {
             )
         
         selection.select("g.progress-bar-contents")
-            /*
+            .call(background()
+                .width((d,i) => dimns[i].contentsWidth)
+                .height((d,i) => dimns[i].contentsHeight)
+                .styles((d, i) => ({
+                    stroke:"none",
+                    fill:_styles(d).bg?.fill || "transparent"
+                })))
             .call(container("tooltips")
-                .transform((d,i) => `translate(${_margin(d,i).left},${_margin(d,i).top})`)
+                //.transform((d,i) => `translate(${_margin(d,i).left},${_margin(d,i).top})`)
             )
-            */
             .call(container("bar-area")
                 //.transform((d,i) => `translate(0,${_upperTooltipsHeight(d,i)})`)
+                .transform((d,i) => `translate(0,${dimns[i].tooltipHeight})`)
             )
         
         selection.select("g.bar-area")
             //.data(selection.data().map(d => d.barData))
             .call(bar
-                .width((d,i) => dimns[i].contentsWidth)
-                .height((d,i) => d3.min([35, dimns[i].contentsHeight]))
-                .editable(true)
+                .width((d,i) => dimns[i].barComponentWidth)
+                .height((d,i) => dimns[i].barComponentHeight)
+                .scale((d,i) => xScales[i])
+                .editable(editable)
             , { transitionEnter, transitionUpdate} )
-        //selection.select("g.tooltips")
-            //.call(tooltips)
+
+        selection.select("g.tooltips")
+            .data(selection.data().map(d => d.tooltipsData))
+        //pass in tooltips data
+        //error - this same component is being called for very single kpi...need to look back at pattern
+        //how am i doing it ?
+            .call(tooltips
+                .width((d,i) => dimns[i].barWidth)
+                .height((d,i) => dimns[i].contentsHeight)
+                //bug when open, tooltipdimns dont increase
+                .tooltipDimns((d,i) => dimns[i].tooltipDimns)
+                .xScale((d,i) => xScales[i])
+                //y is 1 or -1
+                .yScale((d,i) => (rowNr) => rowNr === 1 ? 0.5 * dimns[i].tooltipHeight : (1.5 * dimns[i].tooltipHeight + dimns[i].barComponentHeight)))
 
         return selection;
     }
@@ -141,6 +207,11 @@ export default function progressBarComponent() {
     progressBar.margin = function (func) {
         if (!arguments.length) { return _margin; }
         _margin = (d,i) => ({ ...DEFAULT_MARGIN, ...func(d,i) })
+        return progressBar;
+    };
+    progressBar.editable = function (value) {
+        if (!arguments.length) { return editable; }
+        editable = value;
         return progressBar;
     };
     progressBar.transitionUpdate = function (value) {

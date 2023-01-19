@@ -27,6 +27,8 @@ export default function barComponent() {
     let _barWidth = () => 10;
     let _barHeight = () => 10;
 
+    let _scale;
+
     let handleHeightFactor = 0.333;
 
     let dimns = [];
@@ -65,16 +67,18 @@ export default function barComponent() {
             if(nrNumbers > 3){
                 nrNumberCols = nrNumberCols % 3 === 0 ? 3 :(nrNumbers % 2 === 0 ? 2 : 1)
             }
-            const barWidth = contentsWidth * (0.8 - (nrNumberCols * 0.1));
+            //build up widths from numbers
+            const numberWidth = contentsWidth * 0.2;
+            const numbersWidth = nrNumberCols * numberWidth;
+            const barWidth = contentsWidth - numbersWidth;
             const barHeight = contentsHeight - spaceForHandles;
 
             //numbers
-            const numbersWidth = contentsWidth - barWidth;
             //need to numbers to be centred on the bar, even if only top handles
             const numbersHeight = contentsHeight;
             const numbersMargin = { 
-                left: numbersWidth * 0.1, right: numbersWidth * 0.1, 
-                top: numbersHeight * 0.1, bottom:numbersHeight * 0.1
+                left: numbersWidth * 0, right: numbersWidth * 0, 
+                top: numbersHeight * 0, bottom:numbersHeight * 0
             };
 
             dimns.push({
@@ -84,15 +88,21 @@ export default function barComponent() {
                 withHandles, withTopHandles, withBottomHandles, handleWidth, handleHeight,
             })
 
-            //scales
-            if(!scales[i]){
-                scales[i] = d3.scaleLinear()
+            //scales - can either be passed in via _scale or is determined here
+            if(_scale){
+                //update the latest passed-in scale
+                scales[i] = _scale(d,i)
+            }else{
+                //scales determined here
+                //init
+                /*
+                if(!scales[i]){ scales[i] = d3.scaleLinear(); }
+                //update
+                const extent = [barData.start, barData.end]
+                scales[i]
+                    .domain(extent)
+                    .range([0, barWidth])*/
             }
-
-            const extent = [barData.start, barData.end]
-            scales[i]
-                .domain(extent)
-                .range([0, barWidth])
             
             //error mesg
             if(!barData.find(d => d.key === "current").value){
@@ -112,7 +122,7 @@ export default function barComponent() {
     let _transform = () => null;
     let _className = (d, i) => `bar-${d.key || i}`;
 
-    let editable = false;
+    let _editable = () => false;
     //API CALLBACKS
     let onClick = function(){};
     let onDblClick = function(){};
@@ -167,6 +177,8 @@ export default function barComponent() {
                 })), { transitionEnter, transitionUpdate} 
             )
             .each(function(data,i){
+                //console.log("data key edit", data, data.key, editable(data))
+                const editable = _editable(data);
                 const { barData } = data;
                 const { withHandles, handleHeight, handleWidth,contentsWidth, barWidth, barHeight } = dimns[i];
                 const scale = scales[i];
@@ -179,7 +191,7 @@ export default function barComponent() {
                 barSectionG.enter()
                     .append("g")
                         .attr("class", "bar-section")
-                            .each(function(d,i){
+                            .each(function(d,j){
                                 const sectionWidth = scale(d.value) - scale(d.startValue);
                                 //append rect
                                 d3.select(this)
@@ -191,11 +203,12 @@ export default function barComponent() {
                                         .attr("fill", d.fill);;
                             })
                             .merge(barSectionG)
-                            .attr("transform", (d,i) =>{
+                            .attr("transform", (d,j) =>{
                                 //console.log("test ",i , d, scales[i])
-                                 return `translate(${scales[i](d.startValue)}, 0)`
+                                 return `translate(${scales[j](d.startValue)}, 0)`
                             })
-                            .each(function(d,i){
+                            .each(function(d,j){
+                                //console.log("update bar i j editable",data, d, i, j, editable(data,i))
                                 const sectionWidth = scale(d.value) - scale(d.startValue);
                                 //adjust rect width to end - start
                                 d3.select(this).select("rect.bar-section")
@@ -289,6 +302,11 @@ export default function barComponent() {
         _height = value;
         return bar;
     };
+    bar.scale = function (value) {
+        if (!arguments.length) { return _scale; }
+        _scale = value;
+        return bar;
+    };
     bar.handleHeightFactor = function (value) {
         if (!arguments.length) { return _handleHeightFactor; }
         handleHeightFactor = value;
@@ -328,8 +346,8 @@ export default function barComponent() {
         return bar;
     };
     bar.editable = function (value) {
-        if (!arguments.length) { return editable; }
-        editable = value;
+        if (!arguments.length) { return _editable; }
+        _editable = value;
         return bar;
     };
     bar._name = function (value) {

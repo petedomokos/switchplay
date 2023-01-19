@@ -49,10 +49,10 @@ export default function numbersComponent() {
             const numberWidth = numberData.length > 0 ? contentsWidth / numberData.length : contentsWidth;
             const numberHeight = contentsHeight;
             const numberMargin = { 
-                left: numberWidth * 0.1, right: numberWidth * 0.1,
-                top: numberHeight * 0.1, bottom:numberHeight * 0.1
+                left: numberWidth * 0, right: numberWidth * 0,
+                top: numberHeight * 0, bottom:numberHeight * 0
             }
-            const fontSize = d3.min([numberWidth * 0.5, numberHeight * 2.8]);
+            const fontSize = d3.max([12, d3.min([numberWidth * 0.5, numberHeight * 2.8])]);
  
             dimns.push({
                 width, height, margin, contentsWidth, contentsHeight,
@@ -108,7 +108,7 @@ export default function numbersComponent() {
                             .width(numberWidth)
                             .height(numberHeight)
                             .margin(numberMargin)
-                            .styles(fontSize));
+                            .styles({ fontSize }));
             })
     
         /*

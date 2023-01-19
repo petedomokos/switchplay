@@ -224,7 +224,7 @@ export default function kpisComponent() {
 
                         const clipRect = listG.select("clipPath#clip").select('rect');
                         clipRect
-                                .attr('width', listWidth)
+                                .attr('width', 1000)// listWidth) //dont need horiz clip
                                 .attr('height', listHeight)
                                 .attr('x', 0)
                                 .attr('y', 0);

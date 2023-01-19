@@ -1,8 +1,6 @@
 import * as d3 from 'd3';
 import { DIMNS, grey10 } from "../../constants";
 import dragEnhancements from '../../enhancedDragHandler';
-import tooltipsComponent from '../../tooltipsComponent';
-import barComponent from './barComponent';
 import container from './container';
 import background from './background';
 
