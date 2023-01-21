@@ -72,13 +72,32 @@ export default function progressBarComponent() {
             const barWidth = barComponentWidth * (0.8 - (nrNumberCols * 0.1));
             //tooltips must use same scale as bar, so range is same
             const tooltipsWidth = barWidth;
+            //target margins
+            const targetTooltipMargin = {
+                left:targetTooltipWidth * 0.2, 
+                right:targetTooltipWidth * 0.2, 
+                top:tooltipHeight * 0.2, 
+                bottom:tooltipHeight * 0.2
+            }
+            //expected margins
+            const expectedTooltipMargin = {
+                left:expectedTooltipWidth * 0.15, 
+                right:expectedTooltipWidth * 0.15,
+                top:tooltipHeight * 0.15, 
+                bottom:tooltipHeight * 0.15
+            }
+
             const targetTooltipDimns = { 
                 width:targetTooltipWidth, height:tooltipHeight,
-                contentsWidth: targetTooltipWidth * 0.8, contentsHeight:tooltipHeight * 0.8,
+                contentsWidth: targetTooltipWidth - targetTooltipMargin.left - targetTooltipMargin.right, 
+                contentsHeight:tooltipHeight - targetTooltipMargin.top - targetTooltipMargin.bottom,
+                margin:targetTooltipMargin
             }
             const expectedTooltipDimns = { 
                 width: expectedTooltipWidth, height:tooltipHeight,
-                contentsWidth:expectedTooltipWidth * 0.8, contentsHeight:tooltipHeight * 0.8
+                contentsWidth:expectedTooltipWidth - expectedTooltipMargin.left - expectedTooltipMargin.right, 
+                contentsHeight:tooltipHeight - expectedTooltipMargin.top - expectedTooltipMargin.bottom,
+                margin:expectedTooltipMargin
             }
             const tooltipDimns = { target: targetTooltipDimns, expected:expectedTooltipDimns };
             dimns.push({

@@ -2,6 +2,17 @@ import * as d3 from 'd3';
 import textWrap from "./textWrap";
 import { grey10 } from './constants';
 
+
+//helper
+const iconTranslate = (width, height, requiredWidth, requiredHeight) => {
+    const vertScale = requiredHeight/height;
+    const horizScale = requiredWidth/width;
+    const scaleToUse = d3.min([vertScale, horizScale])
+
+    const renderedWidth = width * scaleToUse;
+    const renderedHeight = height * scaleToUse;
+    return `translate(${-renderedWidth/2},${-renderedHeight/2}) scale(${scaleToUse})`
+}
 /*
 
 */
@@ -60,6 +71,8 @@ export default function tooltipsComponent() {
                 
             }
 
+            
+
             function update(){
                 //console.log("update.......", data)
                 containerG.select("rect.tooltips-bg")
@@ -72,20 +85,36 @@ export default function tooltipsComponent() {
                     .append("g")
                         .attr("class", "tooltip")
                         .each(function(){
-                            d3.select(this).append("rect")
+                            //d3.select(this).append("rect").attr("fill", "none")
+                            d3.select(this).append("g").attr("class", "icon")
+                            
                         })
                         .merge(tooltipG)
                         .attr("transform", (d,i) => `translate(${xScale(d.x) || xScale.range()[0]}, ${yScale(d.y)})`)
                         .each(function(d){
                             //console.log("d xscale", d, xScale(d.x))
                             const { contentsWidth, contentsHeight } = tooltipDimns[d.key];
-                            d3.select(this).select("rect")
+                            //console.log("cW", contentsWidth)
+                            /*d3.select(this).select("rect")
                                 .attr("x", -contentsWidth/2)
                                 .attr("y", -contentsHeight/2)
                                 .attr("width", contentsWidth)
-                                .attr("height", contentsHeight)
-                                .attr("fill", "white")
-                        })
+                                .attr("height", contentsHeight)*/
+
+                            const icon = contentsWidth < 10 ? (d.smallIcon || d.icon) : d.icon;
+                            //todo - make the tooltips with and height based on iconAspect ratio
+                            const iconG = d3.select(this).select("g.icon")
+                                .attr("transform", iconTranslate(icon.width, icon.height, contentsWidth, contentsHeight));
+                            iconG.html(icon.html)
+                            //iconG.attr("transform", "scale(2)")
+                            if(icon.styles?.fill){
+                                iconG.selectAll("*").style("fill", icon.styles.fill)
+                            }
+                            iconG.selectAll(".net")
+                                .style("fill", "#f0f0f0")
+                            iconG.select(".posts")
+                                .style("fill", "#afafaf")
+                                })
 
                 tooltipG.exit().remove();
 

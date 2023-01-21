@@ -4,6 +4,7 @@ import { pcCompletion } from "../../../util/NumberHelpers"
 import { grey10, KPI_CTRLS } from '../constants';
 import { getBandsAndStandards } from "../../../data/bandsAndStandards";
 import { getValueForStat } from '../../../data/dataHelpers';
+import { emptyGoal, ball, goalWithBall, shiningCrystalBall, nonShiningCrystalBall } from "../../../../assets/icons/milestoneIcons.js"
 
 export default function kpisLayout(){
     let date = new Date();
@@ -69,9 +70,20 @@ export default function kpisLayout(){
             barData.start = start;
             barData.end = end;
 
+            const expectedAchieved = i % 2 === 0;
+            const targetAchieved = i % 2 === 0;
             const tooltipsData = [
-                { key:"expected", x:expected, rowNr: 1, y: 1 },
-                { key:"target", x:current, rowNr: -1, y: -1 }
+                { 
+                    key:"expected", x:expected, rowNr: 1, y: 1, 
+                    icon: expectedAchieved ? shiningCrystalBall : nonShiningCrystalBall,
+                    //smallIcon: expectedAchieved ? emptyGoal : emptyGoal,
+                },
+                { 
+                    key:"target", x:current, rowNr: -1, y: -1,
+                    icon: targetAchieved ? ball /*goalWithBall*/ : emptyGoal,
+                    //if small space, just show the ball
+                    smallIcon: targetAchieved ? ball : emptyGoal,
+                }
             ];
             const numbersData = [currentDatum];
 

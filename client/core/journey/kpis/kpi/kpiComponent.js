@@ -126,7 +126,7 @@ export default function kpiComponent() {
                 .width((d,i) => dimns[i].contentsWidth)
                 .height((d,i) => dimns[i].contentsHeight)
                 .styles((d, i) => ({
-                    stroke:"blue",
+                    stroke:"none",
                     fill:/*_styles(d).bg.fill || */"transparent"
                 })))
             .call(container().className("name"))

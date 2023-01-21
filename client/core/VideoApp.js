@@ -48,7 +48,7 @@ const useStyles = makeStyles(theme => ({
   actionBtns:{
     position:"absolute", 
     left:0, 
-    top:"calc(100% - 50px)",
+    top:"calc(100% - 100px)",
     width:"100%", 
     height:"50px"
   },
@@ -210,6 +210,9 @@ export default function NonUserHome(){
   }
 
   //helper
+  //full match https://www.youtube.com/watch?v=eyGmSmEaCQk
+
+  //highlights https://www.youtube.com/watch?v=yUSLSaUutnw
 
   const categoryDesc = action => {
     if(selectedAction?.key !== action.key || !selectedCategory){ return ""}
@@ -223,8 +226,9 @@ export default function NonUserHome(){
         </Typography>
         <div className={classes.videoAppContainer}>
           <ReactPlayer
+            controls={true}
             playing={playing}
-            url='https://www.youtube.com/watch?v=yUSLSaUutnw' />
+            url='https://www.youtube.com/watch?v=eyGmSmEaCQk' />
           <div className={classes.videoCtrls}>
             <button 
               className={classes.videoCtrlsBtn}

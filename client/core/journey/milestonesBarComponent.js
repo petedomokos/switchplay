@@ -9,6 +9,9 @@ import { addMonths } from '../../util/TimeHelpers';
 import { milestoneContainingPt } from "./screenGeometryHelpers";
 import { icons } from '../../util/icons';
 import { hide, show } from './domHelpers';
+
+import { emptyGoal, ball, shiningCrystalBall3, nonShiningCrystalBall3 } from "../../../assets/icons/milestoneIcons.js"
+
 /*
 
 */
@@ -751,6 +754,37 @@ export default function milestonesBarComponent() {
             }
 
         })
+
+
+        //icon practice
+        /*
+        const iconContG = containerG.selectAll("g.icon-cont").data([1])
+        iconContG.enter()
+            .append("g")
+                .attr("class", "icon-cont")
+                .each(function(){
+                    d3.select(this).append("rect");
+                    //d3.select(this).appendSvg(emptyGoal)
+                    d3.select(this)
+                        .append("g")
+                            .html(nonShiningCrystalBall3.html)
+                })
+                .merge(iconContG)
+                .attr("transform", "translate(100,100)")
+                .each(function(){
+                    d3.select(this).select("rect")
+                        .attr("width", 46)
+                        .attr("height", 55)
+                        .attr("fill", "white")
+
+                    const iconG = d3.select(this).select("g");
+                    iconG.selectAll(".net")
+                        .style("fill", "#f0f0f0")
+                    iconG.select(".posts")
+                        .style("fill", "#afafaf")
+                    
+                })*/
+        
 
         //reset one-time only settings
         transitionOn = true;
