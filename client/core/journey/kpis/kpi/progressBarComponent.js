@@ -74,10 +74,10 @@ export default function progressBarComponent() {
             const tooltipsWidth = barWidth;
             //target margins
             const targetTooltipMargin = {
-                left:targetTooltipWidth * 0.2, 
-                right:targetTooltipWidth * 0.2, 
-                top:tooltipHeight * 0.2, 
-                bottom:tooltipHeight * 0.2
+                left:targetTooltipWidth * 0.25, 
+                right:targetTooltipWidth * 0.25, 
+                top:tooltipHeight * 0.25, 
+                bottom:tooltipHeight * 0.25
             }
             //expected margins
             const expectedTooltipMargin = {

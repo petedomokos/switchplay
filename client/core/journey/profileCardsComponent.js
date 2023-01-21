@@ -139,7 +139,7 @@ export default function profileCardsComponent() {
                             .attr("class", "bg")
                             .attr("rx", 3)
                             .attr("ry", 3)
-                            .attr("fill", d.isCurrent ? grey10(2) :"orange")
+                            .attr("fill", d.isCurrent ? grey10(1) :grey10(2))
                             //.attr("stroke", "red")
                             //.attr("stroke-width", 5);
 

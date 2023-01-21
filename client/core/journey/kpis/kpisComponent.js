@@ -81,7 +81,7 @@ export default function kpisComponent() {
         scrollMax = 0;
 
         //kpi margin
-        gapBetweenKpis = kpiHeight * 0.3;
+        gapBetweenKpis = kpiHeight * 0.15;
         kpiMargin = { top: gapBetweenKpis/2, bottom: gapBetweenKpis/2, left:0, right:0 }
 
         closeBtnWidth = 20;// contentsWidth * 0.1;
@@ -400,8 +400,8 @@ export default function kpisComponent() {
                                     btnG.select("text.name")
                                         .attr("x", btnWidth/2)
                                         .attr("y", btnHeight/2)
-                                        .attr("fill", d => d.isSelected ? "white" : "grey")
-                                        .attr("stroke", d => d.isSelected ? "white" : "grey")
+                                        .attr("fill", d => d.isSelected ? grey10(8) : grey10(5))
+                                        .attr("stroke", d => d.isSelected ? grey10(8) : grey10(5))
                                         .attr("opacity", d => d.isSelected ? 1 : 0.6)
                                         .attr("font-size", fontSizes.ctrls)
                                         .attr("stroke-width", 0.1)

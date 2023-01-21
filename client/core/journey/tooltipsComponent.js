@@ -92,8 +92,9 @@ export default function tooltipsComponent() {
                         .merge(tooltipG)
                         .attr("transform", (d,i) => `translate(${xScale(d.x) || xScale.range()[0]}, ${yScale(d.y)})`)
                         .each(function(d){
+                            const tooltipG = d3.select(this);
                             //console.log("d xscale", d, xScale(d.x))
-                            const { contentsWidth, contentsHeight } = tooltipDimns[d.key];
+                            const { height, contentsWidth, contentsHeight } = tooltipDimns[d.key];
                             //console.log("cW", contentsWidth)
                             /*d3.select(this).select("rect")
                                 .attr("x", -contentsWidth/2)
@@ -101,20 +102,41 @@ export default function tooltipsComponent() {
                                 .attr("width", contentsWidth)
                                 .attr("height", contentsHeight)*/
 
-                            const icon = contentsWidth < 10 ? (d.smallIcon || d.icon) : d.icon;
+                            const isSmall = contentsWidth < 10
+                            const icon = isSmall ? (d.smallIcon || d.icon) : d.icon;
                             //todo - make the tooltips with and height based on iconAspect ratio
-                            const iconG = d3.select(this).select("g.icon")
+                            const iconG = tooltipG.select("g.icon")
                                 .attr("transform", iconTranslate(icon.width, icon.height, contentsWidth, contentsHeight));
                             iconG.html(icon.html)
+                            const innerG = iconG.select("g");
+                            innerG.style("opacity", isSmall && !d.achieved ? 1 : 0.85)
+
                             //iconG.attr("transform", "scale(2)")
                             if(icon.styles?.fill){
                                 iconG.selectAll("*").style("fill", icon.styles.fill)
                             }
+                            
                             iconG.selectAll(".net")
                                 .style("fill", "#f0f0f0")
                             iconG.select(".posts")
                                 .style("fill", "#afafaf")
-                                })
+
+                            //value
+                            const valueText = tooltipG.selectAll("g.value").data([1])
+                            valueText.enter()
+                                .append("text")
+                                    .attr("class", "value")
+                                    .attr("text-anchor", "middle")
+                                    .attr("dominant-baseline", "central")
+                                    .merge(valueText)
+                                    .attr("y", d.key === "expected" ? -contentsWidth * 0.1 : 0)
+                                    //temp - use width, not contentsW, so all tooltip fonts the same
+                                    .attr("font-size", height * 0.3)
+                                    .attr("stroke", grey10(6))
+                                    .attr("fill", grey10(6))
+                                    .attr("stroke-width", 0.1)
+                                    .text(d.value || "99")
+                        })
 
                 tooltipG.exit().remove();
 

@@ -10,7 +10,7 @@ import { milestoneContainingPt } from "./screenGeometryHelpers";
 import { icons } from '../../util/icons';
 import { hide, show } from './domHelpers';
 
-import { emptyGoal, ball, shiningCrystalBall3, nonShiningCrystalBall3 } from "../../../assets/icons/milestoneIcons.js"
+import { emptyGoal, ball, shiningCrystalBall, nonShiningCrystalBall } from "../../../assets/icons/milestoneIcons.js"
 
 /*
 
@@ -767,7 +767,7 @@ export default function milestonesBarComponent() {
                     //d3.select(this).appendSvg(emptyGoal)
                     d3.select(this)
                         .append("g")
-                            .html(nonShiningCrystalBall3.html)
+                            .html(shiningCrystalBall.html)
                 })
                 .merge(iconContG)
                 .attr("transform", "translate(100,100)")
@@ -778,6 +778,7 @@ export default function milestonesBarComponent() {
                         .attr("fill", "white")
 
                     const iconG = d3.select(this).select("g");
+                    //iconG.selectAll("path").attr("opacity", "0.5")
                     iconG.selectAll(".net")
                         .style("fill", "#f0f0f0")
                     iconG.select(".posts")

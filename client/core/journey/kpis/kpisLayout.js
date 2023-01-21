@@ -75,11 +75,13 @@ export default function kpisLayout(){
             const tooltipsData = [
                 { 
                     key:"expected", x:expected, rowNr: 1, y: 1, 
+                    value: expected, achieved:expectedAchieved,
                     icon: expectedAchieved ? shiningCrystalBall : nonShiningCrystalBall,
                     //smallIcon: expectedAchieved ? emptyGoal : emptyGoal,
                 },
                 { 
-                    key:"target", x:current, rowNr: -1, y: -1,
+                    key:"target", x:current, rowNr: -1, y: -1, 
+                    value:target, achieved:targetAchieved,
                     icon: targetAchieved ? ball /*goalWithBall*/ : emptyGoal,
                     //if small space, just show the ball
                     smallIcon: targetAchieved ? ball : emptyGoal,
