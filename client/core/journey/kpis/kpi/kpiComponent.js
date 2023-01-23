@@ -69,6 +69,18 @@ export default function kpiComponent() {
         })
     }
 
+    function updateComponents(data){
+        data.forEach(d => {
+            if(!closedProgressBars[d.key]){
+                closedProgressBars[d.key] = progressBarComponent()
+                    .editable(() => false)
+                
+                openProgressBars[d.key] = progressBarComponent()
+                    .editable(() => false)
+            }
+        })
+    }
+
     const DEFAULT_STYLES = {};
     let _styles = () => DEFAULT_STYLES;
 
@@ -89,6 +101,8 @@ export default function kpiComponent() {
     let onMouseover = function(){};
     let onMouseout = function(){};
     let onDelete = function(){};
+    let onStoreValue = function(){};
+    let onSaveValue = function(){};
 
     const enhancedDrag = dragEnhancements()
         .onClick((e,d) => { 
@@ -108,6 +122,7 @@ export default function kpiComponent() {
     function kpi(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log } = options;
         updateDimns(selection.data());
+        updateComponents(selection.data());
 
         const drag = d3.drag()
             .on("start", enhancedDrag())
@@ -162,20 +177,12 @@ export default function kpiComponent() {
             const closedData = status(data) === "closed" ? [data] : [];
             const openData = status(data) === "open" ? [data] : [];
             //components
-            //const closedProgressBar = closedProgressBarComponents[data.key];
-            //const openProgressBar = openProgressBarComponents[data.key];
-            //if(i == 2)
-            //console.log("kpiContents i,d, stat, progH ", i, d.key, status(d), dimns[i].progressBarHeight)
             const kpiContentsG = d3.select(this);
             const closedContentsG = kpiContentsG.selectAll("g.closed-kpi-contents").data(closedData, d => d.key);
             closedContentsG.enter()
                 .append("g")
                     .attr("class", "closed-kpi-contents")
                     .call(fadeIn)
-                    .each(d => {
-                        closedProgressBars[d.key] = progressBarComponent()
-                            .editable(() => false);
-                    })
                     .merge(closedContentsG)
                     .attr("transform", `translate(0,${dimns[i].titleDimns.height})`)
                     .each(function(d){
@@ -195,26 +202,16 @@ export default function kpiComponent() {
                 .append("g")
                     .attr("class", "open-kpi-contents")
                     .call(fadeIn)
-                    .each(d => {
-                        openProgressBars[d.key] = progressBarComponent()
-                            .editable(() => true);
-                        d3.select(this)//todo - fade in
-                            .append("text")
-                    })
                     .merge(openContentsG)
                     .attr("transform", `translate(0,${dimns[i].titleDimns.height})`)
                     .each(function(d, j){
-                        d3.select(this)//todo - fade in
-                            .select("text")
-                            .attr("x", 50)
-                            .attr("y", 50)
-                            .text("open content")
-
                         d3.select(this)
                             .call(openProgressBars[d.key]
                                 .width((d) => dimns[i].progressBarWidth)
                                 .height((d) => dimns[i].progressBarHeight)
-                                .margin((d) => dimns[i].progressBarMargin))
+                                .margin((d) => dimns[i].progressBarMargin)
+                                .onStoreValue(onStoreValue)
+                                .onSaveValue(onSaveValue))
                     })
 
             openContentsG.exit().call(remove, { transition:{ duration: CONTENT_FADE_DURATION }});
@@ -361,6 +358,18 @@ export default function kpiComponent() {
         if (!arguments.length) { return onDelete; }
         if(typeof value === "function"){
             onDelete = value;
+        }
+        return kpi;
+    };
+    kpi.onStoreValue = function (value) {
+        if(typeof value === "function"){
+            onStoreValue = value;
+        }
+        return kpi;
+    };
+    kpi.onSaveValue = function (value) {
+        if(typeof value === "function"){
+            onSaveValue = value;
         }
         return kpi;
     };

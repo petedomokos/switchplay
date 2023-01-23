@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
 const layout = milestonesLayout();
 const milestonesBar = milestonesBarComponent();
 
-const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight }) => {
+const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onStoreValue, onSaveValue }) => {
   const { player, profiles, contracts } = data;
   //console.log("MBar............................................")
   //local state
@@ -121,6 +121,8 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
       .onToggleSliderEnabled(() => setSliderEnabled(prevState => !prevState))
       .onCreateMilestone(onCreateMilestone)
       .onDeleteMilestone(onDeleteMilestone)
+      .onStoreValue(onStoreValue)
+      .onSaveValue(onSaveValue)
       //.onCreateMilestone(function(e,d){
         //if(!bgMenuLocation){
           // setBgMenuLocation(e.x);

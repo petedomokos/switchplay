@@ -125,6 +125,9 @@ export default function kpisComponent() {
     let handleZoom = function(){};
     let handleZoomEnd = function(){};
 
+    let onStoreValue = function(){};
+    let onSaveValue = function(){};
+
     const zoom = d3.zoom();
 
     //d3 components
@@ -317,6 +320,8 @@ export default function kpisComponent() {
                                     updateSelected(d.key, data, true, true);
                                     //onClickKpi.call(this, e, d);
                                 })
+                                .onStoreValue(onStoreValue)
+                                .onSaveValue(onSaveValue)
                             )
                             .each(function(d,i){
                                 //close btn component
@@ -703,6 +708,18 @@ export default function kpisComponent() {
         if (!arguments.length) { return onDelete; }
         if(typeof value === "function"){
             onDelete = value;
+        }
+        return kpis;
+    };
+    kpis.onStoreValue = function (value) {
+        if(typeof value === "function"){
+            onStoreValue = value;
+        }
+        return kpis;
+    };
+    kpis.onSaveValue = function (value) {
+        if(typeof value === "function"){
+            onSaveValue = value;
         }
         return kpis;
     };

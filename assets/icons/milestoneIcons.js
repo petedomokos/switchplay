@@ -4,13 +4,13 @@ export const shiningCrystalBall = {
         <rect x="32px" y="85px" width="58px" height="15px" style="fill:#D4AF37"/>
         <polygon class="star" points="105.21 11.66 111.06 9.58 109.15 15.49 112.93 20.41 106.72 20.42 103.21 25.54 101.28 19.64 95.33 17.88 100.34 14.22 100.18 8.01 105.21 11.66" style="fill:#D4AF37;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
         <polygon points="115.31 35.26 118.56 32.07 119.12 36.58 123.16 38.67 119.04 40.61 118.3 45.09 115.19 41.77 110.69 42.45 112.88 38.47 110.85 34.4 115.31 35.26" style="fill:#D4AF37;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
-        <path d="M75.33,105.25a95.07,95.07,0,0,1-13.19.88c-12.61,0-23.56-2.27-29.07-5.62" style="fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
-        <path d="M91.21,100.51a29.23,29.23,0,0,1-6.73,2.82" style="fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
+        <path d="M75.33,105.25a95.07,95.07,0,0,1-13.19.88c-12.61,0-23.56-2.27-29.07-5.62" style="fill:transparent;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
+        <path d="M91.21,100.51a29.23,29.23,0,0,1-6.73,2.82" style="fill:transparent;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
         <path d="M101.52,99.45A2.4,2.4,0,0,0,98,97.8c-.2.13-.44.25-.66.37a52.13,52.13,0,0,0-1-6.53,2.08,2.08,0,0,0-3.09-1.43c-5.9,3.57-17.61,6-31.1,6s-25.2-2.44-31.09-6A2.09,2.09,0,0,0,28,91.64a52.13,52.13,0,0,0-1,6.53c-.22-.12-.45-.24-.66-.37a2.4,2.4,0,0,0-3.57,1.65,57.66,57.66,0,0,0-1.1,7.55c0,7.17,18.12,13,40.48,13s40.48-5.82,40.48-13A57.66,57.66,0,0,0,101.52,99.45Z" style="fill:#D3D3D3;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
-        <path d="M31.05,76.47A35.91,35.91,0,0,0,37.72,85" style="fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
-        <path d="M34.38,36.74A35.74,35.74,0,0,0,27.7,68.21" style="fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
-        <path d="M75.5,26a37.16,37.16,0,0,0-4.58-1.5" style="fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
-        <path d="M95.74,47.2A35.69,35.69,0,0,0,81.24,29" style="fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
+        <path d="M31.05,76.47A35.91,35.91,0,0,0,37.72,85" style="fill:transparent;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
+        <path d="M34.38,36.74A35.74,35.74,0,0,0,27.7,68.21" style="fill:transparent;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
+        <path d="M75.5,26a37.16,37.16,0,0,0-4.58-1.5" style="fill:transparent;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
+        <path d="M95.74,47.2A35.69,35.69,0,0,0,81.24,29" style="fill:transparent;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
         <path d="M92.62,90.55a44.47,44.47,0,1,0-61,0" style="fill:#D4AF37;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
         <polygon points="11.73 21.46 16.17 17.52 16.59 23.44 21.71 26.45 16.21 28.68 14.94 34.48 11.11 29.94 5.2 30.52 8.34 25.48 5.96 20.03 11.73 21.46" style="fill:#D4AF37;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
         <polygon class="inner-content" points="74.04 41.61 78.59 37.39 79.18 43.57 84.6 46.6 78.9 49.06 77.7 55.16 73.6 50.5 67.43 51.24 70.59 45.89 67.98 40.26 74.04 41.61" style="fill:#D4AF37;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
@@ -28,11 +28,11 @@ export const shiningCrystalBall = {
 export const nonShiningCrystalBall = {
     key:"non-shining-crystal-ball",
     html: `<g transform="translate(-8,-6) scale(0.5)" >
-        <rect x="32px" y="85px" width="58px" height="15px" style="fill:none"/>
-        <path d="M75.33,105.25a95.07,95.07,0,0,1-13.19.88c-12.61,0-23.56-2.27-29.07-5.62" style="fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
-        <path d="M91.21,100.51a29.23,29.23,0,0,1-6.73,2.82" style="fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
-        <path d="M101.52,99.45A2.4,2.4,0,0,0,98,97.8c-.2.13-.44.25-.66.37a52.13,52.13,0,0,0-1-6.53,2.08,2.08,0,0,0-3.09-1.43c-5.9,3.57-17.61,6-31.1,6s-25.2-2.44-31.09-6A2.09,2.09,0,0,0,28,91.64a52.13,52.13,0,0,0-1,6.53c-.22-.12-.45-.24-.66-.37a2.4,2.4,0,0,0-3.57,1.65,57.66,57.66,0,0,0-1.1,7.55c0,7.17,18.12,13,40.48,13s40.48-5.82,40.48-13A57.66,57.66,0,0,0,101.52,99.45Z" style="fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
-        <path d="M92.62,90.55a44.47,44.47,0,1,0-61,0" style="fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
+        <rect x="32px" y="85px" width="58px" height="15px" style="fill:transparent"/>
+        <path d="M75.33,105.25a95.07,95.07,0,0,1-13.19.88c-12.61,0-23.56-2.27-29.07-5.62" style="fill:transparent;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
+        <path d="M91.21,100.51a29.23,29.23,0,0,1-6.73,2.82" style="fill:transparent;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
+        <path d="M101.52,99.45A2.4,2.4,0,0,0,98,97.8c-.2.13-.44.25-.66.37a52.13,52.13,0,0,0-1-6.53,2.08,2.08,0,0,0-3.09-1.43c-5.9,3.57-17.61,6-31.1,6s-25.2-2.44-31.09-6A2.09,2.09,0,0,0,28,91.64a52.13,52.13,0,0,0-1,6.53c-.22-.12-.45-.24-.66-.37a2.4,2.4,0,0,0-3.57,1.65,57.66,57.66,0,0,0-1.1,7.55c0,7.17,18.12,13,40.48,13s40.48-5.82,40.48-13A57.66,57.66,0,0,0,101.52,99.45Z" style="fill:transparent;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
+        <path d="M92.62,90.55a44.47,44.47,0,1,0-61,0" style="fill:transparent;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
         </g>`
         ,
     //these dimns are not inaccurate, and the one below too
@@ -145,7 +145,7 @@ export const ball = {
     key:"ball",
     html:`
         <g transform="translate(-1.75,-1.75) scale(0.5)">
-            <path d="M27.5,24c1.6-2.3,2.5-5,2.5-8c0-2.7-0.8-5.2-2.1-7.3c0-0.1-0.1-0.1-0.1-0.2C25.3,4.6,21,2,16,2C11,2,6.6,4.6,4.2,8.6
+            <path style="fill:#D4AF37" d="M27.5,24c1.6-2.3,2.5-5,2.5-8c0-2.7-0.8-5.2-2.1-7.3c0-0.1-0.1-0.1-0.1-0.2C25.3,4.6,21,2,16,2C11,2,6.6,4.6,4.2,8.6
                 c0,0.1-0.1,0.1-0.1,0.2c-1.3,2.1-2,4.6-2,7.3c0,3,0.9,5.7,2.5,8c0,0,0.1,0.1,0.1,0.1C7.1,27.7,11.3,30,16,30c4.7,0,8.8-2.3,11.4-5.8
                 C27.4,24.1,27.4,24.1,27.5,24z M26,22.5L22.4,23l-1.4-1.4l2-5.8l3.1-1.5l2,1.2c0,0.2,0,0.4,0,0.7C28,18.4,27.3,20.7,26,22.5z
                 M25.9,9.3l-0.8,3l-3.2,1.6L17,10.5V6.6l3.4-1.7c0,0,0,0,0,0C22.7,5.8,24.6,7.3,25.9,9.3z M11.5,4.9C11.5,4.9,11.5,4.9,11.5,4.9

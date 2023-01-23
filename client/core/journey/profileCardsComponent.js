@@ -78,6 +78,8 @@ export default function profileCardsComponent() {
     let onMouseover = function(){};
     let onMouseout = function(){};
     let onDelete = function() {};
+    let onStoreValue = function(){};
+    let onSaveValue = function(){};
     
 
     let enhancedDrag = dragEnhancements();
@@ -181,6 +183,8 @@ export default function profileCardsComponent() {
                         .editable(editable)
                         .scrollable(scrollable)
                         .onCtrlClick(onCtrlClick)
+                        .onStoreValue(onStoreValue)
+                        .onSaveValue(onSaveValue)
                         //pass scroll events on any kpiComponent to all other kpiComponents
                         .onZoomStart(function(e){
                             data.filter(p => p.id !== d.id).forEach(p => {
@@ -674,6 +678,18 @@ export default function profileCardsComponent() {
     profileCards.onAddLink = function (value) {
         if (!arguments.length) { return onAddLink; }
         if(typeof value === "function"){ onAddLink = value; }
+        return profileCards;
+    };
+    profileCards.onStoreValue = function (value) {
+        if(typeof value === "function"){
+            onStoreValue = value;
+        }
+        return profileCards;
+    };
+    profileCards.onSaveValue = function (value) {
+        if(typeof value === "function"){
+            onSaveValue = value;
+        }
         return profileCards;
     };
     return profileCards;

@@ -98,7 +98,7 @@ const initChannels = d3.range(numberMonths)
   })
 
 //width and height may be full screen, but may not be
-const Journey = ({ data, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog, takeOverScreen, releaseScreen }) => {
+const Journey = ({ data, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog, takeOverScreen, releaseScreen, onStoreValue, onSaveValue }) => {
   //console.log("Journey.......")
   //console.log("Journey avail", availableJourneys)
   const { _id, userId, name, contracts, profiles, aims, goals, links, measures, kpis } = data;
@@ -636,6 +636,8 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
               onDeleteMilestone={handleDeleteMilestone}
               takeOverScreen={takeOverScreen}
               releaseScreen={releaseScreen}
+              onStoreValue={onStoreValue}
+              onSaveValue={onSaveValue}
               screen={screen}
               availWidth={width}
               availHeight={height}

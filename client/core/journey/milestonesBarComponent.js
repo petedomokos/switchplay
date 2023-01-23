@@ -137,6 +137,9 @@ export default function milestonesBarComponent() {
     let onTakeOverScreen = () => {};
     let onReleaseScreen = () => {};
 
+    let onStoreValue = function(){};
+    let onSaveValue = function(){};
+
     const drag = d3.drag();
     const enhancedDrag = dragEnhancements();
 
@@ -653,6 +656,8 @@ export default function milestonesBarComponent() {
                         //.kpiHeight(30) //if we want to fix the kpiheIght
                         .editable(swipable ? false : true)
                         .scrollable(swipable ? false : true)
+                        .onStoreValue(onStoreValue)
+                        .onSaveValue(onSaveValue)
                         .topRightCtrls(d => selectedMilestone === d.id ? [
                             //todo - toggle between expand and reduce for now, its just reduce
                             { 
@@ -917,6 +922,18 @@ export default function milestonesBarComponent() {
         if (!arguments.length) { return onMouseout; }
         if(typeof value === "function"){
             onMouseout = value;
+        }
+        return milestonesBar;
+    };
+    milestonesBar.onStoreValue = function (value) {
+        if(typeof value === "function"){
+            onStoreValue = value;
+        }
+        return milestonesBar;
+    };
+    milestonesBar.onSaveValue = function (value) {
+        if(typeof value === "function"){
+            onSaveValue = value;
         }
         return milestonesBar;
     };

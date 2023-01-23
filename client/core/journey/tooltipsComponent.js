@@ -40,6 +40,12 @@ export default function tooltipsComponent() {
 
     //state
     let hovered;
+    let unsavedValues = {}
+    let getUnsavedValue = d => unsavedValues[d.progBarKey] ? unsavedValues[d.progBarKey][d.key] : null;
+    //for now, x and value are same
+    let getValue = d => typeof getUnsavedValue(d) === "number" ? getUnsavedValue(d) : d.value;
+    let getX = d => getValue(d);
+    let isAchieved = d => typeof d.current === "number" && typeof getValue(d) === "number" && d.current >= getValue(d);
 
     const enhancedDrag = dragEnhancements();
     //API CALLBACKS
@@ -98,26 +104,23 @@ export default function tooltipsComponent() {
                     //.onMouseout(onMouseout);
 
                 const drag = d3.drag()
-                    .on("start", enhancedDrag(onDragStart))
+                    //.on("start", enhancedDrag(onDragStart))
                     .on("drag", enhancedDrag(dragged))
-                    .on("end", enhancedDrag(onDragEnd));
+                    //.on("end", enhancedDrag(dragEnd));
 
                 function dragged(e,d){
                     //console.log("xScale dom range", xScale.domain(), xScale.range())
                     const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                     //console.log("currX currVal", translateX, xScale.invert(translateX))
                     const newX = translateX + e.dx;
-                    const newValue = xScale.invert(newX).toFixed(1);
-                    //console.log("newx newval", newX, newValue)
+                    const newValue = Number(xScale.invert(newX).toFixed(1));
                     d3.select(this).attr("transform", `translate(${newX},${translateY})`)
                     //@todo - handle dataset order eg lowest-is-best
-                    d.achieved = d.current >= newValue;
-                   
-                    d.value = newValue;
-                    d.x = newValue;
-                    selection.selectAll("g.tooltip").call(updateIcon)
-
-
+                    if(!unsavedValues[d.progBarKey]){
+                        unsavedValues[d.progBarKey] = {}
+                    }
+                    unsavedValues[d.progBarKey][d.key] = newValue;
+                    d3.select(this).call(updateIcon)
                 }
 
                 //console.log("update.......", data)
@@ -136,7 +139,7 @@ export default function tooltipsComponent() {
                             
                         })
                         .merge(tooltipG)
-                        .attr("transform", (d,i) => `translate(${xScale(d.x) || xScale.range()[0]}, ${yScale(d.y)})`)
+                        .attr("transform", (d,i) => `translate(${xScale(getX(d)) || xScale.range()[0]}, ${yScale(d.y)})`)
                         .call(updateIcon)
                         .call(drag)
                         .on("mouseover", onMouseover)
@@ -154,11 +157,14 @@ export default function tooltipsComponent() {
 
                 tooltipG.exit().remove();
 
+                function updateSaveBtns(selection){
+
+                };
+
                 function updateIcon(selection){
                     selection.each(function(d,i){
                         const tooltipG = d3.select(this);
                         const { height, contentsWidth, contentsHeight } = tooltipDimns[d.key];
-                        //console.log("cW", contentsWidth)
                         /*d3.select(this).select("rect")
                             .attr("x", -contentsWidth/2)
                             .attr("y", -contentsHeight/2)
@@ -168,15 +174,15 @@ export default function tooltipsComponent() {
                         //settings
                         const isSmall = contentsWidth < 10
                         const iconObject = isSmall ? (d.smallIcons || d.icons) : d.icons;
-                        const icon = d.achieved ? iconObject.achieved : iconObject.notAchieved;
-                        const shouldShowValue = !isSmall && (!d.achieved || hovered === d.key)
+                        const icon = isAchieved(d) ? iconObject.achieved : iconObject.notAchieved;
+                        const shouldShowValue = !isSmall && (!isAchieved(d) || hovered === d.key)
 
                         //todo - make the tooltips with and height based on iconAspect ratio
                         const iconG = tooltipG.select("g.icon")
                             .attr("transform", iconTranslate(icon.width, icon.height, contentsWidth, contentsHeight));
                         iconG.html(icon.html)
                         const innerG = iconG.select("g");
-                        innerG.style("opacity", isSmall && !d.achieved ? 1 : 0.85)
+                        innerG.style("opacity", isSmall && !isAchieved(d) ? 1 : 0.85)
 
                         iconG.select(".inner-content").attr("display", shouldShowValue ? "none" : null)
 
@@ -208,7 +214,7 @@ export default function tooltipsComponent() {
                                 .attr("stroke", grey10(6))
                                 .attr("fill", grey10(6))
                                 .attr("stroke-width", 0.1)
-                                .text(d.value || "99")
+                                .text(getValue(d) || "")
 
                         valueText.exit().remove();//need to also transition icon changes.call(remove)
                     })

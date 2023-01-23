@@ -151,7 +151,7 @@ const mapDispatchToProps = dispatch => ({
 	closeDialog(path){
 		//console.log('closing dialog', path)
 		dispatch(closeDialog(path))
-	},
+	}
 })
 
 //wrap all 4 sections in the same container for now.

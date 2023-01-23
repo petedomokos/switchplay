@@ -151,6 +151,8 @@ export default function progressBarComponent() {
 
     let onBarHandleClick = function(){};
     let onBarHandleDblClick = function(){};
+    let onStoreValue = function(){};
+    let onSaveValue = function(){};
 
     const enhancedDrag = dragEnhancements();
     const tooltips = tooltipsComponent();
@@ -207,18 +209,10 @@ export default function progressBarComponent() {
                 .onClick(function(e,d){
                     //console.log("clicked", this, e, d)
                 })
-                .onDragStart(function(e, d){
-                })
-                .onDrag(function(e, d){
-                    const xScale = xScales[d.progBarKey]
-                    const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
-                    const newTransX = translateX + e.dx;
-                    const newValue = xScale.invert(newTransX);
-                    console.log("newx newval", newTransX, newValue)
-                    //d3.select(this).attr("transform", `translate(${newX},${translateY})`)
-                    //instead, need to adjust tooltipsData .achieved, but we still dont need to store it anywhere else
-                    d3.select(this).attr("transform", `translate(${newTransX},${translateY})`)
-                    //instead, need to adjust tooltipsData .achieved, but we still dont need to store it anywhere else
+                .onDragEnd(function(e, d){
+                    //store the new value
+                    onStoreValue(d.value, d.progBarKey, d.key)
+                    //show a save btn
                 })
                 .onMouseover(function(e,d){
                     //console.log("mover")
@@ -336,6 +330,18 @@ export default function progressBarComponent() {
         if (!arguments.length) { return onBarMouseout; }
         if(typeof value === "function"){
             onBarMouseout = value;
+        }
+        return progressBar;
+    };
+    progressBar.onStoreValue = function (value) {
+        if(typeof value === "function"){
+            onStoreValue = value;
+        }
+        return progressBar;
+    };
+    progressBar.onSaveValue = function (value) {
+        if(typeof value === "function"){
+            onSaveValue = value;
         }
         return progressBar;
     };

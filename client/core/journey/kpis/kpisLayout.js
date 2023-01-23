@@ -70,18 +70,16 @@ export default function kpisLayout(){
             barData.start = start;
             barData.end = end;
 
-            const expectedAchieved = i % 2 === 0;
-            const targetAchieved = i % 2 === 0;
             const tooltipsData = [
                 { 
-                    key:"expected", x:expected, rowNr: 1, y: 1, current,
-                    value: expected, achieved:expectedAchieved,
+                    key:"expected", rowNr: 1, y: 1, current,
+                    value: expected, x:expected,
                     icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },
                     //smallIcons: expectedAchieved ? emptyGoal : emptyGoal,
                 },
                 { 
-                    key:"target", x:current, rowNr: -1, y: -1, current,
-                    value:target, achieved:targetAchieved,
+                    key:"target", rowNr: -1, y: -1, current,
+                    value:target, x:target,
                     icons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
                     //if small space, just show the ball
                     //smallIcons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
