@@ -237,6 +237,12 @@ export default function kpisComponent() {
                                     onZoom.call(this, e)
                                 }
                             } : null)
+                            .on('end', scrollEnabled ? function(e){
+                                handleZoomEnd.call(this, e);
+                                if(e.sourceEvent){
+                                    onZoomEnd.call(this, e)
+                                }
+                            } : null)
 
                         listG.select("rect.list-bg")
                             .attr("width", listWidth)
@@ -397,8 +403,16 @@ export default function kpisComponent() {
 
             handleZoom = function(e, i){
                 //scope to containerG instead of 'this' so can be called from outside
+                const y = d3.min([d3.max([scrollMin, e.transform.y]), scrollMax])
                 containerG.select("g.kpis-list-contents")
-                    .attr("transform", `translate(0, ${e.transform.y})`);
+                    .attr("transform", `translate(0, ${y})`);
+            }
+            handleZoomEnd = function(e, i){
+                if(e.transform.y < scrollMin){
+                    e.transform.y = scrollMin;
+                }else if(e.transform.y > scrollMax){ //replace with max
+                    e.transform.y = scrollMax; //replace with max
+                }
             }
         })
 
