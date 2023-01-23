@@ -1,4 +1,5 @@
 export const shiningCrystalBall = {
+    key:"shining-crystal-ball",
     html: `<g transform="translate(0,0) scale(0.5)" opacity="0.85" >
         <rect x="32px" y="85px" width="58px" height="15px" style="fill:#D4AF37"/>
         <polygon class="star" points="105.21 11.66 111.06 9.58 109.15 15.49 112.93 20.41 106.72 20.42 103.21 25.54 101.28 19.64 95.33 17.88 100.34 14.22 100.18 8.01 105.21 11.66" style="fill:#D4AF37;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
@@ -25,6 +26,7 @@ export const shiningCrystalBall = {
 }
 
 export const nonShiningCrystalBall = {
+    key:"non-shining-crystal-ball",
     html: `<g transform="translate(-8,-6) scale(0.5)" >
         <rect x="32px" y="85px" width="58px" height="15px" style="fill:none"/>
         <path d="M75.33,105.25a95.07,95.07,0,0,1-13.19.88c-12.61,0-23.56-2.27-29.07-5.62" style="fill:none;stroke:#000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1px"/>
@@ -44,6 +46,7 @@ export const nonShiningCrystalBall = {
 
 
 export const shiningCrystalBall2 = {
+    key:"shining-crystal-ball-2",
     html: `
         <g transform="translate(-3,-5) scale(0.12)" opacity="0.85" >
             <path d="M181.585,209.726l20.09-36.74l36.74-20.091l-36.74-20.093l-20.09-36.738l-20.091,36.738l-36.74,20.093l36.74,20.091   L181.585,209.726z M172.546,143.854l9.039-16.527l9.038,16.527l16.529,9.04l-16.529,9.038l-9.038,16.528l-9.039-16.528   l-16.529-9.038L172.546,143.854z"/>
@@ -68,6 +71,7 @@ export const shiningCrystalBall2 = {
 }
 
 export const nonShiningCrystalBall2 = {
+    key:"non-shining-crystal-ball-2",
     html: `
     <g transform="translate(-3,-5) scale(0.12)" opacity="0.5" >
         <path d="M471.082,404.158h-50.311L393.6,354.629c18.215-25.686,27.822-55.852,27.822-87.563   
@@ -87,6 +91,7 @@ export const nonShiningCrystalBall2 = {
 
 
 export const emptyGoal = {
+    key:"emptyGoal",
     html: `
         <g transform="translate(-4,-12)">
         <path class="net" d="M52,46a1,1,0,0,1-1-1V22H13V45a1,1,0,0,1-2,0V21a1,1,0,0,1,1-1H52a1,1,0,0,1,1,1V45A1,1,0,0,1,52,46Z"/>
@@ -108,6 +113,7 @@ export const emptyGoal = {
 }
 
 export const goalWithBall = {
+    key:"goal-with-ball",
     html: `
         <g transform="translate(-4,-12)">
         <path class="net" d="M52,46a1,1,0,0,1-1-1V22H13V45a1,1,0,0,1-2,0V21a1,1,0,0,1,1-1H52a1,1,0,0,1,1,1V45A1,1,0,0,1,52,46Z"/>
@@ -136,6 +142,7 @@ export const goalWithBall = {
 }
 
 export const ball = {
+    key:"ball",
     html:`
         <g transform="translate(-1.75,-1.75) scale(0.5)">
             <path d="M27.5,24c1.6-2.3,2.5-5,2.5-8c0-2.7-0.8-5.2-2.1-7.3c0-0.1-0.1-0.1-0.1-0.2C25.3,4.6,21,2,16,2C11,2,6.6,4.6,4.2,8.6

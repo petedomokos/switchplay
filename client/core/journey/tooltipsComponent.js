@@ -2,6 +2,9 @@ import * as d3 from 'd3';
 import textWrap from "./textWrap";
 import { fadeIn, remove } from './domHelpers';
 import { grey10 } from './constants';
+import dragEnhancements from './enhancedDragHandler';
+import { getTransformationFromTrans } from './helpers';
+import { FlashOnRounded } from '@material-ui/icons';
 
 
 //helper
@@ -37,7 +40,18 @@ export default function tooltipsComponent() {
 
     //state
     let hovered;
-    //dom
+
+    const enhancedDrag = dragEnhancements();
+    //API CALLBACKS
+    let onDragStart = function() {};
+    let onDrag = function() {};
+    let onDragEnd = function() {};
+    let onClick = function(){};
+    let onDblClick = function(){};
+    let onLongpressStart = function(){};
+    let onLongpressEnd = function(){};
+    let onMouseover = function(){};
+    let onMouseout = function(){};
 
     //const titleWrap = textWrap();
     
@@ -78,6 +92,34 @@ export default function tooltipsComponent() {
             
 
             function update(){
+                enhancedDrag
+                    .onClick(onClick)
+                    //.onMouseover(onMouseover)
+                    //.onMouseout(onMouseout);
+
+                const drag = d3.drag()
+                    .on("start", enhancedDrag(onDragStart))
+                    .on("drag", enhancedDrag(dragged))
+                    .on("end", enhancedDrag(onDragEnd));
+
+                function dragged(e,d){
+                    //console.log("xScale dom range", xScale.domain(), xScale.range())
+                    const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
+                    //console.log("currX currVal", translateX, xScale.invert(translateX))
+                    const newX = translateX + e.dx;
+                    const newValue = xScale.invert(newX).toFixed(1);
+                    //console.log("newx newval", newX, newValue)
+                    d3.select(this).attr("transform", `translate(${newX},${translateY})`)
+                    //@todo - handle dataset order eg lowest-is-best
+                    d.achieved = d.current >= newValue;
+                   
+                    d.value = newValue;
+                    d.x = newValue;
+                    selection.selectAll("g.tooltip").call(updateIcon)
+
+
+                }
+
                 //console.log("update.......", data)
                 containerG.select("rect.tooltips-bg")
                     .attr("width", width)
@@ -95,68 +137,82 @@ export default function tooltipsComponent() {
                         })
                         .merge(tooltipG)
                         .attr("transform", (d,i) => `translate(${xScale(d.x) || xScale.range()[0]}, ${yScale(d.y)})`)
-                        .each(function(d){
-                            const tooltipG = d3.select(this);
-                            //console.log("d xscale", d, xScale(d.x))
-                            const { height, contentsWidth, contentsHeight } = tooltipDimns[d.key];
-                            //console.log("cW", contentsWidth)
-                            /*d3.select(this).select("rect")
-                                .attr("x", -contentsWidth/2)
-                                .attr("y", -contentsHeight/2)
-                                .attr("width", contentsWidth)
-                                .attr("height", contentsHeight)*/
-
-                            //settings
-                            const isSmall = contentsWidth < 10
-                            const icon = isSmall ? (d.smallIcon || d.icon) : d.icon;
-                            const shouldShowValue = !isSmall && (!d.achieved || hovered === d.key)
-
-                            //todo - make the tooltips with and height based on iconAspect ratio
-                            const iconG = tooltipG.select("g.icon")
-                                .attr("transform", iconTranslate(icon.width, icon.height, contentsWidth, contentsHeight));
-                            iconG.html(icon.html)
-                            const innerG = iconG.select("g");
-                            innerG.style("opacity", isSmall && !d.achieved ? 1 : 0.85)
-
-                            iconG.select(".inner-content").attr("display", shouldShowValue ? "none" : null)
-
-                            //iconG.attr("transform", "scale(2)")
-                            if(icon.styles?.fill){
-                                iconG.selectAll("*").style("fill", icon.styles.fill)
-                            }
-                            
-                            iconG.selectAll(".net")
-                                .style("fill", "#f0f0f0")
-                            iconG.select(".posts")
-                                .style("fill", "#afafaf")
-
-                            //value
-                            const valueText = tooltipG.selectAll("g.value").data(shouldShowValue ? [1] : [])
-                            valueText.enter()
-                                .append("text")
-                                    .attr("class", "value")
-                                    .call(fadeIn)
-                                    .attr("text-anchor", "middle")
-                                    .attr("dominant-baseline", "central")
-                                    .merge(valueText)
-                                    .attr("y", d.key === "expected" ? -contentsWidth * 0.1 : 0)
-                                    //temp - use width, not contentsW, so all tooltip fonts the same
-                                    .attr("font-size", height * 0.3)
-                                    .attr("stroke", grey10(6))
-                                    .attr("fill", grey10(6))
-                                    .attr("stroke-width", 0.1)
-                                    .text(d.value || "99")
-
-                            valueText.exit().call(remove)
-                        })
-                        .on("click", () => {
-                            //todo next - use thus listener just to get the transition form showing values to not showing
+                        .call(updateIcon)
+                        .call(drag)
+                        .on("mouseover", onMouseover)
+                        .on("mouseout", onMouseout)
+                        /*
+                        .on("click", (e,d) => {
+                            hovered = d.key;
+                            console.log("click", d.key)
+                            update();
+                            //todo next - use thus listener just to get the transition from showing values to not showing
                             //eg need to set display of ball .inner-overlay to null and its fill to the sme as our bg fill here,
                             //then move into enhanced drag and also do it on mouseover with enhancedDrag
                             
-                        })
+                        })*/
 
                 tooltipG.exit().remove();
+
+                function updateIcon(selection){
+                    selection.each(function(d,i){
+                        const tooltipG = d3.select(this);
+                        const { height, contentsWidth, contentsHeight } = tooltipDimns[d.key];
+                        //console.log("cW", contentsWidth)
+                        /*d3.select(this).select("rect")
+                            .attr("x", -contentsWidth/2)
+                            .attr("y", -contentsHeight/2)
+                            .attr("width", contentsWidth)
+                            .attr("height", contentsHeight)*/
+
+                        //settings
+                        const isSmall = contentsWidth < 10
+                        const iconObject = isSmall ? (d.smallIcons || d.icons) : d.icons;
+                        const icon = d.achieved ? iconObject.achieved : iconObject.notAchieved;
+                        const shouldShowValue = !isSmall && (!d.achieved || hovered === d.key)
+
+                        //todo - make the tooltips with and height based on iconAspect ratio
+                        const iconG = tooltipG.select("g.icon")
+                            .attr("transform", iconTranslate(icon.width, icon.height, contentsWidth, contentsHeight));
+                        iconG.html(icon.html)
+                        const innerG = iconG.select("g");
+                        innerG.style("opacity", isSmall && !d.achieved ? 1 : 0.85)
+
+                        iconG.select(".inner-content").attr("display", shouldShowValue ? "none" : null)
+
+                        //iconG.attr("transform", "scale(2)")
+                        if(icon.styles?.fill){
+                            iconG.selectAll("*").style("fill", icon.styles.fill)
+                        }
+                        if(shouldShowValue){
+                            iconG.select(".inner-overlay").attr("display", null)
+                        }
+                        
+                        iconG.selectAll(".net")
+                            .style("fill", "#f0f0f0")
+                        iconG.select(".posts")
+                            .style("fill", "#afafaf")
+
+                        //value
+                        const valueText = tooltipG.selectAll("text.value").data(shouldShowValue ? [1] : [])
+                        valueText.enter()
+                            .append("text")
+                                .attr("class", "value")
+                                .call(fadeIn)
+                                .attr("text-anchor", "middle")
+                                .attr("dominant-baseline", "central")
+                                .merge(valueText)
+                                .attr("y", d.key === "expected" ? -contentsWidth * 0.1 : 0)
+                                //temp - use width, not contentsW, so all tooltip fonts the same
+                                .attr("font-size", height * 0.2)
+                                .attr("stroke", grey10(6))
+                                .attr("fill", grey10(6))
+                                .attr("stroke-width", 0.1)
+                                .text(d.value || "99")
+
+                        valueText.exit().remove();//need to also transition icon changes.call(remove)
+                    })
+                }
 
             }
         })
@@ -193,6 +249,51 @@ export default function tooltipsComponent() {
     tooltips.styles = function (value) {
         if (!arguments.length) { return styles; }
         styles = { ...styles, ...value};
+        return tooltips;
+    };
+    tooltips.onClick = function (value) {
+        if (!arguments.length) { return onClick; }
+        onClick = value;
+        return tooltips;
+    };
+    tooltips.onLongpressStart = function (value) {
+        if (!arguments.length) { return onLongpressStart; }
+        onLongpressStart = value;
+        return tooltips;
+    };
+    tooltips.onDragStart = function (value) {
+        if (!arguments.length) { return onDragStart; }
+        if(typeof value === "function"){
+            onDragStart = value;
+        }
+        return tooltips;
+    };
+    tooltips.onDrag = function (value) {
+        if (!arguments.length) { return onDrag; }
+        if(typeof value === "function"){
+            onDrag = value;
+        }
+        return tooltips;
+    };
+    tooltips.onDragEnd = function (value) {
+        if (!arguments.length) { return onDragEnd; }
+        if(typeof value === "function"){
+            onDragEnd = value;
+        }
+        return tooltips;
+    };
+    tooltips.onMouseover = function (value) {
+        if (!arguments.length) { return onMouseover; }
+        if(typeof value === "function"){
+            onMouseover = value;
+        }
+        return tooltips;
+    };
+    tooltips.onMouseout = function (value) {
+        if (!arguments.length) { return onMouseout; }
+        if(typeof value === "function"){
+            onMouseout = value;
+        }
         return tooltips;
     };
 

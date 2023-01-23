@@ -74,17 +74,17 @@ export default function kpisLayout(){
             const targetAchieved = i % 2 === 0;
             const tooltipsData = [
                 { 
-                    key:"expected", x:expected, rowNr: 1, y: 1, 
+                    key:"expected", x:expected, rowNr: 1, y: 1, current,
                     value: expected, achieved:expectedAchieved,
-                    icon: expectedAchieved ? shiningCrystalBall : nonShiningCrystalBall,
-                    //smallIcon: expectedAchieved ? emptyGoal : emptyGoal,
+                    icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },
+                    //smallIcons: expectedAchieved ? emptyGoal : emptyGoal,
                 },
                 { 
-                    key:"target", x:current, rowNr: -1, y: -1, 
+                    key:"target", x:current, rowNr: -1, y: -1, current,
                     value:target, achieved:targetAchieved,
-                    icon: targetAchieved ? ball /*goalWithBall*/ : emptyGoal,
+                    icons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
                     //if small space, just show the ball
-                    smallIcon: targetAchieved ? ball : emptyGoal,
+                    //smallIcons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
                 }
             ];
             const numbersData = [currentDatum];

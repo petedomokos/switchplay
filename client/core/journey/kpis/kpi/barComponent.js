@@ -17,9 +17,6 @@ export default function barComponent() {
     // dimensions
     let DEFAULT_WIDTH = 100;
     let DEFAULT_HEIGHT = 30;
-    let DEFAULT_MARGIN = { left: 0, right:0, top: 0, bottom: 0 };
-    let contentsWidth;
-    let contentsHeight;
     let _width = () => DEFAULT_WIDTH;
     let _height = () => DEFAULT_HEIGHT;
     let _margin = () => DEFAULT_MARGIN;
@@ -48,15 +45,12 @@ export default function barComponent() {
             const { barData, numbersData } = d;
             const width = _width(d,i)
             const height = _height(d,i);
-            const margin = _margin(d,i);
-            const contentsWidth = width - margin.left - margin.right;
-            const contentsHeight = height - margin.top - margin.bottom;
             //bar and handles
-            const withHandles = contentsHeight > 5 && !!barData.find(d => d.handle);
+            const withHandles = height > 5 && !!barData.find(d => d.handle);
             const withTopHandles = withHandles && !!barData.find(d => ["above", "over"].includes(d.handle.pos));
             const withBottomHandles = withHandles && !!barData.find(d => ["below", "over"].includes(d.handle.pos));
 
-            const handleHeight = contentsHeight * handleHeightFactor;
+            const handleHeight = height * handleHeightFactor;
             const handleWidth = handleHeight * 0.6;
 
             const spaceForHandles = (withTopHandles ? handleHeight : 0) + (withBottomHandles ? handleHeight : 0);
@@ -68,21 +62,21 @@ export default function barComponent() {
                 nrNumberCols = nrNumberCols % 3 === 0 ? 3 :(nrNumbers % 2 === 0 ? 2 : 1)
             }
             //build up widths from numbers
-            const numberWidth = contentsWidth * 0.2;
+            const numberWidth = width * 0.2;
             const numbersWidth = nrNumberCols * numberWidth;
-            const barWidth = contentsWidth - numbersWidth;
-            const barHeight = contentsHeight - spaceForHandles;
+            const barWidth = width - numbersWidth;
+            const barHeight = height - spaceForHandles;
 
             //numbers
             //need to numbers to be centred on the bar, even if only top handles
-            const numbersHeight = contentsHeight;
+            const numbersHeight = height;
             const numbersMargin = { 
                 left: numbersWidth * 0, right: numbersWidth * 0, 
                 top: numbersHeight * 0, bottom:numbersHeight * 0
             };
 
             dimns.push({
-                width, height, margin, contentsWidth, contentsHeight,
+                width, height,
                 barWidth, barHeight,
                 numbersWidth, numbersHeight, numbersMargin,
                 withHandles, withTopHandles, withBottomHandles, handleWidth, handleHeight,
@@ -145,8 +139,8 @@ export default function barComponent() {
         selection
             .call(container("bar-contents")
                 .transform((d,i) => {
-                    const { margin, withTopHandles, handleHeight } = dimns[i];
-                    return `translate(${margin.left},${margin.top + (withTopHandles ? handleHeight : 0)})`
+                    const { withTopHandles, handleHeight } = dimns[i];
+                    return `translate(${0},${withTopHandles ? handleHeight : 0})`
                 }));
         
         selection.select("g.bar-contents")
@@ -180,7 +174,7 @@ export default function barComponent() {
                 //console.log("data key edit", data, data.key, editable(data))
                 const editable = _editable(data);
                 const { barData } = data;
-                const { withHandles, handleHeight, handleWidth,contentsWidth, barWidth, barHeight } = dimns[i];
+                const { withHandles, handleHeight, handleWidth,width, barWidth, barHeight } = dimns[i];
                 const scale = scales[i];
                 const styles = _styles(data,i);
 

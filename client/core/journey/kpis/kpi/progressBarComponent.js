@@ -5,6 +5,7 @@ import tooltipsComponent from '../../tooltipsComponent';
 import barComponent from './barComponent';
 import container from './container';
 import background from './background';
+import { getTransformationFromTrans } from '../../helpers';
 
 /*
 
@@ -26,7 +27,7 @@ export default function progressBarComponent() {
     let _upperTooltipsHeight = () => 0;
 
     let dimns = [];
-    let xScales = [];
+    let xScales = {};
 
     /*
     function _dimns(d, i, data){
@@ -47,11 +48,6 @@ export default function progressBarComponent() {
         return data.forEach((d,i) => {
             const { barData, numbersData, tooltipsData } = d;
             const nrTooltips = tooltipsData?.length || 2; //@todo - change default to 0
-            const nrNumbers = numbersData.length
-            let nrNumberCols = nrNumbers;
-            if(nrNumbers > 3){
-                nrNumberCols = nrNumberCols % 3 === 0 ? 3 :(nrNumbers % 2 === 0 ? 2 : 1)
-            }
 
             const width = _width(d,i)
             const height = _height(d,i);
@@ -65,11 +61,20 @@ export default function progressBarComponent() {
             const tooltipHeight = tooltipsTotalHeight/nrTooltips;
 
             const barComponentWidth = contentsWidth;
+            //build up widths from numbers
+            //group numbers into 1, 2 or 3 cols
+            const nrNumbers = numbersData.length
+            let nrNumberCols = nrNumbers;
+            if(nrNumbers > 3){
+                nrNumberCols = nrNumberCols % 3 === 0 ? 3 :(nrNumbers % 2 === 0 ? 2 : 1)
+            }
+            const numberWidth = barComponentWidth * 0.2;
+            const numbersWidth = nrNumberCols * numberWidth;
+            const barWidth = barComponentWidth - numbersWidth;
+
             const targetTooltipWidth = tooltipHeight * 1.3;
             const expectedTooltipWidth = tooltipHeight;
 
-            //can assume barComponent has margin 0, so its contentswidth is same as its width
-            const barWidth = barComponentWidth * (0.8 - (nrNumberCols * 0.1));
             //tooltips must use same scale as bar, so range is same
             const tooltipsWidth = barWidth;
             //target margins
@@ -109,10 +114,10 @@ export default function progressBarComponent() {
             //SCALES
             //xScale (ie bar scale) set here as it is used by tooltips too
             //init
-            if(!xScales[i]){ xScales[i] = d3.scaleLinear(); }
+            if(!xScales[d.key]){ xScales[d.key] = d3.scaleLinear(); }
             //update
             const extent = [barData.start, barData.end]
-            xScales[i]
+            xScales[d.key]
                 .domain(extent)
                 .range([0, barWidth])
 
@@ -181,12 +186,13 @@ export default function progressBarComponent() {
             .call(bar
                 .width((d,i) => dimns[i].barComponentWidth)
                 .height((d,i) => dimns[i].barComponentHeight)
-                .scale((d,i) => xScales[i])
+                .scale((d,i) => xScales[d.key])
                 .editable(editable)
             , { transitionEnter, transitionUpdate} )
 
+        const enrichedTooltipsData = selection.data().map(d => d.tooltipsData.map(t => ({ ...t, progBarKey: d.key })))
         selection.select("g.tooltips")
-            .data(selection.data().map(d => d.tooltipsData))
+            .data(enrichedTooltipsData)
         //pass in tooltips data
         //error - this same component is being called for very single kpi...need to look back at pattern
         //how am i doing it ?
@@ -195,9 +201,31 @@ export default function progressBarComponent() {
                 .height((d,i) => dimns[i].contentsHeight)
                 //bug when open, tooltipdimns dont increase
                 .tooltipDimns((d,i) => dimns[i].tooltipDimns)
-                .xScale((d,i) => xScales[i])
+                .xScale(d => xScales[d[0]?.progBarKey])
                 //y is 1 or -1
-                .yScale((d,i) => (rowNr) => rowNr === 1 ? 0.5 * dimns[i].tooltipHeight : (1.5 * dimns[i].tooltipHeight + dimns[i].barComponentHeight)))
+                .yScale((d,i) => (rowNr) => rowNr === 1 ? 0.5 * dimns[i].tooltipHeight : (1.5 * dimns[i].tooltipHeight + dimns[i].barComponentHeight))
+                .onClick(function(e,d){
+                    //console.log("clicked", this, e, d)
+                })
+                .onDragStart(function(e, d){
+                })
+                .onDrag(function(e, d){
+                    const xScale = xScales[d.progBarKey]
+                    const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
+                    const newTransX = translateX + e.dx;
+                    const newValue = xScale.invert(newTransX);
+                    console.log("newx newval", newTransX, newValue)
+                    //d3.select(this).attr("transform", `translate(${newX},${translateY})`)
+                    //instead, need to adjust tooltipsData .achieved, but we still dont need to store it anywhere else
+                    d3.select(this).attr("transform", `translate(${newTransX},${translateY})`)
+                    //instead, need to adjust tooltipsData .achieved, but we still dont need to store it anywhere else
+                })
+                .onMouseover(function(e,d){
+                    //console.log("mover")
+                })
+                .onMouseout(function(e,d){
+                    //console.log("mout")
+                }))
 
         return selection;
     }

@@ -2,10 +2,10 @@ import * as d3 from 'd3';
 import { addDays } from '../util/TimeHelpers';
 
 export const getValueForStat = statKey => datapoint => {
-    return datapoint
+    return Number(datapoint
         ?.values
         ?.find(v => v.key === statKey)
-        ?.value;
+        ?.value);
 }
 
 export const getGreatestValueForStat = statKey => datapoints => {

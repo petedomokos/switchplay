@@ -185,7 +185,6 @@ export default function kpisComponent() {
 
                         //init zoom
                         const y = calculateListY(selected, data.kpisData, kpiHeight, 1);
-                        console.log("enter y--------------", y)
                         const transformState = d3.zoomTransform(listG.node());
                         const newTransformState = transformState.translate(0, y);
                         listG.call(zoom.transform, newTransformState)
