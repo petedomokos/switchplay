@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import textWrap from "./textWrap";
+import { fadeIn, remove } from './domHelpers';
 import { grey10 } from './constants';
 
 
@@ -33,6 +34,9 @@ export default function tooltipsComponent() {
     
     //note - styles may be implemntd as attrs instead
     let styles = {};
+
+    //state
+    let hovered;
     //dom
 
     //const titleWrap = textWrap();
@@ -102,14 +106,19 @@ export default function tooltipsComponent() {
                                 .attr("width", contentsWidth)
                                 .attr("height", contentsHeight)*/
 
+                            //settings
                             const isSmall = contentsWidth < 10
                             const icon = isSmall ? (d.smallIcon || d.icon) : d.icon;
+                            const shouldShowValue = !isSmall && (!d.achieved || hovered === d.key)
+
                             //todo - make the tooltips with and height based on iconAspect ratio
                             const iconG = tooltipG.select("g.icon")
                                 .attr("transform", iconTranslate(icon.width, icon.height, contentsWidth, contentsHeight));
                             iconG.html(icon.html)
                             const innerG = iconG.select("g");
                             innerG.style("opacity", isSmall && !d.achieved ? 1 : 0.85)
+
+                            iconG.select(".inner-content").attr("display", shouldShowValue ? "none" : null)
 
                             //iconG.attr("transform", "scale(2)")
                             if(icon.styles?.fill){
@@ -122,10 +131,11 @@ export default function tooltipsComponent() {
                                 .style("fill", "#afafaf")
 
                             //value
-                            const valueText = tooltipG.selectAll("g.value").data([1])
+                            const valueText = tooltipG.selectAll("g.value").data(shouldShowValue ? [1] : [])
                             valueText.enter()
                                 .append("text")
                                     .attr("class", "value")
+                                    .call(fadeIn)
                                     .attr("text-anchor", "middle")
                                     .attr("dominant-baseline", "central")
                                     .merge(valueText)
@@ -136,6 +146,14 @@ export default function tooltipsComponent() {
                                     .attr("fill", grey10(6))
                                     .attr("stroke-width", 0.1)
                                     .text(d.value || "99")
+
+                            valueText.exit().call(remove)
+                        })
+                        .on("click", () => {
+                            //todo next - use thus listener just to get the transition form showing values to not showing
+                            //eg need to set display of ball .inner-overlay to null and its fill to the sme as our bg fill here,
+                            //then move into enhanced drag and also do it on mouseover with enhancedDrag
+                            
                         })
 
                 tooltipG.exit().remove();

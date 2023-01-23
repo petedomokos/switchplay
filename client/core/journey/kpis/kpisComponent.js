@@ -231,28 +231,12 @@ export default function kpisComponent() {
 
                         const listContentsG = listG.select("g.kpis-list-contents")
                         zoom
-                            /*
-                            .on('start', function(e){
-                                handleZoomStart.call(this, e);
-                                //the cb will call handleZoom for all other profiles
-                                //only pass to the callback if its a zoom event, not a programmatic zoom
-                                if(e.sourceEvent){
-                                    onZoomStart.call(this, e)
-                                }
-                            })*/
                             .on('zoom', scrollEnabled ? function(e){
                                 handleZoom.call(this, e);
                                 if(e.sourceEvent){
                                     onZoom.call(this, e)
                                 }
                             } : null)
-                            /*
-                            .on("end", scrollEnabled ? function(e){
-                                handleZoomEnd.call(this, e);
-                                if(e.sourceEvent){
-                                    onZoomEnd.call(this, e)
-                                }
-                            })*/
 
                         listG.select("rect.list-bg")
                             .attr("width", listWidth)

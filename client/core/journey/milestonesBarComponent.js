@@ -767,14 +767,14 @@ export default function milestonesBarComponent() {
                     //d3.select(this).appendSvg(emptyGoal)
                     d3.select(this)
                         .append("g")
-                            .html(shiningCrystalBall.html)
+                            .html(ball.html)
                 })
                 .merge(iconContG)
                 .attr("transform", "translate(100,100)")
                 .each(function(){
                     d3.select(this).select("rect")
-                        .attr("width", 46)
-                        .attr("height", 55)
+                        .attr("width", 200)
+                        .attr("height", 200)
                         .attr("fill", "white")
 
                     const iconG = d3.select(this).select("g");
