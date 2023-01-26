@@ -109,6 +109,7 @@ export default function tooltipsComponent() {
                     //.on("end", enhancedDrag(dragEnd));
 
                 function dragged(e,d){
+                    console.log("drg")
                     //console.log("xScale dom range", xScale.domain(), xScale.range())
                     const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                     //console.log("currX currVal", translateX, xScale.invert(translateX))
@@ -134,9 +135,8 @@ export default function tooltipsComponent() {
                     .append("g")
                         .attr("class", "tooltip")
                         .each(function(){
-                            //d3.select(this).append("rect").attr("fill", "none")
-                            d3.select(this).append("g").attr("class", "icon")
-                            
+                            d3.select(this).append("rect").attr("class", "hitbox").attr("fill", "transparent")
+                            d3.select(this).append("g").attr("class", "icon")    
                         })
                         .merge(tooltipG)
                         .attr("transform", (d,i) => `translate(${xScale(getX(d)) || xScale.range()[0]}, ${yScale(d.y)})`)
@@ -165,11 +165,11 @@ export default function tooltipsComponent() {
                     selection.each(function(d,i){
                         const tooltipG = d3.select(this);
                         const { height, contentsWidth, contentsHeight } = tooltipDimns[d.key];
-                        /*d3.select(this).select("rect")
+                        d3.select(this).select("rect.hitbox")
                             .attr("x", -contentsWidth/2)
                             .attr("y", -contentsHeight/2)
                             .attr("width", contentsWidth)
-                            .attr("height", contentsHeight)*/
+                            .attr("height", contentsHeight)
 
                         //settings
                         const isSmall = contentsWidth < 10
@@ -218,6 +218,7 @@ export default function tooltipsComponent() {
 
                         valueText.exit().remove();//need to also transition icon changes.call(remove)
                     })
+                    
                 }
 
             }
