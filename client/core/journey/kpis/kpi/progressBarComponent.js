@@ -81,8 +81,8 @@ export default function progressBarComponent() {
             const targetTooltipMargin = {
                 left:targetTooltipWidth * 0.25, 
                 right:targetTooltipWidth * 0.25, 
-                top:tooltipHeight * 0.25, 
-                bottom:tooltipHeight * 0.25
+                top:tooltipHeight * 0.15, 
+                bottom:tooltipHeight * 0.15
             }
             //expected margins
             const expectedTooltipMargin = {
@@ -136,7 +136,7 @@ export default function progressBarComponent() {
     let fixedDomain = [0,100]
     let _domain;
 
-    let editable = () => false;
+    let editable = false;
 
     let display = () => null;
 
@@ -206,6 +206,7 @@ export default function progressBarComponent() {
                 .xScale(d => xScales[d[0]?.progBarKey])
                 //y is 1 or -1
                 .yScale((d,i) => (rowNr) => rowNr === 1 ? 0.5 * dimns[i].tooltipHeight : (1.5 * dimns[i].tooltipHeight + dimns[i].barComponentHeight))
+                .draggable(editable)
                 .onClick(function(e,d){
                     //console.log("clicked", this, e, d)
                 })

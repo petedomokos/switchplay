@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import textWrap from "./textWrap";
-import { fadeIn, remove } from './domHelpers';
+import { fadeIn, remove, show, hide } from './domHelpers';
 import { grey10 } from './constants';
 import dragEnhancements from './enhancedDragHandler';
 import { getTransformationFromTrans } from './helpers';
@@ -47,6 +47,10 @@ export default function tooltipsComponent() {
     let getX = d => getValue(d);
     let isAchieved = d => typeof d.current === "number" && typeof getValue(d) === "number" && d.current >= getValue(d);
 
+    let draggable = false;
+    let showDragValueAbove = true;
+    let beingDragged = () => false;
+
     const enhancedDrag = dragEnhancements();
     //API CALLBACKS
     let onDragStart = function() {};
@@ -84,10 +88,10 @@ export default function tooltipsComponent() {
                 //const containerG = d3.select(this);
 
                 containerG
-                    .attr("opacity", 0)
+                    .style("opacity", 0)
                     .transition()
                         .duration(200)
-                        .attr("opacity", 1);
+                        .style("opacity", 1);
 
                 containerG
                     .append("rect")
@@ -104,12 +108,27 @@ export default function tooltipsComponent() {
                     //.onMouseout(onMouseout);
 
                 const drag = d3.drag()
-                    //.on("start", enhancedDrag(onDragStart))
+                    .on("start", enhancedDrag(dragStart))
                     .on("drag", enhancedDrag(dragged))
-                    //.on("end", enhancedDrag(dragEnd));
+                    .on("end", enhancedDrag(dragEnd));
 
-                function dragged(e,d){
-                    console.log("drg")
+                function dragStart(e,d){
+                    beingDragged = t => t.progBarKey === d.progBarKey && t.key === d.key;
+                    if(showDragValueAbove){
+                        d3.select(this).select("text.drag-value")
+                            .transition()
+                            .duration(200)
+                                .style("opacity", 0.7)
+
+                        d3.select(this).select("g.icon").select("text.value")
+                            .style("opacity", 1)
+                            .transition()
+                            .duration(200)
+                                .style("opacity", 0)
+                    }
+                }
+
+                function dragged(e,d){                       
                     //console.log("xScale dom range", xScale.domain(), xScale.range())
                     const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                     //console.log("currX currVal", translateX, xScale.invert(translateX))
@@ -121,7 +140,23 @@ export default function tooltipsComponent() {
                         unsavedValues[d.progBarKey] = {}
                     }
                     unsavedValues[d.progBarKey][d.key] = newValue;
-                    d3.select(this).call(updateIcon)
+                    d3.select(this).call(updateTooltip)
+                }
+
+
+                function dragEnd(e,d){
+                    beingDragged = () => false;
+                    d3.select(this).select("text.drag-value")
+                        .transition()
+                        .duration(200)
+                            .style("opacity", 0);
+                    
+                    d3.select(this).select("g.icon").select("text.value")
+                        .transition()
+                        .duration(200)
+                            .style("opacity", 1);
+
+                    d3.select(this).call(updateTooltip); 
                 }
 
                 //console.log("update.......", data)
@@ -135,12 +170,23 @@ export default function tooltipsComponent() {
                     .append("g")
                         .attr("class", "tooltip")
                         .each(function(){
-                            d3.select(this).append("rect").attr("class", "hitbox").attr("fill", "transparent")
-                            d3.select(this).append("g").attr("class", "icon")    
+                            d3.select(this).append("rect").attr("class", "hitbox")
+                                .attr("fill", "transparent")
+
+                            d3.select(this).append("text").attr("class", "drag-value")
+                                .attr("text-anchor", "middle")
+                                .attr("dominant-baseline", "central")
+                                .style("opacity", 0); //starts hidden
+
+                            d3.select(this)
+                                .append("g")
+                                    .attr("class", "icon-cont") 
+                                        .append("g")
+                                            .attr("class", "icon") 
                         })
                         .merge(tooltipG)
                         .attr("transform", (d,i) => `translate(${xScale(getX(d)) || xScale.range()[0]}, ${yScale(d.y)})`)
-                        .call(updateIcon)
+                        .call(updateTooltip)
                         .call(drag)
                         .on("mouseover", onMouseover)
                         .on("mouseout", onMouseout)
@@ -161,25 +207,39 @@ export default function tooltipsComponent() {
 
                 };
 
-                function updateIcon(selection){
+                function updateTooltip(selection){
                     selection.each(function(d,i){
                         const tooltipG = d3.select(this);
                         const { height, contentsWidth, contentsHeight } = tooltipDimns[d.key];
-                        d3.select(this).select("rect.hitbox")
+                        const dragTextHeight = draggable && showDragValueAbove ? contentsHeight * 0.333 : 0;
+                        const iconHeight = contentsHeight - dragTextHeight;
+
+                        tooltipG.select("rect.hitbox")
                             .attr("x", -contentsWidth/2)
                             .attr("y", -contentsHeight/2)
                             .attr("width", contentsWidth)
                             .attr("height", contentsHeight)
 
+                        //dragtext
+                        tooltipG.select("text.drag-value")
+                            .attr("y", -contentsHeight/2 + dragTextHeight/2)
+                            .attr("font-size", dragTextHeight * 0.8)
+                            .attr("display", draggable && showDragValueAbove ? null : "none")
+                            .text(getValue(d) || "")
+
+                        //shoft iconCont down so its in the centre of the icon space not the tooltip space
+                        const iconContG = tooltipG.select("g.icon-cont")
+                            .attr("transform", `translate(0, ${dragTextHeight/2})`)
+
                         //settings
-                        const isSmall = contentsWidth < 10
+                        const isSmall = iconHeight < 10
                         const iconObject = isSmall ? (d.smallIcons || d.icons) : d.icons;
                         const icon = isAchieved(d) ? iconObject.achieved : iconObject.notAchieved;
-                        const shouldShowValue = !isSmall && (!isAchieved(d) || hovered === d.key)
+                        const shouldShowValue = !isSmall && (!isAchieved(d) || hovered === d.key) && !beingDragged(d);
 
                         //todo - make the tooltips with and height based on iconAspect ratio
-                        const iconG = tooltipG.select("g.icon")
-                            .attr("transform", iconTranslate(icon.width, icon.height, contentsWidth, contentsHeight));
+                        const iconG = iconContG.select("g.icon")
+                            .attr("transform", iconTranslate(icon.width, icon.height, contentsWidth, iconHeight));
                         iconG.html(icon.html)
                         const innerG = iconG.select("g");
                         innerG.style("opacity", isSmall && !isAchieved(d) ? 1 : 0.85)
@@ -200,7 +260,8 @@ export default function tooltipsComponent() {
                             .style("fill", "#afafaf")
 
                         //value
-                        const valueText = tooltipG.selectAll("text.value").data(shouldShowValue ? [1] : [])
+                        // problem - this gets added mid-drag, so it doesnt have its opacity set to 0
+                        const valueText = iconContG.selectAll("text.value").data(shouldShowValue ? [1] : [])
                         valueText.enter()
                             .append("text")
                                 .attr("class", "value")
@@ -210,7 +271,7 @@ export default function tooltipsComponent() {
                                 .merge(valueText)
                                 .attr("y", d.key === "expected" ? -contentsWidth * 0.1 : 0)
                                 //temp - use width, not contentsW, so all tooltip fonts the same
-                                .attr("font-size", height * 0.2)
+                                .attr("font-size", height * 0.175)
                                 .attr("stroke", grey10(6))
                                 .attr("fill", grey10(6))
                                 .attr("stroke-width", 0.1)
@@ -256,6 +317,11 @@ export default function tooltipsComponent() {
     tooltips.styles = function (value) {
         if (!arguments.length) { return styles; }
         styles = { ...styles, ...value};
+        return tooltips;
+    };
+    tooltips.draggable = function (value) {
+        if (!arguments.length) { return draggable; }
+        draggable = value;
         return tooltips;
     };
     tooltips.onClick = function (value) {

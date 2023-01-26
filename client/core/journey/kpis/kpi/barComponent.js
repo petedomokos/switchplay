@@ -116,7 +116,7 @@ export default function barComponent() {
     let _transform = () => null;
     let _className = (d, i) => `bar-${d.key || i}`;
 
-    let _editable = () => false;
+    let editable = false;
     //API CALLBACKS
     let onClick = function(){};
     let onDblClick = function(){};
@@ -172,7 +172,6 @@ export default function barComponent() {
             )
             .each(function(data,i){
                 //console.log("data key edit", data, data.key, editable(data))
-                const editable = _editable(data);
                 const { barData } = data;
                 const { withHandles, handleHeight, handleWidth,width, barWidth, barHeight } = dimns[i];
                 const scale = scales[i];
@@ -340,8 +339,8 @@ export default function barComponent() {
         return bar;
     };
     bar.editable = function (value) {
-        if (!arguments.length) { return _editable; }
-        _editable = value;
+        if (!arguments.length) { return editable; }
+        editable = value;
         return bar;
     };
     bar._name = function (value) {

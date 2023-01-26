@@ -73,10 +73,10 @@ export default function kpiComponent() {
         data.forEach(d => {
             if(!closedProgressBars[d.key]){
                 closedProgressBars[d.key] = progressBarComponent()
-                    .editable(() => false)
+                    .editable(false)
                 
                 openProgressBars[d.key] = progressBarComponent()
-                    .editable(() => false)
+                    .editable(true)
             }
         })
     }
