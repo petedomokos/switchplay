@@ -164,12 +164,6 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets){
                 completion:"",
             };
             const achieved = isPast ? current : null;
-        
-            const expected = null;//{
-                //actual:"",
-                //pc:"",
-                //completion:""
-            //};
 
             //filter targets to the range specified by the profile date(s)
             const profileTargets = targets.find(t => t.key === key) || [];
@@ -180,8 +174,29 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets){
             const approvedTargetsInRange = allTargetsInRange.filter(t => t.approved.length !== 0);
             const nonApprovedTargetsInRange = allTargetsInRange.filter(t => t.approved.length === 0);
             //get the latest, or default to the general targets on the kpi, if it exists
-            const target = d3.greatest(approvedTargetsInRange, t => t.date) || findDefaultTarget(defaultTargets, datasetKey, statKey, date);
-            const proposedTarget = d3.greatest(nonApprovedTargetsInRange, t => t.date)
+            const targetObj = d3.greatest(approvedTargetsInRange, t => t.date) || findDefaultTarget(defaultTargets, datasetKey, statKey, date);
+            //all cards have target object except current
+            const target = isCurrent ? null : {
+                actual:targetObj?.value,
+                pc:"",
+                completion:""
+            };
+            //all future cards have proposed target object except current
+            const proposedTargetObj = d3.greatest(nonApprovedTargetsInRange, t => t.date);
+            const proposedTarget = !isFuture ? null : {
+                actual:proposedTargetObj?.value,
+                pc:"",
+                completion:""
+            };
+
+            //@todo - calculate the expected value here, based on start and target
+            //all cards have expected object, except past cards
+            const expected = isPast ? null : {
+                actual:"",
+                pc:"",
+                completion:""
+            };
+            
             return {
                 ...kpi,
                 key,

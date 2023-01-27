@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import Journey  from './Journey'
-import { saveJourney, setActive } from '../../actions/JourneyActions'
+import { saveJourney, setActive, updateProfile } from '../../actions/JourneyActions'
 import { closeDialog, hideMenus, showMenus } from '../../actions/CommonActions'
 import { fetchMultipleFullDatasets } from '../../actions/DatasetActions'
 import { hydrateJourneyData } from "./hydrateJourney";
@@ -136,7 +136,7 @@ const mapDispatchToProps = dispatch => ({
 		dispatch(fetchMultipleFullDatasets(datasetsToLoad, playerId))
 	},
     save(journey, shouldPersist){
-		//console.log('save', journey)
+		console.log('save', journey)
 		dispatch(saveJourney(journey, shouldPersist))
 	},
 	setActive(journeyId){

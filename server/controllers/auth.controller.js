@@ -121,6 +121,7 @@ add this below
     })
 
   } catch (err) {
+    console.log("SIGNIN ERROR-------")
 
     return res.status('401').json({
       error: "Could not sign in"

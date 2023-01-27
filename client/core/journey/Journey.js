@@ -98,8 +98,9 @@ const initChannels = d3.range(numberMonths)
   })
 
 //width and height may be full screen, but may not be
-const Journey = ({ data, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog, takeOverScreen, releaseScreen, onStoreValue, onSaveValue }) => {
-  //console.log("Journey.......")
+const Journey = ({ data, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile }) => {
+  console.log("Journey.......", data)
+  //bug - although only 6 profs are saved, we end up with 7 ie two currents
   //console.log("Journey avail", availableJourneys)
   const { _id, userId, name, contracts, profiles, aims, goals, links, measures, kpis } = data;
   const [journey, setJourney] = useState(null);
@@ -246,6 +247,52 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
       //handleDeleteContract(id);
     }
   }, [JSON.stringify(data)]);
+
+
+  const onStoreValue = useCallback((unsaved, profileId, kpiSetId, key) => {
+    //console.log("onStore", profileId, kpiSetId, key)
+    const profile = profiles.find(p => p.id === profileId);
+    //console.log("onStoreValue profile", profile)
+    const updatedProfile = {
+      ...profile,
+      kpis:profile.kpis.map(kpi => {
+        if(kpi.kpiSetId !== kpiSetId){ return kpi; }
+        return {
+          ...kpi,
+          values:{
+            ...kpi.values,
+            [key]:{ ...kpi.values[key], unsaved }
+          }
+        }
+      })
+    }
+    const otherProfiles = profiles.filter(p => p.id !== profileId);
+    const _profiles = [ ...otherProfiles, updatedProfile]
+    save({ ...data, profiles:_profiles }, false);
+    
+  }, [JSON.stringify(data), userId]);
+
+  const onSaveValue = useCallback((unsavedValue, profileId, kpiSetId, key) => {
+    const profile = profiles.find(p => p.id === profileKey);
+    const updatedProfile = {
+      ...profile,
+      kpis:profile.kpis.map(kpi => {
+        if(kpi.kpiSetId !== kpiSetId){ return kpi; }
+        return {
+          ...kpi,
+          values:kpi.values.map(v => {
+            if(v.key !== key) { return v; }
+            return { }
+          })
+
+        }
+      })
+    }
+    console.log("onSaveValue profile", profile)
+    //add either expected or target manual value
+    //onUpdateProfile(props);
+    
+  }, [JSON.stringify(data), userId]);
 
   useEffect(() => {
     const width = d3.min([journeyWidth * 0.725, 500]);

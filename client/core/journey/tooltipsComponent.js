@@ -41,7 +41,7 @@ export default function tooltipsComponent() {
     //state
     let hovered;
     let unsavedValues = {}
-    let getUnsavedValue = d => unsavedValues[d.progBarKey] ? unsavedValues[d.progBarKey][d.key] : null;
+    let getUnsavedValue = d => d.unsavedValue;// unsavedValues[d.progBarKey] ? unsavedValues[d.progBarKey][d.key] : null;
     //for now, x and value are same
     let getValue = d => typeof getUnsavedValue(d) === "number" ? getUnsavedValue(d) : d.value;
     let getX = d => getValue(d);
@@ -69,7 +69,6 @@ export default function tooltipsComponent() {
         //console.log("tooltips update  ", selection.data())
         //specific tooltip updates
         selection.each(function(data,i){
-            //console.log("tooltips i d",i, data)
             const xScale = _xScale(data,i);
             const yScale = _yScale(data,i);
             const tooltipDimns = _tooltipDimns(data, i);
@@ -102,15 +101,25 @@ export default function tooltipsComponent() {
             
 
             function update(){
+                /*
+                data.forEach(d => {
+                    if(d.progBarKey === "pressUps-reps-current"){
+                        console.log("tooltip d",d)
+                        if(d.key === "expected"){
+                            console.log("val", getValue(d))
+                        }
+                    }
+                })
+                */
                 enhancedDrag
                     .onClick(onClick)
                     //.onMouseover(onMouseover)
                     //.onMouseout(onMouseout);
 
                 const drag = d3.drag()
-                    .on("start", enhancedDrag(dragStart))
-                    .on("drag", enhancedDrag(dragged))
-                    .on("end", enhancedDrag(dragEnd));
+                    .on("start", draggable ? enhancedDrag(dragStart) : null)
+                    .on("drag", draggable ? enhancedDrag(dragged) : null)
+                    .on("end", draggable ? enhancedDrag(dragEnd) : null);
 
                 function dragStart(e,d){
                     beingDragged = t => t.progBarKey === d.progBarKey && t.key === d.key;
@@ -140,6 +149,7 @@ export default function tooltipsComponent() {
                         unsavedValues[d.progBarKey] = {}
                     }
                     unsavedValues[d.progBarKey][d.key] = newValue;
+                    d.unsavedValue = newValue;
                     d3.select(this).call(updateTooltip)
                 }
 
@@ -156,7 +166,10 @@ export default function tooltipsComponent() {
                         .duration(200)
                             .style("opacity", 1);
 
-                    d3.select(this).call(updateTooltip); 
+                    //store the values as 'unsaved'
+                    onDragEnd.call(this, e, d)
+
+                    //d3.select(this).call(updateTooltip); 
                 }
 
                 //console.log("update.......", data)

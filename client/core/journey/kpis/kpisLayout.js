@@ -17,7 +17,7 @@ export default function kpisLayout(){
     let noKpisActive = false;
 
     function update(data){
-        //console.log("update kpisLayout------", data)
+        // console.log("update kpisLayout------", data)
         //console.log("datasets", datasets)
         //const orderedData = sortAscending(data, d => d.date);
         //console.log("ordered", orderedData)
@@ -31,7 +31,7 @@ export default function kpisLayout(){
         //1 only...const _data = [data[0]]
         const kpisData = _data.map((kpi,i) => {
             //console.log("kpi---",i, kpi)
-            const { values } = kpi;
+            const { values, isPast, isCurrent, isFuture, milestoneId, kpiSetId } = kpi;
             //can set all kpis to be active eg for an active profile card that doesnt have access to all data
             const isActive = allKpisActive || kpi.isActive;
             //helper
@@ -51,9 +51,28 @@ export default function kpisLayout(){
             const start = values.start ? values.start[format] : null;
             const end = values.end ? values.end[format] : null;
             const current = values.current ? values.current[format] : null;
-            const expected = values.expected ? values.expected[format] : null;
-            const target = values.target ? values.target[format] : null;
-            const proposedTarget = values.proposedTarget ? values.proposedTarget[format] : null;
+            
+            let expected;
+            let target;
+            let proposedTarget;
+            const expectedObj = values.expected;
+            const targetObj = values.target;
+            const proposedTargetObj = values.target;
+            if(!expectedObj) {
+                expected = null;
+            }else{
+                expected = expectedObj.unsaved ? expectedObj.unsaved[format] : expectedObj[format];
+            }
+            if(!targetObj){
+                target = null;
+            }else{
+                target = targetObj.unsaved ? targetObj.unsaved[format] : targetObj[format];
+            }
+            if(!proposedTargetObj){
+                proposedTarget = null;
+            }else{
+                proposedTarget = proposedTargetObj.unsaved ? proposedTargetObj.unsaved[format] : proposedTargetObj[format];
+            }
 
             //datums
             const currentDatum = {
@@ -70,21 +89,28 @@ export default function kpisLayout(){
             barData.start = start;
             barData.end = end;
 
-            const tooltipsData = [
-                { 
-                    key:"expected", rowNr: 1, y: 1, current,
+            let tooltipsData = [];
+            //expected
+            if(!isPast){
+                tooltipsData.push({ 
+                    key:"expected", milestoneId, kpiSetId,
+                    rowNr: 1, y: 1, current,
                     value: expected, x:expected,
                     icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },
                     //smallIcons: expectedAchieved ? emptyGoal : emptyGoal,
-                },
-                { 
-                    key:"target", rowNr: -1, y: -1, current,
+                })
+            }
+            //target
+            if(!isCurrent){
+                tooltipsData.push({ 
+                    key:"target", milestoneId, kpiSetId,
+                    rowNr: -1, y: -1, current,
                     value:target, x:target,
                     icons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
                     //if small space, just show the ball
                     //smallIcons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
-                }
-            ];
+                })
+            };
             const numbersData = [currentDatum];
 
             return {
