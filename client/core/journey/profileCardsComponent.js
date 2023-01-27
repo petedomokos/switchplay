@@ -97,7 +97,7 @@ export default function profileCardsComponent() {
 
 
     function profileCards(selection, options={}) {
-        //console.log("update profCards expanded", expanded)
+        console.log("update profCards", selection.datum().map(d => d.x))
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
         // expression elements
         selection.each(function (data) {

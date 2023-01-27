@@ -50,17 +50,16 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const layout = milestonesLayout();
-const milestonesBar = milestonesBarComponent();
-
 const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onStoreValue, onSaveValue }) => {
   const { player, profiles, contracts } = data;
-  //console.log("MBar............................................")
   //local state
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
   const [bgMenuLocation, setBgMenuLocation] = useState("");
   const [sliderEnabled, setSliderEnabled] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState("");
+
+  const [layout, setLayout] = useState(() => milestonesLayout());
+  const [milestonesBar, setMilestonesBar] = useState(() => milestonesBarComponent());
   //console.log("sel", selectedMilestone)
 
   const bottomCtrlsBarHeight = screen.isLarge ? DIMNS.milestonesBar.ctrls.height : 0;
@@ -88,7 +87,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   }, [JSON.stringify(profiles), JSON.stringify(datasets)])
 
   useEffect(() => {
-    //console.log("main settings useEffect")
+    console.log("MBar main settings useEffect", availWidth)
 
     const totalAvailHeightStr = d3.select("div.milestone-bar-root").style("height");
     const totalAvailHeight = totalAvailHeightStr.slice(0, totalAvailHeightStr.length - 2);
@@ -156,6 +155,13 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
 
     d3.select(containerRef.current).call(milestonesBar);
   }, [selectedMilestone, JSON.stringify(profiles), JSON.stringify(screen)])
+
+// clean up
+useEffect(() => {
+  return () => {
+      //console.log('Do some cleanup!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+  }
+}, [])
 
   return (
     <div className={`milestone-bar-root ${classes.root}`}>

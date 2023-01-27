@@ -94,9 +94,9 @@ const readMultiple = async (req, res) => {
         .filter(dset => req.body.datasetIds.find(id => dset._id.equals(id)))
       //cant use spread operator or functional style with mongoose
       playerDatasets.forEach(dset =>{
-        dset.datapoints = dset.datapoints.filter(d => d.player._id.equals(req.body.playerId));
+        //legacy issue - the ? checks player exists, in case legacy ds exist but player is deleted
+        dset.datapoints = dset.datapoints.filter(d => d.player?._id.equals(req.body.playerId));
       })
-
       return res.json(playerDatasets)
   }
   catch (err) {

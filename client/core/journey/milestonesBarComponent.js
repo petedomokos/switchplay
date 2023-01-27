@@ -21,6 +21,9 @@ const EASE_IN = d3.easeCubicIn;
 const EASE_IN_OUT = d3.easeCubicInOut;
 
 export default function milestonesBarComponent() {
+    //bug - we are not unmounting the jourrny on signout
+    //need to check all data is wiped and store is reset
+    console.log("CONSTRUCT MBAR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     //API SETTINGS
     // dimensions
     let width = 800;
@@ -303,6 +306,7 @@ export default function milestonesBarComponent() {
                 const calcOffsetX = calculateOffsetX(positionedData)
 
                 slideTo = function(position, options={} ){
+                    console.log("sliding.........")
                     //need to also check offset, incase slider pos hadnt changed but dimns have changed
                     const numericalPosition = typeof position === "number" ? position : convertToNumber(position);
                     const offset = calcOffsetX(numericalPosition);
@@ -316,6 +320,7 @@ export default function milestonesBarComponent() {
                         if(wordPosition === "afterEnd") { return d3.max(data, d => d.nr) + 0.5; }
                         return 0;
                     }
+                    console.log("trans", offset)
 
                     milestonesWrapperG.call(updateTransform, {
                         x: () => offset,

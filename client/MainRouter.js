@@ -22,7 +22,7 @@ import './assets/styles/main.css'
 // import JourneyContainer from './core/journey/JourneyContainer'
 
 const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
-  //console.log("MainRouter", userId)
+  console.log("MainRouter", userId)
   //load user if page is refreshed. MainRouter is under the store so can 
   //trigger re-render once loade
   const jwt = auth.isAuthenticated();
@@ -54,7 +54,8 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
 
   //SCREEN
   //first time must load screen before rendering children
-  if(!window._screen){
+  if(!window._screen || window.screen.width === 0){
+    console.log("updateScreen to", getScreenInfo())
     updateScreen(getScreenInfo())
   }
 

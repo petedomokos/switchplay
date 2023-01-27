@@ -80,7 +80,7 @@ const emptyJourney = user => ({
 })
 
 const mapStateToProps = (state, ownProps) => {
-	//console.log("Container.................", state)
+	console.log("Container..........width", window._screen.width)
     //const { journeyId }  = ownProps.match.params;state,
 	//for now, assume player is user, but need to attach playerId/coachId or groupId to each journey
 	const { journeys=[], homeJourney, loadedDatasets, datasetsMemberOf } = state.user;
@@ -96,7 +96,9 @@ const mapStateToProps = (state, ownProps) => {
 	const datasets = datasetsMemberOf.map(dataset => loadedDatasets.find(ds => ds._id === dataset._id))
 	const fullyLoadedDatasets = datasets
 		.filter(dset => dset.datapoints)
-		.map(dset => ({ ...dset, datapoints:dset.datapoints.filter(d => d.player._id === data.playerId) }))
+		.map(dset => ({
+			...dset, datapoints:dset.datapoints.filter(d => d.player._id === data.playerId)
+		}))
 		//check this players ds have been loaded 
 		//.filter(dset => dset.datapoints.length !== 0) //this player defo has at least 1 d to be a member of it
 	//console.log("fullyLoadedDatasets", fullyLoadedDatasets)
@@ -116,9 +118,12 @@ const mapStateToProps = (state, ownProps) => {
 		loading:state.asyncProcesses.loading.datasets,
 		loadingError:state.asyncProcesses.error.loading.datasets,
 		availableJourneys:journeys,
-		screen:state.system.screen,
-        width:state.system.screen.width,
-        height:state.system.screen.height - 90,
+		//screen:state.system.screen,
+        //width:state.system.screen.width,
+        //height:state.system.screen.height - 90,
+		screen:window._screen,
+        width:window._screen.width,
+        height:window._screen.height - 90,
         //temp put the ? until backend is implemented - will eventually do same as users - we just send a summary at first
 		//journey:state.user.journeys?.find(j => j.id === journeyId),
 		//loading:state.asyncProcesses.loading.journey,
