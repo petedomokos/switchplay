@@ -60,7 +60,6 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
 
   const [layout, setLayout] = useState(() => milestonesLayout());
   const [milestonesBar, setMilestonesBar] = useState(() => milestonesBarComponent());
-  //console.log("sel", selectedMilestone)
 
   const bottomCtrlsBarHeight = screen.isLarge ? DIMNS.milestonesBar.ctrls.height : 0;
   let styleProps = { bottomCtrlsBarHeight, sliderEnabled };
@@ -87,7 +86,6 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   }, [JSON.stringify(profiles), JSON.stringify(datasets)])
 
   useEffect(() => {
-    console.log("MBar main settings useEffect", availWidth)
 
     const totalAvailHeightStr = d3.select("div.milestone-bar-root").style("height");
     const totalAvailHeight = totalAvailHeightStr.slice(0, totalAvailHeightStr.length - 2);
@@ -159,7 +157,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
 // clean up
 useEffect(() => {
   return () => {
-      //console.log('Do some cleanup!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+      //console.log('Do some cleanup!!!');
   }
 }, [])
 

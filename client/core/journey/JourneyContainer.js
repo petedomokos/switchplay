@@ -80,7 +80,7 @@ const emptyJourney = user => ({
 })
 
 const mapStateToProps = (state, ownProps) => {
-	console.log("Container..........width", window._screen.width)
+	//console.log("Container..........width", window._screen.width)
     //const { journeyId }  = ownProps.match.params;state,
 	//for now, assume player is user, but need to attach playerId/coachId or groupId to each journey
 	const { journeys=[], homeJourney, loadedDatasets, datasetsMemberOf } = state.user;
