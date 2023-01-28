@@ -55,19 +55,19 @@ const mockDatasets = [
 const mockProfiles = [
 	{
 	  	date:new Date("2022-09-16"),
-	  	id:"mock1", _id:"mock1", kpiStats:[], yPC:50,
+	  	id:"mock1", _id:"mock1", kpiStats:[], yPC:50, customTargets:[], customExpected:[]
 	},
 	{
 	  	date:new Date("2022-10-16"),
-	  	id:"mock2", _id:"mock2", kpiStats:[], yPC:50,
+	  	id:"mock2", _id:"mock2", kpiStats:[], yPC:50, customTargets:[], customExpected:[]
 	},
 	{
 	  	date:new Date("2023-01-16"),
-		id:"mock3", _id:"mock3", kpiStats:[], yPC:50,
+		id:"mock3", _id:"mock3", kpiStats:[], yPC:50, customTargets:[], customExpected:[]
 	},
 	{
 		date:new Date("2023-02-16"),
-		id:"mock4", _id:"mock4", kpiStats:[], yPC:50,
+		id:"mock4", _id:"mock4", kpiStats:[], yPC:50, customTargets:[], customExpected:[]
 	}
 ]
 
@@ -80,13 +80,16 @@ const emptyJourney = user => ({
 })
 
 const mapStateToProps = (state, ownProps) => {
-	//console.log("Container..........width", window._screen.width)
+	console.log("Container..........width", state)
     //const { journeyId }  = ownProps.match.params;state,
 	//for now, assume player is user, but need to attach playerId/coachId or groupId to each journey
 	const { journeys=[], homeJourney, loadedDatasets, datasetsMemberOf } = state.user;
+	console.log("homeJourney", homeJourney)
+	console.log("journeys", journeys)
 	const journeyId = state.system.activeJourney || homeJourney;
+	console.log("JourneyCont journeyId", journeyId)
 	const _data = journeys.find(j => j._id === journeyId) || journeys[0] || emptyJourney(state.user);
-	//console.log("JourneyContainer data", _data)
+	console.log("JourneyContainer data", _data)
 	//add mock profiles the first time only (note - these must be turnd off before we enabled server-side persitance again)
 	const mocksAdded = !!_data.profiles.find(p => p.id.includes("mock"));
 	const data = mocksAdded ? _data : { ..._data, profiles:[..._data.profiles, ...mockProfiles] };
@@ -107,7 +110,7 @@ const mapStateToProps = (state, ownProps) => {
 	//console.log("areDatsetsLoaded??????????????????????", allDatasetsFullyLoaded)
 	
 	const hydratedData = hydrateJourneyData(data, state.user, fullyLoadedDatasets);
-	//console.log("hydratedData", hydratedData)
+	console.log("hydratedData", hydratedData)
 
 	return{
 		//@todo - use activeJourney instead of homeJourney. It defaults to homeJourney on home page but user can overide.
@@ -141,7 +144,6 @@ const mapDispatchToProps = dispatch => ({
 		dispatch(fetchMultipleFullDatasets(datasetsToLoad, playerId))
 	},
     save(journey, shouldPersist){
-		console.log('save', journey)
 		dispatch(saveJourney(journey, shouldPersist))
 	},
 	setActive(journeyId){

@@ -12,7 +12,8 @@ export default new mongoose.Schema({
   yPC:String,
   colour:String,
   kpiStats:[String],
-  targets:[StatValueSchema],
+  customTargets:[StatValueSchema],
+  customExpected:[StatValueSchema],
   updated: Date,
   created: {type: Date, default: Date.now}
 })

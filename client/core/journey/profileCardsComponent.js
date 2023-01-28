@@ -183,7 +183,13 @@ export default function profileCardsComponent() {
                         .scrollable(scrollable)
                         .onCtrlClick(onCtrlClick)
                         .onStoreValue(onStoreValue)
-                        .onSaveValue(onSaveValue)
+                        .onSaveValue((valueObj, profileId, datasetKey, statKey, key) => {
+                            console.log("profid", profileId, data)
+                            //if profileid is current, swap it for the first future profile
+                            const requiredProfileId = profileId === "current" ? data.find(p => p.isFuture).id : profileId;
+                            console.log("req", requiredProfileId)
+                            onSaveValue(valueObj, requiredProfileId, datasetKey, statKey, key);
+                        })
                         //pass scroll events on any kpiComponent to all other kpiComponents
                         .onZoomStart(function(e){
                             data.filter(p => p.id !== d.id).forEach(p => {

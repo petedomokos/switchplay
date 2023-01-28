@@ -99,7 +99,7 @@ const initChannels = d3.range(numberMonths)
 
 //width and height may be full screen, but may not be
 const Journey = ({ data, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile }) => {
-  //console.log("Journey.......", width)
+  console.log("Journey.......", data)
   //bug - although only 6 profs are saved, we end up with 7 ie two currents
   //console.log("Journey avail", availableJourneys)
   const { _id, userId, name, contracts, profiles, aims, goals, links, measures, kpis } = data;
@@ -250,47 +250,30 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
 
 
   const onStoreValue = useCallback((unsaved, profileId, kpiSetId, key) => {
-    //console.log("onStore", profileId, kpiSetId, key)
-    const profile = profiles.find(p => p.id === profileId);
-    //console.log("onStoreValue profile", profile)
-    const updatedProfile = {
-      ...profile,
-      kpis:profile.kpis.map(kpi => {
-        if(kpi.kpiSetId !== kpiSetId){ return kpi; }
-        return {
-          ...kpi,
-          values:{
-            ...kpi.values,
-            [key]:{ ...kpi.values[key], unsaved }
-          }
-        }
-      })
-    }
-    const otherProfiles = profiles.filter(p => p.id !== profileId);
-    const _profiles = [ ...otherProfiles, updatedProfile]
-    save({ ...data, profiles:_profiles }, false);
     
   }, [JSON.stringify(data), userId]);
 
-  const onSaveValue = useCallback((unsavedValue, profileId, kpiSetId, key) => {
-    const profile = profiles.find(p => p.id === profileKey);
+  const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => {  
+    //profile wont ever be current here, as that is dynamically created ratehr than stored
+    const profile = profiles.find(p => p.id === profileId);
+    let statValue = {
+      ...valueObj,
+      datasetKey,
+      statKey,
+      created:new Date(),
+      //createdBy
+      //approvedBy is empty at first
+    }
+
     const updatedProfile = {
       ...profile,
-      kpis:profile.kpis.map(kpi => {
-        if(kpi.kpiSetId !== kpiSetId){ return kpi; }
-        return {
-          ...kpi,
-          values:kpi.values.map(v => {
-            if(v.key !== key) { return v; }
-            return { }
-          })
-
-        }
-      })
+      //for now, we store every single time a new target or expected value is created eg on every drag - good for user analytics anyway
+      customTargets:key === "target" ? [ ...profile.customTargets, statValue ] : profile.customTargets,
+      customExpected:key === "expected" ? [ ...profile.customExpected, statValue ] : profile.customExpected,
     }
-    console.log("onSaveValue profile", profile)
-    //add either expected or target manual value
-    //onUpdateProfile(props);
+    const otherProfiles = profiles.filter(p => p.id !== profileId);
+    const _profiles = [ ...otherProfiles, updatedProfile]
+    save({ ...data, profiles:_profiles });
     
   }, [JSON.stringify(data), userId]);
 
@@ -625,21 +608,18 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
     let dt = e.dataTransfer
     let files = dt.files
     const input = files[0];
-    //console.log("input", input)
     const reader = new FileReader();
     reader.onload = function (e) {
       var parsed = d3.csvParse(e.target.result);
-      //console.log("parsed", parsed);
       if(input.name.includes("datasets")){
-        //console.log("save datasets")
       }else if(input.name.includes("datapoints")){
-        //console.log("save datapoints")
+        //save datapoints
       }
       else if(input.name.includes("users")){
-        //console.log("save users")
+        //save users
       }
       else if(input.name.includes("groups")){
-        //console.log("save groups")
+        //save groups
       }
   
       //identify what the fle is about,

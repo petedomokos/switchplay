@@ -27,7 +27,7 @@ export default function milestonesLayout(){
         const numberedData = [...numberedPastData, numberedCurrent, ...numberedFutureData];
 
         return numberedData.map((m,i) => {
-            //console.log("milestone------", i, m)
+            //console.log("milestone------", i, m.id)
             const { date, dataType } = m;
 
             //add any profile properties onto kpis if required

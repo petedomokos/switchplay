@@ -122,6 +122,7 @@ export default function tooltipsComponent() {
                     .on("end", draggable ? enhancedDrag(dragEnd) : null);
 
                 function dragStart(e,d){
+                    if(d.key === "expected") { return; }
                     beingDragged = t => t.progBarKey === d.progBarKey && t.key === d.key;
                     if(showDragValueAbove){
                         d3.select(this).select("text.drag-value")
@@ -137,7 +138,8 @@ export default function tooltipsComponent() {
                     }
                 }
 
-                function dragged(e,d){                       
+                function dragged(e,d){
+                    if(d.key === "expected") { return; }                       
                     //console.log("xScale dom range", xScale.domain(), xScale.range())
                     const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                     //console.log("currX currVal", translateX, xScale.invert(translateX))
@@ -153,8 +155,8 @@ export default function tooltipsComponent() {
                     d3.select(this).call(updateTooltip)
                 }
 
-
                 function dragEnd(e,d){
+                    if(d.key === "expected") { return; }
                     beingDragged = () => false;
                     d3.select(this).select("text.drag-value")
                         .transition()
@@ -198,21 +200,12 @@ export default function tooltipsComponent() {
                                             .attr("class", "icon") 
                         })
                         .merge(tooltipG)
+                        .style("display", d => d.shouldDisplay ? null : "none")
                         .attr("transform", (d,i) => `translate(${xScale(getX(d)) || xScale.range()[0]}, ${yScale(d.y)})`)
                         .call(updateTooltip)
                         .call(drag)
                         .on("mouseover", onMouseover)
-                        .on("mouseout", onMouseout)
-                        /*
-                        .on("click", (e,d) => {
-                            hovered = d.key;
-                            console.log("click", d.key)
-                            update();
-                            //todo next - use thus listener just to get the transition from showing values to not showing
-                            //eg need to set display of ball .inner-overlay to null and its fill to the sme as our bg fill here,
-                            //then move into enhanced drag and also do it on mouseover with enhancedDrag
-                            
-                        })*/
+                        .on("mouseout", onMouseout);
 
                 tooltipG.exit().remove();
 

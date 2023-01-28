@@ -38,12 +38,12 @@ const userTargets = {
    //Lewis
    "606b2f1f3eecde47d8864798":[
       //press-ups in 1 min
-      {
-         datasetKey:"pressUps",
-         statKey:"reps",
-         dateString:"09/16/2022",
-         value:40
-      }
+      { datasetKey:"pressUps", statKey:"reps", dateString:"09/30/2022", value:30 },
+      { datasetKey:"pressUps", statKey:"reps", dateString:"10/31/2022", value:35 },
+      { datasetKey:"pressUps", statKey:"reps", dateString:"12/30/2022", value:43 },
+      { datasetKey:"pressUps", statKey:"reps", dateString:"02/15/2023", value:55 }
+      //shuttles time
+
    ]
 }
 

@@ -211,12 +211,13 @@ export default function progressBarComponent() {
                     //console.log("clicked", this, e, d)
                 })
                 .onDragEnd(function(e, d){
+                    //console.log("d", d)
                     //store the new value
                     //need each tooltip to have profilekey, kpikey and ley,
                     //and get rid of progBarKey
                     //assume format is actual for now
-                    const unsaved = { actual: d.unsavedValue, pc:"", completion:"" };
-                    onStoreValue(unsaved, d.milestoneId, d.kpiSetId, d.key)
+                    const valueObj = { actual: d.unsavedValue, completion:"" };
+                    onSaveValue(valueObj, d.milestoneId, d.datasetKey, d.statKey, d.key)
                     //show a save btn
                 })
                 .onMouseover(function(e,d){

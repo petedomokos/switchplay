@@ -44,6 +44,7 @@ export const roundUp = (date, granularity="day", format) => {
 
 export const dateIsInRange = (date, range, options={}) => {
     const { includeStart = true, includeEnd = false } = options;
+    if(!date || !range || !range[1]) { return false; }
     if(includeStart && includeEnd){ return date >= range[0] && date <= range[1]; }
     if(includeStart){ return date >= range[0] && date < range[1]; }
     return date > range[0] && date <= range[1];

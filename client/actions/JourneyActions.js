@@ -125,7 +125,7 @@ export const saveAdhocJourneyToStore = journey => (
 )
 
 export const saveJourney = (journey, shouldPersist=true)  => dispatch => {
-	//console.log("saveJourney", journey)
+	console.log("saveJourney", journey)
 	/*
 	//atm, if no user logged in, we still have  auser object so just store journey in there as normal, but dont persist to server
 	const jwt = auth.isAuthenticated();
@@ -141,14 +141,15 @@ export const saveJourney = (journey, shouldPersist=true)  => dispatch => {
     //2. save to server
     //3. on response, undo if errors, add id (if new) or anything else from server to store
 	const serverJourney = transformJourneyForServer(journey);
-	//console.log("serverJourney", serverJourney);
+	console.log("serverJourney", serverJourney);
 	const jwt = auth.isAuthenticated();
 	//console.log("jwt", jwt)
 	if(!jwt.user) { return; }
 	const journeyIsNew = !serverJourney._id;
 	if(journeyIsNew){
 		console.log("SAVING A NEW JOURNEY!!!!!!!!!!!!!!")
-		alert("saving a new journey")
+		//alert("saving a new journey")
+		return;
 	}
 	//console.log("id is", serverJourney._id)
 	const url = '/api/users/'+jwt.user._id+'/journey' +(serverJourney._id ? "/"+serverJourney._id : "")
