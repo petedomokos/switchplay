@@ -91,7 +91,7 @@ const userByID = async (req, res, next, id) => {
       //.populate('administeredDatasets', '_id name desc notes photo admin created')
       //.populate('datasetsMemberOf', '_id name desc notes photo admin created')
 
-    // console.log('user in userById', user)
+    console.log('success')
     if (!user)
       return res.status('400').json({
         error: "User not found"

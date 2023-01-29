@@ -40,7 +40,7 @@ export const fetchUser = id => dispatch => {
 	fetchThenDispatch(dispatch, 
 		'loading.user',
 		{
-			url: '/api/users/'+id, 
+			url: '/api/users/'+id,
 			requireAuth:true,
 			nextAction: data => {
 				const jwt = auth.isAuthenticated();

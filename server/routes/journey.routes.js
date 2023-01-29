@@ -5,6 +5,10 @@ import journeyCtrl from '../controllers/journey.controller'
 
 const router = express.Router()
 
+//this ineed extra auth code - only if journey is in users administeredJourneys or journeys arrays
+//router.route('/api/journeys/:journeyId')
+  //.get(authCtrl.requireSignin, authCtrl.hasAuthorization, journeyCtrl.read)
+
 //@todo - put or post - why is it post for createUser and put for update?
 //we use :journeyId as an optional param - if it exists, it is update
 router.route('/api/users/:userId/journey/:journeyId')

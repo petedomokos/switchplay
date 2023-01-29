@@ -11,6 +11,7 @@ const journeyByID = async (req, res, next, id) => {
   console.log('readJourneyById......', id)
   try {
     let journey = await Journey.findById(id)
+    console.log("journey success")
 
       /*
       .populate('admin', '_id username firstname surname created')

@@ -93,7 +93,8 @@ export default function kpisLayout(){
             const tooltipsData = [
                 { 
                     key:"expected", milestoneId, kpiSetId, datasetKey, statKey,
-                    shouldDisplay:!isPast, //dont display if past
+                    //if no targetObj, this means there is no future active profile at all so no expected
+                    shouldDisplay:!isPast && !!targetObj, //dont display if past or no future profiles
                     rowNr: 1, y: 1, current,
                     value: expected, x:expected,
                     icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },
@@ -101,7 +102,8 @@ export default function kpisLayout(){
                 },
                 { 
                     key:"target", milestoneId, kpiSetId, datasetKey, statKey,
-                    shouldDisplay:true,
+                    //if no targetObj, this means there is no future active profile at all
+                    shouldDisplay:!!targetObj,
                     rowNr: -1, y: -1, current,
                     value:target, x:target,
                     icons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },

@@ -25,11 +25,14 @@ export function hydrateJourneyData(data, user, datasets){
 
     //STEP 1: HYDRATE PROFILES
     const options = { now, rangeFormat };
+    console.log("hydrateJourney", data)
     const hydratedProfiles = hydrateProfiles(nonCurrentProfiles, datasets, kpis, defaultTargets, options);
+    console.log("hydratedProfiles", hydratedProfiles)
 
     //STEP 2: CREATE CURRENT PROFILE, including expected values
     const currentProfile = createCurrentProfile(hydratedProfiles, datasets, kpis, options );
 
+    console.log("currentProfile", currentProfile)
     //SEP 3: EMBELLISH PROFILES BASED ON CURRENT PROFILE INFO
     const pastProfiles = hydratedProfiles.filter(p => p.isPast);
     const futureProfiles = hydratedProfiles.filter(p => p.isFuture)
@@ -48,6 +51,7 @@ export function hydrateJourneyData(data, user, datasets){
 }
 
 function addExpected(profile, currentProfile){
+    console.log("addExpected", profile, currentProfile)
     //helper
     const getExpected = (datasetKey, statKey) => currentProfile.kpis
         .find(k => k.datasetKey === datasetKey && k.statKey === statKey)
@@ -94,6 +98,8 @@ function hydrateProfiles(profiles=[], datasets, kpis, defaultTargets, options={}
 }
 
 function calcExpected(kpi, prevProfile, activeProfile){
+    //@todo - allow a manual startdate/value so we dont actually need to have a prevProfile
+    if(!prevProfile || !activeProfile) { return null; }
     const { datasetKey, statKey } = kpi;
     const customExpectedValuesForKpi = activeProfile.customExpected
                 .filter(exp => exp.datasetKey === datasetKey && exp.statKey === statKey);
@@ -244,12 +250,12 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
 //current profile is dynamically created, so it doesnt need hydrating
 //note - this is nely created each time, so nothing must be stored on it
 function createCurrentProfile(orderedProfiles, datasets, kpis, options={}){
-    //console.log("createcurrentprofile")
+    console.log("createcurrentprofile")
     const { now, rangeFormat } = options;
     const activeProfile = d3.least(orderedProfiles.filter(p => p.isFuture), p => p.date);
-    const activeProfileValues = kpi => activeProfile.kpis
-        .find(k => k.datasetKey === kpi.datasetKey && k.statKey === kpi.statKey)
-        .values;
+    const activeProfileValues = kpi => activeProfile?.kpis
+        ?.find(k => k.datasetKey === kpi.datasetKey && k.statKey === kpi.statKey)
+        ?.values;
 
     const prevProfile = d3.greatest(orderedProfiles.filter(p => p.isPast), p => p.date);
     const startDate = prevProfile?.date || calcTwentyYearsAgo(now);
@@ -293,7 +299,7 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, options={}){
                     //min/max just values
                     min, max, start, end,
                     expected:calcExpected(kpi, prevProfile, activeProfile),
-                    target:activeProfileValues(kpi).target,
+                    target:activeProfileValues(kpi)?.target,
                     //current on currentProfile has no bounds, unlike current on active profile
                     current:calcCurrent(stat, datapoints, null)
                 },
