@@ -35,8 +35,6 @@ export default function milestonesLayout(){
                 ...kpi, /* what do we need? */ }));
 
             if(dataType === "profile"){
-                //the key will determine if selected - we want this the same across all profile cards
-                //const keyedKpis = kpis.map(kpi => ({ ...kpi, key:kpi.kpiSetId }));
                 myKpisLayout
                     .date(date)
                     //.prevCardDate(i === 0 ? undefined : data[i - 1])

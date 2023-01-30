@@ -181,13 +181,7 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
             //console.log("kpi", kpi)
             //KEYS/ID
             const { datasetKey, statKey, min, max, values } = kpi;
-            
-            //const profileKpi = profile.kpis
-                //.find(pKpi => pKpi.datasetKey === kpi.datasetKey && pKpi.statKey === kpi.statKey);
-
-            //temp - for now give extra index so we can use same dataset more than once
-            const kpiSetId = `${datasetKey}-${statKey}`;
-            const key = `${kpiSetId}-${milestoneId}`;
+            const key = `${datasetKey}-${statKey}`;
             
             //VALUES
             //helper
@@ -207,7 +201,7 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
             //startvalues are only set if prevProfile isPast ie it has an achieved score
             //note - current profile is hydrated on its own so has no prevProfile
             //@todo - if user has given a fixed startTime for a profile, then get value at that point
-            const prevAchieved = prevProfile?.kpis.find(kpi => kpi.kpiSetId === kpiSetId)?.achieved;
+            const prevAchieved = prevProfile?.kpis.find(kpi => kpi.key === key)?.achieved;
             const start = {
                 actual:prevAchieved?.actual || min,
                 completion:0 //this always starts at 0 
@@ -227,7 +221,7 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
             const target = parsedCustomTarget || createTargetFromDefault(datasetKey, statKey, date, defaultTargets);
 
             return {
-                ...kpi, key, milestoneId, kpiSetId,
+                ...kpi, key, milestoneId,
                 //dates
                 date, startDate, startsFromPrevProfile, dateRange, datePhase,
                 isPast, isCurrent, isFuture, isActive,
@@ -262,15 +256,13 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, options={}){
     const startsFromPrevProfile = !!prevProfile;
     const datePhase = "current";
     const dateRange = calcDateRange(startDate, now);
-    //need kpisetId etc and more stuff see hydrateProfile func below
     return {
         startDate, date:now, startsFromPrevProfile, dateRange, datePhase,
         id:"current", isCurrent:true, dataType:"profile",
         kpis:kpis.map((kpi,i) => {
             //console.log("kpi", kpi)
             const { datasetKey, statKey, min, max, values } = kpi;
-            const kpiSetId = `${datasetKey}-${statKey}`;
-            const key = `${kpiSetId}-current`;
+            const key = `${datasetKey}-${statKey}`;
             const milestoneId = "current";
             
             const dataset = datasets.find(dset => dset.key === datasetKey);
@@ -278,7 +270,7 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, options={}){
             const stat = dataset?.stats.find(s => s.key === statKey);
             //START & END
             //@todo - if user has given a fixed startTime for a profile, then get value at that point
-            const prevAchieved = prevProfile?.kpis.find(kpi => kpi.kpiSetId === kpiSetId)?.achieved;
+            const prevAchieved = prevProfile?.kpis.find(kpi => kpi.key === key)?.achieved;
             const start = {
                 actual:prevAchieved?.actual || min,
                 completion:0 //this always starts at 0 
@@ -291,7 +283,6 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, options={}){
             return {
                 ...kpi,
                 key,
-                kpiSetId,
                 milestoneId,
                 //dates
                 date:now, startDate, startsFromPrevProfile, dateRange, datePhase, isCurrent:true,

@@ -249,7 +249,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   }, [JSON.stringify(data)]);
 
 
-  const onStoreValue = useCallback((unsaved, profileId, kpiSetId, key) => {
+  const onStoreValue = useCallback((unsaved, profileId, kpiKey, key) => {
     
   }, [JSON.stringify(data), user._id]);
 

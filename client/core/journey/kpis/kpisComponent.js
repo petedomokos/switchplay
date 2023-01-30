@@ -105,7 +105,7 @@ export default function kpisComponent() {
     let scrollEnabled = false;
 
     //API CALLBACKS
-    let onClickKpi = function(){};
+    let onUpdateSelected = function(){};
     let onDblClickKpi = function(){};
     let onDragStart = function(){};
     let onDrag = function() {};
@@ -313,12 +313,12 @@ export default function kpisComponent() {
                                 }))
                                 .onDblClick(onDblClickKpi)
                                 .onClick(function(e,d){
-                                    console.log("kpi.onClick")
+                                    //console.log("kpi.onClick........", d)
                                     //@todo - bug - after clicking several kpis, the profiles dont 
                                     //stay in sync with each other. it seems that teh ones called from externally,
                                     //ie teh ones not actually scrolled, seem to jump back to 0 again, and go from there
                                     updateSelected(d.key, data, true, true);
-                                    //onClickKpi.call(this, e, d);
+                                    onUpdateSelected(d.milestoneId, d.key, true, true);
                                 })
                                 .onStoreValue(onStoreValue)
                                 .onSaveValue(onSaveValue)
@@ -336,6 +336,7 @@ export default function kpisComponent() {
                                             .onClick(() => {
                                                 //false flag ensures scroll stays where it is
                                                 updateSelected("", data, false, true);
+                                                onUpdateSelected(d.milestoneId, null, true, true);
                                             }));
                             })
                         //UPDATE ONLY
@@ -432,6 +433,7 @@ export default function kpisComponent() {
     }
 
     function updateSelected(key, data, shouldUpdateScroll, shouldUpdateDom){
+        //console.log("updateSelected", data.kpisData[0].milestoneId, key, shouldUpdateScroll, shouldUpdateDom)
         const { kpisData } = data;
         const newSelectedDatum = kpisData.find(d => d.key === key);
         //console.log("updateSel key, d-------", key, newSelectedDatum)
@@ -607,9 +609,9 @@ export default function kpisComponent() {
         updateSelected(value, prevData, shouldUpdateScroll, shouldUpdateDom);
         return kpis;
     };
-    kpis.onClickKpi = function (value) {
-        if (!arguments.length) { return onClickKpi; }
-        onClickKpi = value;
+    kpis.onUpdateSelected = function (value) {
+        if (!arguments.length) { return onUpdateSelected; }
+        onUpdateSelected = value;
         return kpis;
     };
     kpis.onCtrlClick = function (value) {

@@ -31,7 +31,7 @@ export default function kpisLayout(){
         //1 only...const _data = [data[0]]
         const kpisData = _data.map((kpi,i) => {
            
-            const { values, isPast, isCurrent, isFuture, milestoneId, kpiSetId, datasetKey, statKey } = kpi;
+            const { key, values, isPast, isCurrent, isFuture, milestoneId, datasetKey, statKey } = kpi;
             //can set all kpis to be active eg for an active profile card that doesnt have access to all data
             const isActive = allKpisActive || kpi.isActive;
             //helper
@@ -92,7 +92,7 @@ export default function kpisLayout(){
 
             const tooltipsData = [
                 { 
-                    key:"expected", milestoneId, kpiSetId, datasetKey, statKey,
+                    key:"expected", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
                     shouldDisplay:!isPast && !!targetObj, //dont display if past or no future profiles
                     rowNr: 1, y: 1, current,
@@ -102,7 +102,7 @@ export default function kpisLayout(){
                     //smallIcons: expectedAchieved ? emptyGoal : emptyGoal,
                 },
                 { 
-                    key:"target", milestoneId, kpiSetId, datasetKey, statKey,
+                    key:"target", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all
                     shouldDisplay:!!targetObj,
                     rowNr: -1, y: -1, current,
@@ -115,8 +115,8 @@ export default function kpisLayout(){
             ];
 
             if(i === 0 /*&& kpi.key.includes("mock3")*/ && kpi.key.includes("pressUps")){
-                console.log("kpi---",i,kpi.key, kpi)
-                console.log("tooltips", tooltipsData)
+                //console.log("kpi---",i,kpi.key, kpi)
+                //console.log("tooltips", tooltipsData)
             }
             const numbersData = [currentDatum];
 
