@@ -101,7 +101,6 @@ export default function kpiComponent() {
     let onMouseover = function(){};
     let onMouseout = function(){};
     let onDelete = function(){};
-    let onStoreValue = function(){};
     let onSaveValue = function(){};
 
     const enhancedDrag = dragEnhancements()
@@ -210,7 +209,6 @@ export default function kpiComponent() {
                                 .width((d) => dimns[i].progressBarWidth)
                                 .height((d) => dimns[i].progressBarHeight)
                                 .margin((d) => dimns[i].progressBarMargin)
-                                .onStoreValue(onStoreValue)
                                 .onSaveValue(onSaveValue))
                     })
 
@@ -358,12 +356,6 @@ export default function kpiComponent() {
         if (!arguments.length) { return onDelete; }
         if(typeof value === "function"){
             onDelete = value;
-        }
-        return kpi;
-    };
-    kpi.onStoreValue = function (value) {
-        if(typeof value === "function"){
-            onStoreValue = value;
         }
         return kpi;
     };

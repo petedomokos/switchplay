@@ -124,8 +124,6 @@ export default function kpisComponent() {
     let handleZoomStart = function(){};
     let handleZoom = function(){};
     let handleZoomEnd = function(){};
-
-    let onStoreValue = function(){};
     let onSaveValue = function(){};
 
     const zoom = d3.zoom();
@@ -320,7 +318,6 @@ export default function kpisComponent() {
                                     updateSelected(d.key, data, true, true);
                                     onUpdateSelected(d.milestoneId, d.key, true, true);
                                 })
-                                .onStoreValue(onStoreValue)
                                 .onSaveValue(onSaveValue)
                             )
                             .each(function(d,i){
@@ -705,12 +702,6 @@ export default function kpisComponent() {
         if (!arguments.length) { return onDelete; }
         if(typeof value === "function"){
             onDelete = value;
-        }
-        return kpis;
-    };
-    kpis.onStoreValue = function (value) {
-        if(typeof value === "function"){
-            onStoreValue = value;
         }
         return kpis;
     };

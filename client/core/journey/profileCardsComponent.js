@@ -78,7 +78,6 @@ export default function profileCardsComponent() {
     let onMouseover = function(){};
     let onMouseout = function(){};
     let onDelete = function() {};
-    let onStoreValue = function(){};
     let onSaveValue = function(){};
     
 
@@ -187,7 +186,6 @@ export default function profileCardsComponent() {
                            })
                         })
                         .onCtrlClick(onCtrlClick)
-                        .onStoreValue(onStoreValue)
                         .onSaveValue((valueObj, profileId, datasetKey, statKey, key) => {
                             //if profileid is current, swap it for the first future profile
                             const requiredProfileId = profileId === "current" ? data.find(p => p.isFuture).id : profileId;
@@ -686,12 +684,6 @@ export default function profileCardsComponent() {
     profileCards.onAddLink = function (value) {
         if (!arguments.length) { return onAddLink; }
         if(typeof value === "function"){ onAddLink = value; }
-        return profileCards;
-    };
-    profileCards.onStoreValue = function (value) {
-        if(typeof value === "function"){
-            onStoreValue = value;
-        }
         return profileCards;
     };
     profileCards.onSaveValue = function (value) {

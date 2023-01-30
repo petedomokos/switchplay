@@ -248,11 +248,6 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     }
   }, [JSON.stringify(data)]);
 
-
-  const onStoreValue = useCallback((unsaved, profileId, kpiKey, key) => {
-    
-  }, [JSON.stringify(data), user._id]);
-
   const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => {  
     console.log("saveValue", valueObj, profileId, datasetKey, statKey, key)
     //profile wont ever be current here, as that is dynamically created ratehr than stored
@@ -665,7 +660,6 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
               onDeleteMilestone={handleDeleteMilestone}
               takeOverScreen={takeOverScreen}
               releaseScreen={releaseScreen}
-              onStoreValue={onStoreValue}
               onSaveValue={onSaveValue}
               screen={screen}
               availWidth={width}

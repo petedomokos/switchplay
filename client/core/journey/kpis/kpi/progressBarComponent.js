@@ -151,7 +151,6 @@ export default function progressBarComponent() {
 
     let onBarHandleClick = function(){};
     let onBarHandleDblClick = function(){};
-    let onStoreValue = function(){};
     let onSaveValue = function(){};
 
     const enhancedDrag = dragEnhancements();
@@ -336,12 +335,6 @@ export default function progressBarComponent() {
         if (!arguments.length) { return onBarMouseout; }
         if(typeof value === "function"){
             onBarMouseout = value;
-        }
-        return progressBar;
-    };
-    progressBar.onStoreValue = function (value) {
-        if(typeof value === "function"){
-            onStoreValue = value;
         }
         return progressBar;
     };
