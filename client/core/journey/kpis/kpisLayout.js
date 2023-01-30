@@ -40,10 +40,10 @@ export default function kpisLayout(){
             //const expectedCurrent = { date: date, value:(current?.value ? current.value * 1.3 : 0) };//calculateExpected(previous, target, date)
             //const _pcCompletionExpectedValue = pcCompletion(previous.value, target.value, expectedCurrent.value);
             //bars
-            const currentColour = "#696969";
+            const currentColour = grey10(7);// "#696969";
             const colours = {
                 current: currentColour,
-                target: "#DCDCDC",
+                target:grey10(4),// "#DCDCDC",
                 expectedBehind:"red",
                 expectedAhead:currentColour
             }
@@ -76,6 +76,15 @@ export default function kpisLayout(){
             }*/
 
             //datums
+            const targetDatum = {
+                key:"target",
+                label: "Target",
+                isAchieved:target <= current,//replce in a sec with teh correct target value and achieved if its below current
+                startValue:start, //may be undefined
+                value:target, //replace in a sec
+                fill:colours.target,
+                format
+            }
             const currentDatum = {
                 key:"current",
                 label: values.achieved ? "Achieved" : "Current",
@@ -86,7 +95,7 @@ export default function kpisLayout(){
                 format
             }
 
-            const barData = [currentDatum];
+            const barData = [targetDatum, currentDatum];
             barData.start = start;
             barData.end = end;
 

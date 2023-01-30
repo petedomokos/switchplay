@@ -196,10 +196,7 @@ export default function barComponent() {
                                         .attr("fill", d.fill);;
                             })
                             .merge(barSectionG)
-                            .attr("transform", (d,j) =>{
-                                //console.log("test ",i , d, scales[i])
-                                 return `translate(${scales[j](d.startValue)}, 0)`
-                            })
+                            .attr("transform", (d,j) => `translate(${scales[i](d.startValue)}, 0)`)
                             .each(function(d,j){
                                 //console.log("update bar i j editable",data, d, i, j, editable(data,i))
                                 const sectionWidth = scale(d.value) - scale(d.startValue);
