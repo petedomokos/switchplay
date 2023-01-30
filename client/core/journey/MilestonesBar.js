@@ -137,13 +137,10 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   }, [profiles.length, JSON.stringify(screen),/*JSON.stringify(contracts), JSON.stringify(profiles), JSON.stringify(datasets), player, kpiFormat, screen*/])
 
   useEffect(() => {
-    //console.log("swipable useEffect")
+    //@todo - on ms and ss, we want it to always be swipable so get rid of 1st condition below,
+    //and get swipe working well with scroll. Currently this doesnt happen.
     milestonesBar.swipable((selectedMilestone || screen.isLarge ? false : true))
-    /*d3.select(containerRef.current)
-      .call(milestonesBar
-        .swipable((selectedMilestone || screen.isLarge ? false : true)))*/
-
-  }, [selectedMilestone, screen.isLarge, /* need this?containerRef.current*/])
+  }, [selectedMilestone, screen.isLarge])
 
   //render
   //@todo - consider having a shouldRender state, and this could also contain info on transition requirements

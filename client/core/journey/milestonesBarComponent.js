@@ -711,6 +711,13 @@ export default function milestonesBarComponent() {
 
                 slideBack = function(){
                     if(canSlideBack){
+                        if(selectedMilestone){
+                            //move on by one
+                            const selected = data.find(d => d.id === selectedMilestone);
+                            const newSelected = data.find(d => d.nr === selected.nr - 1)
+                            selectedMilestone = newSelected.id;
+                            onSetSelectedMilestone(newSelected.id);
+                        }
                         requiredSliderPosition -= 1;
                         update(data, { slideTransition:SLIDE_TRANSITION });
                     }
@@ -718,6 +725,13 @@ export default function milestonesBarComponent() {
 
                 slideForward = function(){
                     if(canSlideForward){
+                        if(selectedMilestone){
+                            //move back by 1
+                            const selected = data.find(d => d.id === selectedMilestone);
+                            const newSelected = data.find(d => d.nr === selected.nr + 1)
+                            selectedMilestone = newSelected.id;
+                            onSetSelectedMilestone(newSelected.id);
+                        }
                         requiredSliderPosition += 1;
                         update(data, { slideTransition:SLIDE_TRANSITION });
                     }
