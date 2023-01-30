@@ -25,14 +25,14 @@ export function hydrateJourneyData(data, user, datasets){
 
     //STEP 1: HYDRATE PROFILES
     const options = { now, rangeFormat };
-    console.log("hydrateJourney", data)
+    //console.log("hydrateJourney", data)
     const hydratedProfiles = hydrateProfiles(nonCurrentProfiles, datasets, kpis, defaultTargets, options);
-    console.log("hydratedProfiles", hydratedProfiles)
+    //console.log("hydratedProfiles", hydratedProfiles)
 
     //STEP 2: CREATE CURRENT PROFILE, including expected values
     const currentProfile = createCurrentProfile(hydratedProfiles, datasets, kpis, options );
 
-    console.log("currentProfile", currentProfile)
+    //console.log("currentProfile", currentProfile)
     //SEP 3: EMBELLISH PROFILES BASED ON CURRENT PROFILE INFO
     const pastProfiles = hydratedProfiles.filter(p => p.isPast);
     const futureProfiles = hydratedProfiles.filter(p => p.isFuture)
@@ -51,7 +51,6 @@ export function hydrateJourneyData(data, user, datasets){
 }
 
 function addExpected(profile, currentProfile){
-    console.log("addExpected", profile, currentProfile)
     //helper
     const getExpected = (datasetKey, statKey) => currentProfile.kpis
         .find(k => k.datasetKey === datasetKey && k.statKey === statKey)
@@ -147,8 +146,8 @@ function calcDateRange(start, end, format){
 function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, options={}){
     //console.log("hydrateProfile------------", profile.id, datasets)
     const { now, rangeFormat } = options;
-    const { _id, id, date, customTargets=[], isCurrent } = profile;
-    const milestoneId = _id || id;
+    const { id, date, customTargets=[], isCurrent } = profile;
+    const milestoneId = id;
     //startDate
     //either manual startDate if set, or prev date, or otherwise 20 years ago
     const startDate = profile.startDate || prevProfile?.date || calcTwentyYearsAgo(now);
@@ -156,7 +155,7 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
     const datePhase = date < now ? "past" : "future";
     const isPast = datePhase === "past";
     const isFuture = datePhase === "future";
-    const isActive = isFuture && !prevProfile.isFuture;
+    const isActive = isFuture && !prevProfile?.isFuture;
     const dateRange = calcDateRange(startDate, date);
 
     //RANGE
@@ -224,7 +223,8 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
             const achieved = isPast ? current : null;
             const customTargetsForStat = customTargets.filter(t => t.datasetKey === datasetKey && t.statKey === statKey);
             const customTarget = d3.greatest(customTargetsForStat, d => d.created);
-            const target = customTarget || createTargetFromDefault(datasetKey, statKey, date, defaultTargets);
+            const parsedCustomTarget = customTarget ? { actual: Number(customTarget.actual), completion:Number(customTarget.completion) } : null;
+            const target = parsedCustomTarget || createTargetFromDefault(datasetKey, statKey, date, defaultTargets);
 
             return {
                 ...kpi, key, milestoneId, kpiSetId,
@@ -250,7 +250,7 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
 //current profile is dynamically created, so it doesnt need hydrating
 //note - this is nely created each time, so nothing must be stored on it
 function createCurrentProfile(orderedProfiles, datasets, kpis, options={}){
-    console.log("createcurrentprofile")
+    //console.log("createcurrentprofile")
     const { now, rangeFormat } = options;
     const activeProfile = d3.least(orderedProfiles.filter(p => p.isFuture), p => p.date);
     const activeProfileValues = kpi => activeProfile?.kpis

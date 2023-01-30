@@ -98,11 +98,11 @@ const initChannels = d3.range(numberMonths)
   })
 
 //width and height may be full screen, but may not be
-const Journey = ({ data, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile }) => {
+const Journey = ({ user, data, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile }) => {
   console.log("Journey.......", data)
   //bug - although only 6 profs are saved, we end up with 7 ie two currents
   //console.log("Journey avail", availableJourneys)
-  const { _id, userId, name, contracts, profiles, aims, goals, links, measures, kpis } = data;
+  const { _id, name, contracts, profiles, aims, goals, links, measures, kpis } = data;
   const [journey, setJourney] = useState(null);
   const [channels, setChannels] = useState(initChannels);
   const [withCompletionPaths, setWithCompletionPath] = useState(false);
@@ -201,30 +201,30 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
     const profile = {
       //put in some default values in case not specified
       yPC:50,
-      dataType:"profile",
-      colour:"orange",
-      id:createId(profiles.map(p => p.id)),
-      userId,
-      ...props
+      id:createId(profiles.map(p => p.id), "profile"),
+      createdBy:user._id,
+      //empty arrays needed before server returns the default ones
+      customTargets:[],
+      customExpected:[],
+      ...props //will be just the date if from milestonesBar
     }
     const _profiles = [ ...profiles, profile];
     save({ ...data, profiles:_profiles });
     
-  }, [JSON.stringify(data), userId]);
+  }, [JSON.stringify(data), user._id]);
 
   const handleCreateContract = useCallback((props) => {
     const contract = {
       //put in some default values in case not specified
       yPC:50,
-      dataType:"contract",
-      id:createId(contracts.map(c => c.id)),
-      userId,
+      id:createId(contracts.map(c => c.id), "contract"),
+      createdBy:user._id,
       ...props
     }
     const _contracts = [ ...contracts, contract];
     save({ ...data, contracts:_contracts });
     
-  }, [JSON.stringify(data), userId]);
+  }, [JSON.stringify(data), user._id]);
 
   const handleCreateMilestone = useCallback((dataType, date) => {
     if(dataType === "profile"){
@@ -232,7 +232,7 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
     }else{
       handleCreateContract({ date });
     }
-  }, [JSON.stringify(data), userId]);
+  }, [JSON.stringify(data), user._id]);
 
   const handleDeleteProfile = useCallback((id) => {
     //todo - must delete link first, but when state is put together this wont matter
@@ -251,9 +251,10 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
 
   const onStoreValue = useCallback((unsaved, profileId, kpiSetId, key) => {
     
-  }, [JSON.stringify(data), userId]);
+  }, [JSON.stringify(data), user._id]);
 
   const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => {  
+    console.log("saveValue", valueObj, profileId, datasetKey, statKey, key)
     //profile wont ever be current here, as that is dynamically created ratehr than stored
     const profile = profiles.find(p => p.id === profileId);
     let statValue = {
@@ -273,9 +274,10 @@ const Journey = ({ data, datasets, availableJourneys, screen, width, height, sav
     }
     const otherProfiles = profiles.filter(p => p.id !== profileId);
     const _profiles = [ ...otherProfiles, updatedProfile]
+    console.log("profiles to save", _profiles)
     save({ ...data, profiles:_profiles });
     
-  }, [JSON.stringify(data), userId]);
+  }, [JSON.stringify(data), user._id]);
 
   useEffect(() => {
     const width = d3.min([journeyWidth * 0.725, 500]);

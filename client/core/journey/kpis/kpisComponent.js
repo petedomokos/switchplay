@@ -513,18 +513,13 @@ export default function kpisComponent() {
         const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
         //console.log("transition", transition)
         selection.each(function(d, i){
-            //console.log("i d.key", i, d.key)
-            //console.log("t", d3.select(this).attr("transform"))
             const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
-            //console.log("current transY", translateY)
             if(Math.abs(translateX - x(d, i)) < 0.001 && Math.abs(translateY - y(d, i)) < 0.001){
                 //already where it needs to be
-                //console.log("already in pos")
                 return;
             }
             if(d3.select(this).attr("class").includes("transitioning")){
                 //already in transition - so we ignore the new request
-                //console.log("already transitioning")
                 return;
             }
             if(transition){

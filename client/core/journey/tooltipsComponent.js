@@ -122,7 +122,7 @@ export default function tooltipsComponent() {
                     .on("end", draggable ? enhancedDrag(dragEnd) : null);
 
                 function dragStart(e,d){
-                    if(d.key === "expected") { return; }
+                    if(!d.editable) { return; }
                     beingDragged = t => t.progBarKey === d.progBarKey && t.key === d.key;
                     if(showDragValueAbove){
                         d3.select(this).select("text.drag-value")
@@ -139,7 +139,7 @@ export default function tooltipsComponent() {
                 }
 
                 function dragged(e,d){
-                    if(d.key === "expected") { return; }                       
+                    if(!d.editable) { return; }                       
                     //console.log("xScale dom range", xScale.domain(), xScale.range())
                     const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                     //console.log("currX currVal", translateX, xScale.invert(translateX))
@@ -156,7 +156,7 @@ export default function tooltipsComponent() {
                 }
 
                 function dragEnd(e,d){
-                    if(d.key === "expected") { return; }
+                    if(!d.editable) { return; }
                     beingDragged = () => false;
                     d3.select(this).select("text.drag-value")
                         .transition()

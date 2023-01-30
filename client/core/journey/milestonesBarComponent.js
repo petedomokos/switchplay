@@ -305,19 +305,18 @@ export default function milestonesBarComponent() {
                 const calcOffsetX = calculateOffsetX(positionedData)
 
                 slideTo = function(position, options={} ){
-                    //need to also check offset, incase slider pos hadnt changed but dimns have changed
-                    const numericalPosition = typeof position === "number" ? position : convertToNumber(position);
-                    const offset = calcOffsetX(numericalPosition);
-                    
-                    if(currentSliderPosition === position && offset === currentSliderOffset) { return; }
-                    const { transition, cb } = options;
-
                     //helper
                     const convertToNumber = wordPosition => {
                         if(wordPosition === "beforeStart"){ return d3.min(data, d => d.nr) - 0.5 }
                         if(wordPosition === "afterEnd") { return d3.max(data, d => d.nr) + 0.5; }
                         return 0;
                     }
+                    //need to also check offset, incase slider pos hadnt changed but dimns have changed
+                    const numericalPosition = typeof position === "number" ? position : convertToNumber(position);
+                    const offset = calcOffsetX(numericalPosition);
+                    
+                    if(currentSliderPosition === position && offset === currentSliderOffset) { return; }
+                    const { transition, cb } = options;
 
                     milestonesWrapperG.call(updateTransform, {
                         x: () => offset,

@@ -142,12 +142,14 @@ export function updatedState(prevState, props, orderComparator){
     return [updated, ...rest];
 }
 
-export function createId(existingIds=[]){
-    const check = (idToCheck) => {
-        if(!existingIds.find(existingId => existingId === idToCheck+"")){
-            return idToCheck+"";
+export function createId(existingIds=[], prefix=""){
+    const addPrefix = nr => prefix ? `${prefix}-${nr}` : nr;
+    const check = nextNr => {
+        const potentialId = addPrefix(nextNr);
+        if(!existingIds.find(existingId => existingId === potentialId)){
+            return potentialId;
         }else{
-            return check(idToCheck + 1)
+            return check(nextNr + 1)
         }
     }
     return check(1);

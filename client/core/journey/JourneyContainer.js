@@ -55,19 +55,19 @@ const mockDatasets = [
 const mockProfiles = [
 	{
 	  	date:new Date("2022-09-16"),
-	  	id:"mock1", _id:"mock1", kpiStats:[], yPC:50, customTargets:[], customExpected:[]
+	  	id:"mock1", _id:"mock1", yPC:50, customTargets:[], customExpected:[]
 	},
 	{
 	  	date:new Date("2022-10-16"),
-	  	id:"mock2", _id:"mock2", kpiStats:[], yPC:50, customTargets:[], customExpected:[]
+	  	id:"mock2", _id:"mock2", yPC:50, customTargets:[], customExpected:[]
 	},
 	{
 	  	date:new Date("2023-01-16"),
-		id:"mock3", _id:"mock3", kpiStats:[], yPC:50, customTargets:[], customExpected:[]
+		id:"mock3", _id:"mock3", yPC:50, customTargets:[], customExpected:[]
 	},
 	{
 		date:new Date("2023-02-16"),
-		id:"mock4", _id:"mock4", kpiStats:[], yPC:50, customTargets:[], customExpected:[]
+		id:"mock4", _id:"mock4", yPC:50, customTargets:[], customExpected:[]
 	}
 ]
 
@@ -80,10 +80,11 @@ const emptyJourney = user => ({
 })
 
 const mapStateToProps = (state, ownProps) => {
-	//console.log("Container..........state", state)
+	console.log("Container..........state", state.user._id)
     //const { journeyId }  = ownProps.match.params;state,
 	//for now, assume player is user, but need to attach playerId/coachId or groupId to each journey
-	const { journeys=[], homeJourney, loadedDatasets, datasetsMemberOf } = state.user;
+	const { _id, username, firstname, surname, journeys=[], homeJourney, loadedDatasets, datasetsMemberOf } = state.user;
+	const user = { _id, username, firstname, surname };
 	//console.log("JourneyContainer homeJourney", homeJourney)
 	//console.log("journeys", journeys)
 	const journeyId = state.system.activeJourney || homeJourney;
@@ -113,6 +114,7 @@ const mapStateToProps = (state, ownProps) => {
 	console.log("hydratedData", hydratedData)
 
 	return{
+		user,
 		//@todo - use activeJourney instead of homeJourney. It defaults to homeJourney on home page but user can overide.
 		data:hydratedData,
 		datasets:fullyLoadedDatasets,

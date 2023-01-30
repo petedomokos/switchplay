@@ -98,6 +98,7 @@ export default function kpisLayout(){
                     rowNr: 1, y: 1, current,
                     value: expected, x:expected,
                     icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },
+                    editable:false//isCurrent || isFuture,
                     //smallIcons: expectedAchieved ? emptyGoal : emptyGoal,
                 },
                 { 
@@ -107,14 +108,15 @@ export default function kpisLayout(){
                     rowNr: -1, y: -1, current,
                     value:target, x:target,
                     icons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
+                    editable:isCurrent || isFuture,
                     //if small space, just show the ball
                     //smallIcons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
                 }
             ];
 
             if(i === 0 /*&& kpi.key.includes("mock3")*/ && kpi.key.includes("pressUps")){
-                //console.log("kpi---",i,kpi.key, kpi)
-                //console.log("tooltips", tooltipsData)
+                console.log("kpi---",i,kpi.key, kpi)
+                console.log("tooltips", tooltipsData)
             }
             const numbersData = [currentDatum];
 

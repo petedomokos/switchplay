@@ -14,12 +14,17 @@ const transformJourneyForServer = journey => {
 		yPC:c.yPC
 	}));
 	
-	const profiles = journey.profiles.map(p => ({
-		id:p.id,
-		name:p.name,
-		date:p.date,
-		yPC:p.yPC,
-	}));
+	//remove current profile
+	const profiles = journey.profiles
+		.filter(p => p.id !== "current")
+		.map(p => ({
+			id:p.id,
+			name:p.name,
+			date:p.date,
+			yPC:p.yPC,
+			customTargets:p.customTargets,
+			customExpected:p.customExpected
+		}));
 
 	const aims = journey.aims.map(a => ({
 		id:a.id,
