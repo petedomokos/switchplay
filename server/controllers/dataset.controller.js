@@ -192,11 +192,11 @@ const createDatapoints = async (req, res) => {
     //createdBy:req.user._id
   //}));
 
-  //console.log("datapoints to add", datapoints)
+  console.log("datapoints to add", datapoints)
   //console.log("current datapoints", dataset.datapoints)
-  dataset.datapoints = [...dataset.datapoints, ...datapoints]
+  //dataset.datapoints = [...dataset.datapoints, ...datapoints]
   //console.log("new datapoints before save", dataset.datapoints)
-  dataset.updated = Date.now()
+  //dataset.updated = Date.now()
   try {
     console.log("trying to save")
     const savedDataset = await dataset.save()
@@ -205,7 +205,7 @@ const createDatapoints = async (req, res) => {
     const nrNewDs = datapoints.length;
     const nrDs = savedDataset.datapoints.length;
     const newDatapoints = savedDataset.datapoints.slice(nrDs - nrNewDs, nrDs);
-    console.log("saved...newDatapoints", newDatapoints)
+    //console.log("saved...newDatapoints", newDatapoints)
     /*const sortedMostRecentFirst = savedDataset.datapoints.sort((d1, d2) => {
       const milli1 = new Date(d1.created).getTime()
       const milli2 = new Date(d2.created).getTime()

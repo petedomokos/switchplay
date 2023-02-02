@@ -286,7 +286,7 @@ export default function milestonesBarComponent() {
 
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
             function update(data, options={}){
-                //console.log("MBarComponent update....swip ", swipable, data.length)
+                console.log("MBarComponent update....swip ", swipable)
                 const { slideTransition, milestoneTransition } = options;
 
                 //milestone positioning
@@ -400,9 +400,9 @@ export default function milestonesBarComponent() {
                     })
 
                 drag
-                    .on("start", selectedMilestone ? null : enhancedDrag(dragStart))
-                    .on("drag", selectedMilestone ? null : enhancedDrag(dragged))
-                    .on("end", selectedMilestone ? null : enhancedDrag(dragEnd));
+                    .on("start", swipable ? enhancedDrag(dragStart) : null)
+                    .on("drag", swipable ? enhancedDrag(dragged) : null)
+                    .on("end", swipable ? enhancedDrag(dragEnd) : null);
                 
                 //click and dbl-click 
                 //todo: chrome mobile had no dbl-click so currently no difference if no dbl-click
@@ -628,18 +628,10 @@ export default function milestonesBarComponent() {
                         .transformTransition(milestoneTransition || (transitionOn ? transformTransition : { update:null })));
 
                 //scaling helpers - allows them to increase to full height or width including margin
-                /*console.log("height", height)
-                console.log("contentsH", contentsHeight)
-                console.log("milestonesh", milestonesHeight)
-                console.log("topBarH", topBarHeight)
-                console.log("scaleused", width > height ? "v" : "h")*/
                 const horizScale = width / profileWidth;
                 const vertScale = height / profileHeight;
                 const scale = d3.min([horizScale, vertScale]);
-                //also need to pass through max width and height to ensure not exceeded
 
-                // const horizScale = (profileWidth + (2 * hitSpace)) / profileWidth;
-                // const vertScale = (milestonesHeight + topBarHeight) / profileHeight;
                 profilesG
                     //.attr("transform", "translate(0, -20")
                     .datum(positionedData.filter(m => m.dataType === "profile"))

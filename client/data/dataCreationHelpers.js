@@ -1,5 +1,5 @@
 export function createDatapointsFromData(data, dataset){
-    console.log("createDsFromData", dataset)
+    console.log("createDsFromData", data, dataset)
     const nonValueCols = [
         "player",
         "players", 
@@ -19,13 +19,13 @@ export function createDatapointsFromData(data, dataset){
                 datapoint[col] = d[col];
             }
         })
-        // add value cols as a separate array
         datapoint.values = data.columns
             .filter(col => col && !nonValueCols.includes(col))
+            .filter(col => dataset.measures.find(m => m.key === col))
             .map(col => ({ 
                 //legacy - uses measureid
                 //warning - measure key may not be unique in legacy datasets
-                measure: dataset.measures.find(m => m.key === col)?._id,
+                measure: dataset.measures.find(m => m.key === col)._id,
                 value:d[col] 
             }))
 

@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
 //width and height may be full screen, but may not be
 const ImportData = ({ datasets, submit }) => {
   const [importState, setImportState] = useState("");
-  console.log("ImportData!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", datasets)
+  console.log("ImportData...datasets", datasets)
   const styleProps = { importState };
   const classes = useStyles(styleProps) 
 
@@ -70,18 +70,22 @@ const ImportData = ({ datasets, submit }) => {
       setImportState("");
       return;
     }
+    const filename = input.name.split(".")[0];
+    console.log("filename", filename)
+    //todo - name convention is as follows:
+    //part 1 ie nameParts[0] is import type
+    //parts 2 onwards are info identifiers for the specific import type
 
-    const nameParts = input.name.split("-");
-    const username = nameParts[0];
-    const datasetKey = nameParts[1];
-    const importType = nameParts[2].slice(0, nameParts[2].length - 4);
-    if(!username || !datasetKey || !importType){
-      alert("Sorry, the file name needs to be formatted as follows: [username]-[dataset key]-[import type]");
+    const nameParts = filename.split("-");
+    const importType = nameParts[0];
+    const info = nameParts.slice(1, nameParts.length);
+    if(!importType){
+      alert("Sorry, the file name must start with a valid import type");
       setImportState("");
       return;
     }
-    console.log("user dset type", username, datasetKey, importType)
-    
+    console.log("import_type", importType);
+    console.log("info", info);
     const reader = new FileReader();
     reader.onload = function (e) {
       const res = e.target.result;
@@ -89,18 +93,29 @@ const ImportData = ({ datasets, submit }) => {
       const parsedData = d3.csvParse(res);
       console.log("parsed", parsedData);
       if(importType === "datasets"){
-
+        //name convention for datasets is simply the ownername,
+        //and (optional) whether owner is a user or a group eg name-user or name-group
+        //part 2 (nameParts[1])
+        const ownerName = info[0];
+        const ownerType = info[1] || "user";
         console.log("save datasets")
       }else if(importType === "datapoints"){
-        //name convention: owner username - datasetKey - datapoints
+        //name convention: ownerName (user or group) - datasetKey
+        const ownerName = info[0];
+        const datasetKey = info[1];
 
         //check if combination of datasetKey/owner username is in the users administeredDatasets
         //if so, get the datasetId from it
         //note - it is possible that the signed in user is the owner but that
         //they also administer another dataset that they are not teh owber of that
         //has the same name, so need to check owner to get the right dataset
-        const dataset = datasets.find(dset => 
-          dset.owner.username === username && dset.key === datasetKey);
+        
+        //include mutually owned public datasets ie those that dont have owner
+        const isPublic = dset => !dset.userOwner && !dset.groupOwner;
+        const applicableDatasets = datasets
+          .filter(dset => isPublic(dset) || dset.userOwner === ownerName || dset.groupOwner === ownerName)
+        
+        const dataset = applicableDatasets.find(dset => dset.key === datasetKey);
         console.log("dataset", dataset)
 
         if(!dataset){
@@ -109,7 +124,7 @@ const ImportData = ({ datasets, submit }) => {
           return;
         }
         const datapoints = createDatapointsFromData(parsedData, dataset);
-        console.log("datapoints", datapoints)
+        console.log("datapoints", datapoints);
         submit(datapoints, importType, { datasetId:dataset._id })
 
         //then save datapoints to that dataset using correct url route

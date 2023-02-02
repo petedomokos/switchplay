@@ -23,7 +23,8 @@ const DatasetSchema = new mongoose.Schema({
   //datasetType:String,
   photo:{data:Buffer,contentType:String},
   //users who have admin rights over this dataset
-  owner:{type:mongoose.Schema.ObjectId, ref:'User'},
+  userOwner:{type:mongoose.Schema.ObjectId, ref:'User'},
+  groupOwner:{type:mongoose.Schema.ObjectId, ref:'User'},
   admin:[{type:mongoose.Schema.ObjectId, ref:'User'}],
   measures:[{type:DatasetMeasureSchema}],
   //todo - addDerivedmeasures here and remove calculations and change measures to rawmeasures

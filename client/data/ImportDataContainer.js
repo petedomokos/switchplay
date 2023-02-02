@@ -5,6 +5,7 @@ import ImportData from './ImportData';
 import { createDatapoints } from '../actions/DatapointActions'
 
 const mapStateToProps = (state, ownProps) => {
+	console.log("state user", state.user)
 	return({
 		datasets:state.user.administeredDatasets
 	})
