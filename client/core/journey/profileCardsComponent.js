@@ -168,7 +168,6 @@ export default function profileCardsComponent() {
                     transition:transformTransition.update 
                 })
                 .each(function(d){
-                    console.log("fonts", fontSizes.info)
                     const profileInfo = profileInfoComponents[d.id]
                         .width(contentsWidth)
                         .height(infoHeight)

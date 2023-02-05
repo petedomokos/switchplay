@@ -201,12 +201,19 @@ export default function barComponent() {
                                 //console.log("update bar i j editable",data, d, i, j, editable(data,i))
                                 const sectionWidth = scale(d.value) - scale(d.startValue);
                                 //adjust rect width to end - start
-                                d3.select(this).select("rect.bar-section")
-                                    .transition()
-                                    .duration(400)
+                                if(transitionUpdate){
+                                    d3.select(this).select("rect.bar-section")
+                                        .transition()
+                                        .duration(400)
+                                            .attr("width", sectionWidth)
+                                            .attr("height", barHeight)
+                                            .attr("fill", d.fill);
+                                }else{
+                                    d3.select(this).select("rect.bar-section")
                                         .attr("width", sectionWidth)
                                         .attr("height", barHeight)
                                         .attr("fill", d.fill);
+                                }
 
                                 //start in the middle if the handle is over the bar
                                 /*

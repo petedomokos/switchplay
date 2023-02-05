@@ -249,27 +249,31 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   }, [JSON.stringify(data)]);
 
   const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => {  
-    console.log("saveValue", valueObj, profileId, datasetKey, statKey, key)
+    //trouble - the unsaved value gets removed, and tehn an update to tooltips occurs
+    //before the saved value has been adjusted.
     //profile wont ever be current here, as that is dynamically created ratehr than stored
-    const profile = profiles.find(p => p.id === profileId);
+    const profile = profileId === "current" ? 
+      profiles.find(p => p.isFuture)
+      :
+      profiles.find(p => p.id === profileId);
+
     let statValue = {
       ...valueObj,
       datasetKey,
       statKey,
-      created:new Date(),
+      created:`${new Date()}`,
       //createdBy
       //approvedBy is empty at first
     }
-
     const updatedProfile = {
       ...profile,
       //for now, we store every single time a new target or expected value is created eg on every drag - good for user analytics anyway
       customTargets:key === "target" ? [ ...profile.customTargets, statValue ] : profile.customTargets,
       customExpected:key === "expected" ? [ ...profile.customExpected, statValue ] : profile.customExpected,
     }
-    const otherProfiles = profiles.filter(p => p.id !== profileId);
+    //cant use profileId as it may be 'current' which is not updated
+    const otherProfiles = profiles.filter(p => p.id !== updatedProfile.id);
     const _profiles = [ ...otherProfiles, updatedProfile]
-    console.log("profiles to save", _profiles)
     save({ ...data, profiles:_profiles });
     
   }, [JSON.stringify(data), user._id]);

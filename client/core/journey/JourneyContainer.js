@@ -145,8 +145,8 @@ const mapDispatchToProps = dispatch => ({
 			.map(dset => dset._id);
 		dispatch(fetchMultipleFullDatasets(datasetsToLoad, playerId))
 	},
-    save(journey, shouldPersist){
-		dispatch(saveJourney(journey, shouldPersist))
+    save(journey, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
+		dispatch(saveJourney(journey, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter))
 	},
 	setActive(journeyId){
 		dispatch(setActive(journeyId))

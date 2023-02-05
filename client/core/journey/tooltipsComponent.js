@@ -153,6 +153,7 @@ export default function tooltipsComponent() {
                     unsavedValues[d.progBarKey][d.key] = newValue;
                     d.unsavedValue = newValue;
                     d3.select(this).call(updateTooltip)
+                    onDrag.call(this, e, d, newValue);
                 }
 
                 function dragEnd(e,d){
@@ -171,7 +172,7 @@ export default function tooltipsComponent() {
                     //store the values as 'unsaved'
                     onDragEnd.call(this, e, d)
 
-                    //d3.select(this).call(updateTooltip); 
+                    d3.select(this).call(updateTooltip); 
                 }
 
                 //console.log("update.......", data)
@@ -185,9 +186,6 @@ export default function tooltipsComponent() {
                     .append("g")
                         .attr("class", "tooltip")
                         .each(function(){
-                            d3.select(this).append("rect").attr("class", "hitbox")
-                                .attr("fill", "transparent")
-
                             d3.select(this).append("text").attr("class", "drag-value")
                                 .attr("text-anchor", "middle")
                                 .attr("dominant-baseline", "central")
@@ -197,7 +195,10 @@ export default function tooltipsComponent() {
                                 .append("g")
                                     .attr("class", "icon-cont") 
                                         .append("g")
-                                            .attr("class", "icon") 
+                                            .attr("class", "icon")
+                            //hitbox must be on top, as contents under it will change              
+                            d3.select(this).append("rect").attr("class", "hitbox")
+                                .attr("fill", "transparent")
                         })
                         .merge(tooltipG)
                         .style("display", d => d.shouldDisplay ? null : "none")
@@ -250,21 +251,13 @@ export default function tooltipsComponent() {
                         const innerG = iconG.select("g");
                         innerG.style("opacity", isSmall && !isAchieved(d) ? 1 : 0.85)
 
-                        iconG.select(".inner-content").attr("display", shouldShowValue ? "none" : null)
-
-                        //iconG.attr("transform", "scale(2)")
                         if(icon.styles?.fill){
                             iconG.selectAll("*").style("fill", icon.styles.fill)
                         }
-                        if(shouldShowValue){
-                            iconG.select(".inner-overlay").attr("display", null)
-                        }
+                        iconG.select(".inner-overlay").attr("display", shouldShowValue ? null : "none")
                         
-                        iconG.selectAll(".net")
-                            .style("fill", "#f0f0f0")
-                        iconG.select(".posts")
-                            .style("fill", "#afafaf")
-
+                        iconG.selectAll(".net").style("fill", "#f0f0f0")
+                        iconG.select(".posts").style("fill", "#afafaf")
                         //value
                         // problem - this gets added mid-drag, so it doesnt have its opacity set to 0
                         const valueText = iconContG.selectAll("text.value").data(shouldShowValue ? [1] : [])
@@ -284,8 +277,7 @@ export default function tooltipsComponent() {
                                 .text(getValue(d) || "")
 
                         valueText.exit().remove();//need to also transition icon changes.call(remove)
-                    })
-                    
+                    })                    
                 }
 
             }

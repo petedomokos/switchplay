@@ -209,13 +209,32 @@ export default function progressBarComponent() {
                 .onClick(function(e,d){
                     //console.log("clicked", this, e, d)
                 })
+                .onDrag(function(e,d, newValue){
+                    const barAreaG = d3.select(this.parentNode.parentNode).select("g.bar-area")
+                    //@todo - can assume only 1 datum here, but cant always do this for a reusabel component
+                    const _d = barAreaG.data()[0]
+                    const newBarData = _d.barData.map(barD => {
+                        if(barD.key !== d.key) { return barD; }
+                        return {
+                            ...barD,
+                            value:newValue
+                        }
+                    });
+                    newBarData.start = _d.barData.start;
+                    newBarData.end = _d.barData.end;
+                    const newD = {
+                        ..._d,
+                        barData:newBarData
+                    }
+                    barAreaG.datum(newD).call(bar)
+                })
                 .onDragEnd(function(e, d){
-                    //console.log("d", d)
+                    console.log("dragEnd d", d)
                     //store the new value
                     //need each tooltip to have profilekey, kpikey and ley,
                     //and get rid of progBarKey
                     //assume format is actual for now
-                    const valueObj = { actual: d.unsavedValue, completion:"" };
+                    const valueObj = { actual: `${d.unsavedValue}`, completion:"" };
                     onSaveValue(valueObj, d.milestoneId, d.datasetKey, d.statKey, d.key)
                     //show a save btn
                 })
@@ -320,7 +339,7 @@ export default function progressBarComponent() {
     progressBar.onBarLongpressEnd = function (value) {
         if (!arguments.length) { return onBarLongpressEnd; }
         if(typeof value === "function"){
-            onBarLongpressEnd = value;
+            onBarLongpressEnd = value
         }
         return progressBar;
     };

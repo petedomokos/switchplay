@@ -136,7 +136,6 @@ export default function titleComponent() {
                     const nameG = contentsG.select("g.name")
                         .attr("transform", `translate(${nameX},${nameY})`);
 
-                    console.log("fill", styles.primaryTitle.fill)
                     nameG.select("text")
                         .attr("text-anchor", styles.primaryTitle.textAnchor)
                         .attr("dominant-baseline", styles.primaryTitle.dominantBaseline)

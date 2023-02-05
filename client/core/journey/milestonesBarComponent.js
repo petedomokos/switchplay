@@ -615,7 +615,8 @@ export default function milestonesBarComponent() {
                             .attr("stroke", grey10(5))
                             .attr("fill", grey10(5))
                             .attr("stroke-width", 0.3)
-                            .attr("font-size", 12)
+                            .attr("font-size", 14)
+                            .attr("font-family", "helvetica, sans-serifa")
                             .text(d => d.label)
 
                 //call profileCsrds abd contarcts comps, passing in a yscale that centres each one

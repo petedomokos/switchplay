@@ -217,7 +217,12 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
             const achieved = isPast ? current : null;
             const customTargetsForStat = customTargets.filter(t => t.datasetKey === datasetKey && t.statKey === statKey);
             const customTarget = d3.greatest(customTargetsForStat, d => d.created);
+            
             const parsedCustomTarget = customTarget ? { actual: Number(customTarget.actual), completion:Number(customTarget.completion) } : null;
+            
+            //2 possible causes of new targ not getting picked up
+            //date of new targ that hasnt gone thru server os a Date not a string
+            //actual and pc are numbers not strings
             const target = parsedCustomTarget || createTargetFromDefault(datasetKey, statKey, date, defaultTargets);
 
             return {
