@@ -46,7 +46,8 @@ export const fetchMultipleFullDatasets = (datasetIds, playerId) => dispatch => {
 			method:'PUT', 	
 			requireAuth:true,
 			body:JSON.stringify({ datasetIds:datasetIds, playerId:playerId }),
-            nextAction: data => {return {type:C.LOAD_DEEP_DATASETS, datasets:data}}
+            nextAction: data => {
+				return {type:C.LOAD_DEEP_DATASETS, datasets:data}}
         })
 }
 

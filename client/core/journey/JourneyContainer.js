@@ -80,7 +80,7 @@ const emptyJourney = user => ({
 })
 
 const mapStateToProps = (state, ownProps) => {
-	console.log("Container..........state", state.user._id)
+	//console.log("Container..........state", state.user._id)
     //const { journeyId }  = ownProps.match.params;state,
 	//for now, assume player is user, but need to attach playerId/coachId or groupId to each journey
 	const { _id, username, firstname, surname, journeys=[], homeJourney, loadedDatasets, datasetsMemberOf } = state.user;
@@ -90,7 +90,7 @@ const mapStateToProps = (state, ownProps) => {
 	const journeyId = state.system.activeJourney || homeJourney;
 	//console.log("JourneyCont journeyId", journeyId)
 	const _data = journeys.find(j => j._id === journeyId) || journeys[0] || emptyJourney(state.user);
-	console.log("JourneyContainer data", _data)
+	//console.log("JourneyContainer data", _data)
 	//add mock profiles the first time only (note - these must be turnd off before we enabled server-side persitance again)
 	//const mocksAdded = !!_data.profiles.find(p => p.id.includes("mock"));
 	//const data = mocksAdded ? _data : { ..._data, profiles:[..._data.profiles, ...mockProfiles] };
@@ -111,7 +111,7 @@ const mapStateToProps = (state, ownProps) => {
 	//console.log("areDatsetsLoaded??????????????????????", allDatasetsFullyLoaded)
 	
 	const hydratedData = hydrateJourneyData(data, state.user, fullyLoadedDatasets);
-	console.log("hydratedData", hydratedData)
+	//console.log("hydratedData", hydratedData)
 
 	return{
 		user,

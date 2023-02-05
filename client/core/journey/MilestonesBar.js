@@ -152,6 +152,16 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
 
 // clean up
 useEffect(() => {
+  /*
+  const a = 5 //-1;
+  const b = 0//5; we want small b as this is the constant increase component
+  const c = 10;
+
+  //const f = t => a * t * t + b * t + c;
+  const f = t => t <= 0 ? c : 1/(a * t) + c
+  const targs = d3.range(5).map(t => ([t, f(t), f(t-1) - f(t)]))
+  console.log("targs", targs)*/
+  
   return () => {
       //console.log('Do some cleanup!!!');
   }

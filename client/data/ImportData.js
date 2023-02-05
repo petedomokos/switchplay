@@ -125,7 +125,7 @@ const ImportData = ({ datasets, submit }) => {
         }
         const datapoints = createDatapointsFromData(parsedData, dataset);
         console.log("datapoints", datapoints);
-        submit(datapoints, importType, { datasetId:dataset._id })
+        //submit(datapoints, importType, { datasetId:dataset._id })
 
         //then save datapoints to that dataset using correct url route
         // eg /datasets/datasetId/datapoints/create or make oen that adds multiple datapoints

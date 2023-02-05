@@ -286,7 +286,7 @@ export default function milestonesBarComponent() {
 
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
             function update(data, options={}){
-                console.log("MBarComponent update....swip ", swipable)
+                // console.log("MBarComponent update....swip ", swipable)
                 const { slideTransition, milestoneTransition } = options;
 
                 //milestone positioning

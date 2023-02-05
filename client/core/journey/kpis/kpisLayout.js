@@ -23,13 +23,14 @@ export default function kpisLayout(){
         //console.log("ordered", orderedData)
 
         //temp to increase data
+        /*
         const _data = [...data, ...data, ...data, ...data]
             .map((kpi,i) => {
                 if(i <= 1) { return kpi;}
                 return { ...kpi, key:`${i}-${kpi.key}`}
-            });
+            });*/
         //1 only...const _data = [data[0]]
-        const kpisData = _data.map((kpi,i) => {
+        const kpisData = data.map((kpi,i) => {
            
             const { key, values, isPast, isCurrent, isFuture, milestoneId, datasetKey, statKey } = kpi;
             //can set all kpis to be active eg for an active profile card that doesnt have access to all data
@@ -105,7 +106,7 @@ export default function kpisLayout(){
                     //if no targetObj, this means there is no future active profile at all so no expected
                     shouldDisplay:!isPast && !!targetObj, //dont display if past or no future profiles
                     rowNr: 1, y: 1, current,
-                    value: expected, x:expected,
+                    value: 26/*expected*/, x:26,//expected,
                     icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },
                     editable:false//isCurrent || isFuture,
                     //smallIcons: expectedAchieved ? emptyGoal : emptyGoal,

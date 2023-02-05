@@ -18,16 +18,14 @@ const generalKpis = [
 const userKpis = {
    //Lewis
    "606b2f1f3eecde47d8864798":[
-      //press-ups in 1 min
       { datasetKey:"pressUps", statKey:"reps" },
       { datasetKey:"shuttles", statKey:"time" },
-      /*
       { datasetKey:"longJump", statKey:"distance-left" },
       { datasetKey:"longJump", statKey:"distance-right" },
       { datasetKey:"hurdleJumps1Min", statKey:"score" },
       { datasetKey:"shootingRightFoot", statKey:"score" },
       { datasetKey:"shootingLeftFoot", statKey:"score" },
-      { datasetKey:"game-Options", statKey:"score-1" },*/
+      { datasetKey:"game-Options", statKey:"score-1" },
    ]
 }
 

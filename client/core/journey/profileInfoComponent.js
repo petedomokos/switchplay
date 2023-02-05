@@ -84,16 +84,16 @@ export default function profileInfoComponent() {
 
             const format = d3.timeFormat("%_d %b, %y");
 
-            containerG.selectAll("text.date").data([data.date])
+            containerG.selectAll("text.date").data([data])
                 .join("text")
                     .attr("class", "date")
                     .attr("transform", "rotate(-45)")
                     .attr("x", - width * 0.1)
                     .attr("y", height * 0.19)
                     .attr("dominant-baseline", "hanging")
-                    .attr("fill", d => d <= new Date() ? "white" : "grey")
+                    .attr("fill", d => d.isFuture ? "grey" : "white")
                     .attr("font-size", fontSizes.date)
-                    .text(d => format(d))
+                    .text(d => d.isCurrent ? "TODAY" : format(d.date))
 
             const textInfoG = containerG.selectAll("g.text-info").data([data]);
             textInfoG.enter()

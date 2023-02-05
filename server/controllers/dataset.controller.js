@@ -89,7 +89,7 @@ const readMultiple = async (req, res) => {
   try{
       let datasets = await Dataset.find()
           .populate('datapoints.player', '_id firstname surname photo')
-      
+      console.log("datasets", datasets)
       const playerDatasets = datasets
         .filter(dset => req.body.datasetIds.find(id => dset._id.equals(id)))
       //cant use spread operator or functional style with mongoose
