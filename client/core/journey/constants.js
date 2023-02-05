@@ -66,7 +66,7 @@ export const FONTSIZES = {
             name:4 * k,
             age:6 * k,
             position: 3 * k,
-            date:5 * k
+            date:4 * k
         },
         kpis:{
             name:4 * k,

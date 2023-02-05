@@ -99,6 +99,7 @@ export default function titleComponent() {
                             .attr("class", "name")
                                 .append("text")
                                     .attr("font-size", styles.primaryTitle.fontSize) //init
+                                    .style("font-family", styles.primaryTitle.fontFamily)
 
                 })
                 .update(function(d,i){
@@ -135,6 +136,7 @@ export default function titleComponent() {
                     const nameG = contentsG.select("g.name")
                         .attr("transform", `translate(${nameX},${nameY})`);
 
+                    console.log("fill", styles.primaryTitle.fill)
                     nameG.select("text")
                         .attr("text-anchor", styles.primaryTitle.textAnchor)
                         .attr("dominant-baseline", styles.primaryTitle.dominantBaseline)
@@ -142,7 +144,7 @@ export default function titleComponent() {
                         .attr("stroke", styles.primaryTitle.stroke)
                         .attr("fill", styles.primaryTitle.fill)
                         .attr("stroke-width", styles.primaryTitle.strokeWidth)
-                        .text((i+1) + ". " +_primaryTitle(d))
+                        .text((`${i+1}. ${_primaryTitle(d)}`).toUpperCase())
   
                     nameG.select("text")
                         .transition()

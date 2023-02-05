@@ -161,6 +161,8 @@ export default function kpiComponent() {
                         strokeWidth:0.2,
                         ..._styles(d,i).name,
                         dominantBaseline:"central",
+                        fontFamily:"helvetica, sans-serifa",
+                        fill:grey10(4)
                     },
                     secondaryTitle:{
 

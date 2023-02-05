@@ -35,7 +35,8 @@ export default function profileCardsComponent() {
         info:{
             name:9,
             age:11,
-            position:8
+            position:8,
+            date:5
         },
         kpis:{
             name:9,
@@ -139,7 +140,7 @@ export default function profileCardsComponent() {
                             .attr("class", "bg")
                             .attr("rx", 3)
                             .attr("ry", 3)
-                            .attr("fill", d.isCurrent ? grey10(1) :grey10(2))
+                            .attr("fill", d.isCurrent ? "#FFFDFA" :grey10(2))
                             //.attr("stroke", "red")
                             //.attr("stroke-width", 5);
 
@@ -167,6 +168,7 @@ export default function profileCardsComponent() {
                     transition:transformTransition.update 
                 })
                 .each(function(d){
+                    console.log("fonts", fontSizes.info)
                     const profileInfo = profileInfoComponents[d.id]
                         .width(contentsWidth)
                         .height(infoHeight)

@@ -22,7 +22,7 @@ export default function profileInfoComponent() {
         name:9,
         age:11,
         position:8,
-        date:9
+        date:8
     };
 
     let editable;
@@ -93,6 +93,7 @@ export default function profileInfoComponent() {
                     .attr("dominant-baseline", "hanging")
                     .attr("fill", d => d.isFuture ? "grey" : "white")
                     .attr("font-size", fontSizes.date)
+                    .style("font-family", "helvetica, sans-serifa")
                     .text(d => d.isCurrent ? "TODAY" : format(d.date))
 
             const textInfoG = containerG.selectAll("g.text-info").data([data]);
@@ -116,15 +117,18 @@ export default function profileInfoComponent() {
                             .attr("dominant-baseline", "central")
                             .attr("stroke", "white")
                             .attr("stroke-width", 0.5)
+                            .style("font-family", "impact, sans-serifa")
                             .attr("fill", "white");
 
                         //OTHER TEXT: AGE AND POSITION
                         const otherTextInfoG = textInfoG.append("g").attr("class", "other-text-info");
                         otherTextInfoG.append("text").attr("class", "age")
-                            .attr("font-size", fontSizes.age);
+                            .attr("font-size", fontSizes.age)
+                            .style("font-family", "impact, sans-serifa");
 
                         otherTextInfoG.append("text").attr("class", "position")
-                            .attr("font-size", fontSizes.position);
+                            .attr("font-size", fontSizes.position)
+                            .style("font-family", "helvetica, sans-serifa");
 
                         otherTextInfoG.selectAll("text")
                             .attr("dominant-baseline", "central")
@@ -142,8 +146,14 @@ export default function profileInfoComponent() {
                     .merge(textInfoG)
                     .attr("transform", `translate(0, ${photoHeight})`)
                     .each(function(d){
-        
-                        const textMargin = { left: width * 0.1, right: width * 0.1 };
+                        const maxNrLetters = d3.max([d.firstname, d.surname], d => d.length);
+                        const marginReductionPerLetter = 0.02;
+                        const marginReduction = marginReductionPerLetter * maxNrLetters;
+                        //@todo - do this based on name length so its centred
+                        const textMargin = { 
+                            left: width * (0.3 - marginReduction), 
+                            right: width * (0.3 - marginReduction),
+                        };
 
                         const textInfoG = d3.select(this);
                         textInfoG.select("rect.bg")
