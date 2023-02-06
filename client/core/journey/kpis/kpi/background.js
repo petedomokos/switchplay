@@ -5,11 +5,14 @@ import dragEnhancements from '../../enhancedDragHandler';
 /*
 
 */
-export default function background() {
+export default function background(initKey) {
     //API SETTINGS
-    let key = "";
+    let key = initKey || "";
     let parentSelector = "";
     let parent = function(){ return d3.select(this); };
+    
+    let sharedClassName = key ? `bg ${key}-bg` : "bg";
+    let _className;
     // dimensions
     let DEFAULT_WIDTH = 0;
     let DEFAULT_HEIGHT = 0;
@@ -102,6 +105,15 @@ export default function background() {
             parent = function(){ return d3.select(this).select(parentSelector); }
         }else {
             parent = value;
+        }
+        return _background;
+    };
+    _background.className = function (value) {
+        if (!arguments.length) { return _className; }
+        if(typeof value === "string"){
+            sharedClassName = value;
+        }else{
+            _className = value;
         }
         return _background;
     };

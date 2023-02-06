@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { DIMNS, grey10 } from "../../constants";
 import dragEnhancements from '../../enhancedDragHandler';
 import container from './container';
+import background from "./background";
 
 /*
 
@@ -11,25 +12,15 @@ export default function closeComponent() {
     let parentSelector = "";
     let parent = function(){ return d3.select(this); };
     // dimensions
-    let DEFAULT_WIDTH = 30;
-    let DEFAULT_HEIGHT = 30;
-    let DEFAULT_MARGIN = { left: 0, right:0, top: 0, bottom: 0 };
+    let width = 30;
+    let height = 30;
+    let margin = { left: 0, right:0, top: 0, bottom: 0 };
     let contentsWidth;
     let contentsHeight;
-    let _width = DEFAULT_WIDTH;
-    let _height = DEFAULT_HEIGHT;
-    let _margin = DEFAULT_MARGIN;
 
-    function getDimns(d, i, data){
-        const width = typeof _width === "function" ? _width(d,i) : _width;
-        const height = typeof _height === "function" ? _height(d,i) : _height;
-        const margin = typeof _margin === "function" ? _margin(d,i) : _margin;
-        const contentsWidth = width - margin.left - margin.right;
-        const contentsHeight = height - margin.top - margin.bottom;
-
-        return {
-            width, height, margin, contentsWidth, contentsHeight,
-        }
+    function updateDimns(d, i, data){
+        contentsWidth = width - margin.left - margin.right;
+        contentsHeight = height - margin.top - margin.bottom;
     }
 
     const defaultStyles = {
@@ -55,57 +46,45 @@ export default function closeComponent() {
     //API CALLBACKS
     let onClick = function(){};
 
+    const ICON_LENGTH = 12;
+
     function close(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
+
+        updateDimns();
 
         // expression elements
         selection
             .style("cursor", "pointer")
-            .call(container()
-                .className("close-contents")
-                .transform(transform)
+            .call(background("close-btn")
+                .width((d,i) => width)
+                .height((d,i) => height)
+                .styles((d, i) => ({
+                    fill:"transparent"
+                }))
+            )
+            .on("click", onClick)
+            .call(container("close-contents")
                 .enter(function(d,i){
                     const contentsG = d3.select(this);
 
-                    contentsG
-                        .append("rect")
-                            .attr("class", "close-bg")
-                            .attr("stroke", "black")
-                            .attr("fill", "white");
-
-                    //for now, just have one bg rect for the whole close
-                    contentsG.append("text");
-
                     contentsG.append("path")
                         .attr("stroke", "#292929")
-                        .attr("stroke-width", "2.5")
+                        .attr("opacity", 0.7)
+                        .attr("stroke-width", "1.5")
                         .attr("stroke-linecap", "round")
                         .attr("stroke-linejoin", "round")
-                        .attr("d", "M7 7.00006L17 17.0001M7 17.0001L17 7.00006")
+                        .attr("d", "M1 1.00006L11 11.0001M1 11.0001L11 1.00006")
 
                 })
                 .update(function(d,i){
                     const styles = _styles(d, i);
-                    const { width, height }= getDimns(d, i);
                     const contentsG = d3.select(this)
-                        .on("click", onClick);
-
-                    contentsG.select("rect.close-bg")
-                        .attr("width", width)
-                        .attr("height", height)
-                        .attr("fill", styles.bg.fill)
-                        .attr("stroke", styles.bg.stroke)
-                    /*
-                    contentsG.select("text")
-                        .attr("x", width/2)
-                        .attr("y", height/2)
-                        .attr("text-anchor", "middle")
-                        .attr("dominant-baseline", "central")
-                        .attr("font-size", styles.text.fontSize)
-                        .attr("stroke", styles.text.stroke)
-                        .attr("fill", styles.text.fill)
-                        .attr("stroke-width", styles.text.strokeWidth)
-                        .text(text)*/
+                        .attr("transform", `translate(${margin.left},${margin.top})`);
+                    
+                    const horizScale = contentsWidth/ICON_LENGTH;
+                    const vertScale = contentsHeight/ICON_LENGTH;
+                    contentsG.select("path").attr("transform", `scale(${horizScale})`)
 
                 })
                 .exit(function(){
@@ -135,18 +114,18 @@ export default function closeComponent() {
         return close;
     };
     close.width = function (value) {
-        if (!arguments.length) { return _width; }
-        _width = value;
+        if (!arguments.length) { return width; }
+        width = value;
         return close;
     };
     close.height = function (value) {
-        if (!arguments.length) { return _height; }
-        _height = value;
+        if (!arguments.length) { return height; }
+        height = value;
         return close;
     };
-    close.margin = function (func) {
+    close.margin = function (value) {
         if (!arguments.length) { return _margin; }
-        _margin = (d,i) => ({ ...DEFAULT_MARGIN, ...func(d,i) })
+        margin = { ...margin, ...value }
         return close;
     };
     close.transform = function (value) {

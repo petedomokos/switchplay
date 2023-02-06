@@ -45,6 +45,7 @@ export default function kpisComponent() {
 
     let closeBtnWidth;
     let closeBtnHeight;
+    let closeBtnOuterMargin;
 
     let scrollMin;
     let scrollMax;
@@ -84,9 +85,11 @@ export default function kpisComponent() {
         gapBetweenKpis = kpiHeight * 0.15;
         kpiMargin = { top: gapBetweenKpis/2, bottom: gapBetweenKpis/2, left:0, right:0 }
 
-        closeBtnWidth = 20;// contentsWidth * 0.1;
+        closeBtnWidth = 40;// contentsWidth * 0.1;
         closeBtnHeight = closeBtnWidth;
-
+        closeBtnOuterMargin = { 
+            right: closeBtnWidth * 0.2, top:closeBtnHeight * 0.2
+        }
     }
 
     let fontSizes = {
@@ -135,10 +138,9 @@ export default function kpisComponent() {
 
     //dom
     let containerG;
-
     function kpis(selection, options={}) {
         //console.log("kpis update...........................")
-        const { transitionEnter=true, transitionUpdate=true, log} = options;
+        const { transitionEnter=true, transitionUpdate=true, log } = options;
 
         // expression elements
         selection.each(function (data,i) {
@@ -158,6 +160,27 @@ export default function kpisComponent() {
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
             containerG = d3.select(this);
+
+            //close kpi component
+            //helper
+            const openKpi = kpisData.find(d => status(d) === "open" || status(d) === "closing");
+            const closeData = openKpi ? [openKpi] : []
+            containerG.selectAll("g.close-kpi").data(closeData)
+                .join("g")
+                    .attr("class", "close-kpi")
+                    .attr("transform", `translate(${width - closeBtnWidth - closeBtnOuterMargin.right}, ${closeBtnOuterMargin.top})`)
+                    .call(closeComponent()
+                        .width(closeBtnWidth)
+                        .height(closeBtnHeight)
+                        .margin({ 
+                            left: closeBtnWidth * 0.2, right:closeBtnWidth * 0.2,
+                            top:closeBtnHeight * 0.2, bottom:closeBtnHeight * 0.2
+                        })
+                        .onClick((e, d) => {
+                            //false flag ensures scroll stays where it is
+                            updateSelected("", data, false, true);
+                            onUpdateSelected(d.milestoneId, null, true, true);
+                        }));
     
             const contentsG = containerG.selectAll("g.contents").data([1]);
             contentsG.enter()
@@ -322,6 +345,7 @@ export default function kpisComponent() {
                             )
                             .each(function(d,i){
                                 //close btn component
+                                /*
                                 const closeData = status(d) === "open" || status(d) === "closing" ? [1] : []
                                 d3.select(this).selectAll("g.close").data(closeData)
                                     .join("g")
@@ -334,7 +358,7 @@ export default function kpisComponent() {
                                                 //false flag ensures scroll stays where it is
                                                 updateSelected("", data, false, true);
                                                 onUpdateSelected(d.milestoneId, null, true, true);
-                                            }));
+                                            }));*/
                             })
                         //UPDATE ONLY
                         //kpiG.call(updateTransform, { x: d => 0, y: calcY, transition:{ duration:300, delay:400 } })
