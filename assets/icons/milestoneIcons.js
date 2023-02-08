@@ -64,7 +64,7 @@ export const shiningCrystalBall2 = {
     //these dimns are not inaccurate, and the one below too
     width:48,
     height:42,
-    xY:48/42,
+    xY:42/48,
     styles:{
         fill:"orange"
     }
@@ -85,7 +85,7 @@ export const nonShiningCrystalBall2 = {
     ,
     width:56,
     height:42,
-    xY:56/42
+    xY:42/56
 }
 
 
@@ -109,7 +109,7 @@ export const emptyGoal = {
     ,
     width:56,
     height:42,
-    xY:56/42
+    xY:42/56
 }
 
 export const goalWithBall = {
@@ -138,7 +138,7 @@ export const goalWithBall = {
     ,
     width:56,
     height:42,
-    xY:56/42
+    xY:42/56
 }
 
 export const ball = {

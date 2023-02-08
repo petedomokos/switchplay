@@ -98,7 +98,7 @@ export default function numbersComponent() {
                     fill:"transparent"
                 })))
             .each(function(d,i){
-                const { numberWidth, numberHeight, numberMargin, fontSize } = dimns[i];
+                const { numberWidth, numberHeight, numberMargin } = dimns[i];
                 //call a separate numberComponent for each kpi set of numbers, as these are grouped together logically
                 d3.select(this).selectAll("g.number").data(d)
                     .join("g")
@@ -108,7 +108,7 @@ export default function numbersComponent() {
                             .width(numberWidth)
                             .height(numberHeight)
                             .margin(numberMargin)
-                            .styles({ fontSize }));
+                            .styles({ fontSize:numberHeight * 0.8 }));
             })
     
         /*

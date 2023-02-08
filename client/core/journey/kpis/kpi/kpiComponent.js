@@ -46,25 +46,16 @@ export default function kpiComponent() {
             const contentsHeight = height - margin.top - margin.bottom;
 
             const titleDimns = _titleDimns(d,i);
-            //progressBar is bar, handles and tooltips
+
             const progressBarWidth = contentsWidth;
             const progressBarHeight = contentsHeight - titleDimns.height;
-            //todo - need to calc ALL kpi dimns together at start of kpisComponent
-            //so it can be passed down and accessed anywhere. for now we just manuall estimate
-            //teh margin needed on left to keep the tooltips in screen even when at the very end of bar
-            //const horizMarginSpaceForTooltips =
-            //@todo - only need left margin if expected is near bottom, or doesnt exist
-            const progressBarMargin = {
-                //base left margin on height, as that is what affects tooltips width
-                 //right has numbers anyway so no extra margin needed for tooltips as they are above numbers
-                left:progressBarHeight * 0.25, right:0,
-                top: progressBarHeight * 0.1, bottom: progressBarHeight * 0.1 
-            };
-
+            
+            const progressBarMargin = { left:progressBarHeight * 0.25, right: 0, top: 0, bottom: 0 };
+            //console.log("kpiH kpiCH titleH pbh", height, contentsHeight, titleDimns.height, progressBarHeight)
             dimns.push({
                 width, height, margin, contentsWidth, contentsHeight,
                 titleDimns,
-                progressBarWidth, progressBarHeight, progressBarMargin
+                progressBarWidth, progressBarHeight, progressBarMargin,
             })
         })
     }
@@ -215,7 +206,6 @@ export default function kpiComponent() {
                     })
 
             openContentsG.exit().call(remove, { transition:{ duration: CONTENT_FADE_DURATION }});
-
         })
         
         /*kpiContents.select("g.numbers")

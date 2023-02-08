@@ -173,8 +173,8 @@ export default function kpisComponent() {
                         .width(closeBtnWidth)
                         .height(closeBtnHeight)
                         .margin({ 
-                            left: closeBtnWidth * 0.2, right:closeBtnWidth * 0.2,
-                            top:closeBtnHeight * 0.2, bottom:closeBtnHeight * 0.2
+                            left: closeBtnWidth * 0.25, right:closeBtnWidth * 0.25,
+                            top:closeBtnHeight * 0.25, bottom:closeBtnHeight * 0.25
                         })
                         .onClick((e, d) => {
                             //false flag ensures scroll stays where it is

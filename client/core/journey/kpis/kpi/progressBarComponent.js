@@ -1,8 +1,9 @@
 import * as d3 from 'd3';
 import { DIMNS, grey10 } from "../../constants";
 import dragEnhancements from '../../enhancedDragHandler';
-import tooltipsComponent from '../../tooltipsComponent';
 import barComponent from './barComponent';
+import numbersComponent from './numbersComponent';
+import tooltipsComponent from '../../tooltipsComponent';
 import container from './container';
 import background from './background';
 import { getTransformationFromTrans } from '../../helpers';
@@ -28,19 +29,9 @@ export default function progressBarComponent() {
 
     let dimns = [];
     let xScales = {};
-
-    /*
-    function _dimns(d, i, data){
-        const width = _width(d,i)
-        const height = _height(d,i);
-        const margin = _margin(d,i);
-        const contentsWidth = width - margin.left - margin.right;
-        const contentsHeight = height - margin.top - margin.bottom;
-        return {
-            width, height, margin, contentsWidth, contentsHeight,
-        }
-    }
-    */
+    //state
+    let tooltipsLocation = "end";
+    //let tooltipsLocation = "dynamic"
 
     //per datum
     function updateDimns(data){
@@ -54,62 +45,121 @@ export default function progressBarComponent() {
             const margin = _margin(d,i);
             const contentsWidth = width - margin.left - margin.right;
             const contentsHeight = height - margin.top - margin.bottom;
-            //console.log("bar contentsH for ", i, contentsHeight)
-            //todo - also subtract space for tooltips above and below
-            const barComponentHeight = d3.min([20, contentsHeight * 0.2]);
-            const tooltipsTotalHeight = contentsHeight - barComponentHeight;
-            const tooltipHeight = tooltipsTotalHeight/nrTooltips;
 
-            const barComponentWidth = contentsWidth;
-            //build up widths from numbers
+            //@todo - can expand to have two top tooltips eg when we want current value to be editable
+            //and can expand end to include more than 2
+            //Note: we need height of dynamic tooltips, and width of endTooltips, for other calculations
+            //note - we make dynamicTooltipHeight 0 too, so it doesnt incorrectly affect calculations lower down
+            const nrTopTooltips = tooltipsLocation === "end" ? 0 : 1;
+            const nrBottomTooltips = tooltipsLocation === "end" ? 0 : 1;
+            const dynamicTooltipHeight = tooltipsLocation === "end" ? 0 : contentsHeight * 0.2;
+            const topTooltipsHeight = dynamicTooltipHeight * nrTopTooltips;
+            const bottomTooltipsHeight = dynamicTooltipHeight * nrBottomTooltips;
+            
+            //for now, hardcode aspect ratios as we know there are two tooltips
+            const expectedTooltipAspectRatio = 1; //this is approx, as the shiny one is not exactly 1
+            const targetTooltipAspectRatio = 42/56;
+            //end tooltips
+            //@todo next
+            //tooltip and numbers heights can go all the way to the top ad bottom of progBar
+            const endTooltipsHeight = contentsHeight;
+            const endExpectedTooltipWidth = endTooltipsHeight / expectedTooltipAspectRatio;
+            const endTargetTooltipWidth = endTooltipsHeight / targetTooltipAspectRatio;
+            //dynamic tooltips (top and bottom)
+            const topExpectedTooltipWidth = dynamicTooltipHeight / expectedTooltipAspectRatio;
+            const bottomTargetTooltipWidth = dynamicTooltipHeight / targetTooltipAspectRatio;
+            const endToolTipsMarginLeft = 10;
+            const endTooltipsWidth = endExpectedTooltipWidth + endTargetTooltipWidth + endToolTipsMarginLeft;
+
+            //BAR COMPONENT (BAR AND NUMBERS)
+            //numbers 
             //group numbers into 1, 2 or 3 cols
             const nrNumbers = numbersData.length
             let nrNumberCols = nrNumbers;
             if(nrNumbers > 3){
                 nrNumberCols = nrNumberCols % 3 === 0 ? 3 :(nrNumbers % 2 === 0 ? 2 : 1)
             }
-            const numberWidth = barComponentWidth * 0.2;
-            const numbersWidth = nrNumberCols * numberWidth;
-            const barWidth = barComponentWidth - numbersWidth;
-
-            const targetTooltipWidth = tooltipHeight * 1.3;
-            const expectedTooltipWidth = tooltipHeight;
-
-            //tooltips must use same scale as bar, so range is same
-            const tooltipsWidth = barWidth;
-            //target margins
-            const targetTooltipMargin = {
-                left:targetTooltipWidth * 0.25, 
-                right:targetTooltipWidth * 0.25, 
-                top:tooltipHeight * 0.15, 
-                bottom:tooltipHeight * 0.15
-            }
-            //expected margins
-            const expectedTooltipMargin = {
-                left:expectedTooltipWidth * 0.15, 
-                right:expectedTooltipWidth * 0.15,
-                top:tooltipHeight * 0.15, 
-                bottom:tooltipHeight * 0.15
+            // width is built bottom up, whereas height is top down
+            const numberWidth = contentsWidth * 0.2;
+            const numbersContentsWidth = nrNumberCols * numberWidth;
+            const numbersMargin = { left: numbersContentsWidth * 0.1, right:0, top:0, bottom:0 };
+            const numbersWidth = numbersContentsWidth + numbersMargin.left + numbersMargin.right;
+            const numbersHeight = contentsHeight;
+            const numbers = {
+                width:numbersWidth,
+                height:numbersHeight,
+                margin:numbersMargin,
             }
 
-            const targetTooltipDimns = { 
-                width:targetTooltipWidth, height:tooltipHeight,
-                contentsWidth: targetTooltipWidth - targetTooltipMargin.left - targetTooltipMargin.right, 
-                contentsHeight:tooltipHeight - targetTooltipMargin.top - targetTooltipMargin.bottom,
-                margin:targetTooltipMargin
+            //bar
+            const barWidth = contentsWidth - endTooltipsWidth - numbersWidth;
+            const barHeight = contentsHeight - topTooltipsHeight - bottomTooltipsHeight;
+            const bar = {
+                width:barWidth,
+                height:barHeight,
+                margin:{ 
+                    left: barWidth * 0,
+                    right: barWidth * 0,
+                    top:barHeight * 0.33,
+                    bottom:barHeight * 0.33
+                }
             }
-            const expectedTooltipDimns = { 
-                width: expectedTooltipWidth, height:tooltipHeight,
-                contentsWidth:expectedTooltipWidth - expectedTooltipMargin.left - expectedTooltipMargin.right, 
-                contentsHeight:tooltipHeight - expectedTooltipMargin.top - expectedTooltipMargin.bottom,
-                margin:expectedTooltipMargin
+
+            const tooltips = {
+                dynamic:[
+                    {
+                        width:topExpectedTooltipWidth,
+                        height:topTooltipsHeight,
+                        margin: { 
+                            left:0,
+                            right:0,
+                            top:topTooltipsHeight * 0.15,
+                            bottom:topTooltipsHeight * 0.15
+                        }
+                    },
+                    //target
+                    {
+                        width:bottomTargetTooltipWidth, //target is wider
+                        height:bottomTooltipsHeight,
+                        margin: { 
+                            left:bottomTargetTooltipWidth * 0.15,
+                            right:bottomTargetTooltipWidth * 0.15,
+                            top:bottomTooltipsHeight * 0.15,
+                            bottom:bottomTooltipsHeight * 0.15
+                        }
+            
+                    },
+                ],
+                //both
+                end:[
+                    //expected
+                    {
+                        width:endExpectedTooltipWidth,
+                        height:endTooltipsHeight,
+                        margin: { 
+                            left:endExpectedTooltipWidth * 0.15,
+                            right:endExpectedTooltipWidth * 0.15,
+                            top:0,//endTooltipsHeight * 0.15,
+                            bottom:0//endTooltipsHeight * 0.15
+                        }
+                    },
+                    //target
+                    {
+                        width:endTargetTooltipWidth,
+                        height:endTooltipsHeight,
+                        margin: { 
+                            left:endTargetTooltipWidth * 0.15,
+                            right:endTargetTooltipWidth * 0.15,
+                            top:0,//endTooltipsHeight * 0.15,
+                            bottom:0//endTooltipsHeight * 0.15
+                        }
+                    }
+                ] 
             }
-            const tooltipDimns = { target: targetTooltipDimns, expected:expectedTooltipDimns };
+
             dimns.push({
                 width, height, margin, contentsWidth, contentsHeight,
-                barComponentWidth, barComponentHeight,
-                barWidth,
-                tooltipDimns, tooltipHeight
+                bar, numbers, tooltips, topTooltipsHeight, endToolTipsMarginLeft
             })
             //SCALES
             //xScale (ie bar scale) set here as it is used by tooltips too
@@ -156,6 +206,7 @@ export default function progressBarComponent() {
     const enhancedDrag = dragEnhancements();
     const tooltips = tooltipsComponent();
     const bar = barComponent();
+    const numbers = numbersComponent();
 
     function progressBar(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
@@ -174,37 +225,75 @@ export default function progressBarComponent() {
                     stroke:"none",
                     fill:_styles(d).bg?.fill || "transparent"
                 })))
+            .call(container("bar")
+                .transform((d,i) => `translate(0,${dimns[i].topTooltipsHeight})`)
+            )
+            .call(container("numbers")
+                .transform((d,i) => `translate(${dimns[i].bar.width},${dimns[i].topTooltipsHeight})`)
+            )
             .call(container("tooltips")
                 //.transform((d,i) => `translate(${_margin(d,i).left},${_margin(d,i).top})`)
             )
-            .call(container("bar-area")
-                //.transform((d,i) => `translate(0,${_upperTooltipsHeight(d,i)})`)
-                .transform((d,i) => `translate(0,${dimns[i].tooltipHeight})`)
-            )
         
-        selection.select("g.bar-area")
+        selection.select("g.bar")
             //.data(selection.data().map(d => d.barData))
             .call(bar
-                .width((d,i) => dimns[i].barComponentWidth)
-                .height((d,i) => dimns[i].barComponentHeight)
+                .width((d,i) => dimns[i].bar.width)
+                .height((d,i) => dimns[i].bar.height)
+                .margin((d,i) => dimns[i].bar.margin)
                 .scale((d,i) => xScales[d.key])
                 .editable(editable)
             , { transitionEnter, transitionUpdate} )
 
-        const enrichedTooltipsData = selection.data().map(d => d.tooltipsData.map(t => ({ ...t, progBarKey: d.key })))
+        selection.select("g.numbers")
+            .data(selection.data().map(d => d.numbersData))
+            .call(numbers
+                .width((d,i) => dimns[i].numbers.width)
+                .height((d,i) => dimns[i].numbers.height)
+                .margin((d,i) => dimns[i].numbers.margin));
+
+
+        //helper to get value
+        const getValue = d => typeof d.unsavedValue === "number" ? d.unsavedValue : d.value;
+        
+        const enrichedTooltipsData = selection.data().map(d => d.tooltipsData.map(t => ({ ...t, progBarKey: d.key })));
+        //issue - the i in getX below is teh tooltip i, eg target, expected, rther than the kpi i,
+        //which is what dimnns needs
         selection.select("g.tooltips")
             .data(enrichedTooltipsData)
         //pass in tooltips data
         //error - this same component is being called for very single kpi...need to look back at pattern
         //how am i doing it ?
             .call(tooltips
-                .width((d,i) => dimns[i].barWidth)
+                .width((d,i) => dimns[i].contentsWidth)
                 .height((d,i) => dimns[i].contentsHeight)
                 //bug when open, tooltipdimns dont increase
-                .tooltipDimns((d,i) => dimns[i].tooltipDimns)
-                .xScale(d => xScales[d[0]?.progBarKey])
+                .tooltipDimns((d,i) => dimns[i].tooltips[tooltipsLocation])
+                //this is when open
+                .getValue(getValue)
+                .getX((d,i,j) =>{
+                    //i is kpi index, j is tooltip datum index
+                    if(tooltipsLocation === "dynamic"){
+                        const value = getValue(d);
+                        const scale = xScales[d.progBarKey];
+                        return scale(value) || scale.range()[0];
+                    }
+                    const extraHorizGap = 0;// 20;
+                    if(d.key === "expected"){
+                        return dimns[i].bar.width + dimns[i].numbers.width + dimns[i].endToolTipsMarginLeft + dimns[i].tooltips.end[0].width/2;
+                    }
+                    return dimns[i].bar.width + dimns[i].numbers.width + dimns[i].endToolTipsMarginLeft + dimns[i].tooltips.end[0].width + dimns[i].tooltips.end[1].width/2;
+                })
                 //y is 1 or -1
-                .yScale((d,i) => (rowNr) => rowNr === 1 ? 0.5 * dimns[i].tooltipHeight : (1.5 * dimns[i].tooltipHeight + dimns[i].barComponentHeight))
+                .getY((d,i) => {
+                    if(tooltipsLocation === "dynamic"){
+                        if(d.key === "expected"){
+                            return 0.5 * dimns[i].tooltips.top[0].height;
+                        }
+                        return dimns[i].contentsHeight - 0.5 * dimns[i].tooltips.dynamic[1].height;
+                    }
+                    return dimns[i].tooltips.dynamic[0].height + dimns[i].bar.height/2;
+                })
                 .draggable(editable)
                 .onClick(function(e,d){
                     //console.log("clicked", this, e, d)
@@ -317,6 +406,11 @@ export default function progressBarComponent() {
         }else{
             fixedDomain = value;
         }
+        return progressBar;
+    };
+    progressBar.tooltipsLocation = function (value) {
+        if (!arguments.length) { return tooltipsLocation; }
+        tooltipsLocation = value;
         return progressBar;
     };
     progressBar.onBarClick = function (value) {

@@ -27,8 +27,10 @@ export default function tooltipsComponent() {
 
     //function updateDimns(){
     //};
-    let _xScale = () => () => 0;
-    let _yScale = () => () => 0;
+    let getX = () => () => 0;
+    let getY = () => () => 0;
+    let getValue = d => d.value;
+
     const DEFAULT_TOOLTIP_DIMNS = { 
         target: { width:0, height: 0, margin:{left:0, right:0, top:0, bottom:0 } },
         expected: { width:0, height: 0, margin:{left:0, right:0, top:0, bottom:0 } },
@@ -41,10 +43,7 @@ export default function tooltipsComponent() {
     //state
     let hovered;
     let unsavedValues = {}
-    let getUnsavedValue = d => d.unsavedValue;// unsavedValues[d.progBarKey] ? unsavedValues[d.progBarKey][d.key] : null;
-    //for now, x and value are same
-    let getValue = d => typeof getUnsavedValue(d) === "number" ? getUnsavedValue(d) : d.value;
-    let getX = d => getValue(d);
+
     let isAchieved = d => typeof d.current === "number" && typeof getValue(d) === "number" && d.current >= getValue(d);
 
     let draggable = false;
@@ -69,8 +68,6 @@ export default function tooltipsComponent() {
         //console.log("tooltips update  ", selection.data())
         //specific tooltip updates
         selection.each(function(data,i){
-            const xScale = _xScale(data,i);
-            const yScale = _yScale(data,i);
             const tooltipDimns = _tooltipDimns(data, i);
             const containerG = d3.select(this);
                 //.attr("pointer-events", "none");
@@ -140,10 +137,11 @@ export default function tooltipsComponent() {
 
                 function dragged(e,d){
                     if(!d.editable) { return; }                       
-                    //console.log("xScale dom range", xScale.domain(), xScale.range())
                     const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
-                    //console.log("currX currVal", translateX, xScale.invert(translateX))
                     const newX = translateX + e.dx;
+                    //problem - now we dont have xScale, how do e invert? could pass it all up so tooltipsComponent
+                    //doesnt handle drags,
+                    //or could have an invert setting passed in too.
                     const newValue = Number(xScale.invert(newX).toFixed(1));
                     d3.select(this).attr("transform", `translate(${newX},${translateY})`)
                     //@todo - handle dataset order eg lowest-is-best
@@ -185,7 +183,7 @@ export default function tooltipsComponent() {
                 tooltipG.enter()
                     .append("g")
                         .attr("class", "tooltip")
-                        .each(function(){
+                        .each(function(d,i){
                             d3.select(this).append("text").attr("class", "drag-value")
                                 .attr("text-anchor", "middle")
                                 .attr("dominant-baseline", "central")
@@ -202,7 +200,8 @@ export default function tooltipsComponent() {
                         })
                         .merge(tooltipG)
                         .style("display", d => d.shouldDisplay ? null : "none")
-                        .attr("transform", (d,i) => `translate(${xScale(getX(d)) || xScale.range()[0]}, ${yScale(d.y)})`)
+                        //i is the data's i, not the tooltip datum's i
+                        .attr("transform", (d,j) => `translate(${getX(d, i, j)}, ${getY(d, i, j)})`)
                         .call(updateTooltip)
                         .call(drag)
                         .on("mouseover", onMouseover)
@@ -216,9 +215,13 @@ export default function tooltipsComponent() {
 
                 function updateTooltip(selection){
                     selection.each(function(d,i){
+                        //decide the saem common pattern for tooltips - it should probably always be
+                        //an array, even if its top then bottom
                         const tooltipG = d3.select(this);
-                        const { height, contentsWidth, contentsHeight } = tooltipDimns[d.key];
+                        const { width, height, margin } = tooltipDimns[i];
                         const dragTextHeight = draggable && showDragValueAbove ? contentsHeight * 0.333 : 0;
+                        const contentsWidth = width - margin.left - margin.right;
+                        const contentsHeight = height - margin.top - margin.bottom;
                         const iconHeight = contentsHeight - dragTextHeight;
 
                         tooltipG.select("rect.hitbox")
@@ -270,7 +273,7 @@ export default function tooltipsComponent() {
                                 .merge(valueText)
                                 .attr("y", d.key === "expected" ? -contentsWidth * 0.1 : 0)
                                 //temp - use width, not contentsW, so all tooltip fonts the same
-                                .attr("font-size", height * 0.175)
+                                .attr("font-size", contentsHeight * 0.4)
                                 .attr("stroke", grey10(6))
                                 .attr("fill", grey10(6))
                                 .attr("stroke-width", 0.1)
@@ -299,17 +302,22 @@ export default function tooltipsComponent() {
     };
     tooltips.tooltipDimns = function (func) {
         if (!arguments.length) { return _tooltipDimns; }
-        _tooltipDimns = (d,i) => ({ ...DEFAULT_TOOLTIP_DIMNS, ...func(d,i) });
+        _tooltipDimns = (d,i) => func(d,i) || DEFAULT_TOOLTIP_DIMNS;
         return tooltips;
     };
-    tooltips.xScale = function (value) {
-        if (!arguments.length) { return _xScale; }
-        _xScale = value;
+    tooltips.getValue = function (value) {
+        if (!arguments.length) { return getValue; }
+        getValue = value;
         return tooltips;
     };
-    tooltips.yScale = function (value) {
-        if (!arguments.length) { return _yScale; }
-        _yScale = value;
+    tooltips.getX = function (value) {
+        if (!arguments.length) { return getX; }
+        getX = value;
+        return tooltips;
+    };
+    tooltips.getY = function (value) {
+        if (!arguments.length) { return getY; }
+        getY = value;
         return tooltips;
     };
     tooltips.styles = function (value) {

@@ -3,9 +3,7 @@ import { DIMNS, grey10 } from "../../constants";
 import dragEnhancements from '../../enhancedDragHandler';
 import container from './container';
 import background from './background';
-import handle from "./handle";
 import remove from "./remove";
-import numbersComponent from './numbersComponent';
 
 /*
 
@@ -17,16 +15,12 @@ export default function barComponent() {
     // dimensions
     let DEFAULT_WIDTH = 100;
     let DEFAULT_HEIGHT = 30;
+    let DEFAULT_MARGIN = { left:0, right:0, top:0, bottom:0 }
     let _width = () => DEFAULT_WIDTH;
     let _height = () => DEFAULT_HEIGHT;
     let _margin = () => DEFAULT_MARGIN;
 
-    let _barWidth = () => 10;
-    let _barHeight = () => 10;
-
     let _scale;
-
-    let handleHeightFactor = 0.333;
 
     let dimns = [];
 
@@ -45,41 +39,12 @@ export default function barComponent() {
             const { barData, numbersData } = d;
             const width = _width(d,i)
             const height = _height(d,i);
-            //bar and handles
-            const withHandles = height > 5 && !!barData.find(d => d.handle);
-            const withTopHandles = withHandles && !!barData.find(d => ["above", "over"].includes(d.handle.pos));
-            const withBottomHandles = withHandles && !!barData.find(d => ["below", "over"].includes(d.handle.pos));
-
-            const handleHeight = height * handleHeightFactor;
-            const handleWidth = handleHeight * 0.6;
-
-            const spaceForHandles = (withTopHandles ? handleHeight : 0) + (withBottomHandles ? handleHeight : 0);
-
-            //group numbers into 1, 2 or 3 cols
-            const nrNumbers = numbersData.length
-            let nrNumberCols = nrNumbers;
-            if(nrNumbers > 3){
-                nrNumberCols = nrNumberCols % 3 === 0 ? 3 :(nrNumbers % 2 === 0 ? 2 : 1)
-            }
-            //build up widths from numbers
-            const numberWidth = width * 0.2;
-            const numbersWidth = nrNumberCols * numberWidth;
-            const barWidth = width - numbersWidth;
-            const barHeight = height - spaceForHandles;
-
-            //numbers
-            //need to numbers to be centred on the bar, even if only top handles
-            const numbersHeight = height;
-            const numbersMargin = { 
-                left: numbersWidth * 0, right: numbersWidth * 0, 
-                top: numbersHeight * 0, bottom:numbersHeight * 0
-            };
+            const margin = _margin(d,i);
+            const contentsWidth = width - margin.left - margin.right;
+            const contentsHeight = height - margin.top - margin.bottom;
 
             dimns.push({
-                width, height,
-                barWidth, barHeight,
-                numbersWidth, numbersHeight, numbersMargin,
-                withHandles, withTopHandles, withBottomHandles, handleWidth, handleHeight,
+                width, height, margin, contentsWidth, contentsHeight,
             })
 
             //scales - can either be passed in via _scale or is determined here
@@ -95,7 +60,7 @@ export default function barComponent() {
                 const extent = [barData.start, barData.end]
                 scales[i]
                     .domain(extent)
-                    .range([0, barWidth])*/
+                    .range([0, contentsWidth])*/
             }
             
             //error mesg
@@ -127,7 +92,6 @@ export default function barComponent() {
 
     //extensions and components
     const enhancedDrag = dragEnhancements();
-    const numbers = numbersComponent();
 
     function bar(selection, options={}) {
         const { transitionEnter=false, transitionUpdate=false, log} = options;
@@ -138,33 +102,13 @@ export default function barComponent() {
         // expression elements
         selection
             .call(container("bar-contents")
-                .transform((d,i) => {
-                    const { withTopHandles, handleHeight } = dimns[i];
-                    return `translate(${0},${withTopHandles ? handleHeight : 0})`
-                }));
-        
-        selection.select("g.bar-contents")
-            .call(container("main-bar"))
-            .call(container("numbers")
-                .transform((d,i) => {
-                    const { barWidth, withTopHandles, withBottomHandles, handleHeight } = dimns[i];
-                    //shift numbers up for handles, and by half if there are only top or bot handles
-                    let extraYShift = 0;
-                    if(withTopHandles && withBottomHandles){
-                        extraYShift = -handleHeight
-                    }else if(withTopHandles){
-                        extraYShift = -handleHeight/2
-                    }else if(withBottomHandles){
-                        extraYShift = +handleHeight/2
-                    }
-                    return `translate(${barWidth},${extraYShift})`
-                }))
+                .transform((d,i) => `translate(${dimns[i].margin.left},${dimns[i].margin.top})`));
 
         //main-bar
-        selection.select("g.main-bar")
+        selection.select("g.bar-contents")
             .call(background()
-                .width((d,i) => dimns[i].barWidth)
-                .height((d,i) => dimns[i].barHeight)
+                .width((d,i) => dimns[i].contentsWidth)
+                .height((d,i) => dimns[i].contentsHeight)
                 .styles((d, i) => ({
                     stroke:"grey",
                     strokeWidth:0.3
@@ -173,7 +117,7 @@ export default function barComponent() {
             .each(function(data,i){
                 //console.log("data key edit", data, data.key, editable(data))
                 const { barData } = data;
-                const { withHandles, handleHeight, handleWidth,width, barWidth, barHeight } = dimns[i];
+                const { contentsWidth, contentsHeight } = dimns[i];
                 const scale = scales[i];
                 const styles = _styles(data,i);
 
@@ -192,7 +136,7 @@ export default function barComponent() {
                                         .attr("class", "bar-section")
                                         .attr("pointer-events", "none")
                                         .attr("width", sectionWidth)
-                                        .attr("height", barHeight)
+                                        .attr("height", contentsHeight)
                                         .attr("fill", d.fill);;
                             })
                             .merge(barSectionG)
@@ -206,40 +150,14 @@ export default function barComponent() {
                                         .transition()
                                         .duration(400)
                                             .attr("width", sectionWidth)
-                                            .attr("height", barHeight)
+                                            .attr("height", contentsHeight)
                                             .attr("fill", d.fill);
                                 }else{
                                     d3.select(this).select("rect.bar-section")
                                         .attr("width", sectionWidth)
-                                        .attr("height", barHeight)
+                                        .attr("height", contentsHeight)
                                         .attr("fill", d.fill);
                                 }
-
-                                //start in the middle if the handle is over the bar
-                                /*
-                                const { pos } = d.handle;
-                                const handleStartY = pos === "below" ? barHeight : (pos === "over" ? barHeight/2 : 0);
-                                const handleDimns = {
-                                    width:handleWidth,
-                                    //if its over, then it goes above and below the bar by half the handleHeight 
-                                    height:pos === "over" ? handleHeight + barHeight : handleHeight
-                                }
-
-                                //adjust handleG to be at the end of the section, and above or below
-                                const handleG = d3.select(this).selectAll("g.handle").data(withHandles ? [d.handle] : []);
-                                handleG.enter()
-                                    .append("g")
-                                        .attr("class", "handle")
-                                        .call(handle.enter)
-                                        .merge(handleG)
-                                        .attr("transform", `translate(${sectionWidth},${handleStartY})`)
-                                        .style("cursor", editable ? "pointer" : "default")
-                                        .call(handle.update, handleDimns)
-
-                                handleG.exit().call(remove)
-                                */
-                                
-
                             })
 
                 barSectionG.exit().call(remove);
@@ -252,19 +170,12 @@ export default function barComponent() {
                         .attr("text-anchor", "middle")
                         .attr("dominant-baseline", "central")
                         .attr("pointer-events", "none")
-                        .attr("x", barWidth/2)
-                        .attr("y", barHeight/2)
-                        .attr("font-size", barHeight * 0.7)
+                        .attr("x", contentsWidth/2)
+                        .attr("y", contentsHeight/2)
+                        .attr("font-size", contentsHeight * 0.7)
                         .text(d => d);
 
             })
-        //numbers
-        selection.select("g.numbers")
-            .data(selection.data().map(d => d.numbersData))
-            .call(numbers
-                .width((d,i) => dimns[i].numbersWidth)
-                .height((d,i) => dimns[i].numbersHeight)
-                .margin((d,i) => dimns[i].numbersMargin));
 
         return selection;
     }
@@ -299,6 +210,11 @@ export default function barComponent() {
         _height = value;
         return bar;
     };
+    bar.margin = function (func) {
+        if (!arguments.length) { return _margin; }
+        _margin = (d,i) => ({ ...DEFAULT_MARGIN, ...func(d,i) })
+        return bar;
+    };
     bar.scale = function (value) {
         if (!arguments.length) { return _scale; }
         _scale = value;
@@ -307,11 +223,6 @@ export default function barComponent() {
     bar.handleHeightFactor = function (value) {
         if (!arguments.length) { return _handleHeightFactor; }
         handleHeightFactor = value;
-        return bar;
-    };
-    bar.margin = function (func) {
-        if (!arguments.length) { return _margin; }
-        _margin = (d,i) => ({ ...DEFAULT_MARGIN, ...func(d,i) })
         return bar;
     };
     bar.transform = function (value) {
