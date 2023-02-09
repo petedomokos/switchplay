@@ -67,16 +67,18 @@ export default function progressBarComponent() {
             const topTooltipsHeight = dynamicTooltipHeight * nrTopTooltips;
             const bottomTooltipsHeight = dynamicTooltipHeight * nrBottomTooltips;
             
+            //we want expecetd icon to be a bit bigger die to its circular shape
+            const expectedMultiplier = 1.3;
             //for now, hardcode aspect ratios as we know there are two tooltips
             const expectedTooltipAspectRatio = 1; //this is approx, as the shiny one is not exactly 1
             const targetTooltipAspectRatio = 42/56;
             //end tooltips
             //@todo next
             //tooltip and numbers heights can go all the way to the top ad bottom of progBar
-            const endExpectedTooltipWidth = endTooltipsHeight / expectedTooltipAspectRatio;
+            const endExpectedTooltipWidth = (endTooltipsHeight) / expectedTooltipAspectRatio;
             const endTargetTooltipWidth = endTooltipsHeight / targetTooltipAspectRatio;
             //dynamic tooltips (top and bottom)
-            const topExpectedTooltipWidth = dynamicTooltipHeight / expectedTooltipAspectRatio;
+            const topExpectedTooltipWidth = (dynamicTooltipHeight) / expectedTooltipAspectRatio;
             const bottomTargetTooltipWidth = dynamicTooltipHeight / targetTooltipAspectRatio;
             
             const endTooltipsWidth = endExpectedTooltipWidth + endTargetTooltipWidth + endToolTipsMarginLeft;
@@ -130,17 +132,20 @@ export default function progressBarComponent() {
                 }
             }
 
+            //define fontsize here so it is not increased by the expectedMultiplier
+            const fontSize = tooltipsLocation === "end" ? endTooltipsHeight * 0.45 : dynamicTooltipHeight * 0.2;
             const tooltips = {
                 dynamic:[
                     {
-                        width:topExpectedTooltipWidth,
-                        height:topTooltipsHeight,
+                        width:topExpectedTooltipWidth * expectedMultiplier,
+                        height:topTooltipsHeight * expectedMultiplier,
                         margin: { 
                             left:0,
                             right:0,
                             top:topTooltipsHeight * 0.15,
                             bottom:topTooltipsHeight * 0.15
-                        }
+                        },
+                        fontSize
                     },
                     //target
                     {
@@ -151,7 +156,8 @@ export default function progressBarComponent() {
                             right:bottomTargetTooltipWidth * 0.15,
                             top:bottomTooltipsHeight * 0.15,
                             bottom:bottomTooltipsHeight * 0.15
-                        }
+                        },
+                        fontSize
             
                     },
                 ],
@@ -159,14 +165,15 @@ export default function progressBarComponent() {
                 end:[
                     //expected
                     {
-                        width:endExpectedTooltipWidth,
-                        height:endTooltipsHeight,
+                        width:endExpectedTooltipWidth * expectedMultiplier,
+                        height:endTooltipsHeight * expectedMultiplier,
                         margin: { 
                             left:endExpectedTooltipWidth * 0.15,
                             right:endExpectedTooltipWidth * 0.15,
                             top:0,//endTooltipsHeight * 0.15,
                             bottom:0//endTooltipsHeight * 0.15
-                        }
+                        },
+                        fontSize
                     },
                     //target
                     {
@@ -177,17 +184,18 @@ export default function progressBarComponent() {
                             right:endTargetTooltipWidth * 0.15,
                             top:0,//endTooltipsHeight * 0.15,
                             bottom:0//endTooltipsHeight * 0.15
-                        }
+                        },
+                        fontSize
                     }
                 ] 
             }
 
-            //if(d.isCurrent && d.key === "pressUps-reps"){
-            if(d.isCurrent && d.key === "longJump-distance-left"){
+            if(d.isCurrent && d.key === "pressUps-reps"){
+            //if(d.milestoneId === "profile-1" && d.key === "shuttles-time"){
                 //console.log("d", d)
                 //console.log("numbersH maxCH vertmarg", numbersHeight, maxNumbersContentsHeight, numbersMarginVert)
                 //console.log("h ch", height, contentsHeight)
-                //console.log("numbersH", numbersHeight)
+                //console.log("tooltips", tooltips.dynamic[0])
                 //console.log("BARHEIGHT", barHeight)
             }
 
@@ -332,7 +340,7 @@ export default function progressBarComponent() {
                 .getY((d,i) => {
                     if(tooltipsLocation === "dynamic"){
                         if(d.key === "expected"){
-                            return 0.5 * dimns[i].tooltips.dynamic[0].height;
+                            return 0.5 * dimns[i].tooltips.dynamic[0].height * 0.5; //0.4 if to take account of teh expectedMultiplier
                         }
                         return dimns[i].contentsHeight - 0.5 * dimns[i].tooltips.dynamic[1].height;
                     }
@@ -342,11 +350,25 @@ export default function progressBarComponent() {
                 .onClick(function(e,d){
                     //console.log("clicked", this, e, d)
                 })
-                .onDrag(function(e,d, newValue){
-                    console.log("this", this)
-                    const barAreaG = d3.select(this.parentNode.parentNode).select("g.bar-area")
+                .onDrag(function(e,d, tooltipDimns){
+                    //update tooltip position
+                    const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
+                    const newX = translateX + e.dx;
+                    d3.select(this).attr("transform", `translate(${newX},${translateY})`)
+
+                    //update tooltip value
+                    const scale = xScales[d.progBarKey];
+                    const newValue = Number(scale.invert(newX).toFixed(1));
+                    d.unsavedValue = newValue;
+                    //we need to update alltooltips so index for dimns is maintained
+                    //@todo - go back to using a key instead of array for dimns?
+                    const tooltipsG = d3.select(this.parentNode);
+                    tooltipsG.selectAll("g.tooltip").call(tooltips.updateTooltip, tooltipDimns)
+
+                    //update corresponding bar section
+                    const barG = d3.select(this.parentNode.parentNode).select("g.bar")
                     //@todo - can assume only 1 datum here, but cant always do this for a reusabel component
-                    const _d = barAreaG.data()[0]
+                    const _d = barG.data()[0]
                     const newBarData = _d.barData.map(barD => {
                         if(barD.key !== d.key) { return barD; }
                         return {
@@ -360,10 +382,10 @@ export default function progressBarComponent() {
                         ..._d,
                         barData:newBarData
                     }
-                    barAreaG.datum(newD).call(bar)
+                    barG.datum(newD).call(bar)
                 })
                 .onDragEnd(function(e, d){
-                    console.log("dragEnd d", d)
+                    //console.log("dragEnd d", d)
                     //store the new value
                     //need each tooltip to have profilekey, kpikey and ley,
                     //and get rid of progBarKey

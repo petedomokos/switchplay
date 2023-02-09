@@ -6,7 +6,7 @@ export function hide(selection, options={}){
     selection.each(function(){
         const element = d3.select(this);
         //check if already hidden or being hidden
-        if(element.style("class").includes("hidden")){ return; }
+        if(element.attr("class").includes("hidden")){ return; }
         //set init opacity if not set
         if(!element.style("opacity")){ element.style("opacity", 1) }
         //store prev opacity/display, set class before transition to avoid duplicate transitions

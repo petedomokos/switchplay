@@ -109,7 +109,7 @@ export default function kpisLayout(){
                     //if no targetObj, this means there is no future active profile at all so no expected
                     shouldDisplay:!isPast && !!targetObj, //dont display if past or no future profiles
                     rowNr: 1, y: 1, current,
-                    value: 26/*expected*/, x:26,//expected,
+                    value: expected, x:expected,
                     icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },
                     editable:false//isCurrent || isFuture,
                     //smallIcons: expectedAchieved ? emptyGoal : emptyGoal,

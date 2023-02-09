@@ -27,7 +27,7 @@ export function hydrateJourneyData(data, user, datasets){
     const options = { now, rangeFormat };
     //console.log("hydrateJourney", data)
     const hydratedProfiles = hydrateProfiles(nonCurrentProfiles, datasets, kpis, defaultTargets, options);
-    //console.log("hydratedProfiles", hydratedProfiles)
+    //console.log("hydratedProfiles", hydratedProfiles.find(p => p.id === "profile-1"))
 
     //STEP 2: CREATE CURRENT PROFILE, including expected values
     const currentProfile = createCurrentProfile(hydratedProfiles, datasets, kpis, options );
@@ -36,7 +36,7 @@ export function hydrateJourneyData(data, user, datasets){
     //SEP 3: EMBELLISH PROFILES BASED ON CURRENT PROFILE INFO
     const pastProfiles = hydratedProfiles.filter(p => p.isPast);
     const futureProfiles = hydratedProfiles.filter(p => p.isFuture)
-        .map(p => addExpected(p, currentProfile));
+        //.map(p => addExpected(p, currentProfile));
 
     return {
         //for now, asume all users are players
@@ -50,25 +50,6 @@ export function hydrateJourneyData(data, user, datasets){
     }
 }
 
-function addExpected(profile, currentProfile){
-    //helper
-    const getExpected = (datasetKey, statKey) => currentProfile.kpis
-        .find(k => k.datasetKey === datasetKey && k.statKey === statKey)
-        .values
-        .expected;
-
-    return { 
-        ...profile, 
-        kpis:profile.kpis.map(kpi => ({
-            ...kpi, 
-            values:{ 
-                ...kpi.values, 
-                expected:getExpected(kpi.datasetKey, kpi.statKey) 
-            }
-        }))
-    }
-}
-
 function hydrateContracts(contracts=[]){
     return contracts.map(c => {
         return {
@@ -77,7 +58,6 @@ function hydrateContracts(contracts=[]){
         }
     })
 }
-
 
 function hydrateProfiles(profiles=[], datasets, kpis, defaultTargets, options={}){
     //console.log("hydrateProfiles", profiles);
@@ -96,15 +76,32 @@ function hydrateProfiles(profiles=[], datasets, kpis, defaultTargets, options={}
     return hydrateNextProfile(orderedProfiles, []);
 }
 
-function calcExpected(kpi, prevProfile, activeProfile){
+//@todo - proper calculation for expected, inc for 1st profile using a start value
+//@todo - custom expected when user drags
+function calcExpected(kpi, prevProfile, profile){
     //@todo - allow a manual startdate/value so we dont actually need to have a prevProfile
-    if(!prevProfile || !activeProfile) { return null; }
+    if(!prevProfile || !profile) { return null; }
+    const { datasetKey, statKey } = kpi;
+    const key = `${datasetKey}-${statKey}`;
+    let expectedActual = 0;
+    //temp values for demo
+    if(profile.id === "profile-1"){
+        if(key === "pressUps-reps"){
+            expectedActual = 30;
+        }else if(key === "shuttles-time"){
+            expectedActual = 13.2;
+        }
+    }
+    return { actual:expectedActual, completion:"" }
+    /*
+    
     const { datasetKey, statKey } = kpi;
     const customExpectedValuesForKpi = activeProfile.customExpected
                 .filter(exp => exp.datasetKey === datasetKey && exp.statKey === statKey);
     //@todo - base any new expected on teh latest customExpected, increasing it from there to the target
     //in teh given time remaining
     return { actual:"", completion:"" }
+    */
 }
 
 function calcCurrent(stat, datapoints, dateRange){
@@ -182,6 +179,7 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
             //KEYS/ID
             const { datasetKey, statKey, min, max, values } = kpi;
             const key = `${datasetKey}-${statKey}`;
+            //console.log("kpi key", key)
             
             //VALUES
             //helper
@@ -229,6 +227,7 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
             //date of new targ that hasnt gone thru server os a Date not a string
             //actual and pc are numbers not strings
             const target = parsedCustomTarget || createTargetFromDefault(datasetKey, statKey, date, defaultTargets);
+            let expected = calcExpected(kpi, prevProfile, profile);
 
             return {
                 ...kpi, key, milestoneId,
@@ -238,7 +237,7 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
                 //values
                 values:{
                     //min/max are just values
-                    min, max, start, end, current, achieved, target, //proposedTarget,
+                    min, max, start, end, current, expected, achieved, target, //proposedTarget,
                 },
                 //other info
                 datasetName:dataset?.name || "",
@@ -299,7 +298,7 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, options={}){
                 values:{
                     //min/max just values
                     min, max, start, end,
-                    expected:calcExpected(kpi, prevProfile, activeProfile),
+                    expected:activeProfileValues(kpi)?.expected,
                     target:activeProfileValues(kpi)?.target,
                     //current on currentProfile has no bounds, unlike current on active profile
                     current:calcCurrent(stat, datapoints, null)
