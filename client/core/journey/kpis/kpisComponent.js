@@ -57,7 +57,7 @@ export default function kpisComponent() {
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
-        ctrlsWidth = contentsWidth;
+        ctrlsWidth = d3.min([180, contentsWidth]);
         ctrlsHeight = nrCtrlsButtons !== 0 ? contentsHeight * 0.15 : 0;
         ctrlsMargin = { left: contentsWidth * 0.1, right: contentsWidth * 0.1, top: ctrlsHeight * 0.1, bottom: ctrlsHeight * 0.1 };
         ctrlsContentsWidth = ctrlsWidth - ctrlsMargin.left - ctrlsMargin.right;
@@ -378,7 +378,7 @@ export default function kpisComponent() {
                         
                         //ctrls
                         const ctrlsG = contentsG.select("g.kpis-ctrls")
-                            .attr("transform", d => `translate(${ctrlsMargin.left},${listHeight + ctrlsMargin.top})`);
+                            .attr("transform", d => `translate(${ctrlsMargin.left +((contentsWidth-ctrlsWidth)/2)},${listHeight + ctrlsMargin.top})`);
                         
                         ctrlsG.select("rect.ctrls-bg")
                             .attr("width", ctrlsContentsWidth)

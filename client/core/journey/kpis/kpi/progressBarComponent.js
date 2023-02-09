@@ -254,7 +254,7 @@ export default function progressBarComponent() {
                 .height((d,i) => dimns[i].height)
                 .styles((d, i) => ({
                     stroke:"none",
-                    fill:"blue"//_styles(d).bg?.fill || "transparent"
+                    fill:_styles(d).bg?.fill || "transparent"
                 }))
             )
             .call(container("progress-bar-contents")

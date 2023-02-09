@@ -196,7 +196,6 @@ export default function tooltipsComponent() {
                                             .attr("class", "icon")
                             //hitbox must be on top, as contents under it will change              
                             d3.select(this).append("rect").attr("class", "hitbox")
-                                .attr("stroke", "red")
                                 .attr("fill", "transparent")
                         })
                         .merge(tooltipG)
