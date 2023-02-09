@@ -343,6 +343,7 @@ export default function progressBarComponent() {
                     //console.log("clicked", this, e, d)
                 })
                 .onDrag(function(e,d, newValue){
+                    console.log("this", this)
                     const barAreaG = d3.select(this.parentNode.parentNode).select("g.bar-area")
                     //@todo - can assume only 1 datum here, but cant always do this for a reusabel component
                     const _d = barAreaG.data()[0]

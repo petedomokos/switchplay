@@ -120,7 +120,7 @@ export default function barComponent() {
                 .height((d,i) => dimns[i].contentsHeight)
                 .styles((d, i) => ({
                     stroke:"grey",
-                    strokeWidth:0.3,
+                    strokeWidth:0.1,
                     fill:"transparent"
                 })), { transitionEnter, transitionUpdate} 
             )
@@ -189,6 +189,9 @@ export default function barComponent() {
                         .attr("x", contentsWidth/2)
                         .attr("y", contentsHeight/2)
                         .attr("font-size", contentsHeight * 0.7)
+                        .attr("stroke", "grey")
+                        .attr("stroke-width", 0.1)
+                        .attr("fill", grey10(3))
                         .text(d => d);
 
             })

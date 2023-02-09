@@ -418,7 +418,7 @@ export default function kpisComponent() {
                                         .attr("y", btnHeight/2)
                                         .attr("fill", d => d.isSelected ? grey10(8) : grey10(5))
                                         .attr("stroke", d => d.isSelected ? grey10(8) : grey10(5))
-                                        .attr("opacity", d => d.isSelected ? 1 : 0.6)
+                                        .attr("opacity", d => d.isSelected ? 0.7 : 0.5)
                                         .attr("font-size", fontSizes.ctrls)
                                         .attr("stroke-width", 0.1)
                                         .text(d => d.label)
