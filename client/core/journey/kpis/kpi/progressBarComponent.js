@@ -46,13 +46,24 @@ export default function progressBarComponent() {
             const contentsWidth = width - margin.left - margin.right;
             const contentsHeight = height - margin.top - margin.bottom;
 
+            const MAX_BAR_HEIGHT = 25;
+            const vertSpaceForTooltips = contentsHeight - MAX_BAR_HEIGHT;
             //@todo - can expand to have two top tooltips eg when we want current value to be editable
             //and can expand end to include more than 2
             //Note: we need height of dynamic tooltips, and width of endTooltips, for other calculations
             //note - we make dynamicTooltipHeight 0 too, so it doesnt incorrectly affect calculations lower down
             const nrTopTooltips = tooltipsLocation === "end" ? 0 : 1;
             const nrBottomTooltips = tooltipsLocation === "end" ? 0 : 1;
-            const dynamicTooltipHeight = tooltipsLocation === "end" ? 0 : contentsHeight * 0.2;
+            let dynamicTooltipHeight = 0;
+            if(tooltipsLocation === "dynamic"){
+                const tooltipHeightMultiplier = nrTooltips <= 2 ? 0.33 : 0.25;
+                const standardTooltipHeight = contentsHeight * tooltipHeightMultiplier;
+                const minTooltipHeight = vertSpaceForTooltips / nrTooltips;
+                dynamicTooltipHeight = d3.max([standardTooltipHeight, minTooltipHeight])
+            } 
+            const endTooltipsHeight = tooltipsLocation === "end" ? contentsHeight : 0;
+            const endToolTipsMarginLeft = tooltipsLocation === "end" ? 10 : 0;
+
             const topTooltipsHeight = dynamicTooltipHeight * nrTopTooltips;
             const bottomTooltipsHeight = dynamicTooltipHeight * nrBottomTooltips;
             
@@ -62,16 +73,16 @@ export default function progressBarComponent() {
             //end tooltips
             //@todo next
             //tooltip and numbers heights can go all the way to the top ad bottom of progBar
-            const endTooltipsHeight = contentsHeight;
             const endExpectedTooltipWidth = endTooltipsHeight / expectedTooltipAspectRatio;
             const endTargetTooltipWidth = endTooltipsHeight / targetTooltipAspectRatio;
             //dynamic tooltips (top and bottom)
             const topExpectedTooltipWidth = dynamicTooltipHeight / expectedTooltipAspectRatio;
             const bottomTargetTooltipWidth = dynamicTooltipHeight / targetTooltipAspectRatio;
-            const endToolTipsMarginLeft = 10;
+            
             const endTooltipsWidth = endExpectedTooltipWidth + endTargetTooltipWidth + endToolTipsMarginLeft;
 
             //BAR COMPONENT (BAR AND NUMBERS)
+            const barHeight = contentsHeight - topTooltipsHeight - bottomTooltipsHeight;
             //numbers 
             //group numbers into 1, 2 or 3 cols
             const nrNumbers = numbersData.length
@@ -80,11 +91,20 @@ export default function progressBarComponent() {
                 nrNumberCols = nrNumberCols % 3 === 0 ? 3 :(nrNumbers % 2 === 0 ? 2 : 1)
             }
             // width is built bottom up, whereas height is top down
-            const numberWidth = contentsWidth * 0.2;
+            const numbersHeight = tooltipsLocation === "end" ?  contentsHeight : barHeight;// d3.min([35, contentsHeight]);
+            const maxNumbersContentsHeight = 40;
+            const numbersMarginVert = d3.max([0, (numbersHeight - maxNumbersContentsHeight)/2]);
+            const numberWidth = tooltipsLocation === "end" ? contentsWidth * 0.2 : contentsWidth * 0.1;
             const numbersContentsWidth = nrNumberCols * numberWidth;
-            const numbersMargin = { left: numbersContentsWidth * 0.1, right:0, top:0, bottom:0 };
+            const numbersMargin = { 
+                left: numbersContentsWidth * 0.1, 
+                right:0, 
+                top:numbersMarginVert, 
+                bottom:numbersMarginVert, 
+            };
             const numbersWidth = numbersContentsWidth + numbersMargin.left + numbersMargin.right;
-            const numbersHeight = contentsHeight;
+            //@todo - numberheight mx should be in sync with barheight max
+           
             const numbers = {
                 width:numbersWidth,
                 height:numbersHeight,
@@ -92,16 +112,21 @@ export default function progressBarComponent() {
             }
 
             //bar
+            const horizMarginToSeeDynamicTooltips = d3.max([topExpectedTooltipWidth, bottomTargetTooltipWidth]) / 2;
+            const extraMarginRight = d3.max([0, horizMarginToSeeDynamicTooltips - numbersWidth]); 
             const barWidth = contentsWidth - endTooltipsWidth - numbersWidth;
-            const barHeight = contentsHeight - topTooltipsHeight - bottomTooltipsHeight;
+            const barMarginLeft = tooltipsLocation === "end" ? 0 : horizMarginToSeeDynamicTooltips;
+            const barMarginRight = tooltipsLocation === "end" ? 0 : extraMarginRight;
+            //need this for scale here
+            const barContentsWidth = barWidth - barMarginLeft - barMarginRight;
             const bar = {
                 width:barWidth,
                 height:barHeight,
                 margin:{ 
-                    left: barWidth * 0,
-                    right: barWidth * 0,
-                    top:barHeight * 0.33,
-                    bottom:barHeight * 0.33
+                    left: barMarginLeft,
+                    right: barMarginRight,
+                    top:barHeight * 0.15,
+                    bottom:barHeight * 0.15
                 }
             }
 
@@ -157,6 +182,15 @@ export default function progressBarComponent() {
                 ] 
             }
 
+            //if(d.isCurrent && d.key === "pressUps-reps"){
+            if(d.isCurrent && d.key === "longJump-distance-left"){
+                //console.log("d", d)
+                //console.log("numbersH maxCH vertmarg", numbersHeight, maxNumbersContentsHeight, numbersMarginVert)
+                //console.log("h ch", height, contentsHeight)
+                //console.log("numbersH", numbersHeight)
+                //console.log("BARHEIGHT", barHeight)
+            }
+
             dimns.push({
                 width, height, margin, contentsWidth, contentsHeight,
                 bar, numbers, tooltips, topTooltipsHeight, endToolTipsMarginLeft
@@ -166,10 +200,12 @@ export default function progressBarComponent() {
             //init
             if(!xScales[d.key]){ xScales[d.key] = d3.scaleLinear(); }
             //update
+            //console.log("barwidth", barWidth)
+            //console.log("start end", barData.start, barData.end)
             const extent = [barData.start, barData.end]
             xScales[d.key]
                 .domain(extent)
-                .range([0, barWidth])
+                .range([0, barContentsWidth])
 
             //yScale
         })
@@ -213,6 +249,14 @@ export default function progressBarComponent() {
         updateDimns(selection.data());
 
         selection
+            .call(background()
+                .width((d,i) => dimns[i].width)
+                .height((d,i) => dimns[i].height)
+                .styles((d, i) => ({
+                    stroke:"none",
+                    fill:"blue"//_styles(d).bg?.fill || "transparent"
+                }))
+            )
             .call(container("progress-bar-contents")
                 .transform((d,i) => `translate(${dimns[i].margin.left},${dimns[i].margin.top})`)
             )
@@ -224,16 +268,17 @@ export default function progressBarComponent() {
                 .styles((d, i) => ({
                     stroke:"none",
                     fill:_styles(d).bg?.fill || "transparent"
-                })))
+                }))
+            )
             .call(container("bar")
                 .transform((d,i) => `translate(0,${dimns[i].topTooltipsHeight})`)
             )
             .call(container("numbers")
-                .transform((d,i) => `translate(${dimns[i].bar.width},${dimns[i].topTooltipsHeight})`)
+            //needs to also be shifted down by half the extra vert gap when numberheight is at its max
+               .transform((d,i) => `translate(${dimns[i].bar.width},${dimns[i].topTooltipsHeight})`)
             )
             .call(container("tooltips")
-                //.transform((d,i) => `translate(${_margin(d,i).left},${_margin(d,i).top})`)
-            )
+                .transform((d,i) => `translate(${dimns[i].bar.margin.left},0)`))
         
         selection.select("g.bar")
             //.data(selection.data().map(d => d.barData))
@@ -261,9 +306,6 @@ export default function progressBarComponent() {
         //which is what dimnns needs
         selection.select("g.tooltips")
             .data(enrichedTooltipsData)
-        //pass in tooltips data
-        //error - this same component is being called for very single kpi...need to look back at pattern
-        //how am i doing it ?
             .call(tooltips
                 .width((d,i) => dimns[i].contentsWidth)
                 .height((d,i) => dimns[i].contentsHeight)
@@ -276,7 +318,9 @@ export default function progressBarComponent() {
                     if(tooltipsLocation === "dynamic"){
                         const value = getValue(d);
                         const scale = xScales[d.progBarKey];
-                        return scale(value) || scale.range()[0];
+                        if(d.milestoneId === "current" && d.key === "target" && d.progBarKey === "longJump-distance-left"){
+                        }
+                        return value ? scale(value) : scale.range()[0];
                     }
                     const extraHorizGap = 0;// 20;
                     if(d.key === "expected"){
@@ -288,7 +332,7 @@ export default function progressBarComponent() {
                 .getY((d,i) => {
                     if(tooltipsLocation === "dynamic"){
                         if(d.key === "expected"){
-                            return 0.5 * dimns[i].tooltips.top[0].height;
+                            return 0.5 * dimns[i].tooltips.dynamic[0].height;
                         }
                         return dimns[i].contentsHeight - 0.5 * dimns[i].tooltips.dynamic[1].height;
                     }
@@ -323,6 +367,10 @@ export default function progressBarComponent() {
                     //need each tooltip to have profilekey, kpikey and ley,
                     //and get rid of progBarKey
                     //assume format is actual for now
+                    if(typeof d.unsavedValue !== "number" || Number.isNaN(d.unsavedValue)){
+                        console.log("ERROR: NOT A NUMBER");
+                        return;
+                    }
                     const valueObj = { actual: `${d.unsavedValue}`, completion:"" };
                     onSaveValue(valueObj, d.milestoneId, d.datasetKey, d.statKey, d.key)
                     //show a save btn

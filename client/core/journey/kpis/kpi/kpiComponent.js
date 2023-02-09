@@ -48,14 +48,34 @@ export default function kpiComponent() {
             const titleDimns = _titleDimns(d,i);
 
             const progressBarWidth = contentsWidth;
-            const progressBarHeight = contentsHeight - titleDimns.height;
+
+            /*
+            I have added a max value for progBarheight. This is best way to deal with numbers not wantitng to be too
+            large. but need to work thru the consequences to ensure things are still centred within kpi.
+
+            the other factor is the margins of teh bar 
+            */
+           const MAX_PROGRESS_BAR_HEIGHT = 140;
+            const progressBarHeight = d3.min([MAX_PROGRESS_BAR_HEIGHT, contentsHeight - titleDimns.height]);
+            if(d.isCurrent && d.key === "pressUps-reps"){
+                //console.log("progBarHeight", progressBarHeight)
+                //console.log("status", status(d))
+            }
+            const remainingHeight = contentsHeight - titleDimns.height - progressBarHeight
             
-            const progressBarMargin = { left:progressBarHeight * 0.25, right: 0, top: 0, bottom: 0 };
+            const progressBarMargin = { 
+                //@todo - decide if we need a margin when closed
+                left:status(d) === "open" ? 0 : progressBarWidth * 0, 
+                right: 0, 
+                top: 0, 
+                bottom: 0 
+            };
             //console.log("kpiH kpiCH titleH pbh", height, contentsHeight, titleDimns.height, progressBarHeight)
             dimns.push({
                 width, height, margin, contentsWidth, contentsHeight,
                 titleDimns,
                 progressBarWidth, progressBarHeight, progressBarMargin,
+                remainingHeight
             })
         })
     }
@@ -176,7 +196,7 @@ export default function kpiComponent() {
                     .attr("class", "closed-kpi-contents")
                     .call(fadeIn)
                     .merge(closedContentsG)
-                    .attr("transform", `translate(0,${dimns[i].titleDimns.height})`)
+                    .attr("transform", `translate(0,${dimns[i].titleDimns.height + dimns[i].remainingHeight/2})`)
                     .each(function(d){
                         d3.select(this)
                             .call(closedProgressBars[d.key]
@@ -195,13 +215,14 @@ export default function kpiComponent() {
                     .attr("class", "open-kpi-contents")
                     .call(fadeIn)
                     .merge(openContentsG)
-                    .attr("transform", `translate(0,${dimns[i].titleDimns.height})`)
+                    .attr("transform", `translate(0,${dimns[i].titleDimns.height + dimns[i].remainingHeight/2})`)
                     .each(function(d, j){
                         d3.select(this)
                             .call(openProgressBars[d.key]
                                 .width((d) => dimns[i].progressBarWidth)
                                 .height((d) => dimns[i].progressBarHeight)
                                 .margin((d) => dimns[i].progressBarMargin)
+                                .tooltipsLocation("dynamic")
                                 .onSaveValue(onSaveValue))
                     })
 

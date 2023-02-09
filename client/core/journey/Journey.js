@@ -274,7 +274,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     //cant use profileId as it may be 'current' which is not updated
     const otherProfiles = profiles.filter(p => p.id !== updatedProfile.id);
     const _profiles = [ ...otherProfiles, updatedProfile]
-    save({ ...data, profiles:_profiles });
+    //save({ ...data, profiles:_profiles });
     
   }, [JSON.stringify(data), user._id]);
 

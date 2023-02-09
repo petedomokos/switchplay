@@ -215,11 +215,16 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
             //this is also true for 1st profile, unless user specifies a startDate
             const current = calcCurrent(stat, datapoints, dateRange);
             const achieved = isPast ? current : null;
-            const customTargetsForStat = customTargets.filter(t => t.datasetKey === datasetKey && t.statKey === statKey);
+            const customTargetsForStat = customTargets
+                .filter(t => t.datasetKey === datasetKey && t.statKey === statKey)
+                .filter(t => typeof Number(t.actual) === "number" && !Number.isNaN(Number(t.actual)));
+
             const customTarget = d3.greatest(customTargetsForStat, d => d.created);
-            
+            const k = customTarget ? Number(customTarget.actual) : null;
             const parsedCustomTarget = customTarget ? { actual: Number(customTarget.actual), completion:Number(customTarget.completion) } : null;
-            
+            if(i === 0 && id === "profile-1"){
+                //console.log("customTarget", k, customTarget)
+            }
             //2 possible causes of new targ not getting picked up
             //date of new targ that hasnt gone thru server os a Date not a string
             //actual and pc are numbers not strings

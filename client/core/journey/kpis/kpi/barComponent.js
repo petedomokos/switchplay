@@ -101,6 +101,15 @@ export default function barComponent() {
         updateDimns(selection.data());
         // expression elements
         selection
+            .call(background()
+                .width((d,i) => dimns[i].width)
+                .height((d,i) => dimns[i].eight)
+                .styles((d, i) => ({
+                    stroke:"grey",
+                    strokeWidth:0.3,
+                    fill:"red"
+                })), { transitionEnter, transitionUpdate} 
+            )
             .call(container("bar-contents")
                 .transform((d,i) => `translate(${dimns[i].margin.left},${dimns[i].margin.top})`));
 
@@ -111,15 +120,17 @@ export default function barComponent() {
                 .height((d,i) => dimns[i].contentsHeight)
                 .styles((d, i) => ({
                     stroke:"grey",
-                    strokeWidth:0.3
+                    strokeWidth:0.3,
+                    fill:"transparent"
                 })), { transitionEnter, transitionUpdate} 
             )
             .each(function(data,i){
-                //console.log("data key edit", data, data.key, editable(data))
                 const { barData } = data;
                 const { contentsWidth, contentsHeight } = dimns[i];
                 const scale = scales[i];
                 const styles = _styles(data,i);
+                //console.log("bardata-------------------------------", data.key, data)
+                //console.log("contentsw ch scale", contentsWidth, contentsHeight, scale)
 
                 const barContentsG = d3.select(this);
 
@@ -129,7 +140,12 @@ export default function barComponent() {
                     .append("g")
                         .attr("class", "bar-section")
                             .each(function(d,j){
-                                const sectionWidth = scale(d.value) - scale(d.startValue);
+                                //console.log("key scale",d.key, scale.domain(), scale.range())
+                                //error - scale(d.value) is neg
+                                //console.log("value...", d.value, scale(d.value))
+                                //console.log("start value...", d.startValue, scale(d.startValue))
+                                const sectionWidth = scale(d.value) - scale(d.startValue) || 0;
+                                //console.log("setting sectw!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! to sectw", sectionWidth)
                                 //append rect
                                 d3.select(this)
                                     .append("rect")
@@ -140,10 +156,10 @@ export default function barComponent() {
                                         .attr("fill", d.fill);;
                             })
                             .merge(barSectionG)
-                            .attr("transform", (d,j) => `translate(${scales[i](d.startValue)}, 0)`)
+                            .attr("transform", (d,j) => `translate(${scale(d.startValue) || 0}, 0)`)
                             .each(function(d,j){
                                 //console.log("update bar i j editable",data, d, i, j, editable(data,i))
-                                const sectionWidth = scale(d.value) - scale(d.startValue);
+                                const sectionWidth = scale(d.value) - scale(d.startValue) || 0;
                                 //adjust rect width to end - start
                                 if(transitionUpdate){
                                     d3.select(this).select("rect.bar-section")

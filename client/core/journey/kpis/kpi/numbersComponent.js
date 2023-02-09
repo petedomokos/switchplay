@@ -52,7 +52,7 @@ export default function numbersComponent() {
                 left: numberWidth * 0, right: numberWidth * 0,
                 top: numberHeight * 0, bottom:numberHeight * 0
             }
-            const fontSize = d3.max([12, d3.min([numberWidth * 0.5, numberHeight * 2.8])]);
+            const fontSize = d3.max([12, d3.min([16, numberHeight * 0.8])]);
  
             dimns.push({
                 width, height, margin, contentsWidth, contentsHeight,
@@ -95,10 +95,10 @@ export default function numbersComponent() {
                     return dimns[i].contentsHeight
                 })
                 .styles((d, i) => ({
-                    fill:"transparent"
+                    fill:"red"//"transparent"
                 })))
             .each(function(d,i){
-                const { numberWidth, numberHeight, numberMargin } = dimns[i];
+                const { numberWidth, numberHeight, numberMargin, fontSize } = dimns[i];
                 //call a separate numberComponent for each kpi set of numbers, as these are grouped together logically
                 d3.select(this).selectAll("g.number").data(d)
                     .join("g")
@@ -108,7 +108,7 @@ export default function numbersComponent() {
                             .width(numberWidth)
                             .height(numberHeight)
                             .margin(numberMargin)
-                            .styles({ fontSize:numberHeight * 0.8 }));
+                            .styles({ fontSize }));
             })
     
         /*

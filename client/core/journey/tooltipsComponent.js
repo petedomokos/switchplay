@@ -196,6 +196,7 @@ export default function tooltipsComponent() {
                                             .attr("class", "icon")
                             //hitbox must be on top, as contents under it will change              
                             d3.select(this).append("rect").attr("class", "hitbox")
+                                .attr("stroke", "red")
                                 .attr("fill", "transparent")
                         })
                         .merge(tooltipG)
@@ -219,11 +220,19 @@ export default function tooltipsComponent() {
                         //an array, even if its top then bottom
                         const tooltipG = d3.select(this);
                         const { width, height, margin } = tooltipDimns[i];
-                        const dragTextHeight = draggable && showDragValueAbove ? contentsHeight * 0.333 : 0;
+
+                        
                         const contentsWidth = width - margin.left - margin.right;
                         const contentsHeight = height - margin.top - margin.bottom;
+                        const dragTextHeight = draggable && showDragValueAbove ? contentsHeight * 0.333 : 0;
                         const iconHeight = contentsHeight - dragTextHeight;
 
+
+                        if(d.key === "expected" && d.milestoneId === "current" && d.progBarKey === "pressUps-reps"){
+                            //console.log("d", d)
+                            //console.log("width height", width, height)
+                            //console.log("cwidth cheight iconH", contentsWidth, contentsHeight, iconHeight)
+                        }
                         tooltipG.select("rect.hitbox")
                             .attr("x", -contentsWidth/2)
                             .attr("y", -contentsHeight/2)
