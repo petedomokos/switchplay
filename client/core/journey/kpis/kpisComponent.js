@@ -334,7 +334,7 @@ export default function kpisComponent() {
                                 }))
                                 .onDblClick(onDblClickKpi)
                                 .onClick(function(e,d){
-                                    //console.log("kpi.onClick........", d)
+                                    console.log("kpi.onClick........", d)
                                     //@todo - bug - after clicking several kpis, the profiles dont 
                                     //stay in sync with each other. it seems that teh ones called from externally,
                                     //ie teh ones not actually scrolled, seem to jump back to 0 again, and go from there

@@ -152,6 +152,7 @@ export default function milestonesBarComponent() {
     let containerG;
     let contentsG;
     let milestonesWrapperG;
+    let overlayCtrlsG;
     let topBarG;
     let milestonesG;
     let contractsG;
@@ -259,6 +260,11 @@ export default function milestonesBarComponent() {
                 milestonesWrapperG = contentsG.append("g").attr("class", "milestones-wrapper")
                     .attr("transform", `translate(0,0)`);
 
+                /*issue - if we attach to here instead of contents, it goes under the profiles, so need to adjust the order things are done in
+                but its good to attach to this because then teh offset is accounted for so we just need to 
+                use the calcX function
+                */
+
                 topBarG = milestonesWrapperG.append("g").attr("class", "top-bar")
 
                 topBarG.append("rect").attr("fill", "transparent")
@@ -282,11 +288,13 @@ export default function milestonesBarComponent() {
                 contractsG = milestonesG.append("g").attr("class", "contracts");
                 profilesG = milestonesG.append("g").attr("class", "profiles");
 
+                overlayCtrlsG = milestonesG.append("g").attr("class", "overlay-ctrls");
+
             }
 
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
             function update(data, options={}){
-                // console.log("MBarComponent update....swip ", swipable)
+                //console.log("MBarComponent update....currentSliderPos", currentSliderPosition)
                 const { slideTransition, milestoneTransition } = options;
 
                 //milestone positioning
@@ -350,6 +358,41 @@ export default function milestonesBarComponent() {
                     .attr("width", width)
                     .attr("height", height)
 
+                const topRightCtrlsWidth = 40;
+                const topRightCtrlsHeight = 25;
+                const topRightMilestoneCtrlsG = milestonesWrapperG.select("g.overlay-ctrls").selectAll("g.top-right-milestone-ctrls")
+                    .data(positionedData.filter(d => selectedMilestone !== d.id), d => d.id);
+
+                topRightMilestoneCtrlsG.enter()
+                    .append("g")
+                        .attr("class", d => `top-right-milestone-ctrls top-right-milestone-ctrls-${d.id}`)
+                        .each(function(d,i){
+                            d3.select(this).append("rect")
+                                .attr("fill", "red")
+
+                            //transition in
+                            d3.select(this)
+                                .attr("opacity", 0)
+                                    .transition()
+                                    .delay(200)
+                                    .duration(200)
+                                        .attr("opacity", 1)
+
+                        })
+                        .merge(topRightMilestoneCtrlsG)
+                        .attr("transform", d => `translate(${d.x},${d.y})`)
+                        .each(function(d,i){
+                            d3.select(this).select("rect")
+                                .attr("width", topRightCtrlsWidth)
+                                .attr("height", topRightCtrlsHeight)
+                                .attr("x", d.width/2 - topRightCtrlsWidth)
+                                .attr("y", -d.height/2)
+                        })
+                        .on("click", (e,d) => updateSelected(d));
+
+                topRightMilestoneCtrlsG.exit().remove();
+
+
                 contentsG
                     .attr("transform", `translate(${margin.left},${margin.top})`)
                     .select("rect.milestones-bar-contents-bg")
@@ -410,32 +453,56 @@ export default function milestonesBarComponent() {
                 //but maybe best is to just make dbl-click teh same as two clicks , and 
                 //then ppl on chrome mobile just cant do two clicks in quick succession
                 function handleMilestoneWrapperClick(e,d){
+                    //console.log("wrapper clicked")
                     //this is a temp setting to save us having to turn drag off whilst creating a milestone
                     //otherwise the confirm click would also trigger this.
                     if(ignoreNextClick){
                         ignoreNextClick = false;
                         return;
                     }
-                    
                     const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
-                    if(!milestone) { return; }
+                    //console.log("milestone", milestone)
+                    if(milestone) { 
+                        updateSelected(milestone);
+                    }
+                }
+
+                function updateSelected(milestone){
+                    //@todo - consider removing and entering phase labels
+                    //milestonesG.select("g.phase-labels").call(show);
+                    //@todo - same for contracts
+                    //deselecting
+                    if(!milestone){
+                        if(selectedMilestone){
+                            //show all that were hidden
+                            milestonesG.selectAll("g.profile-card").filter(d => d.id !== selectedMilestone)
+                                .call(profiles.removeOverlay/*, { delay:200, duration:200 }*/)
+                        }
+                    }
+                    //selecting
+                    else if(!selectedMilestone){
+                        //hide all others
+                        milestonesG.selectAll("g.profile-card").filter(d => d.id !== milestone.id).call(profiles.applyOverlay)
+                    }else{
+                        //only need to hide the the previous selected
+                        milestonesG.select(`g.profile-card-${selectedMilestone}`).call(profiles.applyOverlay)
+                        //show the new selected
+                        milestonesG.select(`g.profile-card-${milestone.id}`).call(profiles.removeOverlay)
+                    }
                     //@todo - BUG - why is there a delay in removing the burger bars? cut it out for now
                     //onTakeOverScreen();
                     //hide phase labels
-                    milestonesG.select("g.phase-labels").call(hide);
                     //if(selected){
                         //treat it as a dbl-click => clicking a selected milestone zooms user in even further
                         //or maybe this needs to be doen at next evel as drag is turned off when selected i think
                     //}
-                    //set selected
-                    selectedMilestone = milestone.id;
-                    //this doesnt trigger an update here
-                    onSetSelectedMilestone(milestone.id);
-                    //trigger update here
-                    //update(data);
+                    //set selected and slider pos (note - we need both of these, as we will have a sliderPos even if no selected)
+                    selectedMilestone = milestone?.id;
+                    if(milestone) { requiredSliderPosition = milestone.nr; }
+                    onSetSelectedMilestone(milestone?.id);
                     //hide any menu from paretn components (eg burger menu)
-
                 }
+
                 //dragging
                 let dragStartX;
                 function dragStart(e,d){
@@ -650,27 +717,20 @@ export default function milestonesBarComponent() {
                         .scrollable(swipable ? false : true)
                         .onSaveValue(onSaveValue)
                         .topRightCtrls(d => selectedMilestone === d.id ? [
-                            //todo - toggle between expand and reduce for now, its just reduce
+                    
+                            /*
+                            todo next 
+                            CROSSROADS
+                             - move other stuff into updateSelected eg from the topRightCtrls cb - showing/hiding phase labels etc
+                             - add expand icon and remove red box
+                            */
                             { 
                                 label:"collapse", 
                                 icon:{ iconType:"path", d:icons.collapse.d },
                                 onClick:d => {
-                                    milestonesG.select("g.phase-labels").call(show);
-
                                     //@todo - why is this so slow to update? had to cut it out for now
                                     //onReleaseScreen();
-
-                                    //problem - the line below will prompt an update, which will
-                                    //make the manulal call here useless. Either need to pass in a 
-                                    //2nd arg, shouldUpdate = false, or have a temp stting here so it transitions
-                                    //or dont send thru selectedMilestone, instead just maually change the height here.
-
-                                    //EVEN BETTER, WE SHOULDNT BE CURTAILING THE DISPLAY IN TEH PARENT CONTAINER AT ALL
-                                    //WE CAN JUST HABNLE IT HERE THRU THE STANDARD MARGIN CONVENTIO, AND THEN JUST CHANGE IT
-                                    //TO 0 WHEN SELECTED
-                                    onSetSelectedMilestone("");
-                                    selectedMilestone = null;
-                                    update(data, { milestoneTransition:{ update:{ duration:2000 }} })
+                                    updateSelected();
                                 }
                             }
                         ] : [])
@@ -707,12 +767,14 @@ export default function milestonesBarComponent() {
                         if(selectedMilestone){
                             //move on by one
                             const selected = data.find(d => d.id === selectedMilestone);
-                            const newSelected = data.find(d => d.nr === selected.nr - 1)
-                            selectedMilestone = newSelected.id;
-                            onSetSelectedMilestone(newSelected.id);
+                            const newSelected = data.find(d => d.nr === selected.nr - 1);
+                            updateSelected(newSelected);
+                        }else{
+                            //manually do changes instead of using react update
+                            requiredSliderPosition -= 1;
+                            update(data, { slideTransition:SLIDE_TRANSITION });
                         }
-                        requiredSliderPosition -= 1;
-                        update(data, { slideTransition:SLIDE_TRANSITION });
+                        
                     }
                 }
 
@@ -721,12 +783,18 @@ export default function milestonesBarComponent() {
                         if(selectedMilestone){
                             //move back by 1
                             const selected = data.find(d => d.id === selectedMilestone);
-                            const newSelected = data.find(d => d.nr === selected.nr + 1)
-                            selectedMilestone = newSelected.id;
-                            onSetSelectedMilestone(newSelected.id);
+                            const newSelected = data.find(d => d.nr === selected.nr + 1);
+                            updateSelected(newSelected);
+                            //selectedMilestone = newSelected.id;
+                            //onSetSelectedMilestone(newSelected.id);
+                        }else{
+                            //manually do changes instead of using react update
+                            requiredSliderPosition += 1;
+                            update(data, { slideTransition:SLIDE_TRANSITION });
+
                         }
-                        requiredSliderPosition += 1;
-                        update(data, { slideTransition:SLIDE_TRANSITION });
+                        //requiredSliderPosition += 1;
+                        //update(data, { slideTransition:SLIDE_TRANSITION });
                     }
                 }
                 /*

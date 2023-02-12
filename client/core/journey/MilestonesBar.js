@@ -71,8 +71,6 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   //or alternatively only have that processed in milestoneslayout/kpiLayout
   //so we are not doing teh epensive operations each time
   useEffect(() => {
-    //console.log("data useEffect")
-
     layout
       .format(kpiFormat)
       .datasets(datasets)

@@ -80,7 +80,6 @@ export default function profileCardsComponent() {
     let onMouseout = function(){};
     let onDelete = function() {};
     let onSaveValue = function(){};
-    
 
     let enhancedDrag = dragEnhancements();
     //@todo - find out why k=1.05 makes such a big increase in size
@@ -121,10 +120,10 @@ export default function profileCardsComponent() {
                     return this.parentNode.parentNode.parentNode
                 });*/ 
 
-            const profileCardG = containerG.selectAll("g.profile-card").data(data, d => d.id);
+            const profileCardG = containerG.selectAll("g.profile-card").data(data);
             profileCardG.enter()
                 .append("g")
-                .attr("class", d => "milestone profile-card profile-card-"+d.id)
+                .attr("class", d => `milestone profile-card milestone-${d.id} profile-card-${d.id}`)
                 .each(function(d,i){
                     profileInfoComponents[d.id] = profileInfoComponent();
                     kpisComponents[d.id] = kpisComponent();
@@ -148,6 +147,8 @@ export default function profileCardsComponent() {
                     contentsG.append("g").attr("class", "kpis")
 
                     contentsG.append("g").attr("class", "top-right-ctrls")
+                    d3.select(this).append("rect").attr("class", "overlay")
+                        .attr("display", "none");
                 
                 })
                 .style("cursor", editable ? "default" : "grab")
@@ -168,6 +169,16 @@ export default function profileCardsComponent() {
                     transition:transformTransition.update 
                 })
                 .each(function(d){
+                    //overlay 
+                    d3.select(this).select("rect.overlay")
+                        .attr("width", width)
+                        .attr("height", height)
+                        .attr("x", -width/2)
+                        .attr("y", -height/2)
+                        .style("fill", "black")
+                        .style("opacity", 0.5)
+                    
+
                     const profileInfo = profileInfoComponents[d.id]
                         .width(contentsWidth)
                         .height(infoHeight)
@@ -693,5 +704,12 @@ export default function profileCardsComponent() {
         }
         return profileCards;
     };
+    profileCards.applyOverlay = function(selection){
+        //console.log("applyOverlay", selection.nodes(), selection.select("rect.overlay").node())
+        selection.select("rect.overlay").attr("display", null)
+    }
+    profileCards.removeOverlay = function(selection){
+        selection.select("rect.overlay").attr("display", "none")
+    }
     return profileCards;
 }
