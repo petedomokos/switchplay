@@ -1,3 +1,5 @@
+import * as d3 from 'd3';
+
 export const grey10 = (i) => ["#FFFFFF", "#E8E8E8","#D3D3D3", "#BEBEBE", "#A8A8A8", "#888888", "#696969", "#505050", "#303030", "#000000"][i-1];
 
 //1 = summary, 2 = standard, 3 = detail
@@ -71,7 +73,7 @@ export const FONTSIZES = {
         kpis:{
             name:4 * k,
             values:4 * k,
-            ctrls:4 * k
+            ctrls:d3.min([14, 4 * k])
         }
     }),
     menuBar:{

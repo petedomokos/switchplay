@@ -717,11 +717,8 @@ export default function milestonesBarComponent() {
                         .scrollable(swipable ? false : true)
                         .onSaveValue(onSaveValue)
                         .topRightCtrls(d => selectedMilestone === d.id ? [
-                    
                             /*
                             todo next 
-                            CROSSROADS
-                             - move other stuff into updateSelected eg from the topRightCtrls cb - showing/hiding phase labels etc
                              - add expand icon and remove red box
                             */
                             { 
