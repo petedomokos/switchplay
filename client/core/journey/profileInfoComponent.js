@@ -88,9 +88,15 @@ export default function profileInfoComponent() {
                 .join("text")
                     .attr("class", "date")
                     .attr("transform", "rotate(-45)")
-                    .attr("x", - width * 0.1)
-                    .attr("y", height * 0.19)
+                    //these values for x and y work well on large screen, but when card is small on mobile, they are too big
+                    //so need to make them a % of card width or height again
+                    //but also need to reduce the icon size for mobile too, so need to do icons in same
+                    //way as teh crystal ball and ball tooltips are done, where we calc dimns based
+                    //on required width, height and the aspect ratio
+                    .attr("x", d => d.isCurrent ? 25 : (d.date.getDate() < 10 ? 30 : 40))
+                    .attr("y", d => d.isCurrent ? 50 : 60)
                     .attr("dominant-baseline", "hanging")
+                    .attr("text-anchor", "end")
                     .attr("fill", d => d.isFuture ? "grey" : "white")
                     .attr("font-size", fontSizes.date)
                     .style("font-family", "helvetica, sans-serifa")

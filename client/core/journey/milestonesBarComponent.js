@@ -358,8 +358,9 @@ export default function milestonesBarComponent() {
                     .attr("width", width)
                     .attr("height", height)
 
-                const topRightCtrlsWidth = 40;
-                const topRightCtrlsHeight = 25;
+                const topRightCtrlsWidth = 32;
+                const topRightCtrlsHeight = 32;
+                const topRightCtrlsMargin = { top:15, right:15 };
                 const topRightMilestoneCtrlsG = milestonesWrapperG.select("g.overlay-ctrls").selectAll("g.top-right-milestone-ctrls")
                     .data(positionedData.filter(d => selectedMilestone !== d.id), d => d.id);
 
@@ -367,8 +368,15 @@ export default function milestonesBarComponent() {
                     .append("g")
                         .attr("class", d => `top-right-milestone-ctrls top-right-milestone-ctrls-${d.id}`)
                         .each(function(d,i){
-                            d3.select(this).append("rect")
-                                .attr("fill", "red")
+                            d3.select(this)
+                                .append("g")
+                                    .attr("class", "icon")
+                                        .append("path")
+                                        .attr("fill", grey10(3))
+                                        .attr("stroke", grey10(3))
+
+                            d3.select(this).append("rect").attr("class", "hitbox")
+                                .attr("fill", "transparent");
 
                             //transition in
                             d3.select(this)
@@ -380,13 +388,17 @@ export default function milestonesBarComponent() {
 
                         })
                         .merge(topRightMilestoneCtrlsG)
-                        .attr("transform", d => `translate(${d.x},${d.y})`)
+                        .attr("transform", d => `translate(${
+                            d.x + d.width/2 - topRightCtrlsWidth - topRightCtrlsMargin.right},
+                            ${d.y - d.height/2 +topRightCtrlsMargin.top
+                        })`)
                         .each(function(d,i){
-                            d3.select(this).select("rect")
+                            d3.select(this).select("g.icon").select("path")
+                                .attr("d", icons.expand.d)
+                            
+                            d3.select(this).select("rect.hitbox")
                                 .attr("width", topRightCtrlsWidth)
                                 .attr("height", topRightCtrlsHeight)
-                                .attr("x", d.width/2 - topRightCtrlsWidth)
-                                .attr("y", -d.height/2)
                         })
                         .on("click", (e,d) => updateSelected(d));
 

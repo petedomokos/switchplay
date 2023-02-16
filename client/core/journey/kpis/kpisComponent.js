@@ -71,7 +71,6 @@ export default function kpisComponent() {
 
         //height
         listHeight = contentsHeight - ctrlsHeight;
-
         kpiHeight = fixedKpiHeight || listHeight/5;
         //selectedKpi must expand for tooltip rows, by 0.75 of kpiHeight per tooltip
         openKpiHeight = fixedSelectedKpiHeight || listHeight;//kpiHeight + (0.75 * kpiHeight * nrTooltipRows);
