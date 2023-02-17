@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10 } from "./constants";
+import { DIMNS, grey10, COLOURS } from "./constants";
 import dragEnhancements from './enhancedDragHandler';
 // import menuComponent from './menuComponent';
 import profileInfoComponent from './profileInfoComponent';
@@ -272,8 +272,8 @@ export default function profileCardsComponent() {
 
                                 d3.select(this)
                                     .append("path")
-                                        .attr("fill", grey10(3))
-                                        .attr("stroke", grey10(3))
+                                        .attr("fill", COLOURS.btnIcons.default)
+                                        .attr("stroke", COLOURS.btnIcons.default)
                             })
                             .merge(topRightBtnG)
                             .attr("transform", (b,i) => `translate(${-(i + 1) * btnWidth})`)

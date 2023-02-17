@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, FONTSIZES, grey10 } from "./constants";
+import { DIMNS, FONTSIZES, grey10, COLOURS } from "./constants";
 import contractsComponent from './contractsComponent';
 import profileCardsComponent from './profileCardsComponent';
 import dragEnhancements from './enhancedDragHandler';
@@ -358,9 +358,10 @@ export default function milestonesBarComponent() {
                     .attr("width", width)
                     .attr("height", height)
 
-                const topRightCtrlsWidth = 32;
-                const topRightCtrlsHeight = 32;
-                const topRightCtrlsMargin = { top:15, right:15 };
+                const topRightCtrlsWidth = 24;
+                const topRightCtrlsHeight = 24;
+                const topRightCtrlsMargin = d3.min([15, 0.025 * width]);
+
                 const topRightMilestoneCtrlsG = milestonesWrapperG.select("g.overlay-ctrls").selectAll("g.top-right-milestone-ctrls")
                     .data(positionedData.filter(d => selectedMilestone !== d.id), d => d.id);
 
@@ -371,9 +372,10 @@ export default function milestonesBarComponent() {
                             d3.select(this)
                                 .append("g")
                                     .attr("class", "icon")
+                                    .attr("transform", "scale(0.75)")
                                         .append("path")
-                                        .attr("fill", grey10(3))
-                                        .attr("stroke", grey10(3))
+                                        .attr("fill", COLOURS.btnIcons.expand)
+                                        .attr("stroke", COLOURS.btnIcons.expand)
 
                             d3.select(this).append("rect").attr("class", "hitbox")
                                 .attr("fill", "transparent");
@@ -389,8 +391,8 @@ export default function milestonesBarComponent() {
                         })
                         .merge(topRightMilestoneCtrlsG)
                         .attr("transform", d => `translate(${
-                            d.x + d.width/2 - topRightCtrlsWidth - topRightCtrlsMargin.right},
-                            ${d.y - d.height/2 +topRightCtrlsMargin.top
+                            d.x + d.width/2 - topRightCtrlsWidth - topRightCtrlsMargin},
+                            ${d.y - d.height/2 +topRightCtrlsMargin
                         })`)
                         .each(function(d,i){
                             d3.select(this).select("g.icon").select("path")

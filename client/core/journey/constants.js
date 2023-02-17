@@ -233,6 +233,11 @@ export const COLOURS = {
     potentialLink:grey10(3),
     barMenuItem:"none",
     selectedBarMenuItem:"white",
+    btnIcons:{
+        default:grey10(5),
+        expand: grey10(5),
+        collapse: grey10(5)
+    }
     /*
     canvas:"#FAEBD7",
     planet:grey10(5),

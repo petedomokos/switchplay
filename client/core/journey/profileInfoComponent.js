@@ -84,23 +84,43 @@ export default function profileInfoComponent() {
 
             const format = d3.timeFormat("%_d %b, %y");
 
-            containerG.selectAll("text.date").data([data])
-                .join("text")
+            const dateMargin = 10;
+            const x = dateMargin;
+            //const fDate = format(data.date);
+            //if its a single digit day, then remove first space
+            const nrChars = fDate => fDate[0] === " " ? fDate.length - 1 : fDate.length;
+            //todo- make a pseudo text element and use getComputerTxtlngth, instead of this bodge to make TODAY work
+            const calcLength = (fDate, fontSize) =>  nrChars(fDate) * fontSize * (fDate === "TODAY" ? 0.7 : 0.47);
+            const length = d => calcLength((d.isCurrent ? "TODAY" : format(d.date)), fontSizes.date);
+            const dateHeight = fontSizes.date;
+            const y = d => dateMargin + length(d) * Math.sin(Math.PI/4);
+
+            const dateG = containerG.selectAll("g.date").data([data])
+            dateG.enter()
+                .append("g")
                     .attr("class", "date")
-                    .attr("transform", "rotate(-45)")
-                    //these values for x and y work well on large screen, but when card is small on mobile, they are too big
-                    //so need to make them a % of card width or height again
-                    //but also need to reduce the icon size for mobile too, so need to do icons in same
-                    //way as teh crystal ball and ball tooltips are done, where we calc dimns based
-                    //on required width, height and the aspect ratio
-                    .attr("x", d => d.isCurrent ? 25 : (d.date.getDate() < 10 ? 30 : 40))
-                    .attr("y", d => d.isCurrent ? 50 : 60)
-                    .attr("dominant-baseline", "hanging")
-                    .attr("text-anchor", "end")
-                    .attr("fill", d => d.isFuture ? "grey" : "white")
-                    .attr("font-size", fontSizes.date)
-                    .style("font-family", "helvetica, sans-serifa")
-                    .text(d => d.isCurrent ? "TODAY" : format(d.date))
+                    .each(function(d){
+                        d3.select(this).append("text")
+                            .attr("dominant-baseline", "hanging")
+                            .attr("text-anchor", "start")
+                            .style("font-family", "helvetica, sans-serifa")
+                        
+                        d3.select(this).append("rect").attr("class", "hitbox")
+                            .attr("fill", "transparent")
+                    })
+                    .merge(dateG)
+                    .attr("transform", d => `translate(${x},${y(d)}) rotate(-45)`) //rotates from start
+                    .each(function(d){
+                        d3.select(this).select("text")
+                            .attr("font-size", fontSizes.date)
+                            .attr("fill", d => d.isFuture ? "grey" : "white")
+                            .text(d => d.isCurrent ? "TODAY" : format(d.date))
+
+                        d3.select(this).select("rect.hitbox")
+                            .attr("width", length(d))
+                            .attr("height", dateHeight)
+
+                    })
 
             const textInfoG = containerG.selectAll("g.text-info").data([data]);
             textInfoG.enter()
