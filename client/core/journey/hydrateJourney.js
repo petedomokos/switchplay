@@ -60,7 +60,7 @@ function hydrateContracts(contracts=[]){
 }
 
 function hydrateProfiles(profiles=[], datasets, kpis, defaultTargets, options={}){
-    //console.log("hydrateProfiles", profiles);
+    console.log("hydrateProfiles----------------", profiles);
     const orderedProfiles = sortAscending(profiles, d => d.date);
     const hydrateNextProfile = (remaining, hydratedSoFar) => {
         const next = remaining[0];
@@ -104,7 +104,7 @@ function calcExpected(kpi, prevProfile, profile){
     */
 }
 
-function calcCurrent(stat, datapoints, dateRange){
+function calcCurrent(stat, datapoints, dateRange, log){
     //if dataset unavailable, stat will be undefined
     if(!stat){ return { actual:undefined, completion:"" } }
     //helper
@@ -114,6 +114,11 @@ function calcCurrent(stat, datapoints, dateRange){
         .filter(d => !dateRange || dateIsInRange(d.date, dateRange))
         .filter(d => !d.isTarget)
         .map(d => getValue(d))
+    
+    if(log){
+        console.log("calcCurr dateRange", dateRange)
+        console.log("calcCurr values", values)
+    }
 
     return {
         //@todo - use min if order is 'lowest is best', use stat to determine order
@@ -131,7 +136,8 @@ function createTargetFromDefault(datasetKey, statKey, date, defaultTargets){
     }
 }
 
-function calcTwentyYearsAgo(now){ return addMonths(-240, now); }
+function twentyYearsAgo(now){ return addMonths(-240, now); }
+function oneMonthAgo(now){ return addMonths(-1, now); }
 function calcDateRange(start, end, format){
     return [
         roundUp(start, "day", format), 
@@ -141,13 +147,13 @@ function calcDateRange(start, end, format){
 
 
 function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, options={}){
-    //console.log("hydrateProfile------------", profile.id, datasets)
+    console.log("hydrateProfile------------", profile.id, profile.date)
     const { now, rangeFormat } = options;
     const { id, date, customTargets=[], isCurrent } = profile;
     const milestoneId = id;
     //startDate
     //either manual startDate if set, or prev date, or otherwise 20 years ago
-    const startDate = profile.startDate || prevProfile?.date || calcTwentyYearsAgo(now);
+    const startDate = profile.startDate || prevProfile?.date || oneMonthAgo(date);
     const startsFromPrevProfile = !profile.startDate && prevProfile;
     const datePhase = date < now ? "past" : "future";
     const isPast = datePhase === "past";
@@ -211,7 +217,7 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
 
             //note - for current profile, the range is last twenty years so all will be included anyway
             //this is also true for 1st profile, unless user specifies a startDate
-            const current = calcCurrent(stat, datapoints, dateRange);
+            const current = calcCurrent(stat, datapoints, dateRange, id === "profile-3" && datasetKey === "pressUps");
             const achieved = isPast ? current : null;
             const customTargetsForStat = customTargets
                 .filter(t => t.datasetKey === datasetKey && t.statKey === statKey)
@@ -261,7 +267,7 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, options={}){
         ?.values;
 
     const prevProfile = d3.greatest(orderedProfiles.filter(p => p.isPast), p => p.date);
-    const startDate = prevProfile?.date || calcTwentyYearsAgo(now);
+    const startDate = prevProfile?.date || addMonths(-3, now);
     const startsFromPrevProfile = !!prevProfile;
     const datePhase = "current";
     const dateRange = calcDateRange(startDate, now);
@@ -301,7 +307,7 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, options={}){
                     expected:activeProfileValues(kpi)?.expected,
                     target:activeProfileValues(kpi)?.target,
                     //current on currentProfile has no bounds, unlike current on active profile
-                    current:calcCurrent(stat, datapoints, null)
+                    current:calcCurrent(stat, datapoints, null, false)
                 },
                 //other info
                 datasetName:dataset?.name || "",

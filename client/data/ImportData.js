@@ -34,6 +34,13 @@ const useStyles = makeStyles((theme) => ({
 const ImportData = ({ datasets, submit }) => {
   const [importState, setImportState] = useState("");
   console.log("ImportData...datasets", datasets)
+  const spec= new Date("12/12/2022")
+  console.log("spec", spec)
+  const hrs = spec.getHours();
+  console.log("hrs", hrs)
+  let specPlus3 = spec;
+  specPlus3.setHours(hrs + 3)
+  console.log("specPlus3", specPlus3)
   const styleProps = { importState };
   const classes = useStyles(styleProps) 
 
@@ -63,10 +70,12 @@ const ImportData = ({ datasets, submit }) => {
     setImportState("importing");
 
     let dt = e.dataTransfer
+    console.log("dt", dt)
     let files = dt.files
+    console.log("files", files)
     const input = files[0];
     if(input.type !== "text/csv"){
-      alert("Please export the file to CSV format first. Thanks!")
+      alert("Please convert the file to CSV format first. Thanks!")
       setImportState("");
       return;
     }
@@ -91,13 +100,11 @@ const ImportData = ({ datasets, submit }) => {
       const res = e.target.result;
       //console.log("res", res)
       const parsedData = d3.csvParse(res);
-      console.log("parsed", parsedData);
+      console.log("parsedData", parsedData);
       if(importType === "datasets"){
         //name convention for datasets is simply the ownername,
         //and (optional) whether owner is a user or a group eg name-user or name-group
         //part 2 (nameParts[1])
-        const ownerName = info[0];
-        const ownerType = info[1] || "user";
         console.log("save datasets")
       }else if(importType === "datapoints"){
         //name convention: ownerName (user or group) - datasetKey
@@ -124,8 +131,8 @@ const ImportData = ({ datasets, submit }) => {
           return;
         }
         const datapoints = createDatapointsFromData(parsedData, dataset);
-        console.log("datapoints", datapoints);
-        //submit(datapoints, importType, { datasetId:dataset._id })
+        console.log("saving datapoints", datapoints);
+        submit(datapoints, importType, { datasetId:dataset._id })
 
         //then save datapoints to that dataset using correct url route
         // eg /datasets/datasetId/datapoints/create or make oen that adds multiple datapoints

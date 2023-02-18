@@ -127,6 +127,7 @@ const list = async (req, res) => {
 }
 
 const update = async (req, res) => {
+  console.log("dataset ctrl update...")
   let form = new formidable.IncomingForm()
   form.keepExtensions = true
   form.parse(req, async (err, fields, files) => {
@@ -194,18 +195,20 @@ const createDatapoints = async (req, res) => {
 
   console.log("datapoints to add", datapoints)
   //console.log("current datapoints", dataset.datapoints)
-  //dataset.datapoints = [...dataset.datapoints, ...datapoints]
+  dataset.datapoints = [...dataset.datapoints, ...datapoints]
   //console.log("new datapoints before save", dataset.datapoints)
   //dataset.updated = Date.now()
   try {
     console.log("trying to save")
     const savedDataset = await dataset.save()
+    console.log("saved...")
     //@todo - filter so that only the aved ds are returned. 
     //We need to get them from the savedDataset so they have the default values too
     const nrNewDs = datapoints.length;
     const nrDs = savedDataset.datapoints.length;
     const newDatapoints = savedDataset.datapoints.slice(nrDs - nrNewDs, nrDs);
-    //console.log("saved...newDatapoints", newDatapoints)
+    console.log("saved...newDatapoints", newDatapoints)
+    //console.log("saved...allDatapoints", savedDataset.datapoints)
     /*const sortedMostRecentFirst = savedDataset.datapoints.sort((d1, d2) => {
       const milli1 = new Date(d1.created).getTime()
       const milli2 = new Date(d2.created).getTime()

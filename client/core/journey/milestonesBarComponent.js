@@ -714,7 +714,6 @@ export default function milestonesBarComponent() {
                 const vertScale = height / profileHeight;
                 const scale = d3.min([horizScale, vertScale]);
 
-                console.log("data", positionedData.filter(m => m.dataType === "profile"))
                 profilesG
                     //.attr("transform", "translate(0, -20")
                     .datum(positionedData.filter(m => m.dataType === "profile"))

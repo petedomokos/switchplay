@@ -72,7 +72,6 @@ export default function tooltipsComponent() {
             const tooltipG = d3.select(this);
             const { width, height, margin, fontSize } = tooltipDimns[i];
             const styles = _styles(d,i);
-            console.log("styles", styles)
 
             const contentsWidth = width - margin.left - margin.right;
             const contentsHeight = height - margin.top - margin.bottom;
@@ -225,7 +224,15 @@ export default function tooltipsComponent() {
                 }
 
                 function dragStart(e,d){
-                    if(!d.editable) { return; }
+                    if(!d.editable) { 
+                        if(d.key === "expected"){
+                            alert("The expected value can't be changed. It is calculated based on your target.")
+                        }
+                        if(d.key === "target"){
+                            //must be a past card
+                            alert("You can only change future targets. This card is in the past.")
+                        }
+                        return; }
                     beingDragged = t => t.progBarKey === d.progBarKey && t.key === d.key;
                     if(showDragValueAbove){
                         d3.select(this).select("text.drag-value")

@@ -13,7 +13,7 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = dispatch => ({
 	submit(data, importType, info={}){
 		if(importType === "datapoints"){
-			console.log("submitting datapoints.....", data)
+			console.log("submitting datapoints.....",info.datasetId, data)
 			dispatch(createDatapoints(info.datasetId, data));
 		}
 	},

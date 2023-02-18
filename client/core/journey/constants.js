@@ -240,6 +240,11 @@ export const COLOURS = {
         default:grey10(5),
         expand: grey10(5),
         collapse: grey10(5)
+    },
+    tooltipIcons:{
+        shinyBall:"#D4AF37",
+        shinyCrystalBall:"#D4AF37"
+
     }
     /*
     canvas:"#FAEBD7",

@@ -324,10 +324,8 @@ export default function profileCardsComponent() {
             }
 
             function updateFill(selection, options={}){
-                console.log("updateFill", options.transition)
                 const { fill = d => d.colour || "none", transition, cb = () => {} } = options;
                 selection.each(function(d){
-                    console.log("fill", fill(d), d)
                     if(transition){
                         d3.select(this)
                             .transition()
@@ -433,7 +431,7 @@ export default function profileCardsComponent() {
 
             //longpress
             function longpressStart(e, d) {
-                console.log("lp start")
+                //console.log("lp start")
                 //todo - check defs appended, and use them here, then longopressDrag should trigger the delete of a goal
                 //then do same for aims and links
                 /*
@@ -554,21 +552,6 @@ export default function profileCardsComponent() {
         if (!arguments.length) { return selected; }
         selected = values;
         isSelected = d => values.includes(d.id);
-        //only update if alreayd defined
-        console.log("new selected....", selected)
-        /*
-        if(containerG){
-            console.log("all ds", containerG.selectAll("g.profile-card").data())
-            containerG.selectAll("g.profile-card").select("g.contents").select("rect")
-                .transition()
-                //transition doesnt seem to be applied!
-                .duration(2000)
-                    .attr("fill", d => {
-                        console.log("isSel?", d.id, isSelected(d))
-                        return isSelected(d) ? COLOURS.selectedMilestone : COLOURS.milestone
-                    })
-        }
-        */
         return profileCards;
     };
     profileCards.topRightCtrls = function (value) {
