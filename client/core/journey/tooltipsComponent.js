@@ -35,8 +35,13 @@ export default function tooltipsComponent() {
     }
     let _tooltipDimns = () => DEFAULT_TOOLTIP_DIMNS;
     
-    //note - styles may be implemntd as attrs instead
-    let styles = {};
+    const defaultStyles = {
+        text:{
+            fill:grey10(6),
+            stroke:grey10(6)
+        }
+    };
+    let _styles = () => defaultStyles;
 
     //state
     let hovered;
@@ -66,6 +71,8 @@ export default function tooltipsComponent() {
             //an array, even if its top then bottom
             const tooltipG = d3.select(this);
             const { width, height, margin, fontSize } = tooltipDimns[i];
+            const styles = _styles(d,i);
+            console.log("styles", styles)
 
             const contentsWidth = width - margin.left - margin.right;
             const contentsHeight = height - margin.top - margin.bottom;
@@ -81,6 +88,8 @@ export default function tooltipsComponent() {
             //dragtext
             tooltipG.select("text.drag-value")
                 .attr("y", -contentsHeight/2 + dragTextHeight/2)
+                .attr("fill", styles.text.fill)
+                .attr("stroke", styles.text.stroke)
                 .attr("font-size", dragTextHeight * 0.8)
                 .attr("display", draggable && showDragValueAbove ? null : "none")
                 .text(getValue(d) || "")
@@ -105,6 +114,7 @@ export default function tooltipsComponent() {
             innerG.style("opacity", isSmall && !isAchieved(d) ? 1 : 0.85)
 
             if(icon.styles?.fill){
+                //not being used
                 iconG.selectAll("*").style("fill", icon.styles.fill)
             }
             iconG.select(".inner-overlay").attr("display", shouldShowValue ? null : "none")
@@ -124,8 +134,8 @@ export default function tooltipsComponent() {
                     .attr("y", d.key === "expected" ? -contentsWidth * 0.1 : 0)
                     //temp - use width, not contentsW, so all tooltip fonts the same
                     .attr("font-size", fontSize)
-                    .attr("stroke", grey10(6))
-                    .attr("fill", grey10(6))
+                    .attr("fill", styles.text.fill)
+                    .attr("stroke", styles.text.stroke)
                     .attr("stroke-width", 0.1)
                     .text(getValue(d) || "")
 
@@ -140,6 +150,7 @@ export default function tooltipsComponent() {
         //specific tooltip updates
         selection.each(function(data,i){
             const tooltipDimns = _tooltipDimns(data, i);
+            const styles = _styles(data,i);
             const containerG = d3.select(this);
                 //.attr("pointer-events", "none");
             
@@ -311,6 +322,17 @@ export default function tooltipsComponent() {
         _tooltipDimns = (d,i) => func(d,i) || DEFAULT_TOOLTIP_DIMNS;
         return tooltips;
     };
+    tooltips.styles = function (func) {
+        if (!arguments.length) { return _styles; }
+        _styles = (d,i) => {
+            const requiredStyles = func(d,i);
+            return {
+                text:{ ...defaultStyles.text, ...requiredStyles.text },
+                //others here
+            }
+        };
+        return tooltips;
+    };
     tooltips.getValue = function (value) {
         if (!arguments.length) { return getValue; }
         getValue = value;
@@ -324,11 +346,6 @@ export default function tooltipsComponent() {
     tooltips.getY = function (value) {
         if (!arguments.length) { return getY; }
         getY = value;
-        return tooltips;
-    };
-    tooltips.styles = function (value) {
-        if (!arguments.length) { return styles; }
-        styles = { ...styles, ...value};
         return tooltips;
     };
     tooltips.draggable = function (value) {

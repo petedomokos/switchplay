@@ -714,6 +714,7 @@ export default function milestonesBarComponent() {
                 const vertScale = height / profileHeight;
                 const scale = d3.min([horizScale, vertScale]);
 
+                console.log("data", positionedData.filter(m => m.dataType === "profile"))
                 profilesG
                     //.attr("transform", "translate(0, -20")
                     .datum(positionedData.filter(m => m.dataType === "profile"))
@@ -721,6 +722,7 @@ export default function milestonesBarComponent() {
                         .width(profileWidth)
                         .height(profileHeight)
                         .fontSizes(fontSizes.profile)
+                        .selected([selectedMilestone])
                         .expanded([{
                             id:selectedMilestone,
                             //if landscape, then vert space is less so we scale according to that 

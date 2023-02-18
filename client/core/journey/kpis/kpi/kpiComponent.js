@@ -97,7 +97,6 @@ export default function kpiComponent() {
 
     let _name = d => d.name;
     let isEditable = () => false;
-    let withTooltips = () => false;
     let status = () => "closed";
 
     //API CALLBACKS
@@ -261,11 +260,6 @@ export default function kpiComponent() {
     kpi.titleDimns = function (func) {
         if (!arguments.length) { return _titleDimns; }
         _titleDimns = (d,i) => ({ ...DEFAULT_TITLE_DIMNS, ...func(d,i) });
-        return kpi;
-    };
-    kpi.withTooltips = function (value) {
-        if (!arguments.length) { return withTooltips; }
-        withTooltips = value;
         return kpi;
     };
     kpi.status = function (value) {

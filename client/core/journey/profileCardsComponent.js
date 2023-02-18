@@ -49,7 +49,8 @@ export default function profileCardsComponent() {
 
     //state
     let expanded = [];
-    let selected;
+    let selected = [];
+    let isSelected = () => false;
     let editable = false;
     let movable = true;
     let scrollable = false;
@@ -139,9 +140,9 @@ export default function profileCardsComponent() {
                             .attr("class", "bg")
                             .attr("rx", 3)
                             .attr("ry", 3)
-                            .attr("fill", d.isCurrent ? "#FFFDFA" :grey10(2))
-                            //.attr("stroke", "red")
-                            //.attr("stroke-width", 5);
+                            .call(updateFill, { 
+                                fill:d => isSelected(d) ? COLOURS.selectedMilestone : COLOURS.milestone
+                            })
 
                     contentsG.append("g").attr("class", "info")
                     contentsG.append("g").attr("class", "kpis")
@@ -178,6 +179,11 @@ export default function profileCardsComponent() {
                         .style("fill", "black")
                         .style("opacity", 0.5)
                     
+                    d3.select(this).select("g.contents").select("rect.bg")
+                    .call(updateFill, { 
+                        fill:d => isSelected(d) ? COLOURS.selectedMilestone : COLOURS.milestone,
+                        transition:{ duration: 300 }
+                    })
 
                     const profileInfo = profileInfoComponents[d.id]
                         .width(contentsWidth)
@@ -290,43 +296,7 @@ export default function profileCardsComponent() {
                             .on("mouseover", (e,b) => { if(b.onMouseover){ b.onMouseover(b)} })
                             .on("mouseout", (e,b) => { if(b.onMouseout){ b.onMouseout(b)} })
 
-                    topRightBtnG.exit().remove();
-                    //targ
-                    /*
-                    let kpiData = [];
-                    //getting error when doing this
-                    if(selectedMeasureIsInGoal(d)){
-                        const planetMeasureData = d.measures.find(m => m.id === selectedMeasure.id);
-                        targData.push({ ...selectedMeasure, ...planetMeasureData });
-                    }
-
-                    const kpiG = contentsG.selectAll("g.kpi").data(kpiData)
-                    kpiG.enter()
-                        .append("g")
-                            .attr("class", "kpi")
-                            .each(function(measure){
-                                d3.select(this)
-                                    .append("text")
-                                        .attr("text-anchor", "middle")
-                                        .attr("dominant-baseline", "middle")
-                                        .style("pointer-events", "none")
-                            })
-                            .merge(kpiG)
-                            .attr("transform", "translate(0, " +d.ry(height)/2 +")")
-                            .each(function(m){
-                                d3.select(this).select("text")
-                                    .attr("opacity", !selectedMeasure || selectedMeasureIsInGoal(d) ? planetOpacity.normal : planetOpacity.unavailable)
-                                    .style("font-size", fontSize * 1.2)
-                                    //.attr("stroke-width", 0.5)
-                                    .attr("fill", "white")
-                                    //.attr("stroke", COLOURS.selectedMeasure)
-                                    .text("target "+(typeof m.targ === "number" ? m.targ : "not set"))
-
-                            })
-                            
-                    kpiG.exit().remove();
-                    */
-                            
+                    topRightBtnG.exit().remove();        
                 })
                 //.call(updateHighlighted)
                 //.call(drag)
@@ -348,6 +318,24 @@ export default function profileCardsComponent() {
                         d3.select(this)
                             .attr("transform", `translate(${x(d)} , ${y(d)}) scale(${scale(d)})`);
                         
+                        cb.call(this);
+                    }
+                })
+            }
+
+            function updateFill(selection, options={}){
+                console.log("updateFill", options.transition)
+                const { fill = d => d.colour || "none", transition, cb = () => {} } = options;
+                selection.each(function(d){
+                    console.log("fill", fill(d), d)
+                    if(transition){
+                        d3.select(this)
+                            .transition()
+                            .duration(transition.duration || 200)
+                                .attr("fill", fill(d))
+                                .on("end", cb);
+                    }else{
+                        d3.select(this).attr("fill", fill(d))
                         cb.call(this);
                     }
                 })
@@ -562,9 +550,25 @@ export default function profileCardsComponent() {
         movable = value;
         return profileCards;
     };
-    profileCards.selected = function (value) {
+    profileCards.selected = function (values) {
         if (!arguments.length) { return selected; }
-        selected = value;
+        selected = values;
+        isSelected = d => values.includes(d.id);
+        //only update if alreayd defined
+        console.log("new selected....", selected)
+        /*
+        if(containerG){
+            console.log("all ds", containerG.selectAll("g.profile-card").data())
+            containerG.selectAll("g.profile-card").select("g.contents").select("rect")
+                .transition()
+                //transition doesnt seem to be applied!
+                .duration(2000)
+                    .attr("fill", d => {
+                        console.log("isSel?", d.id, isSelected(d))
+                        return isSelected(d) ? COLOURS.selectedMilestone : COLOURS.milestone
+                    })
+        }
+        */
         return profileCards;
     };
     profileCards.topRightCtrls = function (value) {

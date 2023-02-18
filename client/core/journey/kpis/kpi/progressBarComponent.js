@@ -319,6 +319,8 @@ export default function progressBarComponent() {
                 .height((d,i) => dimns[i].contentsHeight)
                 //bug when open, tooltipdimns dont increase
                 .tooltipDimns((d,i) => dimns[i].tooltips[tooltipsLocation])
+                .styles((d,i) => ({
+                }))
                 //this is when open
                 .getValue(getValue)
                 .getX((d,i,j) =>{

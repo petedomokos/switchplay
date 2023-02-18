@@ -312,7 +312,6 @@ export default function kpisComponent() {
                                 .height((d,i) => status(d) === "open" || status(d) === "closing" ? openKpiHeight : kpiHeight)
                                 //.expandedHeight(openKpiHeight)
                                 .status(d => status(d) || "closed")
-                                .withTooltips(d => isSelected(d))
                                 .margin(() => kpiMargin)
                                 .titleDimns((d) => {
                                     //need contentsWidth and Height to work out name dimns and fontsize so it doesnt change based on status in general update

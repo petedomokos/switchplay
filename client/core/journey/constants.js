@@ -226,6 +226,8 @@ export const COLOURS = {
     canvas:"#F8F8F8",
     planet:"#6495ED",//grey10(5),
     milestone:grey10(2),
+    //selectedMilestone:"#375CD4" - this is complemetary blue to the gold of tooltip icons,//"#FFFDFA", //grey10(1),
+    selectedMilestone:grey10(1),
     link:grey10(5),
     selected:grey10(2),
     creatingLink:"white",
@@ -233,6 +235,7 @@ export const COLOURS = {
     potentialLink:grey10(3),
     barMenuItem:"none",
     selectedBarMenuItem:"white",
+    
     btnIcons:{
         default:grey10(5),
         expand: grey10(5),
