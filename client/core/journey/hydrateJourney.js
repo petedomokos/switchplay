@@ -60,7 +60,7 @@ function hydrateContracts(contracts=[]){
 }
 
 function hydrateProfiles(profiles=[], datasets, kpis, defaultTargets, options={}){
-    console.log("hydrateProfiles----------------", profiles);
+    //console.log("hydrateProfiles----------------", profiles);
     const orderedProfiles = sortAscending(profiles, d => d.date);
     const hydrateNextProfile = (remaining, hydratedSoFar) => {
         const next = remaining[0];
@@ -116,8 +116,8 @@ function calcCurrent(stat, datapoints, dateRange, log){
         .map(d => getValue(d))
     
     if(log){
-        console.log("calcCurr dateRange", dateRange)
-        console.log("calcCurr values", values)
+        //console.log("calcCurr dateRange", dateRange)
+        //console.log("calcCurr values", values)
     }
 
     return {
@@ -147,7 +147,7 @@ function calcDateRange(start, end, format){
 
 
 function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, options={}){
-    console.log("hydrateProfile------------", profile.id, profile.date)
+    //console.log("hydrateProfile------------", profile.id, profile.date)
     const { now, rangeFormat } = options;
     const { id, date, customTargets=[], isCurrent } = profile;
     const milestoneId = id;

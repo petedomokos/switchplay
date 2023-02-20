@@ -208,8 +208,9 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       customExpected:[],
       ...props //will be just the date if from milestonesBar
     }
+    console.log("SAVE NEW PROFILE", profile.date, profile)
     const _profiles = [ ...profiles, profile];
-    save({ ...data, profiles:_profiles });
+    //save({ ...data, profiles:_profiles });
     
   }, [JSON.stringify(data), user._id]);
 
