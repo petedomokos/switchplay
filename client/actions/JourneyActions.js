@@ -66,7 +66,11 @@ const transformJourneyForServer = journey => {
 	*/
 
 	return { 
-		_id: journey._id !== "temp" ? journey._id : undefined, 
+		_id: journey._id !== "temp" ? journey._id : undefined,
+		playerId:journey.playerId,
+		coachId:journey.coachId,
+		//why not keep playerId? see also JourneyContainer
+		//and need to add playerId to journey model
 		name: journey.name || "",
 		desc: journey.desc || "",
 		contracts,
@@ -131,6 +135,9 @@ export const saveAdhocJourneyToStore = journey => (
 
 export const saveJourney = (journey, shouldPersist=true, shouldUpdateStoreBefore=false, shouldUpdateStoreAfter=false)  => dispatch => {
 	console.log("saveJourney.............", journey)
+	//note - currently, the client store simply stores the server journey too
+	const serverJourney = transformJourneyForServer(journey);
+	console.log("serverJourney", serverJourney)
 	/*
 	//atm, if no user logged in, we still have  auser object so just store journey in there as normal, but dont persist to server
 	const jwt = auth.isAuthenticated();
@@ -141,12 +148,12 @@ export const saveJourney = (journey, shouldPersist=true, shouldUpdateStoreBefore
 	}
 	*/
 	//1. save to store
-	dispatch(saveJourneyToStore(journey));
+	dispatch(saveJourneyToStore(serverJourney));
 	if(!shouldPersist){ return; }
     //2. save to server
     //3. on response, undo if errors, add id (if new) or anything else from server to store
-	const serverJourney = transformJourneyForServer(journey);
-	console.log("serverJourney", serverJourney);
+	//const serverJourney = transformJourneyForServer(journey);
+	//console.log("serverJourney", serverJourney);
 	const jwt = auth.isAuthenticated();
 	//console.log("jwt", jwt)
 	if(!jwt.user) { return; }

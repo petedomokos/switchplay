@@ -121,14 +121,14 @@ export default function profileCardsComponent() {
                     return this.parentNode.parentNode.parentNode
                 });*/ 
 
-            const profileCardG = containerG.selectAll("g.profile-card").data(data);
+            const profileCardG = containerG.selectAll("g.profile-card").data(data, d => d.id);
             profileCardG.enter()
                 .append("g")
                 .attr("class", d => `milestone profile-card milestone-${d.id} profile-card-${d.id}`)
                 .each(function(d,i){
                     profileInfoComponents[d.id] = profileInfoComponent();
                     kpisComponents[d.id] = kpisComponent();
-                    // console.log("entering card", d)
+                    console.log("entering card", d.id)
                     //ENTER
                     const contentsG = d3.select(this)
                         .append("g")

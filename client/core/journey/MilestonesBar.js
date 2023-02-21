@@ -51,6 +51,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue }) => {
+  console.log("MBar...")
   const { player, profiles, contracts } = data;
   //local state
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);

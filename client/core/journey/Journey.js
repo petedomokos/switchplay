@@ -99,7 +99,7 @@ const initChannels = d3.range(numberMonths)
 
 //width and height may be full screen, but may not be
 const Journey = ({ user, data, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile }) => {
-  // console.log("Journey.......", data)
+  console.log("Journey.......", data)
   //bug - although only 6 profs are saved, we end up with 7 ie two currents
   //console.log("Journey avail", availableJourneys)
   const { _id, name, contracts, profiles, aims, goals, links, measures, kpis } = data;
@@ -116,6 +116,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   //KpiView will display an entire kpiSet, keyed by milestoneId
   const selectedKpiSet = selectedKpi?.kpiSet;
   const shouldShowOverlay = displayedBar === "milestones" || selectedKpiSet;
+  console.log("a...")
 
   //kpiViewData is based on selectedKpiSet, profiles and 
   //todo - finish this - needs the datasetId and the measureId from the kpi. kaybe just grab it from the first profile
@@ -142,6 +143,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   const journeyWidth = width - DIMNS.journey.margin.left - DIMNS.journey.margin.right
   const journeyHeight = height - DIMNS.journey.margin.top - DIMNS.journey.margin.bottom - ctrlsHeight;
   let styleProps = {}
+  console.log("b1...")
   /*
   if(modalData) {
       //todo - handle aim nameOnly case
@@ -196,6 +198,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
 
   //@todo - make a more robust id function - see my exp builder code
   const nrGoalsCreated = useRef(goals.length);
+  console.log("b2...")
 
   const handleCreateProfile = useCallback((props) => {
     const profile = {
@@ -210,9 +213,10 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     }
     console.log("SAVE NEW PROFILE", profile.date, profile)
     const _profiles = [ ...profiles, profile];
-    //save({ ...data, profiles:_profiles });
+    save({ ...data, profiles:_profiles });
     
-  }, [JSON.stringify(data), user._id]);
+  }, [JSON.stringify(profiles), user._id]);
+  console.log("b3...")
 
   const handleCreateContract = useCallback((props) => {
     const contract = {
@@ -225,7 +229,8 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     const _contracts = [ ...contracts, contract];
     save({ ...data, contracts:_contracts });
     
-  }, [JSON.stringify(data), user._id]);
+  }, [JSON.stringify(contracts), user._id]);
+  console.log("b4...")
 
   const handleCreateMilestone = useCallback((dataType, date) => {
     if(dataType === "profile"){
@@ -233,13 +238,15 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     }else{
       handleCreateContract({ date });
     }
-  }, [JSON.stringify(data), user._id]);
+  }, [JSON.stringify(profiles), JSON.stringify(contracts), user._id]);
+  console.log("b5...")
 
   const handleDeleteProfile = useCallback((id) => {
     //todo - must delete link first, but when state is put together this wont matter
     const _profiles = profiles.filter(p => p.id !== id);
     save({ ...data, profiles:_profiles });
-  }, [JSON.stringify(data)]);
+  }, [JSON.stringify(profiles)]);
+  console.log("b6...")
 
   const handleDeleteMilestone = useCallback((dataType, id) => {
     if(dataType === "profile"){
@@ -247,7 +254,9 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     }else{
       //handleDeleteContract(id);
     }
-  }, [JSON.stringify(data)]);
+  }, [JSON.stringify(profiles), JSON.stringify(contracts)]);
+
+  console.log("b7...")
 
   const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => {  
     //trouble - the unsaved value gets removed, and tehn an update to tooltips occurs
@@ -277,7 +286,8 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     const _profiles = [ ...otherProfiles, updatedProfile]
     //save({ ...data, profiles:_profiles });
     
-  }, [JSON.stringify(data), user._id]);
+  }, [JSON.stringify(profiles), user._id]);
+  console.log("b8...")
 
   useEffect(() => {
     const width = d3.min([journeyWidth * 0.725, 500]);
@@ -289,6 +299,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       top:((journeyHeight - height) / 2) + "px"
     }
   }, [journeyWidth, journeyHeight])
+  console.log("b9...")
   
   //overlay
   useEffect(() => {
@@ -300,6 +311,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       .attr("display", shouldShowOverlay ? "none" : "initial");
 
   }, [shouldShowOverlay])
+  console.log("b10...")
 
  //init journey
  /*
@@ -343,7 +355,8 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
         .onSetKpiFormat(setKpiFormat)
         .createJourney(() => {
           setDisplayedBar("");
-          save(newJourney, false); //dont persist until user actually does something. atm , its temp
+          //add playerId  - for now, can assume its userId
+          save({ ...newJourney, playerId:_id, false); //dont persist until user actually does something. atm , its temp
         })
         .onSelectKpiSet((kpi) => {
           setDisplayedBar({kpi}) 
@@ -551,6 +564,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       }
       () => setModalData(undefined);
   }
+  console.log("b11...")
 
   const onClosePlanetForm = () => {
       journey.endEditPlanet();
@@ -604,6 +618,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     e.preventDefault();
     e.stopPropagation();
   };
+  console.log("b12...")
   const handleDrop = (e,d) => {
     e.preventDefault();
     e.stopPropagation();
@@ -635,6 +650,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     */
     //([...files]).forEach(uploadFile)
   };
+  console.log("b13...")
   /*
   function uploadFile(file) {
     let url = 'YOUR URL HERE'
@@ -651,6 +667,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   }
   */
   //@todo -  openFullScreen when user clicks to get into a journey
+  console.log("return statement of Journey...")
   return (
     <div className={classes.root}>
         <div className={`${classes.overlay} overlay`} ref={overlayRef}>

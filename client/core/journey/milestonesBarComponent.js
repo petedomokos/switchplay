@@ -142,6 +142,7 @@ const EASE_IN = d3.easeCubicIn;
 const EASE_IN_OUT = d3.easeCubicInOut;
 
 export default function milestonesBarComponent() {
+    console.log("mBarComponent")
     //bug - we are not unmounting the jourrny on signout
     //need to check all data is wiped and store is reset
     //API SETTINGS
