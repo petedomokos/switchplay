@@ -20,6 +20,12 @@ export const KPI_CTRLS = format => ([
     { key: "completion", label:"Completion", isSelected:format === "completion" }
 ]);
 
+export const TIME_SETTINGS = {
+    YEAR_END : { MONTH:4, DAY_OF_MONTH:31 },
+    WEEK_END_DAY:0, //0 = sunday,
+    DAY_END_HRS:22
+}
+
 export const TRANSITIONS = {
     KPI:{
         FADE:{

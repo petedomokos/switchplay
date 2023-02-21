@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, FONTSIZES, grey10, COLOURS } from "./constants";
+import { TIME_SETTINGS, DIMNS, FONTSIZES, grey10, COLOURS } from "./constants";
 import contractsComponent from './contractsComponent';
 import profileCardsComponent from './profileCardsComponent';
 import dragEnhancements from './enhancedDragHandler';
@@ -16,22 +16,27 @@ import { emptyGoal, ball, shiningCrystalBall, nonShiningCrystalBall } from "../.
 //then - change year end from Dec 31 to April 31 (football season) and Jul 31 (academic year)
 //basically testing that we can giv user option to choose their year end
 //later - implement a termEnd function
+//year end is football season
+
 function generateMilestoneDate(prevDate, nextDate){
     if(!prevDate && !nextDate){ return new Date(); }
     if(!prevDate){ return addMonths(-1, nextDate); }
-    if(!nextDate) { return addMonths(1, prev.date); }
-
+    if(!nextDate) {
+        return isLastDayOfYear(prevDate) ? lastDateOfNextYear(prevDate) : lastDateOfYear(prevDate);
+        //if we want to do 12 months time
+        //return lastDateOfMonth(addMonths(12, prevDate)); }
+    }
     if(nextDate < addMonths(3, prevDate)){
         //within 3 months, so we work in weeks
-        console.log("finding weekEnd")
+        //console.log("finding weekEnd")
         return weekEndBetween(prevDate, nextDate);
     }else if(nextDate < addMonths(24, prevDate)){
         //work in months
-        console.log("finding monthEnd")
+        //console.log("finding monthEnd")
         return monthEndBetween(prevDate, nextDate);
     }else{
         //work in years
-        console.log("finding yearEnd")
+        //console.log("finding yearEnd")
         return yearEndBetween(prevDate, nextDate);
     }
 }
@@ -48,7 +53,8 @@ function isLastDayOfMonth(date){
     }
 }
 function isLastDayOfYear(date){
-    return date.getUTCMonth() === 11 && date.getDate() === 31;
+    const { YEAR_END:{ MONTH, DAY_OF_MONTH } } = TIME_SETTINGS;
+    return date.getUTCMonth() === MONTH && date.getDate() === DAY_OF_MONTH;
 }
 
 function lastDayOfMonth(month, isInLeapYear){
@@ -59,84 +65,75 @@ function lastDayOfMonth(month, isInLeapYear){
     }
 }
 function lastDateOfMonth(date){
+    const { DAY_END_HRS } = TIME_SETTINGS;
     const month = date.getUTCMonth();
     const year = date.getUTCFullYear();
     const day = lastDayOfMonth(month, isInLeapYear(date))
     //add 2 hours on to avoid clases due to euro-time zone differences
-    return new Date(year, month, day, 2);
+    return new Date(year, month, day, DAY_END_HRS);
+}
+function lastDateOfYear(date){
+    const { YEAR_END: { MONTH, DAY_OF_MONTH }, DAY_END_HRS } = TIME_SETTINGS;
+    return new Date(date.getUTCFullYear(), MONTH, DAY_OF_MONTH, DAY_END_HRS); 
+}
+function lastDateOfNextYear(date, yearEnd={}){
+    const { YEAR_END:{ MONTH, DAY_OF_MONTH }, DAY_END_HRS } = TIME_SETTINGS;
+    return new Date(date.getUTCFullYear() + 1, MONTH, DAY_OF_MONTH, DAY_END_HRS); 
 }
 
-function yearEndsBetween(prev, next){
-    console.log("yearEndsBet...............")
+function yearEndsBetween(prev, next, yearEnd={}){
+    const { YEAR_END:{ MONTH, DAY_OF_MONTH }, DAY_END_HRS } = TIME_SETTINGS;
     const pYear = prev.getUTCFullYear();
     const nYear = next.getUTCFullYear();
-    //console.log("prev prevYear", prev, pYear)
-    //console.log("next nextYear", next, nYear)
-    const startYear = isLastDayOfYear(prev) ? pYear + 1 : pYear;
+    const startYear = isLastDayOfYear(prev, yearEnd) ? pYear + 1 : pYear;
     //in theory we could have to profiles both on last day of the year
     if(startYear > nYear) { return []; }
-    return d3.range(startYear, nYear).map(year => new Date(year, 11, 31, 2));
+    return d3.range(startYear, nYear).map(year => new Date(year, MONTH, DAY_OF_MONTH, DAY_END_HRS));
 }
 
 function monthEndsBetween(start, end){
-    //console.log("monthEndsbet................")
-    //console.log("start", start)
-    //console.log("end", end)
+    const { DAY_END_HRS } = TIME_SETTINGS;
     let monthEndsBetween = [];
     //include start month unless it is already the last date of month
     let nextDate = isLastDayOfMonth(start) ? addMonths(1, start) : start;
     while(nextDate < end){
-        //console.log("nextDate", nextDate)
-        const lastD = lastDateOfMonth(nextDate)
-        //console.log("lastD", lastD)
-        monthEndsBetween.push(lastD);
-        //monthEndsBetween.push(lastDateOfMonth(nextDate));
+        monthEndsBetween.push(lastDateOfMonth(nextDate));
         nextDate = addMonths(1, nextDate);
     }
-    //console.log("monthendsBet", monthEndsBetween)
-    return monthEndsBetween;
+    return monthEndsBetween
+        .map(date => new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), DAY_END_HRS));
 }
 
 //0 = Sunday
-function weekEndsBetween(prev, next, endDay=0){
+function weekEndsBetween(prev, next, weekEnd={}){
+    const { WEEK_END_DAY, DAY_END_HRS } = TIME_SETTINGS;
     const nrDaysBetween = Math.floor((next.getTime() - prev.getTime()) / 86400000);
     const daysBetween = d3.range(1, nrDaysBetween + 1 + 5).map(nr => addDays(nr, prev))
-    return daysBetween.filter(d => d.getDay() === endDay);
+    return daysBetween
+        .filter(date => date.getDay() === WEEK_END_DAY)
+        .map(date => new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), DAY_END_HRS));
 }
 
 function yearEndBetween(prev, next){
-    //console.log("yearEndBetween....",)
-    //console.log("prev", prev)
-    //console.log("next", next)
     if(!prev || !next){ return null; }
     const yearEnds = yearEndsBetween(prev, next);
-    //console.log("yearEnds", yearEnds)
     const interpolator = d3.interpolateDate(prev, next);
     const middleDate = interpolator(0.5);
-    //console.log("middleDate", middleDate);
     return d3.least(yearEnds, d => Math.abs(middleDate - d));
 }
 
 function monthEndBetween(prev, next){
-    //console.log("monthEndBetween")
-    //console.log("prev", prev)
-    //console.log("next", next)
     if(!prev || !next){ return null; }
     const monthEnds = monthEndsBetween(prev, next);
     const interpolator = d3.interpolateDate(prev, next);
     const middleDate = interpolator(0.5);
     return d3.least(monthEnds, d => Math.abs(middleDate - d));
 }
-function weekEndBetween(prev, next, endDay=0){
-    //console.log("weekBetween", next - prev)
-    //console.log("prev", prev)
-    //console.log("next", next)
+function weekEndBetween(prev, next, weekEnd){
     if(!prev || !next){ return null; }
-    const weekEnds = weekEndsBetween(prev, next, endDay);
-    //console.log("weekEnds---", weekEnds);
+    const weekEnds = weekEndsBetween(prev, next, weekEnd);
     const interpolator = d3.interpolateDate(prev, next);
     const middleDate = interpolator(0.5);
-    //console.log("middleDate", middleDate)
     return d3.least(weekEnds, d => Math.abs(middleDate - d));
 }
 
