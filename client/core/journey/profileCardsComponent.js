@@ -128,7 +128,6 @@ export default function profileCardsComponent() {
                 .each(function(d,i){
                     profileInfoComponents[d.id] = profileInfoComponent();
                     kpisComponents[d.id] = kpisComponent();
-                    console.log("entering card", d.id)
                     //ENTER
                     const contentsG = d3.select(this)
                         .append("g")

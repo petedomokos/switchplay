@@ -12,17 +12,15 @@ const parseDateStr = dateStr => {
     //this is a diff case to having no date, which can bee assumed to be deliberate
     if(!dateIsValid(date)){ return now; }
     const hrs = date.getHours();
-    //djust hours at edges so timezones dont change the day
-    if(hrs <= 1){ 
-        date.setHours(2)
-    }else if(hrs >= 23){
-        date.setHours(22)
+    //if hrs not specified, set to 3pm to avoid any timezone or dayEnd complications
+    if(hrs === 0){ 
+        date.setHours(15)
     }
     return date;
 }
 
 export function createDatapointsFromData(data, dataset){
-    //console.log("createDsFromData", data, dataset)
+    console.log("createDsFromData", data, dataset)
     const nonValueCols = [
         "player",
         "players", 
@@ -38,11 +36,11 @@ export function createDatapointsFromData(data, dataset){
         let datapoint = {};
         // need the non value properties to remain at top-level
         nonValueCols.forEach(col => {
-            console.log("col", col)
+            //console.log("col", col)
             //if not defined, we must emit them so db will assign the default
             if(d[col]){
                 if(col === "date"){
-                    console.log("d[date]", d["date"], d[col])
+                    //console.log("d[date]", d["date"], d[col])
                     datapoint[col] = parseDateStr(d[col]);
                 }else{
                     datapoint[col] = d[col];
@@ -51,13 +49,15 @@ export function createDatapointsFromData(data, dataset){
         })
         datapoint.values = data.columns
             .filter(col => col && !nonValueCols.includes(col))
-            .filter(col => dataset.measures.find(m => m.key === col))
+            .filter(col => dataset.rawMeasures.find(m => m.key === col))
+            .filter(col => d[col])
             .map(col => ({ 
                 //legacy - uses measureid
                 //warning - measure key may not be unique in legacy datasets
-                measure: dataset.measures.find(m => m.key === col)._id,
+                measure: dataset.rawMeasures.find(m => m.key === col)._id,
                 value:d[col] 
             }))
+        console.log("datapoint", datapoint)
 
         return datapoint;
     })

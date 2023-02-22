@@ -191,16 +191,9 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
             //helper
             //issue - surely we should also filter for datasetKey
             //need to take ll this into the calcCurrent func
-            const getValue = getValueForStat(statKey);
             const dataset = datasets.find(dset => dset.key === datasetKey);
             const datapoints = dataset?.datapoints || [];
             const stat = dataset?.stats.find(s => s.key === statKey);
-            const allActualDatapoints = datapoints
-                .filter(d => !d.isTarget)
-                //.need to just get the stat value for a sinbgle stat
-                .map(d => ({ ...d, value:getValue(d) })); //nee to simply get the statValue
-
-            const actualDatapointsInRange = allActualDatapoints.filter(d => dateIsInRange(d.date, dateRange))
            
             //startvalues are only set if prevProfile isPast ie it has an achieved score
             //note - current profile is hydrated on its own so has no prevProfile
@@ -267,7 +260,12 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, options={}){
         ?.values;
 
     const prevProfile = d3.greatest(orderedProfiles.filter(p => p.isPast), p => p.date);
-    const startDate = prevProfile?.date || addMonths(-3, now);
+
+    //10 was scored in 20th apr 2021 so not within 3 months and not since last card
+    //it seems startdate is more than 3 months ago
+    //note - current always only takes values from last 3 months
+    //@todo - provide this as a setting that can be adjusted 
+    const startDate = addMonths(-3, now);
     const startsFromPrevProfile = !!prevProfile;
     const datePhase = "current";
     const dateRange = calcDateRange(startDate, now);
@@ -306,8 +304,7 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, options={}){
                     min, max, start, end,
                     expected:activeProfileValues(kpi)?.expected,
                     target:activeProfileValues(kpi)?.target,
-                    //current on currentProfile has no bounds, unlike current on active profile
-                    current:calcCurrent(stat, datapoints, null, false)
+                    current:calcCurrent(stat, datapoints, dateRange, false)
                 },
                 //other info
                 datasetName:dataset?.name || "",

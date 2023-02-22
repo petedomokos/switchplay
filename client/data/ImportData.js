@@ -32,15 +32,8 @@ const useStyles = makeStyles((theme) => ({
 
 //width and height may be full screen, but may not be
 const ImportData = ({ datasets, submit }) => {
-  const [importState, setImportState] = useState("");
   console.log("ImportData...datasets", datasets)
-  const spec= new Date("12/12/2022")
-  console.log("spec", spec)
-  const hrs = spec.getHours();
-  console.log("hrs", hrs)
-  let specPlus3 = spec;
-  specPlus3.setHours(hrs + 3)
-  console.log("specPlus3", specPlus3)
+  const [importState, setImportState] = useState("");
   const styleProps = { importState };
   const classes = useStyles(styleProps) 
 

@@ -17,7 +17,7 @@ export function hydrateDataset(dataset){
     //we dont bother with some properties if its a shallow version eg no datapoints or measures
     const startDate = isDeep ? getStartDate(dataset) : null;
     const derivedMeasures = isDeep ? getDerivedMeasures(key) : null;
-    const rawMeasures = isDeep ? dataset.measures.map(m => hydrateMeasure(m)) : null;
+    const rawMeasures = dataset.measures?.map(m => hydrateMeasure(m));
     const datapoints = isDeep ? dataset.datapoints.map(d => {
         //add measure key to rawMeasure values (server stores the measure id instead - need to change)
         const rawValues = d.values.map(v => {
@@ -62,7 +62,7 @@ function calcDerivedValue(datapoint, formula){
             if(typeof valueDescription === "string"){
                 const requiredKey = valueDescription;
                 //its a measure key so get the corresponding value
-                return datapoint.values.find(v => v.key === requiredKey).value
+                return datapoint.values.find(v => v.key === requiredKey)?.value
             }
             if(typeof valueDescription === "number"){
                 //its a constant
