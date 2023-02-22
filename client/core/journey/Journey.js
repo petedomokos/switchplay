@@ -99,9 +99,8 @@ const initChannels = d3.range(numberMonths)
 
 //width and height may be full screen, but may not be
 const Journey = ({ user, data, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile }) => {
-  console.log("Journey.......", data)
+  //console.log("Journey.......", data)
   //bug - although only 6 profs are saved, we end up with 7 ie two currents
-  //console.log("Journey avail", availableJourneys)
   const { _id, name, contracts, profiles, aims, goals, links, measures, kpis } = data;
   const [journey, setJourney] = useState(null);
   const [channels, setChannels] = useState(initChannels);
@@ -116,90 +115,38 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   //KpiView will display an entire kpiSet, keyed by milestoneId
   const selectedKpiSet = selectedKpi?.kpiSet;
   const shouldShowOverlay = displayedBar === "milestones" || selectedKpiSet;
-  console.log("a...")
 
   //kpiViewData is based on selectedKpiSet, profiles and 
   //todo - finish this - needs the datasetId and the measureId from the kpi. kaybe just grab it from the first profile
-  const kpiSetName = kpi => {
+  /*
+  const kpiSetName = useCallback(kpi => {
     const { datasetId, statId } = kpi;
     const dataset = datasets.find(dset => dset._id === datasetId);
     const stat = dataset?.measures.find(m => m._id === statId);
     return stat?.fullNameLong
-  }
-  //need to know which date/profile is selected too -
-  // this also comes from teh kpi that is passed through, as it will have that date
-  /*
-  const kpiViewData = !selectedKpiSet ? null : profiles.map(p =>  ({
-    ...p.kpis.find(kpi => kpi.kpiSet === selectedKpiSet),
-    date:p.date,
-    //key can just be the milestoneId in this case
-    key:p.id,
-  }));
+  },[JSON.stringify(datasets)])
   */
 
-  const shouldD3UpdateRef = useRef(true);
+  //const shouldD3UpdateRef = useRef(true);
 
   const ctrlsHeight = 0;//10;
   const journeyWidth = width - DIMNS.journey.margin.left - DIMNS.journey.margin.right
   const journeyHeight = height - DIMNS.journey.margin.top - DIMNS.journey.margin.bottom - ctrlsHeight;
   let styleProps = {}
-  console.log("b1...")
-  /*
-  if(modalData) {
-      //todo - handle aim nameOnly case
-      const { nameOnly, nameAndTargOnly, d } = modalData;
-
-      if(nameOnly || nameAndTargOnly){
-            //could be aim or planet, but use planet width and height as a guide for both
-            //@todo - have more rigorous dimns
-            const { width, height } = DIMNS.form.single;
-            const goalNameX = d => d.x - width/2;
-            const goalNameY = d => d.y - height/2;
-            const aimNameX = d => (aligned ? d.goalFitX : d.x) + DIMNS.aim.name.margin.left;
-            const aimNameY = d => d.y + DIMNS.aim.name.margin.top;
-
-            const journeyNameLeft = screen.isLarge ? DIMNS.journey.name.margin.left : DIMNS.burgerBarWidth;
-            const journeyNameTop = DIMNS.journey.name.margin.top;
-            const journeyNameWidth = DIMNS.form.journeyName.width;
-            const journeyNameHeight = DIMNS.form.journeyName.height;
-
-            styleProps = {
-                modal:{
-                  width: d.id === "main" ? journeyNameWidth : width,
-                  height: d.id === "main" ? journeyNameHeight : height,
-                  //@todo - sort this out...for now, planet has x whereas aim has goalFitX potentially
-                  left:(d.dataType === "planet" ? goalNameX(d) : (d.id === "main" ? journeyNameLeft : aimNameX(d))) + "px",
-                  top:(d.dataType === "planet" ? goalNameY(d) : (d.id === "main" ? journeyNameTop : aimNameY(d))) + "px",
-                  targTop:"20px"
-                }
-            }
-      }else{
-            //full form
-            const width = d3.min([journeyWidth * 0.725, 500]); 
-            const height = d3.min([journeyHeight * 0.725, 700]);
-            styleProps = {
-                modal:{
-                  width,
-                  height,
-                  left:((journeyWidth - width) / 2) + "px",
-                  top:((journeyHeight - height) / 2) +"px",
-                }
-            }
-      }
-  };
-  */
+  
 
   //console.log("styleProps", styleProps)
   const classes = useStyles(styleProps) 
   const containerRef = useRef(null);
   const overlayRef = useRef(null);
-  const modalRef = useRef(null);
+  //const modalRef = useRef(null);
   const modalDimnsRef = useRef({ width:500, height:700 });
 
   //@todo - make a more robust id function - see my exp builder code
-  const nrGoalsCreated = useRef(goals.length);
-  console.log("b2...")
+  //const nrGoalsCreated = useRef(goals.length);
 
+  const stringifiedProfiles = JSON.stringify(profiles);
+  const stringifiedContracts = JSON.stringify(contracts);
   const handleCreateProfile = useCallback((props) => {
     const profile = {
       //put in some default values in case not specified
@@ -211,12 +158,9 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       customExpected:[],
       ...props //will be just the date if from milestonesBar
     }
-    console.log("SAVE NEW PROFILE", profile.date, profile)
     const _profiles = [ ...profiles, profile];
     save({ ...data, profiles:_profiles });
-    
-  }, [JSON.stringify(profiles), user._id]);
-  console.log("b3...")
+  },[stringifiedProfiles, user._id])
 
   const handleCreateContract = useCallback((props) => {
     const contract = {
@@ -229,8 +173,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     const _contracts = [ ...contracts, contract];
     save({ ...data, contracts:_contracts });
     
-  }, [JSON.stringify(contracts), user._id]);
-  console.log("b4...")
+  }, [stringifiedContracts, user._id]);
 
   const handleCreateMilestone = useCallback((dataType, date) => {
     if(dataType === "profile"){
@@ -238,15 +181,13 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     }else{
       handleCreateContract({ date });
     }
-  }, [JSON.stringify(profiles), JSON.stringify(contracts), user._id]);
-  console.log("b5...")
+  }, [stringifiedProfiles, stringifiedContracts, user._id]);
 
   const handleDeleteProfile = useCallback((id) => {
     //todo - must delete link first, but when state is put together this wont matter
     const _profiles = profiles.filter(p => p.id !== id);
     save({ ...data, profiles:_profiles });
-  }, [JSON.stringify(profiles)]);
-  console.log("b6...")
+  }, [JSON.stringify(data)]);
 
   const handleDeleteMilestone = useCallback((dataType, id) => {
     if(dataType === "profile"){
@@ -254,9 +195,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     }else{
       //handleDeleteContract(id);
     }
-  }, [JSON.stringify(profiles), JSON.stringify(contracts)]);
-
-  console.log("b7...")
+  }, [stringifiedProfiles]);
 
   const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => {  
     //trouble - the unsaved value gets removed, and tehn an update to tooltips occurs
@@ -284,10 +223,10 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     //cant use profileId as it may be 'current' which is not updated
     const otherProfiles = profiles.filter(p => p.id !== updatedProfile.id);
     const _profiles = [ ...otherProfiles, updatedProfile]
+    console.log("UPDATING VALUE, BUT SAVE IS COMMENTED OUT! new profiles...", _profiles)
     //save({ ...data, profiles:_profiles });
     
-  }, [JSON.stringify(profiles), user._id]);
-  console.log("b8...")
+  }, [stringifiedProfiles, user._id]);
 
   useEffect(() => {
     const width = d3.min([journeyWidth * 0.725, 500]);
@@ -299,7 +238,6 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       top:((journeyHeight - height) / 2) + "px"
     }
   }, [journeyWidth, journeyHeight])
-  console.log("b9...")
   
   //overlay
   useEffect(() => {
@@ -311,381 +249,26 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       .attr("display", shouldShowOverlay ? "none" : "initial");
 
   }, [shouldShowOverlay])
-  console.log("b10...")
 
- //init journey
- /*
-  useEffect(() => {
-    if(!containerRef.current){return; }
-    const journey = journeyComponent();
-    setJourney(() => journey);
-  }, [])
-
-  //render and update journey
-  useEffect(() => {
-    if(!containerRef.current || !journey){return; }
-    if(!shouldD3UpdateRef.current){
-      //reset so always true by default on next state update
-      shouldD3UpdateRef.current = true;
-      return;
-    }
-
-    let menuBarData = displayedBar && ["journeys", "measures"].includes(displayedBar) ? { displayedBar } : {};
-    if(displayedBar === "journeys"){
-      //On first load for a user with no saved journeys, this intial journey is not yet saved to store, so it wont be in availableJourneys, so we add it
-      const allUserJourneys = availableJourneys.length === 0 ? [ ...availableJourneys, data] : availableJourneys;
-      menuBarData = { ...menuBarData, data: allUserJourneys, hoverEnabled:false };
-    }else if(displayedBar === "measures"){
-      menuBarData = { ...menuBarData, data: measures }
-    }
-
-    //const containerHeight = d3.select(containerRef.current).attr("height")
-    //console.log("journey containerHeight", containerHeight)
-
-    journey
-        .width(journeyWidth)
-        .height(journeyHeight)
-        .screen(screen)
-        .aligned(aligned)
-        .withCompletionPaths(withCompletionPaths)
-        .menuBarData(menuBarData)
-        .measuresOpen(displayedBar === "measures" ? measures : undefined)
-        .modalData(modalData)
-        .kpiFormat(kpiFormat)
-        .onSetKpiFormat(setKpiFormat)
-        .createJourney(() => {
-          setDisplayedBar("");
-          //add playerId  - for now, can assume its userId
-          save({ ...newJourney, playerId:_id, false); //dont persist until user actually does something. atm , its temp
-        })
-        .onSelectKpiSet((kpi) => {
-          setDisplayedBar({kpi}) 
-        })
-        .setActiveJourney(setActive)
-        .updateState(updates => {
-            //can be used to update multiple items, only needed for aims, goals, links and measures
-            //for each entity that is updated (eg aims), we replace only the properties defined in the update.
-            const _contracts = contracts.map(c => ({ ...c, ...(updates.contracts?.find(cont => cont.id === c.id) || {} ) }))
-            const _profiles = profiles.map(p => ({ ...p, ...(updates.profiles?.find(prof => prof.id === p.id) || {} ) }))
-            const _aims = aims.map(a => ({ ...a, ...(updates.aims?.find(aim => aim.id === a.id) || {} ) }))
-            const _goals = goals.map(g => ({ ...g, ...(updates.goals?.find(goal => goal.id === g.id) || {} ) }))
-            const _links = links.map(l => ({ ...l, ...(updates.links?.find(link => link.id === l.id) || {} ) }))
-            const _measures = measures.map(m => ({ ...m, ...(updates.measures?.find(meas => meas.id === m.id) || {} ) }))
-            save({ ...data, contracts:_contracts, profiles:_profiles, aims:_aims, goals:_goals, links:_links, measures:_measures })
-            //@todo - make createId handle prefixes so all ids are unique
-        })
-        .handleCreateContract(handleCreateContract)
-        .handleCreateProfile(handleCreateProfile)
-        .handleCreateAim(function(aim, planetIds){
-          const id = createId(aims.map(a => a.id));
-          const colour = createColour(aims.length);
-          //updates
-          const _aims = [ ...aims, { id , colour, dataType:"aim", ...aim }];
-          const _goals = goals.map(p => planetIds.includes(p.id) ? { ...p, aimId: id } : p);
-          //setAims(prevState => ([ ...prevState, { id , colour, dataType:"aim", ...aim }]))
-          //setPlanets(prevState => prevState.map(p => planetIds.includes(p.id) ? { ...p, aimId: id } : p))
-          save({ ...data, aims:_aims, goals:_goals });
-        })
-        .createPlanet((targetDate, yPC, aimId) => {
-          const newGoal = {
-              id:"p"+ (nrGoalsCreated.current + 1),
-              aimId,
-              targetDate,
-              yPC,
-              dataType:"planet",
-              measures:[]
-              //goals
-          }
-          //useStateWithCallback doesnt work as this is called before journeyComponent is updated in the new call to this useEffect
-        
-          //todo -0 consider just setting it as selected in state, and handling this in journey ie
-          //ie if a planet is selected, then updateSelected if not set as selected
-          //the below approach may cause an issue if planets hasnt updated yet from the setPlanets call above
-          //updates
-          const _goals = [ ...data.goals,  newGoal];
-          save({ ...data, goals:_goals });
-
-          journey.selected(newGoal.id);
-          //setNrPlanetsCreated(prevState => prevState + 1);
-          nrGoalsCreated.current = nrGoalsCreated.current + 1;
-        })
-        .updatePlanet((props, shouldD3Update=true) => {
-          if(!shouldD3Update){ shouldD3UpdateRef.current = shouldD3Update; }
-          //updates
-          const _goals = updatedState(goals, props);
-          save({ ...data, goals:_goals });
-        })
-        .updatePlanets((planetsToUpdate, shouldD3Update=true) => {
-          if(!shouldD3Update){ shouldD3UpdateRef.current = shouldD3Update; }
-          //updates
-          const _goals = goals.map(p => {
-              const propsToUpdate = planetsToUpdate.find(planet => planet.id === p.id) || {};
-              return { ...p, ...propsToUpdate }
-          });
-          save({ ...data, goals:_goals });
-        })
-        .updateAim((props, shouldD3Update=true) => {
-          if(!shouldD3Update){ shouldD3UpdateRef.current = shouldD3Update; }
-          //updates
-          const _aims = updatedState(aims, props);
-          save({ ...data, aims:_aims });
-        })
-        .onDeleteContract(id => {
-          setModalData(undefined);
-          //must delete link first, but when state is put together this wont matter
-          const _contracts = contracts.filter(p => p.id !== id);
-          save({ ...data, contracts:_contracts });
-        })
-        .onDeleteProfile(id => {
-          setModalData(undefined);
-          //must delete link first, but when state is put together this wont matter
-          const _profiles = profiles.filter(p => p.id !== id);
-          save({ ...data, profiles:_profiles });
-        })
-       .onDeleteAim(aimId => {
-          //this doesnt work - it deltes a planet instead!
-          //@todo - create a Dialog to see if user wants goals deleted too (if aiim has goals), or to cancel
-          setModalData(undefined);
-          const _aims = aims.filter(a => a.id !== aimId);
-          const _goals = goals.map(p => ({ ...p, aimId: p.aimId === aimId ? undefined : p.aimId }));
-          save({ ...data, aims:_aims, goals:_goals });
-       })
-        .deletePlanet(id => {
-          setModalData(undefined);
-          //must delete link first, but when state is put together this wont matter
-          const _links = links.filter(l => l.src !== id && l.targ !== id);
-          const _goals = goals.filter(p => p.id !== id);
-          save({ ...data, goals:_goals, links:_links });
-        })
-        .onAddLink(props => {
-          const newLink = {
-            ...props,
-            id:props.src + "-" + props.targ,
-            dataType:"link"
-          }
-          const _links = [ ...links, newLink];
-          save({ ...data, links:_links });
-        })
-        .deleteLink(id => {
-          const _links = links.filter(l => l.id !== id);
-          save({ ...data, links:_links });
-        })
-        .updateChannel(props => {
-          setChannels(prevState => updatedState(prevState, props, (other, updated) => other.nr < updated.nr))
-        })
-        .setModalData((newModalData) => {
-          if(modalData && !newModalData){
-            //save data to server - changes have already been added to state on change
-            save(data);
-          }
-          setModalData(newModalData)
-        })
-        .setZoom(zoom => {
-          if(modalData){
-            //@todo - what is this for. Should it be formdata.planet.x? or styleprops.left + zoom.x?
-            d3.select(modalRef.current).style("left", (modalData.x + zoom.x) +"px").style("top", (modalData.y + zoom.y) +"px")
-          }
-        })
-
-    d3.select(containerRef.current)
-      .datum({ ...data, channels, datasets })
-      //.datum({ canvas, aims, planets, links, channels, measures })
-      .call(journey)
-
-  }, [JSON.stringify(data), journey, aligned, withCompletionPaths, displayedBar, modalData, kpiFormat, width, height, screen ])
-
-  */
-  const toggleCompletion = () => {
-      setWithCompletionPath(prevState => !prevState);
-  }
-
-  const toggleAligned = () => {
-    setAligned(prevState => !prevState);
-  }
-
-  //for now, we just open or close all measures
-  const toggleMeasuresOpen = useCallback((planetId) => {
-        setDisplayedBar(prevState => prevState === "measures" ? "" : "measures");
-  }, [JSON.stringify(data)]);
-
-  //for now, we just open or close all user's journeys
-  const toggleJourneysOpen = useCallback(() => {
-      setDisplayedBar(prevState => prevState === "journeys" ? "" : "journeys");
-  }, [JSON.stringify(data)]);
-
-  const toggleMilestonesOpen = useCallback(() => {
-    setDisplayedBar(prevState => prevState === "milestones" ? "" : "milestones");
-  }, [JSON.stringify(data)]);
-
-  //for now, we just open or close all measures
-  const openNewJourney = useCallback((planetId) => {
-      //create a new journey, immediately save it to store and it will become the activeJourney
-      // (but not to server yet until first change),
-      setDisplayedBar("");
-  }, [JSON.stringify(data)]);
-
-  const onUpdatePlanetForm = modalType => (name, value) => {
-      //console.log("updatePlanetForm")
-      const { d , measure } = modalData;
-      const planet = goals.find(p => p.id === d.id);
-      let props;
-      if(modalType === "targOnly"){
-        //for now, the only planetMeasureData that can  be updated is that targ.  Everything else that is updated is on the measure itself.
-        props = { id:d.id, measures: planet.measures.map(m => m.id === measure.id ? { ...m, targ:value } : m) };
-      }else{
-        props = { id:d.id, [name]: value };
-      }
-      const _goals = updatedState(goals, props);
-      //dont persist yet until closed
-      save({ ...data, goals:_goals }, false);
-  }
-
-  const onUpdateAimForm = (name, value) => {
-      //console.log("update aim form")
-      const { d } = modalData;
-      if(d.id === "main"){
-        //dont want to persist name change to db yet
-        save({ ...data, [name]: value }, false)
-      }else{
-        const props = { id:d.id, [name]: value };
-        const _aims = updatedState(aims, props)
-        save({ ...data, aims:_aims }, false);
-      }
-  }
-
-  const onSaveMeasureForm = (details, planetId, isNew) => {
-      if(isNew){
-        //any newly created measure from this form must be open as this form comes from the measures bar
-        addNewMeasure(details, planetId)
-        setDisplayedBar("measures");
-      }else{
-        const _measures = updatedState(measures, details)
-        save({ ...data, measures:_measures })
-      }
-      () => setModalData(undefined);
-  }
-  console.log("b11...")
-
-  const onClosePlanetForm = () => {
-      journey.endEditPlanet();
-      setModalData(undefined);
-      //now we want it to persist the changes that have been made
-      save(data);
-  }
-
-  const onCloseAimForm = () => {
-      //console.log("close aim form")
-      //@todo - journey.endEditAim();
-      setModalData(undefined);
-      //now we want it to persist the changes that have been made
-      save(data);
-  }
-
-  const addNewMeasure = (details, /*planetId*/) => {
-      const { name, desc } = details;
-      const newMeasureId = createId(measures.map(m => m.id));
-      //name and desc are same for all planets where this measure is used
-      const _measures = [ ...data.measures, { id: newMeasureId, name, desc }]
-      save({ ...data, measures:_measures })
-      /*
-      //@todo - use this
-      if(planetId){
-        //measure is also set on a particular planet
-        const planet = planets.find(p => p.id === planetId);
-        const planetMeasureData = { measureId:newMeasureId, targ: details.targ};
-        setPlanets(prevState => {
-          const props = { id: planetId, measures:[...planet.measures, planetMeasureData]};
-          return updatedState(prevState, props);
-        })
-      }
-      */
-  }
-
-  const importMeasures = measureIds => {
-      setMeasures(measures => [...measureIds, ...measures]);
-      setModalData(undefined);
-  }
-  const handleDragEnter = e => {
-    e.preventDefault();
-    e.stopPropagation();
-    e.dataTransfer.setData("text", e.target.id);
-  };
-  const handleDragLeave = e => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-  const handleDragOver = e => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-  console.log("b12...")
-  const handleDrop = (e,d) => {
-    e.preventDefault();
-    e.stopPropagation();
-    let dt = e.dataTransfer
-    let files = dt.files
-    const input = files[0];
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      var parsed = d3.csvParse(e.target.result);
-      if(input.name.includes("datasets")){
-      }else if(input.name.includes("datapoints")){
-        //save datapoints
-      }
-      else if(input.name.includes("users")){
-        //save users
-      }
-      else if(input.name.includes("groups")){
-        //save groups
-      }
-  
-      //identify what the fle is about,
-      //call api action to save rows eg as datapoints, datasets, users or groups
-    };
-    reader.readAsText(input);
-    /*
-    d3.csv(f1).then(function(data) {
-      console.log("d3 csv data", data);
-    });
-    */
-    //([...files]).forEach(uploadFile)
-  };
-  console.log("b13...")
-  /*
-  function uploadFile(file) {
-    let url = 'YOUR URL HERE'
-    let formData = new FormData()
-  
-    formData.append('file', file)
-  
-    fetch(url, {
-      method: 'POST',
-      body: formData
-    })
-    .then(() => { }) //done - inform user
-    .catch(() => { }) //error - handle and inform user
-  }
-  */
-  //@todo -  openFullScreen when user clicks to get into a journey
-  console.log("return statement of Journey...")
   return (
     <div className={classes.root}>
         <div className={`${classes.overlay} overlay`} ref={overlayRef}>
           {displayedBar === "milestones" &&
-            <MilestonesBar 
+            <MilestonesBar
               data={data}
               datasets={datasets}
               onSelectKpiSet={kpi => setDisplayedBar({kpi, prev:"milestones"})}
               kpiFormat={kpiFormat} 
               setKpiFormat={setKpiFormat}
-              onCreateMilestone={handleCreateMilestone}
-              onDeleteMilestone={handleDeleteMilestone}
               takeOverScreen={takeOverScreen}
               releaseScreen={releaseScreen}
+              onCreateMilestone={handleCreateMilestone}
+              onDeleteMilestone={handleDeleteMilestone}
               onSaveValue={onSaveValue}
               screen={screen}
               availWidth={width}
               availHeight={height}
+              
             />
           }
           {/**selectedKpiSet && 
@@ -701,61 +284,6 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
             />
           */}
         </div>
-        {/**<svg className={classes.svg} ref={containerRef}></svg>*/}
-        {/**
-        <div className={classes.ctrls}>
-            <div className={classes.leftCtrls}>
-                <Button className={classes.btn} color="primary" variant="contained" onClick={toggleMeasuresOpen} >
-                  {displayedBar === "measures" ?"Close Measures" : "Measures"}</Button>
-                <Button className={classes.btn} color="primary" variant="contained" onClick={toggleJourneysOpen} >
-                  {displayedBar === "journeys" ?"Close Journeys" : "Journeys"}</Button>
-                <Button className={classes.btn} color="primary" variant="contained" onClick={toggleMilestonesOpen} >
-                  {displayedBar === "milestones" ?"Close Milestones" : "Milestones"}</Button>
-            </div>
-            <div className={classes.rightCtrls}>
-                <Button className={classes.btn} color="primary" variant="contained" onClick={toggleAligned} >
-                  {aligned ?"Unalign goals" : "Align goals"}</Button>
-                <Button className={classes.btn} color="primary" variant="contained" onClick={toggleCompletion} >completion</Button>
-            </div>
-        </div>
-        */}
-        {/**modalData && 
-          <div ref={modalRef} className={classes.modal}>
-             {modalData.d.dataType === "aim" && modalData.nameOnly && 
-              <NameForm data={{ 
-                  ...modalData, 
-                  aim:aims.find(a => a.id === modalData.d.id) || { id: _id, name }
-                }}
-                onUpdate={onUpdateAimForm} onClose={onCloseAimForm} />}
-
-            {modalData.d.dataType === "planet" && (modalData.nameOnly || modalData.nameAndTargOnly) &&
-              <NameForm data={{ ...modalData, planet:goals.find(p => p.id === modalData.d?.id) }}
-                onUpdate={onUpdatePlanetForm("nameOnly")} onClose={onClosePlanetForm} />}
-
-            {modalData.nameAndTargOnly &&
-              <div className={classes.targModal}>
-                <TargetForm data={{ ...modalData, planet:goals.find(p => p.id === modalData.d?.id) }}
-                  onUpdate={onUpdatePlanetForm("targOnly")} onClose={onClosePlanetForm} />
-              </div>}
-
-            {modalData.importing &&
-              <ImportMeasures data={modalData} existing={measures} available={[]}
-                onSave={importMeasures} onClose={() => setModalData(undefined)} />}
-
-            {modalData.measureOnly && 
-              <MeasureForm data={{ ...modalData, planet:goals.find(p => p.id === modalData.d?.id) }}
-              onSave={onSaveMeasureForm} onCancel={() => setModalData(undefined)}
-              existingMeasures={measures} />}
-
-            {modalData && !modalData.nameOnly && !modalData.measureOnly && !modalData.nameAndTargOnly && !modalData.importing &&
-              <Form 
-                  data={{ ...modalData, planet:goals.find(p => p.id === modalData.d?.id) }} 
-                  onUpdate={onUpdatePlanetForm("full")} 
-                  onClose={onClosePlanetForm}
-                  availableMeasures={measures}
-                  addNewMeasure={addNewMeasure} />}
-          </div>
-        */}
     </div>
   )
 }

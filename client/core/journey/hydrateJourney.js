@@ -154,7 +154,7 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
     //startDate
     //either manual startDate if set, or prev date, or otherwise 20 years ago
     const startDate = profile.startDate || prevProfile?.date || oneMonthAgo(date);
-    const startsFromPrevProfile = !profile.startDate && prevProfile;
+    const startsFromPrevProfile = !profile.startDate && !!prevProfile;
     const datePhase = date < now ? "past" : "future";
     const isPast = datePhase === "past";
     const isFuture = datePhase === "future";
