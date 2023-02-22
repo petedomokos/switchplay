@@ -1,148 +1,26 @@
 import * as d3 from 'd3';
-import { TIME_SETTINGS, DIMNS, FONTSIZES, grey10, COLOURS } from "./constants";
+import { DIMNS, FONTSIZES, grey10 } from "./constants";
 import contractsComponent from './contractsComponent';
 import profileCardsComponent from './profileCardsComponent';
 import dragEnhancements from './enhancedDragHandler';
 import { calculateOffsetForCardsBeforePlaceholder, calculateOffsetForCardsAfterPlaceholder, calculatePlaceholderX, calcNewMilestoneNr } from "./milestonesBarHelpers";
 import { addMilestonePlaceholderContents, removeMilestonePlaceholderContents } from './milestonePlaceholder';
-import { addDays, addMonths } from '../../util/TimeHelpers';
+import { addMonths } from '../../util/TimeHelpers';
 import { milestoneContainingPt } from "./screenGeometryHelpers";
 import { icons } from '../../util/icons';
 import { hide, show } from './domHelpers';
 
 import { emptyGoal, ball, shiningCrystalBall, nonShiningCrystalBall } from "../../../assets/icons/milestoneIcons.js"
 
-//todo next- check this func works as expected in all cases
-//then - change year end from Dec 31 to April 31 (football season) and Jul 31 (academic year)
-//basically testing that we can giv user option to choose their year end
-//later - implement a termEnd function
-//year end is football season
+/*
 
-function generateMilestoneDate(prevDate, nextDate){
-    if(!prevDate && !nextDate){ return new Date(); }
-    if(!prevDate){ return addMonths(-1, nextDate); }
-    if(!nextDate) {
-        return isLastDayOfYear(prevDate) ? lastDateOfNextYear(prevDate) : lastDateOfYear(prevDate);
-        //if we want to do 12 months time
-        //return lastDateOfMonth(addMonths(12, prevDate)); }
-    }
-    if(nextDate < addMonths(3, prevDate)){
-        //within 3 months, so we work in weeks
-        //console.log("finding weekEnd")
-        return weekEndBetween(prevDate, nextDate);
-    }else if(nextDate < addMonths(24, prevDate)){
-        //work in months
-        //console.log("finding monthEnd")
-        return monthEndBetween(prevDate, nextDate);
-    }else{
-        //work in years
-        //console.log("finding yearEnd")
-        return yearEndBetween(prevDate, nextDate);
-    }
-}
-function isLeapYear(year) { return new Date(year, 1, 29).getDate() === 29; }
-function isInLeapYear(date){ return isLeapYear(date.getUTCFullYear()) }
-
-function isLastDayOfMonth(date){
-    const dayOfMonth = date.getUTCDate();
-    const month = date.getUTCMonth();
-    switch(month){
-        case 0, 2, 4, 6, 7, 9, 11:{ return dayOfMonth === 31; }
-        case 1: { return isInLeapYear(date) ? dayOfMonth === 29 : dayOfMonth === 28; }
-        default: { return dayOfMonth === 30; }
-    }
-}
-function isLastDayOfYear(date){
-    const { YEAR_END:{ MONTH, DAY_OF_MONTH } } = TIME_SETTINGS;
-    return date.getUTCMonth() === MONTH && date.getDate() === DAY_OF_MONTH;
-}
-
-function lastDayOfMonth(month, isInLeapYear){
-    switch(month){
-        case 0, 2, 4, 6, 7, 9, 11:{ return 31; }
-        case 1: { return isInLeapYear ? 29 : 28; }
-        default: { return 30; }
-    }
-}
-function lastDateOfMonth(date){
-    const { DAY_END_HRS } = TIME_SETTINGS;
-    const month = date.getUTCMonth();
-    const year = date.getUTCFullYear();
-    const day = lastDayOfMonth(month, isInLeapYear(date))
-    //add 2 hours on to avoid clases due to euro-time zone differences
-    return new Date(year, month, day, DAY_END_HRS);
-}
-function lastDateOfYear(date){
-    const { YEAR_END: { MONTH, DAY_OF_MONTH }, DAY_END_HRS } = TIME_SETTINGS;
-    return new Date(date.getUTCFullYear(), MONTH, DAY_OF_MONTH, DAY_END_HRS); 
-}
-function lastDateOfNextYear(date, yearEnd={}){
-    const { YEAR_END:{ MONTH, DAY_OF_MONTH }, DAY_END_HRS } = TIME_SETTINGS;
-    return new Date(date.getUTCFullYear() + 1, MONTH, DAY_OF_MONTH, DAY_END_HRS); 
-}
-
-function yearEndsBetween(prev, next, yearEnd={}){
-    const { YEAR_END:{ MONTH, DAY_OF_MONTH }, DAY_END_HRS } = TIME_SETTINGS;
-    const pYear = prev.getUTCFullYear();
-    const nYear = next.getUTCFullYear();
-    const startYear = isLastDayOfYear(prev, yearEnd) ? pYear + 1 : pYear;
-    //in theory we could have to profiles both on last day of the year
-    if(startYear > nYear) { return []; }
-    return d3.range(startYear, nYear).map(year => new Date(year, MONTH, DAY_OF_MONTH, DAY_END_HRS));
-}
-
-function monthEndsBetween(start, end){
-    const { DAY_END_HRS } = TIME_SETTINGS;
-    let monthEndsBetween = [];
-    //include start month unless it is already the last date of month
-    let nextDate = isLastDayOfMonth(start) ? addMonths(1, start) : start;
-    while(nextDate < end){
-        monthEndsBetween.push(lastDateOfMonth(nextDate));
-        nextDate = addMonths(1, nextDate);
-    }
-    return monthEndsBetween
-        .map(date => new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), DAY_END_HRS));
-}
-
-//0 = Sunday
-function weekEndsBetween(prev, next, weekEnd={}){
-    const { WEEK_END_DAY, DAY_END_HRS } = TIME_SETTINGS;
-    const nrDaysBetween = Math.floor((next.getTime() - prev.getTime()) / 86400000);
-    const daysBetween = d3.range(1, nrDaysBetween + 1 + 5).map(nr => addDays(nr, prev))
-    return daysBetween
-        .filter(date => date.getDay() === WEEK_END_DAY)
-        .map(date => new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), DAY_END_HRS));
-}
-
-function yearEndBetween(prev, next){
-    if(!prev || !next){ return null; }
-    const yearEnds = yearEndsBetween(prev, next);
-    const interpolator = d3.interpolateDate(prev, next);
-    const middleDate = interpolator(0.5);
-    return d3.least(yearEnds, d => Math.abs(middleDate - d));
-}
-
-function monthEndBetween(prev, next){
-    if(!prev || !next){ return null; }
-    const monthEnds = monthEndsBetween(prev, next);
-    const interpolator = d3.interpolateDate(prev, next);
-    const middleDate = interpolator(0.5);
-    return d3.least(monthEnds, d => Math.abs(middleDate - d));
-}
-function weekEndBetween(prev, next, weekEnd){
-    if(!prev || !next){ return null; }
-    const weekEnds = weekEndsBetween(prev, next, weekEnd);
-    const interpolator = d3.interpolateDate(prev, next);
-    const middleDate = interpolator(0.5);
-    return d3.least(weekEnds, d => Math.abs(middleDate - d));
-}
+*/
 
 const EASE_IN = d3.easeCubicIn;
 //const EASE_OUT = d3.easeCubicOut;
 const EASE_IN_OUT = d3.easeCubicInOut;
 
 export default function milestonesBarComponent() {
-    console.log("mBarComponent")
     //bug - we are not unmounting the jourrny on signout
     //need to check all data is wiped and store is reset
     //API SETTINGS
@@ -274,7 +152,6 @@ export default function milestonesBarComponent() {
     let containerG;
     let contentsG;
     let milestonesWrapperG;
-    let overlayCtrlsG;
     let topBarG;
     let milestonesG;
     let contractsG;
@@ -356,11 +233,11 @@ export default function milestonesBarComponent() {
     const transformTransition = { update: { duration: 1000 } };
 
     function milestonesBar(selection, options={}) {
-        // console.log("milestonesBar......")
+        //console.log("milestonesBar......")
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            //console.log("updateMBar")
+            //console.log("updateMBar", data)
             containerG = d3.select(this)
                 .attr("width", width)
                 .attr("height", height);
@@ -381,11 +258,6 @@ export default function milestonesBarComponent() {
 
                 milestonesWrapperG = contentsG.append("g").attr("class", "milestones-wrapper")
                     .attr("transform", `translate(0,0)`);
-
-                /*issue - if we attach to here instead of contents, it goes under the profiles, so need to adjust the order things are done in
-                but its good to attach to this because then teh offset is accounted for so we just need to 
-                use the calcX function
-                */
 
                 topBarG = milestonesWrapperG.append("g").attr("class", "top-bar")
 
@@ -410,13 +282,11 @@ export default function milestonesBarComponent() {
                 contractsG = milestonesG.append("g").attr("class", "contracts");
                 profilesG = milestonesG.append("g").attr("class", "profiles");
 
-                overlayCtrlsG = milestonesG.append("g").attr("class", "overlay-ctrls");
-
             }
 
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
             function update(data, options={}){
-                //console.log("MBarComponent update....currentSliderPos", currentSliderPosition)
+                // console.log("MBarComponent update....swip ", swipable)
                 const { slideTransition, milestoneTransition } = options;
 
                 //milestone positioning
@@ -433,6 +303,7 @@ export default function milestonesBarComponent() {
                 const calcOffsetX = calculateOffsetX(positionedData)
 
                 slideTo = function(position, options={} ){
+                    if(data.length ===  0) { return; }
                     //helper
                     const convertToNumber = wordPosition => {
                         if(wordPosition === "beforeStart"){ return d3.min(data, d => d.nr) - 0.5 }
@@ -479,55 +350,6 @@ export default function milestonesBarComponent() {
                 containerG.select("rect.container-bg")
                     .attr("width", width)
                     .attr("height", height)
-
-                const topRightCtrlsWidth = 24;
-                const topRightCtrlsHeight = 24;
-                const topRightCtrlsMargin = d3.min([15, 0.025 * width]);
-
-                const topRightMilestoneCtrlsG = milestonesWrapperG.select("g.overlay-ctrls").selectAll("g.top-right-milestone-ctrls")
-                    .data(positionedData.filter(d => selectedMilestone !== d.id), d => d.id);
-
-                topRightMilestoneCtrlsG.enter()
-                    .append("g")
-                        .attr("class", d => `top-right-milestone-ctrls top-right-milestone-ctrls-${d.id}`)
-                        .each(function(d,i){
-                            d3.select(this)
-                                .append("g")
-                                    .attr("class", "icon")
-                                    .attr("transform", "scale(0.75)")
-                                        .append("path")
-                                        .attr("fill", COLOURS.btnIcons.expand)
-                                        .attr("stroke", COLOURS.btnIcons.expand)
-
-                            d3.select(this).append("rect").attr("class", "hitbox")
-                                .attr("fill", "transparent");
-
-                            //transition in
-                            d3.select(this)
-                                .attr("opacity", 0)
-                                    .transition()
-                                    .delay(200)
-                                    .duration(200)
-                                        .attr("opacity", 1)
-
-                        })
-                        .merge(topRightMilestoneCtrlsG)
-                        .attr("transform", d => `translate(${
-                            d.x + d.width/2 - topRightCtrlsWidth - topRightCtrlsMargin},
-                            ${d.y - d.height/2 +topRightCtrlsMargin
-                        })`)
-                        .each(function(d,i){
-                            d3.select(this).select("g.icon").select("path")
-                                .attr("d", icons.expand.d)
-                            
-                            d3.select(this).select("rect.hitbox")
-                                .attr("width", topRightCtrlsWidth)
-                                .attr("height", topRightCtrlsHeight)
-                        })
-                        .on("click", (e,d) => updateSelected(d));
-
-                topRightMilestoneCtrlsG.exit().remove();
-
 
                 contentsG
                     .attr("transform", `translate(${margin.left},${margin.top})`)
@@ -589,56 +411,32 @@ export default function milestonesBarComponent() {
                 //but maybe best is to just make dbl-click teh same as two clicks , and 
                 //then ppl on chrome mobile just cant do two clicks in quick succession
                 function handleMilestoneWrapperClick(e,d){
-                    //console.log("wrapper clicked")
                     //this is a temp setting to save us having to turn drag off whilst creating a milestone
                     //otherwise the confirm click would also trigger this.
                     if(ignoreNextClick){
                         ignoreNextClick = false;
                         return;
                     }
+                    
                     const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
-                    //console.log("milestone", milestone)
-                    if(milestone) { 
-                        updateSelected(milestone);
-                    }
-                }
-
-                function updateSelected(milestone){
-                    //@todo - consider removing and entering phase labels
-                    //milestonesG.select("g.phase-labels").call(show);
-                    //@todo - same for contracts
-                    //deselecting
-                    if(!milestone){
-                        if(selectedMilestone){
-                            //show all that were hidden
-                            milestonesG.selectAll("g.profile-card").filter(d => d.id !== selectedMilestone)
-                                .call(profiles.removeOverlay/*, { delay:200, duration:200 }*/)
-                        }
-                    }
-                    //selecting
-                    else if(!selectedMilestone){
-                        //hide all others
-                        milestonesG.selectAll("g.profile-card").filter(d => d.id !== milestone.id).call(profiles.applyOverlay)
-                    }else{
-                        //only need to hide the the previous selected
-                        milestonesG.select(`g.profile-card-${selectedMilestone}`).call(profiles.applyOverlay)
-                        //show the new selected
-                        milestonesG.select(`g.profile-card-${milestone.id}`).call(profiles.removeOverlay)
-                    }
+                    if(!milestone) { return; }
                     //@todo - BUG - why is there a delay in removing the burger bars? cut it out for now
                     //onTakeOverScreen();
                     //hide phase labels
+                    milestonesG.select("g.phase-labels").call(hide);
                     //if(selected){
                         //treat it as a dbl-click => clicking a selected milestone zooms user in even further
                         //or maybe this needs to be doen at next evel as drag is turned off when selected i think
                     //}
-                    //set selected and slider pos (note - we need both of these, as we will have a sliderPos even if no selected)
-                    selectedMilestone = milestone?.id;
-                    if(milestone) { requiredSliderPosition = milestone.nr; }
-                    onSetSelectedMilestone(milestone?.id);
+                    //set selected
+                    selectedMilestone = milestone.id;
+                    //this doesnt trigger an update here
+                    onSetSelectedMilestone(milestone.id);
+                    //trigger update here
+                    //update(data);
                     //hide any menu from paretn components (eg burger menu)
-                }
 
+                }
                 //dragging
                 let dragStartX;
                 function dragStart(e,d){
@@ -692,7 +490,8 @@ export default function milestonesBarComponent() {
                             }else{
                                 //interpolate dates to get new date, or adds/subtracts one month if its at an end
                                 const interpolator = d3.interpolateDate(prev?.date, next?.date);
-                                const newDate = generateMilestoneDate(prev?.date, next?.date);
+                                const newDate = prev && next ? interpolator(0.5) :
+                                    (prev ? addMonths(1, prev.date) : addMonths(-1, next.date))
 
                                 handleCreateMilestone(key, newDate, calcNewMilestoneNr(prev, next));
                             }
@@ -793,16 +592,15 @@ export default function milestonesBarComponent() {
                         prevSliderPosition = null;
                     }
                 }
-                //console.log("data", positionedData)
 
                 //phase labels
                 const currentCard = positionedData.find(m => m.isCurrent);
-                const endOfLastPastCard = currentCard.x - currentCard.width/2 - phaseGap - hitSpace - labelMarginHoz;
-                const startOfFirstFutureCard = currentCard.x + currentCard.width/2 + phaseGap + hitSpace + labelMarginHoz;
-                const labelY = -currentCard.height/2 - 10;
+                const endOfLastPastCard = data.length === 0 ? 0 : currentCard.x - currentCard.width/2 - phaseGap - hitSpace - labelMarginHoz;
+                const startOfFirstFutureCard = data.length === 0 ? 0 : currentCard.x + currentCard.width/2 + phaseGap + hitSpace + labelMarginHoz;
+                const labelY = data.length === 0 ? 0 : -currentCard.height/2 - 10;
                 datePhasesData = [
                     { label:"<-- Past", x:endOfLastPastCard, y:labelY, textAnchor:"end", },
-                    { label: "Current", x:currentCard.x, y:labelY, textAnchor:"middle"},
+                    { label: "Current", x:currentCard?.x, y:labelY, textAnchor:"middle"},
                     { label: "Future -->", x:startOfFirstFutureCard, y:labelY, textAnchor:"start" }
                 ]
                 milestonesG.select("g.phase-labels")
@@ -842,7 +640,6 @@ export default function milestonesBarComponent() {
                         .width(profileWidth)
                         .height(profileHeight)
                         .fontSizes(fontSizes.profile)
-                        .selected([selectedMilestone])
                         .expanded([{
                             id:selectedMilestone,
                             //if landscape, then vert space is less so we scale according to that 
@@ -853,17 +650,27 @@ export default function milestonesBarComponent() {
                         .scrollable(swipable ? false : true)
                         .onSaveValue(onSaveValue)
                         .topRightCtrls(d => selectedMilestone === d.id ? [
-                            /*
-                            todo next 
-                             - add expand icon and remove red box
-                            */
+                            //todo - toggle between expand and reduce for now, its just reduce
                             { 
                                 label:"collapse", 
                                 icon:{ iconType:"path", d:icons.collapse.d },
                                 onClick:d => {
+                                    milestonesG.select("g.phase-labels").call(show);
+
                                     //@todo - why is this so slow to update? had to cut it out for now
                                     //onReleaseScreen();
-                                    updateSelected();
+
+                                    //problem - the line below will prompt an update, which will
+                                    //make the manulal call here useless. Either need to pass in a 
+                                    //2nd arg, shouldUpdate = false, or have a temp stting here so it transitions
+                                    //or dont send thru selectedMilestone, instead just maually change the height here.
+
+                                    //EVEN BETTER, WE SHOULDNT BE CURTAILING THE DISPLAY IN TEH PARENT CONTAINER AT ALL
+                                    //WE CAN JUST HABNLE IT HERE THRU THE STANDARD MARGIN CONVENTIO, AND THEN JUST CHANGE IT
+                                    //TO 0 WHEN SELECTED
+                                    onSetSelectedMilestone("");
+                                    selectedMilestone = null;
+                                    update(data, { milestoneTransition:{ update:{ duration:2000 }} })
                                 }
                             }
                         ] : [])
@@ -900,14 +707,12 @@ export default function milestonesBarComponent() {
                         if(selectedMilestone){
                             //move on by one
                             const selected = data.find(d => d.id === selectedMilestone);
-                            const newSelected = data.find(d => d.nr === selected.nr - 1);
-                            updateSelected(newSelected);
-                        }else{
-                            //manually do changes instead of using react update
-                            requiredSliderPosition -= 1;
-                            update(data, { slideTransition:SLIDE_TRANSITION });
+                            const newSelected = data.find(d => d.nr === selected.nr - 1)
+                            selectedMilestone = newSelected.id;
+                            onSetSelectedMilestone(newSelected.id);
                         }
-                        
+                        requiredSliderPosition -= 1;
+                        update(data, { slideTransition:SLIDE_TRANSITION });
                     }
                 }
 
@@ -916,18 +721,12 @@ export default function milestonesBarComponent() {
                         if(selectedMilestone){
                             //move back by 1
                             const selected = data.find(d => d.id === selectedMilestone);
-                            const newSelected = data.find(d => d.nr === selected.nr + 1);
-                            updateSelected(newSelected);
-                            //selectedMilestone = newSelected.id;
-                            //onSetSelectedMilestone(newSelected.id);
-                        }else{
-                            //manually do changes instead of using react update
-                            requiredSliderPosition += 1;
-                            update(data, { slideTransition:SLIDE_TRANSITION });
-
+                            const newSelected = data.find(d => d.nr === selected.nr + 1)
+                            selectedMilestone = newSelected.id;
+                            onSetSelectedMilestone(newSelected.id);
                         }
-                        //requiredSliderPosition += 1;
-                        //update(data, { slideTransition:SLIDE_TRANSITION });
+                        requiredSliderPosition += 1;
+                        update(data, { slideTransition:SLIDE_TRANSITION });
                     }
                 }
                 /*

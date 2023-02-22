@@ -24,7 +24,7 @@ export default function milestonesLayout(){
         const numberedPastData = pastData.map((m,i) => ({ ...m, nr:i - pastData.length }));
         const numberedFutureData = futureData.map((m,i) => ({ ...m, nr:i + 1 }));
         const numberedCurrent = { ...data.find(m => m.isCurrent), nr:0 };
-        const numberedData = [...numberedPastData, numberedCurrent, ...numberedFutureData];
+        const numberedData = data.length  === 0 ? [] : [...numberedPastData, numberedCurrent, ...numberedFutureData];
 
         return numberedData.map((m,i) => {
             //console.log("milestone------", i, m.id)
