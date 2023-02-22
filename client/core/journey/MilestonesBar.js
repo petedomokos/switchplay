@@ -51,8 +51,8 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue }) => {
-  console.log("MBar...")
-  const { player, profiles, contracts } = data;
+  const { player={}, profiles=[], contracts=[] } = data;
+  //console.log("MBar", profiles)
   //local state
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
   const [bgMenuLocation, setBgMenuLocation] = useState("");
@@ -67,11 +67,15 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   const classes = useStyles(styleProps) ;
   const containerRef = useRef(null);
 
+  const stringifiedProfiles = JSON.stringify(profiles);
+
   //init
   //decide what needs to update on setSelectedMilestone, and only have that inteh depArray 
   //or alternatively only have that processed in milestoneslayout/kpiLayout
   //so we are not doing teh epensive operations each time
   useEffect(() => {
+    //console.log("data useEffect")
+
     layout
       .format(kpiFormat)
       .datasets(datasets)
@@ -82,7 +86,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
 
     d3.select(containerRef.current).datum(layout(orderedData))
 
-  }, [JSON.stringify(profiles), JSON.stringify(datasets)])
+  }, [stringifiedProfiles])
 
   useEffect(() => {
 
@@ -133,7 +137,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
         //console.log("mout")
       })//)
 
-  }, [profiles.length, JSON.stringify(screen),/*JSON.stringify(contracts), JSON.stringify(profiles), JSON.stringify(datasets), player, kpiFormat, screen*/])
+  }, [stringifiedProfiles, screen])
 
   useEffect(() => {
     //@todo - on ms and ss, we want it to always be swipable so get rid of 1st condition below,
@@ -147,7 +151,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
     //console.log("render useEffect")
 
     d3.select(containerRef.current).call(milestonesBar);
-  }, [selectedMilestone, JSON.stringify(profiles), JSON.stringify(screen)])
+  }, [selectedMilestone, stringifiedProfiles, screen])
 
 // clean up
 useEffect(() => {
@@ -185,7 +189,20 @@ useEffect(() => {
 
 MilestonesBar.defaultProps = {
   contracts:[],
-  profiles:[]
+  profiles:[],
+  data: { },
+  datasets: [], 
+  kpiFormat: "actual", 
+  setKpiFormat: () => {},
+  onSelectKpiSet: () => {},
+  onCreateMilestone: () => {},
+  onDeleteMilestone: () => {}, 
+  takeOverScreen: () => {}, 
+  releaseScreen: () => {}, 
+  screen: {},
+  availWidth: 0, 
+  availHeight: 0,
+  onSaveValue: () => {}
 }
 
 export default MilestonesBar;
