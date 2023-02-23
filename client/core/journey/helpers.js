@@ -34,6 +34,7 @@ export function msToMonths(ms){
 }
 
 export function linearProjValue(x0MS, y0, x1MS, y1, xProjMS, dps){
+    console.log("linearProjVal", x0MS, y0, x1MS, y1, xProjMS)
     const x0 = msToMonths(x0MS);
     const x1 = msToMonths(x1MS);
     const xProj = msToMonths(xProjMS);

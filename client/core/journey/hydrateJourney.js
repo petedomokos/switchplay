@@ -4,6 +4,7 @@ import { sortAscending } from '../../util/ArrayHelpers';
 import { getKpis } from "../../data/kpis"
 import { getTargets, findDefaultTarget } from "../../data/targets";
 import { roundDown, roundUp, getRangeFormat, dateIsInRange, getValueForStat, getGreatestValueForStat } from "../../data/dataHelpers";
+import { linearProjValue } from "./helpers";
 import { pcCompletion } from "../../util/NumberHelpers"
 //import { } from '../constants';
 import { getBandsAndStandards } from "../../data/bandsAndStandards";
@@ -78,17 +79,27 @@ function hydrateProfiles(profiles=[], datasets, kpis, defaultTargets, options={}
 
 //@todo - proper calculation for expected, inc for 1st profile using a start value
 //@todo - custom expected when user drags
-function calcExpected(kpi, prevProfile, profile){
+function calcExpected(kpi, prevProfile, profile, startDate, target, now){
     //@todo - allow a manual startdate/value so we dont actually need to have a prevProfile
     if(!prevProfile || !profile) { return null; }
     const { datasetKey, statKey } = kpi;
     const key = `${datasetKey}-${statKey}`;
+    const { date } = profile;
+    const startValue = prevProfile?.kpis.find(kpi => kpi.key === key).values.achieved.actual;
     let expectedActual = 0;
+    if(profile.id === "profile-6" && key === "pressUps-reps"){
+        console.log("calcExpected profile", profile)
+        console.log("calcExpected prev...", prevProfile)
+        console.log("startdate", startDate)
+        console.log("startValue", startValue)
+        console.log("target", target)
+        expectedActual = linearProjValue(startDate.getTime(), startValue, date.getTime(), target.actual, now.getTime())
+        console.log("expectedActual", expectedActual)
+
+    }
     //temp values for demo
     if(profile.id === "profile-1"){
-        if(key === "pressUps-reps"){
-            expectedActual = 30;
-        }else if(key === "shuttles-time"){
+        if(key === "shuttles-time"){
             expectedActual = 13.2;
         }
     }
@@ -147,7 +158,7 @@ function calcDateRange(start, end, format){
 
 
 function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, options={}){
-    //console.log("hydrateProfile------------", profile.id, profile.date)
+    console.log("hydrateProfile------------", profile.id, profile.date)
     const { now, rangeFormat } = options;
     const { id, date, customTargets=[], isCurrent } = profile;
     const milestoneId = id;
@@ -219,14 +230,31 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
             const customTarget = d3.greatest(customTargetsForStat, d => d.created);
             const k = customTarget ? Number(customTarget.actual) : null;
             const parsedCustomTarget = customTarget ? { actual: Number(customTarget.actual), completion:Number(customTarget.completion) } : null;
-            if(i === 0 && id === "profile-1"){
-                //console.log("customTarget", k, customTarget)
-            }
+            
             //2 possible causes of new targ not getting picked up
             //date of new targ that hasnt gone thru server os a Date not a string
             //actual and pc are numbers not strings
             const target = parsedCustomTarget || createTargetFromDefault(datasetKey, statKey, date, defaultTargets);
-            let expected = calcExpected(kpi, prevProfile, profile);
+            //note prevProfile has already been processed with a full key and values
+            if(id === "profile-6" && key === "pressUps-reps"){
+                console.log("key", key)
+                console.log("prev", prevProfile)
+            }
+
+            //for now, we only do expected for the active profile, which ensures achived is defined on previous
+            let expected = isActive && target ? calcExpected(kpi, prevProfile, profile, startDate, target, now) : null;
+
+            if(i === 0 && id === "profile-7"){
+                /*
+                console.log("kpi",key,  kpi)
+                console.log("datapoint dates", dataset?.datapoints.filter(d => !d.isTarget).map(d => d.date))
+                console.log("dataset", dataset)
+                console.log("customTargets", customTargetsForStat.map(t => t.created))
+                console.log("customTarget", k, customTarget)
+                console.log("defaultTargets", defaultTargets)
+                console.log("current", current)*/
+                console.log("expected", expected)
+            }
 
             return {
                 ...kpi, key, milestoneId,

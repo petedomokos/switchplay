@@ -224,7 +224,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     const otherProfiles = profiles.filter(p => p.id !== updatedProfile.id);
     const _profiles = [ ...otherProfiles, updatedProfile]
     console.log("UPDATING VALUE, BUT SAVE IS COMMENTED OUT! new profiles...", _profiles)
-    //save({ ...data, profiles:_profiles });
+    save({ ...data, profiles:_profiles });
     
   }, [stringifiedProfiles, user._id]);
 

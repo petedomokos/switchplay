@@ -200,6 +200,7 @@ export default function tooltipsComponent() {
                     .on("end", draggable ? enhancedDrag(dragEnd) : null);
 
                 function handleClick(e,d){
+                    console.log("clicked")
                     //dont need to show value if not achieved as its showing anyway
                     const dragValueText = d3.select(this).select("text.drag-value");
                     if(isAchieved(d) && !dragValueText.attr("class").includes("transitioning") && dragValueText.style("opacity") !== 1) {
