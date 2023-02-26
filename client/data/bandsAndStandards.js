@@ -17,5 +17,28 @@ const bandsAndStandards = {
         "time":{
             bands:[ { min:0, max:16 } ]
         }
+    },
+    "longJump":{
+        "distance-left":{
+            bands:[ { min:3, max:12 } ]
+        },
+        "distance-right":{
+            bands:[ { min:3, max:12 } ]
+        }
+    },
+    "hurdleJumps1Min":{
+        "score":{
+            bands:[ { min:20, max:80 } ]
+        }
+    },
+    "shootingLeftFoot":{
+        "score":{
+            bands:[ { min:0, max:10 } ]
+        }
+    },
+    "shootingRightFoot":{
+        "score":{
+            bands:[ { min:0, max:10 } ]
+        }
     }
 }

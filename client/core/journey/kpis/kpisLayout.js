@@ -84,7 +84,7 @@ export default function kpisLayout(){
                 key:"target",
                 label: "Target",
                 isAchieved:target <= current,//replce in a sec with teh correct target value and achieved if its below current
-                startValue:start, //may be undefined
+                startValue:values.min, //may be undefined
                 value:target, //replace in a sec
                 fill:colours.target,
                 format
@@ -93,15 +93,15 @@ export default function kpisLayout(){
                 key:"current",
                 label: values.achieved ? "Achieved" : "Current",
                 isAchieved:!!values.achieved,
-                startValue:start, //may be undefined
+                startValue:values.min, //may be undefined
                 value:current,
                 fill:colours.current,
                 format
             }
 
             const barData = [targetDatum, currentDatum];
-            barData.start = start;
-            barData.end = end;
+            barData.start = values.min;
+            barData.end = values.max;
 
             const tooltipsData = [
                 { 
