@@ -358,7 +358,7 @@ export default function milestonesBarComponent() {
                 const topRightCtrlsHeight = 24;
                 const topRightCtrlsMargin = d3.min([15, 0.025 * width]);
 
-                const topRightMilestoneCtrlsG = milestonesWrapperG.select("g.overlay-ctrls").selectAll("g.top-right-milestone-ctrls")
+                const topRightMilestoneCtrlsG = overlayCtrlsG.selectAll("g.top-right-milestone-ctrls")
                     .data(positionedData.filter(d => selectedMilestone !== d.id), d => d.id);
 
                 topRightMilestoneCtrlsG.enter()
@@ -771,9 +771,10 @@ export default function milestonesBarComponent() {
                             const selected = data.find(d => d.id === selectedMilestone);
                             const newSelected = data.find(d => d.nr === selected.nr - 1)
                             updateSelected(newSelected);
+                        }else{
+                            requiredSliderPosition -= 1;
+                            update(data, { slideTransition:SLIDE_TRANSITION });
                         }
-                        requiredSliderPosition -= 1;
-                        update(data, { slideTransition:SLIDE_TRANSITION });
                     }
                 }
 
@@ -784,9 +785,10 @@ export default function milestonesBarComponent() {
                             const selected = data.find(d => d.id === selectedMilestone);
                             const newSelected = data.find(d => d.nr === selected.nr + 1)
                             updateSelected(newSelected);
+                        }else{
+                            requiredSliderPosition += 1;
+                            update(data, { slideTransition:SLIDE_TRANSITION });
                         }
-                        requiredSliderPosition += 1;
-                        update(data, { slideTransition:SLIDE_TRANSITION });
                     }
                 }
                 /*
