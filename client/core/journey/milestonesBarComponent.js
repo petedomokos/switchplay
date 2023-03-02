@@ -239,7 +239,7 @@ export default function milestonesBarComponent() {
         // expression elements
         selection.each(function (data) {
             console.log("updateMBar", data)
-            console.log("pressUps kpi values", data.map(p => ({ id:p.id, values: p.kpis.kpisData[0].values })))
+            console.log("shuttles kpi values", data.map(p => ({ id:p.id, values: p.kpis.kpisData[1].values })))
             containerG = d3.select(this)
                 .attr("width", width)
                 .attr("height", height);

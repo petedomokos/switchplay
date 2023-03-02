@@ -3,7 +3,7 @@ import { addMonths } from '../../util/TimeHelpers';
 import { sortAscending } from '../../util/ArrayHelpers';
 import { getKpis } from "../../data/kpis"
 import { getTargets, findDefaultTarget } from "../../data/targets";
-import { roundDown, roundUp, getRangeFormat, dateIsInRange, getValueForStat, getGreatestValueForStat } from "../../data/dataHelpers";
+import { round, roundDown, roundUp, getRangeFormat, dateIsInRange, getValueForStat, getGreatestValueForStat } from "../../data/dataHelpers";
 import { linearProjValue } from "./helpers";
 import { pcCompletion } from "../../util/NumberHelpers"
 //import { } from '../constants';
@@ -83,21 +83,27 @@ function hydrateProfiles(profiles=[], datasets, kpis, defaultTargets, settings, 
 }
 
 //@todo - custom expected when user drags
-function calcExpected(kpi, start, target, now){
+function calcExpected(kpi, start, target, now, options={}){
+    //console.log("calcExp targ", target)
+    if(!start || start.actual === null || target.actual === null){ 
+        return { actual:null, completion:null }; 
+    }
+
+    const { accuracy, showTrailingZeros=true } = options;
     //@todo - allow a manual startdate/value so we dont actually need to have a prevProfile
     const { datasetKey, statKey } = kpi;
     const key = `${datasetKey}-${statKey}`;
     //@todo - make dps based on the kpi ie on the dataset metadata
     const dps = 1;
-    if(key !== "pressUps-reps"){ return { actual:0, completion:"" }; }
 
-    //console.log("calcExpected...")
     //console.log("start", start)
     //console.log("target", target)
     //@todo - completion
     const actual = linearProjValue(start.date.getTime(), start.actual, target.date.getTime(), target.actual, now.getTime(), dps)
-    //console.log("expectedActual", actual)
-    return { actual, completion:"" }
+    return { 
+        actual: round(actual, accuracy, showTrailingZeros), 
+        completion:"" 
+    }
 }
 
 function calcCurrent(stat, datapoints, dateRange, log){
@@ -113,13 +119,6 @@ function calcCurrent(stat, datapoints, dateRange, log){
         .filter(d => !dateRange || dateIsInRange(d.date, dateRange))
         .filter(d => !d.isTarget)
         .map(d => getValue(d))
-    
-    /*if(log){
-        console.log("calcCurr...")
-        console.log("datapoints", datapoints)
-        console.log("values", values)
-        console.log("act...", d3.max(values))
-    }*/
 
     return {
         //@todo - use min if order is 'lowest is best', use stat to determine order
@@ -132,8 +131,8 @@ function calcCurrent(stat, datapoints, dateRange, log){
 function createTargetFromDefault(datasetKey, statKey, date, defaultTargets){
     const defaultTarget = findDefaultTarget(defaultTargets, datasetKey, statKey, date);
     return {
-        actual:defaultTarget?.value || "",
-        completion:defaultTarget?.completion || "",
+        actual:defaultTarget?.value || null,
+        completion:defaultTarget?.completion || null,
     }
 }
 
@@ -197,11 +196,6 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
         dateRange = calcDateRange(addMonths(-expiryDuration, now), now)
     }else{
         dateRange = calcDateRange(addMonths(-expiryDuration, date), date);
-    }
-    
-    //console.log("dateRange", dateRange)
-    if(id === "profile-2"){
-        console.log("lastpast", lastPastProfile)
     }
 
     return {
@@ -274,11 +268,19 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //2 possible causes of new targ not getting picked up
             //date of new targ that hasnt gone thru server os a Date not a string
             //actual and pc are numbers not strings
-            const target = parsedCustomTarget || createTargetFromDefault(datasetKey, statKey, date, defaultTargets);
+            const nonRoundedTarget = parsedCustomTarget || createTargetFromDefault(datasetKey, statKey, date, defaultTargets);
+            //we must round, because accuracy is contextual so a target may not be rounded to the required level
+            const target = {
+                ...nonRoundedTarget,
+                actual:round(nonRoundedTarget.actual, accuracy)
+            }
+            if(key === "pressUps-reps"){
+                
+            }
             //note prevProfile has already been processed with a full key and values
 
             //for now, we only do expected for the active profile, which ensures achived is defined on previous
-            let expected = isPast ? null : calcExpected(kpi, start, { date, ...target }, now);
+            let expected = isPast ? null : calcExpected(kpi, start, { date, ...target }, now, { accuracy });
 
             if(i === 0 && id === "profile-7"){
                 //console.log("expected", expected)
