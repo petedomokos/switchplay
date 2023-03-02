@@ -88,18 +88,9 @@ function calcExpected(kpi, start, target, now, options={}){
     if(!start || start.actual === null || target.actual === null){ 
         return { actual:null, completion:null }; 
     }
-
     const { accuracy, showTrailingZeros=true } = options;
-    //@todo - allow a manual startdate/value so we dont actually need to have a prevProfile
-    const { datasetKey, statKey } = kpi;
-    const key = `${datasetKey}-${statKey}`;
-    //@todo - make dps based on the kpi ie on the dataset metadata
-    const dps = 1;
-
-    //console.log("start", start)
-    //console.log("target", target)
     //@todo - completion
-    const actual = linearProjValue(start.date.getTime(), start.actual, target.date.getTime(), target.actual, now.getTime(), dps)
+    const actual = linearProjValue(start.date.getTime(), start.actual, target.date.getTime(), target.actual, now.getTime())
     return { 
         actual: round(actual, accuracy, showTrailingZeros), 
         completion:"" 
