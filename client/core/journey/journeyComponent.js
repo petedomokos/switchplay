@@ -1314,6 +1314,7 @@ export default function journeyComponent() {
         createProfile = function(pos){
             const profile = {
                 date:zoomedTimeScale.invert(pos.x),
+                //@todo - set hours to 22:00
                 yPC:zoomedYScale.invert(pos.y)
             }
 

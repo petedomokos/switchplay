@@ -105,11 +105,10 @@ const mapStateToProps = (state, ownProps) => {
 		}))
 		//check this players ds have been loaded 
 		//.filter(dset => dset.datapoints.length !== 0) //this player defo has at least 1 d to be a member of it
-	//console.log("fullyLoadedDatasets", fullyLoadedDatasets)
+	// console.log("fullyLoadedDatasets", fullyLoadedDatasets)
 	//some or all datasets may not be fully loaded ie datapoints may not have been loaded
 	const allDatasetsFullyLoaded = datasets.length === fullyLoadedDatasets.length;
 	//console.log("areDatsetsLoaded??????????????????????", allDatasetsFullyLoaded)
-	
 	const hydratedData = hydrateJourneyData(data, state.user, fullyLoadedDatasets);
 	//console.log("hydratedData", hydratedData)
 

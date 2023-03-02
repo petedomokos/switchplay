@@ -223,7 +223,6 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     //cant use profileId as it may be 'current' which is not updated
     const otherProfiles = profiles.filter(p => p.id !== updatedProfile.id);
     const _profiles = [ ...otherProfiles, updatedProfile]
-    console.log("UPDATING VALUE, BUT SAVE IS COMMENTED OUT! new profiles...", _profiles)
     save({ ...data, profiles:_profiles });
     
   }, [stringifiedProfiles, user._id]);
@@ -292,6 +291,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
 export default withLoader(Journey, ["allDatasetsFullyLoaded"] )
 
 Journey.defaultProps = {
+  user:{},
   datasets:[],
   availableJourneys:[],
   screen: {},

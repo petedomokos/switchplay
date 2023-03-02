@@ -15,11 +15,13 @@ export function hydrateJourneyData(data, user, datasets){
     const nonCurrentProfiles = data.profiles.filter(p => p.id !== "current");
     const player = user.player;
 
+    const settings = { ...user.settings.general, ...user.settings.journey };
+
     const kpis = getKpis(player._id).map(kpi => {
-        const { bands, standards } = getBandsAndStandards(kpi.datasetKey, kpi.statKey) || {};
+        const { bands, standards, accuracy } = getBandsAndStandards(kpi.datasetKey, kpi.statKey) || {};
         const min = bands[0] ? bands[0].min : null;
         const max = bands[0] ? bands[bands.length - 1].max : null;
-        return { ...kpi, bands, standards, min, max }
+        return { ...kpi, bands, standards, min, max, accuracy }
     });
     const defaultTargets = getTargets(player._id, player.groupId);
     const rangeFormat = getRangeFormat("day");
@@ -27,11 +29,11 @@ export function hydrateJourneyData(data, user, datasets){
     //STEP 1: HYDRATE PROFILES
     const options = { now, rangeFormat };
     //console.log("hydrateJourney", data)
-    const hydratedProfiles = hydrateProfiles(nonCurrentProfiles, datasets, kpis, defaultTargets, options);
+    const hydratedProfiles = hydrateProfiles(nonCurrentProfiles, datasets, kpis, defaultTargets, settings, options);
     //console.log("hydratedProfiles", hydratedProfiles.find(p => p.id === "profile-1"))
 
     //STEP 2: CREATE CURRENT PROFILE, including expected values
-    const currentProfile = createCurrentProfile(hydratedProfiles, datasets, kpis, options );
+    const currentProfile = createCurrentProfile(hydratedProfiles, datasets, kpis, settings, options );
 
     //console.log("currentProfile", currentProfile)
     //SEP 3: EMBELLISH PROFILES BASED ON CURRENT PROFILE INFO
@@ -60,7 +62,7 @@ function hydrateContracts(contracts=[]){
     })
 }
 
-function hydrateProfiles(profiles=[], datasets, kpis, defaultTargets, options={}){
+function hydrateProfiles(profiles=[], datasets, kpis, defaultTargets, settings, options={}){
     //console.log("hydrateProfiles----------------", profiles);
     const orderedProfiles = sortAscending(profiles, d => d.date);
     const hydrateNextProfile = (remaining, hydratedSoFar) => {
@@ -68,8 +70,11 @@ function hydrateProfiles(profiles=[], datasets, kpis, defaultTargets, options={}
         //base case
         if(!next){ return hydratedSoFar; }
         //hydration
+        //the last past card can only be determined if the one we are on is in future
+        //@todo - deal with profile cards that have date set to eg morning of today - should still be future
+        const lastPastHydrated = next.date < new Date() ? null : d3.greatest(hydratedSoFar.filter(p => p.isPast), p => p.date)
         const prevHydrated = hydratedSoFar.length !== 0 ? hydratedSoFar[hydratedSoFar.length - 1] : null;
-        const nextHydrated = hydrateProfile(next, prevHydrated, datasets, kpis, defaultTargets, options);
+        const nextHydrated = hydrateProfile(next, lastPastHydrated, prevHydrated, datasets, kpis, defaultTargets, settings, options);
         //recursive call
         return hydrateNextProfile(remaining.slice(1, remaining.length), [ ...hydratedSoFar, nextHydrated])
     }
@@ -95,16 +100,26 @@ function calcExpected(kpi, start, target, now){
     return { actual, completion:"" }
 }
 
-function calcCurrent(stat, datapoints, dateRange){
+function calcCurrent(stat, datapoints, dateRange, log){
+    if(stat?.key === "time"){
+        //console.log("calcCurr", stat)
+    }
     //if dataset unavailable, stat will be undefined
     if(!stat){ return { actual:undefined, completion:"" } }
     //helper
-    const getValue = getValueForStat(stat.key);
+    const getValue = getValueForStat(stat.key, stat.accuracy);
     const values = datapoints
         //if no date range, we want to include all as it will be the current card
         .filter(d => !dateRange || dateIsInRange(d.date, dateRange))
         .filter(d => !d.isTarget)
         .map(d => getValue(d))
+    
+    /*if(log){
+        console.log("calcCurr...")
+        console.log("datapoints", datapoints)
+        console.log("values", values)
+        console.log("act...", d3.max(values))
+    }*/
 
     return {
         //@todo - use min if order is 'lowest is best', use stat to determine order
@@ -132,35 +147,70 @@ function calcDateRange(start, end, format){
 }
 
 
-function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, options={}){
-    //console.log("hydrateProfile------------", profile.id, profile.date)
+function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
+    console.log("hydrateProfile------------", profile.id, profile.date, profile.created)
     const { now, rangeFormat } = options;
-    const { id, date, customTargets=[], isCurrent } = profile;
+    const { id, date, customTargets=[], isCurrent, created } = profile;
     const milestoneId = id;
     //startDate
+    //helper
+    const { data:{ expiryDuration }, milestone: { restrictDataToWindow } } = settings;
     //either manual startDate if set, or prev date, or otherwise 20 years ago
-    const startDate = profile.startDate || prevProfile?.date || oneMonthAgo(date);
-    const startsFromPrevProfile = !profile.startDate && !!prevProfile;
+    //const startDate = profile.startDate || prevProfile?.date || oneMonthAgo(date);
+    //if not startdate and no past profile, then we start from when any non-expired data could exist
+    //@todo - deal with profile cards that have date set to eg morning of today - should still be future
     const datePhase = date < now ? "past" : "future";
     const isPast = datePhase === "past";
     const isFuture = datePhase === "future";
-    const isActive = isFuture && !prevProfile?.isFuture;
-    const dateRange = calcDateRange(startDate, date);
+    const isActive = isFuture && prevProfile?.isPast;
+    //notes about why we default to lastPastCard not the prevCard (for future cards)
+    //note 1 - if we want future cards to start from a prev future card, that is achieved by running
+    //a simulation, as that is when it would make sense to do so
+    //note 2: Targets for future cards can still eb calculated incrementally, and visually adjusted based on 
+    //the target for a previous future card
 
-    //RANGE
-    //round both dates in range up, so any datapoint on teh day of a profile
-    //will be counted in THAT profile, and NOT the next one.
-    //note - we round date up,which goes to 00:00 of the next day, but because we check 
-    //dateIsInRange with exclusiveEnd, a datapoint for next day 00:00 will not be counted
+    //note - after this line, we never refer directly to prevProfile or lastPastProfile
+    const prevProfileToUse = isPast ? prevProfile : lastPastProfile;
+    const profileStart = {};
+    if(profile.startDate){
+        profileStart.type = "custom";
+        profileStart.date = profile.startDate;
+    }else if(prevProfileToUse){
+        profileStart.type = "prev";
+        profileStart.prevProfileType = isPast ? "prev" : "lastPast";
+        profileStart.date = prevProfileToUse.date;
+    }else{
+        profileStart.type = "default";
+        const creationDate = new Date(created);
+        profileStart.date = creationDate < date ? creationDate : addMonths(-expiryDuration, date);
+        //all profile dates default to 22:00
+        profileStart.date.setUTCHours(22); 
+        profileStart.date.setUTCMinutes(0); 
+        profileStart.date.setUTCSeconds(0); 
+        profileStart.date.setUTCMilliseconds(0); 
+    }
+   
+    let dateRange;
+    if(restrictDataToWindow){
+        dateRange = calcDateRange(profileStart.date, date);
+    }else if(isFuture){
+        dateRange = calcDateRange(addMonths(-expiryDuration, now), now)
+    }else{
+        dateRange = calcDateRange(addMonths(-expiryDuration, date), date);
+    }
     
-    
+    //console.log("dateRange", dateRange)
+    if(id === "profile-2"){
+        console.log("lastpast", lastPastProfile)
+    }
 
     return {
         ...profile,
         id:milestoneId,
         dataType:"profile",
-        startDate,
-        startsFromPrevProfile,
+        start:profileStart,
+        //legacy  - @todo - remove references to startDate for profile, replace with start.date
+        startDate:profileStart.date, //must remove
         dateRange,
         datePhase,
         isPast,
@@ -168,8 +218,10 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
         isActive,
         kpis:kpis.map((kpi,i) => {
             //console.log("kpi", kpi)
+            //console.log("profileStart", profileStart)
+            //console.log("prevProfToUse", prevProfileToUse)
             //KEYS/ID
-            const { datasetKey, statKey, min, max, values } = kpi;
+            const { datasetKey, statKey, min, max, accuracy } = kpi;
             const key = `${datasetKey}-${statKey}`;
             //console.log("kpi key", key)
             
@@ -179,23 +231,37 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
             //need to take ll this into the calcCurrent func
             const dataset = datasets.find(dset => dset.key === datasetKey);
             const datapoints = dataset?.datapoints || [];
-            const stat = dataset?.stats.find(s => s.key === statKey);
-           
-            //startvalues are only set if prevProfile isPast ie it has an achieved score
-            //note - current profile is hydrated on its own so has no prevProfile
-            //@todo - if user has given a fixed startTime for a profile, then get value at that point
-            const prevValues = prevProfile?.kpis.find(kpi => kpi.key === key).values;
-            const start = isFuture && !isActive ? prevValues.start : {
-                //non-active future cards use the same startValue as the active profile does, which can just be inherited
-                actual:prevProfile ? prevValues.achieved.actual : min,
-                completion:0, //this always starts at 0,
-                //start date must be specified, as future cards may inherit it to calc expected from a previous start
-                date:startDate
+            //add accuracy to teh stat - note that the stat has only stable metadata, whereas the kpi
+            //is dependent on context, so level of accuracy to display is defined in kpi not stat
+            const stat = { ...dataset?.stats.find(s => s.key === statKey), accuracy };
+
+            let start;
+            if(profileStart.type === "custom" || profileStart.type === "default"){
+                //console.log("date....", profileStart.date)
+                const startDateRange = calcDateRange(addMonths(-expiryDuration, profileStart.date), profileStart.date);
+                start = {
+                    ...profileStart,
+                    //todo - do stat before all this, and do datapoints here so we have it for calcCurrent
+                    ...calcCurrent(stat, datapoints, startDateRange) //put params in for the custom startDate
+                }
+            }else{
+                //its based on a prev profile 
+                //@todo - date should actually be the date of the last datapoint entered within the relevant window
+                //rather than the end date of the profile, so that it is more accurate when making predictions
+                const prevValuesToUse = prevProfileToUse.kpis.find(kpi => kpi.key === key).values;
+                start = prevValuesToUse.achieved ? 
+                    { ...profileStart, ...prevValuesToUse.achieved } 
+                    : 
+                    { ...profileStart, ...prevValuesToUse.start } //date is overriden in this case    
             }
+
+
 
             //note - for current profile, the range is last twenty years so all will be included anyway
             //this is also true for 1st profile, unless user specifies a startDate
-            const current = calcCurrent(stat, datapoints, dateRange, id === "profile-3" && datasetKey === "pressUps");
+            const current = calcCurrent(stat, datapoints, dateRange, id === "profile-4" && datasetKey === "pressUps");
+            //console.log("current", current, dateRange)
+            //console.log("ds", datapoints)
             const achieved = isPast ? current : null;
             const customTargetsForStat = customTargets
                 .filter(t => t.datasetKey === datasetKey && t.statKey === statKey)
@@ -221,7 +287,10 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
             return {
                 ...kpi, key, milestoneId,
                 //dates
-                date, startDate, startsFromPrevProfile, dateRange, datePhase,
+                date, 
+                startDate: profileStart.Date, //this may be different from values.start.date
+                dateRange, 
+                datePhase,
                 isPast, isCurrent, isFuture, isActive,
                 //values
                 values:{
@@ -241,60 +310,60 @@ function hydrateProfile(profile, prevProfile, datasets, kpis, defaultTargets, op
 
 //current profile is dynamically created, so it doesnt need hydrating
 //note - this is nely created each time, so nothing must be stored on it
-function createCurrentProfile(orderedProfiles, datasets, kpis, options={}){
-    //console.log("createcurrentprofile")
+function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options={}){
+    //console.log("createcurrentprofile----------------------------------")
     const { now, rangeFormat } = options;
     const activeProfile = d3.least(orderedProfiles.filter(p => p.isFuture), p => p.date);
     const activeProfileValues = kpi => activeProfile?.kpis
         ?.find(k => k.datasetKey === kpi.datasetKey && k.statKey === kpi.statKey)
         ?.values;
 
-    const prevProfile = d3.greatest(orderedProfiles.filter(p => p.isPast), p => p.date);
+    const lastPastProfile = d3.greatest(orderedProfiles.filter(p => p.isPast), p => p.date);
 
+    const { data:{ expiryDuration }, milestone: { restrictDataToWindow } } = settings;
     //10 was scored in 20th apr 2021 so not within 3 months and not since last card
     //it seems startdate is more than 3 months ago
     //note - current always only takes values from last 3 months
-    //@todo - provide this as a setting that can be adjusted 
-    const startDate = addMonths(-3, now);
-    const startsFromPrevProfile = !!prevProfile;
+    //@todo - implement other starts for current card eg latest session/ this week / this season etc
+    const profileStart = {
+        type:"default",
+        date:addMonths(-expiryDuration, now)
+    };
     const datePhase = "current";
-    const dateRange = calcDateRange(startDate, now);
+    const dateRange = calcDateRange(profileStart.date, now);
     return {
-        startDate, date:now, startsFromPrevProfile, dateRange, datePhase,
+        start:profileStart,
+        //legacy - remove
+        startDate:profileStart.date, 
+        date:now, dateRange, datePhase,
         id:"current", isCurrent:true, dataType:"profile",
         kpis:kpis.map((kpi,i) => {
-            //console.log("kpi", kpi)
-            const { datasetKey, statKey, min, max, values } = kpi;
+            //console.log("kpi...", kpi)
+            const { datasetKey, statKey, min, max, values, accuracy } = kpi;
             const key = `${datasetKey}-${statKey}`;
             const milestoneId = "current";
             
             const dataset = datasets.find(dset => dset.key === datasetKey);
             const datapoints = dataset?.datapoints || [];
-            const stat = dataset?.stats.find(s => s.key === statKey);
+            const stat = { ...dataset?.stats.find(s => s.key === statKey), accuracy };
             //START & END
             //@todo - if user has given a fixed startTime for a profile, then get value at that point
-            const prevAchieved = prevProfile?.kpis.find(kpi => kpi.key === key)?.achieved;
-            const start = {
-                actual:prevAchieved?.actual || min,
-                completion:0 //this always starts at 0 
-            }
-            const end = {
-                actual:max,
-                completion:100
-            }
+            const prevAchieved = lastPastProfile?.kpis.find(kpi => kpi.key === key)?.achieved;
 
             return {
                 ...kpi,
                 key,
                 milestoneId,
                 //dates
-                date:now, startDate, startsFromPrevProfile, dateRange, datePhase, isCurrent:true,
+                date:now, 
+                startDate:profileStart.date,
+                dateRange, datePhase, isCurrent:true,
                 values:{
                     //min/max just values
-                    min, max, start, end,
+                    min, max,
                     expected:activeProfileValues(kpi)?.expected,
                     target:activeProfileValues(kpi)?.target,
-                    current:calcCurrent(stat, datapoints, dateRange, false)
+                    current:calcCurrent(stat, datapoints, dateRange)
                 },
                 //other info
                 datasetName:dataset?.name || "",

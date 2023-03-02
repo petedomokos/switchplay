@@ -238,7 +238,8 @@ export default function milestonesBarComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            //console.log("updateMBar", data)
+            console.log("updateMBar", data)
+            console.log("pressUps kpi values", data.map(p => ({ id:p.id, values: p.kpis.kpisData[0].values })))
             containerG = d3.select(this)
                 .attr("width", width)
                 .attr("height", height);
@@ -567,6 +568,11 @@ export default function milestonesBarComponent() {
                                 const interpolator = d3.interpolateDate(prev?.date, next?.date);
                                 const newDate = prev && next ? interpolator(0.5) :
                                     (prev ? addMonths(1, prev.date) : addMonths(-1, next.date))
+                                onCreateMilestone
+                                newDate.setUTCHours(22); 
+                                newDate.setUTCMinutes(0); 
+                                newDate.setUTCSeconds(0); 
+                                newDate.setUTCMilliseconds(0); 
 
                                 handleCreateMilestone(key, newDate, calcNewMilestoneNr(prev, next));
                             }

@@ -1,11 +1,24 @@
 import * as d3 from 'd3';
 import { addDays } from '../util/TimeHelpers';
 
-export const getValueForStat = statKey => datapoint => {
-    return Number(datapoint
+
+//@todo - handle showTrailingZeros = false
+//@todo - handle accuracy >= 5...round to that number
+export const round = (value, accuracy, showTrailingZeros=true) => {
+    if(typeof accuracy === "undefined") { return value; }
+    if(accuracy < 5){
+        return showTrailingZeros ? Number(value.toFixed(accuracy)) : value; //must finish
+    }
+    return value; //must finish
+}
+
+export const getValueForStat = (statKey, accuracy, showTrailingZeros=true) => datapoint => {
+    const value = Number(datapoint
         ?.values
         ?.find(v => v.key === statKey)
         ?.value);
+        
+    return round(value, accuracy, showTrailingZeros)
 }
 
 export const getGreatestValueForStat = statKey => datapoints => {

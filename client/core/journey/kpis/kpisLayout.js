@@ -127,8 +127,9 @@ export default function kpisLayout(){
                 }
             ];
 
-            if(i === 0 /*&& kpi.key.includes("mock3")*/ && kpi.key.includes("pressUps")){
+            if(kpi.datePhase === "current" && kpi.key.includes("pressUps")){
                 //console.log("kpi---",i,kpi.key, kpi)
+                //console.log("values", values)
                 //console.log("tooltips", tooltipsData)
             }
             const numbersData = [currentDatum];

@@ -10,35 +10,42 @@ const bandsAndStandards = {
     "pressUps":{
         "reps":{
             bands:[ { min:0, max:120 } ],
-            standards:[ { name:"minimum", value:20 }]
+            standards:[ { name:"minimum", value:20 }],
+            accuracy:0
         }
     },
     "shuttles":{
         "time":{
-            bands:[ { min:0, max:16 } ]
+            bands:[ { min:0, max:16 } ],
+            accuracy:1
         }
     },
     "longJump":{
         "distance-left":{
-            bands:[ { min:3, max:12 } ]
+            bands:[ { min:3, max:12 } ],
+            accuracy:2
         },
         "distance-right":{
-            bands:[ { min:3, max:12 } ]
+            bands:[ { min:3, max:12 } ],
+            accuracy:2
         }
     },
     "hurdleJumps1Min":{
         "score":{
-            bands:[ { min:20, max:80 } ]
+            bands:[ { min:20, max:80 } ],
+            accuracy:0
         }
     },
     "shootingLeftFoot":{
         "score":{
-            bands:[ { min:0, max:10 } ]
+            bands:[ { min:0, max:10 } ],
+            accuracy:0
         }
     },
     "shootingRightFoot":{
         "score":{
-            bands:[ { min:0, max:10 } ]
+            bands:[ { min:0, max:10 } ],
+            accuracy:0
         }
     }
 }
