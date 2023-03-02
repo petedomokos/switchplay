@@ -45,9 +45,11 @@ export default function tooltipsComponent() {
 
     //state
     let hovered;
-    let unsavedValues = {}
 
-    let isAchieved = d => typeof d.current === "number" && typeof getValue(d) === "number" && d.current >= getValue(d);
+    let isAchieved = d => {
+        if(typeof d.current !== "number" && typeof getValue(d) !== "number"){ return false; }
+        return d.dataOrder === "highest-is-best" ? d.current >= getValue(d) : d.current <= getValue(d);
+    }
 
     let draggable = false;
     let showDragValueAbove = true;

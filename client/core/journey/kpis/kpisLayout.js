@@ -33,6 +33,9 @@ export default function kpisLayout(){
         const kpisData = data.map((kpi,i) => {
            
             const { key, values, isPast, isCurrent, isFuture, milestoneId, datasetKey, statKey } = kpi;
+
+            const dataset = datasets.find(dset => dset.key === datasetKey);
+            const stat = dataset.stats.find(stat => stat.key === statKey);
             //can set all kpis to be active eg for an active profile card that doesnt have access to all data
             const isActive = allKpisActive || kpi.isActive;
             //helper
@@ -83,9 +86,9 @@ export default function kpisLayout(){
             const targetDatum = {
                 key:"target",
                 label: "Target",
-                isAchieved:target <= current,//replce in a sec with teh correct target value and achieved if its below current
-                startValue:values.min, //may be undefined
-                value:target, //replace in a sec
+                isAchieved:stat.order === "highest-is-best" ? target <= current : target >= current,
+                startValue:stat.order === "highest-is-best" ? values.min : values.max, //may be undefined
+                value:target,
                 fill:colours.target,
                 format
             }
@@ -93,15 +96,15 @@ export default function kpisLayout(){
                 key:"current",
                 label: values.achieved ? "Achieved" : "Current",
                 isAchieved:!!values.achieved,
-                startValue:values.min, //may be undefined
+                startValue:stat.order === "highest-is-best" ? values.min : values.max, //may be undefined
                 value:current,
                 fill:colours.current,
                 format
             }
 
             const barData = [targetDatum, currentDatum];
-            barData.start = values.min;
-            barData.end = values.max;
+            barData.start = stat.order === "highest-is-best" ? values.min : values.max;
+            barData.end = stat.order === "highest-is-best" ? values.max : values.min;
 
             const tooltipsData = [
                 { 
@@ -110,6 +113,7 @@ export default function kpisLayout(){
                     shouldDisplay:!isPast && !!targetObj, //dont display if past or no future profiles
                     rowNr: 1, y: 1, current,
                     value: expected, x:expected,
+                    dataOrder:stat.order,
                     icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },
                     editable:false//isCurrent || isFuture,
                     //smallIcons: expectedAchieved ? emptyGoal : emptyGoal,
@@ -120,6 +124,7 @@ export default function kpisLayout(){
                     shouldDisplay:!!targetObj,
                     rowNr: -1, y: -1, current,
                     value:target, x:target,
+                    dataOrder:stat.order,
                     icons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
                     editable:isCurrent || isFuture,
                     //if small space, just show the ball

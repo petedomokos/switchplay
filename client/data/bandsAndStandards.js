@@ -16,7 +16,7 @@ const bandsAndStandards = {
     },
     "shuttles":{
         "time":{
-            bands:[ { min:0, max:16 } ],
+            bands:[ { min:8, max:16 } ],
             accuracy:1
         }
     },

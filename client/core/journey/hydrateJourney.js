@@ -11,7 +11,7 @@ import { getBandsAndStandards } from "../../data/bandsAndStandards";
 
 export function hydrateJourneyData(data, user, datasets){
     const now = new Date();
-    //console.log("hydrateJourneyData", datasets)
+    console.log("hydrateJourneyData", datasets)
     const nonCurrentProfiles = data.profiles.filter(p => p.id !== "current");
     const player = user.player;
 
@@ -93,7 +93,7 @@ function calcExpected(kpi, start, target, now, options={}){
     const actual = linearProjValue(start.date.getTime(), start.actual, target.date.getTime(), target.actual, now.getTime())
     return { 
         actual: round(actual, accuracy, showTrailingZeros), 
-        completion:"" 
+        completion:null 
     }
 }
 
@@ -102,7 +102,7 @@ function calcCurrent(stat, datapoints, dateRange, log){
         //console.log("calcCurr", stat)
     }
     //if dataset unavailable, stat will be undefined
-    if(!stat){ return { actual:undefined, completion:"" } }
+    if(!stat){ return { actual:undefined, completion:null } }
     //helper
     const getValue = getValueForStat(stat.key, stat.accuracy);
     const values = datapoints
@@ -113,8 +113,8 @@ function calcCurrent(stat, datapoints, dateRange, log){
 
     return {
         //@todo - use min if order is 'lowest is best', use stat to determine order
-        actual:d3.max(values),
-        completion:""
+        actual:stat?.key === "time" ? 8 : d3.max(values),
+        completion:null
     }
 
 }
