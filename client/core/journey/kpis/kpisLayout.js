@@ -32,7 +32,7 @@ export default function kpisLayout(){
         //1 only...const _data = [data[0]]
         const kpisData = data.map((kpi,i) => {
            
-            const { key, values, isPast, isCurrent, isFuture, milestoneId, datasetKey, statKey } = kpi;
+            const { key, values, accuracy, isPast, isCurrent, isFuture, milestoneId, datasetKey, statKey } = kpi;
 
             const dataset = datasets.find(dset => dset.key === datasetKey);
             const stat = dataset.stats.find(stat => stat.key === statKey);
@@ -86,8 +86,8 @@ export default function kpisLayout(){
             const targetDatum = {
                 key:"target",
                 label: "Target",
-                isAchieved:stat.order === "highest-is-best" ? target <= current : target >= current,
-                startValue:stat.order === "highest-is-best" ? values.min : values.max, //may be undefined
+                isAchieved:stat.order === "highest is best" ? target <= current : target >= current,
+                startValue:stat.order === "highest is best" ? values.min : values.max, //may be undefined
                 value:target,
                 fill:colours.target,
                 format
@@ -96,15 +96,15 @@ export default function kpisLayout(){
                 key:"current",
                 label: values.achieved ? "Achieved" : "Current",
                 isAchieved:!!values.achieved,
-                startValue:stat.order === "highest-is-best" ? values.min : values.max, //may be undefined
+                startValue:stat.order === "highest is best" ? values.min : values.max, //may be undefined
                 value:current,
                 fill:colours.current,
                 format
             }
 
             const barData = [targetDatum, currentDatum];
-            barData.start = stat.order === "highest-is-best" ? values.min : values.max;
-            barData.end = stat.order === "highest-is-best" ? values.max : values.min;
+            barData.start = stat.order === "highest is best" ? values.min : values.max;
+            barData.end = stat.order === "highest is best" ? values.max : values.min;
 
             const tooltipsData = [
                 { 
@@ -114,6 +114,7 @@ export default function kpisLayout(){
                     rowNr: 1, y: 1, current,
                     value: expected, x:expected,
                     dataOrder:stat.order,
+                    accuracy,
                     icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },
                     editable:false//isCurrent || isFuture,
                     //smallIcons: expectedAchieved ? emptyGoal : emptyGoal,
@@ -125,6 +126,7 @@ export default function kpisLayout(){
                     rowNr: -1, y: -1, current,
                     value:target, x:target,
                     dataOrder:stat.order,
+                    accuracy,
                     icons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
                     editable:isCurrent || isFuture,
                     //if small space, just show the ball

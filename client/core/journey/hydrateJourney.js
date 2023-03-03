@@ -98,9 +98,6 @@ function calcExpected(kpi, start, target, now, options={}){
 }
 
 function calcCurrent(stat, datapoints, dateRange, log){
-    if(stat?.key === "time"){
-        //console.log("calcCurr", stat)
-    }
     //if dataset unavailable, stat will be undefined
     if(!stat){ return { actual:undefined, completion:null } }
     //helper
@@ -110,11 +107,17 @@ function calcCurrent(stat, datapoints, dateRange, log){
         .filter(d => !dateRange || dateIsInRange(d.date, dateRange))
         .filter(d => !d.isTarget)
         .map(d => getValue(d))
+    
+    const valueDates = datapoints
+        //if no date range, we want to include all as it will be the current card
+        //.filter(d => !dateRange || dateIsInRange(d.date, dateRange))
+        //.filter(d => !d.isTarget)
+        .map(d => [d.date, getValue(d)])
 
     return {
         //@todo - use min if order is 'lowest is best', use stat to determine order
-        actual:stat?.key === "time" ? 8 : d3.max(values),
-        completion:null
+        actual: stat.order === "highest is best" ? d3.max(values) : d3.min(values),
+        completion: null
     }
 
 }
@@ -290,6 +293,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                     //min/max are just values
                     min, max, start, current, expected, achieved, target, //proposedTarget,
                 },
+                accuracy,
                 //other info
                 datasetName:dataset?.name || "",
                 statName:stat?.name || "",
@@ -351,6 +355,7 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
                 date:now, 
                 startDate:profileStart.date,
                 dateRange, datePhase, isCurrent:true,
+                accuracy,
                 values:{
                     //min/max just values
                     min, max,

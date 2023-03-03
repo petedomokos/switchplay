@@ -47,8 +47,8 @@ export default function tooltipsComponent() {
     let hovered;
 
     let isAchieved = d => {
-        if(typeof d.current !== "number" && typeof getValue(d) !== "number"){ return false; }
-        return d.dataOrder === "highest-is-best" ? d.current >= getValue(d) : d.current <= getValue(d);
+        if(typeof d.current !== "number" || typeof getValue(d) !== "number"){ return false; }
+        return d.dataOrder === "highest is best" ? d.current >= getValue(d) : d.current <= getValue(d);
     }
 
     let draggable = false;

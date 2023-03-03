@@ -7,6 +7,7 @@ import tooltipsComponent from '../../tooltipsComponent';
 import container from './container';
 import background from './background';
 import { getTransformationFromTrans } from '../../helpers';
+import { round } from "../../../../data/dataHelpers";
 
 /*
 
@@ -353,6 +354,7 @@ export default function progressBarComponent() {
                     //console.log("clicked", this, e, d)
                 })
                 .onDrag(function(e,d, tooltipDimns){
+                    //console.log("drag", d)
                     //update tooltip position
                     const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                     const newX = translateX + e.dx;
@@ -360,7 +362,7 @@ export default function progressBarComponent() {
 
                     //update tooltip value
                     const scale = xScales[d.progBarKey];
-                    const newValue = Number(scale.invert(newX).toFixed(1));
+                    const newValue = round(Number(scale.invert(newX)), d.accuracy);
                     d.unsavedValue = newValue;
                     //we need to update alltooltips so index for dimns is maintained
                     //@todo - go back to using a key instead of array for dimns?
