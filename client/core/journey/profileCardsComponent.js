@@ -124,24 +124,24 @@ export default function profileCardsComponent() {
             const profileCardG = containerG.selectAll("g.profile-card").data(data, d => d.id);
             profileCardG.enter()
                 .append("g")
-                .attr("class", d => `milestone profile-card milestone-${d.id} profile-card-${d.id}`)
-                .each(function(d,i){
-                    profileInfoComponents[d.id] = profileInfoComponent();
-                    kpisComponents[d.id] = kpisComponent();
-                    //ENTER
-                    const contentsG = d3.select(this)
-                        .append("g")
-                        .attr("class", "contents profile-card-contents")
+                    .attr("class", d => `milestone profile-card milestone-${d.id} profile-card-${d.id}`)
+                    .each(function(d,i){
+                        profileInfoComponents[d.id] = profileInfoComponent();
+                        kpisComponents[d.id] = kpisComponent();
+                        //ENTER
+                        const contentsG = d3.select(this)
+                            .append("g")
+                            .attr("class", "contents profile-card-contents")
 
-                    //bg rect
-                    contentsG
-                        .append("rect")
-                            .attr("class", "bg")
-                            .attr("rx", 3)
-                            .attr("ry", 3)
-                            .call(updateFill, { 
-                                fill:d => isSelected(d) ? COLOURS.selectedMilestone : COLOURS.milestone
-                            })
+                        //bg rect
+                        contentsG
+                            .append("rect")
+                                .attr("class", "bg")
+                                .attr("rx", 3)
+                                .attr("ry", 3)
+                                .call(updateFill, { 
+                                    fill:d => isSelected(d) ? COLOURS.selectedMilestone : COLOURS.milestone
+                                })
 
                     contentsG.append("g").attr("class", "info")
                     contentsG.append("g").attr("class", "kpis")
@@ -452,6 +452,7 @@ export default function profileCardsComponent() {
             function longpressDragged(e, d) {
                 if(deleted) { return; }
 
+                //@todo - call dragged first, so that even as it disappears, it is moving away
                 if(enhancedDrag.distanceDragged() > 200 && enhancedDrag.avgSpeed() > 0.08){
                     d3.select(this)
                         //.style("filter", "url(#drop-shadow)")
@@ -691,11 +692,10 @@ export default function profileCardsComponent() {
         return profileCards;
     };
     profileCards.applyOverlay = function(selection){
-        //console.log("applyOverlay", selection.nodes(), selection.select("rect.overlay").node())
-        selection.select("rect.overlay").attr("display", null)
+        selection.selectAll("rect.overlay").attr("display", null)
     }
     profileCards.removeOverlay = function(selection){
-        selection.select("rect.overlay").attr("display", "none")
+        selection.selectAll("rect.overlay").attr("display", "none");
     }
     return profileCards;
 }

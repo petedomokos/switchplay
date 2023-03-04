@@ -253,13 +253,13 @@ export default function kpisComponent() {
 
                         const listContentsG = listG.select("g.kpis-list-contents")
                         zoom
-                            .on('zoom', scrollEnabled ? function(e){
+                            .on('zoom', scrollEnabled || 2 === 2 ? function(e){
                                 handleZoom.call(this, e);
                                 if(e.sourceEvent){
                                     onZoom.call(this, e)
                                 }
                             } : null)
-                            .on('end', scrollEnabled ? function(e){
+                            .on('end', scrollEnabled || 2 === 2 ? function(e){
                                 handleZoomEnd.call(this, e);
                                 if(e.sourceEvent){
                                     onZoomEnd.call(this, e)
@@ -332,7 +332,7 @@ export default function kpisComponent() {
                                 }))
                                 .onDblClick(onDblClickKpi)
                                 .onClick(function(e,d){
-                                    console.log("kpi.onClick........", d)
+                                    //console.log("kpisComponent kpi.onClick........", d)
                                     //@todo - bug - after clicking several kpis, the profiles dont 
                                     //stay in sync with each other. it seems that teh ones called from externally,
                                     //ie teh ones not actually scrolled, seem to jump back to 0 again, and go from there
@@ -451,8 +451,8 @@ export default function kpisComponent() {
         return itemHeight * (selectedIndex - actualNrToShowBefore);
     }
 
-    function updateSelected(key, data, shouldUpdateScroll, shouldUpdateDom){
-        //console.log("updateSelected", data.kpisData[0].milestoneId, key, shouldUpdateScroll, shouldUpdateDom)
+    function updateSelected(key, data, shouldUpdateScroll=false, shouldUpdateDom=false){
+        //console.log("updateSelected.... key", key)
         const { kpisData } = data;
         const newSelectedDatum = kpisData.find(d => d.key === key);
         //console.log("updateSel key, d-------", key, newSelectedDatum)
@@ -496,14 +496,13 @@ export default function kpisComponent() {
             //@todo - for KpiView, we want to show one before because they are connected
             const nrToShowBefore = 0;
             const y = calculateListY(selected, data.kpisData, kpiHeight, nrToShowBefore);
-            //console.log("y", y)
+            //console.log("zoom", zoom)
             containerG.select("g.kpis-list")
                .transition()
                     .delay(CONTENT_FADE_DURATION)
                     .duration(AUTO_SCROLL_DURATION)
                     .call(zoom.translateTo, 0, y, [0,0])
                     .on("end", () => { 
-                        //console.log("scroll end")
                         //kpi is now open so scroll should not be enabled
                         scrollEnabled = scrollable && !selected;
                         if(shouldUpdateDom){

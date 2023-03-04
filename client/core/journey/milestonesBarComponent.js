@@ -8,7 +8,8 @@ import { addMilestonePlaceholderContents, removeMilestonePlaceholderContents } f
 import { addMonths } from '../../util/TimeHelpers';
 import { milestoneContainingPt } from "./screenGeometryHelpers";
 import { icons } from '../../util/icons';
-import { hide, show } from './domHelpers';
+import { hide, show, Oscillator } from './domHelpers';
+import { getTransformationFromTrans } from './helpers';
 
 import { emptyGoal, ball, shiningCrystalBall, nonShiningCrystalBall } from "../../../assets/icons/milestoneIcons.js"
 
@@ -142,6 +143,7 @@ export default function milestonesBarComponent() {
 
     const drag = d3.drag();
     const enhancedDrag = dragEnhancements();
+    let oscillator = Oscillator({ k:1.01, dx:10 });
 
     let onClick = function(){};
     let onDblClick = function(){};
@@ -238,8 +240,8 @@ export default function milestonesBarComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            console.log("updateMBar", data)
-            console.log("shuttles kpi values", data.map(p => ({ id:p.id, values: p.kpis.kpisData[1]?.values })))
+            //console.log("updateMBar", data)
+            //console.log("shuttles kpi values", data.map(p => ({ id:p.id, values: p.kpis.kpisData[1]?.values })))
             containerG = d3.select(this)
                 .attr("width", width)
                 .attr("height", height);
@@ -290,7 +292,7 @@ export default function milestonesBarComponent() {
 
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
             function update(data, options={}){
-                // console.log("MBarComponent update....swip ", swipable)
+                //console.log("MBarComponent update....swip ", swipable)
                 const { slideTransition, milestoneTransition } = options;
 
                 //milestone positioning
@@ -446,17 +448,66 @@ export default function milestonesBarComponent() {
                     .onLongpressStart(function(e, d){
                         const pt = adjustPtForData(e);
                         const milestone = milestoneContainingPt(pt, positionedData);
+                        if(milestone?.id === "current"){
+                            alert("You can't delete your current profile.");
+                            return;
+                        }
                         if(milestone){
-                            console.log("remove animation")
+                            startDeleteMilestone(milestone)
                         }else{
                             createMilestonePlaceholder(prevCard(pt.x), nextCard(pt.x))
                         }
                     })
+                    .onLongpressDragged(longpressDragged)
+                    .onLongpressEnd(endDeleteMilestone)
+                    //try having drag always on, but for ls we have the wrapperg under the profiles etc. we can use
+                    //insert, as we will need it to update when screen size changes, so not enuff to append.
+                
+                let milestoneBeingDeleted;
+                let deleted = false;
+                function startDeleteMilestone(milestone){
+                    milestoneBeingDeleted = milestone;
+                    d3.select(`g.milestone-${milestone.id}`)//.select("rect.bg")
+                    //.style("filter", "url(#drop-shadow)")
+                    //work out whats happening with k
+                    .call(oscillator.start);
+                }
+                function longpressDragged(e){
+                    if(!milestoneBeingDeleted){ return; }
+                    const milestoneG = d3.select(`g.milestone-${milestoneBeingDeleted.id}`);
+                    const { translateX, translateY } = getTransformationFromTrans(milestoneG.attr("transform"));
+                    milestoneG
+                        .attr("transform", "translate(" + (translateX) +"," + (translateY + e.dy) +")")
 
+                    if(enhancedDrag.distanceDragged() > 200 && enhancedDrag.avgSpeed() > 0.08){
+                        if(deleted){ return; }
+                        //oscillator.stop();
+    
+                        deleted = true;
+                        milestoneG
+                            .transition()
+                            .duration(50)
+                                .attr("opacity", 0)
+                                .on("end", () => {
+                                    onDeleteMilestone("profile", milestoneBeingDeleted.id)
+                                })
+                    }
+                }
+
+                function endDeleteMilestone(){
+                    milestoneBeingDeleted = null;
+                    deleted = false;
+                    oscillator.stop();
+                }
+                
                 drag
+                    .on("start", enhancedDrag(dragStart))
+                    .on("drag", enhancedDrag(dragged))
+                    .on("end", enhancedDrag(dragEnd));
+                /*drag
                     .on("start", swipable ? enhancedDrag(dragStart) : null)
                     .on("drag", swipable ? enhancedDrag(dragged) : null)
-                    .on("end", swipable ? enhancedDrag(dragEnd) : null);
+                    .on("end", swipable ? enhancedDrag(dragEnd) : null);*/
                 
                 //click and dbl-click 
                 //todo: chrome mobile had no dbl-click so currently no difference if no dbl-click
@@ -464,6 +515,14 @@ export default function milestonesBarComponent() {
                 //but maybe best is to just make dbl-click teh same as two clicks , and 
                 //then ppl on chrome mobile just cant do two clicks in quick succession
                 function handleMilestoneWrapperClick(e,d){
+                    if(selectedMilestone){ return; }
+                    //this click is only to turn off swiping ann dturn on scrolling, so if not swipable then its not needed
+                    if(!swipable) { return; }
+                    //todo - this can be on, but if a kpi is selcted, then we should not do anything
+                    //atm, if a kpi is selected, then cicking teh X triggers this too, which then selects teh card if nt selcted
+                    //also if a milestone is selected, it shouldnt do anything coz otherwise clicking collapse sometimes
+                    //triggers expand too!
+                    //return
                     //this is a temp setting to save us having to turn drag off whilst creating a milestone
                     //otherwise the confirm click would also trigger this.
                     if(ignoreNextClick){
@@ -478,26 +537,31 @@ export default function milestonesBarComponent() {
                 }
 
                 function updateSelected(milestone){
-                    //@todo - consider removing and entering phase labels
-                    //milestonesG.select("g.phase-labels").call(show);
-                    //@todo - same for contracts
                     //deselecting
                     if(!milestone){
                         if(selectedMilestone){
                             //show all that were hidden
-                            milestonesG.selectAll("g.profile-card").filter(d => d.id !== selectedMilestone)
+                            milestonesG.selectAll("g.milestone").filter(d => d.id !== selectedMilestone)
                                 .call(profiles.removeOverlay/*, { delay:200, duration:200 }*/)
                         }
                     }
                     //selecting
                     else if(!selectedMilestone){
                         //hide all others
-                        milestonesG.selectAll("g.profile-card").filter(d => d.id !== milestone.id).call(profiles.applyOverlay)
+                        milestonesG.selectAll("g.milestone").filter(d => d.id !== milestone.id).call(profiles.applyOverlay)
                     }else{
                         //only need to hide the the previous selected
-                        milestonesG.select(`g.profile-card-${selectedMilestone}`).call(profiles.applyOverlay)
+                        milestonesG
+                            .selectAll("g.milestone")
+                            //d3 doesnt like this line below for some reason - it re-enters the profile card - so filter instead
+                            //.select(`g.milestone-${selectedMilestone}`)
+                            .filter(d => d.id === selectedMilestone)
+                            .call(profiles.applyOverlay)
+
                         //show the new selected
-                        milestonesG.select(`g.profile-card-${milestone.id}`).call(profiles.removeOverlay)
+                        milestonesG.selectAll("g.milestone")
+                            .filter(d => d.id === milestone.id)
+                            .call(profiles.removeOverlay)
                     }
                     //@todo - BUG - why is there a delay in removing the burger bars? cut it out for now
                     //onTakeOverScreen();
@@ -536,7 +600,7 @@ export default function milestonesBarComponent() {
                 }
 
                 milestonesWrapperG.call(drag)
-                profilesG.attr("pointer-events", swipable ? "none" : null)
+                //profilesG.attr("pointer-events", swipable ? "none" : null)
 
                 //POSITIONING
                 //offsetting due to slide
@@ -597,7 +661,7 @@ export default function milestonesBarComponent() {
                         cb:() => {
                             if(prev && next){
                                 //in this case, must slide cards out either side to create space
-                                milestonesG.selectAll("g.profile-card")
+                                milestonesG.selectAll("g.milestone")
                                     .call(updateTransform, { 
                                         //for those after, we add the phaseGap and the new hitspace that will be created from new milestone
                                         x:d => d.x +(d.nr >= next.nr ? xOffsetForCardsAfter :  xOffsetForCardsBefore),
@@ -614,7 +678,7 @@ export default function milestonesBarComponent() {
                     //immediately remove placeholder (no trans)
                     removeMilestonePlaceholder();
 
-                    milestonesG.selectAll("g.profile-card")
+                    milestonesG.selectAll("g.milestone")
                         .attr("transform", d => `translate(${d.x},${d.y})`)
                         //.call(updateTransform, { x:d => d.x, y:d => d.y, transition:null });
 
@@ -643,7 +707,7 @@ export default function milestonesBarComponent() {
                                 .attr("opacity", 0)
                                     .on("end", function(){ 
                                         d3.select(this).remove();
-                                        milestonesG.selectAll("g.profile-card")
+                                        milestonesG.selectAll("g.milestone")
                                             .call(updateTransform, { 
                                                 x:d => d.x,
                                                 y:d => d.y,
@@ -775,7 +839,7 @@ export default function milestonesBarComponent() {
                         if(selectedMilestone){
                             //move on by one
                             const selected = data.find(d => d.id === selectedMilestone);
-                            const newSelected = data.find(d => d.nr === selected.nr - 1)
+                            const newSelected = data.find(d => d.nr === selected.nr - 1);
                             updateSelected(newSelected);
                         }else{
                             requiredSliderPosition -= 1;

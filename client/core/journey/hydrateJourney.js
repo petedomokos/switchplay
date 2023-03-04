@@ -11,7 +11,7 @@ import { getBandsAndStandards } from "../../data/bandsAndStandards";
 
 export function hydrateJourneyData(data, user, datasets){
     const now = new Date();
-    console.log("hydrateJourneyData", datasets)
+    //console.log("hydrateJourneyData", datasets)
     const nonCurrentProfiles = data.profiles.filter(p => p.id !== "current");
     const player = user.player;
 
@@ -141,7 +141,7 @@ function calcDateRange(start, end, format){
 
 
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
-    console.log("hydrateProfile------------", profile.id, profile.date, profile.created)
+    //console.log("hydrateProfile------------", profile.id, profile.date, profile.created)
     const { now, rangeFormat } = options;
     const { id, date, customTargets=[], isCurrent, created } = profile;
     const milestoneId = id;

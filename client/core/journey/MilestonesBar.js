@@ -140,8 +140,8 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   }, [stringifiedProfiles, screen])
 
   useEffect(() => {
-    //@todo - on ms and ss, we want it to always be swipable so get rid of 1st condition below,
-    //and get swipe working well with scroll. Currently this doesnt happen.
+    //it mustnt be swipable when we want it to be scrollable
+    //on large screen, we always want it to be scrollable. 
     milestonesBar.swipable((selectedMilestone || screen.isLarge ? false : true))
   }, [selectedMilestone, screen.isLarge])
 

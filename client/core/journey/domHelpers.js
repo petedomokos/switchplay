@@ -1,5 +1,35 @@
 import * as d3 from "d3";
 
+/*
+function deletor(){
+    const oscillator = Oscillator({k:1})
+    function startDelete(selection){
+        selection.each(function(){
+            d3.select(this).select("rect.bg")
+                //.style("filter", "url(#drop-shadow)")
+                .call(oscillator.start);
+        })
+    }
+}
+export function startDeleteSelection(selection){
+    selection.each(function(){
+        d3.select(this).select("rect.bg")
+            //.style("filter", "url(#drop-shadow)")
+            .call(oscillator.start);
+    })
+    
+
+}
+
+export function deleteSelection(selection){
+
+}
+
+export function cancelDeleteSelection(selection){
+
+}
+*/
+
 //@todo - move these out as also used by Menu
 export function hide(selection, options={}){
     const { delay, duration=200, onEnd, finalOpacity, startOpacity } = options;
@@ -141,12 +171,18 @@ export function Oscillator(options = {}) {
     let selection;
     //let origTransformOrigin;
     const start = (_selection, dynamicOptions={}) => {
-        if(!selection){
-            selection = _selection;
+        if(selection) {
+            //it has already started on a selection and not been stopped
+            return;
         }
+        //if(!selection){
+        selection = _selection;
+        //}
         const allOptions = { ...options, ...dynamicOptions };
         // translate dx, x, y,  scale k
         const { interval = 20, k = 1.05, dx = 5, centre, nrOscillations } = allOptions;
+        //ensure even nr of osc so it ends up how it began
+        const nrOscillationsEven = nrOscillations % 2 === 0 ? nrOscillations : nrOscillations + 1;
         let i = 0;
         timer = d3.interval(() => {
             // get any existing transform on the selection
@@ -159,7 +195,7 @@ export function Oscillator(options = {}) {
             }
             // scale may be an array and in that case just use x compooinent for now. Also use + to coerce.
             const currentScale = typeof scale === "string" ? +scale : +scale[0];
-            const newK = currentScale * k;
+            const newK = i % 2 ? currentScale * k : currentScale / k;
 
             // create a delta for horizontal oscillation based on count
             const newDx = i === 4 ? 0 : (i % 2 ? -dx / 2 : dx / 2);
@@ -171,8 +207,9 @@ export function Oscillator(options = {}) {
                     .attr("transform-origin", centre ? `${centre[0]} ${centre[1]}` : null);
             });
 
-            if (nrOscillations && i === nrOscillations - 1) {
+            if (nrOscillations && i === nrOscillationsEven - 1) {
                 timer.stop();
+                selection = null;
             }
 
             i += 1;

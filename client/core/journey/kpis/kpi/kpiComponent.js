@@ -114,11 +114,14 @@ export default function kpiComponent() {
     let onSaveValue = function(){};
 
     const enhancedDrag = dragEnhancements()
-        .onClick((e,d) => { 
+        .onClick((e,d) => {
             onClick.call(this, e, d); 
         }) //todo - why do i have to write it out like this?
         //.onClick(onClick) not working
-        .onDblClick(onDblClick);
+        .onDblClick(onDblClick)
+        .onLongpressStart(function(e, d){
+            console.log("lp...........")
+        });
 
     //const contents = containerComponent();
     //const background = backgroundComponent();
