@@ -202,28 +202,36 @@ export default function tooltipsComponent() {
                     .on("end", draggable ? enhancedDrag(dragEnd) : null);
 
                 function handleClick(e,d){
-                    console.log("clicked")
                     //dont need to show value if not achieved as its showing anyway
-                    const dragValueText = d3.select(this).select("text.drag-value");
-                    if(isAchieved(d) && !dragValueText.attr("class").includes("transitioning") && dragValueText.style("opacity") !== 1) {
-                        dragValueText
+                    if(isAchieved(d)){ d3.select(this).select("text.drag-value").call(showText, 2000); }
+                    onClick.call(this, e, d)
+                }
+
+                function showText(text, expiryTime){
+                    if(!text.attr("class").includes("transitioning") && text.style("opacity") !== 1) {
+                        text
                             .classed("transitioning", true)
                             .transition()
                             .duration(200)
                                 .style("opacity", 1)
                                 .on("end", function(){
+                                    if(!expiryTime) { return; }
                                     d3.timeout(() => {
-                                        d3.select(this)
-                                            .transition()
-                                            .duration(200)
-                                                .style("opacity", 0)
-                                                .on("end", function(){
-                                                    d3.select(this).classed("transitioning", false);
-                                                })
-                                    }, 2000)
+                                        d3.select(this).call(hideText)
+                                    }, expiryTime)
                                 })
                     }
-                    onClick.call(this, e, d)
+
+                }
+                function hideText(text){
+                    text
+                        .classed("transitioning", true)
+                        .transition()
+                        .duration(200)
+                            .style("opacity", 0)
+                            .on("end", function(){
+                                d3.select(this).classed("transitioning", false);
+                            })
                 }
 
                 function dragStart(e,d){
@@ -306,8 +314,7 @@ export default function tooltipsComponent() {
                         .attr("transform", (d,j) => `translate(${getX(d, i, j)}, ${getY(d, i, j)})`)
                         .call(updateTooltip, tooltipDimns)
                         .call(drag)
-                        .on("mouseover", onMouseover)
-                        .on("mouseout", onMouseout);
+                        .on("mouseover", handleClick);
 
                 tooltipG.exit().remove();
             }
