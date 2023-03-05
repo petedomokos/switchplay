@@ -129,9 +129,6 @@ export default function barComponent() {
                 const { contentsWidth, contentsHeight } = dimns[i];
                 const scale = scales[i];
                 const styles = _styles(data,i);
-                //console.log("bardata-------------------------------", data.key, data)
-                //console.log("contentsw ch scale", contentsWidth, contentsHeight, scale)
-
                 const barContentsG = d3.select(this);
 
                 //sections
@@ -178,7 +175,7 @@ export default function barComponent() {
 
                 barSectionG.exit().call(remove);
 
-                 //error mesg
+                //error mesg
                 const errorMesgData = errorMesgs[i] ? [errorMesgs[i]] : [];
                 barContentsG.selectAll("text.error-mesg").data(errorMesgData)
                     .join("text")

@@ -84,9 +84,11 @@ export default function kpiComponent() {
         data.forEach(d => {
             if(!closedProgressBars[d.key]){
                 closedProgressBars[d.key] = progressBarComponent()
+                    .status("closed")
                     .editable(false)
                 
                 openProgressBars[d.key] = progressBarComponent()
+                    .status("open")
                     .editable(true)
             }
         })
@@ -224,7 +226,6 @@ export default function kpiComponent() {
                                 .width((d) => dimns[i].progressBarWidth)
                                 .height((d) => dimns[i].progressBarHeight)
                                 .margin((d) => dimns[i].progressBarMargin)
-                                .tooltipsLocation("dynamic")
                                 .onSaveValue(onSaveValue))
                     })
 

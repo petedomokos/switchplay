@@ -108,6 +108,24 @@ export default function kpisLayout(){
 
             const tooltipsData = [
                 { 
+                    key:"start", milestoneId, kpiKey:key, datasetKey, statKey,
+                    //if no targetObj, this means there is no future active profile at all so no expected
+                    shouldDisplay:true,
+                    rowNr: -1, y: -1,
+                    value: barData.start, x:barData.start,
+                    accuracy,
+                    editable:false,
+                },
+                { 
+                    key:"end", milestoneId, kpiKey:key, datasetKey, statKey,
+                    //if no targetObj, this means there is no future active profile at all so no expected
+                    shouldDisplay:true,
+                    rowNr: -1, y: -1,
+                    value: barData.end, x:barData.end,
+                    accuracy,
+                    editable:false,
+                },
+                { 
                     key:"expected", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
                     shouldDisplay:!isPast && !!targetObj, //dont display if past or no future profiles
@@ -148,220 +166,6 @@ export default function kpisLayout(){
                 tooltipsData,
                 numbersData
             }
-            /*
-            const targetDatum = { 
-                key: "target", 
-                from:start, 
-                to:target.value, 
-                fill:colours.target,
-                handle:{
-                    handleType:"triangle",  
-                    pos:"above",
-                    key: "target",
-                    colour:colours.target
-                }
-            };
-            const currentDatum = { 
-                key: "current", 
-                from:start, 
-                to:current.value, 
-                fill:colours.current,
-                pcValue:_pcCompletionValue,
-                previousValue:previous.value,
-                targetValue:target.value,
-                format:formatIsActual ? "actual" : "completion",
-                handle:{
-                    handleType:"rect",
-                    pos:"over",
-                    key: "current",
-                    colour:colours.current
-                    //fill:"transparent",
-                    //stroke:"white",
-                    //strokeWidth:0.2,
-                }
-            };
-            const expectedDatum = {
-                key: "expected",
-                handle:{
-                    handleType:"triangle",
-                    pos:"below",
-                    key: "expected",
-                    colour:isOnTrack ? colours.expectedAhead : colours.expectedBehind
-                },
-                value:expectedCurrent.value,
-                previousValue:previous.value,
-                targetValue:target.value,
-                from:start, 
-                to:expectedCurrent.value,
-                //@todo - handle decreasing datasets ie less is best
-                fill:isOnTrack ? colours.expectedAhead : colours.expectedBehind,
-                format:formatIsActual ? "actual" : "completion"
-            }
-
-            const prevDatum = {
-                key: "previous",
-                handle:{
-                    handleType:"line",
-                    pos:"over",
-                    key: "previous",
-                    colour:"white",
-                    strokeWidth:0.5,
-                    strokeDasharray:2,
-                },
-                value:expectedCurrent.value,
-                from:start, 
-                to:previous.value,
-                //@todo - handle decreasing datasets ie less is best
-                fill:"none",
-                format:formatIsActual ? "actual" : "completion"
-            }
-
-            const barData = kpi.isCurrent ? [currentDatum] :(formatIsActual ? [targetDatum, expectedDatum, currentDatum, prevDatum] : [expectedDatum, currentDatum]);
-            barData.start = start;
-            barData.end = end;
-            
-            const currentActualNumberDatum = { key: "current-actual", value: current?.value, colour:colours.current }
-            const numbersData = kpi.isCurrent || formatIsActual ? currentActualNumberDatum :
-                [
-                    { 
-                        key: "current-completion", 
-                        value: `${_pcCompletionValue}%`,
-                        previousValue:previous.value,
-                        targetValue:target.value,
-                        colour:isOnTrack ? colours.current : "red",
-                    },
-                    currentActualNumberDatum
-                ]
-
-            if(withDeficitBar && !kpi.isCurrent && current?.value < expectedCurrent.value){
-                barData.push({ key:"deficit", from:current?.value, to:expectedCurrent.value, fill:"red" })
-            }
-
-            const tooltipStyles = {
-                bg:{ fill: "none" },
-                title:{ stroke: "white" },
-                value:{ fill:"white", stroke: grey10(7)}
-            }
-            let tooltipsData = [];
-            if(kpi.isCurrent){
-                tooltipsData.push({
-                    ...current,
-                    key: "current", 
-                    title:"Current",
-                    shortTitle:"Curr",
-                    location:"above",
-                    row:0, // just above bar
-                    styles:tooltipStyles
-                        
-                })
-            } else {
-                if(formatIsActual){
-                    if(previous){
-                        tooltipsData.push({ 
-                            ...previous,
-                            key: "previous",
-                            title:"Previous",
-                            shortTitle:"Prev",
-                            desc: "...",
-                            location:"above",
-                            row:1, // very top
-                            labelPos:"below",
-                            styles:tooltipStyles
-                        });
-                    }
-                    //if(!isFuture){
-                        //todo - finish all this...its a past kpi - just show the achieved datapoint
-                        //but also show target
-                        //tooltipsData.push({ 
-                            //key: "achieved", 
-                            //title:"Achieved",
-                            //shortTitle:"Ach",
-                            //...achieved,
-                            //location:"above",
-                            //row:0, // just above bar
-                            //styles:tooltipStyles
-                            
-                        //})
-                    //}else{
-                        //its a future kpi
-                        tooltipsData.push(
-                            { 
-                                ...current,
-                                key: "current", 
-                                title:"Current",
-                                shortTitle:"Curr",
-                                location:"above",
-                                row:0, // just above bar
-                                styles:tooltipStyles
-                                
-                            },
-                            { 
-                                ...target,
-                                key: "target",
-                                title: "Target",
-                                shortTitle:"Targ",
-                                desc: "...",
-                                location:"above",
-                                row:1, // very top,
-                                styles:tooltipStyles
-                            }
-                        );
-                        if(isActive){
-                            tooltipsData.push({
-                                ...expectedCurrent,
-                                previousValue:previous.value,
-                                targetValue:target.value,
-                                key: "expected",
-                                title:"Expected",
-                                shortTitle:"Exp",
-                                desc: "...",
-                                location:"below",
-                                row:0, // just below bar
-                                styles:tooltipStyles
-                            });
-                        }
-                }else{
-                    tooltipsData.push({
-                        ...current,
-                        key: "current", 
-                        title:"Current",
-                        shortTitle:"Curr",
-                        desc: "...",
-                        format:'pc',
-                        previousValue:previous.value,
-                        targetValue:target.value,
-                        actualValue:current.value,
-                        //override value with pc
-                        //value: pcCompletion(current.value),
-                        pcValue: _pcCompletionValue,
-                        //units:"%",
-                        location:"above",
-                        row:0, // just above bar,
-                        styles:tooltipStyles
-                    });
-                    if(isActive){
-                        tooltipsData.push({ 
-                            ...expectedCurrent,
-                            key: "expected",
-                            title:"Expected",
-                            shortTitle:"Exp",
-                            desc: "...",
-                            format:"pc",
-                            previousValue:previous.value,
-                            targetValue:target.value,
-                            actualValue:expectedCurrent.value,
-                            //override value with pc
-                            // value: pcCompletion(expectedCurrent.value),
-                            pcValue: _pcCompletionExpectedValue,
-                            //units:"%",
-                            location:"below",
-                            row:0, // very top
-                            styles:tooltipStyles
-                        });
-                    }
-                }
-            }
-            */
             /*
             return {
                 ...kpi,

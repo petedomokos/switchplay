@@ -39,6 +39,10 @@ export default function tooltipsComponent() {
         text:{
             fill:grey10(6),
             stroke:grey10(6)
+        },
+        subtext:{
+            fill:grey10(4),
+            stroke:grey10(4)
         }
     };
     let _styles = () => defaultStyles;
@@ -68,11 +72,13 @@ export default function tooltipsComponent() {
     let onMouseout = function(){};
 
     let updateTooltip = function(selection, tooltipDimns){
+        //console.log("uT...data", selection.data())
+        //const tooltipDimns = _tooltipDimns(data, i);
         selection.each(function(d,i){
             //decide the saem common pattern for tooltips - it should probably always be
             //an array, even if its top then bottom
             const tooltipG = d3.select(this);
-            const { width, height, margin, fontSize } = tooltipDimns[i];
+            const { width, height, margin, fontSize } = tooltipDimns[d.key];
             const styles = _styles(d,i);
 
             const contentsWidth = width - margin.left - margin.right;
@@ -93,38 +99,50 @@ export default function tooltipsComponent() {
                 .attr("stroke", styles.text.stroke)
                 .attr("font-size", dragTextHeight * 0.8)
                 .attr("display", draggable && showDragValueAbove ? null : "none")
-                .text(getValue(d) || "")
+                .text(getValue(d))
 
-            //shoft iconCont down so its in the centre of the icon space not the tooltip space
-            const iconContG = tooltipG.select("g.icon-cont")
-                .attr("transform", `translate(0, ${dragTextHeight/2})`)
-
-            //settings
+            //tooltip settings
             const isSmall = iconHeight < 10
             const iconObject = isSmall ? (d.smallIcons || d.icons) : d.icons;
-            const icon = isAchieved(d) ? iconObject.achieved : iconObject.notAchieved;
+            const icon = isAchieved(d) ? iconObject?.achieved : iconObject?.notAchieved;
             const shouldShowValue = !isSmall && (!isAchieved(d) || hovered === d.key) && !beingDragged(d);
-            if(d.key === "expected" && d.milestoneId === "current" && d.progBarKey === "pressUps-reps"){
-            }
 
-            //todo - make the tooltips with and height based on iconAspect ratio
-            const iconG = iconContG.select("g.icon")
-                .attr("transform", iconTranslate(icon.width, icon.height, contentsWidth, iconHeight));
-            iconG.html(icon.html)
-            const innerG = iconG.select("g");
-            innerG.style("opacity", isSmall && !isAchieved(d) ? 1 : 0.85)
+            const mainContentsG = tooltipG.select("g.main-contents")
+                .attr("transform", `translate(0, ${dragTextHeight/2})`)
 
-            if(icon.styles?.fill){
-                //not being used
-                iconG.selectAll("*").style("fill", icon.styles.fill)
-            }
-            iconG.select(".inner-overlay").attr("display", shouldShowValue ? null : "none")
-            
-            iconG.selectAll(".net").style("fill", "#f0f0f0")
-            iconG.select(".posts").style("fill", "#afafaf")
-            //value
+            //icon
+            const iconData = icon ? [1] : [];
+            const iconG = mainContentsG.selectAll("g.icon").data(iconData);
+            iconG.enter()
+                .append("g")
+                    .attr("class", "icon")
+                    .merge(iconG)
+                    .each(function(){
+                        //if(d.key === "expected" && d.milestoneId === "current" && d.progBarKey === "pressUps-reps"){}
+                        //todo - make the tooltips with and height based on iconAspect ratio
+                        const iconG = d3.select(this)
+                            .attr("transform", iconTranslate(icon.width, icon.height, contentsWidth, iconHeight));
+
+                        iconG.html(icon.html)
+                        const innerG = iconG.select("g");
+                        innerG.style("opacity", isSmall && !isAchieved(d) ? 1 : 0.85)
+
+                        if(icon.styles?.fill){
+                            //not being used
+                            iconG.selectAll("*").style("fill", icon.styles.fill)
+                        }
+                        iconG.select(".inner-overlay").attr("display", shouldShowValue ? null : "none")
+                        
+                        iconG.selectAll(".net").style("fill", "#f0f0f0")
+                        iconG.select(".posts").style("fill", "#afafaf")
+
+                    });
+
+            iconG.exit().remove();
+
+            //text
             // problem - this gets added mid-drag, so it doesnt have its opacity set to 0
-            const valueText = iconContG.selectAll("text.value").data(shouldShowValue ? [1] : [])
+            const valueText = mainContentsG.selectAll("text.value").data(shouldShowValue ? [1] : [])
             valueText.enter()
                 .append("text")
                     .attr("class", "value")
@@ -132,13 +150,13 @@ export default function tooltipsComponent() {
                     .attr("text-anchor", "middle")
                     .attr("dominant-baseline", "central")
                     .merge(valueText)
-                    .attr("y", d.key === "expected" ? -contentsWidth * 0.1 : 0)
+                    .attr("y", d.key === "expected" ? -contentsWidth * 0.05 : 0)
                     //temp - use width, not contentsW, so all tooltip fonts the same
                     .attr("font-size", fontSize)
-                    .attr("fill", styles.text.fill)
-                    .attr("stroke", styles.text.stroke)
+                    .attr("fill", d.key === "expected" || d.key === "target" ? styles.text.fill : styles.subtext.fill)
+                    .attr("stroke", d.key === "expected" || d.key === "target" ? styles.text.stroke : styles.subtext.stroke)
                     .attr("stroke-width", 0.1)
-                    .text(getValue(d) || "")
+                    .text(getValue(d))
 
             valueText.exit().remove();//need to also transition icon changes.call(remove)
         })                    
@@ -147,9 +165,10 @@ export default function tooltipsComponent() {
     //const titleWrap = textWrap();
     
     function tooltips(selection, options={}) {
-        //console.log("tooltips update  ", selection.data())
+        //console.log("tooltips update sel.data()", selection.data())
         //specific tooltip updates
         selection.each(function(data,i){
+            //console.log("data", data)
             const tooltipDimns = _tooltipDimns(data, i);
             const styles = _styles(data,i);
             const containerG = d3.select(this);
@@ -288,7 +307,7 @@ export default function tooltipsComponent() {
                     .attr("height", height)
                     .attr("fill", styles.bg?.fill || "none");
 
-                const tooltipG = containerG.selectAll("g.tooltip").data(data);
+                const tooltipG = containerG.selectAll("g.tooltip").data(data, d => d.key);
                 tooltipG.enter()
                     .append("g")
                         .attr("class", "tooltip")
@@ -298,11 +317,7 @@ export default function tooltipsComponent() {
                                 .attr("dominant-baseline", "central")
                                 .style("opacity", 0); //starts hidden
 
-                            d3.select(this)
-                                .append("g")
-                                    .attr("class", "icon-cont") 
-                                        .append("g")
-                                            .attr("class", "icon")
+                            d3.select(this).append("g").attr("class", "main-contents") 
                             //hitbox must be on top, as contents under it will change              
                             d3.select(this).append("rect").attr("class", "hitbox")
                                 .attr("fill", "transparent")
@@ -345,6 +360,7 @@ export default function tooltipsComponent() {
             const requiredStyles = func(d,i);
             return {
                 text:{ ...defaultStyles.text, ...requiredStyles.text },
+                subtext:{ ...defaultStyles.subtext, ...requiredStyles.subtext }
                 //others here
             }
         };
