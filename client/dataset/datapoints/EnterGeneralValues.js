@@ -60,7 +60,7 @@ EnterGeneralValues.defaultProps = {
 2020 18:37:55 GMT+0000 (Greenwich Mean Time)" does not conform 
 to the required format.  The format is "yyyy-MM-ddThh:mm" 
 followed by optional ":ss" or ":ss.SSS".*/
-const SelectEventDate = ({handleChange, classes}) =>
+const SelectDate = ({handleChange, classes}) =>
   <div>
     <form className={classes.container} noValidate>
     <TextField

@@ -8,6 +8,7 @@ import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 //import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 //import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 //import Button from '@material-ui/core/Button'
+import SelectDate from "../../util/SelectDate";
 import milestonesLayout from "./milestonesLayout";
 import milestonesBarComponent from "./milestonesBarComponent";
 import { DIMNS, FONTSIZES, grey10 } from './constants';
@@ -16,6 +17,7 @@ import { sortAscending } from '../../util/ArrayHelpers';
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    position:"relative",
     //couldnt the height just be the full journey height always for now?
     //until we allow a bar to be shown above the jorney canvas
     //border:"2px solid #C0C0C0",
@@ -47,7 +49,25 @@ const useStyles = makeStyles((theme) => ({
   icon:{
     width:40,
     height:40,
-  }
+  },
+  textField: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    width: '90%',
+    input:{
+      color:"white"
+    }
+  },
+  inputColor:{
+    color:"white"
+  },
+  dateContainer:{
+    position:"absolute",
+    left:30,
+    top:170,
+    color:"white",
+    //marginTop: theme.spacing(6)
+  },
 }))
 
 const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue }) => {
@@ -172,6 +192,9 @@ useEffect(() => {
 
   return (
     <div className={`milestone-bar-root ${classes.root}`}>
+        {/**<SelectDate 
+          classes={classes}
+        dateFormat="YYYY-MM-DD"/>*/}
         <svg className={classes.svg} ref={containerRef}></svg>
         <div className={classes.ctrls}>
           <IconButton className={classes.iconBtn} onClick={milestonesBar.slideBack}

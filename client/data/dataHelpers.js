@@ -1,7 +1,6 @@
 import * as d3 from 'd3';
 import { addDays } from '../util/TimeHelpers';
 
-
 //@todo - handle showTrailingZeros = false
 //@todo - handle accuracy >= 5...round to that number
 export const round = (value, accuracy, showTrailingZeros=true) => {

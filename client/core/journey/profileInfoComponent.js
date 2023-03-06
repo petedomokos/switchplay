@@ -34,6 +34,8 @@ export default function profileInfoComponent() {
     let onMouseout = function(){};
 
     let enhancedDrag = dragEnhancements();
+    
+    let showDateCount = false;
 
     //dom
     let containerG;
@@ -45,7 +47,7 @@ export default function profileInfoComponent() {
         // expression elements
         selection.each(function (data) {
             //console.log("profileInfo data", data)
-            const { firstname, surname, age, position, photos } = data;
+            const { firstname, surname, age, position, photos, isCurrent, isFuture } = data;
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
@@ -93,12 +95,14 @@ export default function profileInfoComponent() {
             const calcLength = (fDate, fontSize) =>  nrChars(fDate) * fontSize * (fDate === "TODAY" ? 0.7 : 0.47);
             const length = d => calcLength((d.isCurrent ? "TODAY" : format(d.date)), fontSizes.date);
             const dateHeight = fontSizes.date;
-            const y = d => dateMargin + length(d) * Math.sin(Math.PI/4);
+            const horizandVertLength = d => length(d) * Math.sin(Math.PI/4);
+            const y = d => dateMargin + horizandVertLength(d);
 
             const dateG = containerG.selectAll("g.date").data([data])
             dateG.enter()
                 .append("g")
                     .attr("class", "date")
+                    .attr("opacity", showDateCount ? 0 : 1)
                     .each(function(d){
                         d3.select(this).append("text")
                             .attr("dominant-baseline", "hanging")
@@ -106,7 +110,7 @@ export default function profileInfoComponent() {
                             .style("font-family", "helvetica, sans-serifa")
                         
                         d3.select(this).append("rect").attr("class", "hitbox")
-                            .attr("fill", "transparent")
+                            .attr("fill", "transparent");
                     })
                     .merge(dateG)
                     .attr("transform", d => `translate(${x},${y(d)}) rotate(-45)`) //rotates from start
@@ -121,6 +125,85 @@ export default function profileInfoComponent() {
                             .attr("height", dateHeight)
 
                     })
+
+            dateG.exit().remove();
+
+            let dateIntervalTimer;
+            const dateCountG = containerG.selectAll("g.date-count").data(data.dateCount ? [data.dateCount] : [])
+            dateCountG.enter()
+                .append("g")
+                    .attr("class", "date-count")
+                    .attr("opacity", showDateCount ? 1 : 0)
+                    .each(function(d){
+                        d3.select(this).append("text")
+                            .attr("class", "number");
+
+                        d3.select(this).append("text")
+                            .attr("class", "words")
+
+                        d3.select(this).selectAll("text")
+                            .attr("dominant-baseline", "central")
+                            .attr("text-anchor", "middle")
+                            .style("font-family", "helvetica, sans-serifa")
+                        
+                        d3.select(this).append("rect").attr("class", "hitbox")
+                            .attr("fill", "transparent");
+                        
+                        dateIntervalTimer = d3.interval(() => {
+                            showDateCount = !showDateCount;
+                            containerG.select("g.date-count")
+                                .transition()
+                                .duration(1000)
+                                .delay(showDateCount ? 500 : 0)
+                                .attr("opacity", showDateCount ? 1 : 0)
+        
+                            containerG.select("g.date")
+                                .transition()
+                                .duration(1000)
+                                .delay(showDateCount ? 0 : 500)
+                                .attr("opacity", showDateCount && !isCurrent ? 0 : 1)
+                        }, 5000)
+                    })
+                    .merge(dateCountG)
+                    .attr("transform", d => `translate(${dateMargin},${dateMargin})`) //rotates from start
+                    .each(function(d){
+                        const width = horizandVertLength(d) * 1.25;
+                        const height = width;
+                        const margin = { top: height * 0.1, bottom: height * 0.3 }
+                        const contentsHeight = height - margin.top - margin.bottom;
+                        const numberHeight = contentsHeight * 0.75;
+                        const wordsHeight = contentsHeight - numberHeight;
+
+                        const numberFontSize = d3.min([16, fontSizes.date * 1.5]);
+                        const wordsFontSize = numberFontSize * 0.5;
+
+                        d3.select(this).select("text.number")
+                            .attr("x", width/2)
+                            .attr("y", margin.top + numberHeight / 2)
+                            .attr("font-size", numberFontSize)
+                            .attr("fill", isFuture ? "grey" : "white")
+                            .text(d => d.value)
+
+                        d3.select(this).select("text.words")
+                            .attr("x", width/2)
+                            .attr("y", margin.top + numberHeight + wordsHeight / 2)
+                            .attr("font-size", wordsFontSize)
+                            .attr("fill", isFuture ? "grey" : "white")
+                            .text(d => `${d.unit} ${d.value < 0 ? "ago" : "to go"}`)
+
+                        d3.select(this).select("rect.hitbox")
+                            //@todo - make it accurate which takes into account the height of the date line so we dont have to enlarge by 1.2
+                            .attr("width", width) 
+                            .attr("height", height)
+
+                    })
+
+            dateCountG.exit()
+                .each(() => {
+                    dateIntervalTimer.stop();
+                    dateIntervalTimer = null;
+                })
+                .remove();
 
             const textInfoG = containerG.selectAll("g.text-info").data([data]);
             textInfoG.enter()

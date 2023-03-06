@@ -5,6 +5,7 @@ import { getKpis } from "../../data/kpis"
 import { getTargets, findDefaultTarget } from "../../data/targets";
 import { round, roundDown, roundUp, getRangeFormat, dateIsInRange, getValueForStat, getGreatestValueForStat } from "../../data/dataHelpers";
 import { linearProjValue } from "./helpers";
+import { calcDateCount } from "../../util/TimeHelpers"
 import { pcCompletion } from "../../util/NumberHelpers"
 //import { } from '../constants';
 import { getBandsAndStandards } from "../../data/bandsAndStandards";
@@ -196,6 +197,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
         ...profile,
         id:milestoneId,
         dataType:"profile",
+        dateCount:calcDateCount(now, date),
         start:profileStart,
         //legacy  - @todo - remove references to startDate for profile, replace with start.date
         startDate:profileStart.date, //must remove

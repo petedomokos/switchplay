@@ -16,7 +16,7 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import { withLoader } from '../../util/HOCs';
 import { DropdownSelector } from "../../util/Selector";
 import SelectPlayer from "./SelectPlayer";
-import SelectEventDate from "./SelectEventDate";
+import SelectDate from "../../util/SelectDate";
 import EnterGeneralValues from "./EnterGeneralValues";
 import EnterMeasureValues from "./EnterMeasureValues";
 import { fatigueLevel, surface } from "../../data/datapointOptions";
@@ -197,7 +197,7 @@ function CreateDatapoint({ userId, datasets, players, creating, error, success, 
                 onLoad={loadUsers}
                 loading={loadingUsers}
                 />
-            <SelectEventDate 
+            <SelectDate 
               handleChange={handleDateChange} 
               selectedDate={values.eventDate}
               classes={classes}

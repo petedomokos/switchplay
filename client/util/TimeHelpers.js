@@ -55,3 +55,12 @@ export function idFromDates(dates){
 		.map(d => d.getTime() +"")
 		.join("-")
 }
+
+function calcBestUnits(from, to){
+	return "days";
+}
+
+export function calcDateCount(from, to, requiredUnits){
+	const units = requiredUnits || calcBestUnits(from, to);
+	return { value: 20, unit: "days" };
+}
