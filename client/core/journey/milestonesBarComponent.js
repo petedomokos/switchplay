@@ -127,6 +127,7 @@ export default function milestonesBarComponent() {
 
     //state
     let selectedMilestone;
+    let selectedKpi;
 
     let kpiFormat;
     let onSetSelectedMilestone = function(){};
@@ -518,6 +519,8 @@ export default function milestonesBarComponent() {
                     if(selectedMilestone){ return; }
                     //this click is only to turn off swiping ann dturn on scrolling, so if not swipable then its not needed
                     if(!swipable) { return; }
+
+                    //if(selectedKpi){ return; }
                     //todo - this can be on, but if a kpi is selcted, then we should not do anything
                     //atm, if a kpi is selected, then cicking teh X triggers this too, which then selects teh card if nt selcted
                     //also if a milestone is selected, it shouldnt do anything coz otherwise clicking collapse sometimes
@@ -794,6 +797,9 @@ export default function milestonesBarComponent() {
                         .editable(swipable ? false : true)
                         .scrollable(swipable ? false : true)
                         .onSaveValue(onSaveValue)
+                        //if closing a kpi, we dont want it to reopen or close the card (via wrapperClick). 
+                        //but if its selecting a kpi, we do want it to also open the card 
+                        .onUpdateSelectedKpi((key) => { if(!key){ ignoreNextClick = true; } })
                         .topRightCtrls(d => selectedMilestone === d.id ? [
                             //todo - toggle between expand and reduce for now, its just reduce
                             { 

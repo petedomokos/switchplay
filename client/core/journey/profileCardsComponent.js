@@ -81,6 +81,7 @@ export default function profileCardsComponent() {
     let onMouseout = function(){};
     let onDelete = function() {};
     let onSaveValue = function(){};
+    let onUpdateSelectedKpi = function(){};
 
     let enhancedDrag = dragEnhancements();
     //@todo - find out why k=1.05 makes such a big increase in size
@@ -201,6 +202,8 @@ export default function profileCardsComponent() {
                             data.filter(p => p.id !== profileId).forEach(p => {
                                 kpisComponents[p.id].selected(kpiKey, data, shouldUpdateScroll, shouldUpdateDom);
                            })
+                           //parent needs to know so it can control how to handle the wrapperClick event
+                           onUpdateSelectedKpi(kpiKey);
                         })
                         .onCtrlClick(onCtrlClick)
                         .onSaveValue((valueObj, profileId, datasetKey, statKey, key) => {
@@ -688,6 +691,12 @@ export default function profileCardsComponent() {
     profileCards.onSaveValue = function (value) {
         if(typeof value === "function"){
             onSaveValue = value;
+        }
+        return profileCards;
+    };
+    profileCards.onUpdateSelectedKpi = function (value) {
+        if(typeof value === "function"){
+            onUpdateSelectedKpi = value;
         }
         return profileCards;
     };
