@@ -50,21 +50,23 @@ const useStyles = makeStyles((theme) => ({
     width:40,
     height:40,
   },
+  formContainer:{
+    position:"absolute",
+    left:props => props.formContainer.left,
+    top:props => props.formContainer.top
+  },
   textField: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
+    //marginLeft: theme.spacing(1),
+    //marginRight: theme.spacing(1),
     width: '90%',
-    input:{
-      color:"white"
-    }
   },
   inputColor:{
-    color:"white"
+    color:"black",
+    fill:"white",
+    backgroundColor: grey10(2),
   },
   dateContainer:{
     position:"absolute",
-    left:30,
-    top:170,
     color:"white",
     //marginTop: theme.spacing(6)
   },
@@ -78,24 +80,45 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   const [bgMenuLocation, setBgMenuLocation] = useState("");
   const [sliderEnabled, setSliderEnabled] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState("");
+  const [form, setForm] = useState(null);
 
   const [layout, setLayout] = useState(() => milestonesLayout());
   const [milestonesBar, setMilestonesBar] = useState(() => milestonesBarComponent());
 
   const bottomCtrlsBarHeight = screen.isLarge ? DIMNS.milestonesBar.ctrls.height : 0;
-  let styleProps = { bottomCtrlsBarHeight, sliderEnabled };
+  let styleProps = { 
+    bottomCtrlsBarHeight, 
+    sliderEnabled, 
+    formContainer:{left: form?.left || 0, top: form?.top || 0 } 
+  };
   const classes = useStyles(styleProps) ;
+  const formContainerRef = useRef(null);
   const containerRef = useRef(null);
 
   const stringifiedProfiles = JSON.stringify(profiles);
 
+  //form
+  /*
+  useEffect(() => {
+    console.log("form current", d3.select("#test1").node(), d3.select(formContainerRef.current).node())
+
+    d3.select("#test1")
+      .style("border", "solid")
+      //.style("margin", "20px")
+      .style("left", "30px")
+      .style("top", "170px")
+    
+    d3.select(formContainerRef.current)
+      .style("left", 30)
+      .style("top", 170)
+
+  }, [form])*/
   //init
   //decide what needs to update on setSelectedMilestone, and only have that inteh depArray 
   //or alternatively only have that processed in milestoneslayout/kpiLayout
   //so we are not doing teh epensive operations each time
   useEffect(() => {
     //console.log("data useEffect")
-
     layout
       .format(kpiFormat)
       .datasets(datasets)
@@ -150,6 +173,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
           //addProfile
         //}
       //})
+      .setForm(setForm)
       .onMouseover(function(e,d){
         //console.log("mover")
       })
@@ -192,9 +216,16 @@ useEffect(() => {
 
   return (
     <div className={`milestone-bar-root ${classes.root}`}>
-        {/**<SelectDate 
-          classes={classes}
-        dateFormat="YYYY-MM-DD"/>*/}
+      {form &&
+        <div className={classes.formContainer} ref={formContainerRef}>
+          {form.formType === "date" &&
+          <SelectDate
+            classes={classes}
+            withLabel={false}
+            dateFormat="YYYY-MM-DD"
+            type="date"
+            defaultValue={data?.profiles[0] ? data.profiles[0].date : null}/>}
+        </div>}
         <svg className={classes.svg} ref={containerRef}></svg>
         <div className={classes.ctrls}>
           <IconButton className={classes.iconBtn} onClick={milestonesBar.slideBack}

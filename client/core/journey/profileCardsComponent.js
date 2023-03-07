@@ -83,6 +83,8 @@ export default function profileCardsComponent() {
     let onSaveValue = function(){};
     let onUpdateSelectedKpi = function(){};
 
+    let onClickInfo = function(){};
+
     let enhancedDrag = dragEnhancements();
     //@todo - find out why k=1.05 makes such a big increase in size
     let oscillator = Oscillator({k:1});
@@ -189,7 +191,8 @@ export default function profileCardsComponent() {
                         .width(contentsWidth)
                         .height(infoHeight)
                         .fontSizes(fontSizes.info)
-                        .editable(editable);
+                        .editable(editable)
+                        .onClick(onClickInfo);
 
                     const kpis = kpisComponents[d.id]
                         .width(contentsWidth)
@@ -596,6 +599,11 @@ export default function profileCardsComponent() {
     profileCards.onClick = function (value) {
         if (!arguments.length) { return onClick; }
         onClick = value;
+        return profileCards;
+    };
+    profileCards.onClickInfo = function (value) {
+        if (!arguments.length) { return onClickInfo; }
+        onClickInfo = value;
         return profileCards;
     };
     profileCards.onClickKpi = function (value) {

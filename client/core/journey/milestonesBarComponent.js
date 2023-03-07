@@ -121,6 +121,7 @@ export default function milestonesBarComponent() {
     }
     let _styles = () => DEFAULT_STYLES;
 
+    let positionedData = [];
     let swipable = true;
 
     let xScale = x => 0;
@@ -146,6 +147,7 @@ export default function milestonesBarComponent() {
     const enhancedDrag = dragEnhancements();
     let oscillator = Oscillator({ k:1.01, dx:10 });
 
+    let setForm = function(){};
     let onClick = function(){};
     let onDblClick = function(){};
     let onLongpress = function(){};
@@ -181,7 +183,7 @@ export default function milestonesBarComponent() {
     let datePhasesData;
 
     //temp settings
-    let ignoreNextClick = false;
+    let ignoreNextWrapperClick = false;
 
     //helper
     //data is passed in here, so we can call this function with other data too eg with placeholder
@@ -298,7 +300,7 @@ export default function milestonesBarComponent() {
 
                 //milestone positioning
                 const calcX = calcMilestoneX(data);
-                const positionedData = data.map(m => ({ 
+                positionedData = data.map(m => ({ 
                     ...m, 
                     x: calcX(m.nr), 
                     y: milestonesHeight/2,
@@ -447,6 +449,9 @@ export default function milestonesBarComponent() {
                     */
                     .onDblClick(handleMilestoneWrapperClick) //see note about chrome on mobile
                     .onLongpressStart(function(e, d){
+                        //remove any open forms
+                        setForm(null);
+
                         const pt = adjustPtForData(e);
                         const milestone = milestoneContainingPt(pt, positionedData);
                         if(milestone?.id === "current"){
@@ -516,30 +521,27 @@ export default function milestonesBarComponent() {
                 //but maybe best is to just make dbl-click teh same as two clicks , and 
                 //then ppl on chrome mobile just cant do two clicks in quick succession
                 function handleMilestoneWrapperClick(e,d){
+                    if(ignoreNextWrapperClick){
+                        ignoreNextWrapperClick = false;
+                        return;
+                    }
+                    //remove any open form
+                    setForm(null);
                     if(selectedMilestone){ return; }
                     //this click is only to turn off swiping ann dturn on scrolling, so if not swipable then its not needed
                     if(!swipable) { return; }
 
-                    //if(selectedKpi){ return; }
-                    //todo - this can be on, but if a kpi is selcted, then we should not do anything
-                    //atm, if a kpi is selected, then cicking teh X triggers this too, which then selects teh card if nt selcted
-                    //also if a milestone is selected, it shouldnt do anything coz otherwise clicking collapse sometimes
-                    //triggers expand too!
-                    //return
-                    //this is a temp setting to save us having to turn drag off whilst creating a milestone
-                    //otherwise the confirm click would also trigger this.
-                    if(ignoreNextClick){
-                        ignoreNextClick = false;
-                        return;
-                    }
+                   
                     
                     const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
-                    if(milestone) { 
+                    if(milestone) {
                         updateSelected(milestone);
                     }
                 }
 
                 function updateSelected(milestone){
+                    //any changes should close any open form
+                    setForm(null);
                     //deselecting
                     if(!milestone){
                         if(selectedMilestone){
@@ -627,7 +629,7 @@ export default function milestonesBarComponent() {
                     const addPlaceholder = () => {
                         const handlePlaceholderBtnClick = key => {
                             //temp fix to stop click selected a milestone. stopProagation doesnt work with d3.drag
-                            ignoreNextClick = true;
+                            ignoreNextWrapperClick = true;
                             if(key === "cancel"){ 
                                 handleCancelMilestone(); 
                             }else{
@@ -797,9 +799,46 @@ export default function milestonesBarComponent() {
                         .editable(swipable ? false : true)
                         .scrollable(swipable ? false : true)
                         .onSaveValue(onSaveValue)
+                        .onClickInfo(function(e, d, data, desc){
+                            ignoreNextWrapperClick = true;
+                            const milestone = positionedData.find(m => m.id === data.id);
+                            const { id, x, y, width, height, dataType } = milestone;
+                            //temp do nothing for current card
+                            if(desc === "date" && id !== "current"){
+                                //@todo - if id === "current", we sow the options for dateRange etc for current
+                                //...
+                                
+                                //need to calc left so it includes all transforms eg offset
+                                const form = { 
+                                    formType: "date", 
+                                    milestoneType:dataType, 
+                                    milestoneId:id, 
+                                    left: currentSliderOffset + x - width/2, 
+                                    top: topBarHeight + y - height/2 
+                                }
+
+                                //hide date-info for this milestone, and show others
+                                milestonesG.selectAll("g.milestone")
+                                    .selectAll("g.date-info")
+                                    .attr("display", d => d.id === id ? "none" : null)
+                        
+                                //show form
+                                setForm(form)
+                                return;
+                            }
+                            //show g.date-info here for all milestones
+                            milestonesG.selectAll("g.milestone").selectAll("g.date-info")
+                                .attr("display", null)
+
+                            //remove form
+                            setForm(null)
+                        })
                         //if closing a kpi, we dont want it to reopen or close the card (via wrapperClick). 
                         //but if its selecting a kpi, we do want it to also open the card 
-                        .onUpdateSelectedKpi((key) => { if(!key){ ignoreNextClick = true; } })
+                        .onUpdateSelectedKpi((key) => { 
+                            setForm(null);
+                            if(!key){ ignoreNextWrapperClick = true; } 
+                        })
                         .topRightCtrls(d => selectedMilestone === d.id ? [
                             //todo - toggle between expand and reduce for now, its just reduce
                             { 
@@ -1039,6 +1078,11 @@ export default function milestonesBarComponent() {
         onReleaseScreen = value;
         return milestonesBar;
     };
+    milestonesBar.setForm = function (value) {
+        if (!arguments.length) { return setForm; }
+        setForm = value;
+        return milestonesBar;
+    };
     milestonesBar.onClick = function (value) {
         if (!arguments.length) { return onClick; }
         onClick = value;
@@ -1073,6 +1117,10 @@ export default function milestonesBarComponent() {
             onSaveValue = value;
         }
         return milestonesBar;
+    };
+
+    milestonesBar.positionedData = function () {
+        return onDblClick;
     };
 
     milestonesBar.slideBack = function(){ slideBack() };

@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import { DIMNS } from "./constants";
-import dragEnhancements from './enhancedDragHandler';
+//import dragEnhancements from './enhancedDragHandler';
 
 /*
 
@@ -33,8 +33,8 @@ export default function profileInfoComponent() {
     let onMouseover = function(){};
     let onMouseout = function(){};
 
-    let enhancedDrag = dragEnhancements();
-    
+    //let enhancedDrag = dragEnhancements();
+    let dateIntervalTimer;
     let showDateCount = false;
 
     //dom
@@ -50,6 +50,7 @@ export default function profileInfoComponent() {
             const { firstname, surname, age, position, photos, isCurrent, isFuture } = data;
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
+            /*
             enhancedDrag
                 .onDblClick(onDblClick)
                 .onClick(onClick);
@@ -57,7 +58,7 @@ export default function profileInfoComponent() {
             const drag = d3.drag()
                 .on("start", enhancedDrag())
                 .on("drag", enhancedDrag())
-                .on("end", enhancedDrag());
+                .on("end", enhancedDrag());*/
 
             // todo - append photo, name, age, pos
             //helper
@@ -78,7 +79,7 @@ export default function profileInfoComponent() {
                             //.attr("height", photoHeight)
 
                     })
-                    .on("click", () => { console.log("photo click") })
+                    .on("click", (e,d) => { onClick.call(this, e, d, data, "photo") })
                     .on("contextmenu", (e) => { 
                         console.log("photo contextmenu event")
                         e.preventDefault(); 
@@ -101,7 +102,7 @@ export default function profileInfoComponent() {
             const dateG = containerG.selectAll("g.date").data([data])
             dateG.enter()
                 .append("g")
-                    .attr("class", "date")
+                    .attr("class", "date date-info")
                     .attr("opacity", showDateCount ? 0 : 1)
                     .each(function(d){
                         d3.select(this).append("text")
@@ -123,32 +124,18 @@ export default function profileInfoComponent() {
                         d3.select(this).select("rect.hitbox")
                             .attr("width", length(d))
                             .attr("height", dateHeight)
+                            .on("click", showDateCount ? null : () => { console.log("date clk")})
 
                     })
 
             dateG.exit().remove();
 
-            let dateIntervalTimer;
             const dateCountG = containerG.selectAll("g.date-count").data(data.dateCount ? [data.dateCount] : [])
             dateCountG.enter()
                 .append("g")
-                    .attr("class", "date-count")
+                    .attr("class", "date-count date-info")
                     .attr("opacity", showDateCount ? 1 : 0)
                     .each(function(d){
-                        d3.select(this).append("text")
-                            .attr("class", "number");
-
-                        d3.select(this).append("text")
-                            .attr("class", "words")
-
-                        d3.select(this).selectAll("text")
-                            .attr("dominant-baseline", "central")
-                            .attr("text-anchor", "middle")
-                            .style("font-family", "helvetica, sans-serifa")
-                        
-                        d3.select(this).append("rect").attr("class", "hitbox")
-                            .attr("fill", "transparent");
-                        
                         dateIntervalTimer = d3.interval(() => {
                             showDateCount = !showDateCount;
                             containerG.select("g.date-count")
@@ -163,6 +150,22 @@ export default function profileInfoComponent() {
                                 .delay(showDateCount ? 0 : 500)
                                 .attr("opacity", showDateCount && !isCurrent ? 0 : 1)
                         }, 5000)
+
+                        d3.select(this).append("text")
+                            .attr("class", "number");
+
+                        d3.select(this).append("text")
+                            .attr("class", "words")
+
+                        d3.select(this).selectAll("text")
+                            .attr("dominant-baseline", "central")
+                            .attr("text-anchor", "middle")
+                            .style("font-family", "helvetica, sans-serifa")
+                        
+                        d3.select(this).append("rect").attr("class", "hitbox")
+                            .attr("fill", "transparent")
+                            //do we hide date and datecount here manually, and then let it turn back on in the next update?
+                            .on("click", (e,d) => { onClick.call(this, e, d, data, "date") })
                     })
                     .merge(dateCountG)
                     .attr("transform", d => `translate(${dateMargin},${dateMargin})`) //rotates from start
@@ -194,7 +197,7 @@ export default function profileInfoComponent() {
                         d3.select(this).select("rect.hitbox")
                             //@todo - make it accurate which takes into account the height of the date line so we dont have to enlarge by 1.2
                             .attr("width", width) 
-                            .attr("height", height)
+                            .attr("height", height);
 
                     })
 
