@@ -116,6 +116,8 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   const selectedKpiSet = selectedKpi?.kpiSet;
   const shouldShowOverlay = displayedBar === "milestones" || selectedKpiSet;
 
+  const shouldUpdateDomRef = useRef(true);
+
   //kpiViewData is based on selectedKpiSet, profiles and 
   //todo - finish this - needs the datasetId and the measureId from the kpi. kaybe just grab it from the first profile
   /*
@@ -229,6 +231,26 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     
   }, [stringifiedProfiles, user._id]);
 
+  const onSaveInfo = useCallback((infoType, milestoneType, id, value) => {
+    console.log("saveinfo", infoType, milestoneType, id, value);
+    //set shoulUpdateDomRef to equal false. This is then referenced in useEffects to 
+    //prevent the card order changing until form is closed
+    shouldUpdateDomRef.current = false;
+    if(infoType === "date"){
+      //@todo - remove creation of Date here - can just store as a string
+      const newDate = new Date(value);
+      newDate.setUTCHours(21);
+      console.log("new date", newDate)
+      if(milestoneType === "profile"){
+        const _profiles = profiles.map(p => p.id === id ? ({ ...p, date: newDate }) : p);
+        save({ ...data, profiles:_profiles });
+        return;
+      }
+      //handle other cases as and when required
+    }
+    
+  }, [stringifiedContracts, user._id]);
+
   useEffect(() => {
     const width = d3.min([journeyWidth * 0.725, 500]);
     const height = d3.min([journeyHeight * 0.725, 700]);
@@ -251,6 +273,14 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
 
   }, [shouldShowOverlay])
 
+  //refs
+  useEffect(() => {
+    if(!shouldUpdateDomRef.current){
+      shouldUpdateDomRef.current = true;
+    }
+
+  }, [shouldShowOverlay])
+
   return (
     <div className={classes.root}>
         <div className={`${classes.overlay} overlay`} ref={overlayRef}>
@@ -266,9 +296,11 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
               onCreateMilestone={handleCreateMilestone}
               onDeleteMilestone={handleDeleteMilestone}
               onSaveValue={onSaveValue}
+              onSaveInfo={onSaveInfo}
               screen={screen}
               availWidth={width}
               availHeight={height}
+              shouldUpdateDom={shouldUpdateDomRef.current}
               
             />
           }

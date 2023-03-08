@@ -802,7 +802,7 @@ export default function milestonesBarComponent() {
                         .onClickInfo(function(e, d, data, desc){
                             ignoreNextWrapperClick = true;
                             const milestone = positionedData.find(m => m.id === data.id);
-                            const { id, x, y, width, height, dataType } = milestone;
+                            const { id, x, y, date, width, height, dataType } = milestone;
                             //temp do nothing for current card
                             if(desc === "date" && id !== "current"){
                                 //@todo - if id === "current", we sow the options for dateRange etc for current
@@ -813,14 +813,21 @@ export default function milestonesBarComponent() {
                                     formType: "date", 
                                     milestoneType:dataType, 
                                     milestoneId:id, 
+                                    date,
                                     left: currentSliderOffset + x - width/2, 
                                     top: topBarHeight + y - height/2 
                                 }
 
                                 //hide date-info for this milestone, and show others
                                 milestonesG.selectAll("g.milestone")
+                                    .filter(d => d.id === id)
                                     .selectAll("g.date-info")
-                                    .attr("display", d => d.id === id ? "none" : null)
+                                    .attr("display", "none")
+                                
+                                milestonesG.selectAll("g.milestone")
+                                    .filter(d => d.id !== id)
+                                    .selectAll("g.date-info")
+                                    .attr("display", null)
                         
                                 //show form
                                 setForm(form)

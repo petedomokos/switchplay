@@ -177,7 +177,7 @@ export default function profileInfoComponent() {
                         const numberHeight = contentsHeight * 0.75;
                         const wordsHeight = contentsHeight - numberHeight;
 
-                        const numberFontSize = d3.min([16, fontSizes.date * 1.5]);
+                        const numberFontSize = d3.min([20, fontSizes.date * 1.5]);
                         const wordsFontSize = numberFontSize * 0.5;
 
                         d3.select(this).select("text.number")
@@ -185,14 +185,14 @@ export default function profileInfoComponent() {
                             .attr("y", margin.top + numberHeight / 2)
                             .attr("font-size", numberFontSize)
                             .attr("fill", isFuture ? "grey" : "white")
-                            .text(d => d.value)
+                            .text(d => Math.abs(d.value))
 
                         d3.select(this).select("text.words")
                             .attr("x", width/2)
                             .attr("y", margin.top + numberHeight + wordsHeight / 2)
                             .attr("font-size", wordsFontSize)
                             .attr("fill", isFuture ? "grey" : "white")
-                            .text(d => `${d.unit} ${d.value < 0 ? "ago" : "to go"}`)
+                            .text(d => `${d.label} ${d.value < 0 ? "ago" : "to go"}`)
 
                         d3.select(this).select("rect.hitbox")
                             //@todo - make it accurate which takes into account the height of the date line so we dont have to enlarge by 1.2

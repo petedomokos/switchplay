@@ -72,7 +72,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue }) => {
+const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo, shouldUpdateDom }) => {
   const { player={}, profiles=[], contracts=[] } = data;
   //console.log("MBar", profiles)
   //local state
@@ -97,22 +97,6 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
 
   const stringifiedProfiles = JSON.stringify(profiles);
 
-  //form
-  /*
-  useEffect(() => {
-    console.log("form current", d3.select("#test1").node(), d3.select(formContainerRef.current).node())
-
-    d3.select("#test1")
-      .style("border", "solid")
-      //.style("margin", "20px")
-      .style("left", "30px")
-      .style("top", "170px")
-    
-    d3.select(formContainerRef.current)
-      .style("left", 30)
-      .style("top", 170)
-
-  }, [form])*/
   //init
   //decide what needs to update on setSelectedMilestone, and only have that inteh depArray 
   //or alternatively only have that processed in milestoneslayout/kpiLayout
@@ -192,27 +176,28 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   //render
   //@todo - consider having a shouldRender state, and this could also contain info on transition requirements
   useEffect(() => {
-    //console.log("render useEffect")
+    console.log("render useEffect", shouldUpdateDom)
+    if(!shouldUpdateDom) { return; }
 
     d3.select(containerRef.current).call(milestonesBar);
   }, [selectedMilestone, stringifiedProfiles, screen])
 
-// clean up
-useEffect(() => {
-  /*
-  const a = 5 //-1;
-  const b = 0//5; we want small b as this is the constant increase component
-  const c = 10;
+  // clean up
+  useEffect(() => {
+    /*
+    const a = 5 //-1;
+    const b = 0//5; we want small b as this is the constant increase component
+    const c = 10;
 
-  //const f = t => a * t * t + b * t + c;
-  const f = t => t <= 0 ? c : 1/(a * t) + c
-  const targs = d3.range(5).map(t => ([t, f(t), f(t-1) - f(t)]))
-  console.log("targs", targs)*/
-  
-  return () => {
-      //console.log('Do some cleanup!!!');
-  }
-}, [])
+    //const f = t => a * t * t + b * t + c;
+    const f = t => t <= 0 ? c : 1/(a * t) + c
+    const targs = d3.range(5).map(t => ([t, f(t), f(t-1) - f(t)]))
+    console.log("targs", targs)*/
+    
+    return () => {
+        //console.log('Do some cleanup!!!');
+    }
+  }, [])
 
   return (
     <div className={`milestone-bar-root ${classes.root}`}>
@@ -224,7 +209,8 @@ useEffect(() => {
             withLabel={false}
             dateFormat="YYYY-MM-DD"
             type="date"
-            defaultValue={data?.profiles[0] ? data.profiles[0].date : null}/>}
+            defaultValue={form.date}
+            handleChange={e => onSaveInfo("date", form.milestoneType, form.milestoneId, e.target.value)}/>}
         </div>}
         <svg className={classes.svg} ref={containerRef}></svg>
         <div className={classes.ctrls}>
@@ -256,7 +242,8 @@ MilestonesBar.defaultProps = {
   screen: {},
   availWidth: 0, 
   availHeight: 0,
-  onSaveValue: () => {}
+  onSaveValue: () => {},
+  onSaveInfo: () => {}
 }
 
 export default MilestonesBar;

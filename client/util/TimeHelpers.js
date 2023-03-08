@@ -60,8 +60,75 @@ function calcBestUnits(from, to){
 	return "days";
 }
 
-export function calcDateCount(from, to, requiredUnits){
-	const units = requiredUnits || calcBestUnits(from, to);
+export function calcDateCount(from, to, requiredUnits, options={}){
+	const { 
+		maxDays=31, 
+		maxWeeks=15, 
+		maxMonths=23, 
+		allowMixedYearsMonths=false,
+		showZeroMonths=false
+	} = options;
 	//@todo next - calc this
-	return { value: 20, unit: "days" };
+	const fromMs = from.getTime();
+	const toMs = to.getTime();
+	const deltaMs = toMs - fromMs;
+	const deltaDays = Math.round(millisecondsToDays(deltaMs));
+	const absDeltaDays = Math.abs(deltaDays);
+	if(absDeltaDays <= maxDays){
+		return { 
+			value: deltaDays, 
+			unit: "days", 
+			label: deltaDays === 1 ? "day" : "days",
+			fullLabel: deltaDays === 1 ? "day" : "days"
+		}
+	}
+	//16 weeks or less is given as weeks
+	if(absDeltaDays <= (7 * maxWeeks)){
+		const deltaWeeks = Math.round(deltaDays / 7);
+		return { 
+			value: deltaWeeks, 
+			unit: "weeks", 
+			label: deltaWeeks === 1 ? "wk" : "wks",
+			fullLabel: deltaWeeks === 1 ? "week" : "weeks"
+		}
+	}
+	//given in months (approx)
+	if(absDeltaDays <= (maxMonths * 30.5)){
+		//@todo - make it more accurate, and the years ie use a date library like Moment
+		const deltaMonths = Math.round(deltaDays / 30.5); 
+		return { 
+			value: deltaMonths, 
+			unit: "months", 
+			label: deltaMonths === 1 ? "mth" : "mths",
+			fullLabel: deltaMonths === 1 ? "month" : "months"
+		}
+	}
+	//give as years, or mixed years and months if asked for in options
+	const deltaYears = deltaDays / 365;
+	const fullYears = Math.floor(deltaYears);
+	const remainingMonths = Math.round((deltaYears - fullYears) * 12/10);
+	if(!allowMixedYearsMonths || (remainingMonths === 0 || !showZeroMonths)){
+		return { 
+			value: fullYears, 
+			unit: "years", 
+			label: fullYears === 1 ? "yr" : "yrs",
+			fullLabel: fullYears === 1 ? "year" : "years" 
+		}
+	}
+
+	return {
+		value: {
+			years:fullYears,
+			months:remainingMonths
+		},
+		label:{
+			years:fullYears === 1 ? "yr" : "yrs",
+			months:remainingMonths === 1 ? "mth" : "mths"
+		},
+		fullLabel:{
+			years:fullYears === 1 ? "year" : "years",
+			months:remainingMonths === 1 ? "month" : "months"
+		},
+		unit:"years-months"
+	}
 }
