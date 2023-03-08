@@ -5,12 +5,10 @@ import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from '@date-io/moment'
 import * as moment from 'moment';
 
-//todo - move wrapper to root of app
 /*
 2020 18:37:55 GMT+0000 (Greenwich Mean Time)" does not conform 
 to the required format.  The format is "yyyy-MM-ddThh:mm" 
 followed by optional ":ss" or ":ss.SSS".*/
-const color = "white";
 const SelectDate = ({type, dateFormat, defaultValue, handleChange, withLabel, classes}) => {
     const label = () => {
         if(!withLabel){ return null; }

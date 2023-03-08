@@ -121,6 +121,9 @@ export default function milestonesBarComponent() {
     }
     let _styles = () => DEFAULT_STYLES;
 
+    let fixedAvailableScale;
+    let availableScale = 1;
+
     let positionedData = [];
     let swipable = true;
 
@@ -128,6 +131,7 @@ export default function milestonesBarComponent() {
 
     //state
     let selectedMilestone;
+    let isSelected = milestoneId => false;
     let selectedKpi;
 
     let kpiFormat;
@@ -243,11 +247,12 @@ export default function milestonesBarComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            //console.log("updateMBar", data)
+            // console.log("updateMBar", data, data.map(d => d.nr))
             //console.log("shuttles kpi values", data.map(p => ({ id:p.id, values: p.kpis.kpisData[1]?.values })))
             containerG = d3.select(this)
                 .attr("width", width)
                 .attr("height", height);
+
             //dimns is needed for init too
             updateDimns(data);
             if(containerG.select("g").empty()){
@@ -322,7 +327,6 @@ export default function milestonesBarComponent() {
                     //need to also check offset, incase slider pos hadnt changed but dimns have changed
                     const numericalPosition = typeof position === "number" ? position : convertToNumber(position);
                     const offset = calcOffsetX(numericalPosition);
-                    
                     if(currentSliderPosition === position && offset === currentSliderOffset) { return; }
                     const { transition, cb } = options;
 
@@ -577,14 +581,16 @@ export default function milestonesBarComponent() {
                     //}
                     //set selected and slider pos (note - we need both of these, as we will have a sliderPos even if no selected)
                     selectedMilestone = milestone?.id;
+                    isSelected = milestoneId => milestoneId === selectedMilestone;
                     if(milestone) { requiredSliderPosition = milestone.nr; }
                     onSetSelectedMilestone(milestone?.id);
-                    //hide any menu from paretn components (eg burger menu)
+                    //hide any menu from parent components (eg burger menu)
                 }
 
                 //dragging
                 let dragStartX;
                 function dragStart(e,d){
+                    setForm(null);
                     if(!swipable) { return; }
                     //check pos
                     dragStartX = e.x;
@@ -781,7 +787,7 @@ export default function milestonesBarComponent() {
                 //scaling helpers - allows them to increase to full height or width including margin
                 const horizScale = width / profileWidth;
                 const vertScale = height / profileHeight;
-                const scale = d3.min([horizScale, vertScale]);
+                availableScale = fixedAvailableScale || d3.min([horizScale, vertScale]);
 
                 profilesG
                     //.attr("transform", "translate(0, -20")
@@ -793,7 +799,7 @@ export default function milestonesBarComponent() {
                         .expanded([{
                             id:selectedMilestone,
                             //if landscape, then vert space is less so we scale according to that 
-                            k: scale,// width > height ? vertScale : horizScale
+                            k: availableScale,// width > height ? vertScale : horizScale
                         }])
                         //.kpiHeight(30) //if we want to fix the kpiheIght
                         .editable(swipable ? false : true)
@@ -809,13 +815,15 @@ export default function milestonesBarComponent() {
                                 //...
                                 
                                 //need to calc left so it includes all transforms eg offset
+                                const k = isSelected(id) ? availableScale : 1;
                                 const form = { 
                                     formType: "date", 
                                     milestoneType:dataType, 
                                     milestoneId:id, 
-                                    date,
-                                    left: currentSliderOffset + x - width/2, 
-                                    top: topBarHeight + y - height/2 
+                                    value: date,
+                                    //if its selected, then we also need to use scale when positioning the form within the profile
+                                    left: currentSliderOffset + x - (width/2) *k, 
+                                    top: topBarHeight + y - (height/2) * k
                                 }
 
                                 //hide date-info for this milestone, and show others
@@ -1008,6 +1016,11 @@ export default function milestonesBarComponent() {
         
         return milestonesBar;
     };
+    milestonesBar.availableScale = function (value) {
+        if (!arguments.length) { return availableScale; }
+        fixedAvailableScale = value;
+        return milestonesBar;
+    };
     milestonesBar.swipable = function (value) {
         if (!arguments.length) { return swipable; }
         swipable = value;
@@ -1016,6 +1029,11 @@ export default function milestonesBarComponent() {
     milestonesBar.selectedMilestone = function (value) {
         if (!arguments.length) { return selectedMilestone; }
         selectedMilestone = value;
+        return milestonesBar;
+    };
+    milestonesBar.requiredSliderPosition = function (value) {
+        if (!arguments.length) { return requiredSliderPosition; }
+        requiredSliderPosition = value;
         return milestonesBar;
     };
     milestonesBar.xScale = function (value) {
@@ -1133,5 +1151,17 @@ export default function milestonesBarComponent() {
     milestonesBar.slideBack = function(){ slideBack() };
     milestonesBar.slideForward = function(){ slideForward() };
     milestonesBar.slideTo = function(){ slideTo() };
+    milestonesBar.updateDatesShown = function(milestonesToShow){
+        const ids = typeof milestonesToShow[0] === "object" ? milestonesToShow.map(m => m.id) : milestonesToShow;
+        milestonesG.selectAll("g.milestone")
+            .filter(d => ids.includes(d.id))
+            .selectAll("g.date-info")
+            .attr("display", null)
+
+        milestonesG.selectAll("g.milestone")
+            .filter(d => !ids.includes(d.id))
+            .selectAll("g.date-info")
+            .attr("display", "none")
+    };
     return milestonesBar;
 }

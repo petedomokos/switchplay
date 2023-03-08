@@ -116,8 +116,6 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   const selectedKpiSet = selectedKpi?.kpiSet;
   const shouldShowOverlay = displayedBar === "milestones" || selectedKpiSet;
 
-  const shouldUpdateDomRef = useRef(true);
-
   //kpiViewData is based on selectedKpiSet, profiles and 
   //todo - finish this - needs the datasetId and the measureId from the kpi. kaybe just grab it from the first profile
   /*
@@ -233,9 +231,6 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
 
   const onSaveInfo = useCallback((infoType, milestoneType, id, value) => {
     console.log("saveinfo", infoType, milestoneType, id, value);
-    //set shoulUpdateDomRef to equal false. This is then referenced in useEffects to 
-    //prevent the card order changing until form is closed
-    shouldUpdateDomRef.current = false;
     if(infoType === "date"){
       //@todo - remove creation of Date here - can just store as a string
       const newDate = new Date(value);
@@ -273,14 +268,6 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
 
   }, [shouldShowOverlay])
 
-  //refs
-  useEffect(() => {
-    if(!shouldUpdateDomRef.current){
-      shouldUpdateDomRef.current = true;
-    }
-
-  }, [shouldShowOverlay])
-
   return (
     <div className={classes.root}>
         <div className={`${classes.overlay} overlay`} ref={overlayRef}>
@@ -300,7 +287,6 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
               screen={screen}
               availWidth={width}
               availHeight={height}
-              shouldUpdateDom={shouldUpdateDomRef.current}
               
             />
           }

@@ -5,14 +5,12 @@ import IconButton from '@material-ui/core/IconButton'
 import HomeIcon from '@material-ui/icons/Home'
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
-//import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-//import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-//import Button from '@material-ui/core/Button'
+import Button from '@material-ui/core/Button'
 import SelectDate from "../../util/SelectDate";
 import milestonesLayout from "./milestonesLayout";
 import milestonesBarComponent from "./milestonesBarComponent";
 import { DIMNS, FONTSIZES, grey10 } from './constants';
-import { sortAscending } from '../../util/ArrayHelpers';
+import { sortAscending, sortDescending } from '../../util/ArrayHelpers';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -29,6 +27,13 @@ const useStyles = makeStyles((theme) => ({
     //marginRight:DIMNS.profiles.margin.right,
     //marginTop:DIMNS.profiles.margin.top, 
     //marginBottom:DIMNS.profiles.margin.bottom
+  },
+  formOverlay:{
+    background:"black", 
+    opacity:0.5, 
+    width:"100%", 
+    height:"100%", 
+    position:"absolute"
   },
   svg:{
     //position:"absolute"
@@ -52,13 +57,14 @@ const useStyles = makeStyles((theme) => ({
   },
   formContainer:{
     position:"absolute",
+    width:"150px",
     left:props => props.formContainer.left,
     top:props => props.formContainer.top
   },
   textField: {
     //marginLeft: theme.spacing(1),
     //marginRight: theme.spacing(1),
-    width: '90%',
+    width: '100%',
   },
   inputColor:{
     color:"black",
@@ -66,14 +72,28 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: grey10(2),
   },
   dateContainer:{
-    position:"absolute",
-    color:"white",
-    //marginTop: theme.spacing(6)
   },
+  formCtrls:{
+    width:"100%",
+    marginTop:"5px",
+    display:"flex",
+    justifyContent:"center"
+  },
+  submit:{
+    width:"35%",
+    margin:"5%",
+    fontSize:"12px",
+  },
+  cancel:{
+    width:"35%",
+    margin:"5%",
+    fontSize:"12px"
+  }
 }))
 
-const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo, shouldUpdateDom }) => {
+const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo }) => {
   const { player={}, profiles=[], contracts=[] } = data;
+  const allMilestones = [ ...profiles, ...contracts ];
   //console.log("MBar", profiles)
   //local state
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
@@ -81,6 +101,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   const [sliderEnabled, setSliderEnabled] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState("");
   const [form, setForm] = useState(null);
+  const shouldAutosaveForm = form?.formType === "date" ? false : true;
 
   const [layout, setLayout] = useState(() => milestonesLayout());
   const [milestonesBar, setMilestonesBar] = useState(() => milestonesBarComponent());
@@ -96,6 +117,47 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   const containerRef = useRef(null);
 
   const stringifiedProfiles = JSON.stringify(profiles);
+
+  const handleDateChange = useCallback(e => {
+    if(!e.target?.value){ return; }
+    const value = e.target.value; //must declare it before the setform call as the cb messes the timing of updates up
+    setForm(prevState => ({ ...prevState, hasChanged:true, value }))
+  }, []);
+
+  const handleSaveForm = useCallback(e => {
+    //new pos of milestone
+    const now = new Date();
+    const newDate = new Date(form.value);
+    const newDateIsPast = newDate < now;
+    let newPosition;
+    if(newDateIsPast){
+      const otherPastMilestones = allMilestones
+        .filter(m => m.id !== form.milestoneId && m.id !== "current")
+        .filter(m => m.isPast);
+      //@todo - bring this numbering methid together with the way it is done in milestonesLayout
+      const sorted = sortDescending([ ...otherPastMilestones, { id: form.milestoneId, date: newDate }], d => d.date)
+      newPosition = -(sorted.map(m => m.id).indexOf(form.milestoneId) + 1)
+    }else{
+      const otherFutureMilestones = allMilestones
+        .filter(m => m.id !== form.milestoneId && m.id !== "current")
+        .filter(m => m.isFuture);
+      
+      const sorted = sortAscending([...otherFutureMilestones, { id: form.milestoneId, date: newDate }], d => d.date)
+      newPosition = sorted.map(m => m.id).indexOf(form.milestoneId) + 1
+    }
+    
+    milestonesBar
+      .requiredSliderPosition(newPosition)
+      .updateDatesShown(allMilestones);
+
+    setForm(null);
+    onSaveInfo("date", form.milestoneType, form.milestoneId, form.value)
+  }, [form]);
+
+  const handleCancelForm = useCallback(e => {
+    milestonesBar.updateDatesShown(allMilestones);
+    setForm(null);
+  }, [form]);
 
   //init
   //decide what needs to update on setSelectedMilestone, and only have that inteh depArray 
@@ -157,7 +219,13 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
           //addProfile
         //}
       //})
-      .setForm(setForm)
+      .setForm(newForm => {
+        if(!newForm){ milestonesBar.updateDatesShown(allMilestones); }
+        //first, always reset to null so SelectDate unmounts and default value is ready to be reloaded
+        //@todo - find a better wy of clearing the defaultValue within the SelectDate component instead
+        setForm(null);
+        setForm(newForm);
+      })
       .onMouseover(function(e,d){
         //console.log("mover")
       })
@@ -176,9 +244,6 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   //render
   //@todo - consider having a shouldRender state, and this could also contain info on transition requirements
   useEffect(() => {
-    console.log("render useEffect", shouldUpdateDom)
-    if(!shouldUpdateDom) { return; }
-
     d3.select(containerRef.current).call(milestonesBar);
   }, [selectedMilestone, stringifiedProfiles, screen])
 
@@ -201,19 +266,28 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
 
   return (
     <div className={`milestone-bar-root ${classes.root}`}>
+      { form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>}
       {form &&
         <div className={classes.formContainer} ref={formContainerRef}>
           {form.formType === "date" &&
-          <SelectDate
-            classes={classes}
-            withLabel={false}
-            dateFormat="YYYY-MM-DD"
-            type="date"
-            defaultValue={form.date}
-            handleChange={e => onSaveInfo("date", form.milestoneType, form.milestoneId, e.target.value)}/>}
+            <>
+              <SelectDate
+                classes={classes}
+                withLabel={false}
+                dateFormat="YYYY-MM-DD"
+                type="date"
+                defaultValue={form.value}
+                handleChange={handleDateChange}/>
+              {form.hasChanged && !shouldAutosaveForm &&
+                <div className={classes.formCtrls}>
+                  <Button color="primary" variant="contained" onClick={handleCancelForm} className={classes.cancel}>Cancel</Button>
+                  <Button color="primary" variant="contained" onClick={handleSaveForm} className={classes.submit}>Save</Button>
+                </div>}
+            </>
+          }
         </div>}
         <svg className={classes.svg} ref={containerRef}></svg>
-        <div className={classes.ctrls}>
+        {!form && <div className={classes.ctrls}>
           <IconButton className={classes.iconBtn} onClick={milestonesBar.slideBack}
               aria-label="Home" >
               <ArrowBackIosIcon className={classes.icon}/>
@@ -222,7 +296,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
               aria-label="Home" >
               <ArrowForwardIosIcon className={classes.icon}/>
           </IconButton>
-        </div>
+        </div>}
     </div>
   )
 }
