@@ -1,5 +1,15 @@
 import * as d3 from 'd3';
 
+export const SETTINGS_OPTIONS = [
+        { key:"currentCardFormat", value: "current", label:"Current", desc:"desc..." },
+        { key:"currentCardFormat", value: "lastSession", label:"Last Session", desc:"desc..." },
+        { key:"currentCardFormat", value: "latestValue", label:"Latest Value", desc:"desc..." }
+]
+
+export const DEFAULT_SETTINGS = [
+    { key:"currentCardFormat", value: "current" }
+]
+
 export const grey10 = (i) => ["#FFFFFF", "#E8E8E8","#D3D3D3", "#BEBEBE", "#A8A8A8", "#888888", "#696969", "#505050", "#303030", "#000000"][i-1];
 
 //1 = summary, 2 = standard, 3 = detail

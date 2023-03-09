@@ -68,7 +68,7 @@ const userByID = async (req, res, next, id) => {
   try {
     let user = await User.findById(id)
       .populate('admin', '_id username firstname surname created')
-      .populate('journeys', '_id name contracts profiles aims goals links measures created')
+      .populate('journeys', '_id name contracts profiles aims goals links measures settings created')
       .populate('administeredUsers', '_id username firstname surname photo created')
       .populate({ 
         path: 'administeredGroups', 

@@ -3,7 +3,7 @@ import { status, parseResponse, logError, fetchStart, fetchEnd, fetchThenDispatc
 import auth from '../auth/auth-helper'
 
 const transformJourneyForServer = journey => {
-	//console.log("tJFS", journey)
+	console.log("tJFS.....", journey)
 	//dont think we need to store anything on channels, or could just be the setting "monthly"
 	//if we want to persist the users last zoom level. Or maybe just preserve the zoom level then?
 	//for now, we dont anyway
@@ -80,12 +80,14 @@ const transformJourneyForServer = journey => {
 		goals,
 		links,
 		measures,
+		settings:journey.settings.map(s => ({ key: s.key, value:s.value })) || [],
 		updated:Date.now
 	}
 }
 
 export const transformJourneyForClient = journey => {
-	const { contracts, profiles, aims, goals, updated, created } = journey;
+	console.log("tjforclient.....", journey)
+	const { contracts, profiles, aims, goals, settings=[], updated, created } = journey;
 	return {
 		...journey,
 		contracts:contracts? contracts.map(c => ({
@@ -114,6 +116,7 @@ export const transformJourneyForClient = journey => {
 			})),
 			created:new Date(g.created)
 		})),
+		settings,
 		updated:new Date(updated),
 		created:new Date(created)
 	}
@@ -138,7 +141,7 @@ export const saveJourney = (journey, shouldPersist=true, shouldUpdateStoreBefore
 	console.log("saveJourney.............", journey)
 	//note - currently, the client store simply stores the server journey too
 	const serverJourney = transformJourneyForServer(journey);
-	console.log("serverJourney", serverJourney)
+	//console.log("serverJourney", serverJourney)
 	/*
 	//atm, if no user logged in, we still have  auser object so just store journey in there as normal, but dont persist to server
 	const jwt = auth.isAuthenticated();
@@ -154,7 +157,7 @@ export const saveJourney = (journey, shouldPersist=true, shouldUpdateStoreBefore
     //2. save to server
     //3. on response, undo if errors, add id (if new) or anything else from server to store
 	//const serverJourney = transformJourneyForServer(journey);
-	//console.log("serverJourney", serverJourney);
+	//console.log("saving serverJourney", serverJourney);
 	const jwt = auth.isAuthenticated();
 	//console.log("jwt", jwt)
 	if(!jwt.user) { return; }

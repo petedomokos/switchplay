@@ -7,7 +7,7 @@ import { round, roundDown, roundUp, getRangeFormat, dateIsInRange, getValueForSt
 import { linearProjValue } from "./helpers";
 import { calcDateCount } from "../../util/TimeHelpers"
 import { pcCompletion } from "../../util/NumberHelpers"
-//import { } from '../constants';
+import { SETTINGS_OPTIONS, DEFAULT_SETTINGS } from './constants';
 import { getBandsAndStandards } from "../../data/bandsAndStandards";
 
 export function hydrateJourneyData(data, user, datasets){
@@ -17,6 +17,7 @@ export function hydrateJourneyData(data, user, datasets){
     const player = user.player;
 
     const settings = { ...user.settings.general, ...user.settings.journey };
+    console.log("settings", settings)
 
     const kpis = getKpis(player._id).map(kpi => {
         const { bands, standards, accuracy } = getBandsAndStandards(kpi.datasetKey, kpi.statKey) || {};
@@ -42,6 +43,14 @@ export function hydrateJourneyData(data, user, datasets){
     const futureProfiles = hydratedProfiles.filter(p => p.isFuture)
         //.map(p => addExpected(p, currentProfile));
 
+    //embellish the settings, and also put in defaults if required
+    const specificJourneySettings = DEFAULT_SETTINGS
+        .map(s => data.settings.find(set => set.key === s.key) || settings?.data[s.key] || settings?.milestone[s.key] || s)
+        .map(setting => ({
+            ...SETTINGS_OPTIONS.find(s => s.key === setting.key && s.value === setting.value), 
+            ...setting 
+        }));
+
     return {
         //for now, asume all users are players
         player,
@@ -50,7 +59,9 @@ export function hydrateJourneyData(data, user, datasets){
         //later do user.players.find if user is a coach, and also journey may be bout a coach or group
         ...data,
         contracts:hydrateContracts(data.contracts),
-        profiles:[ ...pastProfiles, currentProfile, ...futureProfiles]
+        profiles:[ ...pastProfiles, currentProfile, ...futureProfiles],
+        settings:specificJourneySettings,
+        settingsOptions: SETTINGS_OPTIONS
     }
 }
 

@@ -115,6 +115,7 @@ export default function profileInfoComponent() {
                     })
                     .merge(dateG)
                     .attr("transform", d => `translate(${x},${y(d)}) rotate(-45)`) //rotates from start
+                    .attr("pointer-events", showDateCount ? "none" : "all")
                     .each(function(d){
                         d3.select(this).select("text")
                             .attr("font-size", fontSizes.date)
@@ -124,8 +125,7 @@ export default function profileInfoComponent() {
                         d3.select(this).select("rect.hitbox")
                             .attr("width", length(d))
                             .attr("height", dateHeight)
-                            .on("click", showDateCount ? null : () => { console.log("date clk")})
-
+                            .on("click", (e,d) => { onClick.call(this, e, d, data, "date") })
                     })
 
             dateG.exit().remove();
@@ -164,11 +164,11 @@ export default function profileInfoComponent() {
                         
                         d3.select(this).append("rect").attr("class", "hitbox")
                             .attr("fill", "transparent")
-                            //do we hide date and datecount here manually, and then let it turn back on in the next update?
                             .on("click", (e,d) => { onClick.call(this, e, d, data, "date") })
                     })
                     .merge(dateCountG)
                     .attr("transform", d => `translate(${dateMargin},${dateMargin})`) //rotates from start
+                    .attr("pointer-events", showDateCount ? "all" : "none")
                     .each(function(d){
                         const width = horizandVertLength(d) * 1.25;
                         const height = width;

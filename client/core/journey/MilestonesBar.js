@@ -7,11 +7,11 @@ import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import Button from '@material-ui/core/Button'
 import SelectDate from "../../util/SelectDate";
+import Options from "../../util/Options";
 import milestonesLayout from "./milestonesLayout";
 import milestonesBarComponent from "./milestonesBarComponent";
 import { DIMNS, FONTSIZES, grey10 } from './constants';
 import { sortAscending, sortDescending } from '../../util/ArrayHelpers';
-
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -57,14 +57,13 @@ const useStyles = makeStyles((theme) => ({
   },
   formContainer:{
     position:"absolute",
-    width:"150px",
     left:props => props.formContainer.left,
     top:props => props.formContainer.top
   },
   textField: {
     //marginLeft: theme.spacing(1),
     //marginRight: theme.spacing(1),
-    width: '100%',
+    width: "150px",
   },
   inputColor:{
     color:"black",
@@ -74,25 +73,25 @@ const useStyles = makeStyles((theme) => ({
   dateContainer:{
   },
   formCtrls:{
-    width:"100%",
+    width:"150px",
     marginTop:"5px",
     display:"flex",
     justifyContent:"center"
   },
   submit:{
-    width:"35%",
-    margin:"5%",
+    width:"60px",
+    margin:"5px",
     fontSize:"12px",
   },
   cancel:{
-    width:"35%",
-    margin:"5%",
+    width:"60px",
+    margin:"5px",
     fontSize:"12px"
   }
 }))
 
-const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo }) => {
-  const { player={}, profiles=[], contracts=[] } = data;
+const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo, onSaveSetting }) => {
+  const { player={}, profiles=[], contracts=[], settings=[], settingsOptions } = data;
   const allMilestones = [ ...profiles, ...contracts ];
   //console.log("MBar", profiles)
   //local state
@@ -122,9 +121,25 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
     if(!e.target?.value){ return; }
     const value = e.target.value; //must declare it before the setform call as the cb messes the timing of updates up
     setForm(prevState => ({ ...prevState, hasChanged:true, value }))
-  }, []);
+  }, [form]);
+
+  const handleClickCurrentCardFormatOption = useCallback(newOption => {
+    //if(!e.target?.value){ return; }
+    console.log("current card change", newOption)
+    const { key, value } = newOption;
+    onSaveSetting({ key, value })
+    //const value = e.target.value; //must declare it before the setform call as the cb messes the timing of updates up
+    //setForm(prevState => ({ ...prevState, hasChanged:true, value:e.target.value }))
+  }, [form]);
 
   const handleSaveForm = useCallback(e => {
+    console.log("save...", form.milestoneId)
+    //if current, it will have already saved when button pressed
+    if(form.milestoneId === "current"){
+      console.log("cancel") 
+      handleCancelForm();
+      return; 
+    }
     //new pos of milestone
     const now = new Date();
     const newDate = new Date(form.value);
@@ -155,6 +170,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   }, [form]);
 
   const handleCancelForm = useCallback(e => {
+    console.log("cancelForm......")
     milestonesBar.updateDatesShown(allMilestones);
     setForm(null);
   }, [form]);
@@ -220,7 +236,11 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
         //}
       //})
       .setForm(newForm => {
+        //todo - handle if current - value is not set, and also may need the key??
         if(!newForm){ milestonesBar.updateDatesShown(allMilestones); }
+        if(newForm?.milestoneId === "current"){
+          ///add key and value?
+        }
         //first, always reset to null so SelectDate unmounts and default value is ready to be reloaded
         //@todo - find a better wy of clearing the defaultValue within the SelectDate component instead
         setForm(null);
@@ -247,43 +267,34 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
     d3.select(containerRef.current).call(milestonesBar);
   }, [selectedMilestone, stringifiedProfiles, screen])
 
-  // clean up
-  useEffect(() => {
-    /*
-    const a = 5 //-1;
-    const b = 0//5; we want small b as this is the constant increase component
-    const c = 10;
-
-    //const f = t => a * t * t + b * t + c;
-    const f = t => t <= 0 ? c : 1/(a * t) + c
-    const targs = d3.range(5).map(t => ([t, f(t), f(t-1) - f(t)]))
-    console.log("targs", targs)*/
-    
-    return () => {
-        //console.log('Do some cleanup!!!');
-    }
-  }, [])
-
   return (
     <div className={`milestone-bar-root ${classes.root}`}>
       { form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>}
       {form &&
         <div className={classes.formContainer} ref={formContainerRef}>
           {form.formType === "date" &&
-            <>
-              <SelectDate
-                classes={classes}
-                withLabel={false}
-                dateFormat="YYYY-MM-DD"
-                type="date"
-                defaultValue={form.value}
-                handleChange={handleDateChange}/>
-              {form.hasChanged && !shouldAutosaveForm &&
-                <div className={classes.formCtrls}>
-                  <Button color="primary" variant="contained" onClick={handleCancelForm} className={classes.cancel}>Cancel</Button>
-                  <Button color="primary" variant="contained" onClick={handleSaveForm} className={classes.submit}>Save</Button>
-                </div>}
-            </>
+            form.milestoneId === "current" ?
+              <Options
+                  options={settingsOptions.filter(s => s.key === "currentCardFormat")}
+                  selectedValue={settings.find(s => s.key === "currentCardFormat").value}
+                  primaryText={item => item.label}
+                  secondaryText={item => item.desc}
+                  onClickOption={handleClickCurrentCardFormatOption} />
+              :
+              <>
+                <SelectDate
+                  classes={classes}
+                  withLabel={false}
+                  dateFormat="YYYY-MM-DD"
+                  type="date"
+                  defaultValue={form.value}
+                  handleChange={handleDateChange}/>
+                {form.hasChanged && !shouldAutosaveForm &&
+                  <div className={classes.formCtrls}>
+                    <Button color="primary" variant="contained" onClick={handleCancelForm} className={classes.cancel}>Cancel</Button>
+                    <Button color="primary" variant="contained" onClick={handleSaveForm} className={classes.submit}>Save</Button>
+                  </div>}
+              </>
           }
         </div>}
         <svg className={classes.svg} ref={containerRef}></svg>

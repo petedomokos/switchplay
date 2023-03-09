@@ -8,7 +8,7 @@ const signin = async (req, res) => {
   //@todo - find a cleaner way to replicate the code below where we split based on email or username
   //but still populate it the same
   const adminPopulationStr = '_id username firstname surname created';
-  const journeysPopulationStr = '_id name contracts profiles aims goals links measures created';
+  const journeysPopulationStr = '_id name contracts profiles aims goals links measures settings created';
   const administeredUsersPopulationStr = '_id username firstname surname photo created';
   const administeredGroupsPopulationObj = { 
     path: 'administeredGroups', 

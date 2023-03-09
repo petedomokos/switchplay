@@ -247,7 +247,7 @@ export default function milestonesBarComponent() {
         const { transitionEnter=true, transitionUpdate=true } = options;
         // expression elements
         selection.each(function (data) {
-            // console.log("updateMBar", data, data.map(d => d.nr))
+            //console.log("updateMBar", data)
             //console.log("shuttles kpi values", data.map(p => ({ id:p.id, values: p.kpis.kpisData[1]?.values })))
             containerG = d3.select(this)
                 .attr("width", width)
@@ -262,7 +262,7 @@ export default function milestonesBarComponent() {
             update(data, { slideTransition:SLIDE_TRANSITION });
             function init(){
                 containerG.append("rect").attr("class", "container-bg")
-                    .attr("fill", "transparent")
+                    .attr("fill", "transparent");
                 contentsG = containerG.append("g").attr("class", "milestone-bar-contents");
                 contentsG.append("rect")
                     .attr("class", "milestones-bar-contents-bg")
@@ -809,21 +809,29 @@ export default function milestonesBarComponent() {
                             ignoreNextWrapperClick = true;
                             const milestone = positionedData.find(m => m.id === data.id);
                             const { id, x, y, date, width, height, dataType } = milestone;
-                            //temp do nothing for current card
-                            if(desc === "date" && id !== "current"){
-                                //@todo - if id === "current", we sow the options for dateRange etc for current
-                                //...
-                                
+                            let form;
+                            if(desc === "date"){
+                                console.log("date clicked")
                                 //need to calc left so it includes all transforms eg offset
                                 const k = isSelected(id) ? availableScale : 1;
-                                const form = { 
+                                const commonFormProperties = {
                                     formType: "date", 
                                     milestoneType:dataType, 
-                                    milestoneId:id, 
-                                    value: date,
+                                    milestoneId:id,
                                     //if its selected, then we also need to use scale when positioning the form within the profile
                                     left: currentSliderOffset + x - (width/2) *k, 
                                     top: topBarHeight + y - (height/2) * k
+                                }
+                                if(id === "current"){
+                                    form = {
+                                        ...commonFormProperties,
+                                        key:"settings"
+                                    }
+                                }else{
+                                    form = { 
+                                        ...commonFormProperties, 
+                                        value: date, 
+                                    }
                                 }
 
                                 //hide date-info for this milestone, and show others

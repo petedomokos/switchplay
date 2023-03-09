@@ -101,7 +101,7 @@ const initChannels = d3.range(numberMonths)
 const Journey = ({ user, data, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile }) => {
   //console.log("Journey.......", data)
   //bug - although only 6 profs are saved, we end up with 7 ie two currents
-  const { _id, name, contracts, profiles, aims, goals, links, measures, kpis } = data;
+  const { _id, name, contracts, profiles, aims, goals, links, measures, settings, kpis } = data;
   const [journey, setJourney] = useState(null);
   const [channels, setChannels] = useState(initChannels);
   const [withCompletionPaths, setWithCompletionPath] = useState(false);
@@ -230,12 +230,11 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   }, [stringifiedProfiles, user._id]);
 
   const onSaveInfo = useCallback((infoType, milestoneType, id, value) => {
-    console.log("saveinfo", infoType, milestoneType, id, value);
+    //console.log("saveinfo", infoType, milestoneType, id, value);
     if(infoType === "date"){
       //@todo - remove creation of Date here - can just store as a string
       const newDate = new Date(value);
       newDate.setUTCHours(21);
-      console.log("new date", newDate)
       if(milestoneType === "profile"){
         const _profiles = profiles.map(p => p.id === id ? ({ ...p, date: newDate }) : p);
         save({ ...data, profiles:_profiles });
@@ -245,6 +244,12 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     }
     
   }, [stringifiedContracts, user._id]);
+
+  const onSaveSetting = useCallback(newSetting => {
+    const otherSettings = settings.filter(s => s.key !== newSetting.key);
+    const _settings = [ ...otherSettings, newSetting]
+    save({ ...data, settings:_settings });
+  }, [settings]);
 
   useEffect(() => {
     const width = d3.min([journeyWidth * 0.725, 500]);
@@ -284,6 +289,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
               onDeleteMilestone={handleDeleteMilestone}
               onSaveValue={onSaveValue}
               onSaveInfo={onSaveInfo}
+              onSaveSetting={onSaveSetting}
               screen={screen}
               availWidth={width}
               availHeight={height}

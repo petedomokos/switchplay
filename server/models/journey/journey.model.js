@@ -4,6 +4,7 @@ import ProfileSchema from './profile.model';
 import AimSchema from './aim.model';
 import GoalSchema from './goal.model';
 import LinkSchema from './link.model';
+import SettingSchema from './setting.model';
 import JourneyMeasureSchema from './journey-measure.model';
 
 const JourneySchema = new mongoose.Schema({
@@ -31,6 +32,7 @@ const JourneySchema = new mongoose.Schema({
   links:[LinkSchema],
   measures:[JourneyMeasureSchema],
   tags:[String],
+  settings:[SettingSchema],
   visibility:{type: String, default: "private"},
   updated: Date,
   created: {type: Date,default: Date.now}

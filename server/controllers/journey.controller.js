@@ -96,7 +96,7 @@ const create = async (req, res) => {
   }
   
   const update = async (req, res) => {
-    console.log('updating journey....................', req.user._id)
+    //console.log('updating journey....................', req.user._id)
     let journey = req.journey;
     //console.log("req journey", journey)
     //console.log("body", req.body)
