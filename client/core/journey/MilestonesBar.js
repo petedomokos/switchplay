@@ -124,19 +124,13 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   }, [form]);
 
   const handleClickCurrentCardFormatOption = useCallback(newOption => {
-    //if(!e.target?.value){ return; }
-    console.log("current card change", newOption)
     const { key, value } = newOption;
     onSaveSetting({ key, value })
-    //const value = e.target.value; //must declare it before the setform call as the cb messes the timing of updates up
-    //setForm(prevState => ({ ...prevState, hasChanged:true, value:e.target.value }))
   }, [form]);
 
   const handleSaveForm = useCallback(e => {
-    console.log("save...", form.milestoneId)
     //if current, it will have already saved when button pressed
     if(form.milestoneId === "current"){
-      console.log("cancel") 
       handleCancelForm();
       return; 
     }
@@ -170,7 +164,6 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   }, [form]);
 
   const handleCancelForm = useCallback(e => {
-    console.log("cancelForm......")
     milestonesBar.updateDatesShown(allMilestones);
     setForm(null);
   }, [form]);

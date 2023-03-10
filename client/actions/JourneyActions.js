@@ -3,7 +3,6 @@ import { status, parseResponse, logError, fetchStart, fetchEnd, fetchThenDispatc
 import auth from '../auth/auth-helper'
 
 const transformJourneyForServer = journey => {
-	console.log("tJFS.....", journey)
 	//dont think we need to store anything on channels, or could just be the setting "monthly"
 	//if we want to persist the users last zoom level. Or maybe just preserve the zoom level then?
 	//for now, we dont anyway
@@ -86,7 +85,6 @@ const transformJourneyForServer = journey => {
 }
 
 export const transformJourneyForClient = journey => {
-	console.log("tjforclient.....", journey)
 	const { contracts, profiles, aims, goals, settings=[], updated, created } = journey;
 	return {
 		...journey,
@@ -138,7 +136,7 @@ export const saveAdhocJourneyToStore = journey => (
 )
 
 export const saveJourney = (journey, shouldPersist=true, shouldUpdateStoreBefore=false, shouldUpdateStoreAfter=false)  => dispatch => {
-	console.log("saveJourney.............", journey)
+	//console.log("saveJourney.............", journey)
 	//note - currently, the client store simply stores the server journey too
 	const serverJourney = transformJourneyForServer(journey);
 	//console.log("serverJourney", serverJourney)

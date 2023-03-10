@@ -1,10 +1,14 @@
 import * as d3 from 'd3';
 
 export const JOURNEY_SETTINGS_OPTIONS = [
-    //current card format
-    { key:"currentValueDataMethod", value: "best", label:"Best", desc:"desc..." },
-    { key:"currentValueDataMethod", value: "specificSession",/*defaults to last session*/ label:"Last Session", desc:"desc..." },
-    { key:"currentValueDataMethod", value: "latestValue", label:"Latest Value", desc:"desc..." },
+    //currentValueDataMethod
+    { key:"currentValueDataMethod", value: "best", label:"BEST", desc:"desc..." },
+    { key:"currentValueDataMethod", value: "specificSession",/*defaults to last session*/ label:"SESSION", desc:"desc..." },
+    { key:"currentValueDataMethod", value: "latestValue", label:"LATEST", desc:"desc..." },
+    //achievedValueDataMethod - options not implemented yet
+    { key:"achievedValueDataMethod", value: "best", label:"BEST", desc:"desc..." },
+    { key:"achievedDataMethod", value: "specificSession",/*defaults to last session*/ label:"SESSION", desc:"desc..." },
+    { key:"achievedValueDataMethod", value: "latestValue", label:"LATEST", desc:"desc..." },
     //data expiry unit
     { key:"dataExpiryTimeUnits", value:"hours", label:"hours" },
     { key:"dataExpiryTimeUnits", value:"days", label:"days" },
@@ -20,6 +24,7 @@ export const JOURNEY_SETTINGS_OPTIONS = [
 
 export const JOURNEY_SETTINGS = [
     { key:"currentValueDataMethod", defaultValue: "best" },
+    { key:"achievedValueDataMethod", defaultValue: "best" },
     { key:"dataExpiryTimeNumber", defaultValue:2 },
 	{ key:"dataExpiryTimeUnits", defaultValue:"months" },
 	{ key:"restrictMilestoneDataToWindow", defaultValue:false }
@@ -99,7 +104,7 @@ export const FONTSIZES = {
             name:4 * k,
             age:6 * k,
             position: 3 * k,
-            date:4 * k
+            date:3 * k
         },
         kpis:{
             name:4 * k,

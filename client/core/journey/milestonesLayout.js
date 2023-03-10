@@ -28,7 +28,7 @@ export default function milestonesLayout(){
 
         return numberedData.map((m,i) => {
             //console.log("milestone------", i, m.id)
-            const { id, date, dateCount, dataType, isPast, isCurrent, isFuture } = m;
+            const { id, date, dateCount, dataType, isPast, isCurrent, isFuture, settings, specificDate } = m;
 
             //add any profile properties onto kpis if required
             const kpis = m.kpis.map(kpi => ({ 
@@ -45,7 +45,7 @@ export default function milestonesLayout(){
                 return {
                     ...m,
                     i,
-                    info:{ id, ...info, isCurrent, isPast, isFuture, date, dateCount },
+                    info:{ id, ...info, isCurrent, isPast, isFuture, date, dateCount, settings, specificDate },
                     kpis:myKpisLayout(kpis),
                 }
             }else{

@@ -811,7 +811,6 @@ export default function milestonesBarComponent() {
                             const { id, x, y, date, width, height, dataType } = milestone;
                             let form;
                             if(desc === "date"){
-                                console.log("date clicked")
                                 //need to calc left so it includes all transforms eg offset
                                 const k = isSelected(id) ? availableScale : 1;
                                 const commonFormProperties = {

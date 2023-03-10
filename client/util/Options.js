@@ -61,9 +61,6 @@ export default function Options({ title, emptyMesg, options, moreOptions, select
   const stylesProps = {...styles, moreOptions }
   const classes = useStyles(stylesProps);
 
-  console.log("Options", options)
-  console.log("selectedValue", selectedValue)
-
     return (
       <Card className={classes.root} elevation={4}>
          <CardContent className={classes.content}>

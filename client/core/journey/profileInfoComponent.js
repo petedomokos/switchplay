@@ -47,7 +47,7 @@ export default function profileInfoComponent() {
         // expression elements
         selection.each(function (data) {
             //console.log("profileInfo data", data)
-            const { firstname, surname, age, position, photos, isCurrent, isFuture } = data;
+            const { firstname, surname, age, position, photos, isCurrent, isFuture, settings } = data;
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
             /*
@@ -88,43 +88,64 @@ export default function profileInfoComponent() {
             const format = d3.timeFormat("%_d %b, %y");
 
             const dateMargin = 10;
-            const x = dateMargin;
             //const fDate = format(data.date);
             //if its a single digit day, then remove first space
             const nrChars = fDate => fDate[0] === " " ? fDate.length - 1 : fDate.length;
             //todo- make a pseudo text element and use getComputerTxtlngth, instead of this bodge to make TODAY work
-            const calcLength = (fDate, fontSize) =>  nrChars(fDate) * fontSize * (fDate === "TODAY" ? 0.7 : 0.47);
-            const length = d => calcLength((d.isCurrent ? "TODAY" : format(d.date)), fontSizes.date);
+            const calcLength = (text, fontSize, isUpperCase=false) =>  nrChars(text) * fontSize * (isUpperCase ? 0.7 : 0.47);
+            const length = d => calcLength((d.isCurrent ? currentValueDataMethod.label : format(d.date)), fontSizes.date, d.isCurrent);
             const dateHeight = fontSizes.date;
             const horizandVertLength = d => length(d) * Math.sin(Math.PI/4);
-            const y = d => dateMargin + horizandVertLength(d);
-
+            const x = d => dateMargin + horizandVertLength(d)/2;
+            const y = d => dateMargin + horizandVertLength(d)/2
+            
+            //settings are only defined for current card
+            const currentValueDataMethod = settings?.find(s => s.key === "currentValueDataMethod");
+            
             const dateG = containerG.selectAll("g.date").data([data])
             dateG.enter()
                 .append("g")
                     .attr("class", "date date-info")
                     .attr("opacity", showDateCount ? 0 : 1)
                     .each(function(d){
-                        d3.select(this).append("text")
-                            .attr("dominant-baseline", "hanging")
-                            .attr("text-anchor", "start")
-                            .style("font-family", "helvetica, sans-serifa")
+                        d3.select(this)
+                            .append("text")
+                                .attr("class", "primary")
+                                .attr("dominant-baseline", "hanging")
+                                .attr("text-anchor", "middle")
+                                .style("font-family", "helvetica, sans-serifa")
+
+                        d3.select(this)
+                            .append("text")
+                                .attr("class", "secondary")
+                                .attr("dominant-baseline", "hanging")
+                                .attr("text-anchor", "middle")
+                                .style("font-family", "helvetica, sans-serifa")
                         
-                        d3.select(this).append("rect").attr("class", "hitbox")
-                            .attr("fill", "transparent");
+                        d3.select(this)
+                                .append("rect")
+                                    .attr("class", "hitbox")
+                                    .attr("fill", "transparent");
                     })
                     .merge(dateG)
-                    .attr("transform", d => `translate(${x},${y(d)}) rotate(-45)`) //rotates from start
+                    .attr("transform", d => `translate(${x(d)},${y(d)}) rotate(-45)`) //rotates from start
                     .attr("pointer-events", showDateCount ? "none" : "all")
                     .each(function(d){
-                        d3.select(this).select("text")
+                        d3.select(this).select("text.primary")
                             .attr("font-size", fontSizes.date)
-                            .attr("fill", d => d.isFuture ? "grey" : "white")
-                            .text(d => d.isCurrent ? "TODAY" : format(d.date))
+                            .attr("fill", d.isFuture ? "grey" : "white")
+                            .text(d.isCurrent ? currentValueDataMethod.label : format(d.date))
+
+                        d3.select(this).select("text.secondary")
+                            .attr("y", dateHeight * 1.2)
+                            .attr("font-size", fontSizes.date * 0.8)
+                            .attr("fill", d.isFuture ? "grey" : "white")
+                            .text(d.specificDate ? format(d.specificDate) : "")
 
                         d3.select(this).select("rect.hitbox")
+                            .attr("x", -length(d)/2)
                             .attr("width", length(d))
-                            .attr("height", dateHeight)
+                            .attr("height", dateHeight * 2.1)
                             .on("click", (e,d) => { onClick.call(this, e, d, data, "date") })
                     })
 

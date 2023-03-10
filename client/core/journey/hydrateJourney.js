@@ -204,6 +204,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
     const expiryDuration = settings.find(s => s.key === "dataExpiryTimeNumber").value;
     const restrictDataToWindow = settings.find(s => s.key === "restrictMilestoneDataToWindow").value;
     const currentValueDataMethod = settings.find(s => s.key === "currentValueDataMethod").value
+    const achievedValueDataMethod = settings.find(s => s.key === "achievedValueDataMethod").value
     //@todo - use session id (or date and time). For now, default to the last session date
     const specificDate = currentValueDataMethod === "specificSession" ? getLastSessionDate(datasets) : null;
     //either manual startDate if set, or prev date, or otherwise 20 years ago
@@ -288,8 +289,8 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 const startDateRange = calcDateRange(addMonths(-expiryDuration, profileStart.date), profileStart.date);
                 start = {
                     ...profileStart,
-                    //todo - do stat before all this, and do datapoints here so we have it for calcCurrent
-                    ...calcCurrent(stat, datapoints, startDateRange, currentValueDataMethod) //put params in for the custom startDate
+                    //note - we pass in the achieved data method, as this will always be in the past
+                    ...calcCurrent(stat, datapoints, startDateRange, achievedValueDataMethod) //put params in for the custom startDate
                 }
             }else{
                 //its based on a prev profile 
@@ -307,7 +308,10 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //note - for current profile, the range is last twenty years so all will be included anyway
             //this is also true for 1st profile, unless user specifies a startDate
             let current;
-            if(isPast || currentValueDataMethod !== "specificSession"){
+            if(isPast){ 
+                current = calcCurrent(stat, datapoints, dateRange, achievedValueDataMethod); 
+            }
+            else if(currentValueDataMethod !== "specificSession"){
                 current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod);
             }else{
                 //it must be a future card and current value is based purely on a specificSession
@@ -402,8 +406,10 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
     return {
         start:profileStart,
         //legacy - remove
-        startDate:profileStart.date, 
-        date:now, dateRange, datePhase,
+        startDate:profileStart.date,
+        settings,
+        specificDate,
+        /*date:now,*/ dateRange, datePhase,
         id:"current", isCurrent:true, dataType:"profile",
         kpis:kpis.map((kpi,i) => {
             //console.log("kpi...", kpi)

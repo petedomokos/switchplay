@@ -46,14 +46,11 @@ export const user = (state=InitialState.user, act) =>{
 		case C.SAVE_JOURNEY:{
 			//const { journey } = act;
 			//temp - for now, we fake playerid here,a dn it is always userId
-			console.log("saveJourney state", state)
-			console.log("act.journey", act.journey)
 			const journey = { 
 				...act.journey,
 				//temp/legacy - our test journey has no playerId
 				playerId:act.journey.playerId || state._id 
 			}
-			console.log("save journey", journey)
 			const currentJourney = state.journeys.find(j => j._id === journey._id);
 			if(!currentJourney){
 				//_id will be 'temp' here until saved on server
