@@ -3,18 +3,7 @@ export const InitialState = {
 	//so all of them will need to receive the update actions, not just adminUsers/adminGroups
 	//but when creating a new user or group, they dont need to go into other.
 	user:{
-		settings:{
-			general:{},
-			journey:{
-				data:{
-					expiryDuration:2, //months
-				},
-				milestone:{
-					//note - expired data will still not be shown regardless of the following setting
-					restrictDataToWindow:false // - this setting restricts data to after the milestone startDate
-				}
-			}
-		},
+		settings:{},
 		administeredUsers:[],
 		administeredGroups:[],
 		administeredDatasets:[],

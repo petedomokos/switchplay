@@ -1,13 +1,28 @@
 import * as d3 from 'd3';
 
-export const SETTINGS_OPTIONS = [
-        { key:"currentCardFormat", value: "current", label:"Current", desc:"desc..." },
-        { key:"currentCardFormat", value: "lastSession", label:"Last Session", desc:"desc..." },
-        { key:"currentCardFormat", value: "latestValue", label:"Latest Value", desc:"desc..." }
+export const JOURNEY_SETTINGS_OPTIONS = [
+    //current card format
+    { key:"currentValueDataMethod", value: "best", label:"Best", desc:"desc..." },
+    { key:"currentValueDataMethod", value: "specificSession",/*defaults to last session*/ label:"Last Session", desc:"desc..." },
+    { key:"currentValueDataMethod", value: "latestValue", label:"Latest Value", desc:"desc..." },
+    //data expiry unit
+    { key:"dataExpiryTimeUnits", value:"hours", label:"hours" },
+    { key:"dataExpiryTimeUnits", value:"days", label:"days" },
+    { key:"dataExpiryTimeUnits", value:"weeks", label:"weeks" },
+    { key:"dataExpiryTimeUnits", value:"months", label:"months" },
+    { key:"dataExpiryTimeUnits", value:"years", label:"years" },
+    //data expiry value
+    { key:"dataExpiryTimeNumber", unit:"integer" },
+    //restrict data
+    { key:"restrictMilestoneDataToWindow", value:true, label:"True", desc:"..." },
+    { key:"restrictMilestoneDataToWindow", value:false, label:"False", desc:"..." },
 ]
 
-export const DEFAULT_SETTINGS = [
-    { key:"currentCardFormat", value: "current" }
+export const JOURNEY_SETTINGS = [
+    { key:"currentValueDataMethod", defaultValue: "best" },
+    { key:"dataExpiryTimeNumber", defaultValue:2 },
+	{ key:"dataExpiryTimeUnits", defaultValue:"months" },
+	{ key:"restrictMilestoneDataToWindow", defaultValue:false }
 ]
 
 export const grey10 = (i) => ["#FFFFFF", "#E8E8E8","#D3D3D3", "#BEBEBE", "#A8A8A8", "#888888", "#696969", "#505050", "#303030", "#000000"][i-1];

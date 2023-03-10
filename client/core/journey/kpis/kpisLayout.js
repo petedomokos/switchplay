@@ -53,8 +53,7 @@ export default function kpisLayout(){
             }
 
             const start = values.start && typeof values.start[format] === "number" ? values.start[format] : null;
-            if(isCurrent && key === "pressUps-reps"){
-                //console.log("values.start", values.start)
+            if(isCurrent && key === "shuttles-time"){
             }
             const end = values.end && typeof values.end[format] === "number" ? values.end[format] : null;
             const current = values.current && typeof values.current[format] === "number" ? values.current[format] : null;

@@ -10,7 +10,7 @@ import SelectDate from "../../util/SelectDate";
 import Options from "../../util/Options";
 import milestonesLayout from "./milestonesLayout";
 import milestonesBarComponent from "./milestonesBarComponent";
-import { DIMNS, FONTSIZES, grey10 } from './constants';
+import { DIMNS, FONTSIZES, grey10, JOURNEY_SETTINGS_OPTIONS } from './constants';
 import { sortAscending, sortDescending } from '../../util/ArrayHelpers';
 
 const useStyles = makeStyles((theme) => ({
@@ -275,8 +275,8 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
           {form.formType === "date" &&
             form.milestoneId === "current" ?
               <Options
-                  options={settingsOptions.filter(s => s.key === "currentCardFormat")}
-                  selectedValue={settings.find(s => s.key === "currentCardFormat").value}
+                  options={JOURNEY_SETTINGS_OPTIONS.filter(s => s.key === "currentValueDataMethod")}
+                  selectedValue={settings.find(s => s.key === "currentValueDataMethod").value}
                   primaryText={item => item.label}
                   secondaryText={item => item.desc}
                   onClickOption={handleClickCurrentCardFormatOption} />

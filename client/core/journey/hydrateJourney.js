@@ -7,7 +7,7 @@ import { round, roundDown, roundUp, getRangeFormat, dateIsInRange, getValueForSt
 import { linearProjValue } from "./helpers";
 import { calcDateCount } from "../../util/TimeHelpers"
 import { pcCompletion } from "../../util/NumberHelpers"
-import { SETTINGS_OPTIONS, DEFAULT_SETTINGS } from './constants';
+import { JOURNEY_SETTINGS, JOURNEY_SETTINGS_OPTIONS } from './constants';
 import { getBandsAndStandards } from "../../data/bandsAndStandards";
 
 export function hydrateJourneyData(data, user, datasets){
@@ -15,9 +15,6 @@ export function hydrateJourneyData(data, user, datasets){
     //console.log("hydrateJourneyData", datasets)
     const nonCurrentProfiles = data.profiles.filter(p => p.id !== "current");
     const player = user.player;
-
-    const settings = { ...user.settings.general, ...user.settings.journey };
-    console.log("settings", settings)
 
     const kpis = getKpis(player._id).map(kpi => {
         const { bands, standards, accuracy } = getBandsAndStandards(kpi.datasetKey, kpi.statKey) || {};
@@ -27,6 +24,21 @@ export function hydrateJourneyData(data, user, datasets){
     });
     const defaultTargets = getTargets(player._id, player.groupId);
     const rangeFormat = getRangeFormat("day");
+
+    //embellish the settings, and also put in defaults if required
+    const settings = JOURNEY_SETTINGS
+        .map(s => ({ 
+            key: s.key, 
+            value: data.settings.find(set => set.key === s.key)?.value || s.defaultValue 
+        }))
+        .map(s => {
+            //there may not be any embellisments, eg if setting is a number
+            const embellishments = JOURNEY_SETTINGS_OPTIONS.find(set => set.key === s.key && set.value === s.value) || {};
+            return {
+                ...embellishments, 
+                ...s
+            }
+    });
 
     //STEP 1: HYDRATE PROFILES
     const options = { now, rangeFormat };
@@ -43,14 +55,6 @@ export function hydrateJourneyData(data, user, datasets){
     const futureProfiles = hydratedProfiles.filter(p => p.isFuture)
         //.map(p => addExpected(p, currentProfile));
 
-    //embellish the settings, and also put in defaults if required
-    const specificJourneySettings = DEFAULT_SETTINGS
-        .map(s => data.settings.find(set => set.key === s.key) || settings?.data[s.key] || settings?.milestone[s.key] || s)
-        .map(setting => ({
-            ...SETTINGS_OPTIONS.find(s => s.key === setting.key && s.value === setting.value), 
-            ...setting 
-        }));
-
     return {
         //for now, asume all users are players
         player,
@@ -60,8 +64,7 @@ export function hydrateJourneyData(data, user, datasets){
         ...data,
         contracts:hydrateContracts(data.contracts),
         profiles:[ ...pastProfiles, currentProfile, ...futureProfiles],
-        settings:specificJourneySettings,
-        settingsOptions: SETTINGS_OPTIONS
+        settings
     }
 }
 
@@ -94,6 +97,19 @@ function hydrateProfiles(profiles=[], datasets, kpis, defaultTargets, settings, 
     return hydrateNextProfile(orderedProfiles, []);
 }
 
+//note - we are using all datasets here, even ones potentially that have in involvemnet in kpis
+function getLastSessionDate(datasets){
+    const dateMaxes = datasets
+        .map(dset => dset.datapoints)
+        .map(ds => d3.max(ds, d => d.date))
+
+    const max = d3.max(dateMaxes);
+    if(!max){ return null; }
+
+    max.setHours(22);
+    return max;
+}
+
 //@todo - custom expected when user drags
 function calcExpected(kpi, start, target, now, options={}){
     //console.log("calcExp targ", target)
@@ -108,27 +124,52 @@ function calcExpected(kpi, start, target, now, options={}){
         completion:null 
     }
 }
+function isSameDay(d1, d2){
+    return  d1.getUTCDate() === d2.getUTCDate() && 
+            d1.getUTCMonth() === d2.getUTCMonth() && 
+            d1.getUTCFullYear() === d2.getUTCFullYear();
+}
 
-function calcCurrent(stat, datapoints, dateRange, log){
+function getValueForSession(stat, datapoints, sessionDate){
     //if dataset unavailable, stat will be undefined
     if(!stat){ return { actual:undefined, completion:null } }
     //helper
     const getValue = getValueForStat(stat.key, stat.accuracy);
-    const values = datapoints
+    //note for now we assume one per day, but will soon implement a sessionId property of each datapoint too
+    const datapointThatDay = datapoints.find(d => {
+        return isSameDay(d.date, sessionDate) && !d.isTarget
+    });
+    return { actual: getValue(datapointThatDay), completion:null };
+}
+
+function calcCurrent(stat, datapoints, dateRange, dataMethod){
+    //if dataset unavailable, stat will be undefined
+    if(!stat){ return { actual:undefined, completion:null } }
+    //helper
+    const getValue = getValueForStat(stat.key, stat.accuracy);
+    const dateValuePairs = datapoints
         //if no date range, we want to include all as it will be the current card
         .filter(d => !dateRange || dateIsInRange(d.date, dateRange))
         .filter(d => !d.isTarget)
-        .map(d => getValue(d))
-    
-    const valueDates = datapoints
-        //if no date range, we want to include all as it will be the current card
-        //.filter(d => !dateRange || dateIsInRange(d.date, dateRange))
-        //.filter(d => !d.isTarget)
         .map(d => [d.date, getValue(d)])
+        .filter(d => typeof d[1] === "number")
 
+    const values = dateValuePairs.map(d => d[1]);
+    
+    //helper
+    const getBest = values => stat.order === "highest is best" ? d3.max(values) : d3.min(values);
+    const getOverallValue = values => {
+        if(dataMethod === "best"){ return getBest(values); }
+        if(dataMethod === "latestValue") {
+            //console.log("pairs", dateValuePairs) 
+            //console.log("greatest", d3.greatest(dateValuePairs, d => d[0]))
+            return dateValuePairs[0] ? d3.greatest(dateValuePairs, d => d[0])[1] : null 
+        }
+        return 0;
+    }
     return {
         //@todo - use min if order is 'lowest is best', use stat to determine order
-        actual: stat.order === "highest is best" ? d3.max(values) : d3.min(values),
+        actual: getOverallValue(values),
         completion: null
     }
 
@@ -159,7 +200,12 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
     const milestoneId = id;
     //startDate
     //helper
-    const { data:{ expiryDuration }, milestone: { restrictDataToWindow } } = settings;
+    //@todo - implement different expiry units, for now, we assume its months 
+    const expiryDuration = settings.find(s => s.key === "dataExpiryTimeNumber").value;
+    const restrictDataToWindow = settings.find(s => s.key === "restrictMilestoneDataToWindow").value;
+    const currentValueDataMethod = settings.find(s => s.key === "currentValueDataMethod").value
+    //@todo - use session id (or date and time). For now, default to the last session date
+    const specificDate = currentValueDataMethod === "specificSession" ? getLastSessionDate(datasets) : null;
     //either manual startDate if set, or prev date, or otherwise 20 years ago
     //const startDate = profile.startDate || prevProfile?.date || oneMonthAgo(date);
     //if not startdate and no past profile, then we start from when any non-expired data could exist
@@ -243,7 +289,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 start = {
                     ...profileStart,
                     //todo - do stat before all this, and do datapoints here so we have it for calcCurrent
-                    ...calcCurrent(stat, datapoints, startDateRange) //put params in for the custom startDate
+                    ...calcCurrent(stat, datapoints, startDateRange, currentValueDataMethod) //put params in for the custom startDate
                 }
             }else{
                 //its based on a prev profile 
@@ -260,7 +306,13 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
 
             //note - for current profile, the range is last twenty years so all will be included anyway
             //this is also true for 1st profile, unless user specifies a startDate
-            const current = calcCurrent(stat, datapoints, dateRange, id === "profile-4" && datasetKey === "pressUps");
+            let current;
+            if(isPast || currentValueDataMethod !== "specificSession"){
+                current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod);
+            }else{
+                //it must be a future card and current value is based purely on a specificSession
+                current = getValueForSession(stat, datapoints, specificDate)
+            }
             //console.log("current", current, dateRange)
             //console.log("ds", datapoints)
             const achieved = isPast ? current : null;
@@ -330,11 +382,17 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
 
     const lastPastProfile = d3.greatest(orderedProfiles.filter(p => p.isPast), p => p.date);
 
-    const { data:{ expiryDuration }, milestone: { restrictDataToWindow } } = settings;
+    //settings
+    //@todo - implement different expiry units, for now, we assume its months 
+    const expiryDuration = settings.find(s => s.key === "dataExpiryTimeNumber").value;
+    const currentValueDataMethod = settings.find(s => s.key === "currentValueDataMethod").value;
+    //@todo - use session id (or date and time). For now, default to the last session date
+    const specificDate = currentValueDataMethod === "specificSession" ? getLastSessionDate(datasets) : null;
+
     //10 was scored in 20th apr 2021 so not within 3 months and not since last card
     //it seems startdate is more than 3 months ago
     //note - current always only takes values from last 3 months
-    //@todo - implement other starts for current card eg latest session/ this week / this season etc
+    //@todo - implement other starts for current card eg this week / this season etc
     const profileStart = {
         type:"default",
         date:addMonths(-expiryDuration, now)
@@ -360,6 +418,14 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
             //@todo - if user has given a fixed startTime for a profile, then get value at that point
             const prevAchieved = lastPastProfile?.kpis.find(kpi => kpi.key === key)?.achieved;
 
+            let current;
+            if(currentValueDataMethod !== "specificSession"){
+                current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod);
+            }else{
+                //it must be a future card and current value is based purely on a specificSession
+                current = getValueForSession(stat, datapoints, specificDate)
+            }
+
             return {
                 ...kpi,
                 key,
@@ -374,7 +440,7 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
                     min, max,
                     expected:activeProfileValues(kpi)?.expected,
                     target:activeProfileValues(kpi)?.target,
-                    current:calcCurrent(stat, datapoints, dateRange)
+                    current
                 },
                 //other info
                 datasetName:dataset?.name || "",
