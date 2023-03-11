@@ -39,18 +39,14 @@ export function hydrateJourneyData(data, user, datasets){
                 selectedDesc:() => JOURNEY_SETTINGS_INFO[s.key].options.find(opt => opt.value === s.value)?.desc
             }
         });
-    console.log("settings", settings.map(s => [s.key, s.value]))
 
     //STEP 1: HYDRATE PROFILES
     const options = { now, rangeFormat };
-    //console.log("hydrateJourney", data)
     const hydratedProfiles = hydrateProfiles(nonCurrentProfiles, datasets, kpis, defaultTargets, settings, options);
-    //console.log("hydratedProfiles", hydratedProfiles.find(p => p.id === "profile-1"))
 
     //STEP 2: CREATE CURRENT PROFILE, including expected values
     const currentProfile = createCurrentProfile(hydratedProfiles, datasets, kpis, settings, options );
 
-    //console.log("currentProfile", currentProfile)
     //SEP 3: EMBELLISH PROFILES BASED ON CURRENT PROFILE INFO
     const pastProfiles = hydratedProfiles.filter(p => p.isPast);
     const futureProfiles = hydratedProfiles.filter(p => p.isFuture)
@@ -113,8 +109,10 @@ function getLastSessionDate(datasets){
 
 //@todo - custom expected when user drags
 function calcExpected(kpi, start, target, now, options={}){
-    //console.log("calcExp targ", target)
-    if(!start || start.actual === null || target.actual === null){ 
+    console.log("calcExp kpi", kpi)
+    console.log("calcExp start", start)
+    console.log("calcExp targ", target)
+    if(!start || !start.actual || !target.actual){ 
         return { actual:null, completion:null }; 
     }
     const { accuracy, showTrailingZeros=true } = options;
@@ -162,8 +160,6 @@ function calcCurrent(stat, datapoints, dateRange, dataMethod){
     const getOverallValue = values => {
         if(dataMethod === "best"){ return getBest(values); }
         if(dataMethod === "latestValue") {
-            //console.log("pairs", dateValuePairs) 
-            //console.log("greatest", d3.greatest(dateValuePairs, d => d[0]))
             return dateValuePairs[0] ? d3.greatest(dateValuePairs, d => d[0])[1] : null 
         }
         return 0;
@@ -194,20 +190,14 @@ function calcDateRange(start, end, format){
 }
 
 const goBackByExpiryDurationFromDate = (duration, units) => date => {
-    if(units === "years"){
-        //console.log("back by years", duration)
-        return addYears(-duration, date); }
-    if(units === "months"){ 
-        //console.log("back by month", duration)
-        return addMonths(-duration, date); }
-    if(units === 'weeks'){ 
-        //console.log("back by weeks", duration)
-        return addWeeks(-duration, date); }
+    if(units === "years"){ return addYears(-duration, date); }
+    if(units === "months"){ return addMonths(-duration, date); }
+    if(units === 'weeks'){ return addWeeks(-duration, date); }
     return date;
 }
 
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
-    //console.log("hydrateProfile------------", profile.id, profile.date, profile.created)
+    console.log("hydrateProfile------------", profile.id, profile.date, profile.created)
     const { now, rangeFormat } = options;
     const { id, date, customTargets=[], isCurrent, created } = profile;
     const milestoneId = id;
@@ -282,8 +272,6 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
         isActive,
         kpis:kpis.map((kpi,i) => {
             //console.log("kpi", kpi)
-            //console.log("profileStart", profileStart)
-            //console.log("prevProfToUse", prevProfileToUse)
             //KEYS/ID
             const { datasetKey, statKey, min, max, accuracy } = kpi;
             const key = `${datasetKey}-${statKey}`;
@@ -301,7 +289,6 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
 
             let start;
             if(profileStart.type === "custom" || profileStart.type === "default"){
-                //console.log("date....", profileStart.date)
                 const startDateRange = calcDateRange(goBackByExpiryDuration(profileStart.date), profileStart.date);
                 start = {
                     ...profileStart,
@@ -333,8 +320,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 //it must be a future card and current value is based purely on a specificSession
                 current = getValueForSession(stat, datapoints, specificDate)
             }
-            //console.log("current", current, dateRange)
-            //console.log("ds", datapoints)
+
             const achieved = isPast ? current : null;
             const customTargetsForStat = customTargets
                 .filter(t => t.datasetKey === datasetKey && t.statKey === statKey)
@@ -359,10 +345,13 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //note prevProfile has already been processed with a full key and values
 
             //for now, we only do expected for the active profile, which ensures achived is defined on previous
+            if(i === 0 && id === "profile-4"){
+                console.log("getting expected---------------------")
+            }
             let expected = isPast ? null : calcExpected(kpi, start, { date, ...target }, now, { accuracy });
 
-            if(i === 0 && id === "profile-7"){
-                //console.log("expected", expected)
+            if(i === 0 && id === "profile-4"){
+                console.log("expected---------------------", expected)
             }
 
             return {
