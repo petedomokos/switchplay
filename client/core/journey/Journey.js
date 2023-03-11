@@ -158,7 +158,6 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       customExpected:[],
       ...props //will be just the date if from milestonesBar
     }
-    console.log("save prof", profile)
     const _profiles = [ ...profiles, profile];
     //save({ ...data, profiles:_profiles });
   },[stringifiedProfiles, user._id])
@@ -246,6 +245,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   }, [stringifiedContracts, user._id]);
 
   const onSaveSetting = useCallback(newSetting => {
+    console.log("onSaveSetting", newSetting)
     const otherSettings = settings.filter(s => s.key !== newSetting.key);
     const _settings = [ ...otherSettings, newSetting]
     save({ ...data, settings:_settings });

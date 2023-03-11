@@ -31,7 +31,7 @@ export const addMonths = (n, date) => {
 	return new Date(clone.setMonth(clone.getMonth() + n));
 }
 
-export const addYear = (n, date) => addWeeks(n * 52, date);
+export const addYears = (n, date) => addWeeks(n * 52, date);
 
 export const diffInWeeks = (d1, d2) => {
     var t2 = d2.getTime()

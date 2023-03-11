@@ -7,10 +7,10 @@ import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import Button from '@material-ui/core/Button'
 import SelectDate from "../../util/SelectDate";
-import Options from "../../util/Options";
+import Settings from "../../util/Settings";
 import milestonesLayout from "./milestonesLayout";
 import milestonesBarComponent from "./milestonesBarComponent";
-import { DIMNS, FONTSIZES, grey10, JOURNEY_SETTINGS_OPTIONS } from './constants';
+import { DIMNS, FONTSIZES, grey10, JOURNEY_SETTINGS_INFO } from './constants';
 import { sortAscending, sortDescending } from '../../util/ArrayHelpers';
 
 const useStyles = makeStyles((theme) => ({
@@ -91,7 +91,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo, onSaveSetting }) => {
-  const { player={}, profiles=[], contracts=[], settings=[], settingsOptions } = data;
+  const { player={}, profiles=[], contracts=[], settings=[] } = data;
   const allMilestones = [ ...profiles, ...contracts ];
   //console.log("MBar", profiles)
   //local state
@@ -100,6 +100,13 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   const [sliderEnabled, setSliderEnabled] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState("");
   const [form, setForm] = useState(null);
+
+  const moreSettings = sortAscending(settings
+    .filter(s => s.key !== "currentValueDataMethod")
+    .filter(s => s.positionInCurrentCardSettings), 
+    d => d.positionInCurrentCardSettings
+  )
+  
   const shouldAutosaveForm = form?.formType === "date" ? false : true;
 
   const [layout, setLayout] = useState(() => milestonesLayout());
@@ -123,9 +130,12 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
     setForm(prevState => ({ ...prevState, hasChanged:true, value }))
   }, [form]);
 
-  const handleClickCurrentCardFormatOption = useCallback(newOption => {
-    const { key, value } = newOption;
+  const handleClickSettingOption = useCallback((key, value) => {
     onSaveSetting({ key, value })
+  }, [form]);
+
+  const onClickMoreSettings = useCallback(() => {
+    setForm(prevState => ({ ...prevState, shouldShowMoreSettings:true }))
   }, [form]);
 
   const handleSaveForm = useCallback(e => {
@@ -231,9 +241,6 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
       .setForm(newForm => {
         //todo - handle if current - value is not set, and also may need the key??
         if(!newForm){ milestonesBar.updateDatesShown(allMilestones); }
-        if(newForm?.milestoneId === "current"){
-          ///add key and value?
-        }
         //first, always reset to null so SelectDate unmounts and default value is ready to be reloaded
         //@todo - find a better wy of clearing the defaultValue within the SelectDate component instead
         setForm(null);
@@ -267,12 +274,18 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
         <div className={classes.formContainer} ref={formContainerRef}>
           {form.formType === "date" &&
             form.milestoneId === "current" ?
-              <Options
-                  options={JOURNEY_SETTINGS_OPTIONS.filter(s => s.key === "currentValueDataMethod")}
-                  selectedValue={settings.find(s => s.key === "currentValueDataMethod").value}
-                  primaryText={item => item.label}
-                  secondaryText={item => item.desc}
-                  onClickOption={handleClickCurrentCardFormatOption} />
+              <>
+                <Settings
+                    options={JOURNEY_SETTINGS_INFO.currentValueDataMethod.options}
+                    selectedValue={settings.find(s => s.key === "currentValueDataMethod").value}
+                    moreSettings={moreSettings}
+                    shouldShowMoreSettings={form.shouldShowMoreSettings}
+                    primaryText={item => item.label}
+                    secondaryText={item => item.desc}
+                    onClickOption={handleClickSettingOption}
+                    onClickMoreSettings={onClickMoreSettings} />
+                {form.more && <div>more.....</div>}
+              </>
               :
               <>
                 <SelectDate

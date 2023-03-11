@@ -1,33 +1,69 @@
 import * as d3 from 'd3';
 
-export const JOURNEY_SETTINGS_OPTIONS = [
-    //currentValueDataMethod
-    { key:"currentValueDataMethod", value: "best", label:"BEST", desc:"desc..." },
-    { key:"currentValueDataMethod", value: "specificSession",/*defaults to last session*/ label:"SESSION", desc:"desc..." },
-    { key:"currentValueDataMethod", value: "latestValue", label:"LATEST", desc:"desc..." },
-    //achievedValueDataMethod - options not implemented yet
-    { key:"achievedValueDataMethod", value: "best", label:"BEST", desc:"desc..." },
-    { key:"achievedDataMethod", value: "specificSession",/*defaults to last session*/ label:"SESSION", desc:"desc..." },
-    { key:"achievedValueDataMethod", value: "latestValue", label:"LATEST", desc:"desc..." },
-    //data expiry unit
-    { key:"dataExpiryTimeUnits", value:"hours", label:"hours" },
-    { key:"dataExpiryTimeUnits", value:"days", label:"days" },
-    { key:"dataExpiryTimeUnits", value:"weeks", label:"weeks" },
-    { key:"dataExpiryTimeUnits", value:"months", label:"months" },
-    { key:"dataExpiryTimeUnits", value:"years", label:"years" },
-    //data expiry value
-    { key:"dataExpiryTimeNumber", unit:"integer" },
-    //restrict data
-    { key:"restrictMilestoneDataToWindow", value:true, label:"True", desc:"..." },
-    { key:"restrictMilestoneDataToWindow", value:false, label:"False", desc:"..." },
-]
+export const JOURNEY_SETTINGS_INFO = {
+    currentValueDataMethod:{
+        label:"Data Method",
+        desc:"...",
+        valueType:"string",
+        positionInCurrentCardSettings:1,
+        displayFormat:"buttons",
+        options:[
+            { key:"currentValueDataMethod", value: "best", label:"BEST", desc:"desc..." },
+            { key:"currentValueDataMethod", value: "specificSession",/*defaults to last session*/ label:"SESSION", desc:"desc..." },
+            { key:"currentValueDataMethod", value: "latestValue", label:"LATEST", desc:"desc..." }
+        ]
+    },
+    achievedValueDataMethod:{
+        label:"Data Method For Past Cards",
+        desc:"...",
+        valueType:"string",
+        displayFormat:"buttons",
+        options:[
+            { key:"achievedValueDataMethod", value: "best", label:"BEST", desc:"desc..." },
+            { key:"achievedDataMethod", value: "specificSession",/*defaults to last session*/ label:"SESSION", desc:"desc..." },
+            { key:"achievedValueDataMethod", value: "latestValue", label:"LATEST", desc:"desc..." },
+        ]
+    },
+    dataToIncludeInMilestones:{
+        label:"Data To Include In Milestones",
+        desc:"...",
+        valueType:"string",
+        positionInCurrentCardSettings:2,
+        displayFormat:"buttons",
+        options:[
+            { key:"dataToIncludeInMilestones", value:"all", label:"All Data", desc:"..." },
+            { key:"dataToIncludeInMilestones", value:"fromStart", label:"From Start Date", desc:"..." },
+        ]
+    },
+    dataExpiryTimeNumber:{
+        positionInCurrentCardSettings:3,
+        label:"Data Expiry Amount",
+        desc:"...",
+        valueType:"naturalNumber",
+        displayFormat:"dropdown",
+    },
+    dataExpiryTimeUnits:{
+        positionInCurrentCardSettings:4,
+        label:"Data Expiry Unit",
+        desc:"...",
+        valueType:"string",
+        displayFormat:"dropdown",
+        options:[
+            //{ key:"dataExpiryTimeUnits", value:"hours", label:"hours" },
+            //{ key:"dataExpiryTimeUnits", value:"days", label:"days" },
+            { key:"dataExpiryTimeUnits", value:"weeks", label:"weeks" },
+            { key:"dataExpiryTimeUnits", value:"months", label:"months" },
+            { key:"dataExpiryTimeUnits", value:"years", label:"years" }
+        ]
+    }
+}
 
 export const JOURNEY_SETTINGS = [
     { key:"currentValueDataMethod", defaultValue: "best" },
     { key:"achievedValueDataMethod", defaultValue: "best" },
-    { key:"dataExpiryTimeNumber", defaultValue:2 },
-	{ key:"dataExpiryTimeUnits", defaultValue:"months" },
-	{ key:"restrictMilestoneDataToWindow", defaultValue:false }
+    { key:"dataExpiryTimeNumber", defaultValue: 2 },
+	{ key:"dataExpiryTimeUnits", defaultValue: "months" },
+	{ key:"dataToIncludeInMilestones", defaultValue: "all" }
 ]
 
 export const grey10 = (i) => ["#FFFFFF", "#E8E8E8","#D3D3D3", "#BEBEBE", "#A8A8A8", "#888888", "#696969", "#505050", "#303030", "#000000"][i-1];

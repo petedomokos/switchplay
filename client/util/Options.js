@@ -16,71 +16,91 @@ import CardActions from '@material-ui/core/CardActions'
 import CardContent from '@material-ui/core/CardContent'
 import Button from '@material-ui/core/Button'
 import { compareAlpha } from "./ArrayHelpers"
-
+import { DropdownSelector } from './Selector'
 
 const useStyles = makeStyles(theme => ({
   root: theme.mixins.gutters({
-      width:"100px",
-      height:props => props.moreOptions ? "150px" : "120px",
-      padding:"0px",
-      margin:"0px",
-      paddingTop:"3px",
-      paddingBottom:"3px"
-  }),
-  content:{
+    width:"90%",
+    height:"90%",
     padding:"0px",
-    paddingTop:"5px",
+    margin:"0px",
+    paddingTop:"3px",
+    paddingBottom:"3px",
+    display:"flex",
+    flexDirection:"column",
+    justifyContent:"space-between",
+    alignItems:"center",
+  }),
+  actions:{
+  },
+  title: {
+    width:"100%",
+    height:"10%",
+    fontSize:"9px",
+    alignSelf:"flex-start",
+    margin:"3px"
+  },
+  optionsWrapper:{
+    width:'100%',
+    height:"90%"
+  },
+  optionWrapper:{
+    width:"100%",
+    padding:"0px",
     margin:"0px",
     display:"flex",
     flexDirection:"column",
     justifyContent:"space-between",
-    alignItems:"center"
-  },
-  actions:{
-  },
-  title: {
-      
-  },
-  optionWrapper:{
-    padding:"0px",
-    margin:"0px",
+    alignItems:"center",
   },
   optionBtn: {
-      width:"110px",
+      width:props => props.btnWidth || "90%",
       marginTop:"3px",
       marginBottom:"3px",
       fontSize:"10px"
   },
-  more:{
-      fontSize:"10px",
-      marginTop:"10px",
+  dropdownCont:{
+      display:"flex",
+      justifyContent:"center"
   }
 }))
 
-export default function Options({ title, emptyMesg, options, moreOptions, selectedValue, onClickOption, primaryText, secondaryText, styles}) {
-  const stylesProps = {...styles, moreOptions }
+export default function Options({ title, displayFormat, emptyMesg, options, selectedValue, onClickOption, primaryText, styles}) {
+  const stylesProps = { ...styles }
   const classes = useStyles(stylesProps);
+  const key = options[0]?.key;
 
-    return (
-      <Card className={classes.root} elevation={4}>
-         <CardContent className={classes.content}>
-            {title && <Typography variant="h6" className={classes.title}>{title} </Typography>}
-            {options.map((option, i) =>
+  return (
+    <div className={classes.root} elevation={4}>
+          {title && <Typography variant="h6" className={classes.title}>{title} </Typography>}
+          <div className={classes.optionsWrapper}>
+            {displayFormat === "buttons" && options.map((option, i) =>
                 <div key={i} className={classes.optionWrapper} style={{opacity:selectedValue === option.value ? 1 : 0.6}}>
                     <Button color="primary" variant="contained" 
-                        onClick={() => onClickOption(option,i)} className={classes.optionBtn} >
+                        onClick={() => onClickOption(option.key, option.value)} className={classes.optionBtn} >
                         {primaryText(option,i)}
                     </Button>
                 </div>
             )}
-            {moreOptions && <Typography className={classes.more} component="p" color="error">More Options</Typography>}
-         </CardContent>
-      </Card>
-    )
+            {displayFormat === "dropdown" && 
+              <div className={classes.dropdownCont}>
+                <DropdownSelector
+                    options={options}
+                    selected={selectedValue}
+                    valueAccessor={option => option.value}
+                    labelAccessor={option => option.label}
+                    handleChange={e => onClickOption(key, e.target.value)}
+                    style={{margin:0, width:"80px", height:"20px", fontSize:"7px"}}
+                />
+              </div>}
+          </div>
+    </div>
+  )
 }
 
 Options.defaultProps = {
     title:'',
+    displayFormat:"buttons",
     selectedValue:"",
     emptyMesg:'None',
     options:[],

@@ -93,7 +93,7 @@ export default function profileInfoComponent() {
             const nrChars = fDate => fDate[0] === " " ? fDate.length - 1 : fDate.length;
             //todo- make a pseudo text element and use getComputerTxtlngth, instead of this bodge to make TODAY work
             const calcLength = (text, fontSize, isUpperCase=false) =>  nrChars(text) * fontSize * (isUpperCase ? 0.7 : 0.47);
-            const length = d => calcLength((d.isCurrent ? currentValueDataMethod.label : format(d.date)), fontSizes.date, d.isCurrent);
+            const length = d => calcLength((d.isCurrent ? currentValueDataMethod.selectedLabel() : format(d.date)), fontSizes.date, d.isCurrent);
             const dateHeight = fontSizes.date;
             const horizandVertLength = d => length(d) * Math.sin(Math.PI/4);
             const x = d => dateMargin + horizandVertLength(d)/2;
@@ -134,7 +134,7 @@ export default function profileInfoComponent() {
                         d3.select(this).select("text.primary")
                             .attr("font-size", fontSizes.date)
                             .attr("fill", d.isFuture ? "grey" : "white")
-                            .text(d.isCurrent ? currentValueDataMethod.label : format(d.date))
+                            .text(d.isCurrent ? currentValueDataMethod.selectedLabel() : format(d.date))
 
                         d3.select(this).select("text.secondary")
                             .attr("y", dateHeight * 1.2)

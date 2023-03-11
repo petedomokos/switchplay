@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { addMonths } from '../../util/TimeHelpers';
+import { addYears, addMonths, addWeeks } from '../../util/TimeHelpers';
 import { sortAscending } from '../../util/ArrayHelpers';
 import { getKpis } from "../../data/kpis"
 import { getTargets, findDefaultTarget } from "../../data/targets";
@@ -7,7 +7,7 @@ import { round, roundDown, roundUp, getRangeFormat, dateIsInRange, getValueForSt
 import { linearProjValue } from "./helpers";
 import { calcDateCount } from "../../util/TimeHelpers"
 import { pcCompletion } from "../../util/NumberHelpers"
-import { JOURNEY_SETTINGS, JOURNEY_SETTINGS_OPTIONS } from './constants';
+import { JOURNEY_SETTINGS, JOURNEY_SETTINGS_INFO } from './constants';
 import { getBandsAndStandards } from "../../data/bandsAndStandards";
 
 export function hydrateJourneyData(data, user, datasets){
@@ -32,13 +32,14 @@ export function hydrateJourneyData(data, user, datasets){
             value: data.settings.find(set => set.key === s.key)?.value || s.defaultValue 
         }))
         .map(s => {
-            //there may not be any embellisments, eg if setting is a number
-            const embellishments = JOURNEY_SETTINGS_OPTIONS.find(set => set.key === s.key && set.value === s.value) || {};
             return {
-                ...embellishments, 
-                ...s
+                ...JOURNEY_SETTINGS_INFO[s.key], 
+                ...s,
+                selectedLabel:() => JOURNEY_SETTINGS_INFO[s.key].options.find(opt => opt.value === s.value)?.label,
+                selectedDesc:() => JOURNEY_SETTINGS_INFO[s.key].options.find(opt => opt.value === s.value)?.desc
             }
-    });
+        });
+    console.log("settings", settings.map(s => [s.key, s.value]))
 
     //STEP 1: HYDRATE PROFILES
     const options = { now, rangeFormat };
@@ -192,6 +193,18 @@ function calcDateRange(start, end, format){
     ];
 }
 
+const goBackByExpiryDurationFromDate = (duration, units) => date => {
+    if(units === "years"){
+        //console.log("back by years", duration)
+        return addYears(-duration, date); }
+    if(units === "months"){ 
+        //console.log("back by month", duration)
+        return addMonths(-duration, date); }
+    if(units === 'weeks'){ 
+        //console.log("back by weeks", duration)
+        return addWeeks(-duration, date); }
+    return date;
+}
 
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
     //console.log("hydrateProfile------------", profile.id, profile.date, profile.created)
@@ -200,9 +213,12 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
     const milestoneId = id;
     //startDate
     //helper
-    //@todo - implement different expiry units, for now, we assume its months 
-    const expiryDuration = settings.find(s => s.key === "dataExpiryTimeNumber").value;
-    const restrictDataToWindow = settings.find(s => s.key === "restrictMilestoneDataToWindow").value;
+    //@todo - implement different expiry units, for now, we assume its months
+    const expiryDuration = Number(settings.find(s => s.key === "dataExpiryTimeNumber").value);
+    const expiryUnits = settings.find(s => s.key === "dataExpiryTimeUnits").value;
+    const goBackByExpiryDuration = goBackByExpiryDurationFromDate(expiryDuration, expiryUnits);
+
+    const restrictDataToWindow = settings.find(s => s.key === "dataToIncludeInMilestones").value === "fromStart";
     const currentValueDataMethod = settings.find(s => s.key === "currentValueDataMethod").value
     const achievedValueDataMethod = settings.find(s => s.key === "achievedValueDataMethod").value
     //@todo - use session id (or date and time). For now, default to the last session date
@@ -234,7 +250,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
     }else{
         profileStart.type = "default";
         const creationDate = new Date(created);
-        profileStart.date = creationDate < date ? creationDate : addMonths(-expiryDuration, date);
+        profileStart.date = creationDate < date ? creationDate : goBackByExpiryDuration(date);
         //all profile dates default to 22:00
         profileStart.date.setUTCHours(22); 
         profileStart.date.setUTCMinutes(0); 
@@ -246,9 +262,9 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
     if(restrictDataToWindow){
         dateRange = calcDateRange(profileStart.date, date);
     }else if(isFuture){
-        dateRange = calcDateRange(addMonths(-expiryDuration, now), now)
+        dateRange = calcDateRange(goBackByExpiryDuration(now), now)
     }else{
-        dateRange = calcDateRange(addMonths(-expiryDuration, date), date);
+        dateRange = calcDateRange(goBackByExpiryDuration(date), date);
     }
 
     return {
@@ -286,7 +302,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             let start;
             if(profileStart.type === "custom" || profileStart.type === "default"){
                 //console.log("date....", profileStart.date)
-                const startDateRange = calcDateRange(addMonths(-expiryDuration, profileStart.date), profileStart.date);
+                const startDateRange = calcDateRange(goBackByExpiryDuration(profileStart.date), profileStart.date);
                 start = {
                     ...profileStart,
                     //note - we pass in the achieved data method, as this will always be in the past
@@ -387,8 +403,10 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
     const lastPastProfile = d3.greatest(orderedProfiles.filter(p => p.isPast), p => p.date);
 
     //settings
-    //@todo - implement different expiry units, for now, we assume its months 
-    const expiryDuration = settings.find(s => s.key === "dataExpiryTimeNumber").value;
+    const expiryDuration = Number(settings.find(s => s.key === "dataExpiryTimeNumber").value);
+    const expiryUnits = settings.find(s => s.key === "dataExpiryTimeUnits").value;
+    const goBackByExpiryDuration = goBackByExpiryDurationFromDate(expiryDuration, expiryUnits);
+
     const currentValueDataMethod = settings.find(s => s.key === "currentValueDataMethod").value;
     //@todo - use session id (or date and time). For now, default to the last session date
     const specificDate = currentValueDataMethod === "specificSession" ? getLastSessionDate(datasets) : null;
@@ -399,7 +417,7 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
     //@todo - implement other starts for current card eg this week / this season etc
     const profileStart = {
         type:"default",
-        date:addMonths(-expiryDuration, now)
+        date:goBackByExpiryDuration(now)
     };
     const datePhase = "current";
     const dateRange = calcDateRange(profileStart.date, now);
