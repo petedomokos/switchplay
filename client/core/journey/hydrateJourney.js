@@ -109,9 +109,6 @@ function getLastSessionDate(datasets){
 
 //@todo - custom expected when user drags
 function calcExpected(kpi, start, target, now, options={}){
-    console.log("calcExp kpi", kpi)
-    console.log("calcExp start", start)
-    console.log("calcExp targ", target)
     if(!start || !start.actual || !target.actual){ 
         return { actual:null, completion:null }; 
     }
@@ -197,7 +194,7 @@ const goBackByExpiryDurationFromDate = (duration, units) => date => {
 }
 
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
-    console.log("hydrateProfile------------", profile.id, profile.date, profile.created)
+    //console.log("hydrateProfile------------", profile.id, profile.date, profile.created)
     const { now, rangeFormat } = options;
     const { id, date, customTargets=[], isCurrent, created } = profile;
     const milestoneId = id;
@@ -339,20 +336,8 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 ...nonRoundedTarget,
                 actual:round(nonRoundedTarget.actual, accuracy)
             }
-            if(key === "pressUps-reps"){
-                
-            }
             //note prevProfile has already been processed with a full key and values
-
-            //for now, we only do expected for the active profile, which ensures achived is defined on previous
-            if(i === 0 && id === "profile-4"){
-                console.log("getting expected---------------------")
-            }
             let expected = isPast ? null : calcExpected(kpi, start, { date, ...target }, now, { accuracy });
-
-            if(i === 0 && id === "profile-4"){
-                console.log("expected---------------------", expected)
-            }
 
             return {
                 ...kpi, key, milestoneId,
