@@ -43,6 +43,13 @@ export default function tooltipsComponent() {
         subtext:{
             fill:grey10(4),
             stroke:grey10(4)
+        },
+        hitbox:{
+            fill:"transparent",
+            stroke:"none",
+            strokeOpacity:1,
+            opacity:1,
+            strokeWidth:0.1
         }
     };
     let _styles = () => defaultStyles;
@@ -56,7 +63,6 @@ export default function tooltipsComponent() {
     }
 
     let draggable = false;
-    let showDragValueAbove = true;
     let beingDragged = () => false;
 
     const enhancedDrag = dragEnhancements();
@@ -75,6 +81,9 @@ export default function tooltipsComponent() {
         //console.log("uT...data", selection.data())
         //const tooltipDimns = _tooltipDimns(data, i);
         selection.each(function(d,i){
+            if(d.milestoneId === "current" && d.datasetKey ==="shuttles" && d.key === "current"){
+                //console.log("tooltip", d)
+            }
             //decide the saem common pattern for tooltips - it should probably always be
             //an array, even if its top then bottom
             const tooltipG = d3.select(this);
@@ -83,7 +92,7 @@ export default function tooltipsComponent() {
 
             const contentsWidth = width - margin.left - margin.right;
             const contentsHeight = height - margin.top - margin.bottom;
-            const dragTextHeight = draggable && showDragValueAbove ? contentsHeight * 0.333 : 0;
+            const dragTextHeight = draggable && d.withDragValueAbove ? contentsHeight * 0.333 : 0;
             const iconHeight = contentsHeight - dragTextHeight;
 
             tooltipG.select("rect.hitbox")
@@ -91,6 +100,11 @@ export default function tooltipsComponent() {
                 .attr("y", -contentsHeight/2)
                 .attr("width", contentsWidth)
                 .attr("height", contentsHeight)
+                .attr("fill", styles.hitbox.fill)
+                .attr("stroke", styles.hitbox.stroke)
+                .attr("stroke-width", styles.hitbox.strokeWidth)
+                .attr("opacity", styles.hitbox.opacity)
+                .attr("stroke-opacity", styles.hitbox.strokeOpacity)
 
             //dragtext
             tooltipG.select("text.drag-value")
@@ -98,17 +112,18 @@ export default function tooltipsComponent() {
                 .attr("fill", styles.text.fill)
                 .attr("stroke", styles.text.stroke)
                 .attr("font-size", dragTextHeight * 0.8)
-                .attr("display", draggable && showDragValueAbove ? null : "none")
+                .attr("display", draggable && d.withDragValueAbove ? null : "none")
                 .text(getValue(d))
 
             //tooltip settings
             const isSmall = iconHeight < 10
             const iconObject = isSmall ? (d.smallIcons || d.icons) : d.icons;
             const icon = isAchieved(d) ? iconObject?.achieved : iconObject?.notAchieved;
-            const shouldShowValue = !isSmall && (!isAchieved(d) || hovered === d.key) && !beingDragged(d);
+            const shouldShowValue = d.withInnerValue && !isSmall && (!isAchieved(d) || hovered === d.key) && !beingDragged(d);
 
             const mainContentsG = tooltipG.select("g.main-contents")
                 .attr("transform", `translate(0, ${dragTextHeight/2})`)
+                //why is this /2 in the line above? need to go over all dimns for tooltips,
 
             //icon
             const iconData = icon ? [1] : [];
@@ -264,7 +279,7 @@ export default function tooltipsComponent() {
                         }
                         return; }
                     beingDragged = t => t.progBarKey === d.progBarKey && t.key === d.key;
-                    if(showDragValueAbove){
+                    if(d.withDragValueAbove){
                         d3.select(this).select("text.drag-value")
                             .transition()
                             .duration(200)
@@ -319,9 +334,7 @@ export default function tooltipsComponent() {
 
                             d3.select(this).append("g").attr("class", "main-contents") 
                             //hitbox must be on top, as contents under it will change              
-                            d3.select(this).append("rect").attr("class", "hitbox")
-                                .attr("fill", "transparent")
-                                //.attr("stroke", "red")
+                            d3.select(this).append("rect").attr("class", "hitbox");
                         })
                         .merge(tooltipG)
                         .style("display", d => d.shouldDisplay ? null : "none")
@@ -360,7 +373,8 @@ export default function tooltipsComponent() {
             const requiredStyles = func(d,i);
             return {
                 text:{ ...defaultStyles.text, ...requiredStyles.text },
-                subtext:{ ...defaultStyles.subtext, ...requiredStyles.subtext }
+                subtext:{ ...defaultStyles.subtext, ...requiredStyles.subtext },
+                hitbox:{ ...defaultStyles.hitbox, ...requiredStyles.hitbox }
                 //others here
             }
         };

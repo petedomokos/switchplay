@@ -197,7 +197,11 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     }
   }, [stringifiedProfiles]);
 
-  const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => {  
+  const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => { 
+    if(key === "current"){
+      onSaveStatValue(valueObj, profileId, datasetKey, statKey);
+      return;
+    } 
     //trouble - the unsaved value gets removed, and tehn an update to tooltips occurs
     //before the saved value has been adjusted.
     //profile wont ever be current here, as that is dynamically created ratehr than stored
@@ -206,7 +210,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       :
       profiles.find(p => p.id === profileId);
 
-    let statValue = {
+    let obj = {
       ...valueObj,
       datasetKey,
       statKey,
@@ -217,14 +221,31 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     const updatedProfile = {
       ...profile,
       //for now, we store every single time a new target or expected value is created eg on every drag - good for user analytics anyway
-      customTargets:key === "target" ? [ ...profile.customTargets, statValue ] : profile.customTargets,
-      customExpected:key === "expected" ? [ ...profile.customExpected, statValue ] : profile.customExpected,
+      customTargets:key === "target" ? [ ...profile.customTargets, obj ] : profile.customTargets,
+      customExpected:key === "expected" ? [ ...profile.customExpected, obj ] : profile.customExpected,
     }
     //cant use profileId as it may be 'current' which is not updated
     const otherProfiles = profiles.filter(p => p.id !== updatedProfile.id);
     const _profiles = [ ...otherProfiles, updatedProfile]
-    //console.log("saving value", statValue)
-    save({ ...data, profiles:_profiles });
+    console.log("saving targ or expected value", obj)
+    //save({ ...data, profiles:_profiles });
+    
+  }, [stringifiedProfiles, user._id]);
+
+  const onSaveStatValue = useCallback((valueObj, datasetKey, statKey, key) => { 
+    
+    let obj = {
+      ...valueObj,
+      datasetKey,
+      statKey,
+      created:`${new Date()}`,
+      //createdBy
+      //approvedBy is empty at first
+    }
+    console.log("saving stat value", obj)
+    //need to save in a new db collection for manualDatapoints, 
+    //where each one is just a single statKey-value pair, along with 
+    //date, created etc
     
   }, [stringifiedProfiles, user._id]);
 

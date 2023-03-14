@@ -116,6 +116,8 @@ export default function kpisLayout(){
                     value: barData.start, x:barData.start,
                     accuracy,
                     editable:false,
+                    withDragValueAbove:false,
+                    withInnerValue:true,
                 },
                 { 
                     key:"end", milestoneId, kpiKey:key, datasetKey, statKey,
@@ -125,6 +127,8 @@ export default function kpisLayout(){
                     value: barData.end, x:barData.end,
                     accuracy,
                     editable:false,
+                    withDragValueAbove:false,
+                    withInnerValue:true,
                 },
                 { 
                     key:"expected", milestoneId, kpiKey:key, datasetKey, statKey,
@@ -135,7 +139,9 @@ export default function kpisLayout(){
                     dataOrder:stat.order,
                     accuracy,
                     icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },
-                    editable:false//isCurrent || isFuture,
+                    editable:false,//isCurrent || isFuture,
+                    withDragValueAbove:true,
+                    withInnerValue:true,
                     //smallIcons: expectedAchieved ? emptyGoal : emptyGoal,
                 },
                 { 
@@ -148,8 +154,23 @@ export default function kpisLayout(){
                     accuracy,
                     icons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
                     editable:isCurrent || isFuture,
+                    withDragValueAbove:true,
+                    withInnerValue:true,
                     //if small space, just show the ball
                     //smallIcons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
+                },
+                {
+                    key:"current", milestoneId, kpiKey:key, datasetKey, statKey,
+                    label: values.achieved ? "Achieved" : "Current",
+                    rowNr:0, y:0,
+                    value:current,
+                    fill:colours.current,
+                    dataOrder:stat.order,
+                    accuracy,
+                    editable:isCurrent || isFuture,
+                    withDragValueAbove:false,
+                    withInnerValue:false,
+                    shouldDisplay:true
                 }
             ];
 

@@ -68,6 +68,7 @@ export default function progressBarComponent() {
             
             //we want expecetd icon to be a bit bigger die to its circular shape
             const expectedMultiplier = 1.3;
+            const boundsMultiplier = 0.3;
             //for now, hardcode aspect ratios as we know there are two tooltips
             const expectedTooltipAspectRatio = 1; //this is approx, as the shiny one is not exactly 1
             const targetTooltipAspectRatio = 42/56;
@@ -137,24 +138,24 @@ export default function progressBarComponent() {
             const tooltips = {
                 open:{
                     start: {
-                        width:topExpectedTooltipWidth * expectedMultiplier,
-                        height:topTooltipsHeight * expectedMultiplier,
+                        width:topExpectedTooltipWidth * boundsMultiplier,
+                        height:topTooltipsHeight * boundsMultiplier,
                         margin: { 
                             left:0,
                             right:0,
-                            top:topTooltipsHeight * 0.15,
-                            bottom:topTooltipsHeight * 0.15
+                            top:0,
+                            bottom:0
                         },
                         fontSize:boundsFontsize
                     },
                     end: {
-                        width:topExpectedTooltipWidth * expectedMultiplier,
-                        height:topTooltipsHeight * expectedMultiplier,
+                        width:topExpectedTooltipWidth * boundsMultiplier,
+                        height:topTooltipsHeight * boundsMultiplier,
                         margin: { 
                             left:0,
                             right:0,
-                            top:topTooltipsHeight * 0.15,
-                            bottom:topTooltipsHeight * 0.15
+                            top:0,
+                            bottom:0
                         },
                         fontSize:boundsFontsize
                     },
@@ -177,6 +178,18 @@ export default function progressBarComponent() {
                             right:bottomTargetTooltipWidth * 0.15,
                             top:bottomTooltipsHeight * 0.15,
                             bottom:bottomTooltipsHeight * 0.15
+                        },
+                        fontSize
+            
+                    },
+                    current: {
+                        width:10,
+                        height:barHeight,
+                        margin: { 
+                            left:0,
+                            right:0,
+                            top:0,
+                            bottom:0
                         },
                         fontSize
             
@@ -342,6 +355,13 @@ export default function progressBarComponent() {
                 //bug when open, tooltipdimns dont increase
                 .tooltipDimns((d,i) => dimns[i].tooltips[status])
                 .styles((d,i) => ({
+                    hitbox:{
+                        fill:d.key === "current" ? grey10(3) : "transparent",
+                        stroke:d.key === "current" ? grey10(10) : "none",
+                        strokeOpacity:1,
+                        opacity:0.3,
+                        strokeWidth:0.2
+                    }
                 }))
                 //this is when open
                 .getValue(getValue)
@@ -361,17 +381,27 @@ export default function progressBarComponent() {
                 })
                 //y is 1 or -1
                 .getY((d,i) => {
-                    if(d.key === "start" || d.key === "end"){
-                        return dimns[i].topTooltipsHeight + dimns[i].bar.height - dimns[i].bar.margin.bottom * 0.8;
-                    }
+                    const { contentsHeight, topTooltipsHeight, tooltips, bar,  } = dimns[i];
                     if(status === "open"){
-                        if(d.key === "expected"){
-                            return 0.5 * dimns[i].tooltips.open.expected.height * 0.5; //0.4 if to take account of teh expectedMultiplier
+                        if(d.key === "current"){
+                            return topTooltipsHeight + bar.height/2;
                         }
-                        return dimns[i].contentsHeight - 0.5 * dimns[i].tooltips.open.target.height;
+                        if(d.key === "start" || d.key === "end"){
+                            return topTooltipsHeight + bar.height - bar.margin.bottom + tooltips.open.start.height/2;
+                        }
+                        if(d.key === "expected"){
+                            return 0.5 * tooltips.open.expected.height * 0.5; //0.4 if to take account of teh expectedMultiplier
+                        }
+                        if(d.key === "target"){
+                            return contentsHeight - 0.5 * tooltips.open.target.height;
+                        }
+                        return 0;
                     }
-                    //@todo Q why is this based on open.expected.height?
-                    return dimns[i].tooltips.open.expected.height + dimns[i].bar.height/2;
+                    //closed
+                    if(d.key === "expected" || d.key === "target"){
+                        return tooltips.open.expected.height + bar.height/2;
+                    }
+                    return 0;
                 })
                 .draggable(editable)
                 .onClick(function(e,d){
@@ -411,6 +441,10 @@ export default function progressBarComponent() {
                         barData:newBarData
                     }
                     barG.datum(newD).call(bar)
+
+                    //todo next - if value is current, then pass it on to numbers component
+                    //pass the newD to numbers..but what does teh numbers datum look like..check
+                    //numbers
                 })
                 .onDragEnd(function(e, d){
                     //console.log("dragEnd d", d)
