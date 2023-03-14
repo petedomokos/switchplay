@@ -89,9 +89,10 @@ const readMultiple = async (req, res) => {
   try{
       let datasets = await Dataset.find()
           .populate('datapoints.player', '_id firstname surname photo')
-      console.log("datasets", datasets)
+      //console.log("datasets", datasets)
       const playerDatasets = datasets
-        .filter(dset => req.body.datasetIds.find(id => dset._id.equals(id)))
+      //@todo - put filter back in once we have datasetsMemberOf working well. for now, turn off the filter
+        //.filter(dset => req.body.datasetIds.find(id => dset._id.equals(id)))
       //cant use spread operator or functional style with mongoose
       playerDatasets.forEach(dset =>{
         //legacy issue - the ? checks player exists, in case legacy ds exist but player is deleted

@@ -38,7 +38,7 @@ export const fetchDataset = id => dispatch => {
 //note - userId may not be the signed in user
 export const fetchMultipleFullDatasets = (datasetIds, playerId) => dispatch => {
 	//console.log("fetchmultiple p", playerId)
-	//console.log("fetchmultiple dsets", datasetIds)
+	//console.log("fetchmultiple dsets.....................", datasetIds)
 	fetchThenDispatch(dispatch, 
         'loading.datasets',
         {

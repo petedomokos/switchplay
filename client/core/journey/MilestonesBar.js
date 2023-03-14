@@ -93,7 +93,7 @@ const useStyles = makeStyles((theme) => ({
 const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo, onSaveSetting }) => {
   const { player={}, profiles=[], contracts=[], settings=[] } = data;
   const allMilestones = [ ...profiles, ...contracts ];
-  console.log("MBar datasets", datasets)
+  //console.log("MBar datasets", datasets)
   //local state
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
   const [bgMenuLocation, setBgMenuLocation] = useState("");

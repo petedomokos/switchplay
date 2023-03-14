@@ -17,8 +17,8 @@ export default function kpisLayout(){
     let noKpisActive = false;
 
     function update(data){
-        console.log("update kpisLayout------", data)
-        console.log("datasets", datasets)
+        //console.log("update kpisLayout------", data)
+        //console.log("datasets", datasets)
         //const orderedData = sortAscending(data, d => d.date);
         //console.log("ordered", orderedData)
 
@@ -34,9 +34,9 @@ export default function kpisLayout(){
             
            
             const { key, values, accuracy, isPast, isCurrent, isFuture, milestoneId, datasetKey, statKey } = kpi;
-            console.log("kpi key datasetkey", key, datasetKey)
+            //console.log("kpi key datasetkey", key, datasetKey)
             const dataset = datasets.find(dset => dset.key === datasetKey);
-            console.log("dset", dataset)
+            //console.log("dset", dataset)
             const stat = dataset.stats.find(stat => stat.key === statKey);
             //can set all kpis to be active eg for an active profile card that doesnt have access to all data
             const isActive = allKpisActive || kpi.isActive;

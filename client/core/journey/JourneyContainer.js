@@ -96,8 +96,9 @@ const mapStateToProps = (state, ownProps) => {
 	//const data = mocksAdded ? _data : { ..._data, profiles:[..._data.profiles, ...mockProfiles] };
 	const data = _data;
 	//const data = { ..._data, profiles:[] }
-
-	const datasets = datasetsMemberOf.map(dataset => loadedDatasets.find(ds => ds._id === dataset._id))
+	//@todo - put this back once datasetsMemberOf is up to date in the way it works when datasets are created.
+	//for now, just use all loadedDatasets (datapoints have alreayd been filtered in controller)
+	const datasets = loadedDatasets;//temp -  datasetsMemberOf.map(dataset => loadedDatasets.find(ds => ds._id === dataset._id))
 	const fullyLoadedDatasets = datasets
 		.filter(dset => dset.datapoints)
 		.map(dset => ({
