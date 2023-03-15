@@ -337,13 +337,16 @@ export default function progressBarComponent() {
                 .height((d,i) => dimns[i].numbers.height)
                 .margin((d,i) => dimns[i].numbers.margin));
 
-
         //helper to get value
         const getValue = d => typeof d.unsavedValue === "number" ? d.unsavedValue : d.value;
         const enrichedTooltipsData = selection.data()
             .map(d => d.tooltipsData
                 .map(t => ({ ...t, progBarKey: d.key }))
                 .filter(d => status === "open" || ["expected", "target"].includes(d.key)))
+
+        //console.log("progBar status-----", status)
+        //console.log("selG", selection.node())
+        //console.log("sel numbers G", selection.select("g.numbers").data())
 
         //issue - the i in getX below is teh tooltip i, eg target, expected, rther than the kpi i,
         //which is what dimnns needs
@@ -442,9 +445,18 @@ export default function progressBarComponent() {
                     }
                     barG.datum(newD).call(bar)
 
-                    //todo next - if value is current, then pass it on to numbers component
-                    //pass the newD to numbers..but what does teh numbers datum look like..check
                     //numbers
+                    //WARNING: when we grab the numbersG from selection.select("g.numbers"), it doesnt have the numbersData it has the kpi data
+                    //but when we get it from selection.selectAll("g.numbers")
+                    //lesson -> whenever using .data() to bind subdata, when need to use selectAll to get it
+                    const numbersData = selection.selectAll("g.numbers").data();
+                    //todo - need to generalise the top level array too - how to do this?
+                    //console.log("numbersData", numbersData)
+                    const newNumbersData = numbersData.map(data => (data.map(n => n.key === d.key ? ({ ...n, value:newValue }) : n)))
+                    selection.select("g.numbers")
+                        .data(newNumbersData)
+                        .call(numbers)
+
                 })
                 .onDragEnd(function(e, d){
                     //console.log("dragEnd d", d)

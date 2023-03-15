@@ -18,22 +18,24 @@ export function hydrateDataset(dataset){
     const startDate = isDeep ? getStartDate(dataset) : null;
     const derivedMeasures = isDeep ? getDerivedMeasures(key) : null;
     const rawMeasures = dataset.measures?.map(m => hydrateMeasure(m));
-    const datapoints = isDeep ? dataset.datapoints.map(d => {
+    const datapoints = isDeep ? dataset.datapoints.map(datapoint => {
         //add measure key to rawMeasure values (server stores the measure id instead - need to change)
-        const rawValues = d.values.map(v => {
+        const enteredKeyedValues = datapoint.values.map(v => {
             //v.measure is measure _id - we convert it to its key
             return {
-                key:rawMeasures.find(m => m._id === v.measure).key,
-                value:v.value
+                //value could be for a rawmeasure or could be for a raw or derivedMeasure using the key
+                key:rawMeasures.find(m => m._id === v.measure || m.key === v.key).key || derivedMeasures.find(m => m.key === v.key).key,
+                value:v.value,
+                wasCalculated:false
             }
         })
         //derivedValues need a measure key to access the rawValues
-        const dWithValueKeys = { ...d, values:rawValues };
+        const datapointWithEnteredKeyedValues = { ...datapoint, values:enteredKeyedValues };
         return{
-            ...d,
-            date:new Date(d.date),
+            ...datapoint,
+            date:new Date(datapoint.date),
             //values:[...d.values, ...getDerivedValues(dWithValueKeys, derivedMeasures)]
-            values:[...rawValues, ...getDerivedValues(dWithValueKeys, derivedMeasures)]
+            values:[...enteredKeyedValues, ...getDerivedValues(datapointWithEnteredKeyedValues, derivedMeasures)]
         }
     }) : null;
     return {
@@ -49,10 +51,15 @@ export function hydrateDataset(dataset){
 }
 
 export function getDerivedValues(datapoint, derivedMeasures=[]){
-    return derivedMeasures.map(derivedMeasure => ({
-        key:derivedMeasure.key,
-        value:calcDerivedValue(datapoint, derivedMeasure.formula),
-    }))
+    return derivedMeasures
+        .filter(m => !datapoint.values.find(v => v.key === m.key)) //remove any whose values have been entered
+        .map(derivedNonEnteredMeasure => {
+            return {
+                key:derivedNonEnteredMeasure.key,
+                value:calcDerivedValue(datapoint, derivedNonEnteredMeasure.formula),
+                wasCalculated:true 
+            }
+        })
 }
 
 function calcDerivedValue(datapoint, formula){

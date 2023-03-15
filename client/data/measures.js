@@ -489,7 +489,6 @@ const capitalizeAndSpace = str => {
 const space = str => str ? str + " " : "";
 
 export function hydrateMeasure(measure){
-    //console.log("hydratemeasure", measure)
     const { name, key, side, nr, custom } = measure;
     const newKey = [key, side, nr, custom]
         .filter(part => part)

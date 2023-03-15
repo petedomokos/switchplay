@@ -78,6 +78,8 @@ export default function numbersComponent() {
     let onMouseout = function(){};
 
     function numbers(selection, options={}) {
+        //console.log("numbersComp data", selection.data())
+        //console.log("numbersComp node", selection.node())
         const { transitionEnter=true, transitionUpdate=true, log} = options;
         updateDimns(selection.data());
 

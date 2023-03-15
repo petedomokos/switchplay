@@ -197,7 +197,8 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     }
   }, [stringifiedProfiles]);
 
-  const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => { 
+  const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => {
+    console.log("save value", key) 
     if(key === "current"){
       onSaveStatValue(valueObj, profileId, datasetKey, statKey);
       return;
@@ -228,7 +229,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     const otherProfiles = profiles.filter(p => p.id !== updatedProfile.id);
     const _profiles = [ ...otherProfiles, updatedProfile]
     console.log("saving targ or expected value", obj)
-    //save({ ...data, profiles:_profiles });
+    save({ ...data, profiles:_profiles });
     
   }, [stringifiedProfiles, user._id]);
 
@@ -243,9 +244,9 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       //approvedBy is empty at first
     }
     console.log("saving stat value", obj)
-    //need to save in a new db collection for manualDatapoints, 
-    //where each one is just a single statKey-value pair, along with 
-    //date, created etc
+    //need to save it as a datapoint that only contains one value - the one entered here.
+    //then check that no errors occur - the system should not expect any particular values to be defined, so should be fine
+    //the rest shold be work as as expected, with new stat value
     
   }, [stringifiedProfiles, user._id]);
 

@@ -11,6 +11,7 @@ export default new mongoose.Schema({
   values:[ValueSchema],
   notes:{type:String, default:""},
   surface:String,
+  source:{type: String, default: "manual"}, //manual includes spreadsheet, and form 
   fatigueLevel:String,
   isTarget:{type:Boolean, default:false},
   updated: Date
