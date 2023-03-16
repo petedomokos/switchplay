@@ -4,6 +4,7 @@ import dragEnhancements from '../../enhancedDragHandler';
 import barComponent from './barComponent';
 import numbersComponent from './numbersComponent';
 import tooltipsComponent from '../../tooltipsComponent';
+import ctrlsComponent from '../../ctrlsComponent';
 import container from './container';
 import background from './background';
 import { getTransformationFromTrans } from '../../helpers';
@@ -283,6 +284,7 @@ export default function progressBarComponent() {
     const tooltips = tooltipsComponent();
     const bar = barComponent();
     const numbers = numbersComponent();
+    const ctrls = ctrlsComponent();
 
     function progressBar(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
@@ -342,7 +344,7 @@ export default function progressBarComponent() {
         const enrichedTooltipsData = selection.data()
             .map(d => d.tooltipsData
                 .map(t => ({ ...t, progBarKey: d.key }))
-                .filter(d => status === "open" || ["expected", "target"].includes(d.key)))
+                .filter(d =>  d.shouldDisplay(status)))
 
         //console.log("progBar status-----", status)
         //console.log("selG", selection.node())
@@ -458,20 +460,7 @@ export default function progressBarComponent() {
                         .call(numbers)
 
                 })
-                .onDragEnd(function(e, d){
-                    //console.log("dragEnd d", d)
-                    //store the new value
-                    //need each tooltip to have profilekey, kpikey and ley,
-                    //and get rid of progBarKey
-                    //assume format is actual for now
-                    if(typeof d.unsavedValue !== "number" || Number.isNaN(d.unsavedValue)){
-                        console.log("ERROR: NOT A NUMBER");
-                        return;
-                    }
-                    const valueObj = { actual: `${d.unsavedValue}`, completion:"" };
-                    onSaveValue(valueObj, d.milestoneId, d.datasetKey, d.statKey, d.key)
-                    //show a save btn
-                })
+                .onSaveValue(onSaveValue)
                 .onMouseover(function(e,d){
                     //console.log("mover")
                 })

@@ -25,6 +25,7 @@ export function addMilestonePlaceholderContents(selection, width, height, onClic
             { key:"cancel", label: "CANCEL" }
         ]
 
+        console.log("btnData", btnData)
         placeholderContentsG
             .datum({ btnData })
             .call(ctrlsComponent()

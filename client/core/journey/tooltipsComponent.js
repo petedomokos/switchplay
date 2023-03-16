@@ -76,14 +76,17 @@ export default function tooltipsComponent() {
     let onLongpressEnd = function(){};
     let onMouseover = function(){};
     let onMouseout = function(){};
+    let onSaveValue = function(){};
 
     let updateTooltip = function(selection, tooltipDimns){
         //console.log("uT...data", selection.data())
         //const tooltipDimns = _tooltipDimns(data, i);
         selection.each(function(d,i){
-            if(d.milestoneId === "current" && d.datasetKey ==="shuttles" && d.key === "current"){
-                //console.log("tooltip", d)
-            }
+            //if(d.milestoneId === "current" && d.key === "target" && d.datasetKey === "pressUps"){
+                //console.log("d", d)
+                //console.log("unsaved", d.unsavedValue)
+            //}
+
             //decide the saem common pattern for tooltips - it should probably always be
             //an array, even if its top then bottom
             const tooltipG = d3.select(this);
@@ -94,6 +97,61 @@ export default function tooltipsComponent() {
             const contentsHeight = height - margin.top - margin.bottom;
             const dragTextHeight = draggable && d.withDragValueAbove ? contentsHeight * 0.333 : 0;
             const iconHeight = contentsHeight - dragTextHeight;
+
+            const btnWidth = d3.max([40, contentsWidth]);
+            const btnHeight = iconHeight;
+
+            //saveBtn
+            const saveBtnG = tooltipG.selectAll("g.save-btn").data(d.unsavedValue && !beingDragged(d) ? [1] : []);
+            saveBtnG.enter()
+                .append("g")
+                    .attr("class", "save-btn")
+                    .each(function(){
+                        d3.select(this)
+                            .append("rect")
+                                .attr("class", "save-btn-bg")
+                                .attr("fill", "red")
+                                .attr("rx", 5)
+                                .attr("ry", 5);
+
+                        d3.select(this)
+                            .append("text")
+                                .attr("class", "save-btn-txt")
+                                    .attr("text-anchor", "middle")
+                                    .attr("dominant-baseline", "central")
+                                    .attr("font-size", 10)
+                                    .text("SAVE")
+                    })
+                    .merge(saveBtnG)
+                    .attr("transform", `translate(${-btnWidth/2}, ${-contentsHeight/2 + dragTextHeight})`)
+                    .each(function(){
+                        d3.select(this).select("rect.save-btn-bg")
+                            .attr("width", btnWidth)
+                            .attr("height", btnHeight)
+                        
+                        d3.select(this).select("text")
+                            .attr("x", btnWidth/2)
+                            .attr("y", btnHeight/2)
+                    })
+                    .on("click", function(){
+                        const valueObj = { actual: `${d.unsavedValue}`, completion:null }
+                        onSaveValue(valueObj, d.milestoneId, d.datasetKey, d.statKey, d.key);
+                        //reset what is displayed (the save btn will disappear on update after save)
+                        tooltipG.select("text.drag-value")
+                            .transition()
+                            .duration(200)
+                                .style("opacity", 0);
+                    
+                        tooltipG.select("g.icon").select("text.value")
+                            .transition()
+                            .duration(200)
+                                .style("opacity", 1);
+
+                    })
+                    //next - allow save btn to be dragged i same way as the tooltipicon under it. could just apply drag to tooltipG? and impl the click stuff
+                    // that is above inside tooltip drag when ther eis an unsaved value - drag updates it as usual, click saves it
+
+            saveBtnG.exit().remove();
 
             tooltipG.select("rect.hitbox")
                 .attr("x", -contentsWidth/2)
@@ -301,6 +359,8 @@ export default function tooltipsComponent() {
                 function dragEnd(e,d){
                     if(!d.editable) { return; }
                     beingDragged = () => false;
+                    //save option
+                    /*
                     d3.select(this).select("text.drag-value")
                         .transition()
                         .duration(200)
@@ -309,7 +369,7 @@ export default function tooltipsComponent() {
                     d3.select(this).select("g.icon").select("text.value")
                         .transition()
                         .duration(200)
-                            .style("opacity", 1);
+                            .style("opacity", 1);*/
 
                     //store the values as 'unsaved'
                     onDragEnd.call(this, e, d)
@@ -332,11 +392,13 @@ export default function tooltipsComponent() {
                                 .attr("dominant-baseline", "central")
                                 .style("opacity", 0); //starts hidden
 
-                            d3.select(this).append("g").attr("class", "main-contents") 
+                            d3.select(this).append("g").attr("class", "main-contents");
                             //hitbox must be on top, as contents under it will change              
                             d3.select(this).append("rect").attr("class", "hitbox");
                         })
                         .merge(tooltipG)
+                        .each(function(d,i){
+                        })
                         .style("display", d => d.shouldDisplay ? null : "none")
                         //i is the data's i, not the tooltip datum's i
                         .attr("transform", (d,j) => `translate(${getX(d, i, j)}, ${getY(d, i, j)})`)
@@ -442,6 +504,13 @@ export default function tooltipsComponent() {
         if (!arguments.length) { return onMouseout; }
         if(typeof value === "function"){
             onMouseout = value;
+        }
+        return tooltips;
+    };
+    tooltips.onSaveValue = function (value) {
+        if (!arguments.length) { return onSaveValue; }
+        if(typeof value === "function"){
+            onSaveValue = value;
         }
         return tooltips;
     };

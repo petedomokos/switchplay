@@ -198,7 +198,6 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   }, [stringifiedProfiles]);
 
   const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => {
-    console.log("save value", key) 
     if(key === "current"){
       onSaveStatValue(valueObj, profileId, datasetKey, statKey);
       return;
@@ -267,7 +266,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   }, [stringifiedContracts, user._id]);
 
   const onSaveSetting = useCallback(newSetting => {
-    console.log("onSaveSetting", newSetting)
+    //console.log("onSaveSetting", newSetting)
     const otherSettings = settings.filter(s => s.key !== newSetting.key);
     const _settings = [ ...otherSettings, newSetting]
     save({ ...data, settings:_settings });

@@ -111,7 +111,7 @@ export default function kpisLayout(){
                 { 
                     key:"start", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
-                    shouldDisplay:true,
+                    shouldDisplay:status => status === "open",
                     rowNr: -1, y: -1,
                     value: barData.start, x:barData.start,
                     accuracy,
@@ -122,7 +122,7 @@ export default function kpisLayout(){
                 { 
                     key:"end", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
-                    shouldDisplay:true,
+                    shouldDisplay:status => status === "open",
                     rowNr: -1, y: -1,
                     value: barData.end, x:barData.end,
                     accuracy,
@@ -133,7 +133,7 @@ export default function kpisLayout(){
                 { 
                     key:"expected", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
-                    shouldDisplay:!isPast && !!targetObj, //dont display if past or no future profiles
+                    shouldDisplay:status => !isPast && !!targetObj, //dont display if past or no future profiles
                     rowNr: 1, y: 1, current,
                     value: expected, x:expected,
                     dataOrder:stat.order,
@@ -147,7 +147,7 @@ export default function kpisLayout(){
                 { 
                     key:"target", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all
-                    shouldDisplay:!!targetObj,
+                    shouldDisplay:status => !!targetObj,
                     rowNr: -1, y: -1, current,
                     value:target, x:target,
                     dataOrder:stat.order,
@@ -170,7 +170,7 @@ export default function kpisLayout(){
                     editable:isCurrent || isFuture,
                     withDragValueAbove:false,
                     withInnerValue:false,
-                    shouldDisplay:true
+                    shouldDisplay:status => status === "open" && !isPast
                 }
             ];
 
