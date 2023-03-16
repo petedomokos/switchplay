@@ -134,7 +134,15 @@ export default function tooltipsComponent() {
                             .attr("y", btnHeight/2)
                     })
                     .on("click", function(){
-                        const valueObj = { actual: `${d.unsavedValue}`, completion:null }
+                        //@todo - Date editing...add a date icon which if clicked opens a React form from MilestonesBar
+                        //for changing the date.
+                        //@todo - handle case of a very late close-to-midnight time.
+                        const date = new Date();
+                        const valueObj = { 
+                            actual: `${d.unsavedValue}`, 
+                            completion:null,
+                            date
+                        }
                         onSaveValue(valueObj, d.milestoneId, d.datasetKey, d.statKey, d.key);
                         //reset what is displayed (the save btn will disappear on update after save)
                         tooltipG.select("text.drag-value")
@@ -386,6 +394,7 @@ export default function tooltipsComponent() {
                 tooltipG.enter()
                     .append("g")
                         .attr("class", "tooltip")
+                        .style("cursor", "pointer")
                         .each(function(d,i){
                             d3.select(this).append("text").attr("class", "drag-value")
                                 .attr("text-anchor", "middle")

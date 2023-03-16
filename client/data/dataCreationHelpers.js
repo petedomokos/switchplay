@@ -32,7 +32,7 @@ export function createDatapointsFromData(data, dataset){
     ];
 
     return data.map(d => {
-        console.log("d", d)
+        //console.log("d", d)
         let datapoint = {};
         // need the non value properties to remain at top-level
         nonValueCols.forEach(col => {
@@ -55,9 +55,10 @@ export function createDatapointsFromData(data, dataset){
                 //legacy - uses measureid
                 //warning - measure key may not be unique in legacy datasets
                 measure: dataset.rawMeasures.find(m => m.key === col)._id,
+                key:dataset.rawMeasures.find(m => m.key === col).key,
                 value:d[col] 
             }))
-        console.log("datapoint", datapoint)
+        //console.log("datapoint", datapoint)
 
         return datapoint;
     })

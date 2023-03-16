@@ -3,6 +3,7 @@ import Journey  from './Journey'
 import { saveJourney, setActive, updateProfile } from '../../actions/JourneyActions'
 import { closeDialog, hideMenus, showMenus } from '../../actions/CommonActions'
 import { fetchMultipleFullDatasets } from '../../actions/DatasetActions'
+import { createDatapoints } from '../../actions/DatapointActions'
 import { hydrateJourneyData } from "./hydrateJourney";
 
 
@@ -80,7 +81,7 @@ const emptyJourney = user => ({
 })
 
 const mapStateToProps = (state, ownProps) => {
-	//console.log("JourneyContainer..........state", state.user._id)
+	console.log("JourneyContainer..........state", state.user)
     //const { journeyId }  = ownProps.match.params;state,
 	//for now, assume player is user, but need to attach playerId/coachId or groupId to each journey
 	const { _id, username, firstname, surname, journeys=[], homeJourney, loadedDatasets, datasetsMemberOf } = state.user;
@@ -147,6 +148,9 @@ const mapDispatchToProps = dispatch => ({
 	},
     save(journey, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
 		dispatch(saveJourney(journey, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter))
+	},
+	saveDatapoint(datasetId, datapoint){
+		dispatch(createDatapoints(datasetId, [datapoint]))
 	},
 	setActive(journeyId){
 		dispatch(setActive(journeyId))

@@ -98,10 +98,10 @@ const initChannels = d3.range(numberMonths)
   })
 
 //width and height may be full screen, but may not be
-const Journey = ({ user, data, datasets, availableJourneys, screen, width, height, save, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile }) => {
-  //console.log("Journey.......datasets", datasets)
+const Journey = ({ user, data, datasets, availableJourneys, screen, width, height, save, saveDatapoint, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile }) => {
+  console.log("Journey.......data", data)
   //bug - although only 6 profs are saved, we end up with 7 ie two currents
-  const { _id, name, contracts, profiles, aims, goals, links, measures, settings, kpis } = data;
+  const { _id, player, name, contracts, profiles, aims, goals, links, measures, settings, kpis } = data;
   const [journey, setJourney] = useState(null);
   const [channels, setChannels] = useState(initChannels);
   const [withCompletionPaths, setWithCompletionPath] = useState(false);
@@ -199,7 +199,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
 
   const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => {
     if(key === "current"){
-      onSaveStatValue(valueObj, profileId, datasetKey, statKey);
+      onSaveStatValue(valueObj, datasetKey, statKey);
       return;
     } 
     //trouble - the unsaved value gets removed, and tehn an update to tooltips occurs
@@ -227,26 +227,21 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     //cant use profileId as it may be 'current' which is not updated
     const otherProfiles = profiles.filter(p => p.id !== updatedProfile.id);
     const _profiles = [ ...otherProfiles, updatedProfile]
-    console.log("saving targ or expected value", obj)
+    //console.log("saving targ or expected value", obj)
     save({ ...data, profiles:_profiles });
     
   }, [stringifiedProfiles, user._id]);
 
-  const onSaveStatValue = useCallback((valueObj, datasetKey, statKey, key) => { 
+  const onSaveStatValue = useCallback((valueObj, datasetKey, statKey) => { 
+    const datasetId = datasets.find(dset => dset.key === datasetKey)._id;
     
-    let obj = {
-      ...valueObj,
-      datasetKey,
-      statKey,
-      created:`${new Date()}`,
-      //createdBy
-      //approvedBy is empty at first
+    //@todo - if valueObj has completion, then need to convert it to actual
+    const datapoint = {
+      player:player._id,
+      date:valueObj.date,
+      values:[{ key:statKey, value: valueObj.actual }],
     }
-    console.log("saving stat value", obj)
-    //need to save it as a datapoint that only contains one value - the one entered here.
-    //then check that no errors occur - the system should not expect any particular values to be defined, so should be fine
-    //the rest shold be work as as expected, with new stat value
-    
+    saveDatapoint(datasetId, datapoint);
   }, [stringifiedProfiles, user._id]);
 
   const onSaveInfo = useCallback((infoType, milestoneType, id, value) => {

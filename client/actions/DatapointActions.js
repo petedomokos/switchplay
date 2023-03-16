@@ -3,6 +3,31 @@ import C from '../Constants'
 import { status, parseResponse, logError, fetchStart, fetchEnd, fetchThenDispatch, resetStatus} from './CommonActions'
 import auth from '../auth/auth-helper'
 	
+/*
+const initState = {
+      dataset:null,
+      player: null,
+      notes:"",
+      surface:surface.default || "",
+      fatigueLevel:fatigueLevel.default || "",
+      date:Date.now(),
+      isTarget:false,
+      //location:"", //todo - location geography
+      values:[],
+  }
+  */
+function transformNewDatapointForServer(datapoint){
+	return datapoint;
+}
+
+function transformDatapointForServer(datapoint){
+	return datapoint;
+}
+
+function transformDatapointForClient(datapoint){
+	return datapoint;
+}
+
 export const createDatapoint = (datasetId, datapoint) => dispatch => {
     fetchThenDispatch(dispatch, 
 		'creating.datapoint',
@@ -22,12 +47,17 @@ export const createDatapoints = (datasetId, datapoints) => dispatch => {
 	console.log("Action createDatapoints", datasetId, datapoints)
 	const user = auth.isAuthenticated()?.user;
 	console.log("user", user)
+	const enrichedDatapoints = datapoints.map(d => ({ 
+		...d, 
+		createdBy:user._id,
+		created:new Date()
+	}))
     fetchThenDispatch(dispatch, 
 		'creating.datapoints',
 		{
 			url: `/api/users/${user._id}/datasets/${datasetId}/datapoints/create`,
 			method: 'PUT',
-			body:JSON.stringify(datapoints),
+			body:JSON.stringify(enrichedDatapoints),
 			requireAuth:true,
 			//this action will also set dialog.createUser = true
 			nextAction: data => {

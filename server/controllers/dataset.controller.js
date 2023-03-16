@@ -184,7 +184,7 @@ const remove = async (req, res) => {
 
 
 const createDatapoints = async (req, res) => {
-  console.log("createDatapoints...")
+  console.log("createDatapoints...", req.body)
   let { dataset, user } = req;
   if(!user || !dataset){
     return res.status(400);
@@ -194,7 +194,7 @@ const createDatapoints = async (req, res) => {
     //createdBy:req.user._id
   //}));
 
-  console.log("datapoints to add", datapoints)
+  //console.log("datapoints to add", datapoints)
   //console.log("current datapoints", dataset.datapoints)
   dataset.datapoints = [...dataset.datapoints, ...datapoints]
   //console.log("new datapoints before save", dataset.datapoints)
