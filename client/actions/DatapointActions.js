@@ -44,9 +44,9 @@ export const createDatapoint = (datasetId, datapoint) => dispatch => {
 }
 
 export const createDatapoints = (datasetId, datapoints) => dispatch => {
-	console.log("Action createDatapoints", datasetId, datapoints)
+	//console.log("Action createDatapoints", datasetId, datapoints)
 	const user = auth.isAuthenticated()?.user;
-	console.log("user", user)
+	//console.log("user", user)
 	const enrichedDatapoints = datapoints.map(d => ({ 
 		...d, 
 		createdBy:user._id,
@@ -61,7 +61,7 @@ export const createDatapoints = (datasetId, datapoints) => dispatch => {
 			requireAuth:true,
 			//this action will also set dialog.createUser = true
 			nextAction: data => {
-				console.log("next action.....")
+				//console.log("next action.....")
 				return {type:C.CREATE_NEW_DATAPOINTS, mesg:data.mesg, datasetId:datasetId, datapoints:data }
 			}
 		})

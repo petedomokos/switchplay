@@ -18,26 +18,7 @@ export function hydrateDataset(dataset){
     const startDate = isDeep ? getStartDate(dataset) : null;
     const derivedMeasures = isDeep ? getDerivedMeasures(key) : null;
     const rawMeasures = dataset.measures?.map(m => hydrateMeasure(m));
-    const datapoints = isDeep ? dataset.datapoints.map(datapoint => {
-        //add measure key to rawMeasure values (server stores the measure id instead - need to change)
-        const enteredKeyedValues = datapoint.values.map(v => {
-            //v.measure is measure _id - we convert it to its key
-            return {
-                //value could be for a rawmeasure or could be for a raw or derivedMeasure using the key
-                key:rawMeasures.find(m => m._id === v.measure || m.key === v.key).key || derivedMeasures.find(m => m.key === v.key).key,
-                value:v.value,
-                wasCalculated:false
-            }
-        })
-        //derivedValues need a measure key to access the rawValues
-        const datapointWithEnteredKeyedValues = { ...datapoint, values:enteredKeyedValues };
-        return{
-            ...datapoint,
-            date:new Date(datapoint.date),
-            //values:[...d.values, ...getDerivedValues(dWithValueKeys, derivedMeasures)]
-            values:[...enteredKeyedValues, ...getDerivedValues(datapointWithEnteredKeyedValues, derivedMeasures)]
-        }
-    }) : null;
+    const datapoints = isDeep ? dataset.datapoints.map(datapoint => hydrateDatapoint(datapoint, rawMeasures, derivedMeasures)) : null;
     return {
         ...dataset,
         key,
@@ -47,6 +28,27 @@ export function hydrateDataset(dataset){
         derivedMeasures,
         stats: isDeep ? [...rawMeasures, ...derivedMeasures] : null,
         datapoints
+    }
+}
+
+export function hydrateDatapoint(datapoint, hydratedRawMeasures, hydratedDerivedMeasures){
+    //add measure key to rawMeasure values (server stores the measure id instead - need to change)
+    const enteredKeyedValues = datapoint.values.map(v => {
+        //v.measure is measure _id - we convert it to its key
+        return {
+            //value could be for a rawmeasure or could be for a raw or derivedMeasure using the key
+            key:hydratedRawMeasures.find(m => m._id === v.measure || m.key === v.key).key || hydratedDerivedMeasures.find(m => m.key === v.key).key,
+            value:v.value,
+            wasCalculated:false
+        }
+    })
+    //derivedValues need a measure key to access the rawValues
+    const datapointWithEnteredKeyedValues = { ...datapoint, values:enteredKeyedValues };
+    return{
+        ...datapoint,
+        date:new Date(datapoint.date),
+        //values:[...d.values, ...getDerivedValues(dWithValueKeys, derivedMeasures)]
+        values:[...enteredKeyedValues, ...getDerivedValues(datapointWithEnteredKeyedValues, hydratedDerivedMeasures)]
     }
 }
 

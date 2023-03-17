@@ -101,13 +101,13 @@ export const user = (state=InitialState.user, act) =>{
 		case C.CREATE_NEW_DATAPOINTS:{
 			if(act.datapoints.length === 0) { return state; }
 			//note - we can assume all are from same dataset
-
-			//add player info to datapoint (we only really need firstname and surname)
+			const datasetToUpdate = state.loadedDatasets.find(dset => dset._id === act.datasetId);
+			//add player info to datapoint so we dont have to wait for server to populate the d.player property
 			const datapointsToAdd = act.datapoints.map(d => ({
 				...d,
-				player:state.loadedUsers.find(u => u._id === d.player)
+				//first check if the player is the signedin user, otherwise find the player in loadedUsers
+				player:d.player === state._id ? state.player : state.loadedUsers.find(u => u._id === d.player)
 			}))
-			const datasetToUpdate = state.loadedDatasets.find(dset => dset._id === act.datasetId);
 			//may have not loaded deep dataset 
 			if(!datasetToUpdate?.datapoints) { return state; }
 			const updatedDataset = {
