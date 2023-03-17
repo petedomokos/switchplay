@@ -81,10 +81,10 @@ export const WIDGET_WIDTH = 30;
 export const WIDGET_HEIGHT = 40;
 export const WIDGET_MARGIN = { left: 0, right: 0, top:5, bottom:5 }
 
-export const KPI_CTRLS = format => ([
-    { key: "actual", label:"Raw Value", isSelected:format === "actual" },
-    { key: "completion", label:"Completion", isSelected:format === "completion" }
-]);
+export const KPI_CTRLS = format => [
+    //{ key: "actual", label:"Raw Value", isSelected:format === "actual" },
+    //{ key: "completion", label:"Completion", isSelected:format === "completion" }
+];
 
 export const TIME_SETTINGS = {
     YEAR_END : { MONTH:4, DAY_OF_MONTH:31 },
