@@ -303,7 +303,16 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
               </>
           }
         </div>}
-        <svg className={classes.svg} ref={containerRef}></svg>
+        <svg className={classes.svg} ref={containerRef}>
+          <defs>
+            <filter id="filter1" x="0" y="0">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
+            </filter>
+            <filter id="filter2" x="0" y="0">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="8" />
+            </filter>
+          </defs>
+        </svg>
         {!form && <div className={classes.ctrls}>
           <IconButton className={classes.iconBtn} onClick={milestonesBar.slideBack}
               aria-label="Home" >

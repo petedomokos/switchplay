@@ -238,7 +238,7 @@ export default function profileInfoComponent() {
                         const textInfoG = d3.select(this);
 
                         textInfoG.append("rect")
-                            .attr("class", "bg")
+                            .attr("class", "text-info-bg")
                             .attr("fill", "black");
 
                         //NAME
@@ -289,7 +289,7 @@ export default function profileInfoComponent() {
                         };
 
                         const textInfoG = d3.select(this);
-                        textInfoG.select("rect.bg")
+                        textInfoG.select("rect.text-info-bg")
                             .attr("width", width)
                             .attr("height", textInfoHeight);
 

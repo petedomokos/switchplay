@@ -188,8 +188,13 @@ export default function kpiComponent() {
                 //.secondaryTitle(d => d.statName)
                 .textDirection("horiz")
                 .fontSizeTransition({ delay:CONTENT_FADE_DURATION, duration: AUTO_SCROLL_DURATION}))
+
     
+        //open and closed contents
         kpiContentsG.each(function(data,i){
+            //console.log("data-----------------------", data)
+            const { contentsHeight, titleDimns, progressBarWidth, progressBarHeight, progressBarMargin, remainingHeight } = dimns[i];
+
             const closedData = status(data) === "closed" ? [data] : [];
             const openData = status(data) === "open" ? [data] : [];
             //components
@@ -200,13 +205,13 @@ export default function kpiComponent() {
                     .attr("class", "closed-kpi-contents")
                     .call(fadeIn)
                     .merge(closedContentsG)
-                    .attr("transform", `translate(0,${dimns[i].titleDimns.height + dimns[i].remainingHeight/2})`)
+                    .attr("transform", `translate(0,${titleDimns.height + remainingHeight/2})`)
                     .each(function(d){
                         d3.select(this)
                             .call(closedProgressBars[d.key]
-                                    .width(() => dimns[i].progressBarWidth)
-                                    .height(() => dimns[i].progressBarHeight)
-                                    .margin(() => dimns[i].progressBarMargin)
+                                    .width(() => progressBarWidth)
+                                    .height(() => progressBarHeight)
+                                    .margin(() => progressBarMargin)
                                 , { transitionEnter, transitionUpdate} )
 
                     })
@@ -219,17 +224,60 @@ export default function kpiComponent() {
                     .attr("class", "open-kpi-contents")
                     .call(fadeIn)
                     .merge(openContentsG)
-                    .attr("transform", `translate(0,${dimns[i].titleDimns.height + dimns[i].remainingHeight/2})`)
+                    .attr("transform", `translate(0,${titleDimns.height + remainingHeight/2})`)
                     .each(function(d, j){
                         d3.select(this)
                             .call(openProgressBars[d.key]
-                                .width((d) => dimns[i].progressBarWidth)
-                                .height((d) => dimns[i].progressBarHeight)
-                                .margin((d) => dimns[i].progressBarMargin)
+                                .width((d) => progressBarWidth)
+                                .height((d) => progressBarHeight)
+                                .margin((d) => progressBarMargin)
                                 .onSaveValue(onSaveValue))
                     })
 
             openContentsG.exit().call(remove, { transition:{ duration: CONTENT_FADE_DURATION }});
+
+            //history
+            const historyWidth = 110;
+            const historyHeight = 15;
+            const historyData = status(data) === "open" && data.lastDataUpdate ? [data] : [];
+            const historyG = kpiContentsG.selectAll("g.history").data(historyData, d => d.key);
+            historyG.enter()
+                .append("g")
+                    .attr("class", "history")
+                    .call(fadeIn)
+                    .each(function(){
+                        d3.select(this).append("rect");
+                        const mainRowG = d3.select(this).append("g").attr("class", "main-row")
+                        mainRowG.append("text").attr("class", "label")
+                        mainRowG.append("text").attr("class", "date")
+                        mainRowG.selectAll("text")
+                            .attr("dominant-baseline", "central")
+                            .attr("stroke-width", 0.1)
+                            .attr("stroke", grey10(2))
+                            .attr("opacity", 0.5)
+                    })
+                    .merge(historyG)
+                    .attr("transform", `translate(${0}, ${contentsHeight - historyHeight})`)
+                    .each(function(d){
+                        d3.select(this).select("rect")
+                            .attr("width", historyWidth)
+                            .attr("height", historyHeight)
+                            .attr("fill", "none")
+
+                        const mainRowG = d3.select(this).select("g.main-row")
+                            .attr("transform", `translate(0, ${historyHeight/2})`)
+                        
+                        mainRowG.select("text.label")
+                            .attr("font-size", 9)
+                            .text("Last data update:")
+
+                        mainRowG.select("text.date")
+                            .attr("x", 65)
+                            .attr("font-size", 9)
+                            .text(d3.timeFormat("%_d %b, %y")(d.lastDataUpdate))
+                    })
+            
+            historyG.exit().call(remove, { transition:{ duration: CONTENT_FADE_DURATION }});
         })
         
         /*kpiContents.select("g.numbers")

@@ -139,7 +139,7 @@ export default function profileCardsComponent() {
                         //bg rect
                         contentsG
                             .append("rect")
-                                .attr("class", "bg")
+                                .attr("class", "profile-card-bg")
                                 .attr("rx", 3)
                                 .attr("ry", 3)
                                 .call(updateFill, { 
@@ -181,7 +181,7 @@ export default function profileCardsComponent() {
                         .style("fill", "black")
                         .style("opacity", 0.5)
                     
-                    d3.select(this).select("g.contents").select("rect.bg")
+                    d3.select(this).select("g.contents").select("rect.profile-card-bg")
                     .call(updateFill, { 
                         fill:d => isSelected(d) ? COLOURS.selectedMilestone : COLOURS.milestone,
                         transition:{ duration: 300 }
@@ -248,11 +248,22 @@ export default function profileCardsComponent() {
                     const contentsG = d3.select(this).select("g.contents")
                         .attr("transform", d =>  `translate(${-contentsWidth/2},${-contentsHeight/2})`)
 
+                    const getStrokeWidth = status => {
+                        if(status === "fullyOnTrack"){
+                            return 15;
+                        }
+                        if(status === "mostlyOnTrack"){
+                            return 7.5;
+                        }
+                        return 0;
+                    }
                     //rect sizes
-                    contentsG.selectAll("rect.bg")
+                    contentsG.selectAll("rect.profile-card-bg")
                         .attr("width", contentsWidth)
                         .attr("height", contentsHeight)
-                        //.attr("stroke", "none")// d.isMilestone ? grey10(1) : "none")
+                        .attr("stroke-width", getStrokeWidth(d.onTrackStatus))
+                        .attr("stroke", grey10(2))// d.isMilestone ? grey10(1) : "none")
+                        //.attr("filter", "url(#filter1)");
                    
                     // why is this too far down
                     contentsG.selectAll("g.info")
@@ -446,7 +457,7 @@ export default function profileCardsComponent() {
                     .attr("dy", 10);
                 */
 
-                d3.select(this).select("rect.bg")
+                d3.select(this).select("rect.profile-card-bg")
                     //.style("filter", "url(#drop-shadow)")
                     .call(oscillator.start);
 

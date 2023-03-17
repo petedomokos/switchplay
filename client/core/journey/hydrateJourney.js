@@ -49,7 +49,20 @@ export function hydrateJourneyData(data, user, datasets){
 
     //SEP 3: EMBELLISH PROFILES BASED ON CURRENT PROFILE INFO
     const pastProfiles = hydratedProfiles.filter(p => p.isPast);
-    const futureProfiles = hydratedProfiles.filter(p => p.isFuture)
+    const futureProfiles = hydratedProfiles.filter(p => p.isFuture);
+
+    const allProfiles = [ ...pastProfiles, currentProfile, ...futureProfiles];
+    const enrichedProfiles = allProfiles.map(p => {
+        const pcKpisOnTrack = p.kpis.length === 0 ? 0 : Math.round((p.kpis.filter(kpi => kpi.onTrack).length / p.kpis.length) * 100);
+        return {
+            ...p,
+            pcKpisOnTrack,
+            onTrackStatus:pcKpisOnTrack === 100 ? "fullyOnTrack" : 
+                (pcKpisOnTrack >= 75 ? "mostlyOnTrack" : 
+                (pcKpisOnTrack >= 50 ?"partlyOnTrack" : 
+                "offTrack"))
+        }
+    })
         //.map(p => addExpected(p, currentProfile));
 
     return {
@@ -60,7 +73,7 @@ export function hydrateJourneyData(data, user, datasets){
         //later do user.players.find if user is a coach, and also journey may be bout a coach or group
         ...data,
         contracts:hydrateContracts(data.contracts),
-        profiles:[ ...pastProfiles, currentProfile, ...futureProfiles],
+        profiles:enrichedProfiles,
         settings
     }
 }
@@ -280,9 +293,18 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //need to take ll this into the calcCurrent func
             const dataset = datasets.find(dset => dset.key === datasetKey);
             const datapoints = dataset?.datapoints || [];
+                
             //add accuracy to teh stat - note that the stat has only stable metadata, whereas the kpi
             //is dependent on context, so level of accuracy to display is defined in kpi not stat
             const stat = { ...dataset?.stats.find(s => s.key === statKey), accuracy };
+
+            const getValue = getValueForStat(stat.key, stat.accuracy);
+            //@todo - pass these dateValue pairs into calCurrent so not repeating work
+            const dateValuePairs = datapoints
+                .filter(d => !d.isTarget)
+                .map(d => [d.date, getValue(d)])
+
+            const lastDataUpdate = isPast ? null : d3.max(dateValuePairs, d => d[0]);
 
             let start;
             if(profileStart.type === "custom" || profileStart.type === "default"){
@@ -347,6 +369,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 dateRange, 
                 datePhase,
                 isPast, isCurrent, isFuture, isActive,
+                lastDataUpdate,
                 //values
                 values:{
                     //min/max are just values
@@ -412,6 +435,13 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
             const dataset = datasets.find(dset => dset.key === datasetKey);
             const datapoints = dataset?.datapoints || [];
             const stat = { ...dataset?.stats.find(s => s.key === statKey), accuracy };
+            const getValue = getValueForStat(stat.key, stat.accuracy);
+            //@todo - pass these dateValue pairs into calCurrent so not repeating work
+            const dateValuePairs = datapoints
+                .filter(d => !d.isTarget)
+                .map(d => [d.date, getValue(d)])
+
+            const lastDataUpdate = d3.max(dateValuePairs, d => d[0]);
             //START & END
             //@todo - if user has given a fixed startTime for a profile, then get value at that point
             const prevAchieved = lastPastProfile?.kpis.find(kpi => kpi.key === key)?.achieved;
@@ -433,6 +463,7 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
                 startDate:profileStart.date,
                 dateRange, datePhase, isCurrent:true,
                 accuracy,
+                lastDataUpdate,
                 values:{
                     //min/max just values
                     min, max,
