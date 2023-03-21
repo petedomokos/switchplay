@@ -53,7 +53,7 @@ export default function kpisComponent() {
     function updateDimns(nrCtrlsButtons=0, nrTooltipRows=0, kpisData){
         const nrKpis = kpisData.length;
 
-        margin = { left: width * 0.1, right: width * 0.1, top:height * 0.1, bottom: height * 0.05 };
+        margin = { left: width * 0.1, right: width * 0.1, top:height * 0.1, bottom: height * (nrCtrlsButtons === 0 ? 0.1 : 0.05) };
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 

@@ -267,10 +267,16 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
         dateRange = calcDateRange(goBackByExpiryDuration(date), date);
     }
 
+    const profileGoal = profile.goal || {};
     return {
         ...profile,
         id:milestoneId,
         dataType:"profile",
+        goal:{
+            title:"Goal Title",
+            desc:"Goal description...",
+            ...profileGoal
+        },
         dateCount:calcDateCount(now, date),
         start:profileStart,
         //legacy  - @todo - remove references to startDate for profile, replace with start.date

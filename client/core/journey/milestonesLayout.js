@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import kpisLayout from "./kpis/kpisLayout";
 import { getTargets } from "../../data/targets";
 import { addDays, addWeeks } from "../../util/TimeHelpers"
+import { GOAL_CTRLS } from './constants';
 
 
 
@@ -28,7 +29,7 @@ export default function milestonesLayout(){
 
         return numberedData.map((m,i) => {
             //console.log("milestone------", i, m.id)
-            const { id, date, dateCount, dataType, isPast, isCurrent, isFuture, settings, specificDate } = m;
+            const { id, date, dateCount, dataType, isPast, isCurrent, isFuture, settings, specificDate, onTrackStatus } = m;
 
             //add any profile properties onto kpis if required
             const kpis = m.kpis.map(kpi => ({ 
@@ -46,6 +47,7 @@ export default function milestonesLayout(){
                     ...m,
                     i,
                     info:{ id, ...info, isCurrent, isPast, isFuture, date, dateCount, settings, specificDate },
+                    goal:{ ...m.goal, onTrackStatus, ctrlsData:GOAL_CTRLS() },
                     kpis:myKpisLayout(kpis),
                 }
             }else{

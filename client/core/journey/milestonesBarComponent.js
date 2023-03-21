@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, FONTSIZES, grey10, COLOURS } from "./constants";
+import { DIMNS, FONTSIZES, grey10, COLOURS, PROFILE_PAGES  } from "./constants";
 import contractsComponent from './contractsComponent';
 import profileCardsComponent from './profileCardsComponent';
 import dragEnhancements from './enhancedDragHandler';
@@ -11,7 +11,7 @@ import { icons } from '../../util/icons';
 import { hide, show, Oscillator } from './domHelpers';
 import { getTransformationFromTrans } from './helpers';
 
-import { emptyGoal, ball, shiningCrystalBall, nonShiningCrystalBall } from "../../../assets/icons/milestoneIcons.js"
+import { turnPage } from "../../../assets/icons/milestoneIcons.js"
 
 /*
 
@@ -39,6 +39,7 @@ export default function milestonesBarComponent() {
     //api to determine widths of milestones based on type
     let profileWidth;
     let profileHeight;
+    let profileMargin = { top:0, bottom: 0, left:0, right:0 };
     let contractWidth;
     let contractHeight;
     let placeholderWidth;
@@ -113,11 +114,14 @@ export default function milestonesBarComponent() {
             },
             kpis:{
     
+            },
+            goal:{
+
             }
         },
         contracts:{
 
-        }
+        },
     }
     let _styles = () => DEFAULT_STYLES;
 
@@ -126,6 +130,7 @@ export default function milestonesBarComponent() {
 
     let positionedData = [];
     let swipable = true;
+    let currentPage = PROFILE_PAGES[0];
 
     let xScale = x => 0;
 
@@ -151,6 +156,8 @@ export default function milestonesBarComponent() {
     const enhancedDrag = dragEnhancements();
     let oscillator = Oscillator({ k:1.01, dx:10 });
 
+    let setReactComponent = function(){};
+    let updateReactComponent = function(){};
     let setForm = function(){};
     let onClick = function(){};
     let onDblClick = function(){};
@@ -317,6 +324,7 @@ export default function milestonesBarComponent() {
                 const calcOffsetX = calculateOffsetX(positionedData)
 
                 slideTo = function(position, options={} ){
+                    //console.log("slideTo...", d3.select("div#react-container").node())
                     if(data.length ===  0) { return; }
                     //helper
                     const convertToNumber = wordPosition => {
@@ -327,7 +335,17 @@ export default function milestonesBarComponent() {
                     //need to also check offset, incase slider pos hadnt changed but dimns have changed
                     const numericalPosition = typeof position === "number" ? position : convertToNumber(position);
                     const offset = calcOffsetX(numericalPosition);
-                    if(currentSliderPosition === position && offset === currentSliderOffset) { return; }
+                    //console.log("offset", offset)
+                    if(currentSliderPosition === position && offset === currentSliderOffset) {
+                        //still need to check if react-container has been positioned - it may need updating
+                        /*console.log("only applying change to react-container...")
+                        d3.select("div#react-container")
+                            .style("left", `${currentSliderOffset}px`)
+                            .style("top", `${topBarHeight}px`)
+                            */
+
+                        return; 
+                    }
                     const { transition, cb } = options;
 
                     milestonesWrapperG.call(updateTransform, {
@@ -374,6 +392,7 @@ export default function milestonesBarComponent() {
                 topRightMilestoneCtrlsG.enter()
                     .append("g")
                         .attr("class", d => `top-right-milestone-ctrls top-right-milestone-ctrls-${d.id}`)
+                        .attr("display", "none")
                         .each(function(d,i){
                             d3.select(this)
                                 .append("g")
@@ -616,7 +635,28 @@ export default function milestonesBarComponent() {
                 //POSITIONING
                 //offsetting due to slide
                 //slideTo(requiredSliderPosition, { transition:slideTransition });
+
+                //first set the react component, then slideTo will update its position as part of tha transition
+                const reactComponent = currentPage.key === "goal" ? {
+                    componentType:"goal",
+                    transform:[currentSliderOffset, topBarHeight],
+                    items:positionedData
+                } : null;
+                // left: currentSliderOffset + x - (width/2) *k, 
+                //top: topBarHeight + y - (height/2) * k
+                setReactComponent(reactComponent)
+                //console.log("update, about to call slide", d3.select("div#react-container").node())
+
                 slideTo(requiredSliderPosition, { transition:SLIDE_TRANSITION });
+                //the slideTo call above doesnt apply transform because it has alreayd been applied the first time before react-container
+                //is defined
+                /*if(!d3.select("div#react-container").empty()){
+                    console.log("applying pos to react-container................", d3.select("div#react-container").node())
+                    d3.select("div#react-container")
+                        .style("left", `${currentSliderOffset}px`)
+                        .style("top", `${topBarHeight}px`)
+                }*/
+                
 
                 const prevCard = x => d3.greatest(positionedData.filter(m => m.x < x), m => m.x);
                 const nextCard = x => d3.least(positionedData.filter(m => m.x > x), m => m.x);
@@ -795,7 +835,9 @@ export default function milestonesBarComponent() {
                     .call(profiles
                         .width(profileWidth)
                         .height(profileHeight)
+                        .margin(profileMargin)
                         .fontSizes(fontSizes.profile)
+                        .currentPage(currentPage)
                         .expanded([{
                             id:selectedMilestone,
                             //if landscape, then vert space is less so we scale according to that 
@@ -861,18 +903,43 @@ export default function milestonesBarComponent() {
                             setForm(null);
                             if(!key){ ignoreNextWrapperClick = true; } 
                         })
-                        .topRightCtrls(d => selectedMilestone === d.id ? [
-                            //todo - toggle between expand and reduce for now, its just reduce
-                            { 
-                                label:"collapse", 
-                                icon:{ iconType:"path", d:icons.collapse.d },
-                                onClick:d => {
-                                    //@todo - why is this so slow to update? had to cut it out for now
-                                    //onReleaseScreen();
-                                    updateSelected();
+                        .ctrls(d => ({
+                            topRight: [
+                                { 
+                                    label:selectedMilestone === d.id ? "collapse" : "expand", 
+                                    icon:{ 
+                                        iconType:"path", 
+                                        d:selectedMilestone === d.id ? icons.collapse.d : icons.expand.d,
+                                        //todo - refactor...we temp apply a manula scale to expand so they are same size
+                                        transform: selectedMilestone === d.id ? null : "scale(0.75)"
+                                    },
+                                    onClick:() => {
+                                        //@todo - why is this so slow to update? had to cut it out for now
+                                        //onReleaseScreen();
+                                        if(selectedMilestone === d.id){
+                                            updateSelected();
+                                        }else{
+                                            updateSelected(d);
+                                        }
+                                        
+                                    }
                                 }
-                            }
-                        ] : [])
+                            ],
+                            botRight: [
+                                { 
+                                    label:"turnPage", 
+                                    icon:turnPage,
+                                    styles:{
+                                        fill:grey10(5)
+                                    },
+                                    onClick:d => {
+                                        ignoreNextWrapperClick = true;
+                                        currentPage = PROFILE_PAGES[currentPage.nr + 1] || PROFILE_PAGES[0];
+                                        update(data, { slideTransition:SLIDE_TRANSITION });
+                                    }
+                                }
+                            ]
+                        }))
                         .onClick(() => { console.log("handler: profile card clicked")})
                         .onClickKpi(onSelectKpiSet)
                         .onDblClickKpi((e,d) => {
@@ -880,8 +947,8 @@ export default function milestonesBarComponent() {
                         })
                         .transformTransition(milestoneTransition || (transitionOn ? transformTransition : { update:null })));
 
-                //functions
                 function updateTransform(selection, options={}){
+                    //console.log("updateTransform...", selection.nodes())
                     const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
                     selection.each(function(d){
                         if(transition){
@@ -892,9 +959,47 @@ export default function milestonesBarComponent() {
                                 //add delay option here
                                     .attr("transform", "translate("+x(d) +"," +y(d) +")")
                                     .on("end", cb);
+
+                            //react-component (ie must keep in pos with wrapperG)
+                            if(d3.select(this).attr("class") === "milestones-wrapper" && !d3.select("div#react-container").empty()){
+                                d3.select("div#react-container")
+                                    .transition()
+                                    .ease(transition.ease || d3.easeLinear)
+                                    .duration(transition.duration || 200)
+                                    //add delay option here
+                                        .style("left", `${x(d)}px`)
+                                        //must add topBarHeight as this is higher up than the milestoneWrapper so not counted in y(d)
+                                        .style("top", `${y(d) + topBarHeight}px`)
+
+                            }
+                            //react-component-items (children) (must keep in pos with milestoneGs)
+                            if(d3.select(this).classed("milestone") === true){
+                                //react milestones
+                                d3.select(`div#milestone-${d.id}`)
+                                    .transition()
+                                    .duration(200)
+                                        .style("left", `${x(d) - (profileWidth - profileMargin.left)/2}px`)
+                                        .style("top", `${y(d)}px`)
+                            }
+
                         }else{
                             d3.select(this)
                                 .attr("transform", "translate("+x(d) +"," +y(d) +")");
+
+                            //react-component (ie must keep in pos with wrapperG)
+                            if(d3.select(this).attr("class") === "milestones-wrapper" && !d3.select("div#react-container").empty()){
+                                d3.select("div#react-container")
+                                    .style("left", `${x(d)}px`)
+                                    //must add topBarHeight as this is higher up than the milestoneWrapper so not counted in y(d)
+                                    .style("top", `${y(d) + topBarHeight}px`)
+                            }
+                            //react-component-items (children) (must keep in pos with milestoneGs)
+                            if(d3.select(this).classed("milestone") === true){
+                                //react milestones
+                                d3.select(`div#milestone-${d.id}`)
+                                    .style("left", `${x(d)}px`)
+                                    .style("top", `${y(d)}px`)
+                            }
                             
                             cb.call(this);
                         }
@@ -929,7 +1034,7 @@ export default function milestonesBarComponent() {
                     }
                 }
                 /*
-                slideTo = function(nr, onEnd=() => {}){
+                slideTo = function(nr, onEnd=() => {}){update(data, { slideTransition:SLIDE_TRANSITION });
                     sliderPosition = nr;
                     update(data);
                 }
@@ -1108,6 +1213,16 @@ export default function milestonesBarComponent() {
     milestonesBar.onReleaseScreen = function (value) {
         if (!arguments.length) { return onReleaseScreen; }
         onReleaseScreen = value;
+        return milestonesBar;
+    };
+    milestonesBar.setReactComponent = function (value) {
+        if (!arguments.length) { return setReactComponent; }
+        setReactComponent = value;
+        return milestonesBar;
+    };
+    milestonesBar.updateReactComponent = function (value) {
+        if (!arguments.length) { return updateReactComponent; }
+        updateReactComponent = value;
         return milestonesBar;
     };
     milestonesBar.setForm = function (value) {

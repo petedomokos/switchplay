@@ -1,9 +1,10 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10, COLOURS } from "./constants";
+import { DIMNS, grey10, COLOURS, PROFILE_PAGES } from "./constants";
 import dragEnhancements from './enhancedDragHandler';
 // import menuComponent from './menuComponent';
 import profileInfoComponent from './profileInfoComponent';
 import kpisComponent from './kpis/kpisComponent';
+import goalComponent from './goal/goalComponent';
 import { Oscillator } from './domHelpers';
 import { getTransformationFromTrans } from './helpers';
 const noop = () => {};
@@ -20,7 +21,7 @@ export default function profileCardsComponent() {
     let contentsHeight;
 
     let infoHeight;
-    let kpisHeight;
+    let bottomAreaHeight;
 
     let kpiHeight;
 
@@ -28,7 +29,7 @@ export default function profileCardsComponent() {
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
         infoHeight = contentsHeight/2;
-        kpisHeight = contentsHeight/2;
+        bottomAreaHeight = contentsHeight/2;
     }
 
     let fontSizes = {
@@ -45,7 +46,12 @@ export default function profileCardsComponent() {
         }
     };
 
-    let topRightCtrls = d => [];
+    let ctrls = () => ({
+        topLeft: [],
+        topRight: [],
+        botLeft: [],
+        botRight: [],
+    });
 
     //state
     let expanded = [];
@@ -54,6 +60,7 @@ export default function profileCardsComponent() {
     let editable = false;
     let movable = true;
     let scrollable = false;
+    let currentPage = PROFILE_PAGES[0];
 
     let transformTransition = { enter: null, update: null };
 
@@ -97,6 +104,7 @@ export default function profileCardsComponent() {
     //components
     let profileInfoComponents = {};
     let kpisComponents = {};
+    let goalComponents = {};
 
 
     function profileCards(selection, options={}) {
@@ -131,6 +139,7 @@ export default function profileCardsComponent() {
                     .each(function(d,i){
                         profileInfoComponents[d.id] = profileInfoComponent();
                         kpisComponents[d.id] = kpisComponent();
+                        goalComponents[d.id] = goalComponent();
                         //ENTER
                         const contentsG = d3.select(this)
                             .append("g")
@@ -147,9 +156,11 @@ export default function profileCardsComponent() {
                                 })
 
                     contentsG.append("g").attr("class", "info")
-                    contentsG.append("g").attr("class", "kpis")
+                    contentsG.append("g").attr("class", "bottom-area")
 
                     contentsG.append("g").attr("class", "top-right-ctrls")
+                    contentsG.append("g").attr("class", "bot-right-ctrls")
+
                     d3.select(this).append("rect").attr("class", "overlay")
                         .attr("display", "none");
                 
@@ -194,9 +205,20 @@ export default function profileCardsComponent() {
                         .editable(editable)
                         .onClick(onClickInfo);
 
+                    const goal = goalComponents[d.id]
+                        .width(contentsWidth)
+                        .height(contentsHeight/2)
+                        .fontSizes(fontSizes.goal)
+                        //.editable(editable)
+                        //.scrollable(scrollable)
+                        .editable(false)
+                        .scrollable(false)
+                        .onCtrlClick(onCtrlClick)
+
+
                     const kpis = kpisComponents[d.id]
                         .width(contentsWidth)
-                        .height(kpisHeight)
+                        .height(bottomAreaHeight)
                         .kpiHeight(kpiHeight) //may be undefined
                         .fontSizes(fontSizes.kpis)
                         .editable(editable)
@@ -269,11 +291,29 @@ export default function profileCardsComponent() {
                     contentsG.selectAll("g.info")
                         .datum(d.info)
                         .call(profileInfo)
+
+                    const bottomAreaG = contentsG.select("g.bottom-area")
+                        .attr("transform", "translate(0," +(contentsHeight/2) +")");
+
+                    const kpisG = bottomAreaG.selectAll("g.kpis").data(currentPage.key === "kpis" ? [1] : []);
+                    kpisG.enter()
+                        .append("g")
+                            .attr("class", "kpis")
+                            .merge(kpisG)
+                            .datum(d.kpis)
+                            .call(kpis);
+
+                    kpisG.exit().remove();
+
+                    const goalG = bottomAreaG.selectAll("g.goal").data(currentPage.key === "goal" ? [1] : []);
+                    goalG.enter()
+                        .append("g")
+                            .attr("class", "goal")
+                            .merge(goalG)
+                            .datum(d.goal)
+                            .call(goal);
                     
-                    contentsG.selectAll("g.kpis")
-                        .attr("transform", "translate(0," +(contentsHeight/2) +")")
-                        .datum(d.kpis)
-                        .call(kpis);
+                    goalG.exit().remove();
 
                     //top right ctrls (dependent on each card)
                     let btnWidth = 25;
@@ -282,18 +322,19 @@ export default function profileCardsComponent() {
                     const topRightBtnG = contentsG.select("g.top-right-ctrls")
                         .attr("transform", `translate(${contentsWidth * 0.98}, ${contentsHeight * 0.02})`)
                         .selectAll("g.top-right-btn")
-                        .data(topRightCtrls(d), b => b.label)
+                        .data(ctrls(d).topRight, b => b.label)
                     
                     topRightBtnG.enter()
                         .append("g")
                             .attr("class", "top-right-btn")
-                            .each(function(){
+                            .each(function(b){
                                 d3.select(this)
                                     .append("rect")
                                         .attr("fill", "transparent");
 
                                 d3.select(this)
                                     .append("path")
+                                        .attr("transform", b.icon.transform || null)
                                         .attr("fill", COLOURS.btnIcons.default)
                                         .attr("stroke", COLOURS.btnIcons.default)
                             })
@@ -312,7 +353,49 @@ export default function profileCardsComponent() {
                             .on("mouseover", (e,b) => { if(b.onMouseover){ b.onMouseover(b)} })
                             .on("mouseout", (e,b) => { if(b.onMouseout){ b.onMouseout(b)} })
 
-                    topRightBtnG.exit().remove();        
+                    topRightBtnG.exit().remove(); 
+
+                    const botRightBtnG = contentsG.select("g.bot-right-ctrls")
+                        .attr("transform", `translate(${contentsWidth * 0.96}, ${(contentsHeight * 0.98) - btnHeight})`)
+                        .selectAll("g.bot-right-btn")
+                        .data(ctrls(d).botRight, b => b.label)
+                    
+                    botRightBtnG.enter()
+                        .append("g")
+                            .attr("class", "bot-right-btn")
+                            .each(function(b){
+                                d3.select(this)
+                                    .append("rect")
+                                        .attr("fill", "transparent");
+
+                                d3.select(this)
+                                    .append("g")
+                                        .attr("class", "icon")
+                                        //.attr("fill", COLOURS.btnIcons.default)
+                                        //.attr("stroke", COLOURS.btnIcons.default)
+                            })
+                            .merge(botRightBtnG)
+                            .attr("transform", (b,i) => `translate(${-(i + 1) * btnWidth})`)
+                            .each(function(b){
+                                d3.select(this).select("rect")
+                                    .attr("width", btnWidth * 1.1) //@todo - replqce x1.1 with proper measurements
+                                    .attr("height", btnHeight * 1.1)
+
+                                d3.select(this).select("g.icon")
+                                    //.style("stroke", b.styles.stroke)
+                                    .style("fill", b.styles.fill)
+                                    .html(b.icon.html)
+                            })
+                            .style("cursor", "pointer")
+                            .on("click",(e,b) => { 
+                                //e.stopPropagation(); doesnt work
+                                //e.stopImmediatePropagation()2
+                                if(b.onClick){ b.onClick(b)} 
+                            })
+                            .on("mouseover", (e,b) => { if(b.onMouseover){ b.onMouseover(b)} })
+                            .on("mouseout", (e,b) => { if(b.onMouseout){ b.onMouseout(b)} })
+
+                    botRightBtnG.exit().remove(); 
                 })
                 //.call(updateHighlighted)
                 //.call(drag)
@@ -321,18 +404,56 @@ export default function profileCardsComponent() {
                 })
 
             function updateTransform(selection, options={}){
-                //console.log("updateTransform profileCards", options.transition)
+                //console.log("updateTransform profileCards")
                 const { x = d => d.x, y = d => d.y, scale = d => 1, transition, cb = () => {} } = options;
                 selection.each(function(d){
+                    const k = scale(d);
+                    const scaledContentsWidth = contentsWidth * k;
+                    const scaledContentsHeight = contentsHeight * k
+
                     if(transition){
                         d3.select(this)
                             .transition()
                             .duration(200)
-                                .attr("transform", `translate(${x(d)} , ${y(d)}) scale(${scale(d)})`)
+                                .attr("transform", `translate(${x(d)} , ${y(d)}) scale(${k})`)
                                 .on("end", cb);
+
+                        //react milestones - we dont apply scale as a transform because it effects the margin
+                        //instead, use scaledValues
+                        d3.select(`div#milestone-${d.id}`)
+                            .transition()
+                            .duration(200)
+                                /*
+                                .style("width", `${scaledContentsWidth}px`)
+                                .style("height", `${scaledContentsHeight/2}px`)
+                                .style("left", `${x(d) - scaledContentsWidth/2}px`)
+                                .style("top", `${y(d)}px`)
+                                */
+                                .style("width", `${contentsWidth}px`)
+                                .style("height", `${height/2}px`)
+                                .style("left", `${x(d) - contentsWidth/2}px`)
+                                .style("top", `${y(d)}px`)
+                                .style("transform-origin", "top center")
+                                .style("transform", ` scale(${k})`)
+
                     }else{
                         d3.select(this)
-                            .attr("transform", `translate(${x(d)} , ${y(d)}) scale(${scale(d)})`);
+                            .attr("transform", `translate(${x(d)} , ${y(d)}) scale(${k})`);
+
+                        //react milestones
+                        d3.select(`div#milestone-${d.id}`)
+                            /*
+                            .style("width", `${scaledContentsWidth}px`)
+                            .style("height", `${scaledContentsHeight/2}px`)
+                            .style("left", `${x(d) - scaledContentsWidth/2}px`)
+                            .style("top", `${y(d)}px`)
+                            */
+                            .style("width", `${contentsWidth}px`)
+                            .style("height", `${height/2}px`)
+                            .style("left", `${x(d) - contentsWidth/2}px`)
+                            .style("top", `${y(d)}px`)
+                            .style("transform-origin", "top center")
+                            .style("transform", ` scale(${k})`)
                         
                         cb.call(this);
                     }
@@ -373,30 +494,6 @@ export default function profileCardsComponent() {
                     }
                 })
             }
-                /*
-            function transform(selection, transform={}, transition){
-                const { x = d => 0, y = d => 0, k = d => 1 } = transform;
-                selection.each(function(d){
-                    const planetG = d3.select(this);
-                    //translate is undefined when we drag a planet into an aim and release
-                    const { translateX, translateY } = getTransformationFromTrans(planetG.attr("transform"));
-                    //on call from enter, there will be no translate so deltas are 0 so no transition
-                    //but then transform is called again on entered profileCards after merge with update
-                    const deltaX = translateX ? Math.abs(translateX - x(d)) : 0;
-                    const deltaY = translateY ? Math.abs(translateY - y(d)) : 0;
-                    if(transition && (deltaX > 0.1 || deltaY > 0.1)){
-                        planetG
-                            .transition()
-                                .delay(transition.delay || 0)
-                                .duration(transition.duration || 200)
-                                .attr("transform", "translate("+x(d) +"," +y(d) +") scale("+k(d) +")");
-
-                    }else{
-                        planetG.attr("transform", "translate("+x(d) +"," +y(d) +") scale("+k(d) +")");
-                    }
-                })
-            }
-            */
 
             //EXIT
             profileCardG.exit().each(function(d){
@@ -545,6 +642,11 @@ export default function profileCardsComponent() {
         fontSizes = { ...fontSizes, ...values };
         return profileCards;
     };
+    profileCards.currentPage = function (value) {
+        if (!arguments.length) { return currentPage; }
+        currentPage = value;
+        return profileCards;
+    };
     profileCards.expanded = function (value) {
         if (!arguments.length) { return expanded; }
         expanded = value;
@@ -571,9 +673,17 @@ export default function profileCardsComponent() {
         isSelected = d => values.includes(d.id);
         return profileCards;
     };
-    profileCards.topRightCtrls = function (value) {
-        if (!arguments.length) { return topRightCtrls; }
-        topRightCtrls = value;
+    profileCards.ctrls = function (f) {
+        if (!arguments.length) { return ctrls; }
+        ctrls = d => {
+            const _ctrls = f(d);
+            return {
+                topLeft:_ctrls.topleft || [],
+                topRight:_ctrls.topRight || [],
+                botLeft:_ctrls.botleft || [],
+                botRight:_ctrls.botRight || [],
+            }
+        }
         return profileCards;
     };
     profileCards.longpressed = function (value) {

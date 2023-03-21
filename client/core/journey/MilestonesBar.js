@@ -8,6 +8,7 @@ import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import Button from '@material-ui/core/Button'
 import SelectDate from "../../util/SelectDate";
 import Settings from "../../util/Settings";
+import Goal from "./Goal";
 import milestonesLayout from "./milestonesLayout";
 import milestonesBarComponent from "./milestonesBarComponent";
 import { DIMNS, FONTSIZES, grey10, JOURNEY_SETTINGS_INFO } from './constants';
@@ -55,6 +56,18 @@ const useStyles = makeStyles((theme) => ({
     width:40,
     height:40,
   },
+  reactComponentContainer:{
+    position:"absolute",
+    display: props => props.reactComponentContainer.display
+    //left:props => props.reactComponentContainer.left,
+    //top:props => props.reactComponentContainer.top
+  },
+  reactComponentItem:{
+    position:"absolute",
+    pointerEvents:"none",
+    background:"yellow",
+    opacity:0.5
+  },
   formContainer:{
     position:"absolute",
     left:props => props.formContainer.left,
@@ -93,12 +106,13 @@ const useStyles = makeStyles((theme) => ({
 const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo, onSaveSetting }) => {
   const { player={}, profiles=[], contracts=[], settings=[] } = data;
   const allMilestones = [ ...profiles, ...contracts ];
-  //console.log("MBar datasets", datasets)
+  //console.log("MBar contracts", contracts)
   //local state
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
   const [bgMenuLocation, setBgMenuLocation] = useState("");
   const [sliderEnabled, setSliderEnabled] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState("");
+  const [reactComponent, setReactComponent] = useState(null);
   const [form, setForm] = useState(null);
 
   const moreSettings = sortAscending(settings
@@ -116,10 +130,16 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   let styleProps = { 
     bottomCtrlsBarHeight, 
     sliderEnabled, 
-    formContainer:{left: form?.left || 0, top: form?.top || 0 } 
+    formContainer:{left: form?.left || 0, top: form?.top || 0 },
+    reactComponentContainer: {
+      display:reactComponent ? null : "none",
+      left: reactComponent?.transform[0] || 0, 
+      top: reactComponent?.transform[1] || 0 
+    }
   };
-  const classes = useStyles(styleProps) ;
-  const formContainerRef = useRef(null);
+  const classes = useStyles(styleProps);
+  const reactComponentRef = useRef(null);
+  const formRef = useRef(null);
   const containerRef = useRef(null);
 
   const stringifiedProfiles = JSON.stringify(profiles);
@@ -246,6 +266,13 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
         setForm(null);
         setForm(newForm);
       })
+      .setReactComponent(newComponent => {
+        //even if same compn, it could be the transform that is updating
+        //if(newComponent?.componentType === reactComponent?.componentType) { return; }
+        //first, always reset to null so component unmounts and state is reset
+        setReactComponent(null);
+        setReactComponent(newComponent);
+      })
       .onMouseover(function(e,d){
         //console.log("mover")
       })
@@ -253,7 +280,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
         //console.log("mout")
       })//)
 
-  }, [stringifiedProfiles, screen])
+  }, [stringifiedProfiles, screen, form, reactComponent])
 
   useEffect(() => {
     //it mustnt be swipable when we want it to be scrollable
@@ -267,11 +294,33 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
     d3.select(containerRef.current).call(milestonesBar);
   }, [selectedMilestone, stringifiedProfiles, screen])
 
+  const onClickGoal = () => {
+    console.log("goal clicked")
+  }
+
   return (
     <div className={`milestone-bar-root ${classes.root}`}>
+      <div className={classes.reactComponentContainer} id="react-container" ref={reactComponentRef}>
+        {
+          allMilestones.map(m => (
+            <div className={classes.reactComponentItem} key={`milestone-${m.id}`} id={`milestone-`+m.id}>
+              <Goal/>
+              {/**
+                <div style={{ margin:"5%", width:"90%", height:"20%", background:"blue", pointerEvents:"all" }} onClick={onClickGoal}>
+                  Goal Title For {m.id}
+                </div>
+
+                <div style={{ margin:"5%", width:"90%", height:"50%", background:"red", pointerEvents:"all" }} onClick={onClickGoal}>
+                  desc.........
+                </div>
+              */}
+            </div>
+          ))
+        }
+      </div>
       { form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>}
       {form &&
-        <div className={classes.formContainer} ref={formContainerRef}>
+        <div className={classes.formContainer} ref={formRef}>
           {form.formType === "date" &&
             form.milestoneId === "current" ?
               <>

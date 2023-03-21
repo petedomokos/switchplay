@@ -85,6 +85,10 @@ export const KPI_CTRLS = format => [
     //{ key: "actual", label:"Raw Value", isSelected:format === "actual" },
     //{ key: "completion", label:"Completion", isSelected:format === "completion" }
 ];
+export const GOAL_CTRLS = format => [
+];
+
+export const PROFILE_PAGES = [{ nr:0, key:"goal" }, { nr: 1, key:"kpis" }];
 
 export const TIME_SETTINGS = {
     YEAR_END : { MONTH:4, DAY_OF_MONTH:31 },
@@ -145,6 +149,11 @@ export const FONTSIZES = {
         kpis:{
             name:4 * k,
             values:4 * k,
+            ctrls:d3.min([14, 4 * k])
+        },
+        goal:{
+            title:5 * k,
+            desc:4 * k,
             ctrls:d3.min([14, 4 * k])
         }
     }),
