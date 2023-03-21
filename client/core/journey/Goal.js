@@ -16,44 +16,94 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 const mockDesc = " ewiof efojjew fewfjew xxxx xccxx eiofj efj fw fefjw ---- -- efoe wfe fjf ewof oef hhhhhhhh kjdlkd djd  ..... ... .. .. . . uhd dhud dud d houh zzzz zz zz"
 
 const useStyles = makeStyles(theme => ({
-  card: {
+  root: {
     width:"100%",
     height:"100%",
     textAlign: 'center',
+    display:"flex",
+    flexDirection:"column",
+    alignItems:"center",
+    background:"none"
   },
   cardContent:{
-    width:"90%",
-    height:"90%",
+    width:"100%",
+    height:"calc(100% - 45px)",
+    marginTop:"5%",
+    background:"pink",
+    //paddingBottom:0,
+    display:"flex",
+    flexDirection:"column",
+    alignItems:"center"
   },
-  error: {
-    verticalAlign: 'middle'
+  titleContainer:{
+    background:"yellow",
+    width:"85%",
+    height:"45px",
+    margin:0,
+    marginBottom:"5px",
+    display:"flex",
+    justifyContent:"center",
+    alignItems:"center"
+  },
+  descContainer:{
+    border:"solid",
+    borderWidth:"thin",
+    width:"85%",
+    height:"calc(100% - 45px)",
+    margin:0
   },
   title: {
-    height:"15%",
-    margin:"5%",
-    color: theme.palette.openTitle,
+    width:"100%",
+    height:"90%",
+    display:"flex",
+    justifyContent:"center",
+    alignItems:"center",
+    margin:"0 5% 2.5% 5%",
+    //color: theme.palette.openTitle,
     fontSize:"18px",
-    background:"blue",
-    padding:"5px"
+    padding:"3px 5px 3px 5px",
+    cursor:"pointer",
+    pointerEvents:"all"
   },
-  desc:{
-    height:"45%",
-    margin:"5%",
-    padding:"5px",
-    fontSize:"10px",
-    background:"red",
-    overflow:"hidden"
-    //overflowY:"scroll" - doesnt work - may be coz of milestoneWrapper?
-  },
-  textField: {
+  titleTextField: {
     //marginLeft: theme.spacing(1),
     //marginRight: theme.spacing(1),
-    //width: 300
+    height:"100%",
+    margin:"0 5% 0% 5%",
+    //color: "aqua",//theme.palette.openTitle,
+    fontSize:"18px",
+    padding:"0px 5px 0px 5px",
+    //cursor:"pointer",
+    pointerEvents:"all"
+  },
+  desc:{
+    height:"90%",
+    margin:0,//"5% 5% 2.5% 5%",
+    padding:"3px 5px 3px 5px",
+    fontSize:"10px",
+    background:"red",
+    overflow:"hidden",
+    cursor:"pointer",
+    pointerEvents:"all"
+    //overflowY:"scroll" - doesnt work - may be coz of milestoneWrapper?
+  },
+  descTextField:{
+    height:"90%",
+    margin:0,//"2.5% 5% 2.5% 5%",
+    padding:"3px 5px 3px 5px",
+    fontSize:"10px",
+    background:"orange",
+    overflow:"hidden",
+    //cursor:"pointer",
+    pointerEvents:"all"
   },
   submit: {
     margin: 'auto',
     marginBottom: theme.spacing(2)
-  }
+  },
+  error: {
+    verticalAlign: 'middle'
+  },
 }))
 
 export default function Goal({ goal, submit, error }) {
@@ -64,37 +114,54 @@ export default function Goal({ goal, submit, error }) {
         desc:goal.desc || "",
     }
     const [values, setValues] = useState(initState)
+    const [editing, setEditing] = useState("")
 
     const handleChange = name => event => {
         setValues({ ...values, [name]: event.target.value })
     }
 
     const clickSubmit = () => {
+      //todo next - add title and desc to profile, and wire submit up so it saves title
+      //then do desc textfield and wire it up
         submit(goal);
     }
 
+    const openTitleForm = () => { setEditing("title") }
+
     return (
-      <Card className={classes.card}>
-        <CardContent className={classes.cardContent}>
-          <Typography variant="h2" className={classes.title}>
-          {goal.title|| "No Title"}
-          </Typography>
-          <Typography variant="h6" className={classes.desc} paragraph={true} align="left">
-          {goal.desc || mockDesc || "No Description"}
-          </Typography>
-          {/**<TextField id="username" label="Username" className={classes.textField} value={values.username} onChange={handleChange('username')} margin="normal"/><br/>*/}
-          {/**<TextField id="firstname" label="First name" className={classes.textField} value={values.firstname} onChange={handleChange('firstname')} margin="normal"/><br/>*/}
-          <br/> 
+      <div className={classes.root}>
+        <div className={classes.cardContent}>
+          <div className={classes.titleContainer}>
+            {editing === "title" ? 
+              <TextField 
+              id="title" label={values.title ? "" : "Enter title"} className={classes.titleTextField} autoFocus
+              InputLabelProps={{shrink: values.title ? false : true}}
+              value={values.title} onChange={handleChange('title')} margin="dense"/>
+              :
+              <Typography variant="h2" className={classes.title} onClick={openTitleForm}>
+              {goal.title|| "No Title"}
+              </Typography>
+            }
+          </div>
+          <div className={classes.descContainer}>
+            {editing === "desc" ?
+              <TextField 
+              id="desc" label="Description" className={classes.descTextField} 
+              value={values.desc} onChange={handleChange('desc')} margin="normal"/>
+              :
+              <Typography variant="h6" className={classes.desc} paragraph={true} align="left" onClick={openTitleForm}>
+              {goal.desc || mockDesc || "No Description"}
+              </Typography>
+            }
+          </div>
           {
             error && (<Typography component="p" color="error">
               <Icon color="error" className={classes.error}>error</Icon>
               {error}</Typography>)
           }
-        </CardContent>
-        {/**<CardActions>
-          <Button color="primary" variant="contained" onClick={clickSubmit} className={classes.submit}>Save</Button>
-        </CardActions>*/}
-      </Card>
+        </div>
+        {/**<Button color="primary" variant="contained" onClick={clickSubmit} className={classes.submit}>Save</Button>*/}
+      </div>
     )
 }
 

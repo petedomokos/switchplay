@@ -65,8 +65,9 @@ const useStyles = makeStyles((theme) => ({
   reactComponentItem:{
     position:"absolute",
     pointerEvents:"none",
-    background:"yellow",
-    opacity:0.5
+    border:"solid",
+    borderColor:"blue",
+    borderWidth:"thin",
   },
   formContainer:{
     position:"absolute",
@@ -318,7 +319,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
           ))
         }
       </div>
-      { form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>}
+      {form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>}
       {form &&
         <div className={classes.formContainer} ref={formRef}>
           {form.formType === "date" &&
