@@ -157,6 +157,7 @@ export default function milestonesBarComponent() {
     let oscillator = Oscillator({ k:1.01, dx:10 });
 
     let setReactComponent = function(){};
+    let onSetEditingReactComponent = function(){};
     let updateReactComponent = function(){};
     let setForm = function(){};
     let onClick = function(){};
@@ -544,11 +545,15 @@ export default function milestonesBarComponent() {
                 //but maybe best is to just make dbl-click teh same as two clicks , and 
                 //then ppl on chrome mobile just cant do two clicks in quick succession
                 function handleMilestoneWrapperClick(e,d){
+                    //remove any open reactcomponent (these are not opened from d3 components so we can be 
+                    //sure that it is not a d3 click thatis opening it)
+                    onSetEditingReactComponent(null);
+
                     if(ignoreNextWrapperClick){
                         ignoreNextWrapperClick = false;
                         return;
                     }
-                    //remove any open form
+                    //dont setForm to null if click is ignored as the click may be to open the form!
                     setForm(null);
                     if(selectedMilestone){ return; }
                     //this click is only to turn off swiping ann dturn on scrolling, so if not swipable then its not needed
@@ -564,6 +569,7 @@ export default function milestonesBarComponent() {
 
                 function updateSelected(milestone){
                     //any changes should close any open form
+                    onSetEditingReactComponent(null);
                     setForm(null);
                     //deselecting
                     if(!milestone){
@@ -609,6 +615,7 @@ export default function milestonesBarComponent() {
                 //dragging
                 let dragStartX;
                 function dragStart(e,d){
+                    onSetEditingReactComponent(null);
                     setForm(null);
                     if(!swipable) { return; }
                     //check pos
@@ -1007,6 +1014,7 @@ export default function milestonesBarComponent() {
                 }
 
                 slideBack = function(){
+                    setForm(null)
                     if(canSlideBack){
                         if(selectedMilestone){
                             //move on by one
@@ -1021,6 +1029,7 @@ export default function milestonesBarComponent() {
                 }
 
                 slideForward = function(){
+                    setForm(null)
                     if(canSlideForward){
                         if(selectedMilestone){
                             //move back by 1
@@ -1218,6 +1227,11 @@ export default function milestonesBarComponent() {
     milestonesBar.setReactComponent = function (value) {
         if (!arguments.length) { return setReactComponent; }
         setReactComponent = value;
+        return milestonesBar;
+    };
+    milestonesBar.onSetEditingReactComponent = function (value) {
+        if (!arguments.length) { return onSetEditingReactComponent; }
+        onSetEditingReactComponent = value;
         return milestonesBar;
     };
     milestonesBar.updateReactComponent = function (value) {

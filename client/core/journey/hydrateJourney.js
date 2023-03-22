@@ -45,11 +45,11 @@ export function hydrateJourneyData(data, user, datasets){
     const hydratedProfiles = hydrateProfiles(nonCurrentProfiles, datasets, kpis, defaultTargets, settings, options);
 
     //STEP 2: CREATE CURRENT PROFILE, including expected values
-    const currentProfile = createCurrentProfile(hydratedProfiles, datasets, kpis, settings, options );
+    const currentProfile = { ...createCurrentProfile(hydratedProfiles, datasets, kpis, settings, options ), nr:0 };
 
     //SEP 3: EMBELLISH PROFILES BASED ON CURRENT PROFILE INFO
-    const pastProfiles = hydratedProfiles.filter(p => p.isPast);
-    const futureProfiles = hydratedProfiles.filter(p => p.isFuture);
+    const pastProfiles = hydratedProfiles.filter(p => p.isPast).map((p,i, data) => ({ ...p, nr:i - data.length }));
+    const futureProfiles = hydratedProfiles.filter(p => p.isFuture).map((p,i) => ({ ...p, nr:i + 1 }));
 
     const allProfiles = [ ...pastProfiles, currentProfile, ...futureProfiles];
     const enrichedProfiles = allProfiles.map(p => {

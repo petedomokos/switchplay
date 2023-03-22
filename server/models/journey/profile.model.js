@@ -7,6 +7,8 @@ export default new mongoose.Schema({
     type: String,
     required: 'Profile id is required'
   },
+  title:String,
+  desc:String,
   date:String,
   yPC:String,
   customTargets:[StatValueSchema],

@@ -18,7 +18,8 @@ const transformJourneyForServer = journey => {
 		.filter(p => p.id !== "current")
 		.map(p => ({
 			id:p.id,
-			name:p.name,
+			title:p.title,
+			desc:p.desc,
 			created:p.created,
 			date:p.date,
 			yPC:p.yPC,

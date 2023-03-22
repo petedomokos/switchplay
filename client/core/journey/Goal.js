@@ -13,7 +13,7 @@ import DialogContent from '@material-ui/core/DialogContent'
 import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
 
-const mockDesc = " ewiof efojjew fewfjew xxxx xccxx eiofj efj fw fefjw ---- -- efoe wfe fjf ewof oef hhhhhhhh kjdlkd djd  ..... ... .. .. . . uhd dhud dud d houh zzzz zz zz"
+const mockDesc = " ewiof efojjew fewfjew xxxx xccxx eiofj efj fewiof efojjew fewfjew xxxx xccxx eiofj efj fw fefjw efoe wfe fjf ewof oef hhhhhhhh kjdlkd dj uhd dhud dud d houh zzzz zz zz"
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -29,14 +29,12 @@ const useStyles = makeStyles(theme => ({
     width:"100%",
     height:"calc(100% - 45px)",
     marginTop:"5%",
-    background:"pink",
-    //paddingBottom:0,
     display:"flex",
     flexDirection:"column",
     alignItems:"center"
   },
   titleContainer:{
-    background:"yellow",
+    //background:"yellow",
     width:"85%",
     height:"45px",
     margin:0,
@@ -46,8 +44,8 @@ const useStyles = makeStyles(theme => ({
     alignItems:"center"
   },
   descContainer:{
-    border:"solid",
-    borderWidth:"thin",
+    //border:"solid",
+    //borderWidth:"thin",
     width:"85%",
     height:"calc(100% - 45px)",
     margin:0
@@ -81,7 +79,7 @@ const useStyles = makeStyles(theme => ({
     margin:0,//"5% 5% 2.5% 5%",
     padding:"3px 5px 3px 5px",
     fontSize:"10px",
-    background:"red",
+    //background:"red",
     overflow:"hidden",
     cursor:"pointer",
     pointerEvents:"all"
@@ -92,7 +90,7 @@ const useStyles = makeStyles(theme => ({
     margin:0,//"2.5% 5% 2.5% 5%",
     padding:"3px 5px 3px 5px",
     fontSize:"10px",
-    background:"orange",
+    //background:"orange",
     overflow:"hidden",
     //cursor:"pointer",
     pointerEvents:"all"
@@ -106,66 +104,61 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export default function Goal({ goal, submit, error }) {
-  //console.log("Goal")
-    const classes = useStyles()
-    const initState = {
-        title: goal.title || "",
-        desc:goal.desc || "",
-    }
-    const [values, setValues] = useState(initState)
-    const [editing, setEditing] = useState("")
+export default function Goal({ milestone, error, editing, setEditing }) {
+  const { id, nr, title="", desc="" } = milestone;
+  if(id === "current"){
+    //console.log("Goal", editing)
+  }
+  const classes = useStyles();
 
-    const handleChange = name => event => {
-        setValues({ ...values, [name]: event.target.value })
-    }
+  const defaultName = nr => nr < 0 ? `Past ${-nr}` : (nr > 0 ? `Future ${nr}` : "Current")
 
-    const clickSubmit = () => {
-      //todo next - add title and desc to profile, and wire submit up so it saves title
-      //then do desc textfield and wire it up
-        submit(goal);
-    }
+  const handleChange = event => { 
+    const newEditing = { ...editing, value:event.target.value };
+    setEditing(newEditing) 
+  }
+  const openTitleForm = () => { setEditing({ milestoneId:id, key:"title", value:title }) }
+  const openDescForm = () => { setEditing({ milestoneId:id, key:"desc", value:desc }) }
 
-    const openTitleForm = () => { setEditing("title") }
-
-    return (
-      <div className={classes.root}>
-        <div className={classes.cardContent}>
-          <div className={classes.titleContainer}>
-            {editing === "title" ? 
-              <TextField 
-              id="title" label={values.title ? "" : "Enter title"} className={classes.titleTextField} autoFocus
-              InputLabelProps={{shrink: values.title ? false : true}}
-              value={values.title} onChange={handleChange('title')} margin="dense"/>
-              :
-              <Typography variant="h2" className={classes.title} onClick={openTitleForm}>
-              {goal.title|| "No Title"}
-              </Typography>
-            }
-          </div>
-          <div className={classes.descContainer}>
-            {editing === "desc" ?
-              <TextField 
-              id="desc" label="Description" className={classes.descTextField} 
-              value={values.desc} onChange={handleChange('desc')} margin="normal"/>
-              :
-              <Typography variant="h6" className={classes.desc} paragraph={true} align="left" onClick={openTitleForm}>
-              {goal.desc || mockDesc || "No Description"}
-              </Typography>
-            }
-          </div>
-          {
-            error && (<Typography component="p" color="error">
-              <Icon color="error" className={classes.error}>error</Icon>
-              {error}</Typography>)
+  return (
+    <div className={classes.root}>
+      <div className={classes.cardContent}>
+        <div className={classes.titleContainer}>
+          {editing?.key === "title" ? 
+            <TextField 
+            id="title" label={editing.value ? "" : "Enter title"} className={classes.titleTextField} autoFocus
+            InputLabelProps={{shrink: editing.value ? false : true}}
+            value={editing.value} onChange={handleChange} margin="dense"/>
+            :
+            <Typography variant="h2" className={classes.title} onClick={openTitleForm}>
+            {title|| defaultName(nr)}
+            </Typography>
           }
         </div>
-        {/**<Button color="primary" variant="contained" onClick={clickSubmit} className={classes.submit}>Save</Button>*/}
+        <div className={classes.descContainer}>
+          {editing?.key === "desc" ?
+            <TextField 
+            id="desc" label={editing.value ? "" : "Description"} className={classes.descTextField} 
+            value={editing.value} onChange={handleChange} margin="normal"/>
+            :
+            <Typography variant="h6" className={classes.desc} paragraph={true} align="left" onClick={openDescForm}>
+            {desc || mockDesc || "No Description"}
+            </Typography>
+          }
+        </div>
+        {
+          error && (<Typography component="p" color="error">
+            <Icon color="error" className={classes.error}>error</Icon>
+            {error}</Typography>)
+        }
       </div>
-    )
+      {/**<Button color="primary" variant="contained" onClick={clickSubmit} className={classes.submit}>Save</Button>*/}
+    </div>
+  )
 }
 
 Goal.defaultProps = {
-    goal:{},
+    milestone:{},
+    editing:null,
     submit:() => {}
 }

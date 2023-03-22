@@ -81,6 +81,8 @@ export const WIDGET_WIDTH = 30;
 export const WIDGET_HEIGHT = 40;
 export const WIDGET_MARGIN = { left: 0, right: 0, top:5, bottom:5 }
 
+export const OVERLAY = { FILL:"black", OPACITY:0.5 }
+
 export const KPI_CTRLS = format => [
     //{ key: "actual", label:"Raw Value", isSelected:format === "actual" },
     //{ key: "completion", label:"Completion", isSelected:format === "completion" }

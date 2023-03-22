@@ -11,7 +11,7 @@ import Settings from "../../util/Settings";
 import Goal from "./Goal";
 import milestonesLayout from "./milestonesLayout";
 import milestonesBarComponent from "./milestonesBarComponent";
-import { DIMNS, FONTSIZES, grey10, JOURNEY_SETTINGS_INFO } from './constants';
+import { DIMNS, FONTSIZES, grey10, JOURNEY_SETTINGS_INFO, OVERLAY } from './constants';
 import { sortAscending, sortDescending } from '../../util/ArrayHelpers';
 
 const useStyles = makeStyles((theme) => ({
@@ -46,6 +46,7 @@ const useStyles = makeStyles((theme) => ({
     display:props => props.sliderEnabled && props.bottomCtrlsBarHeight !== 0 ? "flex" : "none",
     justifyContent:"center",
     alignItems:"center",
+    background:"blue"
   },
   iconBtn:{
     color:grey10(2),
@@ -68,6 +69,15 @@ const useStyles = makeStyles((theme) => ({
     border:"solid",
     borderColor:"blue",
     borderWidth:"thin",
+  },
+  reactComponentItemOverlay:{
+    position:"absolute",
+    left:"0px",
+    top:"0px",
+    width:"100%",
+    height:"100%",
+    background:OVERLAY.FILL,
+    opacity:OVERLAY.OPACITY,
   },
   formContainer:{
     position:"absolute",
@@ -114,7 +124,9 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   const [sliderEnabled, setSliderEnabled] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState("");
   const [reactComponent, setReactComponent] = useState(null);
+  const [editingReactComponent, setEditingReactComponent] = useState("");
   const [form, setForm] = useState(null);
+  
 
   const moreSettings = sortAscending(settings
     .filter(s => s.key !== "currentValueDataMethod")
@@ -159,6 +171,23 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
     setForm(prevState => ({ ...prevState, shouldShowMoreSettings:true }))
   }, [form]);
 
+  //const onSetEditingReactComponent = useCallback((newEditing) => {
+  const onSetEditingReactComponent = newEditing => {
+    //console.log("onSetERC........", editingReactComponent)
+    //console.log("new", newEditing)
+    const changedProfile = editingReactComponent?.milestoneId !== newEditing?.milestoneId;
+    const changedKey = editingReactComponent?.key !== newEditing?.key;
+    //console.log("editing? changed?",!!editingReactComponent, changedProfile || changedKey)
+    //save any existing value
+    if(editingReactComponent && (changedProfile || changedKey)){
+      const { milestoneId, key, value } = editingReactComponent;
+      onSaveInfo(milestoneId, key, value);
+    }
+    //update
+    setEditingReactComponent(newEditing)
+  }
+  //}, [editingReactComponent]);
+
   const handleSaveForm = useCallback(e => {
     //if current, it will have already saved when button pressed
     if(form.milestoneId === "current"){
@@ -191,7 +220,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
       .updateDatesShown(allMilestones);
 
     setForm(null);
-    onSaveInfo("date", form.milestoneType, form.milestoneId, form.value)
+    onSaveInfo(form.milestoneId, "date", form.value);
   }, [form]);
 
   const handleCancelForm = useCallback(e => {
@@ -274,6 +303,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
         setReactComponent(null);
         setReactComponent(newComponent);
       })
+      .onSetEditingReactComponent(onSetEditingReactComponent)
       .onMouseover(function(e,d){
         //console.log("mover")
       })
@@ -281,7 +311,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
         //console.log("mout")
       })//)
 
-  }, [stringifiedProfiles, screen, form, reactComponent])
+  }, [stringifiedProfiles, screen, form, reactComponent, editingReactComponent])
 
   useEffect(() => {
     //it mustnt be swipable when we want it to be scrollable
@@ -295,8 +325,8 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
     d3.select(containerRef.current).call(milestonesBar);
   }, [selectedMilestone, stringifiedProfiles, screen])
 
-  const onClickGoal = () => {
-    console.log("goal clicked")
+  const onCtrlsAreaClick = () => {
+    onSetEditingReactComponent(null);
   }
 
   return (
@@ -305,16 +335,12 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
         {
           allMilestones.map(m => (
             <div className={classes.reactComponentItem} key={`milestone-${m.id}`} id={`milestone-`+m.id}>
-              <Goal/>
-              {/**
-                <div style={{ margin:"5%", width:"90%", height:"20%", background:"blue", pointerEvents:"all" }} onClick={onClickGoal}>
-                  Goal Title For {m.id}
-                </div>
-
-                <div style={{ margin:"5%", width:"90%", height:"50%", background:"red", pointerEvents:"all" }} onClick={onClickGoal}>
-                  desc.........
-                </div>
-              */}
+              <Goal
+                milestone={m}
+                editing={editingReactComponent?.milestoneId === m.id ? editingReactComponent : null}
+                setEditing={onSetEditingReactComponent}
+              />
+              {selectedMilestone && selectedMilestone !== m.id && <div className={classes.reactComponentItemOverlay}></div>}
             </div>
           ))
         }
@@ -363,7 +389,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
             </filter>
           </defs>
         </svg>
-        {!form && <div className={classes.ctrls}>
+        {!form && <div className={classes.ctrls} onClick={onCtrlsAreaClick}>
           <IconButton className={classes.iconBtn} onClick={milestonesBar.slideBack}
               aria-label="Home" >
               <ArrowBackIosIcon className={classes.icon}/>

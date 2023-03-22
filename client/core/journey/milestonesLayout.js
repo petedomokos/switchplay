@@ -20,14 +20,7 @@ export default function milestonesLayout(){
 
     function update(data){
         //console.log("update milestonesLayout data----------------------------", data)
-        const pastData = data.filter(m => m.isPast);
-        const futureData = data.filter(m => m.isFuture);
-        const numberedPastData = pastData.map((m,i) => ({ ...m, nr:i - pastData.length }));
-        const numberedFutureData = futureData.map((m,i) => ({ ...m, nr:i + 1 }));
-        const numberedCurrent = { ...data.find(m => m.isCurrent), nr:0 };
-        const numberedData = data.length  === 0 ? [] : [...numberedPastData, numberedCurrent, ...numberedFutureData];
-
-        return numberedData.map((m,i) => {
+        return data.map((m,i) => {
             //console.log("milestone------", i, m.id)
             const { id, date, dateCount, dataType, isPast, isCurrent, isFuture, settings, specificDate, onTrackStatus } = m;
 

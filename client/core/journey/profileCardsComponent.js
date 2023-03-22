@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10, COLOURS, PROFILE_PAGES } from "./constants";
+import { DIMNS, grey10, COLOURS, PROFILE_PAGES, OVERLAY } from "./constants";
 import dragEnhancements from './enhancedDragHandler';
 // import menuComponent from './menuComponent';
 import profileInfoComponent from './profileInfoComponent';
@@ -189,8 +189,8 @@ export default function profileCardsComponent() {
                         .attr("height", height)
                         .attr("x", -width/2)
                         .attr("y", -height/2)
-                        .style("fill", "black")
-                        .style("opacity", 0.5)
+                        .style("fill", OVERLAY.FILL)
+                        .style("opacity", OVERLAY.OPACITY)
                     
                     d3.select(this).select("g.contents").select("rect.profile-card-bg")
                     .call(updateFill, { 

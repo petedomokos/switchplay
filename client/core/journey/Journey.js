@@ -244,19 +244,22 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     saveDatapoint(datasetId, datapoint);
   }, [stringifiedProfiles, user._id]);
 
-  const onSaveInfo = useCallback((infoType, milestoneType, id, value) => {
-    //console.log("saveinfo", infoType, milestoneType, id, value);
-    if(infoType === "date"){
+  const onSaveInfo = useCallback((profileId, key, value) => {
+    console.log("saveinfo", profileId, key, value);
+    //special case - date need formatting
+    if(key === "date"){
       //@todo - remove creation of Date here - can just store as a string
       const newDate = new Date(value);
       newDate.setUTCHours(21);
-      if(milestoneType === "profile"){
-        const _profiles = profiles.map(p => p.id === id ? ({ ...p, date: newDate }) : p);
-        save({ ...data, profiles:_profiles });
-        return;
-      }
-      //handle other cases as and when required
+      const _profiles = profiles.map(p => p.id === profileId ? ({ ...p, date: newDate }) : p);
+      save({ ...data, profiles:_profiles });
+      return;
     }
+    
+    //default case
+    const _profiles = profiles.map(p => p.id === profileId ? ({ ...p, [key]: value }) : p);
+    console.log("save profiles", _profiles)
+    save({ ...data, profiles:_profiles });
     
   }, [stringifiedContracts, user._id]);
 
