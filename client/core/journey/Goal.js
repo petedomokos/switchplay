@@ -34,7 +34,6 @@ const useStyles = makeStyles(theme => ({
     alignItems:"center"
   },
   titleContainer:{
-    //background:"yellow",
     width:"85%",
     height:"45px",
     margin:0,
@@ -44,8 +43,6 @@ const useStyles = makeStyles(theme => ({
     alignItems:"center"
   },
   descContainer:{
-    //border:"solid",
-    //borderWidth:"thin",
     width:"85%",
     height:"calc(100% - 45px)",
     margin:0
@@ -56,41 +53,42 @@ const useStyles = makeStyles(theme => ({
     display:"flex",
     justifyContent:"center",
     alignItems:"center",
-    margin:"0 5% 2.5% 5%",
+    margin:0,//"0 0% 2.5% 0%",
     //color: theme.palette.openTitle,
     fontSize:"18px",
-    padding:"3px 5px 3px 5px",
+    padding:0,//"3px 5px 3px 5px",
     cursor:"pointer",
     pointerEvents:"all"
   },
   titleTextField: {
     //marginLeft: theme.spacing(1),
     //marginRight: theme.spacing(1),
+    width:"100%",
     height:"100%",
-    margin:"0 5% 0% 5%",
+    margin:0,//"0 5% 0% 5%",
     //color: "aqua",//theme.palette.openTitle,
     fontSize:"18px",
-    padding:"0px 5px 0px 5px",
+    padding:0, //"0px 5px 0px 5px",
     //cursor:"pointer",
     pointerEvents:"all"
   },
   desc:{
     height:"90%",
+    width:"100%",
     margin:0,//"5% 5% 2.5% 5%",
-    padding:"3px 5px 3px 5px",
+    padding:0,//"3px 5px 3px 5px",
     fontSize:"10px",
-    //background:"red",
     overflow:"hidden",
     cursor:"pointer",
     pointerEvents:"all"
     //overflowY:"scroll" - doesnt work - may be coz of milestoneWrapper?
   },
   descTextField:{
+    width:"100%",
     height:"90%",
     margin:0,//"2.5% 5% 2.5% 5%",
-    padding:"3px 5px 3px 5px",
+    padding:0,//"3px 5px 3px 5px",
     fontSize:"10px",
-    //background:"orange",
     overflow:"hidden",
     //cursor:"pointer",
     pointerEvents:"all"
@@ -104,12 +102,18 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
+export function splitMultilineString(str){
+  return str.split("\n");
+}
+
 export default function Goal({ milestone, error, editing, setEditing }) {
   const { id, nr, title="", desc="" } = milestone;
-  if(id === "current"){
-    //console.log("Goal", editing)
+  const descLines = desc ? splitMultilineString(desc) : ["No Description"];
+  const styleProps = {
   }
-  const classes = useStyles();
+  const classes = useStyles(styleProps);
+
+
 
   const defaultName = nr => nr < 0 ? `Past ${-nr}` : (nr > 0 ? `Future ${nr}` : "Current")
 
@@ -138,11 +142,21 @@ export default function Goal({ milestone, error, editing, setEditing }) {
         <div className={classes.descContainer}>
           {editing?.key === "desc" ?
             <TextField 
-            id="desc" label={editing.value ? "" : "Description"} className={classes.descTextField} 
-            value={editing.value} onChange={handleChange} margin="normal"/>
+            id="desc" label={editing.value ? "" : "Enter Description"} className={classes.descTextField} 
+            InputLabelProps={{shrink: editing.value ? false : true}} autoFocus
+            value={editing.value} onChange={handleChange} margin="normal"
+            multiline />
             :
-            <Typography variant="h6" className={classes.desc} paragraph={true} align="left" onClick={openDescForm}>
-            {desc || mockDesc || "No Description"}
+            <Typography 
+              variant="h6" className={classes.desc} paragraph={true} 
+              align={desc ? "left" : "center"}
+              onClick={openDescForm}>
+                {descLines.map(line => (
+                  <>
+                    {line}
+                    <br/>
+                  </>
+                ))}
             </Typography>
           }
         </div>
