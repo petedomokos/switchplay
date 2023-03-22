@@ -46,7 +46,6 @@ const useStyles = makeStyles((theme) => ({
     display:props => props.sliderEnabled && props.bottomCtrlsBarHeight !== 0 ? "flex" : "none",
     justifyContent:"center",
     alignItems:"center",
-    background:"blue"
   },
   iconBtn:{
     color:grey10(2),
@@ -66,9 +65,6 @@ const useStyles = makeStyles((theme) => ({
   reactComponentItem:{
     position:"absolute",
     pointerEvents:"none",
-    border:"solid",
-    borderColor:"blue",
-    borderWidth:"thin",
   },
   reactComponentItemOverlay:{
     position:"absolute",

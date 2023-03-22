@@ -199,6 +199,7 @@ export default function profileCardsComponent() {
                     })
 
                     const profileInfo = profileInfoComponents[d.id]
+                        .currentPage(currentPage)
                         .width(contentsWidth)
                         .height(infoHeight)
                         .fontSizes(fontSizes.info)

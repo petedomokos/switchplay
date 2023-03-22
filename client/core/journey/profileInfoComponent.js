@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS } from "./constants";
+import { DIMNS, PROFILE_PAGES } from "./constants";
 //import dragEnhancements from './enhancedDragHandler';
 
 /*
@@ -15,7 +15,7 @@ export default function profileInfoComponent() {
 
     function updateDimns(){
         photoHeight = height * 0.8;
-        textInfoHeight = height * 0.2;
+        textInfoHeight = currentPage.key === "goal" ? 0 : height * 0.2;
     }
 
     let fontSizes = {
@@ -36,6 +36,7 @@ export default function profileInfoComponent() {
     //let enhancedDrag = dragEnhancements();
     let dateIntervalTimer;
     let showDateCount = false;
+    let currentPage = PROFILE_PAGES[0];
 
     //dom
     let containerG;
@@ -229,7 +230,7 @@ export default function profileInfoComponent() {
                 })
                 .remove();
 
-            const textInfoG = containerG.selectAll("g.text-info").data([data]);
+            const textInfoG = containerG.selectAll("g.text-info").data(currentPage.key === "goal" ? [] : [data]);
             textInfoG.enter()
                 .append("g")
                     .attr("class", "text-info")
@@ -328,6 +329,8 @@ export default function profileInfoComponent() {
 
                     })
 
+            textInfoG.exit().remove();
+
         })
 
         return selection;
@@ -347,6 +350,11 @@ export default function profileInfoComponent() {
     profileInfo.fontSizes = function (values) {
         if (!arguments.length) { return fontSizes; }
         fontSizes = { ...fontSizes, ...values };
+        return profileInfo;
+    };
+    profileInfo.currentPage = function (value) {
+        if (!arguments.length) { return currentPage; }
+        currentPage = value;
         return profileInfo;
     };
     profileInfo.editable = function (value) {
