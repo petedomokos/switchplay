@@ -1,4 +1,5 @@
 import { getGoals } from "../data/goals";
+import { calcAge } from "../util/TimeHelpers";
 
 export const hydrateUser = user => {
     return {
@@ -16,9 +17,12 @@ export const hydrateUser = user => {
 export const hydrateUsers = users => users.map(u => hydrateUser(u));
 
 function createPlayer(user){
-    const { _id, firstname, surname, position, dob, groupsMemberOf } = user;
+    const { _id, firstname, surname, position, /*dob,*/ groupsMemberOf } = user;
+    //@todo - remove this temp mock dob 
+    const dob = user.dob || "2005/02/19";
     return {
         _id, firstname, surname, position,
+        dob,
         age:calcAge(dob),
         group:groupsMemberOf[0], //for now, assume max 1 group per player
         photos:[{label:"main"}] //@todo - user should have this already
@@ -32,10 +36,4 @@ function createCoach(user){
         group:administeredGroups[0], //for now, assume max 1 group per coach
         photos:[{label:"main"}] //@todo - user should have this already
     }
-}
-
-//@todo
-function calcAge(dob){
-    return 21;
-
 }

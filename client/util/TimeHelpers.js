@@ -132,3 +132,18 @@ export function calcDateCount(from, to, requiredUnits, options={}){
 		unit:"years-months"
 	}
 }
+
+export function calcAge(dob, date){
+	if(!dob){ return undefined; }
+	const birthDate = typeof dob === "string" ? new Date(dob) : dob;
+	const dateMS = date?.getTime() || Date.now();
+    //calculate ms difference from current date in time  
+    const deltaMS = dateMS - birthDate.getTime();
+      
+    //convert the calculated difference in date format  
+    const deltaAge = new Date(deltaMS);  
+    //extract year from date      
+    const year = deltaAge.getUTCFullYear();  
+    //now calculate the age of the user  
+    return Math.abs(year - 1970);  
+}

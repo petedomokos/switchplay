@@ -360,7 +360,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
     <div className={`milestone-bar-root ${classes.root}`}>
       <div className={classes.reactComponentContainer} id="react-container" ref={reactComponentRef}>
         {
-          allMilestones.map(m => (
+          allMilestones.filter(m => !m.isCurrent).map(m => (
             <div className={`${classes.reactComponentItem} milestone`} key={`milestone-${m.id}`} id={`milestone-`+m.id}>
               <Goal
                 milestone={m}

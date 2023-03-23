@@ -932,7 +932,7 @@ export default function milestonesBarComponent() {
                                     }
                                 }
                             ],
-                            botRight: [
+                            botRight: d.isCurrent ? [] : [
                                 { 
                                     label:"turnPage", 
                                     icon:turnPage,

@@ -1,11 +1,10 @@
 import * as d3 from 'd3';
-import { addYears, addMonths, addWeeks } from '../../util/TimeHelpers';
+import { addYears, addMonths, addWeeks, calcDateCount, calcAge } from '../../util/TimeHelpers';
 import { sortAscending } from '../../util/ArrayHelpers';
 import { getKpis } from "../../data/kpis"
 import { getTargets, findDefaultTarget } from "../../data/targets";
 import { round, roundDown, roundUp, getRangeFormat, dateIsInRange, getValueForStat, getGreatestValueForStat } from "../../data/dataHelpers";
 import { linearProjValue } from "./helpers";
-import { calcDateCount } from "../../util/TimeHelpers"
 import { pcCompletion } from "../../util/NumberHelpers"
 import { JOURNEY_SETTINGS, JOURNEY_SETTINGS_INFO } from './constants';
 import { getBandsAndStandards } from "../../data/bandsAndStandards";
@@ -13,8 +12,8 @@ import { getBandsAndStandards } from "../../data/bandsAndStandards";
 export function hydrateJourneyData(data, user, datasets){
     const now = new Date();
     //console.log("hydrateJourneyData", datasets)
-    const nonCurrentProfiles = data.profiles.filter(p => p.id !== "current");
     const player = user.player;
+    const nonCurrentProfiles = data.profiles.filter(p => p.id !== "current");
 
     const kpis = getKpis(player._id).map(kpi => {
         const { bands, standards, accuracy } = getBandsAndStandards(kpi.datasetKey, kpi.statKey) || {};
@@ -56,6 +55,7 @@ export function hydrateJourneyData(data, user, datasets){
         const pcKpisOnTrack = p.kpis.length === 0 ? 0 : Math.round((p.kpis.filter(kpi => kpi.onTrack).length / p.kpis.length) * 100);
         return {
             ...p,
+            playerAge:calcAge(player.dob, p.date),
             pcKpisOnTrack,
             onTrackStatus:pcKpisOnTrack === 100 ? "fullyOnTrack" : 
                 (pcKpisOnTrack >= 75 ? "mostlyOnTrack" : 

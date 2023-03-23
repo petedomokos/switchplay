@@ -12,11 +12,11 @@ export default function profileInfoComponent() {
     let width = DIMNS.profile.width;
     let height = DIMNS.profile.height / 2;
     let photoHeight;
-    let textInfoHeight;
+    let getTextInfoHeight = () => 0;
 
-    function updateDimns(){
+    function updateDimns(d){
         photoHeight = height * 0.8;
-        textInfoHeight = currentPage.key === "goal" ? 0 : height * 0.2;
+        getTextInfoHeight = d => currentPage.key === "goal" && !d.isCurrent ? 0 : height * 0.2;
     }
 
     let fontSizes = {
@@ -240,7 +240,7 @@ export default function profileInfoComponent() {
                 })
                 .remove();
 
-            const textInfoG = containerG.selectAll("g.text-info").data(currentPage.key === "goal" ? [] : [data]);
+            const textInfoG = containerG.selectAll("g.text-info").data(currentPage.key === "goal" && !isCurrent ? [] : [data]);
             textInfoG.enter()
                 .append("g")
                     .attr("class", "text-info")
@@ -290,6 +290,7 @@ export default function profileInfoComponent() {
                     .merge(textInfoG)
                     .attr("transform", `translate(0, ${photoHeight})`)
                     .each(function(d){
+                        const textInfoHeight = getTextInfoHeight(d);
                         const maxNrLetters = d3.max([d.firstname, d.surname], d => d.length);
                         const marginReductionPerLetter = 0.02;
                         const marginReduction = marginReductionPerLetter * maxNrLetters;
@@ -325,8 +326,8 @@ export default function profileInfoComponent() {
 
                         otherTextInfoG.select("text.age")
                             .attr("transform", `translate(0, ${textInfoHeight * 0.33})`)
-                            .attr("font-size", fontSizes.age)
-                            .text("23");
+                            .attr("font-size", age ? fontSizes.age : fontSizes.age * 0.7)
+                            .text(age || "Age Unknown");
 
                         otherTextInfoG.select("text.position")
                             .attr("transform", `translate(0, ${textInfoHeight * 0.67})`)

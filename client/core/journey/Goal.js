@@ -110,7 +110,7 @@ export function splitMultilineString(str){
 
 export default function Goal({ milestone, error, editing, setEditing }) {
   const { id, nr, title="", desc="" } = milestone;
-  const descLines = desc ? splitMultilineString(desc) : ["No Description"];
+  const descLines = desc ? splitMultilineString(desc) : ["No Notes"];
   const styleProps = {
   }
   const classes = useStyles(styleProps);
@@ -126,19 +126,6 @@ export default function Goal({ milestone, error, editing, setEditing }) {
   const openTitleForm = () => { setEditing({ milestoneId:id, key:"title", value:title }) }
   const openDescForm = () => { setEditing({ milestoneId:id, key:"desc", value:desc }) }
 
-  const handleDragStart = e => {
-    console.log("ds", e)
-    //const emptyImg = new Image();
-    //e.dataTransfer.setDragImage(emptyImg, 0, 0)
-    //e.preventDefault();
-  }
-  const handleDrag = e => {
-    console.log("dragged")
-    //e.preventDefault();
-  }
-
-  //draggable onDragStart={handleDragStart} onDrag={handleDrag}
-  //onTouchStart={handleDragStart} onTouchMove={handleDrag}
   return (
     <div className={classes.root}>
       <div className={classes.cardContent}>
@@ -157,7 +144,7 @@ export default function Goal({ milestone, error, editing, setEditing }) {
         <div className={classes.descContainer}>
           {editing?.key === "desc" ?
             <TextField 
-            id="desc" label={editing.value ? "" : "Enter Description"} className={classes.descTextField} 
+            id="desc" label={editing.value ? "" : "Enter Notes"} className={classes.descTextField} 
             InputLabelProps={{shrink: editing.value ? false : true}} autoFocus
             value={editing.value} onChange={handleChange} margin="normal"
             multiline />

@@ -296,7 +296,7 @@ export default function profileCardsComponent() {
                     const bottomAreaG = contentsG.select("g.bottom-area")
                         .attr("transform", "translate(0," +(contentsHeight/2) +")");
 
-                    const kpisG = bottomAreaG.selectAll("g.kpis").data(currentPage.key === "kpis" ? [1] : []);
+                    const kpisG = bottomAreaG.selectAll("g.kpis").data(currentPage.key === "kpis" || d.isCurrent ? [1] : []);
                     kpisG.enter()
                         .append("g")
                             .attr("class", "kpis")
@@ -306,7 +306,7 @@ export default function profileCardsComponent() {
 
                     kpisG.exit().remove();
 
-                    const goalG = bottomAreaG.selectAll("g.goal").data(currentPage.key === "goal" ? [1] : []);
+                    const goalG = bottomAreaG.selectAll("g.goal").data(currentPage.key === "goal" && !d.isCurrent ? [1] : []);
                     goalG.enter()
                         .append("g")
                             .attr("class", "goal")
