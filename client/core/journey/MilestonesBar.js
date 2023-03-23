@@ -13,6 +13,7 @@ import milestonesLayout from "./milestonesLayout";
 import milestonesBarComponent from "./milestonesBarComponent";
 import { DIMNS, FONTSIZES, grey10, JOURNEY_SETTINGS_INFO, OVERLAY } from './constants';
 import { sortAscending, sortDescending } from '../../util/ArrayHelpers';
+import { ContactSupportOutlined } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -65,6 +66,7 @@ const useStyles = makeStyles((theme) => ({
   reactComponentItem:{
     position:"absolute",
     pointerEvents:"none",
+    //background:"orange"
   },
   reactComponentItemOverlay:{
     position:"absolute",
@@ -122,7 +124,8 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   const [reactComponent, setReactComponent] = useState(null);
   const [editingReactComponent, setEditingReactComponent] = useState("");
   const [form, setForm] = useState(null);
-  
+
+  const dragStartXRef = useState(null);
 
   const moreSettings = sortAscending(settings
     .filter(s => s.key !== "currentValueDataMethod")
@@ -325,12 +328,40 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
     onSetEditingReactComponent(null);
   }
 
+  useEffect(() => {
+    //todo - need to have the sme logic as in milestonesbarComponent for determining if its slideForward or back or nothing,
+    //and call the relevant functions to slide it
+    //This soln seems to work, but it breaks ifyou drag above or below the blue box.
+    //simplest soln for now may be to just have a box aboev and below, but teh one below just doesnt extend over the bottom right corner.
+    //in longer term, may bring the ctrls to this level - they may aswell be.
+    const swipable = (selectedMilestone || screen.isLarge ? false : true);
+    const DRAG_THRESHOLD = 50;
+    const drag = d3.drag()
+      .on("start", e => { 
+        if(!swipable) { return; }
+        dragStartXRef.current = e.x;
+      })
+      .on("drag", e => { 
+        if(!swipable) { return; }
+        if(dragStartXRef.current && dragStartXRef.current - e.x > DRAG_THRESHOLD){
+          dragStartXRef.current = null;
+          milestonesBar.slideForward();
+        } else if(dragStartXRef.current && e.x - dragStartXRef.current > DRAG_THRESHOLD){
+            dragStartXRef.current = null;
+            milestonesBar.slideBack();
+        }
+      })
+
+    d3.selectAll(`div.milestone`).call(drag)
+      //.on("click", e => { console.log("curr clicked")})
+  }, [selectedMilestone, screen.isLarge])
+
   return (
     <div className={`milestone-bar-root ${classes.root}`}>
       <div className={classes.reactComponentContainer} id="react-container" ref={reactComponentRef}>
         {
           allMilestones.map(m => (
-            <div className={classes.reactComponentItem} key={`milestone-${m.id}`} id={`milestone-`+m.id}>
+            <div className={`${classes.reactComponentItem} milestone`} key={`milestone-${m.id}`} id={`milestone-`+m.id}>
               <Goal
                 milestone={m}
                 editing={editingReactComponent?.milestoneId === m.id ? editingReactComponent : null}

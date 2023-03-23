@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import { DIMNS, PROFILE_PAGES } from "./constants";
+import container from './kpis/kpi/container';
 //import dragEnhancements from './enhancedDragHandler';
 
 /*
@@ -50,6 +51,15 @@ export default function profileInfoComponent() {
             //console.log("profileInfo data", data)
             const { firstname, surname, age, position, photos, isCurrent, isFuture, settings } = data;
             containerG = d3.select(this);
+
+            const bgRect = containerG.selectAll("rect.info-bg").data([1]);
+            bgRect.enter()
+                .append("rect")
+                    .attr("class", "info-bg")
+                    .merge(bgRect)
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr("fill", "black")
             //can use same enhancements object for outer and inner as click is same for both
             /*
             enhancedDrag

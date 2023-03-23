@@ -23,15 +23,17 @@ const useStyles = makeStyles(theme => ({
     display:"flex",
     flexDirection:"column",
     alignItems:"center",
-    background:"none"
+    background:"none",
   },
   cardContent:{
     width:"100%",
     height:"calc(100% - 45px)",
-    marginTop:"5%",
+    marginTop:"0",
     display:"flex",
     flexDirection:"column",
-    alignItems:"center"
+    alignItems:"center",
+    //background:"blue",
+    pointerEvents:"all"
   },
   titleContainer:{
     width:"85%",
@@ -124,6 +126,19 @@ export default function Goal({ milestone, error, editing, setEditing }) {
   const openTitleForm = () => { setEditing({ milestoneId:id, key:"title", value:title }) }
   const openDescForm = () => { setEditing({ milestoneId:id, key:"desc", value:desc }) }
 
+  const handleDragStart = e => {
+    console.log("ds", e)
+    //const emptyImg = new Image();
+    //e.dataTransfer.setDragImage(emptyImg, 0, 0)
+    //e.preventDefault();
+  }
+  const handleDrag = e => {
+    console.log("dragged")
+    //e.preventDefault();
+  }
+
+  //draggable onDragStart={handleDragStart} onDrag={handleDrag}
+  //onTouchStart={handleDragStart} onTouchMove={handleDrag}
   return (
     <div className={classes.root}>
       <div className={classes.cardContent}>
@@ -151,11 +166,11 @@ export default function Goal({ milestone, error, editing, setEditing }) {
               variant="h6" className={classes.desc} paragraph={true} 
               align={desc ? "left" : "center"}
               onClick={openDescForm}>
-                {descLines.map(line => (
-                  <>
+                {descLines.map((line,i) => (
+                  <div key={`line-${i}-${id}`}>
                     {line}
                     <br/>
-                  </>
+                  </div>
                 ))}
             </Typography>
           }
