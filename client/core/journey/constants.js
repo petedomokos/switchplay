@@ -90,7 +90,7 @@ export const KPI_CTRLS = format => [
 export const GOAL_CTRLS = format => [
 ];
 
-export const PROFILE_PAGES = [{ nr:0, key:"goal" }, { nr: 1, key:"kpis" }];
+export const PROFILE_PAGES = [{ nr:0, key:"goal" }, { nr: 1, key:"profile" }];
 
 export const TIME_SETTINGS = {
     YEAR_END : { MONTH:4, DAY_OF_MONTH:31 },

@@ -53,9 +53,12 @@ export function hydrateJourneyData(data, user, datasets){
     const allProfiles = [ ...pastProfiles, currentProfile, ...futureProfiles];
     const enrichedProfiles = allProfiles.map(p => {
         const pcKpisOnTrack = p.kpis.length === 0 ? 0 : Math.round((p.kpis.filter(kpi => kpi.onTrack).length / p.kpis.length) * 100);
+        console.log("profile", p)
         return {
             ...p,
             playerAge:calcAge(player.dob, p.date),
+            goalPhotoLabel:p.goalPhotoLabel || "goal-default",
+            profilePhotoLabel:p.profilePhotoLabel || (p.isCurrent ? "main" : "profile-default"),
             pcKpisOnTrack,
             onTrackStatus:pcKpisOnTrack === 100 ? "fullyOnTrack" : 
                 (pcKpisOnTrack >= 75 ? "mostlyOnTrack" : 
@@ -63,6 +66,7 @@ export function hydrateJourneyData(data, user, datasets){
                 "offTrack"))
         }
     })
+    console.log("enriched", enrichedProfiles)
         //.map(p => addExpected(p, currentProfile));
 
     return {

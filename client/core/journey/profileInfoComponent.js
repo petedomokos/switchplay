@@ -41,7 +41,19 @@ export default function profileInfoComponent() {
 
     //dom
     let containerG;
+    /*
+    decide how user can change the main photo
+    (ideally, user should be able to have a different photo under current card for each path, but thats later)
 
+    refactor the way photos Data is created, both in hydrateUser and in Journey, so that each profile has a ne-item array
+    just as now, except the label in the item is the photoLabel of that profile, not always main
+
+    we also want some kind of carousel or gallery option for user to select a different photolabel for eahc profile
+
+    if user does this on current, then it updates the photo that is stored in "main" I think
+    Otherwise need a way to store photoLabel for current = could just store it on top level of Journey
+
+    */
     function profileInfo(selection, options={}) {
         //console.log("profileinfo", height)
         updateDimns();
@@ -49,7 +61,8 @@ export default function profileInfoComponent() {
         // expression elements
         selection.each(function (data) {
             //console.log("profileInfo data", data)
-            const { firstname, surname, age, position, photos, isCurrent, isFuture, settings } = data;
+            const { firstname, surname, age, position, isCurrent, isFuture, settings } = data;
+            const photos = isCurrent ? data.photos["profile"] : (data.photos[currentPage.key] || [{ label:"main" }]);
             containerG = d3.select(this);
 
             const bgRect = containerG.selectAll("rect.info-bg").data([1]);
@@ -73,7 +86,7 @@ export default function profileInfoComponent() {
 
             // todo - append photo, name, age, pos
             //helper
-            const photoUrl = d => (`/players/${firstname}_${surname}/${d.label}.png`).toLowerCase();
+            const photoUrl = d => (`/users/${firstname}_${surname}/${d.label}.png`).toLowerCase();
             const photosG = containerG.selectAll("g.photos").data(photos, d => d.label);
             photosG.enter()
                 .append("g")
@@ -95,6 +108,7 @@ export default function profileInfoComponent() {
                         console.log("photo contextmenu event")
                         e.preventDefault(); 
                     })
+            photosG.exit().remove();
 
             const format = d3.timeFormat("%_d %b, %y");
 

@@ -11,6 +11,7 @@ export default new mongoose.Schema({
   desc:String,
   date:String,
   yPC:String,
+  photoLabel:String,
   customTargets:[StatValueSchema],
   customExpected:[StatValueSchema],
   updated: Date,
