@@ -51,9 +51,11 @@ export function hydrateJourneyData(data, user, datasets){
     const futureProfiles = hydratedProfiles.filter(p => p.isFuture).map((p,i) => ({ ...p, nr:i + 1 }));
 
     const allProfiles = [ ...pastProfiles, currentProfile, ...futureProfiles];
+    //onTrackStatus
+    const onlyIncludeKpisWithTargets = settings.find(s => s.key === "onTrackStatusOnlyIncludesKpisWithTargets")?.value
     const enrichedProfiles = allProfiles.map(p => {
-        const pcKpisOnTrack = p.kpis.length === 0 ? 0 : Math.round((p.kpis.filter(kpi => kpi.onTrack).length / p.kpis.length) * 100);
-        console.log("profile", p)
+        const kpisToInclude = onlyIncludeKpisWithTargets  ? p.kpis.filter(kpi => kpi.onTrackStatus) :p.kpis;
+        const pcKpisOnTrack = kpisToInclude.length === 0 ? 0 : Math.round((kpisToInclude.filter(kpi => kpi.onTrackStatus === "onTrack").length / kpisToInclude.length) * 100);
         return {
             ...p,
             playerAge:calcAge(player.dob, p.date),
@@ -66,7 +68,7 @@ export function hydrateJourneyData(data, user, datasets){
                 "offTrack"))
         }
     })
-    console.log("enriched", enrichedProfiles)
+    //console.log("enriched", enrichedProfiles)
         //.map(p => addExpected(p, currentProfile));
 
     return {
@@ -371,11 +373,17 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //note prevProfile has already been processed with a full key and values
             let expected = isPast ? null : calcExpected(kpi, start, { date, ...target }, now, { accuracy });
 
+            let onTrackStatus;
+            if(isPast && target?.actual){
+                onTrackStatus = achieved.actual >= target.actual ? "onTrack" : "offTrack";
+            }else if(!isPast && expected?.actual){
+                onTrackStatus = current && expected.actual <= current.actual ? "onTrack" : "offTrack";
+            }
             return {
                 ...kpi, key, milestoneId,
                 //dates
                 date, 
-                startDate: profileStart.Date, //this may be different from values.start.date
+                startDate: profileStart.date, //this may be different from values.start.date
                 dateRange, 
                 datePhase,
                 isPast, isCurrent, isFuture, isActive,
@@ -385,6 +393,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                     //min/max are just values
                     min, max, start, current, expected, achieved, target, //proposedTarget,
                 },
+                onTrackStatus,
                 accuracy,
                 //other info
                 datasetName:dataset?.name || "",
@@ -454,14 +463,22 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
             const lastDataUpdate = d3.max(dateValuePairs, d => d[0]);
             //START & END
             //@todo - if user has given a fixed startTime for a profile, then get value at that point
-            const prevAchieved = lastPastProfile?.kpis.find(kpi => kpi.key === key)?.achieved;
+            const prevAchieved = lastPastProfile?.kpis.find(kpi => kpi.key === key)?.values.achieved;
 
+            const expected = activeProfileValues(kpi)?.expected;
+            const target = activeProfileValues(kpi)?.target;
             let current;
             if(currentValueDataMethod !== "specificSession"){
                 current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod);
             }else{
                 //it must be a future card and current value is based purely on a specificSession
                 current = getValueForSession(stat, datapoints, specificDate)
+            }
+
+            //if no target/expected, then onTrackStatus is undefined
+            let onTrackStatus;
+            if(expected?.actual){
+                onTrackStatus = current?.actual && expected.actual <= current.actual ? "onTrack" : "offTrack";
             }
 
             return {
@@ -477,10 +494,11 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
                 values:{
                     //min/max just values
                     min, max,
-                    expected:activeProfileValues(kpi)?.expected,
-                    target:activeProfileValues(kpi)?.target,
+                    expected,
+                    target,
                     current
                 },
+                onTrackStatus,
                 //other info
                 datasetName:dataset?.name || "",
                 statName:stat?.name || "",

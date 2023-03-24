@@ -55,7 +55,7 @@ export const JOURNEY_SETTINGS_INFO = {
             { key:"dataExpiryTimeUnits", value:"months", label:"months" },
             { key:"dataExpiryTimeUnits", value:"years", label:"years" }
         ]
-    }
+    },
 }
 
 export const JOURNEY_SETTINGS = [
@@ -63,7 +63,8 @@ export const JOURNEY_SETTINGS = [
     { key:"achievedValueDataMethod", defaultValue: "best" },
     { key:"dataExpiryTimeNumber", defaultValue: 2 },
 	{ key:"dataExpiryTimeUnits", defaultValue: "months" },
-	{ key:"dataToIncludeInMilestones", defaultValue: "all" }
+	{ key:"dataToIncludeInMilestones", defaultValue: "all" },
+    { key: "onTrackStatusOnlyIncludesKpisWithTargets", defaultValue: true }
 ]
 
 export const grey10 = (i) => ["#FFFFFF", "#E8E8E8","#D3D3D3", "#BEBEBE", "#A8A8A8", "#888888", "#696969", "#505050", "#303030", "#000000"][i-1];
