@@ -148,6 +148,11 @@ export default function profileCardsComponent() {
                         //bg rect
                         contentsG
                             .append("rect")
+                                .attr("class", "profile-card-border")
+                                .attr("rx", 3)
+                                .attr("ry", 3)
+                        contentsG
+                            .append("rect")
                                 .attr("class", "profile-card-bg")
                                 .attr("rx", 3)
                                 .attr("ry", 3)
@@ -183,21 +188,6 @@ export default function profileCardsComponent() {
                     transition:transformTransition.update 
                 })
                 .each(function(d){
-                    //overlay 
-                    d3.select(this).select("rect.overlay")
-                        .attr("width", width)
-                        .attr("height", height)
-                        .attr("x", -width/2)
-                        .attr("y", -height/2)
-                        .style("fill", OVERLAY.FILL)
-                        .style("opacity", OVERLAY.OPACITY)
-                    
-                    d3.select(this).select("g.contents").select("rect.profile-card-bg")
-                    .call(updateFill, { 
-                        fill:d => isSelected(d) ? COLOURS.selectedMilestone : COLOURS.milestone,
-                        transition:{ duration: 300 }
-                    })
-
                     const profileInfo = profileInfoComponents[d.id]
                         .currentPage(currentPage)
                         .width(contentsWidth)
@@ -268,25 +258,64 @@ export default function profileCardsComponent() {
                         .onDblClickKpi(onDblClickKpi);
 
                     //ENTER AND UPDATE
+                    //overlay 
+                    d3.select(this).select("rect.overlay")
+                        .attr("width", width)
+                        .attr("height", height)
+                        .attr("x", -width/2)
+                        .attr("y", -height/2)
+                        .style("fill", OVERLAY.FILL)
+                        .style("opacity", OVERLAY.OPACITY)
+
                     const contentsG = d3.select(this).select("g.contents")
                         .attr("transform", d =>  `translate(${-contentsWidth/2},${-contentsHeight/2})`)
 
                     const getStrokeWidth = status => {
                         if(status === "fullyOnTrack"){
-                            return 15;
+                            return 10; 
                         }
                         if(status === "mostlyOnTrack"){
-                            return 7.5;
+                            return 5;
                         }
                         return 0;
+                    }
+                    const currentColorSchemeOrange = "#D4AF37"
+                    const lightGold = "#c9b037";
+                    const darkGold = "#af9500"
+                    const lightSilver = "#d7d7d7";
+                    const darkSilver = "b4b4b4";
+
+                    const gold = lightGold;
+                    const silver = lightSilver;
+
+                    const getStroke = status => {
+                        if(status === "fullyOnTrack"){
+                            return gold; 
+                        }
+                        if(status === "mostlyOnTrack"){
+                            return silver;
+                        }
+                        return "none";
                     }
                     //rect sizes
                     contentsG.selectAll("rect.profile-card-bg")
                         .attr("width", contentsWidth)
                         .attr("height", contentsHeight)
+                        .attr("stroke", "none")
+                        .call(updateFill, { 
+                            fill:d => isSelected(d) ? COLOURS.selectedMilestone : COLOURS.milestone,
+                            transition:{ duration: 300 }
+                        })
+
+                    //from https://www.schemecolor.com/gold-silver-and-bronze-color-palette.php#download
+                    contentsG.selectAll("rect.profile-card-border")
+                        .attr("width", contentsWidth)
+                        .attr("height", contentsHeight)
                         .attr("stroke-width", getStrokeWidth(d.onTrackStatus))
-                        .attr("stroke", grey10(2))// d.isMilestone ? grey10(1) : "none")
-                        //.attr("filter", "url(#filter1)");
+                        .attr("stroke", getStroke(d.onTrackStatus))
+                        .call(updateFill, { fill:d => "none", transition:{ duration: 300 } })
+                        .attr("filter", "url(#shine)")
+                        
                    
                     // why is this too far down
                     contentsG.selectAll("g.info")
@@ -296,7 +325,7 @@ export default function profileCardsComponent() {
                     const bottomAreaG = contentsG.select("g.bottom-area")
                         .attr("transform", "translate(0," +(contentsHeight/2) +")");
 
-                    const kpisG = bottomAreaG.selectAll("g.kpis").data(currentPage.key === "kpis" || d.isCurrent ? [1] : []);
+                    const kpisG = bottomAreaG.selectAll("g.kpis").data(currentPage.key === "profile" || d.isCurrent ? [1] : []);
                     kpisG.enter()
                         .append("g")
                             .attr("class", "kpis")

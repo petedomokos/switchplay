@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
   },
   reactComponentContainer:{
     position:"absolute",
-    display: props => props.reactComponentContainer.display
+    display: props => props.reactComponentContainer.display,
     //left:props => props.reactComponentContainer.left,
     //top:props => props.reactComponentContainer.top
   },
@@ -407,11 +407,8 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
         </div>}
         <svg className={classes.svg} ref={containerRef}>
           <defs>
-            <filter id="filter1" x="0" y="0">
+            <filter id="shine">
               <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
-            </filter>
-            <filter id="filter2" x="0" y="0">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="8" />
             </filter>
           </defs>
         </svg>

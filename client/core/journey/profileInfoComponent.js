@@ -73,6 +73,8 @@ export default function profileInfoComponent() {
                     .attr("width", width)
                     .attr("height", height)
                     .attr("fill", "black")
+                    .attr("rx", 3)
+                    .attr("ry", 3)
             //can use same enhancements object for outer and inner as click is same for both
             /*
             enhancedDrag
@@ -264,7 +266,9 @@ export default function profileInfoComponent() {
 
                         textInfoG.append("rect")
                             .attr("class", "text-info-bg")
-                            .attr("fill", "black");
+                            .attr("fill", "black")
+                            .attr("rx", 3)
+                            .attr("ry", 3);
 
                         //NAME
                         const nameG = textInfoG.append("g").attr("class", "name");
