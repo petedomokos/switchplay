@@ -11,7 +11,7 @@ import { getBandsAndStandards } from "../../data/bandsAndStandards";
 
 export function hydrateJourneyData(data, user, datasets){
     const now = new Date();
-    //console.log("hydrateJourneyData", datasets)
+    //console.log("hydrateJourneyData", data)
     const player = user.player;
     const nonCurrentProfiles = data.profiles.filter(p => p.id !== "current");
 
@@ -68,7 +68,7 @@ export function hydrateJourneyData(data, user, datasets){
                 "offTrack"))
         }
     })
-    //console.log("enriched", enrichedProfiles)
+    console.log("enriched", enrichedProfiles)
         //.map(p => addExpected(p, currentProfile));
 
     return {

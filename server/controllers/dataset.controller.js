@@ -87,9 +87,10 @@ const readMultiple = async (req, res) => {
   console.log('read multiple full datasets......', req.body)
   // @TODO instead of getting all then filtering, just make request for the ones we need
   try{
+    //console.log("trying...")
       let datasets = await Dataset.find()
           .populate('datapoints.player', '_id firstname surname photo')
-      //console.log("datasets", datasets)
+      //console.log("nr datasets", datasets.length)
       const playerDatasets = datasets
       //@todo - put filter back in once we have datasetsMemberOf working well. for now, turn off the filter
         //.filter(dset => req.body.datasetIds.find(id => dset._id.equals(id)))
@@ -98,6 +99,7 @@ const readMultiple = async (req, res) => {
         //legacy issue - the ? checks player exists, in case legacy ds exist but player is deleted
         dset.datapoints = dset.datapoints.filter(d => d.player?._id.equals(req.body.playerId));
       })
+      //console.log("returning ", playerDatasets)
       return res.json(playerDatasets)
   }
   catch (err) {

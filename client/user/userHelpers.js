@@ -4,7 +4,6 @@ import { calcAge } from "../util/TimeHelpers";
 export const hydrateUser = user => {
     return {
         ...user,
-        photos:[{label:"main"}], //@todo - user should have this already
         goals:getGoals(user._id), //legacy - can probably remove
         player:user.isPlayer ? createPlayer(user) : null,
         coach:user.isCoach ? createCoach(user) : null,
@@ -17,7 +16,7 @@ export const hydrateUser = user => {
 export const hydrateUsers = users => users.map(u => hydrateUser(u));
 
 function createPlayer(user){
-    const { _id, firstname, surname, position, /*dob,*/ groupsMemberOf } = user;
+    const { _id, firstname, surname, position, /*dob,*/ groupsMemberOf, photos } = user;
     //@todo - remove this temp mock dob 
     const dob = user.dob || "2005/02/19";
     return {
@@ -25,15 +24,15 @@ function createPlayer(user){
         dob,
         age:calcAge(dob),
         group:groupsMemberOf[0], //for now, assume max 1 group per player
-        photos:[{label:"main"}] //@todo - user should have this already
+        photos
     }
 }
 
 function createCoach(user){
-    const { _id, firstname, surname, administeredGroups } = user;
+    const { _id, firstname, surname, administeredGroups, photos } = user;
     return {
         _id, firstname, surname,
         group:administeredGroups[0], //for now, assume max 1 group per coach
-        photos:[{label:"main"}] //@todo - user should have this already
+        photos
     }
 }

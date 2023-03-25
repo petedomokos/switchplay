@@ -9,11 +9,11 @@ import Button from '@material-ui/core/Button'
 import SelectDate from "../../util/SelectDate";
 import Settings from "../../util/Settings";
 import Goal from "./Goal";
+import Photos from "./Photos";
 import milestonesLayout from "./milestonesLayout";
 import milestonesBarComponent from "./milestonesBarComponent";
 import { DIMNS, FONTSIZES, grey10, JOURNEY_SETTINGS_INFO, OVERLAY } from './constants';
 import { sortAscending, sortDescending } from '../../util/ArrayHelpers';
-import { ContactSupportOutlined } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -79,6 +79,11 @@ const useStyles = makeStyles((theme) => ({
   },
   formContainer:{
     position:"absolute",
+    //dimns may be null if we dont want it to render beyond/between its chidren components
+    width:"90%",//props => props.formContainer.width || null,
+    height:props => props.formContainer.height || null,
+    margin:props => props.formContainer.margin || null,
+    background:"yellow",
     left:props => props.formContainer.left,
     top:props => props.formContainer.top
   },
@@ -112,7 +117,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo, onSaveSetting }) => {
+const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo, onSaveSetting, onSavePhoto }) => {
   const { player={}, profiles=[], contracts=[], settings=[] } = data;
   const allMilestones = [ ...profiles, ...contracts ];
   //console.log("MBar contracts", contracts)
@@ -142,7 +147,13 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   let styleProps = { 
     bottomCtrlsBarHeight, 
     sliderEnabled, 
-    formContainer:{left: form?.left || 0, top: form?.top || 0 },
+    formContainer:{
+      left: form?.left || 0, 
+      top: form?.top || 50,
+      width: form?.formType === "photo" ? "90%" : form?.width,
+      height: form?.formType === "photo" ? "80%" : form?.height,
+      margin: form?.formType === "photo" ? "10% 5%" : form?.margin,
+    }, //50 so it doesnt go over burger bar
     reactComponentContainer: {
       display:reactComponent ? null : "none",
       left: reactComponent?.transform[0] || 0, 
@@ -375,7 +386,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
       {form &&
         <div className={classes.formContainer} ref={formRef}>
           {form.formType === "date" &&
-            form.milestoneId === "current" ?
+            (form.milestoneId === "current" ?
               <>
                 <Settings
                     options={JOURNEY_SETTINGS_INFO.currentValueDataMethod.options}
@@ -397,12 +408,17 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
                   type="date"
                   defaultValue={form.value}
                   handleChange={handleDateChange}/>
+
                 {form.hasChanged && !shouldAutosaveForm &&
                   <div className={classes.formCtrls}>
                     <Button color="primary" variant="contained" onClick={handleCancelForm} className={classes.cancel}>Cancel</Button>
                     <Button color="primary" variant="contained" onClick={handleSaveForm} className={classes.submit}>Save</Button>
                   </div>}
               </>
+            )
+          }
+          {form.formType === "photo" &&
+            <Photos locationKey={form.location} onSavePhoto={onSavePhoto}/>
           }
         </div>}
         <svg className={classes.svg} ref={containerRef}>

@@ -98,7 +98,7 @@ const initChannels = d3.range(numberMonths)
   })
 
 //width and height may be full screen, but may not be
-const Journey = ({ user, data, datasets, availableJourneys, screen, width, height, save, saveDatapoint, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile }) => {
+const Journey = ({ user, data, datasets, availableJourneys, screen, width, height, save, saveDatapoint, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile, savePhoto }) => {
   //console.log("Journey.......data", data)
   //bug - although only 6 profs are saved, we end up with 7 ie two currents
   const { _id, player, name, contracts, profiles, aims, goals, links, measures, settings, kpis } = data;
@@ -270,6 +270,12 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     save({ ...data, settings:_settings });
   }, [settings]);
 
+  const onSavePhoto = useCallback(photo => {
+    const photoData = new FormData();
+    photoData.append("photo", photo)
+    savePhoto(user._id, photoData);
+  }, []);
+
   useEffect(() => {
     const width = d3.min([journeyWidth * 0.725, 500]);
     const height = d3.min([journeyHeight * 0.725, 700]);
@@ -309,6 +315,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
               onSaveValue={onSaveValue}
               onSaveInfo={onSaveInfo}
               onSaveSetting={onSaveSetting}
+              onSavePhoto={onSavePhoto}
               screen={screen}
               availWidth={width}
               availHeight={height}

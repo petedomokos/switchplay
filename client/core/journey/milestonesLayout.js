@@ -30,8 +30,6 @@ export default function milestonesLayout(){
 
             if(dataType === "profile"){
                 myKpisLayout
-                    .date(date)
-                    //.prevCardDate(i === 0 ? undefined : data[i - 1])
                     .format(format)
                     .datasets(datasets)
                     .allKpisActive(m.isActive);

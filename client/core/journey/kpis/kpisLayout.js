@@ -7,8 +7,6 @@ import { getValueForStat } from '../../../data/dataHelpers';
 import { emptyGoal, ball, goalWithBall, shiningCrystalBall, nonShiningCrystalBall } from "../../../../assets/icons/milestoneIcons.js"
 
 export default function kpisLayout(){
-    let date = new Date();
-    let prevCardDate;
     let format = "completion"; //actual, pc or completion
     let datasets = [];
     let targets = [];
@@ -221,16 +219,6 @@ export default function kpisLayout(){
         return { kpisData, ctrlsData }
     }
 
-    update.date = function (value) {
-        if (!arguments.length) { return date; }
-        date = value;
-        return update;
-    };
-    update.prevCardDate = function (value) {
-        if (!arguments.length) { return prevCardDate; }
-        prevCardDate = value;
-        return update;
-    };
     update.format = function (value) {
         if (!arguments.length) { return format; }
         //new value may be undefined in which case dont update it

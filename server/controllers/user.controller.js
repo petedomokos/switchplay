@@ -3,6 +3,7 @@ import Journey from '../models/journey/journey.model'
 import extend from 'lodash/extend'
 import errorHandler from './../helpers/dbErrorHandler'
 import formidable from 'formidable'
+import fs from 'fs'
 
 
 /*
@@ -134,6 +135,8 @@ const update = async (req, res) => {
   let form = new formidable.IncomingForm()
   form.keepExtensions = true
   form.parse(req, async (err, fields, files) => {
+    console.log("fields", fields)
+    console.log("files", files)
     if (err) {
       return res.status(400).json({
         error: "Photo could not be uploaded"
@@ -141,20 +144,34 @@ const update = async (req, res) => {
     }
 
     //parse array fields which have been stringified
-    fields.admin = JSON.parse(fields.admin);
+    if(fields.admin){
+      fields.admin = JSON.parse(fields.admin);
+    }
     let user = req.user
     user = extend(user, fields)
     user.updated = Date.now()
-    console.log('user now', user)
+    //console.log('user now', user)
+    let newPhoto;
     if(files.photo){
-      user.photo.data = fs.readFileSync(files.photo.path)
-      user.photo.contentType = files.photo.type
+      newPhoto = {
+        data: fs.readFileSync(files.photo.path),
+        contentType: files.photo.type
+      }
+      //console.log("pushing new photo")
+      user.photos.push(newPhoto);
+      //user.photo.data = fs.readFileSync(files.photo.path)
+      //user.photo.contentType = files.photo.type
     }
     try {
       await user.save()
       user.hashed_password = undefined
       user.salt = undefined
-      res.json(user)
+      //only return properties that have been updated
+      let userToReturn = {
+        ...fields,
+        photos:newPhoto ? [newPhoto] : [] //this will be merged on lcient with existing
+      };
+      res.json(userToReturn)
     } catch (err) {
       return res.status(400).json({
         error: errorHandler.getErrorMessage(err)
@@ -178,6 +195,24 @@ const remove = async (req, res) => {
   }
 }
 
+const photo = (req, res, next) => {
+  if(req.profile.photo.data){
+    res.set("Content-Type", req.profile.photo.contentType);
+    return res.send(req.profile.photo.data)
+  }
+  //next is defaultPhoto if no photo
+  next();
+}
+
+
+const defaultPhoto = (req, res) => {
+  return res.status(400);
+  //todo - need to import profileImage at top of file
+  //return res.sendFile(process.cwd() + profileImage)
+}
+
+
+
 export default {
   create,
   userByID,
@@ -185,4 +220,6 @@ export default {
   list,
   remove,
   update,
+  photo,
+  defaultPhoto
 }

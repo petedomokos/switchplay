@@ -6,10 +6,11 @@ import { signout } from './AuthActions.js';
 import { transformJourneyForClient } from "./JourneyActions"
 
 export const transformUserForClient = serverUser => {
+	console.log("transformUserForClient")
 	const { journeys } = serverUser;
 	return {
 		...serverUser,
-		journeys:journeys.map(j => transformJourneyForClient(j))
+		journeys:journeys ? journeys.map(j => transformJourneyForClient(j)) : null
 	}
 }
 
@@ -63,7 +64,11 @@ export const fetchUsers = () => dispatch => {
 		{
 			url: '/api/users', 
 			requireAuth:true,
-			nextAction: data => { return { type:C.LOAD_USERS, users:data } }
+			nextAction: data => { 
+				return { 
+					type:C.LOAD_USERS, users:data.map(user => transformUserForClient(user)) 
+				} 
+			}
 		}) 
 }
 
@@ -74,17 +79,20 @@ export const updateUser = (id, formData, history) => dispatch => {
 			url: '/api/users/'+id,
 			method: 'PUT',
 			headers:{
-	        	'Accept': 'application/json'
+	        	'Accept': 'application/json',
 	      	},
 			body:formData, //not stringify as its a formidable object
 			requireAuth:true,
 			nextAction: data => {
-				history.push("/")
+				if(history){
+					history.push("/");
+				}
 				const jwt = auth.isAuthenticated();
 				if(jwt.user._id === data._id){
-					return { type:C.UPDATE_SIGNEDIN_USER, user:data };
+					//we still call transform function even though it may not be all fields
+					return { type:C.UPDATE_SIGNEDIN_USER, user:transformUserForClient(data)};
 				}
-				return { type:C.UPDATE_ADMINISTERED_USER, user:data }
+				return { type:C.UPDATE_ADMINISTERED_USER, user:transformUserForClient(data) }
 			}
 		})
 }

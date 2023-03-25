@@ -105,7 +105,7 @@ export default function profileInfoComponent() {
                             //.attr("height", photoHeight)
 
                     })
-                    .on("click", (e,d) => { onClick.call(this, e, d, data, "photo") })
+                    .on("click", (e,d) => { onClick.call(this, e, d, data, "photo", currentPage.key) })
                     .on("contextmenu", (e) => { 
                         console.log("photo contextmenu event")
                         e.preventDefault(); 

@@ -854,15 +854,14 @@ export default function milestonesBarComponent() {
                         .editable(swipable ? false : true)
                         .scrollable(swipable ? false : true)
                         .onSaveValue(onSaveValue)
-                        .onClickInfo(function(e, d, data, desc){
+                        .onClickInfo(function(e, d, data, desc, location){
                             ignoreNextWrapperClick = true;
                             const milestone = positionedData.find(m => m.id === data.id);
                             const { id, x, y, date, width, height, dataType } = milestone;
-                            let form;
                             if(desc === "date"){
                                 //need to calc left so it includes all transforms eg offset
                                 const k = isSelected(id) ? availableScale : 1;
-                                const commonFormProperties = {
+                                const commonProps = {
                                     formType: "date", 
                                     milestoneType:dataType, 
                                     milestoneId:id,
@@ -870,17 +869,7 @@ export default function milestonesBarComponent() {
                                     left: currentSliderOffset + x - (width/2) *k, 
                                     top: topBarHeight + y - (height/2) * k
                                 }
-                                if(id === "current"){
-                                    form = {
-                                        ...commonFormProperties,
-                                        key:"settings"
-                                    }
-                                }else{
-                                    form = { 
-                                        ...commonFormProperties, 
-                                        value: date, 
-                                    }
-                                }
+                                const dateForm = id === "current" ? { ...commonProps, key:"settings" } : { ...commonProps, value: date };
 
                                 //hide date-info for this milestone, and show others
                                 milestonesG.selectAll("g.milestone")
@@ -894,14 +883,26 @@ export default function milestonesBarComponent() {
                                     .attr("display", null)
                         
                                 //show form
-                                setForm(form)
+                                setForm(dateForm)
                                 return;
                             }
-                            //show g.date-info here for all milestones
-                            milestonesG.selectAll("g.milestone").selectAll("g.date-info")
-                                .attr("display", null)
+                            //@todo - CHECK WE DEFO DONT NEED THIS AS ITS UPDATED ELSEWHERE
+                            //milestonesG.selectAll("g.milestone").selectAll("g.date-info")
+                               //.attr("display", null)
 
-                            //remove form
+                            //photo
+                            if(desc === "photo"){
+                                const photoForm = {
+                                    formType:"photo",
+                                    milestoneId:id,
+                                    location
+                                }
+                                setForm(photoForm);
+                                return;
+                            }
+
+
+                            //default -> remove form
                             setForm(null)
                         })
                         //if closing a kpi, we dont want it to reopen or close the card (via wrapperClick). 

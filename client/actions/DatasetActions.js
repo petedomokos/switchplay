@@ -37,8 +37,8 @@ export const fetchDataset = id => dispatch => {
 //for now, use  a PUT with body, but should change to get with params
 //note - userId may not be the signed in user
 export const fetchMultipleFullDatasets = (datasetIds, playerId) => dispatch => {
-	//console.log("fetchmultiple p", playerId)
-	//console.log("fetchmultiple dsets.....................", datasetIds)
+	//console.log("fetchmultipleFullDatasets p", playerId)
+	//console.log("fetchmultipleFull dsets.....................", datasetIds)
 	fetchThenDispatch(dispatch, 
         'loading.datasets',
         {
@@ -47,6 +47,7 @@ export const fetchMultipleFullDatasets = (datasetIds, playerId) => dispatch => {
 			requireAuth:true,
 			body:JSON.stringify({ datasetIds:datasetIds, playerId:playerId }),
             nextAction: data => {
+				//console.log("fecthMultipleDatasets returned success", data)
 				return {type:C.LOAD_DEEP_DATASETS, datasets:data}}
         })
 }

@@ -91,7 +91,10 @@ export const KPI_CTRLS = format => [
 export const GOAL_CTRLS = format => [
 ];
 
-export const PROFILE_PAGES = [{ nr:0, key:"goal" }, { nr: 1, key:"profile" }];
+export const PROFILE_PAGES = [
+    { nr:0, key:"goal", label:"Goal", photoDimns:{ width: 1, height: 1} }, 
+    { nr: 1, key:"profile", label:"Profile", photoDimns:{ width: 1, height: 1} }
+];
 
 export const TIME_SETTINGS = {
     YEAR_END : { MONTH:4, DAY_OF_MONTH:31 },

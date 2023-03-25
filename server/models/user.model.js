@@ -27,6 +27,10 @@ const UserSchema = new mongoose.Schema({
     data:Buffer,
     contentType:String
   },
+  photos:[{
+    data:Buffer,
+    contentType:String
+  }],
   dob: Date,
   email: {
     type: String,

@@ -4,6 +4,7 @@ import { saveJourney, setActive, updateProfile } from '../../actions/JourneyActi
 import { closeDialog, hideMenus, showMenus } from '../../actions/CommonActions'
 import { fetchMultipleFullDatasets } from '../../actions/DatasetActions'
 import { createDatapoints } from '../../actions/DatapointActions'
+import { updateUser } from '../../actions/UserActions'
 import { hydrateJourneyData } from "./hydrateJourney";
 
 
@@ -115,7 +116,6 @@ const mapStateToProps = (state, ownProps) => {
 	const allDatasetsFullyLoaded = datasets.length === fullyLoadedDatasets.length;
 	//console.log("areDatsetsLoaded??????????????????????", allDatasetsFullyLoaded)
 	const hydratedData = hydrateJourneyData(data, state.user, fullyLoadedDatasets);
-	//console.log("hydratedData", hydratedData)
 
 	return{
 		user,
@@ -140,8 +140,10 @@ const mapStateToProps = (state, ownProps) => {
         //dialogOpen:...???
 	}
 }
+
 const mapDispatchToProps = dispatch => ({
 	onLoad(propsToLoad, extraLoadArg){
+		//console.log("onLoad",propsToLoad, extraLoadArg)
 		const { datasets, playerId } = extraLoadArg
 		//we know this player must have at least one d in this dset, so if empty, need to load
 		const datasetsToLoad = datasets
@@ -154,6 +156,9 @@ const mapDispatchToProps = dispatch => ({
 	},
 	saveDatapoint(datasetId, datapoint){
 		dispatch(createDatapoints(datasetId, [datapoint]))
+	},
+	savePhoto(userId, formData){
+		dispatch(updateUser(userId, formData))
 	},
 	setActive(journeyId){
 		dispatch(setActive(journeyId))

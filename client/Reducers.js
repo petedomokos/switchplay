@@ -275,8 +275,14 @@ export const user = (state=InitialState.user, act) =>{
 			//hydration
 			//note - we will need to re-hydrate when the deep versions are loaded too
 			//1. datasets
-			const administeredDatasets = hydrateDatasets(act.user.administeredDatasets);
-			const datasetsMemberOf = hydrateDatasets(act.user.datasetsMemberOf);
+			//no need to rehydrate if these have not updated
+			const administeredDatasets = act.user.administeredDatasets ? 
+				hydrateDatasets(act.user.administeredDatasets) :
+				state.administeredDatasets;
+
+			const datasetsMemberOf = act.user.datasetsMemberOf ?
+				hydrateDatasets(act.user.datasetsMemberOf) :
+				state.datasetsMemberOf;
 			//2. users - todo
 			//3. groupd - todo
 

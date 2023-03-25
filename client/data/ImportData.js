@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
 
 //width and height may be full screen, but may not be
 const ImportData = ({ datasets, submit }) => {
-  console.log("ImportData...datasets", datasets)
+  //console.log("ImportData...datasets", datasets)
   const [importState, setImportState] = useState("");
   const styleProps = { importState };
   const classes = useStyles(styleProps) 
