@@ -95,6 +95,7 @@ export default function kpisComponent() {
     };
     let styles = {}
 
+    let kpiFormat = "actual";
     let withTooltips = true;
     let withCtrls = true;
     let selected;
@@ -400,7 +401,7 @@ export default function kpisComponent() {
 
                                 })
                                 .merge(btnG)
-                                .attr("transform", (b,i) => `translate(${i * btnWidth}, 0)`)
+                                .attr("transform", (b,i) => `translate(${i * btnWidth * 1.1}, 0)`)
                                 .each(function(b){
                                     const btnG = d3.select(this)
                                         .on("click", onCtrlClick);
@@ -606,6 +607,11 @@ export default function kpisComponent() {
     kpis.withCtrls = function (value) {
         if (!arguments.length) { return withCtrls; }
         withCtrls = value;
+        return kpis;
+    };
+    kpis.kpiFormat = function (value) {
+        if (!arguments.length) { return kpiFormat; }
+        kpiFormat = value;
         return kpis;
     };
     kpis.editable = function (value) {

@@ -3,7 +3,7 @@ import { addYears, addMonths, addWeeks, calcDateCount, calcAge } from '../../uti
 import { sortAscending } from '../../util/ArrayHelpers';
 import { getKpis } from "../../data/kpis"
 import { getTargets, findDefaultTarget } from "../../data/targets";
-import { round, roundDown, roundUp, getRangeFormat, dateIsInRange, getValueForStat, getGreatestValueForStat } from "../../data/dataHelpers";
+import { convertToPC, round, roundDown, roundUp, getRangeFormat, dateIsInRange, getValueForStat, getGreatestValueForStat } from "../../data/dataHelpers";
 import { linearProjValue } from "./helpers";
 import { pcCompletion } from "../../util/NumberHelpers"
 import { JOURNEY_SETTINGS, JOURNEY_SETTINGS_INFO } from './constants';
@@ -138,11 +138,16 @@ function calcExpected(kpi, start, target, now, options={}){
         return { actual:null, completion:null }; 
     }
     const { accuracy, showTrailingZeros=true } = options;
-    //@todo - completion
     const actual = linearProjValue(start.date.getTime(), start.actual, target.date.getTime(), target.actual, now.getTime())
+    const completion = convertToPC(start.actual, target.actual)(actual);
+    if(kpi.datasetKey === "pressUps"){
+        //console.log("calcExpected start", start)
+        //console.log("calcExpected target", target)
+        //console.log("calcExpected", actual)
+    }
     return { 
         actual: round(actual, accuracy, showTrailingZeros), 
-        completion:null 
+        completion
     }
 }
 function isSameDay(d1, d2){
@@ -151,7 +156,7 @@ function isSameDay(d1, d2){
             d1.getUTCFullYear() === d2.getUTCFullYear();
 }
 
-function getValueForSession(stat, datapoints, sessionDate){
+function getValueForSession(stat, datapoints, sessionDate, start, target){
     //if dataset unavailable, stat will be undefined
     if(!stat){ return { actual:undefined, completion:null } }
     //helper
@@ -160,10 +165,12 @@ function getValueForSession(stat, datapoints, sessionDate){
     const datapointThatDay = datapoints.find(d => {
         return isSameDay(d.date, sessionDate) && !d.isTarget
     });
-    return { actual: getValue(datapointThatDay), completion:null };
+    const actual = getValue(datapointThatDay);
+    const completion = start && target ? convertToPC(start.actual, target.actual)(actual) : null;
+    return { actual , completion };
 }
 
-function calcCurrent(stat, datapoints, dateRange, dataMethod){
+function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target){
     //if dataset unavailable, stat will be undefined
     if(!stat){ return { actual:undefined, completion:null } }
     //helper
@@ -186,10 +193,11 @@ function calcCurrent(stat, datapoints, dateRange, dataMethod){
         }
         return 0;
     }
+    const actual = getOverallValue(values);
+    const completion = start && target ? convertToPC(start.actual, target.actual)(actual) : null;
     return {
-        //@todo - use min if order is 'lowest is best', use stat to determine order
-        actual: getOverallValue(values),
-        completion: null
+        actual,
+        completion
     }
 
 }
@@ -327,13 +335,15 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
 
             const lastDataUpdate = isPast ? null : d3.max(dateValuePairs, d => d[0]);
 
+            //START
             let start;
             if(profileStart.type === "custom" || profileStart.type === "default"){
                 const startDateRange = calcDateRange(goBackByExpiryDuration(profileStart.date), profileStart.date);
                 start = {
                     ...profileStart,
                     //note - we pass in the achieved data method, as this will always be in the past
-                    ...calcCurrent(stat, datapoints, startDateRange, achievedValueDataMethod) //put params in for the custom startDate
+                    ...calcCurrent(stat, datapoints, startDateRange, achievedValueDataMethod), //put params in for the custom startDate
+                    completion:0
                 }
             }else{
                 //its based on a prev profile 
@@ -341,34 +351,19 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 //rather than the end date of the profile, so that it is more accurate when making predictions
                 const prevValuesToUse = prevProfileToUse.kpis.find(kpi => kpi.key === key).values;
                 start = prevValuesToUse.achieved ? 
-                    { ...profileStart, ...prevValuesToUse.achieved } 
+                    { ...profileStart, ...prevValuesToUse.achieved, completion:0 } 
                     : 
-                    { ...profileStart, ...prevValuesToUse.start } //date is overriden in this case    
+                    { ...profileStart, ...prevValuesToUse.start, completion:0 } //date is overriden in this case    
             }
 
-
-
-            //note - for current profile, the range is last twenty years so all will be included anyway
-            //this is also true for 1st profile, unless user specifies a startDate
-            let current;
-            if(isPast){ 
-                current = calcCurrent(stat, datapoints, dateRange, achievedValueDataMethod); 
-            }
-            else if(currentValueDataMethod !== "specificSession"){
-                current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod);
-            }else{
-                //it must be a future card and current value is based purely on a specificSession
-                current = getValueForSession(stat, datapoints, specificDate)
-            }
-
-            const achieved = isPast ? current : null;
+            //TARGET
             const customTargetsForStat = customTargets
                 .filter(t => t.datasetKey === datasetKey && t.statKey === statKey)
                 .filter(t => typeof Number(t.actual) === "number" && !Number.isNaN(Number(t.actual)));
 
             const customTarget = d3.greatest(customTargetsForStat, d => d.created);
             const k = customTarget ? Number(customTarget.actual) : null;
-            const parsedCustomTarget = customTarget ? { actual: Number(customTarget.actual), completion:Number(customTarget.completion) } : null;
+            const parsedCustomTarget = customTarget ? { actual: Number(customTarget.actual), completion:100 } : null;
             
             //2 possible causes of new targ not getting picked up
             //date of new targ that hasnt gone thru server os a Date not a string
@@ -379,6 +374,22 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 ...nonRoundedTarget,
                 actual:round(nonRoundedTarget.actual, accuracy)
             }
+
+            //CURRENT
+            //note - for current profile, the range is last twenty years so all will be included anyway
+            //this is also true for 1st profile, unless user specifies a startDate
+            let current;
+            if(isPast){ 
+                current = calcCurrent(stat, datapoints, dateRange, achievedValueDataMethod, start, target); 
+            }
+            else if(currentValueDataMethod !== "specificSession"){
+                current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod, start, target);
+            }else{
+                //it must be a future card and current value is based purely on a specificSession
+                current = getValueForSession(stat, datapoints, specificDate, start, target)
+            }
+
+            const achieved = isPast ? current : null;
             //note prevProfile has already been processed with a full key and values
             let expected = isPast ? null : calcExpected(kpi, start, { date, ...target }, now, { accuracy });
 
@@ -476,9 +487,10 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
 
             const expected = activeProfileValues(kpi)?.expected;
             const target = activeProfileValues(kpi)?.target;
+            const start = activeProfileValues(kpi)?.start;
             let current;
             if(currentValueDataMethod !== "specificSession"){
-                current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod);
+                current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod, start, target);
             }else{
                 //it must be a future card and current value is based purely on a specificSession
                 current = getValueForSession(stat, datapoints, specificDate)

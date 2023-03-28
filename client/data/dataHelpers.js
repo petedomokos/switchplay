@@ -12,6 +12,22 @@ export const round = (value, accuracy, showTrailingZeros=true) => {
     return value; //must finish
 }
 
+//@todo - edge case, where target is lower than start, eg player has been injured
+//do we deal with that edge case here, or in another way? probably another way.
+export const convertToPC = (startValue, targetValue) => (value, options={}) => {
+    const { dps=0, min=0, max=100, defaultToZero=true } = options;
+    if(typeof startValue !== "number" || typeof targetValue !== "number" || typeof value !== "number"){
+        return defaultToZero ? 0 : null;
+    }
+    const actualChange = value - startValue;
+    const targetChange = targetValue - startValue;
+    if(targetChange === 0){ return 100; }
+    const pc = Number(((actualChange/targetChange) * 100).toFixed(dps))
+    const lowerBounded = typeof min === "number" ? d3.max([min, pc]) : pc;
+    const fullyBounded = typeof max === "number" ? d3.min([max, lowerBounded]) : lowerBounded;
+    return fullyBounded;
+}
+
 export const getValueForStat = (statKey, accuracy, showTrailingZeros=true) => datapoint => {
     const value = Number(datapoint
         ?.values

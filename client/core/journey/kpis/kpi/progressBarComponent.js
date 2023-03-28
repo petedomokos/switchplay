@@ -263,6 +263,7 @@ export default function progressBarComponent() {
     let _domain;
 
     let status = "closed";
+    let kpiFormat = "actual";
     let editable = false;
 
     let display = () => null;
@@ -500,6 +501,11 @@ export default function progressBarComponent() {
     progressBar.status = function (value) {
         if (!arguments.length) { return status; }
         status = value;
+        return progressBar;
+    };
+    progressBar.kpiFormat = function (value) {
+        if (!arguments.length) { return kpiFormat; }
+        kpiFormat = value;
         return progressBar;
     };
     progressBar.editable = function (value) {

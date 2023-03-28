@@ -129,7 +129,7 @@ const useStyles = makeStyles((theme) => ({
 const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo, onSaveSetting, onSavePhoto }) => {
   const { media=[], player={}, profiles=[], contracts=[], settings=[] } = data;
   const allMilestones = [ ...profiles, ...contracts ];
-  //console.log("MBar profile dates", profiles.map(p => ([p.id, p.date])))
+  //console.log("MBar", kpiFormat)
   //local state
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
   const [bgMenuLocation, setBgMenuLocation] = useState("");
@@ -284,7 +284,7 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
 
     d3.select(containerRef.current).datum(layout(orderedData))
 
-  }, [stringifiedProfiles])
+  }, [stringifiedProfiles, kpiFormat])
 
   useEffect(() => {
 
@@ -306,6 +306,7 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
 
         }
       })
+      .kpiFormat(kpiFormat)
       //.height(kpiListHeight)
       //.profileCardDimns(profileCardDimns)
       //.contractDimns(contractDimns)
@@ -363,7 +364,7 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
   //@todo - consider having a shouldRender state, and this could also contain info on transition requirements
   useEffect(() => {
     d3.select(containerRef.current).call(milestonesBar);
-  }, [selectedMilestone, stringifiedProfiles, screen])
+  }, [selectedMilestone, stringifiedProfiles, screen, kpiFormat])
 
   const onCtrlsAreaClick = () => {
     onSetEditingReactComponent(null);

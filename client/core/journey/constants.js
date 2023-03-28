@@ -85,8 +85,8 @@ export const WIDGET_MARGIN = { left: 0, right: 0, top:5, bottom:5 }
 export const OVERLAY = { FILL:"black", OPACITY:0.5 }
 
 export const KPI_CTRLS = format => [
-    //{ key: "actual", label:"Raw Value", isSelected:format === "actual" },
-    //{ key: "completion", label:"Completion", isSelected:format === "completion" }
+    { key: "actual", label:"Raw Values", isSelected:format === "actual" },
+    { key: "completion", label:"Completion", isSelected:format === "completion" }
 ];
 export const GOAL_CTRLS = format => [
 ];

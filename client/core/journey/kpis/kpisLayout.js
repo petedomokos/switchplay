@@ -56,8 +56,9 @@ export default function kpisLayout(){
             if(isCurrent && key === "shuttles-time"){
             }
             const end = values.end && typeof values.end[format] === "number" ? values.end[format] : null;
+            //console.log("values.curr", values.current)
             const current = values.current && typeof values.current[format] === "number" ? values.current[format] : null;
-            
+            //console.log("format value", format, current)
             let expected;
             let target;
             //let proposedTarget;
@@ -86,7 +87,7 @@ export default function kpisLayout(){
                 key:"target",
                 label: "Target",
                 isAchieved:stat.order === "highest is best" ? target <= current : target >= current,
-                startValue:stat.order === "highest is best" ? values.min : values.max, //may be undefined
+                startValue:format === "completion" ? 0 : (stat.order === "highest is best" ? values.min : values.max), //may be undefined
                 value:target,
                 fill:colours.target,
                 format
@@ -95,15 +96,15 @@ export default function kpisLayout(){
                 key:"current",
                 label: values.achieved ? "Achieved" : "Current",
                 isAchieved:!!values.achieved,
-                startValue:stat.order === "highest is best" ? values.min : values.max, //may be undefined
+                startValue: format === "completion" ? 0 : (stat.order === "highest is best" ? values.min : values.max), //may be undefined
                 value:current,
                 fill:colours.current,
                 format
             }
 
             const barData = [targetDatum, currentDatum];
-            barData.start = stat.order === "highest is best" ? values.min : values.max;
-            barData.end = stat.order === "highest is best" ? values.max : values.min;
+            barData.start = format === "completion" ? 0 : (stat.order === "highest is best" ? values.min : values.max);
+            barData.end = format === "completion" ? 100 : (stat.order === "highest is best" ? values.max : values.min);
 
             const tooltipsData = [
                 { 
@@ -134,7 +135,7 @@ export default function kpisLayout(){
                     shouldDisplay:status => !isPast && !!targetObj, //dont display if past or no future profiles
                     rowNr: 1, y: 1, current,
                     value: expected, x:expected,
-                    dataOrder:stat.order,
+                    dataOrder: format === "completion" ? "lowest-is-best" : stat.order,
                     accuracy,
                     icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },
                     editable:false,//isCurrent || isFuture,
@@ -148,7 +149,7 @@ export default function kpisLayout(){
                     shouldDisplay:status => !!targetObj,
                     rowNr: -1, y: -1, current,
                     value:target, x:target,
-                    dataOrder:stat.order,
+                    dataOrder: format === "completion" ? "lowest-is-best" : stat.order,
                     accuracy,
                     icons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
                     editable:isCurrent || isFuture,
@@ -163,7 +164,7 @@ export default function kpisLayout(){
                     rowNr:0, y:0,
                     value:current,
                     fill:colours.current,
-                    dataOrder:stat.order,
+                    dataOrder: format === "completion" ? "lowest-is-best" : stat.order,
                     accuracy,
                     editable:isCurrent || isFuture,
                     withDragValueAbove:false,
@@ -172,9 +173,11 @@ export default function kpisLayout(){
                 }
             ];
 
-            if(kpi.datePhase === "current" && kpi.key.includes("pressUps")){
+            if(kpi.datePhase === "future" && kpi.key.includes("pressUps")){
                 //console.log("kpi---",i,kpi.key, kpi)
-                //console.log("values", values)
+                //console.log("milestone", milestoneId)
+                //console.log("current", values.current)
+                //console.log("expected", values.expected)
                 //console.log("tooltips", tooltipsData)
             }
             const numbersData = [currentDatum];

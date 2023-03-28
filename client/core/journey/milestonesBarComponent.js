@@ -178,7 +178,10 @@ export default function milestonesBarComponent() {
     //components
     const contracts = contractsComponent();
     const profiles = profileCardsComponent()
-        .onCtrlClick((e,d) => { onSetKpiFormat(d.key) });
+        .onCtrlClick((e,d) => { 
+            ignoreNextWrapperClick = true;
+            onSetKpiFormat(d.key) 
+        });
 
     let requiredSliderPosition = 0;
     let currentSliderPosition;
@@ -851,6 +854,7 @@ export default function milestonesBarComponent() {
                             k: availableScale,// width > height ? vertScale : horizScale
                         }])
                         //.kpiHeight(30) //if we want to fix the kpiheIght
+                        .kpiFormat(kpiFormat)
                         .editable(swipable ? false : true)
                         .scrollable(swipable ? false : true)
                         .onSaveValue(onSaveValue)
@@ -924,6 +928,7 @@ export default function milestonesBarComponent() {
                                     onClick:() => {
                                         //@todo - why is this so slow to update? had to cut it out for now
                                         //onReleaseScreen();
+                                        ignoreNextWrapperClick = true;
                                         if(selectedMilestone === d.id){
                                             updateSelected();
                                         }else{

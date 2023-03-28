@@ -54,6 +54,7 @@ export default function profileCardsComponent() {
     });
 
     //state
+    let kpiFormat = "actual";
     let expanded = [];
     let selected = [];
     let isSelected = () => false;
@@ -212,6 +213,7 @@ export default function profileCardsComponent() {
                         .height(bottomAreaHeight)
                         .kpiHeight(kpiHeight) //may be undefined
                         .fontSizes(fontSizes.kpis)
+                        .kpiFormat(kpiFormat)
                         .editable(editable)
                         .scrollable(scrollable)
                         .onUpdateSelected((profileId, kpiKey, shouldUpdateScroll, shouldUpdateDom) => {
@@ -701,6 +703,11 @@ export default function profileCardsComponent() {
         if (!arguments.length) { return selected; }
         selected = values;
         isSelected = d => values.includes(d.id);
+        return profileCards;
+    };
+    profileCards.kpiFormat = function (value) {
+        if (!arguments.length) { return kpiFormat; }
+        kpiFormat = value;
         return profileCards;
     };
     profileCards.ctrls = function (f) {
