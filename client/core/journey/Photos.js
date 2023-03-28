@@ -4,12 +4,14 @@ import Card from '@material-ui/core/Card'
 import CardActions from '@material-ui/core/CardActions'
 import CardContent from '@material-ui/core/CardContent'
 import Button from '@material-ui/core/Button'
+import Avatar from '@material-ui/core/Avatar'
 import TextField from '@material-ui/core/TextField'
 import Typography from '@material-ui/core/Typography'
 import Icon from '@material-ui/core/Icon'
 import Publish from '@material-ui/icons/Publish'
 import { makeStyles } from '@material-ui/core/styles'
-import { profilePages, PROFILE_PAGES } from "./constants"
+import { profilePages, PROFILE_PAGES, getURLForUser } from "./constants"
+import { sortDescending } from '../../util/ArrayHelpers';
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -92,11 +94,15 @@ const useStyles = makeStyles(theme => ({
     justifyContent:"center",
     alignItems:"center",
   },
-  imgWrapper:{
+  selectedImgWrapper:{
     width:"100%",
     height:"calc(100% - 40px - 40px)",
     margin:0,//"5%",
     background:"aqua"
+  },
+  selectedImage:{
+    border:"solid"
+
   },
   editPhoto:{
     width:"100%",
@@ -159,16 +165,30 @@ const useStyles = makeStyles(theme => ({
   uploadLabel:{
   },
   filename:{
+  },
+  galleryPhotosArea:{
+    width:"100%",
+    display:"flex",
+    flexWrap:"wrap",
+    justifyContent:"flex-start",
+    alignItems:"start"
+  },
+  galleryPhoto:{
+    height:"40px",
+    margin:"5px",
+    //background:"grey"
   }
 }))
 
 //next - use formiddible in here to format photo for server before saving
 //then save to server
 //then retrieve it to display it
-export default function Photos({ locationKey/*width, height*/, onSavePhoto }) {
+export default function Photos({ userId, userPhotos, selectedPhotoId, locationKey/*width, height*/, onSavePhoto, onSelect }) {
+  //console.log("Photos", userPhotos)
+  //console.log("selectedPhoto", selectedPhotoId)
   const [action, setAction] = useState("");
   const [newSelected, setNewSelected] = useState("");
-  const [uploadedPhoto, setUploadedPhoto] = useState("");
+  const [uploadingPhoto, setUploadingPhoto] = useState("");
   const classes = useStyles({
     selectedWrapperHeight:!action ? "50%" : (action === "editPhoto" ? "calc(100% - 80px)" : "80px"),
     galleryWrapperHeight:!action ? "50%" : (action === "editGallery" ? "calc(100% - 80px)" : "80px"),
@@ -177,6 +197,10 @@ export default function Photos({ locationKey/*width, height*/, onSavePhoto }) {
       upload:action === "editGallery" ? "flex" : "none"
     }
   })
+  //@todo - d.added should be converted to Date in hydrate function
+  const orderedPhotos = sortDescending(userPhotos, d => new Date(d.added));
+  //const orderedPhotos = [..._orderedPhotos, ..._orderedPhotos, ..._orderedPhotos, ..._orderedPhotos]
+  //console.log("orderd", orderedPhotos)
   const pageInfo = PROFILE_PAGES.find(page => page.key === locationKey) || {};
   const { photoDimns, label="" } = pageInfo;
   const viewboxWidth = photoDimns?.width || 100;
@@ -186,14 +210,23 @@ export default function Photos({ locationKey/*width, height*/, onSavePhoto }) {
   const toggleEditGallery = () => { setAction(prevState => prevState === "editGallery" ? "" : "editGallery"); }
   const onUploadPhoto = e => { 
     const photo = e.target.files[0];
-    console.log("new photo", photo)
-    setUploadedPhoto(photo);
+    setUploadingPhoto(photo);
     onSavePhoto(photo);
     //@todo: animation whilst uploading...setUploading(true); 
   }
 
   const clickSubmit = () => { }
+
+  const getURL = getURLForUser(userId);
   
+  
+  const onClickPhoto = (photo) => {
+    console.log("photo", photo)
+    onSelect({ 
+      locationKey, 
+      mediaId:photo._id
+    })
+  }
 
   //note - editing a photo only applies the edit to the photoLocationType
   return (
@@ -205,7 +238,9 @@ export default function Photos({ locationKey/*width, height*/, onSavePhoto }) {
         <div className={classes.mainContents}>
           <div className={classes.selectedWrapper}>
               <h5 className={classes.sectionTitle}>Selected</h5>
-              {!action && <div className={classes.imgWrapper}></div>}
+              {!action && <div className={classes.selectedImgWrapper}>
+                <img className={classes.selectedImage} src={getURL(selectedPhotoId || orderedPhotos[0]._id)} alt="Not loaded" width="150" height="100"/>
+              </div>}
               {action === "editPhoto" && 
                 <div className={classes.editPhoto}> Edit Area - pinch to zoom, or drag</div>
               }
@@ -221,10 +256,8 @@ export default function Photos({ locationKey/*width, height*/, onSavePhoto }) {
               
           <div className={classes.galleryWrapper}>
               <h5 className={classes.sectionTitle}>Gallery</h5>
-              <div className={classes.gallery}>
-                {uploadedPhoto && <div>show image here</div>}
-              </div>
-              <UploadPhoto onUpload={onUploadPhoto} photo={uploadedPhoto} classes={classes} />
+              <Gallery photos={orderedPhotos} selectedId={selectedPhotoId} getURL={getURL} onClick={onClickPhoto} classes={classes} />
+              <UploadPhoto onUpload={onUploadPhoto} photo={uploadingPhoto} classes={classes} />
               <div className={classes.sectionCtrls}>
                   {/**<UploadPhoto/>*/}
                   <Button color="primary" variant="contained" 
@@ -248,7 +281,7 @@ function UploadPhoto({ photo, onUpload, classes }){
   return (
     <div className={classes.upload}>
         <input 
-            accept="image/*" onChange={onUpload} style={{ display:"none", height:0 }}
+            accept="selectedImage/*" onChange={onUpload} style={{ display:"none", height:0 }}
             id="icon-button-file" type="file" />
         <label htmlFor="icon-button-file" className={classes.uploadLabel} >
           <Button variant="contained" color="default" component="span">
@@ -257,6 +290,20 @@ function UploadPhoto({ photo, onUpload, classes }){
           </Button>
         </label>
         <span className={classes.filename}>{photo ? photo.name : ''}</span>
+    </div>
+  )
+}
+
+function Gallery({ userId, photos, getURL, selectedId, onClick, classes }){
+  return (
+    <div className={classes.gallery}>
+      <div className={classes.galleryPhotosArea}>
+        {photos.map((photo,i) => (
+          <div key={`photo-${i}`} className={classes.galleryPhoto} onClick={() => onClick(photo)}>
+            <img className={classes.selectedImage} src={getURL(photo._id)} alt="Not loaded" height="100%"/>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

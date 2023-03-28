@@ -8,6 +8,7 @@ import { linearProjValue } from "./helpers";
 import { pcCompletion } from "../../util/NumberHelpers"
 import { JOURNEY_SETTINGS, JOURNEY_SETTINGS_INFO } from './constants';
 import { getBandsAndStandards } from "../../data/bandsAndStandards";
+import journeyComponent from './journeyComponent';
 
 export function hydrateJourneyData(data, user, datasets){
     const now = new Date();
@@ -44,7 +45,11 @@ export function hydrateJourneyData(data, user, datasets){
     const hydratedProfiles = hydrateProfiles(nonCurrentProfiles, datasets, kpis, defaultTargets, settings, options);
 
     //STEP 2: CREATE CURRENT PROFILE, including expected values
-    const currentProfile = { ...createCurrentProfile(hydratedProfiles, datasets, kpis, settings, options ), nr:0 };
+    const currentProfile = { 
+        ...createCurrentProfile(hydratedProfiles, datasets, kpis, settings, options ), 
+        nr:0,
+        media:data.media || []
+    };
 
     //SEP 3: EMBELLISH PROFILES BASED ON CURRENT PROFILE INFO
     const pastProfiles = hydratedProfiles.filter(p => p.isPast).map((p,i, data) => ({ ...p, nr:i - data.length }));
@@ -68,7 +73,7 @@ export function hydrateJourneyData(data, user, datasets){
                 "offTrack"))
         }
     })
-    console.log("enriched", enrichedProfiles)
+    //console.log("enriched", enrichedProfiles)
         //.map(p => addExpected(p, currentProfile));
 
     return {
@@ -80,7 +85,8 @@ export function hydrateJourneyData(data, user, datasets){
         ...data,
         contracts:hydrateContracts(data.contracts),
         profiles:enrichedProfiles,
-        settings
+        settings,
+        media:data.media || []
     }
 }
 
@@ -215,7 +221,9 @@ const goBackByExpiryDurationFromDate = (duration, units) => date => {
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
     //console.log("hydrateProfile------------", profile.id, profile.date, profile.created)
     const { now, rangeFormat } = options;
-    const { id, date, customTargets=[], isCurrent, created } = profile;
+    const { id, customTargets=[], isCurrent } = profile;
+    const date = typeof profile.date === "string" ? new Date(profile.date) : profile.date;
+    const created = typeof profile.created === "string" ? new Date(profile.created) : profile.created;
     const milestoneId = id;
     //startDate
     //helper
@@ -278,6 +286,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
         ...profile,
         id:milestoneId,
         dataType:"profile",
+        media:profile.media || [],
         goal:{
             title:"Goal Title",
             desc:"Goal description...",

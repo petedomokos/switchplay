@@ -55,7 +55,7 @@ function beeSwarm(){
 			svg.append('defs')
                 .append('clipPath')
                     .attr('id', 'clip')
-                .append('rect')
+                        .append('rect')
 
             //chartG
            chartG = svg

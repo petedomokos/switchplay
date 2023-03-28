@@ -6,11 +6,15 @@ import { signout } from './AuthActions.js';
 import { transformJourneyForClient } from "./JourneyActions"
 
 export const transformUserForClient = serverUser => {
-	console.log("transformUserForClient")
-	const { journeys } = serverUser;
+	console.log("transformUserForClient", serverUser)
+	const { journeys=[], photos=[] } = serverUser;
+	const hydratedPhotos = photos.map(p => ({ ...p, added: new Date(p.added) }))
+	//@todo - check will we ever use this for updating journeys? I dont think we need it 
+	const hydratedJourneys = journeys.map(j => transformJourneyForClient(j))
 	return {
 		...serverUser,
-		journeys:journeys ? journeys.map(j => transformJourneyForClient(j)) : null
+		photos:hydratedPhotos,
+		journeys:hydratedJourneys
 	}
 }
 
@@ -44,6 +48,7 @@ export const fetchUser = id => dispatch => {
 			url: '/api/users/'+id,
 			requireAuth:true,
 			nextAction: data => {
+				//console.log("load user returned", data)
 				const jwt = auth.isAuthenticated();
 				//may be reloading the signed in user
 				if(jwt.user._id === data._id){
@@ -73,28 +78,31 @@ export const fetchUsers = () => dispatch => {
 }
 
 export const updateUser = (id, formData, history) => dispatch => {
-	fetchThenDispatch(dispatch, 
-		'updating.user',
-		{
-			url: '/api/users/'+id,
-			method: 'PUT',
-			headers:{
-	        	'Accept': 'application/json',
-	      	},
-			body:formData, //not stringify as its a formidable object
-			requireAuth:true,
-			nextAction: data => {
-				if(history){
-					history.push("/");
+	//setTimeout(() => {
+		fetchThenDispatch(dispatch, 
+			'updating.user',
+			{
+				url: '/api/users/'+id,
+				method: 'PUT',
+				headers:{
+					'Accept': 'application/json',
+				  },
+				body:formData, //not stringify as its a formidable object
+				requireAuth:true,
+				nextAction: data => {
+					if(history){
+						history.push("/");
+					}
+					const jwt = auth.isAuthenticated();
+					if(jwt.user._id === data._id){
+						//we still call transform function even though it may not be all fields
+						return { type:C.UPDATE_SIGNEDIN_USER, user:transformUserForClient(data)};
+					}
+					return { type:C.UPDATE_ADMINISTERED_USER, user:transformUserForClient(data) }
 				}
-				const jwt = auth.isAuthenticated();
-				if(jwt.user._id === data._id){
-					//we still call transform function even though it may not be all fields
-					return { type:C.UPDATE_SIGNEDIN_USER, user:transformUserForClient(data)};
-				}
-				return { type:C.UPDATE_ADMINISTERED_USER, user:transformUserForClient(data) }
 			}
-		})
+		)
+	//}, 2000)
 }
 export const deleteUserAccount = (id, history) => dispatch => {
 	fetchThenDispatch(dispatch, 

@@ -25,11 +25,19 @@ const UserSchema = new mongoose.Schema({
   },
   photo:{
     data:Buffer,
-    contentType:String
+    contentType:String,
+    added:Date,
+    name:String,
+    //lastModified:String - these dont transfer across from client properly
+    //lastModifiedDate:Date
   },
   photos:[{
     data:Buffer,
-    contentType:String
+    contentType:String,
+    added:Date,
+    name:String,
+    //lastModified:String
+    //lastModifiedDate:Date
   }],
   dob: Date,
   email: {

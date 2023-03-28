@@ -96,12 +96,12 @@ const create = async (req, res) => {
   }
   
   const update = async (req, res) => {
-    //console.log('updating journey....................', req.user._id)
+    console.log('updating journey.................................', req.user._id)
     let journey = req.journey;
     //console.log("req journey", journey)
     //console.log("body", req.body)
     journey = extend(journey, req.body);
-    //console.log("extended journey", journey)
+    console.log("extended journey", journey.profiles.map(p => p.date))
     try {
       const result = await journey.save()
       //console.log("res", result)

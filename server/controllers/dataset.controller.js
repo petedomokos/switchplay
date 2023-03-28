@@ -84,7 +84,7 @@ const read = (req, res) => {
 
 //todo - dont send photo with every d
 const readMultiple = async (req, res) => {
-  console.log('read multiple full datasets......', req.body)
+  console.log('read multiple full datasets......')
   // @TODO instead of getting all then filtering, just make request for the ones we need
   try{
     //console.log("trying...")
@@ -159,7 +159,7 @@ const update = async (req, res) => {
     try {
       console.log("trying to save...............")
       const result = await dataset.save()
-      console.log("returning...........................", result)
+      console.log("returning...........................")
       res.json(result)
     } catch (err) {
       return res.status(400).json({
@@ -186,7 +186,7 @@ const remove = async (req, res) => {
 
 
 const createDatapoints = async (req, res) => {
-  console.log("createDatapoints...", req.body)
+  console.log("createDatapoints...")
   let { dataset, user } = req;
   if(!user || !dataset){
     return res.status(400);

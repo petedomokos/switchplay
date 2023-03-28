@@ -40,8 +40,14 @@ export const user = (state=InitialState.user, act) =>{
 			return InitialState.user;
 		}
 		case C.UPDATE_SIGNEDIN_USER:{
+			//note, photos and journeys arrays from server are always present but may not be complete, and may be empty
+			const otherPhotos = state.photos.filter(p => !act.user.photos.find(ph => ph._id === p._id));
+			const mergedPhotos = [...otherPhotos, ...act.user.photos];
+			const otherJourneys = state.journeys.filter(j => !act.user.journeys.find(jo => jo._id === j._id));
+			const mergedJourneys = [...otherJourneys, ...act.user.journeys];
 			//this doesnt update administered users or groups, just basic details eg name, email,...
-			return { ...state, ...act.user };
+			//aswell as photos and journeys
+			return { ...state, ...act.user, photos:mergedPhotos, journeys:mergedJourneys };
 		}
 		case C.SAVE_JOURNEY:{
 			//const { journey } = act;
@@ -271,6 +277,7 @@ export const user = (state=InitialState.user, act) =>{
 		//Note 2 - this will overwrite/enhance any existing objects rather than replace
 		case C.LOAD_USER:{
 			const { admin, administeredUsers, administeredGroups, groupsMemberOf } = act.user;
+			console.log("LOAD_USER", act.user)
 
 			//hydration
 			//note - we will need to re-hydrate when the deep versions are loaded too

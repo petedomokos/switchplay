@@ -96,6 +96,19 @@ export const PROFILE_PAGES = [
     { nr: 1, key:"profile", label:"Profile", photoDimns:{ width: 1, height: 1} }
 ];
 
+//@todo - whats time for in book??? '/api/user/photo/' +user._id +'?'+new Date().getTime()
+export const getURLForUser = userId => (photoId, locationKey) => {
+    if(!userId || !photoId){
+        //if(locationKey){
+            //@todo - if we have userId, we could just send aother photo from users library?
+            //@todo - use locationKey to send a specific default per location
+            //return '/api/users/defaultphoto-${locationKey}'
+        //} 
+        return '/api/users/defaultphoto'; 
+    }
+    return `/api/users/photo/${userId}/${photoId}`
+}
+
 export const TIME_SETTINGS = {
     YEAR_END : { MONTH:4, DAY_OF_MONTH:31 },
     WEEK_END_DAY:0, //0 = sunday,

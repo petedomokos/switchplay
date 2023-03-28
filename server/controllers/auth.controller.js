@@ -8,7 +8,7 @@ const signin = async (req, res) => {
   //@todo - find a cleaner way to replicate the code below where we split based on email or username
   //but still populate it the same
   const adminPopulationStr = '_id username firstname surname created';
-  const journeysPopulationStr = '_id name contracts profiles aims goals links measures settings created';
+  const journeysPopulationStr = '_id name media contracts profiles aims goals links measures settings created';
   const administeredUsersPopulationStr = '_id username firstname surname photo created';
   const administeredGroupsPopulationObj = { 
     path: 'administeredGroups', 
@@ -83,7 +83,6 @@ add this below
         //.populate('datasetsMemberOf', datasetsMemberOfPopulationStr)
       
     }
-    console.log("find query complete")
 
     if (!user){
       console.log("not found")
@@ -109,9 +108,11 @@ add this below
       expire: new Date() + 9999
     })
 
+    user.photos = user.photos.map(p => ({ _id:p._id, name:p.name, added:p.added }));
+
     return res.json({
       token,
-      user:user
+      user,
       /*user: {
         _id: user._id,
         name: user.name,

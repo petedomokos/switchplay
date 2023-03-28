@@ -5,10 +5,13 @@ import authCtrl from '../controllers/auth.controller'
 const router = express.Router()
 
 
-router.route('/api/users/photos/:userId')
+router.route('/api/users/photo/:userId/:photoId')
   .get(userCtrl.photo, userCtrl.defaultPhoto)
 
-router.route('/api/users/defaultPhoto')
+router.route('/api/users/photo/:userId')
+  .get(userCtrl.photo, userCtrl.defaultPhoto)
+
+router.route('/api/users/defaultphoto')
   .get(userCtrl.defaultPhoto)
 
 router.route('/api/users')
@@ -22,5 +25,6 @@ router.route('/api/users/:userId')
 
 
 router.param('userId', userCtrl.userByID)
+router.param('photoId', userCtrl.photoByID)
 
 export default router

@@ -6,6 +6,7 @@ import GoalSchema from './goal.model';
 import LinkSchema from './link.model';
 import SettingSchema from './setting.model';
 import JourneyMeasureSchema from './journey-measure.model';
+import MediaSchema from './media.model'
 
 const JourneySchema = new mongoose.Schema({
   userId:{type:mongoose.Schema.ObjectId, ref:'User'},
@@ -23,7 +24,7 @@ const JourneySchema = new mongoose.Schema({
   },*/
   name: String,
   desc:String,
-  //photo:{data:Buffer,contentType:String},
+  media:[MediaSchema],
   //users who have admin rights over this journey
   contracts:[ContractSchema],
   profiles:[ProfileSchema],

@@ -4,6 +4,8 @@ import { calcAge } from "../util/TimeHelpers";
 export const hydrateUser = user => {
     return {
         ...user,
+        photo: user.photo ? { ...user.photo, added:new Date(user.photo.added)} : null,
+        photos:user.photos ? user.photos.map(p => ({ ...p, added:new Date(p.added) })) : null,
         goals:getGoals(user._id), //legacy - can probably remove
         player:user.isPlayer ? createPlayer(user) : null,
         coach:user.isCoach ? createCoach(user) : null,

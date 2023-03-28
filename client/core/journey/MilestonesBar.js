@@ -12,7 +12,7 @@ import Goal from "./Goal";
 import Photos from "./Photos";
 import milestonesLayout from "./milestonesLayout";
 import milestonesBarComponent from "./milestonesBarComponent";
-import { DIMNS, FONTSIZES, grey10, JOURNEY_SETTINGS_INFO, OVERLAY } from './constants';
+import { DIMNS, FONTSIZES, grey10, JOURNEY_SETTINGS_INFO, OVERLAY, getURLForUser } from './constants';
 import { sortAscending, sortDescending } from '../../util/ArrayHelpers';
 
 const useStyles = makeStyles((theme) => ({
@@ -39,6 +39,7 @@ const useStyles = makeStyles((theme) => ({
   },
   svg:{
     //position:"absolute"
+    display:props => props.svg.display
   },
   ctrls:{
     width:"100%",//DIMNS.milestonesBar.ctrls.width,
@@ -57,16 +58,24 @@ const useStyles = makeStyles((theme) => ({
     width:40,
     height:40,
   },
+  outerReactContainer:{
+    position:"absolute",
+    left:"0px",
+    top:"0px",
+    width:"100%",
+    height:"100%",
+    overflow:"hidden",
+    pointerEvents:"none"
+  },
   reactComponentContainer:{
+    width:0,
+    height:0,
     position:"absolute",
     display: props => props.reactComponentContainer.display,
-    //left:props => props.reactComponentContainer.left,
-    //top:props => props.reactComponentContainer.top
   },
   reactComponentItem:{
     position:"absolute",
-    pointerEvents:"none",
-    //background:"orange"
+    //pointerEvents:"none",
   },
   reactComponentItemOverlay:{
     position:"absolute",
@@ -85,7 +94,7 @@ const useStyles = makeStyles((theme) => ({
     margin:props => props.formContainer.margin || null,
     background:"yellow",
     left:props => props.formContainer.left,
-    top:props => props.formContainer.top
+    top:props => props.formContainer.top,
   },
   textField: {
     //marginLeft: theme.spacing(1),
@@ -117,10 +126,10 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo, onSaveSetting, onSavePhoto }) => {
-  const { player={}, profiles=[], contracts=[], settings=[] } = data;
+const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo, onSaveSetting, onSavePhoto }) => {
+  const { media=[], player={}, profiles=[], contracts=[], settings=[] } = data;
   const allMilestones = [ ...profiles, ...contracts ];
-  //console.log("MBar contracts", contracts)
+  //console.log("MBar profile dates", profiles.map(p => ([p.id, p.date])))
   //local state
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
   const [bgMenuLocation, setBgMenuLocation] = useState("");
@@ -129,6 +138,16 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   const [reactComponent, setReactComponent] = useState(null);
   const [editingReactComponent, setEditingReactComponent] = useState("");
   const [form, setForm] = useState(null);
+  const formMilestone = allMilestones.find(m => m._id === form?.milestoneId);
+  let getSelectedPhotoId = () => {
+    if(!form?.formType === "photo"){ return ""; }
+    if(form.milestoneId === "current"){
+      //use top level journey media
+      return media.find(m => m.locationKey === form.location)?.mediaId || "";
+    }
+    const milestone = allMilestones.find(m => m.id === form.milestoneId);
+    return milestone.media.find(m => m.locationKey === form.location)?.mediaId || "";
+  }
 
   const dragStartXRef = useState(null);
 
@@ -155,9 +174,14 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
       margin: form?.formType === "photo" ? "10% 5%" : form?.margin,
     }, //50 so it doesnt go over burger bar
     reactComponentContainer: {
-      display:reactComponent ? null : "none",
+      //hide if photo form is showing so it doesnt scroll the screen
+      display:reactComponent && form?.formType !== "photo" ? null : "none",
       left: reactComponent?.transform[0] || 0, 
       top: reactComponent?.transform[1] || 0 
+    },
+    svg:{
+      //hide if photo form is showing so it doesnt scroll the screen
+      display:form?.formType === "photo" ? "none" : null,
     }
   };
   const classes = useStyles(styleProps);
@@ -191,7 +215,7 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
     //save any existing value
     if(editingReactComponent && (changedProfile || changedKey)){
       const { milestoneId, key, value } = editingReactComponent;
-      onSaveInfo(milestoneId, key, value);
+      onSaveInfo(milestoneId, key)(value);
     }
     //update
     setEditingReactComponent(newEditing)
@@ -199,38 +223,44 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
   //}, [editingReactComponent]);
 
   const handleSaveForm = useCallback(e => {
-    //if current, it will have already saved when button pressed
-    if(form.milestoneId === "current"){
+      //if current, it will have already saved when button pressed
+      if(form.milestoneId === "current"){
+        handleCancelForm();
+        return; 
+      }
+      if(form.formType === "date"){
+        //new pos of milestone
+        const now = new Date();
+        const newDate = new Date(form.value);
+        const newDateIsPast = newDate < now;
+        let newPosition;
+        if(newDateIsPast){
+          const otherPastMilestones = allMilestones
+            .filter(m => m.id !== form.milestoneId && m.id !== "current")
+            .filter(m => m.isPast);
+          //@todo - bring this numbering methid together with the way it is done in milestonesLayout
+          const sorted = sortDescending([ ...otherPastMilestones, { id: form.milestoneId, date: newDate }], d => d.date)
+          newPosition = -(sorted.map(m => m.id).indexOf(form.milestoneId) + 1)
+        }else{
+          const otherFutureMilestones = allMilestones
+            .filter(m => m.id !== form.milestoneId && m.id !== "current")
+            .filter(m => m.isFuture);
+          
+          const sorted = sortAscending([...otherFutureMilestones, { id: form.milestoneId, date: newDate }], d => d.date)
+          newPosition = sorted.map(m => m.id).indexOf(form.milestoneId) + 1
+        }
+      
+        milestonesBar
+          .requiredSliderPosition(newPosition)
+          .updateDatesShown(allMilestones);
+
+        setForm(null);
+        onSaveInfo(form.milestoneId, "date")(form.value);
+        return;
+      }
+      //all other cases, just cancel
       handleCancelForm();
       return; 
-    }
-    //new pos of milestone
-    const now = new Date();
-    const newDate = new Date(form.value);
-    const newDateIsPast = newDate < now;
-    let newPosition;
-    if(newDateIsPast){
-      const otherPastMilestones = allMilestones
-        .filter(m => m.id !== form.milestoneId && m.id !== "current")
-        .filter(m => m.isPast);
-      //@todo - bring this numbering methid together with the way it is done in milestonesLayout
-      const sorted = sortDescending([ ...otherPastMilestones, { id: form.milestoneId, date: newDate }], d => d.date)
-      newPosition = -(sorted.map(m => m.id).indexOf(form.milestoneId) + 1)
-    }else{
-      const otherFutureMilestones = allMilestones
-        .filter(m => m.id !== form.milestoneId && m.id !== "current")
-        .filter(m => m.isFuture);
-      
-      const sorted = sortAscending([...otherFutureMilestones, { id: form.milestoneId, date: newDate }], d => d.date)
-      newPosition = sorted.map(m => m.id).indexOf(form.milestoneId) + 1
-    }
-    
-    milestonesBar
-      .requiredSliderPosition(newPosition)
-      .updateDatesShown(allMilestones);
-
-    setForm(null);
-    onSaveInfo(form.milestoneId, "date", form.value);
   }, [form]);
 
   const handleCancelForm = useCallback(e => {
@@ -246,7 +276,8 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
     layout
       .format(kpiFormat)
       .datasets(datasets)
-      .info(player);
+      .info(player)
+      .getURL(getURLForUser(user._id));
 
     //profiles go before contracts of same date
     const orderedData = sortAscending([ ...profiles, ...contracts], d => d.date);
@@ -348,10 +379,12 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
     const DRAG_THRESHOLD = 50;
     const drag = d3.drag()
       .on("start", e => { 
+        //console.log("ds")
         if(!swipable) { return; }
         dragStartXRef.current = e.x;
       })
       .on("drag", e => { 
+        //console.log("drg")
         if(!swipable) { return; }
         if(dragStartXRef.current && dragStartXRef.current - e.x > DRAG_THRESHOLD){
           dragStartXRef.current = null;
@@ -363,24 +396,27 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
       })
 
     d3.selectAll(`div.milestone`).call(drag)
-      //.on("click", e => { console.log("curr clicked")})
+
   }, [selectedMilestone, screen.isLarge])
 
   return (
     <div className={`milestone-bar-root ${classes.root}`}>
-      <div className={classes.reactComponentContainer} id="react-container" ref={reactComponentRef}>
-        {
-          allMilestones.filter(m => !m.isCurrent).map(m => (
-            <div className={`${classes.reactComponentItem} milestone`} key={`milestone-${m.id}`} id={`milestone-`+m.id}>
-              <Goal
-                milestone={m}
-                editing={editingReactComponent?.milestoneId === m.id ? editingReactComponent : null}
-                setEditing={onSetEditingReactComponent}
-              />
-              {selectedMilestone && selectedMilestone !== m.id && <div className={classes.reactComponentItemOverlay}></div>}
-            </div>
-          ))
-        }
+      <div className={classes.outerReactContainer}>
+        <div className={classes.reactComponentContainer} id="react-container" ref={reactComponentRef}
+            onClick={() => { console.log("container clicked")}}>
+          {
+            allMilestones.filter(m => !m.isCurrent).map(m => (
+              <div className={`${classes.reactComponentItem} milestone`} key={`milestone-${m.id}`} id={`milestone-`+m.id}>
+                <Goal
+                  milestone={m}
+                  editing={editingReactComponent?.milestoneId === m.id ? editingReactComponent : null}
+                  setEditing={onSetEditingReactComponent}
+                />
+                {selectedMilestone && selectedMilestone !== m.id && <div className={classes.reactComponentItemOverlay}></div>}
+              </div>
+            ))
+          }
+        </div>
       </div>
       {form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>}
       {form &&
@@ -418,10 +454,17 @@ const MilestonesBar = ({ data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet
             )
           }
           {form.formType === "photo" &&
-            <Photos locationKey={form.location} onSavePhoto={onSavePhoto}/>
+            <Photos 
+              userId={user._id}
+              userPhotos={user.photos}
+              selectedPhotoId={getSelectedPhotoId()}
+              locationKey={form.location} 
+              onSavePhoto={onSavePhoto}
+              onSelect ={onSaveInfo(form.milestoneId, "photo")}
+            />
           }
         </div>}
-        <svg className={classes.svg} ref={containerRef}>
+        <svg className={classes.svg} ref={containerRef} id={`milestones-bar`}>
           <defs>
             <filter id="shine">
               <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
@@ -458,7 +501,7 @@ MilestonesBar.defaultProps = {
   availWidth: 0, 
   availHeight: 0,
   onSaveValue: () => {},
-  onSaveInfo: () => {}
+  onSaveInfo: () => () => {}
 }
 
 export default MilestonesBar;

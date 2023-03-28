@@ -75,7 +75,7 @@ const mockProfiles = [
 
 const emptyJourney = user => ({ 
 	_id:"temp", contracts:[], profiles:[], aims:[], goals:[], links:[],
-	measures:[], kpis:[], 
+	measures:[], kpis:[], media:[],
 	playerId:user.isPlayer ? user._id : null,
 	coachId:user.isCoach && !user.isPlayer ? user._id : null,
 	groupId: null //todo - this can be an option for a coach
@@ -85,9 +85,9 @@ const mapStateToProps = (state, ownProps) => {
 	//console.log("JourneyContainer..........state", state.user)
     //const { journeyId }  = ownProps.match.params;state,
 	//for now, assume player is user, but need to attach playerId/coachId or groupId to each journey
-	const { _id, username, firstname, surname, journeys=[], homeJourney, loadedDatasets, datasetsMemberOf } = state.user;
-	const user = { _id, username, firstname, surname };
-	//console.log("JourneyContainer homeJourney", homeJourney)
+	const { _id, username, firstname, surname, photo, photos, journeys=[], homeJourney, loadedDatasets, datasetsMemberOf } = state.user;
+	const user = { _id, username, firstname, surname, photos, photo };
+	//console.log("JourneyContainer photos", photos)
 	//console.log("journeys", journeys)
 	const journeyId = state.system.activeJourney || homeJourney;
 	//console.log("JourneyCont journeyId", journeyId)

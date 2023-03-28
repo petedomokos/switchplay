@@ -82,7 +82,10 @@ const useStyles = makeStyles(theme => ({
     fontSize:"10px",
     overflow:"hidden",
     cursor:"pointer",
-    pointerEvents:"all"
+    pointerEvents:"all",
+    display:"flex",
+    flexDirection:"column",
+    alignItems:props => props.descAlignItems
     //overflowY:"scroll" - doesnt work - may be coz of milestoneWrapper?
   },
   descTextField:{
@@ -112,6 +115,7 @@ export default function Goal({ milestone, error, editing, setEditing }) {
   const { id, nr, title="", desc="" } = milestone;
   const descLines = desc ? splitMultilineString(desc) : ["No Notes"];
   const styleProps = {
+    descAlignItems:desc ? "start" : "center"
   }
   const classes = useStyles(styleProps);
 
@@ -154,10 +158,10 @@ export default function Goal({ milestone, error, editing, setEditing }) {
               align={desc ? "left" : "center"}
               onClick={openDescForm}>
                 {descLines.map((line,i) => (
-                  <div key={`line-${i}-${id}`}>
+                  <span key={`line-${i}-${id}`}>
                     {line}
                     <br/>
-                  </div>
+                  </span>
                 ))}
             </Typography>
           }

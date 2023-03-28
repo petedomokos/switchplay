@@ -99,9 +99,9 @@ const initChannels = d3.range(numberMonths)
 
 //width and height may be full screen, but may not be
 const Journey = ({ user, data, datasets, availableJourneys, screen, width, height, save, saveDatapoint, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile, savePhoto }) => {
-  //console.log("Journey.......data", data)
+  console.log("Journey.......", data)
   //bug - although only 6 profs are saved, we end up with 7 ie two currents
-  const { _id, player, name, contracts, profiles, aims, goals, links, measures, settings, kpis } = data;
+  const { _id, player, name, media, contracts, profiles, aims, goals, links, measures, settings, kpis } = data;
   const [journey, setJourney] = useState(null);
   const [channels, setChannels] = useState(initChannels);
   const [withCompletionPaths, setWithCompletionPath] = useState(false);
@@ -159,7 +159,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       ...props //will be just the date if from milestonesBar
     }
     const _profiles = [ ...profiles, profile];
-    //save({ ...data, profiles:_profiles });
+    save({ ...data, profiles:_profiles });
   },[stringifiedProfiles, user._id])
 
   const handleCreateContract = useCallback((props) => {
@@ -244,7 +244,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     saveDatapoint(datasetId, datapoint);
   }, [stringifiedProfiles, user._id]);
 
-  const onSaveInfo = useCallback((profileId, key, value) => {
+  const onSaveInfo = useCallback((profileId, key) => value => {
     console.log("saveinfo", profileId, key, value);
     //special case - date need formatting
     if(key === "date"){
@@ -252,6 +252,23 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       const newDate = new Date(value);
       newDate.setUTCHours(21);
       const _profiles = profiles.map(p => p.id === profileId ? ({ ...p, date: newDate }) : p);
+      save({ ...data, profiles:_profiles });
+      return;
+    }else if(key === "photo"){
+      //value will be the photo object
+      if(profileId === "current"){
+        const otherMedia = media.filter(m => m.locationKey !== value.locationKey)
+        const newJ = { ...data, media:[ ...otherMedia, value]}
+        console.log("newJ", newJ)
+        save({ ...data, media:[ ...otherMedia, value]})
+        return;
+      }
+      const _profiles = profiles.map(p => {
+        if(p.id !== profileId) { return p; }
+        const otherMedia = p.media.filter(m => m.locationKey !== value.locationKey);
+        return { ...p, media: [ ...otherMedia, value] }
+      });
+      console.log("update media...updatedProfiles", _profiles)
       save({ ...data, profiles:_profiles });
       return;
     }
@@ -271,6 +288,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   }, [settings]);
 
   const onSavePhoto = useCallback(photo => {
+    console.log("onSavePhoto", photo)
     const photoData = new FormData();
     photoData.append("photo", photo)
     savePhoto(user._id, photoData);
@@ -303,6 +321,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
         <div className={`${classes.overlay} overlay`} ref={overlayRef}>
           {displayedBar === "milestones" &&
             <MilestonesBar
+              user={user}
               data={data}
               datasets={datasets}
               onSelectKpiSet={kpi => setDisplayedBar({kpi, prev:"milestones"})}

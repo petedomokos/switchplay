@@ -2,7 +2,7 @@ import * as d3 from 'd3';
 import kpisLayout from "./kpis/kpisLayout";
 import { getTargets } from "../../data/targets";
 import { addDays, addWeeks } from "../../util/TimeHelpers"
-import { GOAL_CTRLS } from './constants';
+import { getURLForUser, GOAL_CTRLS } from './constants';
 
 
 
@@ -12,6 +12,7 @@ export default function milestonesLayout(){
     let currentZoom = d3.zoomIdentity;
     let datasets = [];
     let info = {};
+    let getURL = () => "";
 
     let aligned = false;
     let format = "actual";
@@ -22,8 +23,7 @@ export default function milestonesLayout(){
         //console.log("update milestonesLayout data----------------------------", data)
         return data.map((m,i) => {
             //console.log("milestone------", i, m.id)
-            const { id, date, dateCount, playerAge, dataType, isPast, isCurrent, isFuture, settings, specificDate, onTrackStatus, goalPhotoLabel, profilePhotoLabel } = m;
-
+            const { id, date, media, dateCount, playerAge, dataType, isPast, isCurrent, isFuture, settings, specificDate, onTrackStatus, goalPhotoLabel, profilePhotoLabel } = m;
             //add any profile properties onto kpis if required
             const kpis = m.kpis.map(kpi => ({ 
                 ...kpi, /* what do we need? */ }));
@@ -41,8 +41,8 @@ export default function milestonesLayout(){
                         id, 
                         ...info, 
                         photos:{
-                            goal:[{ label:goalPhotoLabel }],
-                            profile:[{ label: profilePhotoLabel }]
+                            goal:[{ key:"goal", url:getURL(media.find(med => med.locationKey === "goal")?.mediaId, "goal") }],
+                            profile:[{ key:"profile", url:getURL(media.find(med => med.locationKey === "profile")?.mediaId, "profile") }]
                         },
                         age:playerAge, 
                         isCurrent, isPast, isFuture, 
@@ -79,6 +79,11 @@ export default function milestonesLayout(){
     update.info = function (value) {
         if (!arguments.length) { return info; }
         info = value;
+        return update;
+    };
+    update.getURL = function (f) {
+        if (!arguments.length) { return getURL; }
+        getURL = f;
         return update;
     };
 

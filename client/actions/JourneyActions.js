@@ -1,8 +1,15 @@
 import C from '../Constants'
 import { status, parseResponse, logError, fetchStart, fetchEnd, fetchThenDispatch} from './CommonActions'
 import auth from '../auth/auth-helper'
+import { addMonths } from '../util/TimeHelpers';
+
+function dateIsValid(date) {
+	return date instanceof Date && !isNaN(date);
+}
 
 const transformJourneyForServer = journey => {
+	//console.log("transformJourneyForServer")
+	const { playerId, coachId, media, name="", desc="" } = journey;
 	//dont think we need to store anything on channels, or could just be the setting "monthly"
 	//if we want to persist the users last zoom level. Or maybe just preserve the zoom level then?
 	//for now, we dont anyway
@@ -20,6 +27,7 @@ const transformJourneyForServer = journey => {
 			id:p.id,
 			title:p.title,
 			desc:p.desc,
+			media:p.media,
 			created:p.created,
 			date:p.date,
 			yPC:p.yPC,
@@ -68,12 +76,13 @@ const transformJourneyForServer = journey => {
 
 	return { 
 		_id: journey._id !== "temp" ? journey._id : undefined,
-		playerId:journey.playerId,
-		coachId:journey.coachId,
+		playerId,
+		coachId,
 		//why not keep playerId? see also JourneyContainer
 		//and need to add playerId to journey model
-		name: journey.name || "",
-		desc: journey.desc || "",
+		name,
+		desc,
+		media,
 		contracts,
 		profiles,
 		aims,
@@ -86,6 +95,8 @@ const transformJourneyForServer = journey => {
 }
 
 export const transformJourneyForClient = journey => {
+	console.log("transformJForClient", journey)
+	//for legacy we put in [] defaults
 	const { contracts, profiles, aims, goals, settings=[], updated, created } = journey;
 	return {
 		...journey,
@@ -137,10 +148,10 @@ export const saveAdhocJourneyToStore = journey => (
 )
 
 export const saveJourney = (journey, shouldPersist=true, shouldUpdateStoreBefore=false, shouldUpdateStoreAfter=false)  => dispatch => {
-	//console.log("saveJourney.............", journey)
+	console.log("saveJourney.............", journey)
 	//note - currently, the client store simply stores the server journey too
 	const serverJourney = transformJourneyForServer(journey);
-	//console.log("serverJourney", serverJourney)
+	console.log("save journey to server---------------", serverJourney)
 	/*
 	//atm, if no user logged in, we still have  auser object so just store journey in there as normal, but dont persist to server
 	const jwt = auth.isAuthenticated();
@@ -216,54 +227,4 @@ export const fetchJourney = (userId, journeyId) => dispatch => {
 				}
 			}
 		}) 
-}
-
-export const fetchUsers = () => dispatch => {
-	fetchThenDispatch(dispatch, 
-		'loading.users',
-		{
-			url: '/api/users', 
-			requireAuth:true,
-			nextAction: data => { return { type:C.LOAD_USERS, users:data } }
-		}) 
-}
-
-export const updateUser = (id, formData, history) => dispatch => {
-	fetchThenDispatch(dispatch, 
-		'updating.user',
-		{
-			url: '/api/users/'+id,
-			method: 'PUT',
-			headers:{
-	        	'Accept': 'application/json'
-	      	},
-			body:formData, //not stringify as its a formidable object
-			requireAuth:true,
-			nextAction: data => {
-				history.push("/")
-				const jwt = auth.isAuthenticated();
-				if(jwt.user._id === data._id){
-					return { type:C.UPDATE_SIGNEDIN_USER, user:data };
-				}
-				return { type:C.UPDATE_ADMINISTERED_USER, user:data }
-			}
-		})
-}
-export const deleteUserAccount = (id, history) => dispatch => {
-	fetchThenDispatch(dispatch, 
-		'deleting.user',
-		{
-			url: '/api/users/'+id,
-			method: 'DELETE',
-			requireAuth:true,
-			//todo - only signout if user being deleted was signed in
-			nextAction: data => {
-				history.push('/')
-				const jwt = auth.isAuthenticated();
-				if(jwt.user._id === data._id){
-					return { type:C.SIGN_OUT };
-				}
-				return { type:C.DELETE_ADMINISTERED_USER, user:data }
-			}
-		})
 }

@@ -4,6 +4,7 @@ import extend from 'lodash/extend'
 import errorHandler from './../helpers/dbErrorHandler'
 import formidable from 'formidable'
 import fs from 'fs'
+import defaultImage from './../../assets/defaultPhoto.png';
 
 
 /*
@@ -65,11 +66,11 @@ const create = async (req, res) => {
  * Load user and append to req.
  */
 const userByID = async (req, res, next, id) => {
-  console.log('readuserById......', id)
+  //console.log('readuserById......', id)
   try {
     let user = await User.findById(id)
       .populate('admin', '_id username firstname surname created')
-      .populate('journeys', '_id name contracts profiles aims goals links measures settings created')
+      .populate('journeys', '_id name media contracts profiles aims goals links measures settings created')
       .populate('administeredUsers', '_id username firstname surname photo created')
       .populate({ 
         path: 'administeredGroups', 
@@ -92,7 +93,6 @@ const userByID = async (req, res, next, id) => {
       //.populate('administeredDatasets', '_id name desc notes photo admin created')
       //.populate('datasetsMemberOf', '_id name desc notes photo admin created')
 
-    console.log('success')
     if (!user)
       return res.status('400').json({
         error: "User not found"
@@ -106,10 +106,18 @@ const userByID = async (req, res, next, id) => {
   }
 }
 
+
+const photoByID = async (req, res, next, id) => {
+  //console.log('readPhotoById......', id);
+  req.photoId = id;
+  next();
+}
+
 const read = (req, res) => {
-  console.log('read......')
+  //console.log('read......')
   req.user.hashed_password = undefined
   req.user.salt = undefined
+  req.user.photos = req.user.photos.map(p => ({ _id:p._id, name:p.name, added:p.added }))
   return res.json(req.user)
 }
 
@@ -117,6 +125,7 @@ const list = async (req, res) => {
   //const fakeUsers = [{_id:"1", name:"a user", email:"a@b.com"}]
   //res.json(fakeUsers)
   try {
+    //only send the main photo for each user (not the users own photos gallery)
     let users = await User.find()
       .select('username firstname surname photo email updated created admin')
       .populate('admin', '_id username firstname surname created')
@@ -135,8 +144,8 @@ const update = async (req, res) => {
   let form = new formidable.IncomingForm()
   form.keepExtensions = true
   form.parse(req, async (err, fields, files) => {
-    console.log("fields", fields)
-    console.log("files", files)
+    //console.log("fields", fields)
+    //console.log("files", files)
     if (err) {
       return res.status(400).json({
         error: "Photo could not be uploaded"
@@ -155,10 +164,15 @@ const update = async (req, res) => {
     if(files.photo){
       newPhoto = {
         data: fs.readFileSync(files.photo.path),
-        contentType: files.photo.type
+        contentType: files.photo.type,
+        name:files.photo.name,
+        added:Date.now()
       }
-      //console.log("pushing new photo")
-      user.photos.push(newPhoto);
+      //console.log("pushing new photo-------------------", newPhoto)
+      //user.photos.push(newPhoto);
+      if(files.photo.isMain){
+        user.photo = newPhoto; //todo - chck this works instead of the lines below
+      }
       //user.photo.data = fs.readFileSync(files.photo.path)
       //user.photo.contentType = files.photo.type
     }
@@ -168,8 +182,9 @@ const update = async (req, res) => {
       user.salt = undefined
       //only return properties that have been updated
       let userToReturn = {
-        ...fields,
-        photos:newPhoto ? [newPhoto] : [] //this will be merged on lcient with existing
+        //...fields,
+        photos:user.photos.map(p => ({ _id:p._id, name:p.name, added:p.added })), //this will be merged on client with existing
+        _id:user._id
       };
       res.json(userToReturn)
     } catch (err) {
@@ -178,6 +193,28 @@ const update = async (req, res) => {
       })
     }
   })
+}
+
+const removePhotos = async (req, res) => {
+  console.log('remove user..............')
+  const photoIdsToDelete = req.body.photos;
+  const shouldDelete = photo => photoIdsToDelete.find(id => id.equals(photo.id));
+  try {
+    let user = req.user;
+    //if no photosToDelete specified, then delete all
+    const updatedPhotos = photoIdsToDelete ? req.user.photos.filter(p => shouldDelete(p)) : [];
+    user.photos = updatedPhotos;
+    user.updated = Date.now()
+    await user.save()
+    user.hashed_password = undefined
+    user.salt = undefined
+    //only return photo Ids that have been deleted
+    res.json(photoIdsToDelete)
+  } catch (err) {
+      return res.status(400).json({
+        error: errorHandler.getErrorMessage(err)
+      })
+  }
 }
 
 const remove = async (req, res) => {
@@ -196,19 +233,38 @@ const remove = async (req, res) => {
 }
 
 const photo = (req, res, next) => {
-  if(req.profile.photo.data){
-    res.set("Content-Type", req.profile.photo.contentType);
-    return res.send(req.profile.photo.data)
+  console.log("photo....", req.photoId);
+  if(req.photoId){
+      const photo = req.user.photos.find(photo => photo._id.equals(req.photoId));
+      if(!photo){ return res.status(400);}
+      res.set("Content-Type", photo.contentType);
+      return res.send(photo.data)
+  }
+  if(req.user.photo?.data){
+    res.set("Content-Type", req.user.photo.contentType);
+    return res.send(req.user.photo.data)
   }
   //next is defaultPhoto if no photo
   next();
 }
 
+const photos = (req, res, next) => {
+  //console.log("photos", req.photoId)
+  return res.status(400);
+  /*const photos = req.user.photos.map(photo => {
+    return {
+
+    }
+  })
+    res.set("Content-Type", req.user.photo.contentType);
+    return res.send(req.user.photo.data)
+  }*/
+}
+
 
 const defaultPhoto = (req, res) => {
-  return res.status(400);
-  //todo - need to import profileImage at top of file
-  //return res.sendFile(process.cwd() + profileImage)
+  //console.log("defaultphoto")
+  return res.sendFile(process.cwd() + defaultImage)
 }
 
 
@@ -216,10 +272,12 @@ const defaultPhoto = (req, res) => {
 export default {
   create,
   userByID,
+  photoByID,
   read,
   list,
   remove,
   update,
+  photos,
   photo,
   defaultPhoto
 }

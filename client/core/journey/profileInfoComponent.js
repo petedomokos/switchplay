@@ -11,12 +11,16 @@ export default function profileInfoComponent() {
     // dimensions
     let width = DIMNS.profile.width;
     let height = DIMNS.profile.height / 2;
-    let photoHeight;
+    let topBorderHeight;
+    let getBottomBorderHeight = () => 0;
     let getTextInfoHeight = () => 0;
+    let getPhotoHeight = () => 0;
 
     function updateDimns(d){
-        photoHeight = height * 0.8;
-        getTextInfoHeight = d => currentPage.key === "goal" && !d.isCurrent ? 0 : height * 0.2;
+        topBorderHeight = d3.max([45, height * 0.2]);
+        getBottomBorderHeight = d =>  d.isCurrent || currentPage.key === "profile" ? topBorderHeight : topBorderHeight * 0.3;
+        getTextInfoHeight = d => getBottomBorderHeight(d);
+        getPhotoHeight = d => height - topBorderHeight - getBottomBorderHeight(d);
     }
 
     let fontSizes = {
@@ -58,11 +62,12 @@ export default function profileInfoComponent() {
         //console.log("profileinfo", height)
         updateDimns();
         const { transitionEnter=true, transitionUpdate=true } = options;
+
         // expression elements
         selection.each(function (data) {
             //console.log("profileInfo data", data)
-            const { firstname, surname, age, position, isCurrent, isFuture, settings } = data;
-            const photos = isCurrent ? data.photos["profile"] : (data.photos[currentPage.key] || [{ label:"main" }]);
+            const { id, firstname, surname, age, position, isCurrent, isFuture, settings } = data;
+            const photos = isCurrent ? data.photos["profile"] : data.photos[currentPage.key];
             containerG = d3.select(this);
 
             const bgRect = containerG.selectAll("rect.info-bg").data([1]);
@@ -88,24 +93,49 @@ export default function profileInfoComponent() {
 
             // todo - append photo, name, age, pos
             //helper
-            const photoUrl = d => (`/users/${firstname}_${surname}/${d.label}.png`).toLowerCase();
-            const photosG = containerG.selectAll("g.photos").data(photos, d => d.label);
+            //todo next - new url
+
+            //const photoUrl = d => (`/users/${firstname}_${surname}/${d.label}.png`).toLowerCase();
+
+            //next - try a clipPath over the image
+            //also, longpress at bottom of kpiscoponent to create a new kpi
+            //and target completion
+            const photosG = containerG.selectAll("g.photos").data(photos);
             photosG.enter()
                 .append("g")
                     .attr("class", "photos")
                     .each(function(d){
                         d3.select(this)
                             .insert("image","text")
-                            .attr("xlink:href", photoUrl(d)) 
+
+                        //photoareas may be different so need a separate clipPath per photo
+                        //@todo - make svg id tied to journey id
+                        d3.select("svg#milestones-bar").select('defs')
+                            .append('clipPath')
+                                .attr('id', `photo-clip-${id}-${d.key}`)
+                                    .append('rect');
+                        
+                        d3.select(this)
+                            .attr('clip-path', `url(#photo-clip-${id}-${d.key})`)
                     })
                     .merge(photosG)
+                    .attr("transform", `translate(0, ${topBorderHeight})`)
                     .each(function(d){
+                        d3.select("svg#milestones-bar").select(`#photo-clip-${id}-${d.key}`)
+                            .select("rect")
+                                .attr("width", width)
+                                .attr("height", getPhotoHeight(d))
+
                         d3.select(this).select("image")  
                             .attr("width", width)
-                            //.attr("height", photoHeight)
+                            .attr("xlink:href", d.url) 
+                            //.attr("height", getPhotoHeight(d))
 
                     })
-                    .on("click", (e,d) => { onClick.call(this, e, d, data, "photo", currentPage.key) })
+                    .on("click", (e,d) => {
+                        const locationKey = isCurrent ? "profile" : currentPage.key;
+                        onClick.call(this, e, d, data, "photo", locationKey) 
+                    })
                     .on("contextmenu", (e) => { 
                         console.log("photo contextmenu event")
                         e.preventDefault(); 
@@ -306,7 +336,7 @@ export default function profileInfoComponent() {
 
                     })
                     .merge(textInfoG)
-                    .attr("transform", `translate(0, ${photoHeight})`)
+                    .attr("transform", d => `translate(0, ${topBorderHeight + getPhotoHeight(d)})`)
                     .each(function(d){
                         const textInfoHeight = getTextInfoHeight(d);
                         const maxNrLetters = d3.max([d.firstname, d.surname], d => d.length);
