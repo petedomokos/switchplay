@@ -33,7 +33,7 @@ const useStyles = makeStyles(theme => ({
     display:"flex",
     flexDirection:"column",
     alignItems:"center",
-    border:"solid"
+    //border:"solid"
   },
   cardActions:{
     height:"60px"
@@ -41,7 +41,7 @@ const useStyles = makeStyles(theme => ({
   editPhoto:{
     width:"90%",
     height:"90%",
-    border:"solid"
+    //border:"solid"
   },
   title: {
     //margin: theme.spacing(2),
@@ -68,9 +68,9 @@ const useStyles = makeStyles(theme => ({
     flexDirection:"column",
     justifyContent:"space-between",
     alignItems:"center",
-    background:"yellow",
-    border:"solid",
-    borderWidth:"thin"
+    //background:"yellow",
+    //border:"solid",
+    //borderWidth:"thin"
   },
   galleryWrapper:{
     width:"90%",
@@ -80,13 +80,13 @@ const useStyles = makeStyles(theme => ({
     flexDirection:"column",
     justifyContent:"space-between",
     alignItems:"center",
-    background:"yellow",
-    border:"solid",
-    borderWidth:"thin"
+    //background:"yellow",
+    //border:"solid",
+    //borderWidth:"thin"
   },
   sectionTitle:{
     alignSelf:"flex-start",
-    background:"pink",
+    //background:"pink",
     height:"40px",
     margin:0,
     display:"flex",
@@ -98,23 +98,23 @@ const useStyles = makeStyles(theme => ({
     width:"100%",
     height:"calc(100% - 40px - 40px)",
     margin:0,//"5%",
-    background:"aqua"
+    //background:"aqua"
   },
   selectedImage:{
-    border:"solid"
+    //border:"solid"
 
   },
   editPhoto:{
     width:"100%",
     height:"calc(100% - 40px - 40px)",
     margin:0,//"5%",
-    background:"blue"
+    //background:"blue"
   },
   gallery:{
     width:"100%",
     height:props => props.galleryHeight,
     margin:0,//"5%",
-    background:"aqua",
+    //background:"aqua",
   },
   upload:{
     width:"90%",
@@ -127,7 +127,7 @@ const useStyles = makeStyles(theme => ({
     flexDirection:"column",
     justifyContent:"flex-start",
     alignItems:"center",
-    background:"red"
+    //background:"red"
     //margin:"5%",
   },
   sectionCtrls:{
@@ -136,7 +136,7 @@ const useStyles = makeStyles(theme => ({
     height:"40px",
     display:"flex",
     justifyContent:"flex-end",
-    background:"orange"
+    //background:"orange"
   },
   error: {
     verticalAlign: 'middle'
@@ -153,7 +153,7 @@ const useStyles = makeStyles(theme => ({
     //marginBottom: theme.spacing(2)
   },
   uploadInput:{
-    border:"solid",
+    //border:"solid",
     padding:0,
     margin:0,//"2.5% 2.5% 0 2.5%",
     width:"100%",
@@ -239,7 +239,7 @@ export default function Photos({ userId, userPhotos, selectedPhotoId, locationKe
           <div className={classes.selectedWrapper}>
               <h5 className={classes.sectionTitle}>Selected</h5>
               {!action && <div className={classes.selectedImgWrapper}>
-                <img className={classes.selectedImage} src={getURL(selectedPhotoId || orderedPhotos[0]._id)} alt="Not loaded" width="150" height="100"/>
+                {selectedPhotoId && <img className={classes.selectedImage} src={getURL(selectedPhotoId)} alt="Not loaded" width="150" height="100"/>}
               </div>}
               {action === "editPhoto" && 
                 <div className={classes.editPhoto}> Edit Area - pinch to zoom, or drag</div>
