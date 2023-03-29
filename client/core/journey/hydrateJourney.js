@@ -10,6 +10,13 @@ import { JOURNEY_SETTINGS, JOURNEY_SETTINGS_INFO } from './constants';
 import { getBandsAndStandards } from "../../data/bandsAndStandards";
 import journeyComponent from './journeyComponent';
 
+//helper
+const targetIsAchieved = (value, target, order) => {
+    if(!value?.actual || !target?.actual){ return false; }
+    if(order === "highest-is-best"){ return value.actual >= target.actual }
+    return value.actual <= target.value;
+}
+
 export function hydrateJourneyData(data, user, datasets){
     const now = new Date();
     //console.log("hydrateJourneyData", data)
@@ -372,7 +379,8 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //we must round, because accuracy is contextual so a target may not be rounded to the required level
             const target = {
                 ...nonRoundedTarget,
-                actual:round(nonRoundedTarget.actual, accuracy)
+                actual:round(nonRoundedTarget.actual, accuracy),
+                completion:100
             }
 
             //CURRENT
@@ -394,10 +402,10 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             let expected = isPast ? null : calcExpected(kpi, start, { date, ...target }, now, { accuracy });
 
             let onTrackStatus;
-            if(isPast && target?.actual){
-                onTrackStatus = achieved.actual >= target.actual ? "onTrack" : "offTrack";
-            }else if(!isPast && expected?.actual){
-                onTrackStatus = current && expected.actual <= current.actual ? "onTrack" : "offTrack";
+            if(isPast){
+                onTrackStatus = targetIsAchieved(achieved, target, stat.order) ? "onTrack" : "offTrack";
+            }else{
+                onTrackStatus = targetIsAchieved(current, expected, stat.order) ? "onTrack" : "offTrack";
             }
             return {
                 ...kpi, key, milestoneId,
@@ -414,6 +422,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                     min, max, start, current, expected, achieved, target, //proposedTarget,
                 },
                 onTrackStatus,
+                order:stat.order,
                 accuracy,
                 //other info
                 datasetName:dataset?.name || "",
@@ -495,12 +504,8 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
                 //it must be a future card and current value is based purely on a specificSession
                 current = getValueForSession(stat, datapoints, specificDate)
             }
-
-            //if no target/expected, then onTrackStatus is undefined
-            let onTrackStatus;
-            if(expected?.actual){
-                onTrackStatus = current?.actual && expected.actual <= current.actual ? "onTrack" : "offTrack";
-            }
+            //status may be different to activeProfile status as current may be different
+            const onTrackStatus = targetIsAchieved(current, expected, stat.order) ? "onTrack" : "offTrack";
 
             return {
                 ...kpi,
@@ -510,6 +515,7 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
                 date:now, 
                 startDate:profileStart.date,
                 dateRange, datePhase, isCurrent:true,
+                order:stat.order,
                 accuracy,
                 lastDataUpdate,
                 values:{

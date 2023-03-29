@@ -561,8 +561,6 @@ export default function milestonesBarComponent() {
                     if(selectedMilestone){ return; }
                     //this click is only to turn off swiping ann dturn on scrolling, so if not swipable then its not needed
                     if(!swipable) { return; }
-
-                   
                     
                     const milestone = milestoneContainingPt(adjustPtForData(e), positionedData);
                     if(milestone) {

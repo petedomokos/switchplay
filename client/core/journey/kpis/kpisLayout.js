@@ -29,13 +29,9 @@ export default function kpisLayout(){
             });*/
         //1 only...const _data = [data[0]]
         const kpisData = data.map((kpi,i) => {
-            
-           
-            const { key, values, accuracy, isPast, isCurrent, isFuture, milestoneId, datasetKey, statKey } = kpi;
+            const { key, values, accuracy, order, isPast, isCurrent, isFuture, milestoneId, datasetKey, statKey } = kpi;
             //console.log("kpi key datasetkey", key, datasetKey)
             const dataset = datasets.find(dset => dset.key === datasetKey);
-            //console.log("dset", dataset)
-            const stat = dataset.stats.find(stat => stat.key === statKey);
             //can set all kpis to be active eg for an active profile card that doesnt have access to all data
             const isActive = allKpisActive || kpi.isActive;
             //helper
@@ -52,13 +48,22 @@ export default function kpisLayout(){
                 expectedAhead:currentColour
             }
 
+            //todo - fix bug why expected and current are showing as ontrack when they are not
+            //also refacotr the below logic
+
             const start = values.start && typeof values.start[format] === "number" ? values.start[format] : null;
             if(isCurrent && key === "shuttles-time"){
             }
             const end = values.end && typeof values.end[format] === "number" ? values.end[format] : null;
             //console.log("values.curr", values.current)
             const current = values.current && typeof values.current[format] === "number" ? values.current[format] : null;
-            //console.log("format value", format, current)
+            
+            if(kpi.datasetKey === "shuttles"){
+                //console.log("milestoneId--------------------", kpi.milestoneId)
+                //console.log("format ")
+
+            }
+            
             let expected;
             let target;
             //let proposedTarget;
@@ -86,8 +91,8 @@ export default function kpisLayout(){
             const targetDatum = {
                 key:"target",
                 label: "Target",
-                isAchieved:stat.order === "highest is best" ? target <= current : target >= current,
-                startValue:format === "completion" ? 0 : (stat.order === "highest is best" ? values.min : values.max), //may be undefined
+                isAchieved:(order === "highest is best" || format === "completion") ? target <= current : target >= current,
+                startValue:format === "completion" ? 0 : (order === "highest is best" ? values.min : values.max), //may be undefined
                 value:target,
                 fill:colours.target,
                 format
@@ -95,16 +100,17 @@ export default function kpisLayout(){
             const currentDatum = {
                 key:"current",
                 label: values.achieved ? "Achieved" : "Current",
+                //@todo - remove isAchieved form this - is confusing and means nothing
                 isAchieved:!!values.achieved,
-                startValue: format === "completion" ? 0 : (stat.order === "highest is best" ? values.min : values.max), //may be undefined
+                startValue: format === "completion" ? 0 : (order === "highest is best" ? values.min : values.max), //may be undefined
                 value:current,
                 fill:colours.current,
                 format
             }
 
             const barData = [targetDatum, currentDatum];
-            barData.start = format === "completion" ? 0 : (stat.order === "highest is best" ? values.min : values.max);
-            barData.end = format === "completion" ? 100 : (stat.order === "highest is best" ? values.max : values.min);
+            barData.start = format === "completion" ? 0 : (order === "highest is best" ? values.min : values.max);
+            barData.end = format === "completion" ? 100 : (order === "highest is best" ? values.max : values.min);
 
             const tooltipsData = [
                 { 
@@ -135,7 +141,7 @@ export default function kpisLayout(){
                     shouldDisplay:status => !isPast && !!targetObj, //dont display if past or no future profiles
                     rowNr: 1, y: 1, current,
                     value: expected, x:expected,
-                    dataOrder: format === "completion" ? "lowest-is-best" : stat.order,
+                    dataOrder: format === "completion" ? "highest-is-best" : order,
                     accuracy,
                     icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },
                     editable:false,//isCurrent || isFuture,
@@ -149,7 +155,7 @@ export default function kpisLayout(){
                     shouldDisplay:status => !!targetObj,
                     rowNr: -1, y: -1, current,
                     value:target, x:target,
-                    dataOrder: format === "completion" ? "lowest-is-best" : stat.order,
+                    dataOrder: format === "completion" ? "highest-is-best" : order,
                     accuracy,
                     icons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
                     editable:isCurrent || isFuture,
@@ -158,13 +164,14 @@ export default function kpisLayout(){
                     //if small space, just show the ball
                     //smallIcons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
                 },
+                //when completion, value below is 0
                 {
                     key:"current", milestoneId, kpiKey:key, datasetKey, statKey,
                     label: values.achieved ? "Achieved" : "Current",
                     rowNr:0, y:0,
                     value:current,
                     fill:colours.current,
-                    dataOrder: format === "completion" ? "lowest-is-best" : stat.order,
+                    dataOrder: format === "completion" ? "highest-is-best" : order,
                     accuracy,
                     editable:isCurrent || isFuture,
                     withDragValueAbove:false,
@@ -181,6 +188,15 @@ export default function kpisLayout(){
                 //console.log("tooltips", tooltipsData)
             }
             const numbersData = [currentDatum];
+
+            if(kpi.datasetKey === "shuttles"){
+                //console.log("milestoneId", kpi.milestoneId)
+                //console.log("kpi", kpi)
+                //console.log("values", values)
+                //console.log("tooltipsData", tooltipsData)
+                //console.log("format ", format, current)
+
+            }
 
             return {
                 ...kpi,
