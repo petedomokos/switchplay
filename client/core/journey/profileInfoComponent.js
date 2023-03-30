@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, PROFILE_PAGES } from "./constants";
+import { DIMNS, PROFILE_PAGES, grey10 } from "./constants";
 import container from './kpis/kpi/container';
 //import dragEnhancements from './enhancedDragHandler';
 
@@ -12,15 +12,21 @@ export default function profileInfoComponent() {
     let width = DIMNS.profile.width;
     let height = DIMNS.profile.height / 2;
     let topBorderHeight;
-    let getBottomBorderHeight = () => 0;
-    let getTextInfoHeight = () => 0;
-    let getPhotoHeight = () => 0;
+    let bottomBorderHeight;
+    let textInfoHeight;
+    let photoHeight;
 
-    function updateDimns(d){
-        topBorderHeight = d3.max([45, height * 0.2]);
-        getBottomBorderHeight = d =>  d.isCurrent || currentPage.key === "profile" ? topBorderHeight : topBorderHeight * 0.3;
-        getTextInfoHeight = d => getBottomBorderHeight(d);
-        getPhotoHeight = d => height - topBorderHeight - getBottomBorderHeight(d);
+    function updateDimns(data){
+        //console.log("data", data)
+        const borderHeight = d3.max([45, height * 0.2]);
+        topBorderHeight = 0;// data.isCurrent || currentPage.key === "profile" ? borderHeight : 0;
+        bottomBorderHeight = data.isCurrent || currentPage.key === "profile" ? borderHeight : 0;// topBorderHeight * 0.3;
+        textInfoHeight = bottomBorderHeight;
+        photoHeight = height - topBorderHeight - bottomBorderHeight;
+        if(data.isCurrent){
+            //console.log("h", height)
+            //console.log("top bot pho", topBorderHeight, bottomBorderHeight, photoHeight)
+        }
     }
 
     let fontSizes = {
@@ -60,11 +66,11 @@ export default function profileInfoComponent() {
     */
     function profileInfo(selection, options={}) {
         //console.log("profileinfo", height)
-        updateDimns();
         const { transitionEnter=true, transitionUpdate=true } = options;
 
         // expression elements
         selection.each(function (data) {
+            updateDimns(data);
             //console.log("profileInfo data", data)
             const { id, firstname, surname, age, position, isCurrent, isFuture, settings } = data;
             const photos = isCurrent ? data.photos["profile"] : data.photos[currentPage.key];
@@ -77,7 +83,7 @@ export default function profileInfoComponent() {
                     .merge(bgRect)
                     .attr("width", width)
                     .attr("height", height)
-                    .attr("fill", "black")
+                    .attr("fill", currentPage.key === "goal" && !isCurrent ? "none" : "black")
                     .attr("rx", 3)
                     .attr("ry", 3)
             //can use same enhancements object for outer and inner as click is same for both
@@ -105,31 +111,39 @@ export default function profileInfoComponent() {
                 .append("g")
                     .attr("class", "photos")
                     .each(function(d){
-                        d3.select(this)
-                            .insert("image","text")
-
-                        //photoareas may be different so need a separate clipPath per photo
-                        //@todo - make svg id tied to journey id
+                        //d3.select(this).append("rect")
+                            //.attr('class', "photo-border")
+                        
                         d3.select("svg#milestones-bar").select('defs')
                             .append('clipPath')
-                                .attr('id', `photo-clip-${id}-${d.key}`)
+                                .attr('id', `photo-clip-${id}`)
                                     .append('rect');
+                            
+                        d3.select(this)
+                            .insert("image","text");
                         
                         d3.select(this)
-                            .attr('clip-path', `url(#photo-clip-${id}-${d.key})`)
+                            .attr('clip-path', `url(#photo-clip-${id})`)
                     })
                     .merge(photosG)
-                    .attr("transform", `translate(0, ${topBorderHeight})`)
+                    .attr("transform", d => `translate(0, ${topBorderHeight})`)
                     .each(function(d){
-                        d3.select("svg#milestones-bar").select(`#photo-clip-${id}-${d.key}`)
+                        d3.select("svg#milestones-bar").select(`#photo-clip-${id}`)
                             .select("rect")
                                 .attr("width", width)
-                                .attr("height", getPhotoHeight(d))
+                                .attr("height", photoHeight)
 
-                        d3.select(this).select("image")  
+                        /*d3.select(this).select("rect.photo-border")
                             .attr("width", width)
+                            .attr("height", photoHeight)
+                            .attr("stroke-width", 5)*/
+
+                        const img = d3.select(this).select("image")  
+                            //.attr("width", width)
                             .attr("xlink:href", d.url) 
-                            //.attr("height", getPhotoHeight(d))
+                            //.attr("height", photoHeight)
+
+                        //console.log("actual w h", img.attr("width"), img.attr("height"))
 
                     })
                     .on("click", (e,d) => {
@@ -178,6 +192,12 @@ export default function profileInfoComponent() {
                                 .attr("dominant-baseline", "hanging")
                                 .attr("text-anchor", "middle")
                                 .style("font-family", "helvetica, sans-serifa")
+
+
+                        d3.select(this).selectAll("text")
+                            .attr("stroke","black")// grey10(5))
+                            .attr("stroke-width", 0.5)
+                            .attr("fill", grey10(5))
                         
                         d3.select(this)
                                 .append("rect")
@@ -190,13 +210,13 @@ export default function profileInfoComponent() {
                     .each(function(d){
                         d3.select(this).select("text.primary")
                             .attr("font-size", fontSizes.date)
-                            .attr("fill", d.isFuture ? "grey" : "white")
+                            //.attr("fill", d.isFuture ? "grey" : "white")
                             .text(d.isCurrent ? currentValueDataMethod.selectedLabel() : format(d.date))
 
                         d3.select(this).select("text.secondary")
                             .attr("y", dateHeight * 1.2)
                             .attr("font-size", fontSizes.date * 0.8)
-                            .attr("fill", d.isFuture ? "grey" : "white")
+                            //.attr("fill", d.isFuture ? "grey" : "white")
                             .text(d.specificDate ? format(d.specificDate) : "")
 
                         d3.select(this).select("rect.hitbox")
@@ -239,6 +259,9 @@ export default function profileInfoComponent() {
                             .attr("dominant-baseline", "central")
                             .attr("text-anchor", "middle")
                             .style("font-family", "helvetica, sans-serifa")
+                            .attr("stroke", "black")// grey10(5))
+                            .attr("stroke-width", 0.5)
+                            .attr("fill", grey10(5))
                         
                         d3.select(this).append("rect").attr("class", "hitbox")
                             .attr("fill", "transparent")
@@ -256,21 +279,21 @@ export default function profileInfoComponent() {
                         const wordsHeight = contentsHeight - numberHeight;
 
                         const numberFontSize = d3.min([20, fontSizes.date * 1.5]);
-                        const wordsFontSize = numberFontSize * 0.5;
+                        const wordsFontSize = numberFontSize * 0.75;
 
                         d3.select(this).select("text.number")
                             .attr("x", width/2)
                             .attr("y", margin.top + numberHeight / 2)
                             .attr("font-size", numberFontSize)
-                            .attr("fill", isFuture ? "grey" : "white")
+                            //.attr("fill", isFuture ? "grey" : "white")
                             .text(d => Math.abs(d.value))
 
                         d3.select(this).select("text.words")
                             .attr("x", width/2)
                             .attr("y", margin.top + numberHeight + wordsHeight / 2)
                             .attr("font-size", wordsFontSize)
-                            .attr("fill", isFuture ? "grey" : "white")
-                            .text(d => `${d.label} ${d.value < 0 ? "ago" : "to go"}`)
+                            //.attr("fill", isFuture ? "grey" : "white")
+                            .text(d => `${d.label} ${d.value < 0 ? "ago" : ""}`)
 
                         d3.select(this).select("rect.hitbox")
                             //@todo - make it accurate which takes into account the height of the date line so we dont have to enlarge by 1.2
@@ -336,9 +359,8 @@ export default function profileInfoComponent() {
 
                     })
                     .merge(textInfoG)
-                    .attr("transform", d => `translate(0, ${topBorderHeight + getPhotoHeight(d)})`)
+                    .attr("transform", d => `translate(0, ${topBorderHeight + photoHeight})`)
                     .each(function(d){
-                        const textInfoHeight = getTextInfoHeight(d);
                         const maxNrLetters = d3.max([d.firstname, d.surname], d => d.length);
                         const marginReductionPerLetter = 0.02;
                         const marginReduction = marginReductionPerLetter * maxNrLetters;

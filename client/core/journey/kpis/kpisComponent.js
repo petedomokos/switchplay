@@ -139,14 +139,13 @@ export default function kpisComponent() {
     //dom
     let containerG;
     function kpis(selection, options={}) {
-        //console.log("kpis update...........................")
+        //console.log("kpis update...............................................")
         const { transitionEnter=true, transitionUpdate=true, log } = options;
 
         // expression elements
         selection.each(function (data,i) {
             prevData = data;
             const { kpisData } = data;
-            //console.log("kpisData", kpisData)
             //console.log("kpis",this.parentNode.parentNode, data)
             const ctrlsData = withCtrls ? data.ctrlsData : [];
 
@@ -333,7 +332,6 @@ export default function kpisComponent() {
                                 }))
                                 .onDblClick(onDblClickKpi)
                                 .onClick(function(e,d){
-                                    //console.log("kpisComponent kpi.onClick........", d)
                                     //@todo - bug - after clicking several kpis, the profiles dont 
                                     //stay in sync with each other. it seems that teh ones called from externally,
                                     //ie teh ones not actually scrolled, seem to jump back to 0 again, and go from there
@@ -453,7 +451,6 @@ export default function kpisComponent() {
     }
 
     function updateSelected(key, data, shouldUpdateScroll=false, shouldUpdateDom=false){
-        //console.log("updateSelected.... key", key)
         const { kpisData } = data;
         const newSelectedDatum = kpisData.find(d => d.key === key);
         //console.log("updateSel key, d-------", key, newSelectedDatum)
@@ -630,7 +627,9 @@ export default function kpisComponent() {
     //ie the tooltips etc
     kpis.selected = function (value, shouldUpdateScroll, shouldUpdateDom) {
         if (!arguments.length) { return selected; }
-        updateSelected(value, prevData, shouldUpdateScroll, shouldUpdateDom);
+        if(prevData.length !== 0){
+            updateSelected(value, prevData, shouldUpdateScroll, shouldUpdateDom);
+        }
         return kpis;
     };
     kpis.onUpdateSelected = function (value) {

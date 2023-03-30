@@ -218,7 +218,7 @@ export default function profileCardsComponent() {
                         .scrollable(scrollable)
                         .onUpdateSelected((profileId, kpiKey, shouldUpdateScroll, shouldUpdateDom) => {
                             data.filter(p => p.id !== profileId).forEach(p => {
-                                kpisComponents[p.id].selected(kpiKey, data, shouldUpdateScroll, shouldUpdateDom);
+                                kpisComponents[p.id].selected(kpiKey, shouldUpdateScroll, shouldUpdateDom);
                            })
                            //parent needs to know so it can control how to handle the wrapperClick event
                            onUpdateSelectedKpi(kpiKey);
