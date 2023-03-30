@@ -57,6 +57,7 @@ export function hydrateJourneyData(data, user, datasets){
         nr:0,
         media:data.media || []
     };
+    //console.log("currentprofile", currentProfile)
 
     //SEP 3: EMBELLISH PROFILES BASED ON CURRENT PROFILE INFO
     const pastProfiles = hydratedProfiles.filter(p => p.isPast).map((p,i, data) => ({ ...p, nr:i - data.length }));
@@ -472,7 +473,7 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
         startDate:profileStart.date,
         settings,
         specificDate,
-        /*date:now,*/ dateRange, datePhase,
+        date:now, dateRange, datePhase,
         id:"current", isCurrent:true, dataType:"profile",
         kpis:kpis.map((kpi,i) => {
             //console.log("kpi...", kpi)

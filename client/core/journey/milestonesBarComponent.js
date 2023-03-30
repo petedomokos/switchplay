@@ -689,13 +689,15 @@ export default function milestonesBarComponent() {
                             }else{
                                 //interpolate dates to get new date, or adds/subtracts one month if its at an end
                                 const interpolator = d3.interpolateDate(prev?.date, next?.date);
+                                console.log("createM prev next", prev, next)
                                 const newDate = prev && next ? interpolator(0.5) :
                                     (prev ? addMonths(1, prev.date) : addMonths(-1, next.date))
-                                onCreateMilestone
+                                console.log("new Date", newDate)
                                 newDate.setUTCHours(22); 
                                 newDate.setUTCMinutes(0); 
                                 newDate.setUTCSeconds(0); 
                                 newDate.setUTCMilliseconds(0); 
+                                console.log("new Date after reset", newDate)
 
                                 handleCreateMilestone(key, newDate, calcNewMilestoneNr(prev, next));
                             }

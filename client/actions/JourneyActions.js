@@ -8,7 +8,7 @@ function dateIsValid(date) {
 }
 
 const transformJourneyForServer = journey => {
-	//console.log("transformJourneyForServer")
+	console.log("transformJourneyForServer", journey)
 	const { playerId, coachId, media, name="", desc="" } = journey;
 	//dont think we need to store anything on channels, or could just be the setting "monthly"
 	//if we want to persist the users last zoom level. Or maybe just preserve the zoom level then?
