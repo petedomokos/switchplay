@@ -12,6 +12,8 @@ export default function ctrlsComponent() {
     let margin = { left: 0, right: 0, top: 0, bottom:0 };
     let contentsWidth;
     let contentsHeight;
+    let extraMarginTop;   
+    let extraMarginLeft;
 
     let btnWidth;
     let btnHeight;
@@ -22,12 +24,26 @@ export default function ctrlsComponent() {
 
     let orientation = "vertical";
 
-    function updateDimns(data){
+    function updateDimns(nrBtns){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
         btnWidth = fixedBtnWidth || (orientation === "vertical" ? contentsWidth : 30); //todo - instead of 50, calc max text length
         btnHeight = fixedBtnHeight || (orientation === "vertical" ? contentsHeight * 0.25 : contentsHeight);
-        btnGap = fixedBtnGap || (orientation === "vertical" ? btnHeight * 0.5 : btnWidth * 0.1)
+        btnGap = fixedBtnGap || (orientation === "vertical" ? btnHeight * 0.5 : btnWidth * 0.1);
+
+        let totalBtnsWidth;
+        let totalBtnsHeight;
+        if(orientation === "vertical"){
+            totalBtnsWidth = btnWidth;
+            totalBtnsHeight = nrBtns * (btnHeight + btnGap) - btnGap;
+        }else{
+            totalBtnsWidth = nrBtns * (btnWidth + btnGap) - btnGap;
+            totalBtnsHeight = btnHeight;
+        }
+        const remainingHorizSpace = contentsWidth - totalBtnsWidth;
+        const remainingVertSpace = contentsHeight - totalBtnsHeight;
+        extraMarginLeft = remainingHorizSpace/2;
+        extraMarginTop = remainingVertSpace/2; 
     }
 
     //@todo - replace fontsizes with styles only
@@ -46,20 +62,21 @@ export default function ctrlsComponent() {
 
     function ctrls(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true } = options;
-        updateDimns();
-        selection.each(function (data) { update.call(this, data); })
+        selection.each(function (data, i) { update.call(this, data, i); })
         return selection;
     }
 
-    function update(data){
+    function update(data, i){
         const styles = _styles(data);
 
         const { btnData } = data;
+        //dimns only once
+        if(i === 0){ updateDimns(btnData.length);}
 
         d3.select(this).selectAll("g.ctrls-contents").data([1])
             .join("g")
             .attr("class", "ctrls-contents")
-            .attr("transform", `translate(${margin.left}, ${margin.top})`)
+            .attr("transform", `translate(${margin.left + extraMarginLeft}, ${margin.top + extraMarginTop})`)
             .each(function(){
                 const contentsG = d3.select(this);
 

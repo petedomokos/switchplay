@@ -20,8 +20,8 @@ export function addMilestonePlaceholderContents(selection, width, height, onClic
         const margin = { left: width * 0.1, right: width * 0.1, top: height * 0.2, bottom: height * 0.2 }
         
         const btnData = [
-            { key:"profile", label: "PROFILE" },
-            { key:"contract", label: "CONTRACT" },
+            { key:"create", label: "CREATE" },
+            //{ key:"contract", label: "CONTRACT" },
             { key:"cancel", label: "CANCEL" }
         ]
 

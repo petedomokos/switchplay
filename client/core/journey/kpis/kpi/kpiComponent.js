@@ -269,10 +269,10 @@ export default function kpiComponent() {
                         
                         mainRowG.select("text.label")
                             .attr("font-size", 9)
-                            .text("Last data update:")
+                            .text("Last data:")
 
                         mainRowG.select("text.date")
-                            .attr("x", 65)
+                            .attr("x", 37.5)
                             .attr("font-size", 9)
                             .text(d3.timeFormat("%_d %b, %y")(d.lastDataUpdate))
                     })

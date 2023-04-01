@@ -190,8 +190,8 @@ export default function Photos({ userId, userPhotos, selectedPhotoId, locationKe
   const [newSelected, setNewSelected] = useState("");
   const [uploadingPhoto, setUploadingPhoto] = useState("");
   const classes = useStyles({
-    selectedWrapperHeight:!action ? "50%" : (action === "editPhoto" ? "calc(100% - 80px)" : "80px"),
-    galleryWrapperHeight:!action ? "50%" : (action === "editGallery" ? "calc(100% - 80px)" : "80px"),
+    selectedWrapperHeight:!action ? "30%" : (action === "editPhoto" ? "calc(100% - 80px)" : "80px"),
+    galleryWrapperHeight:!action ? "70%" : (action === "editGallery" ? "calc(100% - 80px)" : "80px"),
     galleryHeight:action === "editGallery" ? "calc(100% - 70px - 40px)" : "calc(100% - 40px - 40px)",
     display:{
       upload:action === "editGallery" ? "flex" : "none"
@@ -249,8 +249,8 @@ export default function Photos({ userId, userPhotos, selectedPhotoId, locationKe
                     <Button color="primary" variant="contained" onClick={clickSubmit} 
                             className={classes.btn}>Save</Button>
                   }
-                  <Button color="primary" variant="contained" 
-                          onClick={toggleEditPhoto} className={classes.btn}>Edit</Button>
+                  {/**<Button color="primary" variant="contained" 
+                          onClick={toggleEditPhoto} className={classes.btn}>Edit</Button>*/}
               </div>
           </div>
               

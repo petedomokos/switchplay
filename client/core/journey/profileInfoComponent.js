@@ -23,10 +23,6 @@ export default function profileInfoComponent() {
         bottomBorderHeight = data.isCurrent || currentPage.key === "profile" ? borderHeight : 0;// topBorderHeight * 0.3;
         textInfoHeight = bottomBorderHeight;
         photoHeight = height - topBorderHeight - bottomBorderHeight;
-        if(data.isCurrent){
-            //console.log("h", height)
-            //console.log("top bot pho", topBorderHeight, bottomBorderHeight, photoHeight)
-        }
     }
 
     let fontSizes = {
@@ -127,8 +123,6 @@ export default function profileInfoComponent() {
                 .append("g")
                     .attr("class", "photo")
                     .each(function(d){
-                        console.log("enter p")
-                        
                         d3.select("svg#milestones-bar").select('defs')
                             .append('clipPath')
                                 .attr('id', `photo-clip-${id}`)
@@ -185,7 +179,6 @@ export default function profileInfoComponent() {
                 //const cX = width/2;
                 //const cY = photoHeight/2;
                 const { x, y, k } = e.transform;
-                console.log("zoomed", x, y, k)
                 d3.select(this).select("image")
                     //.attr("transform-origin",`${cX} ${cY}`)
                     .attr("transform", `translate(${x},${y}) scale(${k})`)
