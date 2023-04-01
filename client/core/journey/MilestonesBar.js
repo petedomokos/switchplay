@@ -92,7 +92,6 @@ const useStyles = makeStyles((theme) => ({
     width:"90%",//props => props.formContainer.width || null,
     height:props => props.formContainer.height || null,
     margin:props => props.formContainer.margin || null,
-    background:"yellow",
     left:props => props.formContainer.left,
     top:props => props.formContainer.top,
   },
@@ -126,7 +125,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo, onSaveSetting, onSavePhoto }) => {
+const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onUpdateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo, onSaveSetting, onSavePhoto }) => {
   const { media=[], player={}, profiles=[], contracts=[], settings=[] } = data;
   const allMilestones = [ ...profiles, ...contracts ];
   //console.log("MBar", kpiFormat)
@@ -137,6 +136,7 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
   const [selectedMilestone, setSelectedMilestone] = useState("");
   const [reactComponent, setReactComponent] = useState(null);
   const [editingReactComponent, setEditingReactComponent] = useState("");
+  const [editingSVGComponent, setEditingSVGComponent] = useState(null);
   const [form, setForm] = useState(null);
   const formMilestone = allMilestones.find(m => m._id === form?.milestoneId);
   let getSelectedPhotoId = () => {
@@ -287,7 +287,6 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
   }, [stringifiedProfiles, kpiFormat])
 
   useEffect(() => {
-
     const totalAvailHeightStr = d3.select("div.milestone-bar-root").style("height");
     const totalAvailHeight = totalAvailHeightStr.slice(0, totalAvailHeightStr.length - 2);
     const height = d3.min([DIMNS.milestonesBar.maxHeight, totalAvailHeight - bottomCtrlsBarHeight])
@@ -315,10 +314,14 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
       .onSetSelectedMilestone(setSelectedMilestone)
       .onSetKpiFormat(setKpiFormat)
       .onSelectKpiSet((e,kpi) => { 
-        onSelectKpiSet(kpi); 
+          onSelectKpiSet(kpi); 
       })
       .onToggleSliderEnabled(() => setSliderEnabled(prevState => !prevState))
       .onCreateMilestone(onCreateMilestone)
+      .onUpdateMilestone((id, desc, locationKey, updates) => {
+          setEditingSVGComponent(null);
+          onUpdateMilestone(id, desc, locationKey, updates);
+      })
       .onDeleteMilestone(onDeleteMilestone)
       .onSaveValue(onSaveValue)
       //.onCreateMilestone(function(e,d){
@@ -345,6 +348,7 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
         setReactComponent(newComponent);
       })
       .onSetEditingReactComponent(onSetEditingReactComponent)
+      .onSetEditingSVGComponent(setEditingSVGComponent)
       .onMouseover(function(e,d){
         //console.log("mover")
       })
@@ -352,7 +356,7 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
         //console.log("mout")
       })//)
 
-  }, [stringifiedProfiles, screen, form, reactComponent, editingReactComponent])
+  }, [stringifiedProfiles, screen, form, reactComponent, editingReactComponent, editingSVGComponent])
 
   useEffect(() => {
     //it mustnt be swipable when we want it to be scrollable
@@ -367,7 +371,11 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
   }, [selectedMilestone, stringifiedProfiles, screen, kpiFormat])
 
   const onCtrlsAreaClick = () => {
-    onSetEditingReactComponent(null);
+    if(editingSVGComponent){
+      milestonesBar.endMilestoneEdit();
+    }else if(editingReactComponent){
+      onSetEditingReactComponent(null);
+    }
   }
 
   useEffect(() => {
@@ -403,13 +411,13 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
   return (
     <div className={`milestone-bar-root ${classes.root}`}>
       <div className={classes.outerReactContainer}>
-        <div className={classes.reactComponentContainer} id="react-container" ref={reactComponentRef}
-            onClick={() => { console.log("container clicked")}}>
+        <div className={classes.reactComponentContainer} id="react-container" ref={reactComponentRef}>
           {
             allMilestones.filter(m => !m.isCurrent).map(m => (
               <div className={`${classes.reactComponentItem} milestone`} key={`milestone-${m.id}`} id={`milestone-`+m.id}>
                 <Goal
                   milestone={m}
+                  editable={editingSVGComponent === null}
                   editing={editingReactComponent?.milestoneId === m.id ? editingReactComponent : null}
                   setEditing={onSetEditingReactComponent}
                 />

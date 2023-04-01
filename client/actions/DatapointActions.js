@@ -52,6 +52,8 @@ export const createDatapoints = (datasetId, datapoints) => dispatch => {
 		createdBy:user._id,
 		created:new Date()
 	}))
+	//1. save datapoint to store
+
     fetchThenDispatch(dispatch, 
 		'creating.datapoints',
 		{
@@ -61,7 +63,7 @@ export const createDatapoints = (datasetId, datapoints) => dispatch => {
 			requireAuth:true,
 			//this action will also set dialog.createUser = true
 			nextAction: data => {
-				//console.log("next action.....")
+				console.log("next action.....", data)
 				return {type:C.CREATE_NEW_DATAPOINTS, mesg:data.mesg, datasetId:datasetId, datapoints:data }
 			}
 		})

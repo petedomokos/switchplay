@@ -18,7 +18,7 @@ export function hydrateDataset(dataset){
     const startDate = isDeep ? getStartDate(dataset) : null;
     const derivedMeasures = isDeep ? getDerivedMeasures(key) : null;
     const rawMeasures = dataset.measures?.map(m => hydrateMeasure(m));
-    const datapoints = isDeep ? dataset.datapoints.map(datapoint => hydrateDatapoint(datapoint, rawMeasures, derivedMeasures)) : null;
+    const datapoints = isDeep ? hydrateDatapoints(dataset.datapoints, rawMeasures, derivedMeasures) : null;
     return {
         ...dataset,
         key,
@@ -29,6 +29,10 @@ export function hydrateDataset(dataset){
         stats: isDeep ? [...rawMeasures, ...derivedMeasures] : null,
         datapoints
     }
+}
+
+export function hydrateDatapoints(datapoints, hydratedRawMeasures, hydratedDerivedMeasures){
+    return datapoints.map(d => hydrateDatapoint(d, hydratedRawMeasures, hydratedDerivedMeasures));
 }
 
 export function hydrateDatapoint(datapoint, hydratedRawMeasures, hydratedDerivedMeasures){
@@ -47,6 +51,7 @@ export function hydrateDatapoint(datapoint, hydratedRawMeasures, hydratedDerived
     return{
         ...datapoint,
         date:new Date(datapoint.date),
+        created:new Date(datapoint.date),
         //values:[...d.values, ...getDerivedValues(dWithValueKeys, derivedMeasures)]
         values:[...enteredKeyedValues, ...getDerivedValues(datapointWithEnteredKeyedValues, hydratedDerivedMeasures)]
     }

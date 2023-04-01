@@ -100,6 +100,7 @@ const initChannels = d3.range(numberMonths)
 //width and height may be full screen, but may not be
 const Journey = ({ user, data, datasets, availableJourneys, screen, width, height, save, saveDatapoint, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile, savePhoto }) => {
   console.log("Journey.......", data)
+  //console.log("Journey.......", datasets?.find(dset => dset.key === "pressUps")?.datapoints)
   //bug - although only 6 profs are saved, we end up with 7 ie two currents
   const { _id, player, name, media, contracts, profiles, aims, goals, links, measures, settings, kpis } = data;
   const [journey, setJourney] = useState(null);
@@ -158,7 +159,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       customExpected:[],
       ...props //will be just the date if from milestonesBar
     }
-    console.log("new profile", profile)
+    //console.log("new profile", profile)
     const _profiles = [ ...profiles, profile];
     save({ ...data, profiles:_profiles });
   },[stringifiedProfiles, user._id])
@@ -199,13 +200,20 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   }, [stringifiedProfiles]);
 
   const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => {
+    console.log("savevalue valueObj", valueObj)
+    console.log("savevalue", key)
     if(key === "current"){
-      onSaveStatValue(valueObj, datasetKey, statKey);
-      return;
-    } 
-    //trouble - the unsaved value gets removed, and tehn an update to tooltips occurs
-    //before the saved value has been adjusted.
-    //profile wont ever be current here, as that is dynamically created ratehr than stored
+      onSaveDatapoint(valueObj, datasetKey, statKey);
+    } else{
+      onSaveTargetOrExpectedValue(valueObj, profileId, datasetKey, statKey, key)
+    }
+  }, [stringifiedProfiles, user._id]);
+
+  //trouble - the unsaved value gets removed, and tehn an update to tooltips occurs
+  //before the saved value has been adjusted.
+  //profile wont ever be current here, as that is dynamically created ratehr than stored
+  const onSaveTargetOrExpectedValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => {
+    console.log("save target/exp value")
     const profile = profileId === "current" ? 
       profiles.find(p => p.isFuture)
       :
@@ -230,12 +238,10 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     const _profiles = [ ...otherProfiles, updatedProfile]
     //console.log("saving targ or expected value", obj)
     save({ ...data, profiles:_profiles });
-    
   }, [stringifiedProfiles, user._id]);
 
-  const onSaveStatValue = useCallback((valueObj, datasetKey, statKey) => { 
+  const onSaveDatapoint = useCallback((valueObj, datasetKey, statKey) => { 
     const datasetId = datasets.find(dset => dset.key === datasetKey)._id;
-    
     //@todo - if valueObj has completion, then need to convert it to actual
     const datapoint = {
       player:player._id,
@@ -245,8 +251,37 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     saveDatapoint(datasetId, datapoint);
   }, [stringifiedProfiles, user._id]);
 
+  const handleUpdateMilestone = useCallback((profileId, desc, locationKey, updates) => {
+    console.log("updateMilestone", profileId, desc, locationKey);
+    console.log("updates--------", updates);
+    //note atm media is always a photo, but its about its transform etc
+    //helper
+    const updatedMediaArr = mediaArr => mediaArr.map(m => m.locationKey !== locationKey ?  m : { ...m, ...updates })
+    if(desc === "media"){
+      const _profiles = profiles.map(p => {
+        if(p.id !== profileId){ return p; }
+        console.log("updating prof", p.id)
+        //update medpia
+        const updatedMedia = updatedMediaArr(p.media, locationKey, updates);
+        console.log("updatedProfileMedia", updatedMedia)
+        return {
+          ...p,
+          media:updatedMedia
+        }
+      })
+      //if current card, then media is stored at top level of journey, hence available here as media
+      const journeyMedia = profileId === "current" ? updatedMediaArr(media, locationKey, updates) : media;
+      if(profileId === "current"){
+        console.log("updatedJourneyMedia", journeyMedia)
+      }
+      save({ ...data, profiles:_profiles, media:journeyMedia });
+      return;
+    }
+    
+  }, [stringifiedContracts, user._id]);
+
   const onSaveInfo = useCallback((profileId, key) => value => {
-    console.log("saveinfo", profileId, key, value);
+    //console.log("saveinfo", profileId, key, value);
     //special case - date need formatting
     if(key === "date"){
       //@todo - remove creation of Date here - can just store as a string
@@ -260,7 +295,6 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       if(profileId === "current"){
         const otherMedia = media.filter(m => m.locationKey !== value.locationKey)
         const newJ = { ...data, media:[ ...otherMedia, value]}
-        console.log("newJ", newJ)
         save({ ...data, media:[ ...otherMedia, value]})
         return;
       }
@@ -269,7 +303,6 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
         const otherMedia = p.media.filter(m => m.locationKey !== value.locationKey);
         return { ...p, media: [ ...otherMedia, value] }
       });
-      console.log("update media...updatedProfiles", _profiles)
       save({ ...data, profiles:_profiles });
       return;
     }
@@ -331,6 +364,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
               takeOverScreen={takeOverScreen}
               releaseScreen={releaseScreen}
               onCreateMilestone={handleCreateMilestone}
+              onUpdateMilestone={handleUpdateMilestone}
               onDeleteMilestone={handleDeleteMilestone}
               onSaveValue={onSaveValue}
               onSaveInfo={onSaveInfo}

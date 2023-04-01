@@ -3,7 +3,7 @@ import _ from 'lodash'
 import * as cloneDeep from 'lodash/cloneDeep'
 import { isIn, isNotIn, isSame, filterUniqueById, filterUniqueByProperty } from './util/ArrayHelpers'
 import { InitialState } from './InitialState'
-import { hydrateDataset, hydrateDatasets } from "./data/datasets";
+import { hydrateDatapoints, hydrateDataset, hydrateDatasets } from "./data/datasets";
 import { hydrateUser, hydrateUsers } from './user/userHelpers';
 //HELPERS
 
@@ -114,11 +114,12 @@ export const user = (state=InitialState.user, act) =>{
 				//first check if the player is the signedin user, otherwise find the player in loadedUsers
 				player:d.player === state._id ? state.player : state.loadedUsers.find(u => u._id === d.player)
 			}))
+			const hydratedDatapointsToAdd = hydrateDatapoints(datapointsToAdd, datasetToUpdate.rawMeasures, datasetToUpdate.derivedMeasures);
 			//may have not loaded deep dataset 
 			if(!datasetToUpdate?.datapoints) { return state; }
 			const updatedDataset = {
 				...datasetToUpdate,
-				datapoints:[...datasetToUpdate.datapoints, ...datapointsToAdd]
+				datapoints:[...datasetToUpdate.datapoints, ...hydratedDatapointsToAdd]
 			};
 			return { 
 				...state, 

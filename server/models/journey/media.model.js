@@ -8,5 +8,8 @@ export default new mongoose.Schema({
   filename:String,
   mediaId:String,
   url:String,
-  transform:String
+  //transform:String
+  x:String,
+  y:String,
+  k:String
 })

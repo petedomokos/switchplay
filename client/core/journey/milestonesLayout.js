@@ -34,6 +34,8 @@ export default function milestonesLayout(){
                     .datasets(datasets)
                     .allKpisActive(m.isActive);
 
+                const goalMedia = media.find(med => med.locationKey === "goal") || {};
+                const profileMedia = media.find(med => med.locationKey === "profile") || {};
                 return {
                     ...m,
                     i,
@@ -41,8 +43,8 @@ export default function milestonesLayout(){
                         id, 
                         ...info, 
                         photos:{
-                            goal:[{ key:"goal", url:getURL(media.find(med => med.locationKey === "goal")?.mediaId, "goal") }],
-                            profile:[{ key:"profile", url:getURL(media.find(med => med.locationKey === "profile")?.mediaId, "profile") }]
+                            goal:isCurrent ? null : [{ key:"goal", url:getURL(goalMedia.mediaId, "goal"), ...goalMedia }],
+                            profile:[{ key:"profile", url:getURL(profileMedia.mediaId, "profile"), ...profileMedia }]
                         },
                         age:playerAge, 
                         isCurrent, isPast, isFuture, 

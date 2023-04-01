@@ -33,7 +33,7 @@ const useStyles = makeStyles(theme => ({
     flexDirection:"column",
     alignItems:"center",
     //background:"blue",
-    pointerEvents:"all"
+    pointerEvents:props => props.editable ? "all" : "none",
   },
   titleContainer:{
     width:"85%",
@@ -59,8 +59,8 @@ const useStyles = makeStyles(theme => ({
     //color: theme.palette.openTitle,
     fontSize:"18px",
     padding:0,//"3px 5px 3px 5px",
-    cursor:"pointer",
-    pointerEvents:"all"
+    cursor:props => props.editable ? "pointer" : null,
+    pointerEvents:props => props.editable ? "all" : "none",
   },
   titleTextField: {
     //marginLeft: theme.spacing(1),
@@ -81,8 +81,8 @@ const useStyles = makeStyles(theme => ({
     padding:0,//"3px 5px 3px 5px",
     fontSize:"10px",
     overflow:"hidden",
-    cursor:"pointer",
-    pointerEvents:"all",
+    cursor:props => props.editable ? "pointer" : null,
+    pointerEvents:props => props.editable ? "all" : "none",
     display:"flex",
     flexDirection:"column",
     alignItems:props => props.descAlignItems
@@ -111,24 +111,28 @@ export function splitMultilineString(str){
   return str.split("\n");
 }
 
-export default function Goal({ milestone, error, editing, setEditing }) {
+export default function Goal({ milestone, error, editable, editing, setEditing }) {
   const { id, nr, title="", desc="" } = milestone;
   const descLines = desc ? splitMultilineString(desc) : ["No Notes"];
   const styleProps = {
-    descAlignItems:desc ? "start" : "center"
+    descAlignItems:desc ? "start" : "center",
+    editable
   }
   const classes = useStyles(styleProps);
-
-
-
   const defaultName = nr => nr < 0 ? `Past ${-nr}` : (nr > 0 ? `Future ${nr}` : "Current")
 
   const handleChange = event => { 
     const newEditing = { ...editing, value:event.target.value };
     setEditing(newEditing) 
   }
-  const openTitleForm = () => { setEditing({ milestoneId:id, key:"title", value:title }) }
-  const openDescForm = () => { setEditing({ milestoneId:id, key:"desc", value:desc }) }
+  const openTitleForm = () => { 
+    if(!editable){ return; }
+    setEditing({ milestoneId:id, key:"title", value:title }) 
+  }
+  const openDescForm = () => { 
+    if(!editable){ return; }
+    setEditing({ milestoneId:id, key:"desc", value:desc }) 
+  }
 
   return (
     <div className={classes.root}>
@@ -179,6 +183,7 @@ export default function Goal({ milestone, error, editing, setEditing }) {
 
 Goal.defaultProps = {
     milestone:{},
+    editable:true,
     editing:null,
     submit:() => {}
 }

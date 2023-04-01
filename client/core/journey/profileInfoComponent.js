@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
-import { DIMNS, PROFILE_PAGES, grey10 } from "./constants";
+import { DIMNS, PROFILE_PAGES, grey10, OVERLAY } from "./constants";
 import container from './kpis/kpi/container';
-//import dragEnhancements from './enhancedDragHandler';
+import dragEnhancements from './enhancedDragHandler';
 
 /*
 
@@ -37,12 +37,20 @@ export default function profileInfoComponent() {
     };
 
     let editable;
+    let beingEdited = "";
+    let initZoomApplied = false;
 
     //API CALLBACKS
     let onClick = function(){};
     let onDblClick = function(){};
     let onMouseover = function(){};
     let onMouseout = function(){};
+    let onStartEditingPhotoTransform = function(){};
+    let onEndEditingPhotoTransform = function(){};
+
+    let onMilestoneWrapperPseudoDragStart = function(){};
+    let onMilestoneWrapperPseudoDrag = function(){};
+    let onMilestoneWrapperPseudoDragEnd = function(){};
 
     //let enhancedDrag = dragEnhancements();
     let dateIntervalTimer;
@@ -64,6 +72,10 @@ export default function profileInfoComponent() {
     Otherwise need a way to store photoLabel for current = could just store it on top level of Journey
 
     */
+
+    const photoZoom = d3.zoom();
+    const photoDrag = d3.drag();
+    const enhancedDrag = dragEnhancements();
     function profileInfo(selection, options={}) {
         //console.log("profileinfo", height)
         const { transitionEnter=true, transitionUpdate=true } = options;
@@ -71,10 +83,14 @@ export default function profileInfoComponent() {
         // expression elements
         selection.each(function (data) {
             updateDimns(data);
-            //console.log("profileInfo data", data)
-            const { id, firstname, surname, age, position, isCurrent, isFuture, settings } = data;
-            const photos = isCurrent ? data.photos["profile"] : data.photos[currentPage.key];
             containerG = d3.select(this);
+            //update
+            update(data);
+        })
+
+        function update(data){
+            const { id, firstname, surname, age, position, isCurrent, isFuture, settings } = data;
+            const photosData = isCurrent ? data.photos["profile"] : data.photos[currentPage.key];
 
             const bgRect = containerG.selectAll("rect.info-bg").data([1]);
             bgRect.enter()
@@ -106,13 +122,12 @@ export default function profileInfoComponent() {
             //next - try a clipPath over the image
             //also, longpress at bottom of kpiscoponent to create a new kpi
             //and target completion
-            const photosG = containerG.selectAll("g.photos").data(photos);
-            photosG.enter()
+            const photoG = containerG.selectAll("g.photo").data(photosData);
+            photoG.enter()
                 .append("g")
-                    .attr("class", "photos")
+                    .attr("class", "photo")
                     .each(function(d){
-                        //d3.select(this).append("rect")
-                            //.attr('class', "photo-border")
+                        console.log("enter p")
                         
                         d3.select("svg#milestones-bar").select('defs')
                             .append('clipPath')
@@ -124,8 +139,11 @@ export default function profileInfoComponent() {
                         
                         d3.select(this)
                             .attr('clip-path', `url(#photo-clip-${id})`)
+
+                        d3.select(this).append("rect")
+                            .attr('class', "photo-border")
                     })
-                    .merge(photosG)
+                    .merge(photoG)
                     .attr("transform", d => `translate(0, ${topBorderHeight})`)
                     .each(function(d){
                         d3.select("svg#milestones-bar").select(`#photo-clip-${id}`)
@@ -133,28 +151,113 @@ export default function profileInfoComponent() {
                                 .attr("width", width)
                                 .attr("height", photoHeight)
 
-                        /*d3.select(this).select("rect.photo-border")
+                        d3.select(this).select("rect.photo-border")
                             .attr("width", width)
                             .attr("height", photoHeight)
-                            .attr("stroke-width", 5)*/
+                            .attr("fill", "none")
+                            .attr("stroke", beingEdited === "photo" ? "orange" : "none")
+                            .attr("stroke-width", 5)
 
                         const img = d3.select(this).select("image")  
                             //.attr("width", width)
-                            .attr("xlink:href", d.url) 
+                            .attr("xlink:href", d.url)
                             //.attr("height", photoHeight)
 
                         //console.log("actual w h", img.attr("width"), img.attr("height"))
-
                     })
-                    .on("click", (e,d) => {
-                        const locationKey = isCurrent ? "profile" : currentPage.key;
-                        onClick.call(this, e, d, data, "photo", locationKey) 
-                    })
+                    //.on("click", (e,d) => {
+                        //console.log("native photo click")
+                        //const locationKey = isCurrent ? "profile" : currentPage.key;
+                        //onClick.call(this, e, d, data, "photo", locationKey) 
+                    //})
                     .on("contextmenu", (e) => { 
-                        console.log("photo contextmenu event")
+                        //console.log("photo contextmenu event")
                         e.preventDefault(); 
                     })
-            photosG.exit().remove();
+                    .call(photoDrag)
+                    .call(photoZoom);
+        
+            photoZoom.on("zoom", function(e, d){
+                
+                if(beingEdited !== "photo"){ return; }
+                //origin is centre otherwise if its based on sourceEvent it jumps
+        
+                //const cX = width/2;
+                //const cY = photoHeight/2;
+                const { x, y, k } = e.transform;
+                console.log("zoomed", x, y, k)
+                d3.select(this).select("image")
+                    //.attr("transform-origin",`${cX} ${cY}`)
+                    .attr("transform", `translate(${x},${y}) scale(${k})`)
+
+                //todo - apply transfrorm in same way as below and see if this means teh transfrom objkect is correct
+                //when saving at the end in milestonesBarComponent
+            })
+            //init zoom
+            //for now, we just assume there is only one photo
+            if(!initZoomApplied){
+                beingEdited = "photo";
+                const { x=0, y=0, k=1 } = photosData[0];
+                const identity = d3.zoomIdentity;
+                const requiredTransformState = identity.translate(x, y).scale(k);
+                containerG.select("g.photo").call(photoZoom.transform, requiredTransformState)
+                //flags
+                beingEdited = "";
+                initZoomApplied = true;
+            }
+
+
+            enhancedDrag
+                .onClick((e,d) => {
+                    const locationKey = isCurrent ? "profile" : currentPage.key;
+                    onClick.call(this, e, d, data, "photo", locationKey) 
+                })
+                .onLongpressStart(startEditing);
+
+            function startEditing(){
+                onStartEditingPhotoTransform(id, currentPage.key);
+                beingEdited = "photo";
+                update(data);
+            }
+            //todo - make this available via api
+            function endEditing(){
+                //shouldnt call parent if its being triggered from the parent
+                onEndEditingPhotoTransform(id, currentPage.key);
+                beingEdited = "";
+                update(data);
+            }
+
+
+            photoDrag
+                .on("start", enhancedDrag(function(e, d){
+                    if(!beingEdited){
+                        onMilestoneWrapperPseudoDragStart.call(this, e, d);
+                        return;
+                    }
+                }))
+                .on("drag", enhancedDrag(function(e, d){
+                    if(!beingEdited){
+                        onMilestoneWrapperPseudoDrag.call(this, e, d)
+                        return;
+                    }
+                    if(beingEdited === "photo"){
+                        const transformState = d3.zoomTransform(this);
+                        //console.log("transformState", transformState)
+                        //need to divide to undo the scale effect to keep the drag effect consistent
+                        const { k } = transformState;
+                        const newTransformState = transformState.translate(e.dx/k, e.dy/k);
+                        d3.select(this)
+                            .call(photoZoom.transform, newTransformState)
+                    }
+                }))
+                .on("end", enhancedDrag(function(e, d){
+                    if(!beingEdited){
+                        onMilestoneWrapperPseudoDragEnd.call(this, e, d)
+                        return;
+                    }
+                }))
+
+            photoG.exit().remove();
 
             const format = d3.timeFormat("%_d %b, %y");
 
@@ -357,6 +460,15 @@ export default function profileInfoComponent() {
                         textInfoG.append("line").attr("class", "divider")
                             .attr("stroke", "white");
 
+                        textInfoG.append("rect")
+                            .attr("class", "text-info-overlay")
+                            .style("fill", OVERLAY.FILL)
+                            .style("opacity", OVERLAY.OPACITY)
+                            .attr("display", "none")
+                            .attr("rx", 3)
+                            .attr("ry", 3)
+                            .on("click", endEditing);
+
                     })
                     .merge(textInfoG)
                     .attr("transform", d => `translate(0, ${topBorderHeight + photoHeight})`)
@@ -374,6 +486,11 @@ export default function profileInfoComponent() {
                         textInfoG.select("rect.text-info-bg")
                             .attr("width", width)
                             .attr("height", textInfoHeight);
+                        
+                        textInfoG.select("rect.text-info-overlay")
+                            .attr("width", width)
+                            .attr("height", textInfoHeight)
+                            .attr("display", beingEdited && beingEdited !== "text" ? null : "none");
 
                         const nameG = textInfoG.select("g.name")
                             .attr("transform", `translate(${textMargin.left},0)`) //move to middle of name area
@@ -412,7 +529,7 @@ export default function profileInfoComponent() {
 
             textInfoG.exit().remove();
 
-        })
+        }
 
         return selection;
     }
@@ -436,11 +553,45 @@ export default function profileInfoComponent() {
     profileInfo.currentPage = function (value) {
         if (!arguments.length) { return currentPage; }
         currentPage = value;
+        initZoomApplied = false;
         return profileInfo;
     };
     profileInfo.editable = function (value) {
         if (!arguments.length) { return editable; }
         editable = value;
+        return profileInfo;
+    };
+    profileInfo.onStartEditingPhotoTransform = function (value) {
+        if(typeof value === "function"){
+            onStartEditingPhotoTransform = value;
+        }
+        return profileInfo;
+    };
+    profileInfo.onEndEditingPhotoTransform = function (value) {
+        if(typeof value === "function"){
+            onEndEditingPhotoTransform = value;
+        }
+        return profileInfo;
+    };
+    profileInfo.onMilestoneWrapperPseudoDragStart = function (value) {
+        if (!arguments.length) { return onMilestoneWrapperPseudoDragStart; }
+        if(typeof value === "function"){
+            onMilestoneWrapperPseudoDragStart = value;
+        }
+        return profileInfo;
+    };
+    profileInfo.onMilestoneWrapperPseudoDrag = function (value) {
+        if (!arguments.length) { return onMilestoneWrapperPseudoDrag; }
+        if(typeof value === "function"){
+            onMilestoneWrapperPseudoDrag = value;
+        }
+        return profileInfo;
+    };
+    profileInfo.onMilestoneWrapperPseudoDragEnd = function (value) {
+        if (!arguments.length) { return onMilestoneWrapperPseudoDragEnd; }
+        if(typeof value === "function"){
+            onMilestoneWrapperPseudoDragEnd = value;
+        }
         return profileInfo;
     };
     profileInfo.onClick = function (value) {
@@ -467,5 +618,9 @@ export default function profileInfoComponent() {
         }
         return profileInfo;
     };
+    profileInfo.endEditing = function (){
+        beingEdited = "";
+        containerG.call(profileInfo)
+    }
     return profileInfo;
 }

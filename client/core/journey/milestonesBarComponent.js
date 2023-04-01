@@ -56,7 +56,7 @@ export default function milestonesBarComponent() {
     function updateDimns(data){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
-        topBarHeight = d3.min([30, contentsHeight * 0.1]);
+        topBarHeight = d3.min([40, contentsHeight * 0.1]);
         milestonesHeight = contentsHeight - topBarHeight;
         //todo - add space either side for creating new milestones
         //also space at top
@@ -131,6 +131,7 @@ export default function milestonesBarComponent() {
     let positionedData = [];
     let swipable = true;
     let currentPage = PROFILE_PAGES[0];
+    let milestoneBeingEdited = null;
 
     let xScale = x => 0;
 
@@ -139,6 +140,8 @@ export default function milestonesBarComponent() {
     let isSelected = milestoneId => false;
     let selectedKpi;
 
+    let endMilestoneEdit = function(){}
+
     let kpiFormat;
     let onSetSelectedMilestone = function(){};
     let onSetKpiFormat = function(){};
@@ -146,6 +149,7 @@ export default function milestonesBarComponent() {
     let onToggleSliderEnabled = function(){};
 
     let onCreateMilestone = () => {};
+    let onUpdateMilestone = () => {};
     let onDeleteMilestone = () => {};
 
     let onTakeOverScreen = () => {};
@@ -158,8 +162,11 @@ export default function milestonesBarComponent() {
 
     let setReactComponent = function(){};
     let onSetEditingReactComponent = function(){};
+    let onSetEditingSVGComponent = function(){};
     let updateReactComponent = function(){};
     let setForm = function(){};
+   
+
     let onClick = function(){};
     let onDblClick = function(){};
     let onLongpress = function(){};
@@ -284,7 +291,7 @@ export default function milestonesBarComponent() {
 
                 topBarG = milestonesWrapperG.append("g").attr("class", "top-bar")
 
-                topBarG.append("rect").attr("fill", "transparent")
+                topBarG.append("rect").attr("fill", "none")
 
                 milestonesG = milestonesWrapperG
                     .append("g")
@@ -548,12 +555,17 @@ export default function milestonesBarComponent() {
                 //but maybe best is to just make dbl-click teh same as two clicks , and 
                 //then ppl on chrome mobile just cant do two clicks in quick succession
                 function handleMilestoneWrapperClick(e,d){
+                    //console.log("wrapperclk...ignore?", ignoreNextWrapperClick)
                     //remove any open reactcomponent (these are not opened from d3 components so we can be 
                     //sure that it is not a d3 click thatis opening it)
                     onSetEditingReactComponent(null);
 
                     if(ignoreNextWrapperClick){
                         ignoreNextWrapperClick = false;
+                        return;
+                    }
+                    if(milestoneBeingEdited){
+                        endMilestoneEdit();
                         return;
                     }
                     //dont setForm to null if click is ignored as the click may be to open the form!
@@ -692,7 +704,7 @@ export default function milestonesBarComponent() {
                                 console.log("createM prev next", prev, next)
                                 const newDate = prev && next ? interpolator(0.5) :
                                     (prev ? addMonths(1, prev.date) : addMonths(-1, next.date))
-                                console.log("new Date", newDate)
+
                                 newDate.setUTCHours(22); 
                                 newDate.setUTCMinutes(0); 
                                 newDate.setUTCSeconds(0); 
@@ -806,7 +818,7 @@ export default function milestonesBarComponent() {
                 const labelY = data.length === 0 ? 0 : -currentCard.height/2 - 10;
                 datePhasesData = [
                     { label:"<-- Past", x:endOfLastPastCard, y:labelY, textAnchor:"end", },
-                    { label: "Current", x:currentCard?.x, y:labelY, textAnchor:"middle"},
+                    //{ label: "Current", x:currentCard?.x, y:labelY, textAnchor:"middle"},
                     { label: "Future -->", x:startOfFirstFutureCard, y:labelY, textAnchor:"start" }
                 ]
                 milestonesG.select("g.phase-labels")
@@ -858,6 +870,45 @@ export default function milestonesBarComponent() {
                         .editable(swipable ? false : true)
                         .scrollable(swipable ? false : true)
                         .onSaveValue(onSaveValue)
+                        .onStartEditingPhotoTransform(function(milestoneId, locationKey){
+                            milestoneBeingEdited = { id:milestoneId, desc:"photo" }
+                            milestonesG
+                                .selectAll("g.milestone")
+                            //d3 doesnt like this line below for some reason - it re-enters the profile card - so filter instead
+                            //.select(`g.milestone-${selectedMilestone}`)
+                                .filter(d => d.id !== milestoneId)
+                                .call(profiles.applyOverlay, {
+                                    onClick:()=>{
+                                        ignoreNextWrapperClick = true;
+                                        endMilestoneEdit();
+                                    }
+                                })
+
+                            milestonesG
+                                .selectAll("g.milestone")
+                            //d3 doesnt like this line below for some reason - it re-enters the profile card - so filter instead
+                            //.select(`g.milestone-${selectedMilestone}`)
+                                .filter(d => d.id === milestoneId)
+                                .call(profiles.applyOverlay, {
+                                    include:["bottom"],
+                                    onClick:()=>{
+                                        ignoreNextWrapperClick = true;
+                                        endMilestoneEdit();
+                                    }
+                                })
+                            //pass to react parent
+                            onSetEditingSVGComponent(milestoneBeingEdited)
+                        })
+                        .onEndEditingPhotoTransform(function(milestoneId, locationKey){
+                            milestoneBeingEdited = null;
+                            ignoreNextWrapperClick = true;
+                            milestonesG
+                                .selectAll("g.milestone")
+                                .call(profiles.removeOverlay);
+
+                            //pass to react parent
+                            onSetEditingSVGComponent(null);
+                        })
                         .onClickInfo(function(e, d, data, desc, location){
                             ignoreNextWrapperClick = true;
                             const milestone = positionedData.find(m => m.id === data.id);
@@ -915,6 +966,9 @@ export default function milestonesBarComponent() {
                             setForm(null);
                             if(!key){ ignoreNextWrapperClick = true; } 
                         })
+                        .onMilestoneWrapperPseudoDragStart(dragStart)
+                        .onMilestoneWrapperPseudoDrag(dragged)
+                        .onMilestoneWrapperPseudoDragEnd(dragEnd)
                         .ctrls(d => ({
                             topRight: [
                                 { 
@@ -959,6 +1013,34 @@ export default function milestonesBarComponent() {
                             onSelectKpiSet(d);
                         })
                         .transformTransition(milestoneTransition || (transitionOn ? transformTransition : { update:null })));
+
+                endMilestoneEdit = function(){
+                    //bug - this is being called twice when cliking eg bottom overlay of profile
+                    console.log("endMilestoneEdit")
+                    if(!milestoneBeingEdited){ return; }
+                    const { id, desc } = milestoneBeingEdited;
+                    profiles.endEditing(id);
+                    milestonesG
+                        .selectAll("g.milestone")
+                        .call(profiles.removeOverlay);
+                        
+                    //pass transform to react parent to save
+                    //const initTransformState = d3.zoomTransform(containerG.select("g.photo").node());
+                    //console.log("tttttttt", initTransformState)
+                    const transform = d3.select(`g.milestone-${id}`).select("g.photo").select("image").attr("transform");
+                    console.log("transform to save", transform)
+                    const { translateX=0, translateY=0, scaleX=1 } = getTransformationFromTrans(transform);
+                    console.log("tX tY scale", translateX, translateY, scaleX)
+                    //@todo - work out why I cant seem to gran teh transform from the d3 transform object
+                    //const trans = d3.zoomTransform(milestoneG.select("g.photo")) -> returns the identity instead
+                    const locationKey = id === "current" ? "profile" : currentPage.key;
+                    const updates = {
+                        x:Number(translateX.toFixed(3)),
+                        y:Number(translateY.toFixed(3)),
+                        k:Number(scaleX.toFixed(3))
+                    }
+                    onUpdateMilestone(id, "media", locationKey, updates);
+                }
 
                 function updateTransform(selection, options={}){
                     //console.log("updateTransform...", selection.nodes())
@@ -1206,6 +1288,13 @@ export default function milestonesBarComponent() {
         }
         return milestonesBar;
     };
+    milestonesBar.onUpdateMilestone = function (value) {
+        if (!arguments.length) { return onUpdateMilestone; }
+        if(typeof value === "function"){
+            onUpdateMilestone = value;
+        }
+        return milestonesBar;
+    };
     milestonesBar.onDeleteMilestone = function (value) {
         if (!arguments.length) { return onDeleteMilestone; }
         if(typeof value === "function"){
@@ -1238,6 +1327,11 @@ export default function milestonesBarComponent() {
     milestonesBar.onSetEditingReactComponent = function (value) {
         if (!arguments.length) { return onSetEditingReactComponent; }
         onSetEditingReactComponent = value;
+        return milestonesBar;
+    };
+    milestonesBar.onSetEditingSVGComponent = function (value) {
+        if (!arguments.length) { return onSetEditingSVGComponent; }
+        onSetEditingSVGComponent = value;
         return milestonesBar;
     };
     milestonesBar.updateReactComponent = function (value) {
@@ -1305,5 +1399,6 @@ export default function milestonesBarComponent() {
             .selectAll("g.date-info")
             .attr("display", "none")
     };
+    milestonesBar.endMilestoneEdit = function () {  endMilestoneEdit(); }
     return milestonesBar;
 }

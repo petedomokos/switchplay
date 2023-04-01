@@ -162,6 +162,7 @@ export const saveJourney = (journey, shouldPersist=true, shouldUpdateStoreBefore
 	}
 	*/
 	//1. save to store
+	//@todo - clarify the pattern im using -> ie server is saem as store?
 	dispatch(saveJourneyToStore(serverJourney));
 	if(!shouldPersist){ return; }
     //2. save to server

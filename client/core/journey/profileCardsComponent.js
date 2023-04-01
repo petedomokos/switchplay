@@ -8,6 +8,8 @@ import goalComponent from './goal/goalComponent';
 import { Oscillator } from './domHelpers';
 import { getTransformationFromTrans } from './helpers';
 const noop = () => {};
+
+const trapeziumD = "M31.3,28H0.8c-0.2,0-0.5-0.1-0.6-0.3C0,27.5,0,27.3,0,27L6.5,4.5C6.6,4.2,6.9,4,7.3,4h17.5c0.3,0,0.6,0.2,0.7,0.5L32,27 c0.1,0.2,0,0.5-0.1,0.7C31.7,27.9,31.5,28,31.3,28z M1.7,26.5h28.5l-6.1-21H7.8L1.7,26.5z"
 /*
 
 */
@@ -21,15 +23,18 @@ export default function profileCardsComponent() {
     let contentsHeight;
 
     let infoHeight;
-    let bottomAreaHeight;
+    let bottomHeight;
 
     let kpiHeight;
+
+    let profileCtrlsWidth = 150;
+    let profileCtrlsHeight = 40;
 
     function updateDimns(){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
         infoHeight = contentsHeight/2;
-        bottomAreaHeight = contentsHeight/2;
+        bottomHeight = contentsHeight/2;
     }
 
     let fontSizes = {
@@ -90,6 +95,12 @@ export default function profileCardsComponent() {
     let onDelete = function() {};
     let onSaveValue = function(){};
     let onUpdateSelectedKpi = function(){};
+    let onStartEditingPhotoTransform = function(){};
+    let onEndEditingPhotoTransform = function(){};
+
+    let onMilestoneWrapperPseudoDragStart = function(){};
+    let onMilestoneWrapperPseudoDrag = function(){};
+    let onMilestoneWrapperPseudoDragEnd = function(){};
 
     let onClickInfo = function(){};
 
@@ -138,6 +149,26 @@ export default function profileCardsComponent() {
                 .append("g")
                     .attr("class", d => `milestone profile-card milestone-${d.id} profile-card-${d.id}`)
                     .each(function(d,i){
+                        //@todo - decide if we need this for anything, or do we just turn off all interacitons inside
+                        //a profile unless the profile is first selected so the profile itself can be used for longpress to delete/drag
+                        
+                        const profileCtrlsG = d3.select(this)
+                            .append("g")
+                                .attr("class", "profile-ctrls")
+                                .attr("display", "none");
+
+                        profileCtrlsG
+                            .append("rect")
+                            .attr("fill", "transparent");
+                        
+                        profileCtrlsG
+                            .append("path")
+                            .attr("fill", "none")
+                            .attr("stroke", grey10(5))
+                            .attr("opacity", 0.1)
+                            .attr("d", trapeziumD)
+                            .attr("transform", "scale(3 1.2)")
+
                         profileInfoComponents[d.id] = profileInfoComponent();
                         kpisComponents[d.id] = kpisComponent();
                         goalComponents[d.id] = goalComponent();
@@ -161,279 +192,315 @@ export default function profileCardsComponent() {
                                     fill:d => isSelected(d) ? COLOURS.selectedMilestone : COLOURS.milestone
                                 })
 
-                    contentsG.append("g").attr("class", "info")
-                    contentsG.append("g").attr("class", "bottom-area")
+                        const topG = contentsG.append("g").attr("class", "top")
+                        const bottomG = contentsG.append("g").attr("class", "bottom")
 
-                    contentsG.append("g").attr("class", "top-right-ctrls")
-                    contentsG.append("g").attr("class", "bot-right-ctrls")
+                        contentsG.append("g").attr("class", "top-right-ctrls")
+                        contentsG.append("g").attr("class", "bot-right-ctrls")
 
-                    d3.select(this).append("rect").attr("class", "overlay")
-                        .attr("display", "none");
+                        //d3.select(this).append("rect").attr("class", "overlay")
+                            //.attr("display", "none");
+
+                        topG.append("g").attr("class", "info");
+                        bottomG.append("g").attr("class", "kpis-area")
+                        //overlays
+                        topG.append("rect").attr("class", "overlay top-overlay")
+                            .attr("display", "none");
+                        bottomG.append("rect").attr("class", "overlay bottom-overlay")
+                            .attr("display", "none");
+
                 
-                })
-                .style("cursor", editable ? "default" : "grab")
-                //.call(transform, { x: d => d.x, y:d => d.y }, transitionEnter && transitionsOn)
-                .call(updateTransform, { 
-                    x:calcX, 
-                    y:calcY, 
-                    scale:d => expanded.find(m => m.id === d.id)?.k || 1,
-                    transition:transformTransition.enter 
-                })
-                .merge(profileCardG)
-                // .on("click", () => { console.log("prof card click native")})
-                //.call(drag)
-                .call(updateTransform, { 
-                    x:calcX, 
-                    y:calcY,
-                    scale:d => expanded.find(m => m.id === d.id)?.k || 1,
-                    transition:transformTransition.update 
-                })
-                .each(function(d){
-                    const profileInfo = profileInfoComponents[d.id]
-                        .currentPage(currentPage)
-                        .width(contentsWidth)
-                        .height(infoHeight)
-                        .fontSizes(fontSizes.info)
-                        .editable(editable)
-                        .onClick(onClickInfo);
+                    })
+                    .style("cursor", editable ? "default" : "grab")
+                    //.call(transform, { x: d => d.x, y:d => d.y }, transitionEnter && transitionsOn)
+                    .call(updateTransform, { 
+                        x:calcX, 
+                        y:calcY, 
+                        scale:d => expanded.find(m => m.id === d.id)?.k || 1,
+                        transition:transformTransition.enter 
+                    })
+                    .merge(profileCardG)
+                    // .on("click", () => { console.log("prof card click native")})
+                    //.call(drag)
+                    .call(updateTransform, { 
+                        x:calcX, 
+                        y:calcY,
+                        scale:d => expanded.find(m => m.id === d.id)?.k || 1,
+                        transition:transformTransition.update 
+                    })
+                    .each(function(d){
 
-                    const goal = goalComponents[d.id]
-                        .width(contentsWidth)
-                        .height(contentsHeight/2)
-                        .fontSizes(fontSizes.goal)
-                        //.editable(editable)
-                        //.scrollable(scrollable)
-                        .editable(false)
-                        .scrollable(false)
-                        .onCtrlClick(onCtrlClick)
+                        const profileCtrlsG = d3.select(this).select("g.profile-ctrls")
+                            .attr("transform", `translate(${-(profileCtrlsWidth/3)}, ${-contentsHeight/2 - profileCtrlsHeight+5})`)
+                            .call(drag)
+
+                        profileCtrlsG.select("rect")
+                            .attr("width", profileCtrlsWidth)
+                            .attr("height", profileCtrlsHeight);
+
+                        const profileInfo = profileInfoComponents[d.id]
+                            .currentPage(currentPage)
+                            .width(contentsWidth)
+                            .height(infoHeight)
+                            .fontSizes(fontSizes.info)
+                            .editable(editable)
+                            .onStartEditingPhotoTransform(onStartEditingPhotoTransform)
+                            .onEndEditingPhotoTransform(onEndEditingPhotoTransform)
+                            .onClick(onClickInfo)
+                            .onMilestoneWrapperPseudoDragStart(onMilestoneWrapperPseudoDragStart)
+                            .onMilestoneWrapperPseudoDrag(onMilestoneWrapperPseudoDrag)
+                            .onMilestoneWrapperPseudoDragEnd(onMilestoneWrapperPseudoDragEnd);
+
+                        const goal = goalComponents[d.id]
+                            .width(contentsWidth)
+                            .height(contentsHeight/2)
+                            .fontSizes(fontSizes.goal)
+                            //.editable(editable)
+                            //.scrollable(scrollable)
+                            .editable(false)
+                            .scrollable(false)
+                            .onCtrlClick(onCtrlClick)
 
 
-                    const kpis = kpisComponents[d.id]
-                        .width(contentsWidth)
-                        .height(bottomAreaHeight)
-                        .kpiHeight(kpiHeight) //may be undefined
-                        .fontSizes(fontSizes.kpis)
-                        .kpiFormat(kpiFormat)
-                        .editable(editable)
-                        .scrollable(scrollable)
-                        .onUpdateSelected((profileId, kpiKey, shouldUpdateScroll, shouldUpdateDom) => {
-                            data.filter(p => p.id !== profileId).forEach(p => {
-                                kpisComponents[p.id].selected(kpiKey, shouldUpdateScroll, shouldUpdateDom);
-                           })
-                           //parent needs to know so it can control how to handle the wrapperClick event
-                           onUpdateSelectedKpi(kpiKey);
-                        })
-                        .onCtrlClick(onCtrlClick)
-                        .onSaveValue((valueObj, profileId, datasetKey, statKey, key) => {
-                            //if profileid is current, swap it for the first future profile
-                            const requiredProfileId = profileId === "current" ? data.find(p => p.isFuture).id : profileId;
-                            onSaveValue(valueObj, requiredProfileId, datasetKey, statKey, key);
-                        })
-                        //pass scroll events on any kpiComponent to all other kpiComponents
-                        .onZoomStart(function(e){
-                            data.filter(p => p.id !== d.id).forEach(p => {
-                                kpisComponents[p.id].handleZoomStart.call(this, e)
-                           })
-                        })
-                        .onZoom(function(e){
-                            data.filter(p => p.id !== d.id).forEach((p,i) => {
-                                kpisComponents[p.id].handleZoom.call(this, e, i)
-                           })
-                        })
-                        .onZoomEnd(function(e){
-                            data.filter(p => p.id !== d.id).forEach(p => {
-                                kpisComponents[p.id].handleZoomEnd.call(this, e)
-                           })
-                        })
+                        const kpis = kpisComponents[d.id]
+                            .width(contentsWidth)
+                            .height(bottomHeight)
+                            .kpiHeight(kpiHeight) //may be undefined
+                            .fontSizes(fontSizes.kpis)
+                            .kpiFormat(kpiFormat)
+                            .editable(editable)
+                            .scrollable(scrollable)
+                            .onUpdateSelected((profileId, kpiKey, shouldUpdateScroll, shouldUpdateDom) => {
+                                data.filter(p => p.id !== profileId).forEach(p => {
+                                    kpisComponents[p.id].selected(kpiKey, shouldUpdateScroll, shouldUpdateDom);
+                            })
+                            //parent needs to know so it can control how to handle the wrapperClick event
+                            onUpdateSelectedKpi(kpiKey);
+                            })
+                            .onCtrlClick(onCtrlClick)
+                            .onSaveValue((valueObj, profileId, datasetKey, statKey, key) => {
+                                //if profileid is current, swap it for the first future profile
+                                const requiredProfileId = profileId === "current" ? data.find(p => p.isFuture).id : profileId;
+                                onSaveValue(valueObj, requiredProfileId, datasetKey, statKey, key);
+                            })
+                            //pass scroll events on any kpiComponent to all other kpiComponents
+                            .onZoomStart(function(e){
+                                data.filter(p => p.id !== d.id).forEach(p => {
+                                    kpisComponents[p.id].handleZoomStart.call(this, e)
+                            })
+                            })
+                            .onZoom(function(e){
+                                data.filter(p => p.id !== d.id).forEach((p,i) => {
+                                    kpisComponents[p.id].handleZoom.call(this, e, i)
+                            })
+                            })
+                            .onZoomEnd(function(e){
+                                data.filter(p => p.id !== d.id).forEach(p => {
+                                    kpisComponents[p.id].handleZoomEnd.call(this, e)
+                            })
+                            })
+                            /*
+                            .onClickKpi((e,kpi) => {
+                                console.log("profileCrad kpi.onClickKpi---")
+                                //update selected KPI in all profile cards
+                                data.filter(p => p.id !== d.id).forEach(p => {
+                                    //must sway the profile id from the key
+                                    const keyParts = kpi.key.split("-");
+                                    const keyWithoutProfileId = keyParts.slice(0, keyParts.length - 1).join("-");
+                                    const kpiKeyInThisProfile = `${keyWithoutProfileId}-${p.id}`
+                                    kpisComponents[p.id].selected(kpiKeyInThisProfile, true, true);
+                                })
+                            })*/
+                            .onDblClickKpi(onDblClickKpi);
+
+                        //ENTER AND UPDATE
+                        //overlays
                         /*
-                        .onClickKpi((e,kpi) => {
-                            console.log("profileCrad kpi.onClickKpi---")
-                            //update selected KPI in all profile cards
-                            data.filter(p => p.id !== d.id).forEach(p => {
-                                //must sway the profile id from the key
-                                const keyParts = kpi.key.split("-");
-                                const keyWithoutProfileId = keyParts.slice(0, keyParts.length - 1).join("-");
-                                const kpiKeyInThisProfile = `${keyWithoutProfileId}-${p.id}`
-                                kpisComponents[p.id].selected(kpiKeyInThisProfile, true, true);
-                            })
-                        })*/
-                        .onDblClickKpi(onDblClickKpi);
-
-                    //ENTER AND UPDATE
-                    //overlay 
-                    d3.select(this).select("rect.overlay")
-                        .attr("width", width)
-                        .attr("height", height)
-                        .attr("x", -width/2)
-                        .attr("y", -height/2)
-                        .style("fill", OVERLAY.FILL)
-                        .style("opacity", OVERLAY.OPACITY)
-
-                    const contentsG = d3.select(this).select("g.contents")
-                        .attr("transform", d =>  `translate(${-contentsWidth/2},${-contentsHeight/2})`)
-
-                    const getStrokeWidth = status => {
-                        if(status === "fullyOnTrack"){
-                            return 10; 
-                        }
-                        if(status === "mostlyOnTrack"){
-                            return 5;
-                        }
-                        return 0;
-                    }
-                    const currentColorSchemeOrange = "#D4AF37"
-                    const lightGold = "#c9b037";
-                    const darkGold = "#af9500"
-                    const lightSilver = "#d7d7d7";
-                    const darkSilver = "b4b4b4";
-
-                    const gold = lightGold;
-                    const silver = lightSilver;
-
-                    const getStroke = status => {
-                        if(status === "fullyOnTrack"){
-                            return gold; 
-                        }
-                        if(status === "mostlyOnTrack"){
-                            return silver;
-                        }
-                        return "none";
-                    }
-                    //rect sizes
-                    contentsG.selectAll("rect.profile-card-bg")
-                        .attr("width", contentsWidth)
-                        .attr("height", contentsHeight)
-                        .attr("stroke", "none")
-                        .call(updateFill, { 
-                            fill:d => isSelected(d) ? COLOURS.selectedMilestone : COLOURS.milestone,
-                            transition:{ duration: 300 }
-                        })
-
-                    //from https://www.schemecolor.com/gold-silver-and-bronze-color-palette.php#download
-                    contentsG.selectAll("rect.profile-card-border")
-                        .attr("width", contentsWidth)
-                        .attr("height", contentsHeight)
-                        .attr("stroke-width", getStrokeWidth(d.onTrackStatus))
-                        .attr("stroke", getStroke(d.onTrackStatus))
-                        .call(updateFill, { fill:d => "none", transition:{ duration: 300 } })
-                        .attr("filter", "url(#shine)")
+                        d3.select(this).select("rect.overlay")
+                            .attr("width", width)
+                            .attr("height", height)
+                            .attr("x", -width/2)
+                            .attr("y", -height/2)
+                            .style("fill", OVERLAY.FILL)
+                            .style("opacity", OVERLAY.OPACITY)*/
                         
-                   
-                    // why is this too far down
-                    contentsG.selectAll("g.info")
-                        .datum(d.info)
-                        .call(profileInfo)
+                        d3.select(this).select("rect.top-overlay")
+                            .attr("width", width)
+                            .attr("height", height/2)
+                            .style("fill", OVERLAY.FILL)
+                            .style("opacity", OVERLAY.OPACITY)
+                            
+                        d3.select(this).select("rect.bottom-overlay")
+                            .attr("width", width)
+                            .attr("height", height/2)
+                            .style("fill", OVERLAY.FILL)
+                            .style("opacity", OVERLAY.OPACITY)
 
-                    const bottomAreaG = contentsG.select("g.bottom-area")
-                        .attr("transform", "translate(0," +(contentsHeight/2) +")");
+                        const contentsG = d3.select(this).select("g.contents")
+                            .attr("transform", d =>  `translate(${-contentsWidth/2},${-contentsHeight/2})`)
 
-                    const kpisG = bottomAreaG.selectAll("g.kpis").data(currentPage.key === "profile" || d.isCurrent ? [1] : []);
-                    kpisG.enter()
-                        .append("g")
-                            .attr("class", "kpis")
-                            .merge(kpisG)
-                            .datum(d.kpis)
-                            .call(kpis);
+                        const getStrokeWidth = status => {
+                            if(status === "fullyOnTrack"){
+                                return 10; 
+                            }
+                            if(status === "mostlyOnTrack"){
+                                return 5;
+                            }
+                            return 0;
+                        }
+                        const currentColorSchemeOrange = "#D4AF37"
+                        const lightGold = "#c9b037";
+                        const darkGold = "#af9500"
+                        const lightSilver = "#d7d7d7";
+                        const darkSilver = "b4b4b4";
 
-                    kpisG.exit().remove();
+                        const gold = lightGold;
+                        const silver = lightSilver;
 
-                    const goalG = bottomAreaG.selectAll("g.goal").data(currentPage.key === "goal" && !d.isCurrent ? [1] : []);
-                    goalG.enter()
-                        .append("g")
-                            .attr("class", "goal")
-                            .merge(goalG)
-                            .datum(d.goal)
-                            .call(goal);
+                        const getStroke = status => {
+                            if(status === "fullyOnTrack"){
+                                return gold; 
+                            }
+                            if(status === "mostlyOnTrack"){
+                                return silver;
+                            }
+                            return "none";
+                        }
+                        //rect sizes
+                        contentsG.selectAll("rect.profile-card-bg")
+                            .attr("width", contentsWidth)
+                            .attr("height", contentsHeight)
+                            .attr("stroke", "none")
+                            .call(updateFill, { 
+                                fill:d => isSelected(d) ? COLOURS.selectedMilestone : COLOURS.milestone,
+                                transition:{ duration: 300 }
+                            })
+
+                        //from https://www.schemecolor.com/gold-silver-and-bronze-color-palette.php#download
+                        contentsG.selectAll("rect.profile-card-border")
+                            .attr("width", contentsWidth)
+                            .attr("height", contentsHeight)
+                            .attr("stroke-width", getStrokeWidth(d.onTrackStatus))
+                            .attr("stroke", getStroke(d.onTrackStatus))
+                            .call(updateFill, { fill:d => "none", transition:{ duration: 300 } })
+                            .attr("filter", "url(#shine)")
+                            
                     
-                    goalG.exit().remove();
+                        // why is this too far down
+                        contentsG.selectAll("g.info")
+                            .datum(d.info)
+                            .call(profileInfo)
 
-                    //top right ctrls (dependent on each card)
-                    let btnWidth = 25;
-                    let btnHeight = 25;
+                        const bottomG = contentsG.select("g.bottom")
+                            .attr("transform", "translate(0," +(contentsHeight/2) +")");
 
-                    const topRightBtnG = contentsG.select("g.top-right-ctrls")
-                        .attr("transform", `translate(${contentsWidth * 0.98}, ${contentsHeight * 0.02})`)
-                        .selectAll("g.top-right-btn")
-                        .data(ctrls(d).topRight, b => b.label)
+                        const kpisG = bottomG.select("g.kpis-area").selectAll("g.kpis").data(currentPage.key === "profile" || d.isCurrent ? [1] : []);
+                        kpisG.enter()
+                            .append("g")
+                                .attr("class", "kpis")
+                                .merge(kpisG)
+                                .datum(d.kpis)
+                                .call(kpis);
+
+                        kpisG.exit().remove();
+
+                        const goalG = bottomG.selectAll("g.goal").data(currentPage.key === "goal" && !d.isCurrent ? [1] : []);
+                        goalG.enter()
+                            .append("g")
+                                .attr("class", "goal")
+                                .merge(goalG)
+                                .datum(d.goal)
+                                .call(goal);
+                        
+                        goalG.exit().remove();
+
+                        //top right ctrls (dependent on each card)
+                        let btnWidth = 25;
+                        let btnHeight = 25;
+
+                        const topRightBtnG = contentsG.select("g.top-right-ctrls")
+                            .attr("transform", `translate(${contentsWidth * 0.98}, ${contentsHeight * 0.02})`)
+                            .selectAll("g.top-right-btn")
+                            .data(ctrls(d).topRight, b => b.label)
                     
-                    topRightBtnG.enter()
-                        .append("g")
-                            .attr("class", "top-right-btn")
-                            .each(function(b){
-                                d3.select(this)
-                                    .append("rect")
-                                        .attr("fill", "transparent");
+                        topRightBtnG.enter()
+                            .append("g")
+                                .attr("class", "top-right-btn")
+                                .each(function(b){
+                                    d3.select(this)
+                                        .append("rect")
+                                            .attr("fill", "transparent");
 
-                                d3.select(this)
-                                    .append("path")
-                                        .attr("transform", b.icon.transform || null)
-                                        .attr("fill", COLOURS.btnIcons.default)
-                                        .attr("stroke", COLOURS.btnIcons.default)
-                            })
-                            .merge(topRightBtnG)
-                            .attr("transform", (b,i) => `translate(${-(i + 1) * btnWidth})`)
-                            .each(function(b){
-                                d3.select(this).select("rect")
-                                    .attr("width", btnWidth)
-                                    .attr("height", btnHeight)
+                                    d3.select(this)
+                                        .append("path")
+                                            .attr("transform", b.icon.transform || null)
+                                            .attr("fill", COLOURS.btnIcons.default)
+                                            .attr("stroke", COLOURS.btnIcons.default)
+                                })
+                                .merge(topRightBtnG)
+                                .attr("transform", (b,i) => `translate(${-(i + 1) * btnWidth})`)
+                                .each(function(b){
+                                    d3.select(this).select("rect")
+                                        .attr("width", btnWidth)
+                                        .attr("height", btnHeight)
 
-                                d3.select(this).select("path")
-                                    .attr("d", b.icon.d)
-                            })
-                            .style("cursor", "pointer")
-                            .on("click",(e,b) => { if(b.onClick){ b.onClick(b)} })
-                            .on("mouseover", (e,b) => { if(b.onMouseover){ b.onMouseover(b)} })
-                            .on("mouseout", (e,b) => { if(b.onMouseout){ b.onMouseout(b)} })
+                                    d3.select(this).select("path")
+                                        .attr("d", b.icon.d)
+                                })
+                                .style("cursor", "pointer")
+                                .on("click",(e,b) => { if(b.onClick){ b.onClick(b)} })
+                                .on("mouseover", (e,b) => { if(b.onMouseover){ b.onMouseover(b)} })
+                                .on("mouseout", (e,b) => { if(b.onMouseout){ b.onMouseout(b)} })
 
-                    topRightBtnG.exit().remove(); 
+                        topRightBtnG.exit().remove(); 
 
-                    const botRightBtnG = contentsG.select("g.bot-right-ctrls")
-                        .attr("transform", `translate(${contentsWidth * 0.96}, ${(contentsHeight * 0.98) - btnHeight})`)
-                        .selectAll("g.bot-right-btn")
-                        .data(ctrls(d).botRight, b => b.label)
+                        const botRightBtnG = contentsG.select("g.bot-right-ctrls")
+                            .attr("transform", `translate(${contentsWidth * 0.96}, ${(contentsHeight * 0.98) - btnHeight})`)
+                            .selectAll("g.bot-right-btn")
+                            .data(ctrls(d).botRight, b => b.label)
                     
-                    botRightBtnG.enter()
-                        .append("g")
-                            .attr("class", "bot-right-btn")
-                            .each(function(b){
-                                d3.select(this)
-                                    .append("rect")
-                                        .attr("fill", "transparent");
+                        botRightBtnG.enter()
+                            .append("g")
+                                .attr("class", "bot-right-btn")
+                                .each(function(b){
+                                    d3.select(this)
+                                        .append("rect")
+                                            .attr("fill", "transparent");
 
-                                d3.select(this)
-                                    .append("g")
-                                        .attr("class", "icon")
-                                        //.attr("fill", COLOURS.btnIcons.default)
-                                        //.attr("stroke", COLOURS.btnIcons.default)
-                            })
-                            .merge(botRightBtnG)
-                            .attr("transform", (b,i) => `translate(${-(i + 1) * btnWidth})`)
-                            .each(function(b){
-                                d3.select(this).select("rect")
-                                    .attr("width", btnWidth * 1.1) //@todo - replqce x1.1 with proper measurements
-                                    .attr("height", btnHeight * 1.1)
+                                    d3.select(this)
+                                        .append("g")
+                                            .attr("class", "icon")
+                                            //.attr("fill", COLOURS.btnIcons.default)
+                                            //.attr("stroke", COLOURS.btnIcons.default)
+                                })
+                                .merge(botRightBtnG)
+                                .attr("transform", (b,i) => `translate(${-(i + 1) * btnWidth})`)
+                                .each(function(b){
+                                    d3.select(this).select("rect")
+                                        .attr("width", btnWidth * 1.1) //@todo - replqce x1.1 with proper measurements
+                                        .attr("height", btnHeight * 1.1)
 
-                                d3.select(this).select("g.icon")
-                                    //.style("stroke", b.styles.stroke)
-                                    .style("fill", b.styles.fill)
-                                    .html(b.icon.html)
-                            })
-                            .style("cursor", "pointer")
-                            .on("click",(e,b) => { 
-                                //e.stopPropagation(); doesnt work
-                                //e.stopImmediatePropagation()2
-                                if(b.onClick){ b.onClick(b)} 
-                            })
-                            .on("mouseover", (e,b) => { if(b.onMouseover){ b.onMouseover(b)} })
-                            .on("mouseout", (e,b) => { if(b.onMouseout){ b.onMouseout(b)} })
+                                    d3.select(this).select("g.icon")
+                                        //.style("stroke", b.styles.stroke)
+                                        .style("fill", b.styles.fill)
+                                        .html(b.icon.html)
+                                })
+                                .style("cursor", "pointer")
+                                .on("click",(e,b) => { 
+                                    //e.stopPropagation(); doesnt work
+                                    //e.stopImmediatePropagation()2
+                                    if(b.onClick){ b.onClick(b)} 
+                                })
+                                .on("mouseover", (e,b) => { if(b.onMouseover){ b.onMouseover(b)} })
+                                .on("mouseout", (e,b) => { if(b.onMouseout){ b.onMouseout(b)} })
 
-                    botRightBtnG.exit().remove(); 
-                })
-                //.call(updateHighlighted)
-                //.call(drag)
-                .each(function(d){
+                        botRightBtnG.exit().remove(); 
+                    })
+                    //.call(updateHighlighted)
+                    //.call(drag)
+                    .each(function(d){
 
-                })
+                    })
 
             function updateTransform(selection, options={}){
                 //console.log("updateTransform profileCards")
@@ -576,7 +643,7 @@ export default function profileCardsComponent() {
 
             //longpress
             function longpressStart(e, d) {
-                //console.log("lp start")
+                console.log("lp start")
                 //todo - check defs appended, and use them here, then longopressDrag should trigger the delete of a goal
                 //then do same for aims and links
                 /*
@@ -585,10 +652,9 @@ export default function profileCardsComponent() {
                     .attr("stdDeviation", 10)
                     .attr("dy", 10);
                 */
-
                 d3.select(this).select("rect.profile-card-bg")
                     //.style("filter", "url(#drop-shadow)")
-                    .call(oscillator.start);
+                    //.call(oscillator.start);
 
                 longpressed = d;
                 containerG.call(profileCards);
@@ -620,6 +686,7 @@ export default function profileCardsComponent() {
             };
 
             function longpressEnd(e, d) {
+                console.log("lp end")
                 if(deleted){ 
                     deleted = false;
                     return; 
@@ -637,7 +704,7 @@ export default function profileCardsComponent() {
 
                 d3.select(this)
                     //.style("filter", "url(#drop-shadow)")
-                    .call(oscillator.stop);
+                    //.call(oscillator.stop);
                 
                 onLongpressEnd.call(this, e, d)
             };
@@ -842,6 +909,27 @@ export default function profileCardsComponent() {
         }
         return profileCards;
     };
+    profileCards.onMilestoneWrapperPseudoDragStart = function (value) {
+        if (!arguments.length) { return onMilestoneWrapperPseudoDragStart; }
+        if(typeof value === "function"){
+            onMilestoneWrapperPseudoDragStart = value;
+        }
+        return profileCards;
+    };
+    profileCards.onMilestoneWrapperPseudoDrag = function (value) {
+        if (!arguments.length) { return onMilestoneWrapperPseudoDrag; }
+        if(typeof value === "function"){
+            onMilestoneWrapperPseudoDrag = value;
+        }
+        return profileCards;
+    };
+    profileCards.onMilestoneWrapperPseudoDragEnd = function (value) {
+        if (!arguments.length) { return onMilestoneWrapperPseudoDragEnd; }
+        if(typeof value === "function"){
+            onMilestoneWrapperPseudoDragEnd = value;
+        }
+        return profileCards;
+    };
     profileCards.onDelete = function (value) {
         if (!arguments.length) { return onDelete; }
         if(typeof value === "function"){
@@ -860,17 +948,46 @@ export default function profileCardsComponent() {
         }
         return profileCards;
     };
+    profileCards.onStartEditingPhotoTransform = function (value) {
+        if(typeof value === "function"){
+            onStartEditingPhotoTransform = value;
+        }
+        return profileCards;
+    };
+    profileCards.onEndEditingPhotoTransform = function (value) {
+        if(typeof value === "function"){
+            onEndEditingPhotoTransform = value;
+        }
+        return profileCards;
+    };
     profileCards.onUpdateSelectedKpi = function (value) {
         if(typeof value === "function"){
             onUpdateSelectedKpi = value;
         }
         return profileCards;
     };
-    profileCards.applyOverlay = function(selection){
-        selection.selectAll("rect.overlay").attr("display", null)
+    profileCards.applyOverlay = function(selection, options={}){
+        const { include, onClick=() => {} } = options;
+        selection.selectAll("rect.overlay")
+            .filter(function(){
+                if(!include){ return true; }
+                const className = d3.select(this).attr("class");
+                let shouldInclude = false;
+                include.forEach(nameToInclude => {
+                    if(className.includes(nameToInclude)){
+                        shouldInclude = true;
+                    }
+                })
+                return shouldInclude;
+            })
+            .attr("display", null)
+            .on("click", onClick)
     }
-    profileCards.removeOverlay = function(selection){
+    profileCards.removeOverlay = function(selection, include){
         selection.selectAll("rect.overlay").attr("display", "none");
+    }
+    profileCards.endEditing = function(milestoneId){
+        profileInfoComponents[milestoneId].endEditing();
     }
     return profileCards;
 }

@@ -12,8 +12,10 @@ import journeyComponent from './journeyComponent';
 
 //helper
 const targetIsAchieved = (value, target, order) => {
-    if(!value?.actual || !target?.actual){ return false; }
-    if(order === "highest-is-best"){ return value.actual >= target.actual }
+    if(typeof value?.actual !== "number" || typeof target?.actual !== "number"){ return false; }
+    if(order === "highest is best"){ 
+        return value.actual >= target.actual 
+    }
     return value.actual <= target.actual;
 }
 
@@ -108,7 +110,7 @@ function hydrateContracts(contracts=[]){
 }
 
 function hydrateProfiles(profiles=[], datasets, kpis, defaultTargets, settings, options={}){
-    //console.log("hydrateProfiles----------------", profiles);
+    //console.log("hydrateProfiles----------------", datasets?.find(dset => dset.key === "pressUps")?.datapoints);
     const orderedProfiles = sortAscending(profiles, d => d.date);
     const hydrateNextProfile = (remaining, hydratedSoFar) => {
         const next = remaining[0];
@@ -148,11 +150,6 @@ function calcExpected(kpi, start, target, now, options={}){
     const { accuracy, showTrailingZeros=true } = options;
     const actual = linearProjValue(start.date.getTime(), start.actual, target.date.getTime(), target.actual, now.getTime())
     const completion = convertToPC(start.actual, target.actual)(actual);
-    if(kpi.datasetKey === "pressUps"){
-        //console.log("calcExpected start", start)
-        //console.log("calcExpected target", target)
-        //console.log("calcExpected", actual)
-    }
     return { 
         actual: round(actual, accuracy, showTrailingZeros), 
         completion
@@ -178,7 +175,7 @@ function getValueForSession(stat, datapoints, sessionDate, start, target){
     return { actual , completion };
 }
 
-function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target){
+function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target, log){
     //if dataset unavailable, stat will be undefined
     if(!stat){ return { actual:undefined, completion:null } }
     //helper
@@ -188,7 +185,9 @@ function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target){
         .filter(d => !dateRange || dateIsInRange(d.date, dateRange))
         .filter(d => !d.isTarget)
         .map(d => [d.date, getValue(d)])
-        .filter(d => typeof d[1] === "number")
+        .filter(d => {
+            return typeof d[1] === "number"
+        })
 
     const values = dateValuePairs.map(d => d[1]);
     
@@ -235,6 +234,7 @@ const goBackByExpiryDurationFromDate = (duration, units) => date => {
 }
 
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
+    //if(profile.id === "profile-2")
     //console.log("hydrateProfile------------", profile.id, profile.date, profile.created)
     const { now, rangeFormat } = options;
     const { id, customTargets=[], isCurrent } = profile;
@@ -392,7 +392,8 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 current = calcCurrent(stat, datapoints, dateRange, achievedValueDataMethod, start, target); 
             }
             else if(currentValueDataMethod !== "specificSession"){
-                current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod, start, target);
+                const log = profile.id === "profile-5" && datasetKey === "pressUps";
+                current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod, start, target, log);
             }else{
                 //it must be a future card and current value is based purely on a specificSession
                 current = getValueForSession(stat, datapoints, specificDate, start, target)
