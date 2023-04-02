@@ -1,4 +1,8 @@
 import * as d3 from "d3";
+import { TRANSITIONS } from "./constants";
+
+const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
+const AUTO_SCROLL_DURATION = TRANSITIONS.KPIS.AUTO_SCROLL.DURATION;
 
 /*
 function deletor(){
@@ -83,7 +87,8 @@ export function fadeIn(selection, options={}){
                 .attr("opacity", d3.select(this).attr("opacity") || 0)
                 .classed("fading-in", true)
                 .transition()
-                    .duration(transition?.duration || 400)
+                    .delay(transition?.delay || 0)
+                    .duration(transition?.duration || CONTENT_FADE_DURATION)
                     .attr("opacity", 1)
                     .on("end", function() { 
                         //console.log("removed")
@@ -98,11 +103,13 @@ export function remove(selection, options={}){
     selection.each(function(){
         //will be multiple exits because of the delay in removing
         if(!d3.select(this).attr("class").includes("exiting")){
-            //console.log("removing............................")
+            //console.log("removing............................",)
             d3.select(this)
+                .attr("opacity", d3.select(this).attr("opacity") || 1)
                 .classed("exiting", true)
                 .transition()
-                    .duration(transition?.duration || 400)
+                    .delay(transition?.delay || 0)
+                    .duration(transition?.duration || CONTENT_FADE_DURATION)
                     .attr("opacity", 0)
                     .on("end", function() { 
                         //console.log("removed")

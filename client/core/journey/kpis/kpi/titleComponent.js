@@ -143,7 +143,7 @@ export default function titleComponent() {
                         .attr("stroke", styles.primaryTitle.stroke)
                         .attr("fill", styles.primaryTitle.fill)
                         .attr("stroke-width", styles.primaryTitle.strokeWidth)
-                        .text((`${i+1}. ${_primaryTitle(d)}`).toUpperCase())
+                        .text((`${_primaryTitle(d)}`).toUpperCase())
   
                     nameG.select("text")
                         .transition()

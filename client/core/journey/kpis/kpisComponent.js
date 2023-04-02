@@ -3,12 +3,22 @@ import { DIMNS, grey10, TRANSITIONS } from "../constants";
 import kpiComponent from './kpi/kpiComponent';
 import closeComponent from './kpi/closeComponent';
 import { getTransformationFromTrans } from '../helpers';
+import { remove, fadeIn } from '../domHelpers';
 
 const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
 const AUTO_SCROLL_DURATION = TRANSITIONS.KPIS.AUTO_SCROLL.DURATION;
 //faster speed than scroll to ensure it leaves page before scroll finishes
 const KPI_SLIDE_DURATION = AUTO_SCROLL_DURATION * 0.66;
 
+//helper
+const getOpenedKpiKey = statuses => {
+    const open = Object.entries(statuses).find(pair => pair[1] === "open");
+    return open ? open[0] : null;
+}
+const getNotClosedKpiKey = statuses => {
+    const pair = Object.entries(statuses).find(pair => pair[1] !== "closed");
+    return pair ? pair[0] : null;
+}
 /*
 
 */
@@ -17,6 +27,7 @@ export default function kpisComponent() {
     // dimensions
     let width = DIMNS.profile.width;
     let height = DIMNS.profile.height;
+    let expandedHeight = height;
     let margin;
     let contentsWidth;
     let contentsHeight;
@@ -53,12 +64,17 @@ export default function kpisComponent() {
     function updateDimns(nrCtrlsButtons=0, nrTooltipRows=0, kpisData){
         const nrKpis = kpisData.length;
 
-        margin = { left: width * 0.1, right: width * 0.1, top:height * 0.1, bottom: height * (nrCtrlsButtons === 0 ? 0.1 : 0.05) };
+        margin = { 
+            left: width * 0.1, 
+            right: width * 0.1, 
+            top:height * 0.1, 
+            bottom: height * (nrCtrlsButtons === 0 ? 0.1 : 0.05) 
+        };
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
         ctrlsWidth = contentsWidth * (contentsWidth < 200 ? 0.8 : 0.7);
-        ctrlsHeight = nrCtrlsButtons !== 0 ? contentsHeight * 0.15 : 0;
+        ctrlsHeight = nrCtrlsButtons !== 0 ? 30 : 0;
         ctrlsMargin = { left: contentsWidth * 0.1, right: contentsWidth * 0.1, top: ctrlsHeight * 0.1, bottom: ctrlsHeight * 0.1 };
         ctrlsContentsWidth = ctrlsWidth - ctrlsMargin.left - ctrlsMargin.right;
         ctrlsContentsHeight = ctrlsHeight - ctrlsMargin.top - ctrlsMargin.bottom;
@@ -80,9 +96,9 @@ export default function kpisComponent() {
         scrollMin = -d3.sum(kpiHeights.slice(0, kpiHeights.length - 1)); //stop when last kpi is at top
         scrollMax = 0;
 
-        //kpi margin
+        //kpi margin (top must be constant so title pos doesnt shift when opening a kpi)
         gapBetweenKpis = kpiHeight * 0.15;
-        kpiMargin = { top: gapBetweenKpis/2, bottom: gapBetweenKpis/2, left:0, right:0 }
+        kpiMargin = { top: 0, bottom: gapBetweenKpis, left:0, right:0 }
 
         closeBtnWidth = 40;// contentsWidth * 0.1;
         closeBtnHeight = closeBtnWidth;
@@ -139,7 +155,7 @@ export default function kpisComponent() {
     //dom
     let containerG;
     function kpis(selection, options={}) {
-        //console.log("kpis update...............................................")
+        //console.log("kpis update..............")
         const { transitionEnter=true, transitionUpdate=true, log } = options;
 
         // expression elements
@@ -161,12 +177,17 @@ export default function kpisComponent() {
             containerG = d3.select(this);
 
             //close kpi component
-            //helper
-            const openKpi = kpisData.find(d => status(d) === "open" || status(d) === "closing");
-            const closeData = openKpi ? [openKpi] : []
-            containerG.selectAll("g.close-kpi").data(closeData)
-                .join("g")
-                    .attr("class", "close-kpi")
+            //dont removebtn until other content removes so its a smooth transition
+            const openedKpi = getOpenedKpiKey(statuses);
+            const closeBtnData = openedKpi ? [openedKpi] : [];
+            //const openOrClosingKpi = kpisData.find(d => status(d) === "open" || status(d) === "closing");
+            //const closeBtnData = openOrClosingKpi ? [openOrClosingKpi] : [];
+            const closeBtnG = containerG.selectAll("g.close-btn").data(closeBtnData);
+            closeBtnG.enter()
+                .append("g")
+                    .attr("class", "close-btn")
+                    .call(fadeIn)
+                    .merge(closeBtnG)
                     .attr("transform", `translate(${width - closeBtnWidth - closeBtnOuterMargin.right}, ${closeBtnOuterMargin.top})`)
                     .call(closeComponent()
                         .width(closeBtnWidth)
@@ -180,6 +201,7 @@ export default function kpisComponent() {
                             updateSelected("", data, false, true);
                             onUpdateSelected(d.milestoneId, null, true, true);
                         }));
+            closeBtnG.exit().call(remove);
     
             const contentsG = containerG.selectAll("g.contents").data([1]);
             contentsG.enter()
@@ -191,13 +213,18 @@ export default function kpisComponent() {
                         contentsG
                             .append("rect")
                                 .attr("class", "contents-bg")
+                                .attr("width", contentsWidth)
+                                .attr("height", contentsHeight)
                                 .attr("fill", "transparent")
                                 .attr("stroke", "none");
+                                
 
                         const listG = contentsG.append("g").attr("class", "kpis-list");
                         listG
                             .append("rect")
                                 .attr("class", "list-bg")
+                                .attr("width", listWidth)
+                                .attr("height", listHeight)
                                 .attr("fill", "transparent")
                                 .attr("stroke", "none");
 
@@ -215,41 +242,50 @@ export default function kpisComponent() {
                         listG
                             .append("defs")
                                 .append('clipPath')
-                                    .attr('id', "clip")
+                                    .attr('id', "kpis-list-clip")
                                         .append('rect')
+                                            .attr('width', 1000)
+                                            .attr('height', listHeight);
 
-                        contentsG.append("g").attr("class", "kpis-ctrls")
-                            .append("rect")
-                                .attr("class", "ctrls-bg");
+                        contentsG
+                            .append("g")
+                                .attr("class", "kpis-ctrls")
+                                .attr("transform", d => `translate(${ctrlsMargin.left +((contentsWidth-ctrlsWidth)/2)},${listHeight + ctrlsMargin.top})`)
+                                    .append("rect")
+                                        .attr("class", "ctrls-bg");
 
                     })
                     .merge(contentsG)
                     .attr("transform", `translate(${margin.left},${margin.top})`)
                     .each(function(){
                         const contentsG = d3.select(this);
-
+                        /*
+                        these rect increases now occur in updateselected function.
+                        @todo - check that the only time they need to increase is when a kpi is selected
                         contentsG.select("rect.contents-bg")
                             .attr("width", contentsWidth)
                             .attr("height", contentsHeight)
+                        */
 
                         //kpi list
                         //scroll
                         //todo - 1. put clipPath in place
                         //2. put extent in place so it doesnt scroll beyond the start and end 
                         const listG = contentsG.select("g.kpis-list")
-                            .attr('clip-path', "url(#clip)")
+                            .attr('clip-path', "url(#kpis-list-clip)")
 
                         if(scrollEnabled){
                             //this is a temp fix - we need to be able to toggle it 
                             listG.call(zoom);
                         }
-
-                        const clipRect = listG.select("clipPath#clip").select('rect');
+                        /*
+                        const clipRect = listG.select("clipPath#kpis-list-clip").select('rect');
                         clipRect
-                                .attr('width', 1000)// listWidth) //dont need horiz clip
+                                .attr('width', 1000)
                                 .attr('height', listHeight)
                                 .attr('x', 0)
                                 .attr('y', 0);
+                        */
 
                         const listContentsG = listG.select("g.kpis-list-contents")
                         zoom
@@ -266,10 +302,12 @@ export default function kpisComponent() {
                                 }
                             } : null)
 
+                        /*
                         listG.select("rect.list-bg")
                             .attr("width", listWidth)
                             .attr("height", listHeight)
-                            .on("click", () => { console.log("clk...")});;
+                            .on("click", () => { console.log("clk...")});
+                            */
 
                         //todo - get liust bg showing
                         //make kpi bar width font size etc based on listHeight
@@ -284,28 +322,22 @@ export default function kpisComponent() {
                             return i * kpiHeight +(isAfterOpenKpi ? extraSpaceForSelected : 0)
                         }
 
+                        //NOT SURE IF WE SHOULD FILTER OUT KPIS HERE?
+                        //ALSO, WHY IS THERE A DELYA BEFORE THE CONTENTS ARE REMOVED?
+                        //we want the list items that are not-selected to fade out immeditaely,
+                        //and we also at teh same time want the closedKpi to fade out for the selected kpi.
+                        //this should happen before the scroll.
+                        //a delay seems ot have crept in
 
-                        const kpiG = listContentsG.selectAll("g.kpi").data(kpisData, d => d.key);
+                        const notClosedKpi = getNotClosedKpiKey(statuses);
+                        const kpisDataToUse = notClosedKpi ? kpisData.filter(d => d.key === notClosedKpi) : kpisData;
+                        const kpiG = listContentsG.selectAll("g.kpi").data(kpisDataToUse, d => d.key);
                         kpiG.enter()
                             .append("g")
                             .attr("class", d => "kpi kpi-"+d.key)
+                            .call(fadeIn)
                             .call(updateTransform, { x: d => 0, y: calcY })
                             .merge(kpiG) 
-                            /*
-                            .attr("transf
-                            orm", (d,i) => {
-                                //console.log("trans i, d", i, d)
-                                const extraSpaceForSelected = openKpiHeight - kpiHeight;
-                                //console.log("extraspace", extraSpaceForSelected)
-                                const isAfterOpenKpi = kpisData
-                                    .slice(0, i)
-                                    .find(kpi => statuses[kpi] === "opening" || statuses[kpi] === "open");
-                                //console.log("isAfter Selcted", isAfterSelectedKpi)
-                                const vertShift = i * kpiHeight +(isAfterOpenKpi ? extraSpaceForSelected : 0)
-                                //console.log("vertShift", vertShift)
-                                return `translate(0,${vertShift})`
-                            })
-                            */
                             .style("cursor", d => isSelected(d) ? "default" : "pointer")
                             .call(kpi
                                 .width(() => kpiWidth)
@@ -332,6 +364,11 @@ export default function kpisComponent() {
                                 }))
                                 .onDblClick(onDblClickKpi)
                                 .onClick(function(e,d){
+                                    //need to go thru the logi of how this works, and then feed
+                                    //the increase of kpisComp size and the sliding up to accomodate it
+                                    //then add the react comp in teh gap
+                                    //and also add then bands to kpis -> are these bands or something else? see my paper
+                                    
                                     //@todo - bug - after clicking several kpis, the profiles dont 
                                     //stay in sync with each other. it seems that teh ones called from externally,
                                     //ie teh ones not actually scrolled, seem to jump back to 0 again, and go from there
@@ -340,42 +377,14 @@ export default function kpisComponent() {
                                 })
                                 .onSaveValue(onSaveValue)
                             )
-                            .each(function(d,i){
-                                //close btn component
-                                /*
-                                const closeData = status(d) === "open" || status(d) === "closing" ? [1] : []
-                                d3.select(this).selectAll("g.close").data(closeData)
-                                    .join("g")
-                                        .attr("class", "close")
-                                        .call(closeComponent()
-                                            .transform(() => `translate(${kpiWidth - closeBtnWidth}, 0)`)
-                                            .width((d,i) => closeBtnWidth)
-                                            .height((d,i) => closeBtnHeight)
-                                            .onClick(() => {
-                                                //false flag ensures scroll stays where it is
-                                                updateSelected("", data, false, true);
-                                                onUpdateSelected(d.milestoneId, null, true, true);
-                                            }));*/
-                            })
-                        //UPDATE ONLY
-                        //kpiG.call(updateTransform, { x: d => 0, y: calcY, transition:{ duration:300, delay:400 } })
 
                         //EXIT
-                        kpiG.exit().each(function(){
-                            //will be multiple exits because of the delay in removing
-                            if(!d3.select(this).attr("class").includes("exiting")){
-                                d3.select(this)
-                                    .classed("exiting", true)
-                                    .transition()
-                                        .duration(200)
-                                        .attr("opacity", 0)
-                                        .on("end", function() { d3.select(this).remove(); });
-                            }
-                        })
+                        kpiG.exit().call(remove);
                         
                         //ctrls
+                        //change so its positioned from the bottom and not part of contents
                         const ctrlsG = contentsG.select("g.kpis-ctrls")
-                            .attr("transform", d => `translate(${ctrlsMargin.left +((contentsWidth-ctrlsWidth)/2)},${listHeight + ctrlsMargin.top})`);
+                            //.attr("transform", d => `translate(${ctrlsMargin.left +((contentsWidth-ctrlsWidth)/2)},${listHeight + ctrlsMargin.top})`);
                         
                         ctrlsG.select("rect.ctrls-bg")
                             .attr("width", ctrlsContentsWidth)
@@ -396,7 +405,6 @@ export default function kpisComponent() {
                                             .attr("class", "name")
                                             .attr("text-anchor", "middle")
                                             .attr("dominant-baseline", "central")
-
                                 })
                                 .merge(btnG)
                                 .attr("transform", (b,i) => `translate(${i * btnWidth * 1.1}, 0)`)
@@ -453,7 +461,8 @@ export default function kpisComponent() {
     function updateSelected(key, data, shouldUpdateScroll=false, shouldUpdateDom=false){
         const { kpisData } = data;
         const newSelectedDatum = kpisData.find(d => d.key === key);
-        //console.log("updateSel key, d-------", key, newSelectedDatum)
+        //console.log("updateSel key--------------", key)
+        //console.log("selected----", selected)
         //1. UPDATE STATUS TO OPENING/CLOSING
         if(selected === key) { return; }
         //todo next - check this works with statusses , once i implement it in chldren
@@ -461,10 +470,36 @@ export default function kpisComponent() {
         let prevSelected;
         if(selected && selected !== key){
             prevSelected = selected;
-            //console.log("setting status to closing for", selected)
             statuses[selected] = "closing";
+            if(!key){
+                //close everything to return to normal dimns
+                containerG.select("rect.contents-bg")
+                    .transition()
+                    .delay(CONTENT_FADE_DURATION)
+                    .duration(AUTO_SCROLL_DURATION)
+                        .attr("height", contentsHeight)
+                
+                containerG.select("rect.list-bg")
+                    .transition()
+                    .delay(CONTENT_FADE_DURATION)
+                    .duration(AUTO_SCROLL_DURATION)
+                        .attr("height", listHeight)
+    
+                containerG.select("clipPath#kpis-list-clip").select('rect')
+                    .transition()
+                    .delay(CONTENT_FADE_DURATION)
+                    .duration(AUTO_SCROLL_DURATION)
+                        .attr('height', listHeight)
+    
+                containerG.select("g.kpis-ctrls")
+                    .transition()
+                    .delay(CONTENT_FADE_DURATION)
+                    .duration(AUTO_SCROLL_DURATION)
+                        .attr("transform", d => `translate(${ctrlsMargin.left +((contentsWidth-ctrlsWidth)/2)},${listHeight + ctrlsMargin.top})`)
+            }
         }
-        //start opening new one
+        //start opening new one (we can assume for now that there isnt one open atm 
+        //as you cant see other kpis when one is open)
         if(key){
             statuses[key] = "opening";
         }
@@ -472,8 +507,11 @@ export default function kpisComponent() {
         status = d => statuses[d.key] || "closed";
         selected = key;
         isSelected = d => d.key === selected;
+
         //2.GENERAL UPDATE TO REMOVE CLOSED/OPEN CONTENT
-        if(shouldUpdateDom){ containerG.call(kpis) }
+        if(shouldUpdateDom){ 
+            containerG.call(kpis)
+        }
 
         //3. AFTER DELAY TO ALLOW REMOVAL OF CONTENT, SLIDE THE KPIS BELOW DOWN/BACK UP
         const calcY = (d,i) => {
@@ -485,9 +523,9 @@ export default function kpisComponent() {
             return i * kpiHeight +(isAfterOpenKpi ? extraSpaceForSelected : 0)
         }
         //faster speed than scroll to ensure it leaves page before scroll finishes
-        containerG.selectAll("g.kpi")
-            .call(updateTransform, { x: d => 0, y: calcY, 
-                transition:{ duration:KPI_SLIDE_DURATION, delay:CONTENT_FADE_DURATION } })
+        //containerG.selectAll("g.kpi")
+            //.call(updateTransform, { x: d => 0, y: calcY, 
+                //transition:{ duration:KPI_SLIDE_DURATION, delay:CONTENT_FADE_DURATION } })
         //4.AT THE SAME TIME, SCROLL TO TOP (ONLY IF OPENING)
         if(shouldUpdateScroll){
             //console.log("update scroll-------")
@@ -497,21 +535,49 @@ export default function kpisComponent() {
             //console.log("zoom", zoom)
             containerG.select("g.kpis-list")
                .transition()
-                    .delay(CONTENT_FADE_DURATION)
-                    .duration(AUTO_SCROLL_DURATION)
+                .delay(CONTENT_FADE_DURATION)
+                .duration(AUTO_SCROLL_DURATION)
                     .call(zoom.translateTo, 0, y, [0,0])
                     .on("end", () => { 
                         //kpi is now open so scroll should not be enabled
                         scrollEnabled = scrollable && !selected;
                         if(shouldUpdateDom){
-                            //console.log("update after trans")
-                            if(key) { statuses[key] = "open"; }
+                            if(key) { 
+                                statuses[key] = "open";
+                            }
                             if(prevSelected) { statuses[prevSelected] = "closed";}
                             status = d => statuses[d.key] || "closed";
-                            //here the open stuff shopuld fade in
+                            //console.log("calling 2nd update...")
                             containerG.call(kpis) 
                         }
-                    }); 
+                    });
+            //also transition the height of the opening kpi
+            const expandedContentsHeight = expandedHeight - margin.top - margin.bottom;
+            const expandedListHeight = expandedContentsHeight - ctrlsHeight;
+            containerG.select("rect.contents-bg")
+                .transition()
+                .delay(CONTENT_FADE_DURATION)
+                .duration(AUTO_SCROLL_DURATION)
+                    .attr("height", expandedContentsHeight)
+            
+            containerG.select("rect.list-bg")
+                .transition()
+                .delay(CONTENT_FADE_DURATION)
+                .duration(AUTO_SCROLL_DURATION)
+                    .attr("height", expandedListHeight)
+
+            containerG.select("clipPath#kpis-list-clip").select('rect')
+                .transition()
+                .delay(CONTENT_FADE_DURATION)
+                .duration(AUTO_SCROLL_DURATION)
+                    .attr('height', expandedListHeight)
+
+            containerG.select("g.kpis-ctrls")
+                .transition()
+                .delay(CONTENT_FADE_DURATION)
+                .duration(AUTO_SCROLL_DURATION)
+                    .attr("transform", d => `translate(${ctrlsMargin.left +((contentsWidth-ctrlsWidth)/2)},${expandedListHeight + ctrlsMargin.top})`)
+
         }else if(shouldUpdateDom){
             //console.log("update no trans")
             //still need slight delay to allow open cntent to close
@@ -574,6 +640,11 @@ export default function kpisComponent() {
     kpis.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
+        return kpis;
+    };
+    kpis.expandedHeight = function (value) {
+        if (!arguments.length) { return expandedHeight; }
+        expandedHeight = value;
         return kpis;
     };
     kpis.kpiHeight = function (value) {

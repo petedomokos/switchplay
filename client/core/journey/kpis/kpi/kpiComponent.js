@@ -55,13 +55,14 @@ export default function kpiComponent() {
 
             the other factor is the margins of teh bar 
             */
-           const MAX_PROGRESS_BAR_HEIGHT = 140;
+            //this needs to change so it stays at top when open
+            const MAX_PROGRESS_BAR_HEIGHT = 140;
             const progressBarHeight = d3.min([MAX_PROGRESS_BAR_HEIGHT, contentsHeight - titleDimns.height]);
             if(d.isCurrent && d.key === "pressUps-reps"){
                 //console.log("progBarHeight", progressBarHeight)
                 //console.log("status", status(d))
             }
-            const remainingHeight = contentsHeight - titleDimns.height - progressBarHeight
+            const kpiInfoHeight = contentsHeight - titleDimns.height - progressBarHeight;
             
             const progressBarMargin = { 
                 //@todo - decide if we need a margin when closed
@@ -75,7 +76,7 @@ export default function kpiComponent() {
                 width, height, margin, contentsWidth, contentsHeight,
                 titleDimns,
                 progressBarWidth, progressBarHeight, progressBarMargin,
-                remainingHeight
+                kpiInfoHeight
             })
         })
     }
@@ -183,7 +184,7 @@ export default function kpiComponent() {
 
                     }
                 }))
-                .primaryTitle(d => `${d.datasetName} (${d.statName})`)
+                .primaryTitle(d => `${d.nr}. ${d.datasetName} (${d.statName})`)
                 //@todo - make statName a sec title, and measure length of primaryTitle
                 //.secondaryTitle(d => d.statName)
                 .textDirection("horiz")
@@ -193,7 +194,7 @@ export default function kpiComponent() {
         //open and closed contents
         kpiContentsG.each(function(data,i){
             //console.log("data-----------------------", data)
-            const { contentsHeight, titleDimns, progressBarWidth, progressBarHeight, progressBarMargin, remainingHeight } = dimns[i];
+            const { contentsHeight, titleDimns, progressBarWidth, progressBarHeight, progressBarMargin, kpiInfoHeight } = dimns[i];
 
             const closedData = status(data) === "closed" ? [data] : [];
             const openData = status(data) === "open" ? [data] : [];
@@ -205,7 +206,8 @@ export default function kpiComponent() {
                     .attr("class", "closed-kpi-contents")
                     .call(fadeIn)
                     .merge(closedContentsG)
-                    .attr("transform", `translate(0,${titleDimns.height + remainingHeight/2})`)
+                    //closedkpi doesnt show info so that space is just turned into an extra margin
+                    .attr("transform", `translate(0,${titleDimns.height + kpiInfoHeight/2})`)
                     .each(function(d){
                         d3.select(this)
                             .call(closedProgressBars[d.key]
@@ -216,7 +218,7 @@ export default function kpiComponent() {
 
                     })
 
-            closedContentsG.exit().call(remove, { transition:{ duration: CONTENT_FADE_DURATION }})
+            closedContentsG.exit().call(remove)
                 
             const openContentsG = kpiContentsG.selectAll("g.open-kpi-contents").data(openData, d => d.key);
             openContentsG.enter()
@@ -224,7 +226,7 @@ export default function kpiComponent() {
                     .attr("class", "open-kpi-contents")
                     .call(fadeIn)
                     .merge(openContentsG)
-                    .attr("transform", `translate(0,${titleDimns.height + remainingHeight/2})`)
+                    .attr("transform", `translate(0,${titleDimns.height})`)
                     .each(function(d, j){
                         d3.select(this)
                             .call(openProgressBars[d.key]

@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10, COLOURS, PROFILE_PAGES, OVERLAY } from "./constants";
+import { DIMNS, grey10, COLOURS, PROFILE_PAGES, OVERLAY, TRANSITIONS } from "./constants";
 import dragEnhancements from './enhancedDragHandler';
 // import menuComponent from './menuComponent';
 import profileInfoComponent from './profileInfoComponent';
@@ -8,6 +8,9 @@ import goalComponent from './goal/goalComponent';
 import { Oscillator } from './domHelpers';
 import { getTransformationFromTrans } from './helpers';
 const noop = () => {};
+
+const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
+const AUTO_SCROLL_DURATION = TRANSITIONS.KPIS.AUTO_SCROLL.DURATION;
 
 const trapeziumD = "M31.3,28H0.8c-0.2,0-0.5-0.1-0.6-0.3C0,27.5,0,27.3,0,27L6.5,4.5C6.6,4.2,6.9,4,7.3,4h17.5c0.3,0,0.6,0.2,0.7,0.5L32,27 c0.1,0.2,0,0.5-0.1,0.7C31.7,27.9,31.5,28,31.3,28z M1.7,26.5h28.5l-6.1-21H7.8L1.7,26.5z"
 /*
@@ -30,11 +33,16 @@ export default function profileCardsComponent() {
     let profileCtrlsWidth = 150;
     let profileCtrlsHeight = 40;
 
+    let getTextInfoHeight = () => 0;
+
     function updateDimns(){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
         infoHeight = contentsHeight/2;
         bottomHeight = contentsHeight/2;
+
+        const borderHeight = d3.max([45, infoHeight * 0.2]);
+        getTextInfoHeight = d => d.isCurrent || currentPage.key === "profile" ? borderHeight : 0;
     }
 
     let fontSizes = {
@@ -118,10 +126,16 @@ export default function profileCardsComponent() {
     let kpisComponents = {};
     let goalComponents = {};
 
-
     function profileCards(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
-        // expression elements
+
+        if(d3.select("svg#milestones-bar").select(`#profile-card-clip`).empty()){
+            d3.select("svg#milestones-bar").select('defs')
+                .append('clipPath')
+                    .attr('id', `profile-card-clip`)
+                        .append('rect');
+        }
+            // expression elements
         selection.each(function (data) {
             updateDimns();
             //plan - dont update dom twice for name form
@@ -152,6 +166,7 @@ export default function profileCardsComponent() {
                         //@todo - decide if we need this for anything, or do we just turn off all interacitons inside
                         //a profile unless the profile is first selected so the profile itself can be used for longpress to delete/drag
                         
+                        //ctrls above the card
                         const profileCtrlsG = d3.select(this)
                             .append("g")
                                 .attr("class", "profile-ctrls")
@@ -175,7 +190,11 @@ export default function profileCardsComponent() {
                         //ENTER
                         const contentsG = d3.select(this)
                             .append("g")
-                            .attr("class", "contents profile-card-contents")
+                                .attr("class", "contents profile-card-contents")
+                        
+                        const innerContentsG = contentsG
+                            .append("g")
+                                .attr("class", "inner-contents profile-card-inner-contents");
 
                         //bg rect
                         contentsG
@@ -183,7 +202,7 @@ export default function profileCardsComponent() {
                                 .attr("class", "profile-card-border")
                                 .attr("rx", 3)
                                 .attr("ry", 3)
-                        contentsG
+                        innerContentsG
                             .append("rect")
                                 .attr("class", "profile-card-bg")
                                 .attr("rx", 3)
@@ -192,11 +211,11 @@ export default function profileCardsComponent() {
                                     fill:d => isSelected(d) ? COLOURS.selectedMilestone : COLOURS.milestone
                                 })
 
-                        const topG = contentsG.append("g").attr("class", "top")
-                        const bottomG = contentsG.append("g").attr("class", "bottom")
+                        const topG = innerContentsG.append("g").attr("class", "top").attr("transform", "translate(0,0)")
+                        const bottomG = innerContentsG.append("g").attr("class", "bottom")
 
-                        contentsG.append("g").attr("class", "top-right-ctrls")
-                        contentsG.append("g").attr("class", "bot-right-ctrls")
+                        innerContentsG.append("g").attr("class", "top-right-ctrls")
+                        innerContentsG.append("g").attr("class", "bot-right-ctrls")
 
                         //d3.select(this).append("rect").attr("class", "overlay")
                             //.attr("display", "none");
@@ -208,6 +227,8 @@ export default function profileCardsComponent() {
                             .attr("display", "none");
                         bottomG.append("rect").attr("class", "overlay bottom-overlay")
                             .attr("display", "none");
+
+                        innerContentsG.attr('clip-path', "url(#profile-card-clip)")
 
                 
                     })
@@ -229,7 +250,6 @@ export default function profileCardsComponent() {
                         transition:transformTransition.update 
                     })
                     .each(function(d){
-
                         const profileCtrlsG = d3.select(this).select("g.profile-ctrls")
                             .attr("transform", `translate(${-(profileCtrlsWidth/3)}, ${-contentsHeight/2 - profileCtrlsHeight+5})`)
                             .call(drag)
@@ -265,6 +285,7 @@ export default function profileCardsComponent() {
                         const kpis = kpisComponents[d.id]
                             .width(contentsWidth)
                             .height(bottomHeight)
+                            .expandedHeight(contentsHeight - getTextInfoHeight(d))
                             .kpiHeight(kpiHeight) //may be undefined
                             .fontSizes(fontSizes.kpis)
                             .kpiFormat(kpiFormat)
@@ -273,9 +294,22 @@ export default function profileCardsComponent() {
                             .onUpdateSelected((profileId, kpiKey, shouldUpdateScroll, shouldUpdateDom) => {
                                 data.filter(p => p.id !== profileId).forEach(p => {
                                     kpisComponents[p.id].selected(kpiKey, shouldUpdateScroll, shouldUpdateDom);
-                            })
-                            //parent needs to know so it can control how to handle the wrapperClick event
-                            onUpdateSelectedKpi(kpiKey);
+                                })
+                                //slide stuff up on every card (not just this one) 
+                                containerG.selectAll("g.profile-card").selectAll("g.top")
+                                    .transition()
+                                    .duration(AUTO_SCROLL_DURATION)
+                                    .delay(CONTENT_FADE_DURATION)
+                                        .attr("transform", d => `translate(0,${kpiKey ? -contentsHeight/2 + getTextInfoHeight(d) : 0})`);
+                                
+                                containerG.selectAll("g.profile-card").selectAll("g.bottom")
+                                    .transition()
+                                    .duration(AUTO_SCROLL_DURATION)
+                                    .delay(CONTENT_FADE_DURATION)
+                                       .attr("transform", d => `translate(0,${kpiKey ? getTextInfoHeight(d) : contentsHeight/2})`);
+
+                                //parent needs to know so it can control how to handle the wrapperClick event
+                                onUpdateSelectedKpi(kpiKey);
                             })
                             .onCtrlClick(onCtrlClick)
                             .onSaveValue((valueObj, profileId, datasetKey, statKey, key) => {
@@ -336,8 +370,10 @@ export default function profileCardsComponent() {
                             .style("fill", OVERLAY.FILL)
                             .style("opacity", OVERLAY.OPACITY)
 
-                        const contentsG = d3.select(this).select("g.contents")
+                        const contentsG = d3.select(this).select("g.profile-card-contents")
                             .attr("transform", d =>  `translate(${-contentsWidth/2},${-contentsHeight/2})`)
+                        
+                        const innerContentsG = contentsG.select("g.profile-card-inner-contents")
 
                         const getStrokeWidth = status => {
                             if(status === "fullyOnTrack"){
@@ -367,7 +403,7 @@ export default function profileCardsComponent() {
                             return "none";
                         }
                         //rect sizes
-                        contentsG.selectAll("rect.profile-card-bg")
+                        innerContentsG.selectAll("rect.profile-card-bg")
                             .attr("width", contentsWidth)
                             .attr("height", contentsHeight)
                             .attr("stroke", "none")
@@ -387,11 +423,11 @@ export default function profileCardsComponent() {
                             
                     
                         // why is this too far down
-                        contentsG.selectAll("g.info")
+                        innerContentsG.selectAll("g.info")
                             .datum(d.info)
                             .call(profileInfo)
 
-                        const bottomG = contentsG.select("g.bottom")
+                        const bottomG = innerContentsG.select("g.bottom")
                             .attr("transform", "translate(0," +(contentsHeight/2) +")");
 
                         const kpisG = bottomG.select("g.kpis-area").selectAll("g.kpis").data(currentPage.key === "profile" || d.isCurrent ? [1] : []);
@@ -418,7 +454,7 @@ export default function profileCardsComponent() {
                         let btnWidth = 25;
                         let btnHeight = 25;
 
-                        const topRightBtnG = contentsG.select("g.top-right-ctrls")
+                        const topRightBtnG = innerContentsG.select("g.top-right-ctrls")
                             .attr("transform", `translate(${contentsWidth * 0.98}, ${contentsHeight * 0.02})`)
                             .selectAll("g.top-right-btn")
                             .data(ctrls(d).topRight, b => b.label)
@@ -454,7 +490,7 @@ export default function profileCardsComponent() {
 
                         topRightBtnG.exit().remove(); 
 
-                        const botRightBtnG = contentsG.select("g.bot-right-ctrls")
+                        const botRightBtnG = innerContentsG.select("g.bot-right-ctrls")
                             .attr("transform", `translate(${contentsWidth * 0.96}, ${(contentsHeight * 0.98) - btnHeight})`)
                             .selectAll("g.bot-right-btn")
                             .data(ctrls(d).botRight, b => b.label)
@@ -501,6 +537,12 @@ export default function profileCardsComponent() {
                     .each(function(d){
 
                     })
+            profileCardG.exit().remove();
+
+            d3.select("svg#milestones-bar").select(`#profile-card-clip`)
+                .select("rect")
+                    .attr("width", contentsWidth)
+                    .attr("height", contentsHeight)
 
             function updateTransform(selection, options={}){
                 //console.log("updateTransform profileCards")

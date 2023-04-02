@@ -200,7 +200,7 @@ export default function kpisLayout(){
 
             return {
                 ...kpi,
-                nr:i,
+                nr:i+1,
                 barData,
                 tooltipsData,
                 numbersData
