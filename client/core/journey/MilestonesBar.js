@@ -9,6 +9,7 @@ import Button from '@material-ui/core/Button'
 import SelectDate from "../../util/SelectDate";
 import Settings from "../../util/Settings";
 import Goal from "./Goal";
+import OpenedKpi from './OpenedKpi';
 import Photos from "./Photos";
 import milestonesLayout from "./milestonesLayout";
 import milestonesBarComponent from "./milestonesBarComponent";
@@ -75,8 +76,6 @@ const useStyles = makeStyles((theme) => ({
   },
   reactComponentItem:{
     position:"absolute",
-    border:"solid",
-    borderColor:"blue"
     //pointerEvents:"none",
   },
   reactComponentItemOverlay:{
@@ -131,8 +130,7 @@ const useStyles = makeStyles((theme) => ({
     top:props => `${props.openedKpi.top}px`,
     width:props => `${props.openedKpi.width}px`,
     height:props => `${props.openedKpi.height}px`,
-    //display:props => props.openedKpi.display,
-    background:"yellow",
+    border:"solid"
   }
 }))
 
@@ -187,6 +185,8 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
     return d3.sum(Object.values(heights)) + margins.kpi.top + profile.y - profile.height/2;
   }
   */
+  //apply the bottom margin to the top of openedKpi too so its even (note: the top margin is above the d3 component)
+  const extraMarginAboveOpenedKpi = selectedKpi ? selectedKpi.dimns.margins.kpi.bottom : 0;
   const calcOpenedKpiWidth = dimns => {
     const { margins, profile } = dimns;
     return profile.width - margins.kpi.left - margins.kpi.right;
@@ -195,7 +195,7 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
     const { heights, margins, profile, heightsBelow } = dimns;
     const totalHeightAbove = d3.sum(Object.values(heights)) - heights.topBar + margins.kpi.top;
     const totalHeightBelow = d3.sum(Object.values(heightsBelow)) + margins.kpi.bottom;
-    return profile.height - totalHeightAbove - totalHeightBelow;
+    return profile.height - totalHeightAbove - totalHeightBelow - extraMarginAboveOpenedKpi;
   }
   let styleProps = { 
     bottomCtrlsBarHeight, 
@@ -219,12 +219,12 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
     },
     openedKpi:{
       left:selectedKpi ? selectedKpi.dimns.margins.kpi.left : 0,
-      top:0,
+      top:selectedKpi ? extraMarginAboveOpenedKpi : 0,
       width:selectedKpi ? calcOpenedKpiWidth(selectedKpi.dimns) : 0,
       height:selectedKpi ? calcOpenedKpiHeight(selectedKpi.dimns) : 0,
-      //display:selectedKpi ? null : "none",
     }
   };
+  const openedKpiDisplay = milestone => (selectedKpi && (milestone.isCurrent || reactComponent?.componentType === "profile")) ? null : "none";
   const classes = useStyles(styleProps);
   const reactComponentRef = useRef(null);
   const formRef = useRef(null);
@@ -466,10 +466,9 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
                     setEditing={onSetEditingReactComponent}
                   />
                 }
-                <div 
-                  className={`${classes.openedKpi} opened-kpi`} id={`opened-kpi-${m.id}`}
-                  style={{display:(selectedKpi && (m.isCurrent || reactComponent?.componentType === "profile")) ? null : "none"}}
-                  >opened kpi</div>
+                <div className={classes.openedKpi} id={`opened-kpi-${m.id}`} style={{display:openedKpiDisplay(m)}}>
+                    <OpenedKpi/>
+                </div>
                 {selectedMilestone && selectedMilestone !== m.id && <div className={classes.reactComponentItemOverlay}></div>}
               </div>
             ))
