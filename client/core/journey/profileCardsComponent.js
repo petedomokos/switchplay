@@ -212,7 +212,10 @@ export default function profileCardsComponent() {
                                 })
 
                         const topG = innerContentsG.append("g").attr("class", "top").attr("transform", "translate(0,0)")
+                        //set transform here rather than update so it doesnt reset whilst a kpi is selected
+                        //alternative is ot update it based on selectedKpi too
                         const bottomG = innerContentsG.append("g").attr("class", "bottom")
+                            .attr("transform", "translate(0," +(contentsHeight/2) +")")
 
                         innerContentsG.append("g").attr("class", "top-right-ctrls")
                         innerContentsG.append("g").attr("class", "bot-right-ctrls")
@@ -291,25 +294,32 @@ export default function profileCardsComponent() {
                             .kpiFormat(kpiFormat)
                             .editable(editable)
                             .scrollable(scrollable)
-                            .onUpdateSelected((profileId, kpiKey, shouldUpdateScroll, shouldUpdateDom) => {
+                            .onUpdateSelected((profileId, kpiKey, shouldUpdateScroll, shouldUpdateDom, dimns) => {
+                                const profileShouldUpdate = profile => profile.id === "current" || currentPage.key === "profile"; 
                                 data.filter(p => p.id !== profileId).forEach(p => {
                                     kpisComponents[p.id].selected(kpiKey, shouldUpdateScroll, shouldUpdateDom);
                                 })
                                 //slide stuff up on every card (not just this one) 
-                                containerG.selectAll("g.profile-card").selectAll("g.top")
+                                containerG.selectAll("g.profile-card").filter(d => profileShouldUpdate(d)).selectAll("g.top")
                                     .transition()
                                     .duration(AUTO_SCROLL_DURATION)
                                     .delay(CONTENT_FADE_DURATION)
                                         .attr("transform", d => `translate(0,${kpiKey ? -contentsHeight/2 + getTextInfoHeight(d) : 0})`);
                                 
-                                containerG.selectAll("g.profile-card").selectAll("g.bottom")
+                                containerG.selectAll("g.profile-card").filter(d => profileShouldUpdate(d)).selectAll("g.bottom")
                                     .transition()
                                     .duration(AUTO_SCROLL_DURATION)
                                     .delay(CONTENT_FADE_DURATION)
                                        .attr("transform", d => `translate(0,${kpiKey ? getTextInfoHeight(d) : contentsHeight/2})`);
 
                                 //parent needs to know so it can control how to handle the wrapperClick event
-                                onUpdateSelectedKpi(kpiKey);
+                                const profile = data.find(p => p.id === profileId);
+                                const _dimns = !profile ? null : {
+                                    ...dimns,
+                                    profile: { x: profile.x, y:profile.y, width:profile.width, height:profile.height },
+                                    heights: { ...dimns.heights, textInfo:getTextInfoHeight(profile) }
+                                }
+                                onUpdateSelectedKpi(profileId, kpiKey, _dimns);
                             })
                             .onCtrlClick(onCtrlClick)
                             .onSaveValue((valueObj, profileId, datasetKey, statKey, key) => {
@@ -427,8 +437,13 @@ export default function profileCardsComponent() {
                             .datum(d.info)
                             .call(profileInfo)
 
+                        //the issue is this causes it to junp dwn when selctedmilestone changes, even if 
+                        //a kpi is still selected
+                        //soln 1 - used now - just do on enter
+                        //soln 2 - could get selectedKpi from kpiscomponent, and adjust transform here accordingly
+                        //for soln 2, prob best to move selectedKpi to this level too, and pass it through
                         const bottomG = innerContentsG.select("g.bottom")
-                            .attr("transform", "translate(0," +(contentsHeight/2) +")");
+                            //.attr("transform", "translate(0," +(contentsHeight/2) +")");
 
                         const kpisG = bottomG.select("g.kpis-area").selectAll("g.kpis").data(currentPage.key === "profile" || d.isCurrent ? [1] : []);
                         kpisG.enter()

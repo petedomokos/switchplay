@@ -52,7 +52,7 @@ export default function kpisComponent() {
     let gapBetweenKpis;
 
     let fixedSelectedKpiHeight;
-    let openKpiHeight;
+    let openedKpiHeight;
 
     let closeBtnWidth;
     let closeBtnHeight;
@@ -89,9 +89,9 @@ export default function kpisComponent() {
         listHeight = contentsHeight - ctrlsHeight;
         kpiHeight = fixedKpiHeight || listHeight/5;
         //selectedKpi must expand for tooltip rows, by 0.75 of kpiHeight per tooltip
-        openKpiHeight = fixedSelectedKpiHeight || listHeight;//kpiHeight + (0.75 * kpiHeight * nrTooltipRows);
+        openedKpiHeight = fixedSelectedKpiHeight || listHeight;//kpiHeight + (0.75 * kpiHeight * nrTooltipRows);
         const kpiHeights = kpisData
-            .map(kpi => status(kpi) === "open" || status(kpi) === "closing" ? openKpiHeight : kpiHeight);
+            .map(kpi => status(kpi) === "open" || status(kpi) === "closing" ? openedKpiHeight : kpiHeight);
 
         scrollMin = -d3.sum(kpiHeights.slice(0, kpiHeights.length - 1)); //stop when last kpi is at top
         scrollMax = 0;
@@ -111,6 +111,7 @@ export default function kpisComponent() {
     };
     let styles = {}
 
+    let milestoneId;
     let kpiFormat = "actual";
     let withTooltips = true;
     let withCtrls = true;
@@ -154,6 +155,7 @@ export default function kpisComponent() {
 
     //dom
     let containerG;
+    let openedKpiDiv;
     function kpis(selection, options={}) {
         //console.log("kpis update..............")
         const { transitionEnter=true, transitionUpdate=true, log } = options;
@@ -162,7 +164,12 @@ export default function kpisComponent() {
         selection.each(function (data,i) {
             prevData = data;
             const { kpisData } = data;
-            //console.log("kpis",this.parentNode.parentNode, data)
+            //useful references
+            if(kpisData[0]){
+                milestoneId = kpisData[0].milestoneId;
+                openedKpiDiv = d3.select(`div#opened-kpi-${milestoneId}`)
+            }
+
             const ctrlsData = withCtrls ? data.ctrlsData : [];
 
             const nrOfCtrlsButtons = ctrlsData?.length;
@@ -315,7 +322,7 @@ export default function kpisComponent() {
                         //helper to get y pos
                         const calcY = (d,i) => {
 
-                            const extraSpaceForSelected = openKpiHeight - kpiHeight;
+                            const extraSpaceForSelected = openedKpiHeight - kpiHeight;
                             const isAfterOpenKpi = !!kpisData
                                 .slice(0, i)
                                 .find(kpi => status(kpi) === "open" || status(kpi) === "closing");
@@ -329,6 +336,21 @@ export default function kpisComponent() {
                         //this should happen before the scroll.
                         //a delay seems ot have crept in
 
+                        //helpers
+                        const calcProgressBarHeight = (d,i) => {
+                            status(d) === "open" || status(d) === "closing" ? openedKpiHeight : kpiHeight
+                        }
+                        const calcTitleDimns = (d,i) => {
+                             //need contentsWidth and Height to work out name dimns and fontsize so it doesnt change based on status in general update
+                             const kpiContentsWidth = kpiWidth - kpiMargin.left - kpiMargin.right;
+                             const kpiContentsHeight = kpiHeight - kpiMargin.top - kpiMargin.bottom;
+                             const width = kpiContentsWidth * 0.5;
+                             const height = d3.min([kpiContentsHeight * 0.35, 10]);
+                             const margin = { top: height * 0.1, bottom: height * 0.1 };
+                             const fontSize = status(d) === "open" || status(d) === "opening" ? height : height * 0.7;
+                             return { width, height, margin, fontSize }
+                        }
+
                         const notClosedKpi = getNotClosedKpiKey(statuses);
                         const kpisDataToUse = notClosedKpi ? kpisData.filter(d => d.key === notClosedKpi) : kpisData;
                         const kpiG = listContentsG.selectAll("g.kpi").data(kpisDataToUse, d => d.key);
@@ -341,8 +363,7 @@ export default function kpisComponent() {
                             .style("cursor", d => isSelected(d) ? "default" : "pointer")
                             .call(kpi
                                 .width(() => kpiWidth)
-                                .height((d,i) => status(d) === "open" || status(d) === "closing" ? openKpiHeight : kpiHeight)
-                                //.expandedHeight(openKpiHeight)
+                                .height((d,i) => status(d) === "open" || status(d) === "closing" ? openedKpiHeight : kpiHeight)
                                 .status(d => status(d) || "closed")
                                 .margin(() => kpiMargin)
                                 .titleDimns((d) => {
@@ -363,17 +384,20 @@ export default function kpisComponent() {
                                     }
                                 }))
                                 .onDblClick(onDblClickKpi)
-                                .onClick(function(e,d){
-                                    //need to go thru the logi of how this works, and then feed
-                                    //the increase of kpisComp size and the sliding up to accomodate it
-                                    //then add the react comp in teh gap
-                                    //and also add then bands to kpis -> are these bands or something else? see my paper
-                                    
-                                    //@todo - bug - after clicking several kpis, the profiles dont 
-                                    //stay in sync with each other. it seems that teh ones called from externally,
-                                    //ie teh ones not actually scrolled, seem to jump back to 0 again, and go from there
+                                .onClick(function(e, d){
                                     updateSelected(d.key, data, true, true);
-                                    onUpdateSelected(d.milestoneId, d.key, true, true);
+                                    const dimns = {
+                                        heights: { 
+                                            kpi:openedKpiHeight
+                                        },
+                                        margins:{
+                                            kpi:margin
+                                        },
+                                        heightsBelow:{
+                                            kpisCtrlsHeight:ctrlsHeight
+                                        }
+                                    }
+                                    onUpdateSelected(d.milestoneId, d.key, true, true, dimns);
                                 })
                                 .onSaveValue(onSaveValue)
                             )
@@ -465,6 +489,7 @@ export default function kpisComponent() {
         //console.log("selected----", selected)
         //1. UPDATE STATUS TO OPENING/CLOSING
         if(selected === key) { return; }
+
         //todo next - check this works with statusses , once i implement it in chldren
         //if currently somethign is selected, we will deselct and close
         let prevSelected;
@@ -473,6 +498,15 @@ export default function kpisComponent() {
             statuses[selected] = "closing";
             if(!key){
                 //close everything to return to normal dimns
+                //bug - there is an extra delay to the removal of the d3 openedKpi contents
+                //need to find  it, or at least add it on to this...
+                //d3.selectAll("div.openedKpi")
+                openedKpiDiv
+                    .transition()
+                    .duration(CONTENT_FADE_DURATION)
+                        .style("opacity", 0)
+                        //.on("end", function(){ d3.select(this).style("display", "none"); })
+
                 containerG.select("rect.contents-bg")
                     .transition()
                     .delay(CONTENT_FADE_DURATION)
@@ -515,7 +549,7 @@ export default function kpisComponent() {
 
         //3. AFTER DELAY TO ALLOW REMOVAL OF CONTENT, SLIDE THE KPIS BELOW DOWN/BACK UP
         const calcY = (d,i) => {
-            const extraSpaceForSelected = openKpiHeight - kpiHeight;
+            const extraSpaceForSelected = openedKpiHeight - kpiHeight;
             //find the newly opening one, if it exists, otherwise its false for all kpis (note, it isnt 'open' yet)
             const isAfterOpenKpi = !!kpisData
                 .slice(0, i)
@@ -551,7 +585,16 @@ export default function kpisComponent() {
                             containerG.call(kpis) 
                         }
                     });
-            //also transition the height of the opening kpi
+            if(!key){ return; }
+            //open everything, and also transition the height of the opening kpi
+            openedKpiDiv
+                .style("display", null)
+                .style("opacity", 0)
+                    .transition()
+                    .delay(CONTENT_FADE_DURATION + AUTO_SCROLL_DURATION)
+                    .duration(CONTENT_FADE_DURATION)
+                        .style("opacity", 1)
+
             const expandedContentsHeight = expandedHeight - margin.top - margin.bottom;
             const expandedListHeight = expandedContentsHeight - ctrlsHeight;
             containerG.select("rect.contents-bg")
@@ -652,7 +695,7 @@ export default function kpisComponent() {
         fixedKpiHeight = value;
         return kpis;
     };
-    kpis.openKpiHeight = function (value) {
+    kpis.openedKpiHeight = function (value) {
         if (!arguments.length) { return fixedSelectedKpiHeight; }
         fixedSelectedKpiHeight = value;
         return kpis;

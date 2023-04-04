@@ -75,6 +75,8 @@ const useStyles = makeStyles((theme) => ({
   },
   reactComponentItem:{
     position:"absolute",
+    border:"solid",
+    borderColor:"blue"
     //pointerEvents:"none",
   },
   reactComponentItemOverlay:{
@@ -122,6 +124,15 @@ const useStyles = makeStyles((theme) => ({
     width:"60px",
     margin:"5px",
     fontSize:"12px"
+  },
+  openedKpi:{
+    position:"absolute",
+    left:props => `${props.openedKpi.left}px`,
+    top:props => `${props.openedKpi.top}px`,
+    width:props => `${props.openedKpi.width}px`,
+    height:props => `${props.openedKpi.height}px`,
+    //display:props => props.openedKpi.display,
+    background:"yellow",
   }
 }))
 
@@ -134,6 +145,8 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
   const [bgMenuLocation, setBgMenuLocation] = useState("");
   const [sliderEnabled, setSliderEnabled] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState("");
+  const [selectedKpi, setSelectedKpi] = useState(null);
+  //console.log("selKPI", selectedKpi)
   const [reactComponent, setReactComponent] = useState(null);
   const [editingReactComponent, setEditingReactComponent] = useState("");
   const [editingSVGComponent, setEditingSVGComponent] = useState(null);
@@ -163,6 +176,27 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
   const [milestonesBar, setMilestonesBar] = useState(() => milestonesBarComponent());
 
   const bottomCtrlsBarHeight = screen.isLarge ? DIMNS.milestonesBar.ctrls.height : 0;
+  //helpers
+  /*
+  const calcOpenedKpiX = dimns => {
+    const { margins, profile, offset } = dimns;
+    return profile.x - profile.width/2 + offset + margins.kpi.left;
+  }
+  const calcOpenedKpiY = dimns => {
+    const { heights, margins, profile } = dimns;
+    return d3.sum(Object.values(heights)) + margins.kpi.top + profile.y - profile.height/2;
+  }
+  */
+  const calcOpenedKpiWidth = dimns => {
+    const { margins, profile } = dimns;
+    return profile.width - margins.kpi.left - margins.kpi.right;
+  }
+  const calcOpenedKpiHeight = dimns => {
+    const { heights, margins, profile, heightsBelow } = dimns;
+    const totalHeightAbove = d3.sum(Object.values(heights)) - heights.topBar + margins.kpi.top;
+    const totalHeightBelow = d3.sum(Object.values(heightsBelow)) + margins.kpi.bottom;
+    return profile.height - totalHeightAbove - totalHeightBelow;
+  }
   let styleProps = { 
     bottomCtrlsBarHeight, 
     sliderEnabled, 
@@ -182,12 +216,20 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
     svg:{
       //hide if photo form is showing so it doesnt scroll the screen
       display:form?.formType === "photo" ? "none" : null,
+    },
+    openedKpi:{
+      left:selectedKpi ? selectedKpi.dimns.margins.kpi.left : 0,
+      top:0,
+      width:selectedKpi ? calcOpenedKpiWidth(selectedKpi.dimns) : 0,
+      height:selectedKpi ? calcOpenedKpiHeight(selectedKpi.dimns) : 0,
+      //display:selectedKpi ? null : "none",
     }
   };
   const classes = useStyles(styleProps);
   const reactComponentRef = useRef(null);
   const formRef = useRef(null);
   const containerRef = useRef(null);
+  const openedKpiRef = useRef(null);
 
   const stringifiedProfiles = JSON.stringify(profiles);
 
@@ -312,6 +354,7 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
       .onTakeOverScreen(takeOverScreen)
       .onReleaseScreen(releaseScreen)
       .onSetSelectedMilestone(setSelectedMilestone)
+      .onSetSelectedKpi(setSelectedKpi)
       .onSetKpiFormat(setKpiFormat)
       .onSelectKpiSet((e,kpi) => { 
           onSelectKpiSet(kpi); 
@@ -413,14 +456,20 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
       <div className={classes.outerReactContainer}>
         <div className={classes.reactComponentContainer} id="react-container" ref={reactComponentRef}>
           {
-            allMilestones.filter(m => !m.isCurrent).map(m => (
+            allMilestones.map(m => (
               <div className={`${classes.reactComponentItem} milestone`} key={`milestone-${m.id}`} id={`milestone-`+m.id}>
-                <Goal
-                  milestone={m}
-                  editable={editingSVGComponent === null}
-                  editing={editingReactComponent?.milestoneId === m.id ? editingReactComponent : null}
-                  setEditing={onSetEditingReactComponent}
-                />
+                {!m.isCurrent && reactComponent?.componentType === "goal" &&
+                  <Goal
+                    milestone={m}
+                    editable={editingSVGComponent === null}
+                    editing={editingReactComponent?.milestoneId === m.id ? editingReactComponent : null}
+                    setEditing={onSetEditingReactComponent}
+                  />
+                }
+                <div 
+                  className={`${classes.openedKpi} opened-kpi`} id={`opened-kpi-${m.id}`}
+                  style={{display:(selectedKpi && (m.isCurrent || reactComponent?.componentType === "profile")) ? null : "none"}}
+                  >opened kpi</div>
                 {selectedMilestone && selectedMilestone !== m.id && <div className={classes.reactComponentItemOverlay}></div>}
               </div>
             ))

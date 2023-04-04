@@ -30,14 +30,14 @@ export default function kpiComponent() {
     let _margin = () => DEFAULT_MARGIN;
     let _titleDimns = () => DEFAULT_TITLE_DIMNS;
 
-    let dimns = [];
+    let dimns = {};
     //components
     let closedProgressBars = {};
     let openProgressBars = {};
 
     //per datum
     function updateDimns(data){
-        dimns = [];
+        dimns = {};
         return data.forEach((d,i) => {
             const width = _width(d,i)
             const height = _height(d,i);
@@ -58,10 +58,6 @@ export default function kpiComponent() {
             //this needs to change so it stays at top when open
             const MAX_PROGRESS_BAR_HEIGHT = 140;
             const progressBarHeight = d3.min([MAX_PROGRESS_BAR_HEIGHT, contentsHeight - titleDimns.height]);
-            if(d.isCurrent && d.key === "pressUps-reps"){
-                //console.log("progBarHeight", progressBarHeight)
-                //console.log("status", status(d))
-            }
             const kpiInfoHeight = contentsHeight - titleDimns.height - progressBarHeight;
             
             const progressBarMargin = { 
@@ -72,12 +68,12 @@ export default function kpiComponent() {
                 bottom: 0 
             };
             //console.log("kpiH kpiCH titleH pbh", height, contentsHeight, titleDimns.height, progressBarHeight)
-            dimns.push({
+            dimns[d.key] = {
                 width, height, margin, contentsWidth, contentsHeight,
                 titleDimns,
                 progressBarWidth, progressBarHeight, progressBarMargin,
                 kpiInfoHeight
-            })
+            }
         })
     }
 
@@ -116,15 +112,18 @@ export default function kpiComponent() {
     let onDelete = function(){};
     let onSaveValue = function(){};
 
+    /*
     const enhancedDrag = dragEnhancements()
         .onClick((e,d) => {
-            onClick.call(this, e, d); 
+            console.log("clicked", d)
+            onClick.call(this, e, d, { progressBarHeight }); 
         }) //todo - why do i have to write it out like this?
         //.onClick(onClick) not working
         .onDblClick(onDblClick)
         .onLongpressStart(function(e, d){
             console.log("lp...........")
         });
+    */
 
     //const contents = containerComponent();
     //const background = backgroundComponent();
@@ -139,41 +138,41 @@ export default function kpiComponent() {
         updateDimns(selection.data());
         updateComponents(selection.data());
 
-        const drag = d3.drag()
+        /*const drag = d3.drag()
             .on("start", enhancedDrag())
             .on("drag", enhancedDrag())
-            .on("end", enhancedDrag());
+            .on("end", enhancedDrag());*/
 
         // expression elements
         selection
             .call(container()
                 .className("kpi-contents")
-                .transform((d, i) => `translate(${dimns[i].margin.left},${dimns[i].margin.top})`)
+                .transform((d, i) => `translate(${dimns[d.key].margin.left},${dimns[d.key].margin.top})`)
             )
         const kpiContentsG = selection.select("g.kpi-contents");
         kpiContentsG
             .call(background()
-                .width((d,i) => dimns[i].contentsWidth)
-                .height((d,i) => dimns[i].contentsHeight)
+                .width((d,i) => dimns[d.key].contentsWidth)
+                .height((d,i) => dimns[d.key].contentsHeight)
                 .styles((d, i) => ({
                     stroke:"none",
                     fill:/*_styles(d).bg.fill || */"transparent"
                 })))
             .call(container().className("name"))
             //.call(container().className("non-selected-progress-bar")
-                //.transform((d, i) => `translate(0,${dimns[i].titleHeight})`))
+                //.transform((d, i) => `translate(0,${dimns[d.key].titleHeight})`))
             .on("click", onClick)
             //.call(drag)
 
         //console.log("marginTop titleMarginTop titleHeight", dimns[2].margin.top, dimns[2].titleMargin.top, dimns[2].titleHeight)
         kpiContentsG.select("g.name")
             .call(title
-                .width((d,i) => dimns[i].titleDimns.width)
-                .height((d,i) => dimns[i].titleDimns.height)
-                .margin((d,i) => dimns[i].titleDimns.margin)
+                .width((d,i) => dimns[d.key].titleDimns.width)
+                .height((d,i) => dimns[d.key].titleDimns.height)
+                .margin((d,i) => dimns[d.key].titleDimns.margin)
                 .styles((d,i) => ({
                     primaryTitle:{ 
-                        fontSize:dimns[i].titleDimns.fontSize,
+                        fontSize:dimns[d.key].titleDimns.fontSize,
                         strokeWidth:0.2,
                         ..._styles(d,i).name,
                         dominantBaseline:"central",
@@ -194,7 +193,7 @@ export default function kpiComponent() {
         //open and closed contents
         kpiContentsG.each(function(data,i){
             //console.log("data-----------------------", data)
-            const { contentsHeight, titleDimns, progressBarWidth, progressBarHeight, progressBarMargin, kpiInfoHeight } = dimns[i];
+            const { contentsHeight, titleDimns, progressBarWidth, progressBarHeight, progressBarMargin, kpiInfoHeight } = dimns[data.key];
 
             const closedData = status(data) === "closed" ? [data] : [];
             const openData = status(data) === "open" ? [data] : [];
@@ -285,9 +284,9 @@ export default function kpiComponent() {
         /*kpiContents.select("g.numbers")
             .data(selection.data().map(d => d.numbersData))
             .call(numbers
-                .width((d,i) => dimns[i].numbersWidth)
-                .height((d,i) => dimns[i].numbersHeight)
-                .margin((d,i) => dimns[i].numbersMargin)
+                .width((d,i) => dimns[d.key].numbersWidth)
+                .height((d,i) => dimns[d.key].numbersHeight)
+                .margin((d,i) => dimns[d.key].numbersMargin)
             )*/
             //.call(drag)
 

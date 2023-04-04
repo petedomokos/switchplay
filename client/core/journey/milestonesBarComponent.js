@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, FONTSIZES, grey10, COLOURS, PROFILE_PAGES  } from "./constants";
+import { DIMNS, FONTSIZES, grey10, COLOURS, PROFILE_PAGES, TRANSITIONS  } from "./constants";
 import contractsComponent from './contractsComponent';
 import profileCardsComponent from './profileCardsComponent';
 import dragEnhancements from './enhancedDragHandler';
@@ -12,6 +12,8 @@ import { hide, show, Oscillator } from './domHelpers';
 import { getTransformationFromTrans } from './helpers';
 
 import { turnPage } from "../../../assets/icons/milestoneIcons.js"
+
+const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
 
 /*
 
@@ -144,6 +146,7 @@ export default function milestonesBarComponent() {
 
     let kpiFormat;
     let onSetSelectedMilestone = function(){};
+    let onSetSelectedKpi = function(){};
     let onSetKpiFormat = function(){};
     let onSelectKpiSet = function(){};
     let onToggleSliderEnabled = function(){};
@@ -657,11 +660,11 @@ export default function milestonesBarComponent() {
                 //slideTo(requiredSliderPosition, { transition:slideTransition });
 
                 //first set the react component, then slideTo will update its position as part of tha transition
-                const reactComponent = currentPage.key === "goal" ? {
-                    componentType:"goal",
+                const reactComponent = /*currentPage.key === "goal" ?*/ {
+                    componentType:currentPage.key,//"goal",
                     transform:[currentSliderOffset, topBarHeight],
                     items:positionedData
-                } : null;
+                }// : null;
                 // left: currentSliderOffset + x - (width/2) *k, 
                 //top: topBarHeight + y - (height/2) * k
                 setReactComponent(reactComponent)
@@ -962,9 +965,20 @@ export default function milestonesBarComponent() {
                         })
                         //if closing a kpi, we dont want it to reopen or close the card (via wrapperClick). 
                         //but if its selecting a kpi, we do want it to also open the card 
-                        .onUpdateSelectedKpi((key) => { 
+                        .onUpdateSelectedKpi((profileId, key, dimns) => { 
                             setForm(null);
-                            if(!key){ ignoreNextWrapperClick = true; } 
+                            if(!key){ 
+                                ignoreNextWrapperClick = true;
+                                //must delay changing the display to none, to allow teh opacity to fade out
+                                //@todo - refcator into a clearer and consistent pattern how we handle react comp 
+                                //opacity ad display updates
+                                d3.timeout(() => {
+                                    onSetSelectedKpi(null);
+                                }, CONTENT_FADE_DURATION)
+                            }else{
+                                const _dimns = { ...dimns, heights:{ ...dimns.heights, topBar: topBarHeight }, offset:currentSliderOffset };
+                                onSetSelectedKpi({ profileId, key, dimns:_dimns });
+                            }
                         })
                         .onMilestoneWrapperPseudoDragStart(dragStart)
                         .onMilestoneWrapperPseudoDrag(dragged)
@@ -1016,7 +1030,6 @@ export default function milestonesBarComponent() {
 
                 endMilestoneEdit = function(){
                     //bug - this is being called twice when cliking eg bottom overlay of profile
-                    console.log("endMilestoneEdit")
                     if(!milestoneBeingEdited){ return; }
                     const { id, desc } = milestoneBeingEdited;
                     profiles.endEditing(id);
@@ -1028,9 +1041,7 @@ export default function milestonesBarComponent() {
                     //const initTransformState = d3.zoomTransform(containerG.select("g.photo").node());
                     //console.log("tttttttt", initTransformState)
                     const transform = d3.select(`g.milestone-${id}`).select("g.photo").select("image").attr("transform");
-                    console.log("transform to save", transform)
                     const { translateX=0, translateY=0, scaleX=1 } = getTransformationFromTrans(transform);
-                    console.log("tX tY scale", translateX, translateY, scaleX)
                     //@todo - work out why I cant seem to gran teh transform from the d3 transform object
                     //const trans = d3.zoomTransform(milestoneG.select("g.photo")) -> returns the identity instead
                     const locationKey = id === "current" ? "profile" : currentPage.key;
@@ -1271,6 +1282,13 @@ export default function milestonesBarComponent() {
         if (!arguments.length) { return onSetSelectedMilestone; }
         if(typeof value === "function"){
             onSetSelectedMilestone = value;
+        }
+        return milestonesBar;
+    };
+    milestonesBar.onSetSelectedKpi = function (value) {
+        if (!arguments.length) { return onSetSelectedKpi; }
+        if(typeof value === "function"){
+            onSetSelectedKpi = value;
         }
         return milestonesBar;
     };
