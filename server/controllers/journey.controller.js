@@ -54,16 +54,17 @@ const journeyByID = async (req, res, next, id) => {
 attempts to create a new user in in db. 
 */
 const create = async (req, res) => {
+  //todo - next  - uncomment this stuff so it saves
     console.log('create journey...user.................................................................', req.user._id)
     //console.log("req body", req.body)
-    /*
     //create new
     //const id = "new-journey" //todo - use uuid() or date etc to make unique
     const journey = new Journey({ 
       //id,
       ...req.body,
       userId:req.user._id,
-      admin:[req.user._id]
+      admin:[req.user._id],
+      updated:Date.now()
     });
     //console.log('created journey', journey)
     //todo - add admin as the signed in user
@@ -92,7 +93,6 @@ const create = async (req, res) => {
         error: errorHandler.getErrorMessage(err)
       })
     }
-    */
   }
   
   const update = async (req, res) => {
@@ -101,7 +101,8 @@ const create = async (req, res) => {
     //console.log("req journey", journey)
     //console.log("body", req.body)
     journey = extend(journey, req.body);
-    console.log("extended journey", journey.profiles.map(p => p.date))
+    journey.updated = Date.now()
+    ///console.log("extended journey", journey.profiles.map(p => p.date))
     try {
       const result = await journey.save()
       //console.log("res", result)

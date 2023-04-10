@@ -6,6 +6,7 @@ import { fetchMultipleFullDatasets } from '../../actions/DatasetActions'
 import { createDatapoints } from '../../actions/DatapointActions'
 import { updateUser } from '../../actions/UserActions'
 import { hydrateJourneyData } from "./hydrateJourney";
+import { createEmptyJourney } from './constants'
 
 
 const mockJourneyMeasures = [
@@ -73,13 +74,6 @@ const mockProfiles = [
 	}
 ]
 
-const emptyJourney = user => ({ 
-	_id:"temp", contracts:[], profiles:[], aims:[], goals:[], links:[],
-	measures:[], kpis:[], media:[],
-	playerId:user.isPlayer ? user._id : null,
-	coachId:user.isCoach && !user.isPlayer ? user._id : null,
-	groupId: null //todo - this can be an option for a coach
-})
 
 const mapStateToProps = (state, ownProps) => {
 	//console.log("JourneyContainer..........state", state.user)
@@ -91,7 +85,7 @@ const mapStateToProps = (state, ownProps) => {
 	//console.log("journeys", journeys)
 	const journeyId = state.system.activeJourney || homeJourney;
 	//console.log("JourneyCont journeyId", journeyId)
-	const _data = journeys.find(j => j._id === journeyId) || journeys[0] || emptyJourney(state.user);
+	const _data = journeys.find(j => j._id === journeyId) || journeys[0] || createEmptyJourney(state.user);
 	//console.log("JourneyContainer data", _data)
 	//add mock profiles the first time only (note - these must be turnd off before we enabled server-side persitance again)
 	//const mocksAdded = !!_data.profiles.find(p => p.id.includes("mock"));

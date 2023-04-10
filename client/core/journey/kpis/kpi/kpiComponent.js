@@ -6,11 +6,28 @@ import { Oscillator, fadeIn, remove } from '../../domHelpers';
 import { getTransformationFromTrans } from '../../helpers';
 import titleComponent from './titleComponent';
 import progressBarComponent from './progressBarComponent';
+import listComponent from './listComponent';
 import container from './container';
 import background from './background';
 
 const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
 const AUTO_SCROLL_DURATION = TRANSITIONS.KPIS.AUTO_SCROLL.DURATION;
+
+const MAX_PROGRESS_BAR_HEIGHT = 100;
+
+
+const mockSteps = [
+    { id:"1", desc:"Step 1", complete:false },
+    { id:"2", desc:"Step 2", complete:false },
+    { id:"3", desc:"Step 3", complete:false },
+    { id:"4", desc:"Step 4", complete:false },
+    { id:"5", desc:"Step 5", complete:false },
+    { id:"6", desc:"Step 6", complete:false },
+    { id:"7", desc:"Step 7", complete:false },
+    { id:"8", desc:"Step 8", complete:false },
+    { id:"9", desc:"Step 9", complete:false },
+    { id:"10", desc:"Step 10", complete:false }
+  ]
 
 
 /*
@@ -56,9 +73,13 @@ export default function kpiComponent() {
             the other factor is the margins of teh bar 
             */
             //this needs to change so it stays at top when open
-            const MAX_PROGRESS_BAR_HEIGHT = 140;
             const progressBarHeight = d3.min([MAX_PROGRESS_BAR_HEIGHT, contentsHeight - titleDimns.height]);
-            const kpiInfoHeight = contentsHeight - titleDimns.height - progressBarHeight;
+
+            const kpiInfoWidth = contentsWidth;
+
+            const historyWidth = 110;
+            const historyHeight = 15;
+            const kpiInfoHeight = contentsHeight - titleDimns.height - progressBarHeight - historyHeight;
             
             const progressBarMargin = { 
                 //@todo - decide if we need a margin when closed
@@ -72,7 +93,8 @@ export default function kpiComponent() {
                 width, height, margin, contentsWidth, contentsHeight,
                 titleDimns,
                 progressBarWidth, progressBarHeight, progressBarMargin,
-                kpiInfoHeight
+                kpiInfoWidth, kpiInfoHeight,
+                historyWidth, historyHeight
             }
         })
     }
@@ -100,6 +122,7 @@ export default function kpiComponent() {
 
     //API CALLBACKS
     let onClick = function(){};
+    let onEditStep = function(){};
     let onDblClick = function(){};
     let onDragStart = function(){};
     let onDrag = function() {};
@@ -128,6 +151,7 @@ export default function kpiComponent() {
     //const contents = containerComponent();
     //const background = backgroundComponent();
     const title = titleComponent();
+    const stepsList = listComponent();
     //const openProgressBar = progressBarComponent()
         //.editable(() => true);
    //const closedProgressBar = progressBarComponent()
@@ -183,7 +207,7 @@ export default function kpiComponent() {
 
                     }
                 }))
-                .primaryTitle(d => `${d.nr}. ${d.datasetName} (${d.statName})`)
+                .primaryTitle(d => d.name ? `${d.nr}. ${d.name}` : `${d.nr}. ${d.datasetName} (${d.statName})`)
                 //@todo - make statName a sec title, and measure length of primaryTitle
                 //.secondaryTitle(d => d.statName)
                 .textDirection("horiz")
@@ -193,7 +217,8 @@ export default function kpiComponent() {
         //open and closed contents
         kpiContentsG.each(function(data,i){
             //console.log("data-----------------------", data)
-            const { contentsHeight, titleDimns, progressBarWidth, progressBarHeight, progressBarMargin, kpiInfoHeight } = dimns[data.key];
+            const { contentsHeight, titleDimns, progressBarWidth, progressBarHeight, progressBarMargin, 
+                kpiInfoWidth, kpiInfoHeight, historyWidth, historyHeight } = dimns[data.key];
 
             const closedData = status(data) === "closed" ? [data] : [];
             const openData = status(data) === "open" ? [data] : [];
@@ -206,7 +231,7 @@ export default function kpiComponent() {
                     .call(fadeIn)
                     .merge(closedContentsG)
                     //closedkpi doesnt show info so that space is just turned into an extra margin
-                    .attr("transform", `translate(0,${titleDimns.height + kpiInfoHeight/2})`)
+                    .attr("transform", `translate(0,${titleDimns.height})`)
                     .each(function(d){
                         d3.select(this)
                             .call(closedProgressBars[d.key]
@@ -227,19 +252,58 @@ export default function kpiComponent() {
                     .merge(openContentsG)
                     .attr("transform", `translate(0,${titleDimns.height})`)
                     .each(function(d, j){
+                        console.log("d", d)
                         d3.select(this)
                             .call(openProgressBars[d.key]
                                 .width((d) => progressBarWidth)
                                 .height((d) => progressBarHeight)
                                 .margin((d) => progressBarMargin)
                                 .onSaveValue(onSaveValue))
+
+                        const stepsData = d.steps;
+                        const kpiStepsG = d3.select(this).selectAll("g.kpi-steps").data([stepsData]);
+                        kpiStepsG.enter()
+                            .append("g")
+                                .attr("class", "kpi-steps")
+                                .merge(kpiStepsG)
+                                .attr("transform", `translate(0, ${progressBarHeight})`)
+                                .call(stepsList
+                                    .width(kpiInfoWidth)
+                                    .height(kpiInfoHeight)
+                                    .margin({ left:0, right: 0, top:kpiInfoHeight * 0.1, bottom:kpiInfoHeight * 0.1 })
+                                    .newItemDesc("Add Step")
+                                    .onCreateItem(() => {
+                                        //console.log("create new step...")
+                                    })
+                                    .onEditItem(function(id, dimns){
+                                        const { translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
+                                        const _dimns = {
+                                            widths:dimns.widths,
+                                            margins:dimns.margins,
+                                            heights:{
+                                                ...dimns.heights,
+                                                title:titleDimns.height,
+                                                progressBar:progressBarHeight,
+                                                stepsAbove:translateY,
+                                            }
+                                        }
+                                        onEditStep(id, _dimns)
+                                    })
+                                    .onDeleteItem((id) => {
+                                        //console.log("delete step...", id)
+                                    })
+                                    .onToggleItemCompletion(id => {
+                                        //console.log("toggle compl", id)
+
+                                    }))
+                        
+                        kpiStepsG.exit().call(remove);
+                                 
                     })
 
             openContentsG.exit().call(remove, { transition:{ duration: CONTENT_FADE_DURATION }});
 
             //history
-            const historyWidth = 110;
-            const historyHeight = 15;
             const historyData = status(data) === "open" && data.lastDataUpdate ? [data] : [];
             const historyG = kpiContentsG.selectAll("g.history").data(historyData, d => d.key);
             historyG.enter()
@@ -349,6 +413,11 @@ export default function kpiComponent() {
     kpi.onClick = function (value) {
         if (!arguments.length) { return onClick; }
         onClick = value;
+        return kpi;
+    };
+    kpi.onEditStep = function (value) {
+        if (!arguments.length) { return onEditStep; }
+        onEditStep = value;
         return kpi;
     };
     kpi.onDblClick = function (value) {

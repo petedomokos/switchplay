@@ -77,7 +77,7 @@ export const user = (state=InitialState.user, act) =>{
 				...state,
 				journeys:state.journeys.map(j => j._id === "temp" ? { ...j, _id } : j),
 				//if homeJoureny is temp, its this one so update with actual id
-				homeJourney:homeJourney === "temp" ? _id : homeJourney
+				homeJourney:state.homeJourney === "temp" ? _id : state.homeJourney
 			}
 		}
 		//OTHER USERS AND GROUPS

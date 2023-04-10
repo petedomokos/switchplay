@@ -29,7 +29,8 @@ export default function kpisLayout(){
             });*/
         //1 only...const _data = [data[0]]
         const kpisData = data.map((kpi,i) => {
-            const { key, values, accuracy, order, isPast, isCurrent, isFuture, milestoneId, datasetKey, statKey } = kpi;
+            const { key, values, accuracy, order, isPast, isCurrent, isFuture, milestoneId, datasetKey, statKey,
+                steps, stepsValues } = kpi;
             //console.log("kpi key datasetkey", key, datasetKey)
             const dataset = datasets.find(dset => dset.key === datasetKey);
             //can set all kpis to be active eg for an active profile card that doesnt have access to all data
@@ -45,7 +46,8 @@ export default function kpisLayout(){
                 current: currentColour,
                 target:grey10(4),// "#DCDCDC",
                 expectedBehind:"red",
-                expectedAhead:currentColour
+                expectedAhead:currentColour,
+                stepsCurrent:"blue"
             }
 
             //todo - fix bug why expected and current are showing as ontrack when they are not
@@ -108,7 +110,7 @@ export default function kpisLayout(){
                 format
             }
 
-            const barData = [targetDatum, currentDatum];
+            const barData = format === "completion" ? [currentDatum] : [targetDatum, currentDatum];
             barData.start = format === "completion" ? 0 : (order === "highest is best" ? values.min : values.max);
             barData.end = format === "completion" ? 100 : (order === "highest is best" ? values.max : values.min);
 
@@ -189,6 +191,24 @@ export default function kpisLayout(){
             }
             const numbersData = [currentDatum];
 
+            const stepsCurrentDatum = {
+                key:"steps-current",
+                label: values.achieved ? "Achieved" : "Current",
+                //@todo - remove isAchieved form this - is confusing and means nothing
+                isAchieved:!!values.achieved,
+                startValue: 0,
+                value:stepsValues.current.completion,
+                fill:colours.stepsCurrent,
+            }
+
+            const stepsBarData = [stepsCurrentDatum];
+            stepsBarData.start = 0;
+            stepsBarData.end = 100;
+            //console.log("key value", key, stepsValues.current.completion)
+            //console.log("steps", steps)
+
+            const stepsTooltipsData = [];
+
             if(kpi.datasetKey === "shuttles"){
                 //console.log("milestoneId", kpi.milestoneId)
                 //console.log("kpi", kpi)
@@ -203,7 +223,9 @@ export default function kpisLayout(){
                 nr:i+1,
                 barData,
                 tooltipsData,
-                numbersData
+                numbersData,
+                stepsBarData,
+                stepsTooltipsData
             }
             /*
             return {

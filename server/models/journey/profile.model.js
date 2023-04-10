@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import StatValueSchema from './stat-value.model'
 import MediaSchema from './media.model'
+import ProfileKpiSchema from "./profile-kpi.model";
 
 export default new mongoose.Schema({
   //id is created on client and is unique to the journey profiles
@@ -11,6 +12,7 @@ export default new mongoose.Schema({
   title:String,
   desc:String,
   date:String,
+  profileKpis:[ProfileKpiSchema],
   yPC:String,
   photoLabel:String,
   media:[MediaSchema],

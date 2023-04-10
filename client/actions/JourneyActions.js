@@ -21,19 +21,23 @@ const transformJourneyForServer = journey => {
 	}));
 	
 	//remove current profile
-	const profiles = journey.profiles
+	let profiles = journey.profiles
 		.filter(p => p.id !== "current")
-		.map(p => ({
-			id:p.id,
-			title:p.title,
-			desc:p.desc,
-			media:p.media,
-			created:p.created,
-			date:p.date,
-			yPC:p.yPC,
-			customTargets:p.customTargets,
-			customExpected:p.customExpected
-		}));
+		.map(p => {
+			let profile = {
+				id:p.id,
+				title:p.title,
+				desc:p.desc,
+				media:p.media,
+				created:p.created,
+				date:p.date,
+				yPC:p.yPC,
+				customTargets:p.customTargets,
+				customExpected:p.customExpected,
+				kpis:p.kpis
+			};
+			return profile;
+		});
 
 	const aims = journey.aims.map(a => ({
 		id:a.id,
@@ -74,6 +78,8 @@ const transformJourneyForServer = journey => {
 	});
 	*/
 
+	//q - what happens to new irst future profile id ?
+	//what else do we need to consider before saving
 	return { 
 		_id: journey._id !== "temp" ? journey._id : undefined,
 		playerId,
@@ -89,7 +95,9 @@ const transformJourneyForServer = journey => {
 		goals,
 		links,
 		measures,
-		settings:journey.settings.map(s => ({ key: s.key, value:s.value })) || [],
+		settings:journey.settings
+			.filter(s => s.isCustom)
+			.map(s => ({ key: s.key, value:s.value })) || [],
 		updated:Date.now
 	}
 }
@@ -107,7 +115,8 @@ export const transformJourneyForClient = journey => {
 		profiles:profiles? profiles.map(p => ({
 			...p,
 			date:new Date(p.date),
-			yPC:+p.yPC
+			yPC:+p.yPC,
+			profileKpis:p.profileKpis || []
 		})) : [],
 		aims:aims.map(a => ({
 			...a,
@@ -175,8 +184,6 @@ export const saveJourney = (journey, shouldPersist=true, shouldUpdateStoreBefore
 	const journeyIsNew = !serverJourney._id;
 	if(journeyIsNew){
 		console.log("SAVING A NEW JOURNEY!!!!!!!!!!!!!!")
-		//alert("saving a new journey")
-		return;
 	}
 	//console.log("id is", serverJourney._id)
 	const url = '/api/users/'+jwt.user._id+'/journey' +(serverJourney._id ? "/"+serverJourney._id : "")

@@ -1,4 +1,32 @@
 import * as d3 from 'd3';
+import { addWeeks } from '../../util/TimeHelpers';
+import { createId } from './helpers';
+
+export const createFutureProfile = (existingProfiles=[]) => {
+	const now = new Date();
+	const firstFutureProfileDate = addWeeks(4, now);
+	firstFutureProfileDate.setHours(22);
+	return {
+		date:firstFutureProfileDate,
+		id:createId(existingProfiles.map(p => p.id), "profile"),
+		media:[],
+		created:now,
+		yPC:"50",
+		customTargets:[],
+		customExpected:[],
+        profileKpis:[],
+	}
+}
+export const createEmptyJourney = user => ({ 
+	_id:"temp", 
+	profiles:[ createFutureProfile() ],
+	contracts:[], aims:[], goals:[], links:[],
+	settings:[],
+	measures:[], kpis:[], media:[],
+	playerId:user.isPlayer ? user._id : null,
+	coachId:user.isCoach && !user.isPlayer ? user._id : null,
+	groupId: null //todo - this can be an option for a coach
+})
 
 export const JOURNEY_SETTINGS_INFO = {
     currentValueDataMethod:{
@@ -273,9 +301,18 @@ export const DIMNS = {
         width:60,
         height:75
     },
+    list:{
+        item:{
+            height:25,
+            margin:{ left: 2.5, right: 2.5, top: 2.5, bottom: 2.5 }
+        }
+    },
+    progressBar:{
+        maxHeight:140
+    },
     profile:{
         width:100,
-        height:150
+        height:150,
     },
     planet:{
         width:110,

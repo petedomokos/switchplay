@@ -9,8 +9,8 @@ import Button from '@material-ui/core/Button'
 import SelectDate from "../../util/SelectDate";
 import Settings from "../../util/Settings";
 import Goal from "./Goal";
-import OpenedKpi from './OpenedKpi';
 import Photos from "./Photos";
+import StepForm from "./StepForm";
 import milestonesLayout from "./milestonesLayout";
 import milestonesBarComponent from "./milestonesBarComponent";
 import { DIMNS, FONTSIZES, grey10, JOURNEY_SETTINGS_INFO, OVERLAY, getURLForUser } from './constants';
@@ -87,14 +87,25 @@ const useStyles = makeStyles((theme) => ({
     background:OVERLAY.FILL,
     opacity:OVERLAY.OPACITY,
   },
+  formOuterContainer:{
+    position:"absolute",
+    display:props => props.formOuterContainer.display,
+    left:props => props.formOuterContainer.left,
+    top:props => props.formOuterContainer.top,
+    width:props => props.formOuterContainer.width || null,
+    height:props => props.formOuterContainer.height || null,
+    pointerEvents:"none",
+  },
   formContainer:{
+    //opacity:0.5,
     position:"absolute",
     //dimns may be null if we dont want it to render beyond/between its chidren components
-    width:"90%",//props => props.formContainer.width || null,
+    width:props => props.formContainer.width || "90%",
     height:props => props.formContainer.height || null,
     margin:props => props.formContainer.margin || null,
     left:props => props.formContainer.left,
     top:props => props.formContainer.top,
+    pointerEvents:"all"
   },
   textField: {
     //marginLeft: theme.spacing(1),
@@ -129,8 +140,7 @@ const useStyles = makeStyles((theme) => ({
     left:props => `${props.openedKpi.left}px`,
     top:props => `${props.openedKpi.top}px`,
     width:props => `${props.openedKpi.width}px`,
-    height:props => `${props.openedKpi.height}px`,
-    border:"solid"
+    height:props => `${props.openedKpi.height}px`
   }
 }))
 
@@ -184,7 +194,6 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
     const { heights, margins, profile } = dimns;
     return d3.sum(Object.values(heights)) + margins.kpi.top + profile.y - profile.height/2;
   }
-  */
   //apply the bottom margin to the top of openedKpi too so its even (note: the top margin is above the d3 component)
   const extraMarginAboveOpenedKpi = selectedKpi ? selectedKpi.dimns.margins.kpi.bottom : 0;
   const calcOpenedKpiWidth = dimns => {
@@ -197,9 +206,17 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
     const totalHeightBelow = d3.sum(Object.values(heightsBelow)) + margins.kpi.bottom;
     return profile.height - totalHeightAbove - totalHeightBelow - extraMarginAboveOpenedKpi;
   }
+  */
   let styleProps = { 
     bottomCtrlsBarHeight, 
     sliderEnabled, 
+    formOuterContainer:{
+      display:form ? null : "none",
+      left: form?.outerContainerLeft || 0, 
+      top: form?.outerContainerTop || 50,
+      width: form?.formType === "photo" ? "90%" : form?.outerContainerWidth,
+      height: form?.formType === "photo" ? "80%" : form?.outerContainerHeight,
+    },
     formContainer:{
       left: form?.left || 0, 
       top: form?.top || 50,
@@ -218,12 +235,13 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
       display:form?.formType === "photo" ? "none" : null,
     },
     openedKpi:{
-      left:selectedKpi ? selectedKpi.dimns.margins.kpi.left : 0,
-      top:selectedKpi ? extraMarginAboveOpenedKpi : 0,
-      width:selectedKpi ? calcOpenedKpiWidth(selectedKpi.dimns) : 0,
-      height:selectedKpi ? calcOpenedKpiHeight(selectedKpi.dimns) : 0,
+      left:0,//selectedKpi ? selectedKpi.dimns.margins.kpi.left : 0,
+      top:0,//selectedKpi ? extraMarginAboveOpenedKpi : 0,
+      width:0,//selectedKpi ? calcOpenedKpiWidth(selectedKpi.dimns) : 0,
+      height:0//selectedKpi ? calcOpenedKpiHeight(selectedKpi.dimns) : 0,
     }
   };
+  //console.log("styleProps", styleProps.formOuterContainer)
   const openedKpiDisplay = milestone => (selectedKpi && (milestone.isCurrent || reactComponent?.componentType === "profile")) ? null : "none";
   const classes = useStyles(styleProps);
   const reactComponentRef = useRef(null);
@@ -354,7 +372,17 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
       .onTakeOverScreen(takeOverScreen)
       .onReleaseScreen(releaseScreen)
       .onSetSelectedMilestone(setSelectedMilestone)
+      .selectedKpi(selectedKpi?.key)
       .onSetSelectedKpi(setSelectedKpi)
+      /*
+      .onSetSelectedStep((stepId => {
+        console.log("setStep", stepId)
+        console.log("selectedM", selectedMilestone)
+        console.log("selectedKpi", selectedKpi)
+        //setSelectedStep
+        //setForm
+      })
+      */
       .onSetKpiFormat(setKpiFormat)
       .onSelectKpiSet((e,kpi) => { 
           onSelectKpiSet(kpi); 
@@ -451,6 +479,10 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
 
   }, [selectedMilestone, screen.isLarge])
 
+  const saveStepValue = value => {
+    console.log("saveStepValue", value)
+  }
+
   return (
     <div className={`milestone-bar-root ${classes.root}`}>
       <div className={classes.outerReactContainer}>
@@ -461,14 +493,15 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
                 {!m.isCurrent && reactComponent?.componentType === "goal" &&
                   <Goal
                     milestone={m}
+                    selectedKpi={selectedKpi}
                     editable={editingSVGComponent === null}
                     editing={editingReactComponent?.milestoneId === m.id ? editingReactComponent : null}
                     setEditing={onSetEditingReactComponent}
                   />
                 }
-                <div className={classes.openedKpi} id={`opened-kpi-${m.id}`} style={{display:openedKpiDisplay(m)}}>
-                    <OpenedKpi/>
-                </div>
+                {/**<div className={classes.openedKpi} id={`opened-kpi-${m.id}`} style={{display:openedKpiDisplay(m)}}>
+                    <OpenedKpi milestone={m} selectedKpiInfo={selectedKpi} editable/>
+              </div>*/}
                 {selectedMilestone && selectedMilestone !== m.id && <div className={classes.reactComponentItemOverlay}></div>}
               </div>
             ))
@@ -476,68 +509,73 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
         </div>
       </div>
       {form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>}
-      {form &&
-        <div className={classes.formContainer} ref={formRef}>
-          {form.formType === "date" &&
-            (form.milestoneId === "current" ?
-              <>
-                <Settings
-                    options={JOURNEY_SETTINGS_INFO.currentValueDataMethod.options}
-                    selectedValue={settings.find(s => s.key === "currentValueDataMethod").value}
-                    moreSettings={moreSettings}
-                    shouldShowMoreSettings={form.shouldShowMoreSettings}
-                    primaryText={item => item.label}
-                    secondaryText={item => item.desc}
-                    onClickOption={handleClickSettingOption}
-                    onClickMoreSettings={onClickMoreSettings} />
-                {form.more && <div>more.....</div>}
-              </>
-              :
-              <>
-                <SelectDate
-                  classes={classes}
-                  withLabel={false}
-                  dateFormat="YYYY-MM-DD"
-                  type="date"
-                  defaultValue={form.value}
-                  handleChange={handleDateChange}/>
+      <div className={`${classes.formOuterContainer} form-outer-container`} ref={formRef}>
+        <div className={classes.formContainer}>
+            {form?.formType === "step" && 
+              <StepForm fontSize={form.height * 0.5} save={saveStepValue} />
+            }
+            {form?.formType === "date" &&
+              (form.milestoneId === "current" ?
+                <>
+                  <Settings
+                      options={JOURNEY_SETTINGS_INFO.currentValueDataMethod.options}
+                      selectedValue={settings.find(s => s.key === "currentValueDataMethod").value}
+                      moreSettings={moreSettings}
+                      shouldShowMoreSettings={form.shouldShowMoreSettings}
+                      primaryText={item => item.label}
+                      secondaryText={item => item.desc}
+                      onClickOption={handleClickSettingOption}
+                      onClickMoreSettings={onClickMoreSettings}
+                  />
+                  {form.more && <div>more.....</div>}
+                </>
+                :
+                <>
+                  <SelectDate
+                    classes={classes}
+                    withLabel={false}
+                    dateFormat="YYYY-MM-DD"
+                    type="date"
+                    defaultValue={form.value}
+                    handleChange={handleDateChange}/>
 
-                {form.hasChanged && !shouldAutosaveForm &&
-                  <div className={classes.formCtrls}>
-                    <Button color="primary" variant="contained" onClick={handleCancelForm} className={classes.cancel}>Cancel</Button>
-                    <Button color="primary" variant="contained" onClick={handleSaveForm} className={classes.submit}>Save</Button>
-                  </div>}
-              </>
-            )
-          }
-          {form.formType === "photo" &&
-            <Photos 
-              userId={user._id}
-              userPhotos={user.photos}
-              selectedPhotoId={getSelectedPhotoId()}
-              locationKey={form.location} 
-              onSavePhoto={onSavePhoto}
-              onSelect ={onSaveInfo(form.milestoneId, "photo")}
-            />
-          }
-        </div>}
-        <svg className={classes.svg} ref={containerRef} id={`milestones-bar`}>
-          <defs>
-            <filter id="shine">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
-            </filter>
-          </defs>
-        </svg>
-        {!form && <div className={classes.ctrls} onClick={onCtrlsAreaClick}>
-          <IconButton className={classes.iconBtn} onClick={milestonesBar.slideBack}
-              aria-label="Home" >
-              <ArrowBackIosIcon className={classes.icon}/>
-          </IconButton>
-          <IconButton className={classes.iconBtn} onClick={milestonesBar.slideForward}
-              aria-label="Home" >
-              <ArrowForwardIosIcon className={classes.icon}/>
-          </IconButton>
-        </div>}
+                  {form.hasChanged && !shouldAutosaveForm &&
+                    <div className={classes.formCtrls}>
+                      <Button color="primary" variant="contained" onClick={handleCancelForm} className={classes.cancel}>Cancel</Button>
+                      <Button color="primary" variant="contained" onClick={handleSaveForm} className={classes.submit}>Save</Button>
+                    </div>}
+                </>
+              )
+            }
+            {form?.formType === "photo" &&
+              <Photos 
+                userId={user._id}
+                userPhotos={user.photos}
+                selectedPhotoId={getSelectedPhotoId()}
+                locationKey={form.location} 
+                onSavePhoto={onSavePhoto}
+                onSelect ={onSaveInfo(form.milestoneId, "photo")}
+              />
+            }
+        </div>
+      </div>
+      <svg className={classes.svg} ref={containerRef} id={`milestones-bar`}>
+        <defs>
+          <filter id="shine">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
+          </filter>
+        </defs>
+      </svg>
+      {!form && <div className={classes.ctrls} onClick={onCtrlsAreaClick}>
+        <IconButton className={classes.iconBtn} onClick={milestonesBar.slideBack}
+            aria-label="Home" >
+            <ArrowBackIosIcon className={classes.icon}/>
+        </IconButton>
+        <IconButton className={classes.iconBtn} onClick={milestonesBar.slideForward}
+            aria-label="Home" >
+            <ArrowForwardIosIcon className={classes.icon}/>
+        </IconButton>
+      </div>}
     </div>
   )
 }

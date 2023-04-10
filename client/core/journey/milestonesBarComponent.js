@@ -147,6 +147,7 @@ export default function milestonesBarComponent() {
     let kpiFormat;
     let onSetSelectedMilestone = function(){};
     let onSetSelectedKpi = function(){};
+    //let onSetSelectedStep = function(){};
     let onSetKpiFormat = function(){};
     let onSelectKpiSet = function(){};
     let onToggleSliderEnabled = function(){};
@@ -486,6 +487,8 @@ export default function milestonesBarComponent() {
                     */
                     .onDblClick(handleMilestoneWrapperClick) //see note about chrome on mobile
                     .onLongpressStart(function(e, d){
+                        //@TODO - INSTEAD, WE WILL IMPL THIS IN TEH LITTLE LABEL OUTSIDE THE PROFILE AT TOP
+                        /*
                         //remove any open forms
                         setForm(null);
 
@@ -500,6 +503,7 @@ export default function milestonesBarComponent() {
                         }else{
                             createMilestonePlaceholder(prevCard(pt.x), nextCard(pt.x))
                         }
+                        */
                     })
                     .onLongpressDragged(longpressDragged)
                     .onLongpressEnd(endDeleteMilestone)
@@ -863,6 +867,7 @@ export default function milestonesBarComponent() {
                         .margin(profileMargin)
                         .fontSizes(fontSizes.profile)
                         .currentPage(currentPage)
+                        .selected(selectedMilestone)
                         .expanded([{
                             id:selectedMilestone,
                             //if landscape, then vert space is less so we scale according to that 
@@ -966,6 +971,7 @@ export default function milestonesBarComponent() {
                         //if closing a kpi, we dont want it to reopen or close the card (via wrapperClick). 
                         //but if its selecting a kpi, we do want it to also open the card 
                         .onUpdateSelectedKpi((profileId, key, dimns) => { 
+                            //Remove forms, including any selectedStep form
                             setForm(null);
                             if(!key){ 
                                 ignoreNextWrapperClick = true;
@@ -979,6 +985,56 @@ export default function milestonesBarComponent() {
                                 const _dimns = { ...dimns, heights:{ ...dimns.heights, topBar: topBarHeight }, offset:currentSliderOffset };
                                 onSetSelectedKpi({ profileId, key, dimns:_dimns });
                             }
+                        })
+                        .onEditStep((stepId, dimns) => {
+                            //console.log("editStep dimns", dimns)
+                            if(!stepId){ 
+                                //close any stepform if it is open
+                                setForm(null);
+                                return; 
+                            }
+                            //dimns
+                            const { widths, heights, margins, profile } = dimns;
+                            const leftOfCard = profile.x - profile.width/2 + currentSliderOffset;
+                            const marginsBeforeItem = margins.kpi.left + margins.list.left + margins.item.left;
+                            const outerContainerLeft = leftOfCard;
+                            const left = marginsBeforeItem + widths.symbol + margins.desc.left;
+
+                            const topOfCard = topBarHeight + profile.y - profile.height/2;
+                            const cardHeightAboveList = heights.textInfo + margins.kpi.top + heights.title + heights.progressBar
+                            const listHeightAboveItem = margins.list.top + heights.stepsAbove + margins.item.top;
+                            const outerContainerTop = topOfCard;
+                            const top = cardHeightAboveList + listHeightAboveItem;
+    
+                            const width = widths.descContents;
+                            const height = heights.itemContents;
+
+                            const milestone = positionedData.find(m => m.id === selectedMilestone);
+                            const kpi = milestone.kpis.kpisData.find(kpi => kpi.key === selectedKpi);
+                            //const step = kpi.steps?.find(step => step.id === stepId);
+
+                            //apply the scale 
+
+                            //todo next - got hruh teh x,y,width,height funcs check tehy are correct
+                            //then implement the form textfield 
+                            const form = {
+                                formType:"step",
+                                milestoneType:milestone.dataType, 
+                                milestoneId:milestone.id,
+                                outerContainerLeft,
+                                outerContainerTop,
+                                outerContainerWidth:milestone.width,
+                                outerContainerHeight:milestone.height,
+                                left,
+                                top,
+                                width,//calcStepWidth(dimns),
+                                height,//calcStepHeight(dimns)
+                                //left:currentSliderOffset + x - (width/2) * k,
+                                //top:topBarHeight + y - (height/2) * k
+                            }
+                            //console.log("form..........", form)
+                            //set form for the profile, kpi and stepId
+                            setForm(form)
                         })
                         .onMilestoneWrapperPseudoDragStart(dragStart)
                         .onMilestoneWrapperPseudoDrag(dragged)
@@ -1022,7 +1078,7 @@ export default function milestonesBarComponent() {
                             ]
                         }))
                         .onClick(() => { console.log("handler: profile card clicked")})
-                        .onClickKpi(onSelectKpiSet)
+                        //.onClickKpi((kpi, stepId) => {})
                         .onDblClickKpi((e,d) => {
                             onSelectKpiSet(d);
                         })
@@ -1251,6 +1307,11 @@ export default function milestonesBarComponent() {
         selectedMilestone = value;
         return milestonesBar;
     };
+    milestonesBar.selectedKpi = function (value) {
+        if (!arguments.length) { return selectedKpi; }
+        selectedKpi = value;
+        return milestonesBar;
+    };
     milestonesBar.requiredSliderPosition = function (value) {
         if (!arguments.length) { return requiredSliderPosition; }
         requiredSliderPosition = value;
@@ -1292,6 +1353,15 @@ export default function milestonesBarComponent() {
         }
         return milestonesBar;
     };
+    /*
+    milestonesBar.onSetSelectedStep = function (value) {
+        if (!arguments.length) { return onSetSelectedStep; }
+        if(typeof value === "function"){
+            onSetSelectedStep = value;
+        }
+        return milestonesBar;
+    };
+    */
     milestonesBar.onSelectKpiSet = function (value) {
         if (!arguments.length) { return onSelectKpiSet; }
         if(typeof value === "function"){

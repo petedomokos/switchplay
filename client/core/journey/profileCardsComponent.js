@@ -69,8 +69,7 @@ export default function profileCardsComponent() {
     //state
     let kpiFormat = "actual";
     let expanded = [];
-    let selected = [];
-    let isSelected = () => false;
+    let selected = "";
     let editable = false;
     let movable = true;
     let scrollable = false;
@@ -103,6 +102,7 @@ export default function profileCardsComponent() {
     let onDelete = function() {};
     let onSaveValue = function(){};
     let onUpdateSelectedKpi = function(){};
+    let onEditStep = function(){};
     let onStartEditingPhotoTransform = function(){};
     let onEndEditingPhotoTransform = function(){};
 
@@ -208,7 +208,7 @@ export default function profileCardsComponent() {
                                 .attr("rx", 3)
                                 .attr("ry", 3)
                                 .call(updateFill, { 
-                                    fill:d => isSelected(d) ? COLOURS.selectedMilestone : COLOURS.milestone
+                                    fill:d => d.id === selected ? COLOURS.selectedMilestone : COLOURS.milestone
                                 })
 
                         const topG = innerContentsG.append("g").attr("class", "top").attr("transform", "translate(0,0)")
@@ -315,11 +315,27 @@ export default function profileCardsComponent() {
                                 //parent needs to know so it can control how to handle the wrapperClick event
                                 const profile = data.find(p => p.id === profileId);
                                 const _dimns = !profile ? null : {
-                                    ...dimns,
-                                    profile: { x: profile.x, y:profile.y, width:profile.width, height:profile.height },
-                                    heights: { ...dimns.heights, textInfo:getTextInfoHeight(profile) }
+                                    widths:dimns.widths,
+                                    margins:dimns.margins,
+                                    heights: { ...dimns.heights, textInfo:getTextInfoHeight(profile) },
+                                    profile: { x: profile.x, y:profile.y, width:profile.width, height:profile.height }
                                 }
                                 onUpdateSelectedKpi(profileId, kpiKey, _dimns);
+                            })
+                            .onEditStep((id, dimns) => {
+                                //console.log("editStep selcetdProfile", selected)
+                                //assume only one selected milestone
+                                const profile = data.find(p => p.id === selected);
+                                //console.log("profile-------", profile)
+                                const _dimns = {
+                                    ...dimns,
+                                    profile: { x: profile.x, y:profile.y, width:profile.width, height:profile.height },
+                                    heights: { 
+                                        ...dimns.heights, 
+                                        textInfo:getTextInfoHeight(profile) 
+                                    }
+                                }
+                                onEditStep(id, _dimns)
                             })
                             .onCtrlClick(onCtrlClick)
                             .onSaveValue((valueObj, profileId, datasetKey, statKey, key) => {
@@ -343,18 +359,7 @@ export default function profileCardsComponent() {
                                     kpisComponents[p.id].handleZoomEnd.call(this, e)
                             })
                             })
-                            /*
-                            .onClickKpi((e,kpi) => {
-                                console.log("profileCrad kpi.onClickKpi---")
-                                //update selected KPI in all profile cards
-                                data.filter(p => p.id !== d.id).forEach(p => {
-                                    //must sway the profile id from the key
-                                    const keyParts = kpi.key.split("-");
-                                    const keyWithoutProfileId = keyParts.slice(0, keyParts.length - 1).join("-");
-                                    const kpiKeyInThisProfile = `${keyWithoutProfileId}-${p.id}`
-                                    kpisComponents[p.id].selected(kpiKeyInThisProfile, true, true);
-                                })
-                            })*/
+                            //.onClickKpi(onClickKpi)
                             .onDblClickKpi(onDblClickKpi);
 
                         //ENTER AND UPDATE
@@ -418,7 +423,7 @@ export default function profileCardsComponent() {
                             .attr("height", contentsHeight)
                             .attr("stroke", "none")
                             .call(updateFill, { 
-                                fill:d => isSelected(d) ? COLOURS.selectedMilestone : COLOURS.milestone,
+                                fill:d => d.id === selected ? COLOURS.selectedMilestone : COLOURS.milestone,
                                 transition:{ duration: 300 }
                             })
 
@@ -560,10 +565,14 @@ export default function profileCardsComponent() {
                     .attr("height", contentsHeight)
 
             function updateTransform(selection, options={}){
-                //console.log("updateTransform profileCards")
                 const { x = d => d.x, y = d => d.y, scale = d => 1, transition, cb = () => {} } = options;
+                let maxK = 1;
                 selection.each(function(d){
                     const k = scale(d);
+                    //set maxK so we know whether or not to scale up the formContainer
+                    if(k > maxK){
+                        maxK = k;
+                    }
                     const scaledContentsWidth = contentsWidth * k;
                     const scaledContentsHeight = contentsHeight * k
 
@@ -614,6 +623,19 @@ export default function profileCardsComponent() {
                         cb.call(this);
                     }
                 })
+
+                //form-container (there is only one of these)
+                //note - scale is performed on outer-container so it is from same centre as the d3 card
+                //@todo - not sure why transform-origin is different then for milestone div above
+                if(transition){
+                    d3.select(`div.form-outer-container`)
+                        .transition()
+                        .duration(200)
+                            .style("transform", ` scale(${maxK})`)
+                }else{
+                    d3.select(`div.form-outer-container`)
+                        .style("transform", ` scale(${maxK})`)
+                }
             }
 
             function updateFill(selection, options={}){
@@ -823,10 +845,10 @@ export default function profileCardsComponent() {
         movable = value;
         return profileCards;
     };
-    profileCards.selected = function (values) {
+    profileCards.selected = function (value) {
+        //console.log("profileCards selected....", value)
         if (!arguments.length) { return selected; }
-        selected = values;
-        isSelected = d => values.includes(d.id);
+        selected = value;
         return profileCards;
     };
     profileCards.kpiFormat = function (value) {
@@ -1020,6 +1042,12 @@ export default function profileCardsComponent() {
     profileCards.onUpdateSelectedKpi = function (value) {
         if(typeof value === "function"){
             onUpdateSelectedKpi = value;
+        }
+        return profileCards;
+    };
+    profileCards.onEditStep = function (value) {
+        if(typeof value === "function"){
+            onEditStep = value;
         }
         return profileCards;
     };

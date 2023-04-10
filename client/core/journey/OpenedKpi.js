@@ -24,16 +24,50 @@ const useStyles = makeStyles(theme => ({
     flexDirection:"column",
     alignItems:"center",
     background:"none",
+    //background:"red",
   },
   cardContent:{
     width:"100%",
-    height:"calc(100% - 45px)",
+    height:"100%",
     marginTop:"0",
     display:"flex",
     flexDirection:"column",
     alignItems:"center",
     //background:"blue",
     pointerEvents:props => props.editable ? "all" : "none",
+  },
+  steps:{
+    width:"100%",
+    height:"100%",
+    background:"pink",
+    overflowY:"scroll"
+  },
+  step:{
+    width:"100%",
+    height:props => `${props.stepHeight}px`,
+    margin:props => `${props.stepMargin}px`,
+    border:"solid",
+    borderWidth:"thin",
+    display:"flex"
+  },
+  nr:{
+    width:"15px",
+    display:"flex",
+    alignItems:"center",
+    fontSize:"13px",
+  },
+  desc:{
+    width:"calc(100% - 15px - 30px)",
+    display:"flex",
+    alignItems:"center",
+    fontSize:"11px",
+  },
+  checkbox:{
+    width:"30px",
+    display:"flex",
+    alignItems:"center",
+    justifyContent:"center",
+    fontSize:"13px",
   },
   titleContainer:{
     width:"85%",
@@ -74,6 +108,7 @@ const useStyles = makeStyles(theme => ({
     //cursor:"pointer",
     pointerEvents:"all"
   },
+  /*
   desc:{
     height:"90%",
     width:"100%",
@@ -98,6 +133,7 @@ const useStyles = makeStyles(theme => ({
     //cursor:"pointer",
     pointerEvents:"all"
   },
+  */
   submit: {
     margin: 'auto',
     marginBottom: theme.spacing(2)
@@ -111,13 +147,26 @@ export function splitMultilineString(str){
   return str.split("\n");
 }
 
-export default function OpenedKpi({ milestone, error, editable, editing, setEditing }) {
+export default function OpenedKpi({ milestone, selectedKpiInfo, error, editable, editing, setEditing }) {
+  const selectedKpi = milestone.kpis.find(kpi => kpi.key === selectedKpiInfo?.key);
+  if(!selectedKpi){
+    //we will just show a blank space on those cards for whom the openedKpi is not a kpi
     return null;
+  }
+  const stepHeight = 22;
+  const stepMargin = 3;
+  if(selectedKpiInfo && milestone.id === "current"){
+    console.log("OpenedKpiInfo", selectedKpiInfo)
+    console.log("milestone", milestone)
+    console.log("OpenedKpi", selectedKpi)
+  }
   const { id, nr, title="", desc="" } = milestone;
   const descLines = desc ? splitMultilineString(desc) : ["No Notes"];
   const styleProps = {
     descAlignItems:desc ? "start" : "center",
-    editable
+    editable,
+    stepHeight,
+    stepMargin
   }
   const classes = useStyles(styleProps);
   const defaultName = nr => nr < 0 ? `Past ${-nr}` : (nr > 0 ? `Future ${nr}` : "Current")
@@ -135,11 +184,30 @@ export default function OpenedKpi({ milestone, error, editable, editing, setEdit
     setEditing({ milestoneId:id, key:"desc", value:desc }) 
   }
 
+  const steps = mockSteps;
+  //newstepy not in correct pos
+  const newStepY = steps.length * (stepHeight + stepMargin);
   return (
     <div className={classes.root}>
       <div className={classes.cardContent}>
-        <div className={classes.titleContainer}>
-          {editing?.key === "title" ? 
+        <div className={classes.steps}>
+          {steps.map((step,i) => 
+            <div className={classes.step} key={`m-${milestone.id}-step-${i}`}>
+              <div className={classes.nr}>{i + 1}.</div>
+              <div className={classes.desc}>{step.desc}</div>
+              <div className={classes.checkbox}>Y</div>
+            </div>
+          )}
+          <div className={classes.step} key={`m-${milestone.id}-step-new`}>
+              <div className={classes.desc}>
+                <svg transform={`translate(0,${newStepY})`}>
+                  <text>Add new</text>
+                </svg>
+              </div>
+          </div>
+        </div>
+        {/**
+        <div className={classes.descContainer}>
             <TextField 
             id="title" label={editing.value ? "" : "Enter title"} className={classes.titleTextField} autoFocus
             InputLabelProps={{shrink: editing.value ? false : true}}
@@ -150,34 +218,8 @@ export default function OpenedKpi({ milestone, error, editable, editing, setEdit
             </Typography>
           }
         </div>
-        <div className={classes.descContainer}>
-          {editing?.key === "desc" ?
-            <TextField 
-            id="desc" label={editing.value ? "" : "Enter Notes"} className={classes.descTextField} 
-            InputLabelProps={{shrink: editing.value ? false : true}} autoFocus
-            value={editing.value} onChange={handleChange} margin="normal"
-            multiline />
-            :
-            <Typography 
-              variant="h6" className={classes.desc} paragraph={true} 
-              align={desc ? "left" : "center"}
-              onClick={openDescForm}>
-                {descLines.map((line,i) => (
-                  <span key={`line-${i}-${id}`}>
-                    {line}
-                    <br/>
-                  </span>
-                ))}
-            </Typography>
-          }
-        </div>
-        {
-          error && (<Typography component="p" color="error">
-            <Icon color="error" className={classes.error}>error</Icon>
-            {error}</Typography>)
-        }
+        */}
       </div>
-      {/**<Button color="primary" variant="contained" onClick={clickSubmit} className={classes.submit}>Save</Button>*/}
     </div>
   )
 }

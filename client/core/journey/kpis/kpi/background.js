@@ -28,6 +28,9 @@ export default function background(initKey) {
     };
     let _styles = () => defaultStyles;
 
+    let fixedMargin;
+    let _margin = () => null;
+
     //API CALLBACKS
     /*
     let onClick = function(){};
@@ -55,6 +58,7 @@ export default function background(initKey) {
             const styles = _styles(data, i);
             const width = fixedWidth || _width(data, i) || DEFAULT_WIDTH;
             const height = fixedHeight || _height(data, i) || DEFAULT_HEIGHT;
+            const margin = fixedMargin || _margin(data,i) || null;
 
             /*
             const drag = d3.drag()
@@ -81,6 +85,8 @@ export default function background(initKey) {
                 .append("rect")
                     .attr("class", key ? `bg ${key}-bg` : "bg")
                     .merge(rect)
+                    .attr("x", margin?.left || 0)
+                    .attr("y", margin?.top || 0)
                     .attr("width", width)
                     .attr("height", height)
                     .attr("fill", styles.fill)
@@ -134,6 +140,16 @@ export default function background(initKey) {
         }else{
             fixedHeight = null;
             _height = value; 
+        }
+        return _background;
+    };
+    _background.margin = function (value) {
+        if (!arguments.length) { return margin; }
+        if(typeof value === "function"){
+            fixedMargin = null;
+            _margin = value; 
+        }else{
+            fixedMargin = value;
         }
         return _background;
     };

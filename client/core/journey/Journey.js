@@ -18,9 +18,6 @@ import MilestonesBar from './MilestonesBar';
 import KpiView from './KpiView';
 import { DIMNS, FONTSIZES, grey10 } from './constants';
 //import { openFullScreen } from "./domHelpers"
-
-const newJourney = { _id:"temp", contracts:[], profiles:[], aims:[], goals:[], links:[], measures:[]}
-
 const useStyles = makeStyles((theme) => ({
   root: {
     width:"100%",

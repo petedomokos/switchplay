@@ -89,7 +89,9 @@ export default function kpisComponent() {
         listHeight = contentsHeight - ctrlsHeight;
         kpiHeight = fixedKpiHeight || listHeight/5;
         //selectedKpi must expand for tooltip rows, by 0.75 of kpiHeight per tooltip
-        openedKpiHeight = fixedSelectedKpiHeight || listHeight;//kpiHeight + (0.75 * kpiHeight * nrTooltipRows);
+        const expandedContentsHeight = expandedHeight - margin.top - margin.bottom;
+        //const expandedListHeight = expandedContentsHeight - ctrlsHeight;
+        openedKpiHeight = expandedContentsHeight - ctrlsHeight;// fixedSelectedKpiHeight || listHeight;//kpiHeight + (0.75 * kpiHeight * nrTooltipRows);
         const kpiHeights = kpisData
             .map(kpi => status(kpi) === "open" || status(kpi) === "closing" ? openedKpiHeight : kpiHeight);
 
@@ -126,6 +128,8 @@ export default function kpisComponent() {
 
     //API CALLBACKS
     let onUpdateSelected = function(){};
+    let onClickKpi = function(){};
+    let onEditStep = function(){};
     let onDblClickKpi = function(){};
     let onDragStart = function(){};
     let onDrag = function() {};
@@ -233,7 +237,7 @@ export default function kpisComponent() {
                                 .attr("width", listWidth)
                                 .attr("height", listHeight)
                                 .attr("fill", "transparent")
-                                .attr("stroke", "none");
+                                .attr("stroke", "black")// "none");
 
                         //container that the listG zoom transforms are applied to
                         listG
@@ -385,19 +389,31 @@ export default function kpisComponent() {
                                 }))
                                 .onDblClick(onDblClickKpi)
                                 .onClick(function(e, d){
-                                    updateSelected(d.key, data, true, true);
-                                    const dimns = {
-                                        heights: { 
-                                            kpi:openedKpiHeight
-                                        },
-                                        margins:{
-                                            kpi:margin
-                                        },
-                                        heightsBelow:{
-                                            kpisCtrlsHeight:ctrlsHeight
+                                    if(selected !== d.key){
+                                        //select the kpi
+                                        updateSelected(d.key, data, true, true);
+                                        const dimns = {
+                                            heights: { kpi:openedKpiHeight },
+                                            margins:{ kpi:margin },
+                                            heightsBelow:{ kpisCtrlsHeight:ctrlsHeight }
                                         }
+                                        onUpdateSelected(d.milestoneId, d.key, true, true, dimns);
                                     }
-                                    onUpdateSelected(d.milestoneId, d.key, true, true, dimns);
+                                })
+                                .onEditStep((id, dimns) => {
+                                    const _dimns = {
+                                        widths:dimns.widths,
+                                        heights: { 
+                                            ...dimns.heights,
+                                            kpisCtrlsHeight:ctrlsHeight, 
+                                            kpi:openedKpiHeight 
+                                        },
+                                        margins:{ 
+                                            ...dimns.margins, 
+                                            kpi:margin 
+                                        },
+                                    }
+                                    onEditStep(id, _dimns);
                                 })
                                 .onSaveValue(onSaveValue)
                             )
@@ -754,6 +770,16 @@ export default function kpisComponent() {
     kpis.onCtrlClick = function (value) {
         if (!arguments.length) { return onCtrlClick; }
         onCtrlClick = value;
+        return kpis;
+    };
+    kpis.onClickKpi = function (value) {
+        if (!arguments.length) { return onClickKpi; }
+        onClickKpi = value;
+        return kpis;
+    };
+    kpis.onEditStep = function (value) {
+        if (!arguments.length) { return onEditStep; }
+        onEditStep = value;
         return kpis;
     };
     kpis.onDblClickKpi = function (value) {

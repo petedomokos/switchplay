@@ -6,9 +6,8 @@ import { getTargets, findDefaultTarget } from "../../data/targets";
 import { convertToPC, round, roundDown, roundUp, getRangeFormat, dateIsInRange, getValueForStat, getGreatestValueForStat } from "../../data/dataHelpers";
 import { linearProjValue } from "./helpers";
 import { pcCompletion } from "../../util/NumberHelpers"
-import { JOURNEY_SETTINGS, JOURNEY_SETTINGS_INFO } from './constants';
+import { JOURNEY_SETTINGS, JOURNEY_SETTINGS_INFO, createFutureProfile } from './constants';
 import { getBandsAndStandards } from "../../data/bandsAndStandards";
-import journeyComponent from './journeyComponent';
 
 //helper
 const targetIsAchieved = (value, target, order) => {
@@ -21,25 +20,41 @@ const targetIsAchieved = (value, target, order) => {
 
 export function hydrateJourneyData(data, user, datasets){
     const now = new Date();
-    //console.log("hydrateJourneyData", data)
+    console.log("hydrateJourneyData", data)
     const player = user.player;
     const nonCurrentProfiles = data.profiles.filter(p => p.id !== "current");
+
+    const nrFutureProfiles = nonCurrentProfiles.filter(p => {
+        //cant assume date has been parsed
+        const date = typeof p.date === "string" ? new Date(p.date) : p.date;
+        const today = new Date();
+        today.setHours(22);
+        //profiles set to today count as future
+        return date >= new Date();
+    }).length;
+
+    const profiles = nrFutureProfiles !== 0 ? nonCurrentProfiles : [createFutureProfile(nonCurrentProfiles)]
 
     const kpis = getKpis(player._id).map(kpi => {
         const { bands, standards, accuracy } = getBandsAndStandards(kpi.datasetKey, kpi.statKey) || {};
         const min = bands[0] ? bands[0].min : null;
         const max = bands[0] ? bands[bands.length - 1].max : null;
-        return { ...kpi, bands, standards, min, max, accuracy }
+        return { ...kpi, min, max }
     });
+    console.log("kpis....................", kpis)
     const defaultTargets = getTargets(player._id, player.groupId);
     const rangeFormat = getRangeFormat("day");
 
     //embellish the settings, and also put in defaults if required
     const settings = JOURNEY_SETTINGS
-        .map(s => ({ 
-            key: s.key, 
-            value: data.settings.find(set => set.key === s.key)?.value || s.defaultValue 
-        }))
+        .map(s => {
+            const customValue = data.settings.find(set => set.key === s.key)?.value
+            return { 
+                key: s.key, 
+                value: customValue || s.defaultValue,
+                isCustom: !!customValue 
+            }
+        })
         .map(s => {
             return {
                 ...JOURNEY_SETTINGS_INFO[s.key], 
@@ -51,11 +66,11 @@ export function hydrateJourneyData(data, user, datasets){
 
     //STEP 1: HYDRATE PROFILES
     const options = { now, rangeFormat };
-    const hydratedProfiles = hydrateProfiles(nonCurrentProfiles, datasets, kpis, defaultTargets, settings, options);
+    const hydratedProfiles = hydrateProfiles(profiles, datasets, kpis, defaultTargets, settings, options);
 
     //STEP 2: CREATE CURRENT PROFILE, including expected values
     const currentProfile = { 
-        ...createCurrentProfile(hydratedProfiles, datasets, kpis, settings, options ), 
+        ...createCurrentProfile(hydratedProfiles, datasets, settings, options ), 
         nr:0,
         media:data.media || []
     };
@@ -110,7 +125,7 @@ function hydrateContracts(contracts=[]){
 }
 
 function hydrateProfiles(profiles=[], datasets, kpis, defaultTargets, settings, options={}){
-    //console.log("hydrateProfiles----------------", datasets?.find(dset => dset.key === "pressUps")?.datapoints);
+    //console.log("hydrateProfiles----------------");
     const orderedProfiles = sortAscending(profiles, d => d.date);
     const hydrateNextProfile = (remaining, hydratedSoFar) => {
         const next = remaining[0];
@@ -235,9 +250,9 @@ const goBackByExpiryDurationFromDate = (duration, units) => date => {
 
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
     //if(profile.id === "profile-2")
-    //console.log("hydrateProfile------------", profile.id, profile.date, profile.created)
+    console.log("hydrateProfile------------", profile.id, profile.date, profile.created, profile)
     const { now, rangeFormat } = options;
-    const { id, customTargets=[], isCurrent } = profile;
+    const { id, customTargets=[], isCurrent, profileKpis=[] } = profile;
     const date = typeof profile.date === "string" ? new Date(profile.date) : profile.date;
     const created = typeof profile.created === "string" ? new Date(profile.created) : profile.created;
     const milestoneId = id;
@@ -321,7 +336,10 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //console.log("kpi", kpi)
             //KEYS/ID
             const { datasetKey, statKey, min, max, accuracy } = kpi;
-            const key = `${datasetKey}-${statKey}`;
+            const key = kpi.key || `${datasetKey}-${statKey}`;
+
+            const profileKpi = profileKpis.find(pKpi => pKpi.key === key);
+            const steps = profileKpi?.steps || [{key:"1", desc:"Step 1", completed:true }, {key:"2", desc:"Step 2"}];
             //console.log("kpi key", key)
             
             //VALUES
@@ -409,6 +427,29 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             }else if(expected?.actual){
                 onTrackStatus = targetIsAchieved(current, expected, stat.order) ? "onTrack" : "offTrack";
             }
+
+            function calcStepsValues(startDate, date, steps=[]){
+                const start = { completion:0 };
+                const target = { completion:100 };
+                const nrSteps = steps.length;
+                if(nrSteps === 0){ return {}; }
+                const nrCompletedSteps = steps.filter(s => s.completed).length;
+                const current = { completion: Math.round((nrCompletedSteps/nrSteps) * 100) } 
+                //@todo - impl expected
+                const expected = { completion:0 }
+                return { start, current, target, expected }
+            }
+
+            //steps
+            const stepsValues = calcStepsValues(profileStart.date, date, steps);
+            let stepsOnTrackStatus;
+            if(steps?.length !== 0){
+                if(isPast && target?.actual){
+                    stepsOnTrackStatus = targetIsAchieved(stepsValues.achieved, stepsValues.target) ? "onTrack" : "offTrack";
+                }else if(expected?.actual){
+                    stepsOnTrackStatus = targetIsAchieved(stepsValues.current, stepsValues.expected) ? "onTrack" : "offTrack";
+                }
+            }
             return {
                 ...kpi, key, milestoneId,
                 //dates
@@ -429,8 +470,10 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 //other info
                 datasetName:dataset?.name || "",
                 statName:stat?.name || "",
-                unit:stat?.unit || ""
-                
+                unit:stat?.unit || "",
+                steps,
+                stepsValues,
+                stepsOnTrackStatus
             }
         })
     }
@@ -439,11 +482,14 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
 
 //current profile is dynamically created, so it doesnt need hydrating
 //note - this is nely created each time, so nothing must be stored on it
-function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options={}){
+function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
     //console.log("createcurrentprofile----------------------------------")
     const { now, rangeFormat } = options;
     const activeProfile = d3.least(orderedProfiles.filter(p => p.isFuture), p => p.date);
-    const activeProfileValues = kpi => activeProfile?.kpis
+    const { kpis } = activeProfile;
+    //@todo - current profile should show all kpis that are used in any future profile, grouped by profile?
+    //for now, current profile just shpows the kpis for the active profile
+    const activeProfileValues = kpi => kpis
         ?.find(k => k.datasetKey === kpi.datasetKey && k.statKey === kpi.statKey)
         ?.values;
 
@@ -478,8 +524,7 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
         id:"current", isCurrent:true, dataType:"profile",
         kpis:kpis.map((kpi,i) => {
             //console.log("kpi...", kpi)
-            const { datasetKey, statKey, min, max, values, accuracy } = kpi;
-            const key = `${datasetKey}-${statKey}`;
+            const { datasetKey, statKey, min, max, values, accuracy, key, steps, stepsValues, stepsOnTrackStatus } = kpi;
             const milestoneId = "current";
             
             const dataset = datasets.find(dset => dset.key === datasetKey);
@@ -534,7 +579,10 @@ function createCurrentProfile(orderedProfiles, datasets, kpis, settings, options
                 //other info
                 datasetName:dataset?.name || "",
                 statName:stat?.name || "",
-                unit:stat?.unit || ""
+                unit:stat?.unit || "",
+                steps,
+                stepsValues,
+                stepsOnTrackStatus
             }
         })
     }
