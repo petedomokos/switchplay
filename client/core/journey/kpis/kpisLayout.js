@@ -91,6 +91,7 @@ export default function kpisLayout(){
 
             //datums
             const targetDatum = {
+                progressBarType:"dataset",
                 key:"target",
                 label: "Target",
                 isAchieved:(order === "highest is best" || format === "completion") ? target <= current : target >= current,
@@ -100,6 +101,7 @@ export default function kpisLayout(){
                 format
             }
             const currentDatum = {
+                progressBarType:"dataset",
                 key:"current",
                 label: values.achieved ? "Achieved" : "Current",
                 //@todo - remove isAchieved form this - is confusing and means nothing
@@ -116,6 +118,7 @@ export default function kpisLayout(){
 
             const tooltipsData = [
                 { 
+                    progressBarType:"dataset",
                     key:"start", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
                     shouldDisplay:status => status === "open",
@@ -127,6 +130,7 @@ export default function kpisLayout(){
                     withInnerValue:true,
                 },
                 { 
+                    progressBarType:"dataset",
                     key:"end", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
                     shouldDisplay:status => status === "open",
@@ -138,6 +142,7 @@ export default function kpisLayout(){
                     withInnerValue:true,
                 },
                 { 
+                    progressBarType:"dataset",
                     key:"expected", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
                     shouldDisplay:status => !isPast && !!targetObj, //dont display if past or no future profiles
@@ -152,6 +157,7 @@ export default function kpisLayout(){
                     //smallIcons: expectedAchieved ? emptyGoal : emptyGoal,
                 },
                 { 
+                    progressBarType:"dataset",
                     key:"target", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all
                     shouldDisplay:status => !!targetObj,
@@ -168,6 +174,7 @@ export default function kpisLayout(){
                 },
                 //when completion, value below is 0
                 {
+                    progressBarType:"dataset",
                     key:"current", milestoneId, kpiKey:key, datasetKey, statKey,
                     label: values.achieved ? "Achieved" : "Current",
                     rowNr:0, y:0,
@@ -192,7 +199,8 @@ export default function kpisLayout(){
             const numbersData = [currentDatum];
 
             const stepsCurrentDatum = {
-                key:"steps-current",
+                progressBarType:"steps",
+                key:"current",
                 label: values.achieved ? "Achieved" : "Current",
                 //@todo - remove isAchieved form this - is confusing and means nothing
                 isAchieved:!!values.achieved,
@@ -208,8 +216,9 @@ export default function kpisLayout(){
             //console.log("steps", steps)
 
             const stepsTooltipsData = [];
+            const stepsNumbersData = [];
 
-            if(kpi.datasetKey === "shuttles"){
+            if(datasetKey === "shuttles"){
                 //console.log("milestoneId", kpi.milestoneId)
                 //console.log("kpi", kpi)
                 //console.log("values", values)
@@ -225,7 +234,8 @@ export default function kpisLayout(){
                 tooltipsData,
                 numbersData,
                 stepsBarData,
-                stepsTooltipsData
+                stepsTooltipsData,
+                stepsNumbersData
             }
             /*
             return {

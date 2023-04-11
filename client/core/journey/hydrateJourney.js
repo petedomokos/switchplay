@@ -20,7 +20,7 @@ const targetIsAchieved = (value, target, order) => {
 
 export function hydrateJourneyData(data, user, datasets){
     const now = new Date();
-    console.log("hydrateJourneyData", data)
+    //console.log("hydrateJourneyData", data)
     const player = user.player;
     const nonCurrentProfiles = data.profiles.filter(p => p.id !== "current");
 
@@ -41,7 +41,7 @@ export function hydrateJourneyData(data, user, datasets){
         const max = bands[0] ? bands[bands.length - 1].max : null;
         return { ...kpi, min, max }
     });
-    console.log("kpis....................", kpis)
+    //console.log("kpis....................", kpis)
     const defaultTargets = getTargets(player._id, player.groupId);
     const rangeFormat = getRangeFormat("day");
 
@@ -250,7 +250,7 @@ const goBackByExpiryDurationFromDate = (duration, units) => date => {
 
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
     //if(profile.id === "profile-2")
-    console.log("hydrateProfile------------", profile.id, profile.date, profile.created, profile)
+    //console.log("hydrateProfile------------", profile.id, profile.date, profile.created, profile)
     const { now, rangeFormat } = options;
     const { id, customTargets=[], isCurrent, profileKpis=[] } = profile;
     const date = typeof profile.date === "string" ? new Date(profile.date) : profile.date;

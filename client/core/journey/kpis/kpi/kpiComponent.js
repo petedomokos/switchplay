@@ -106,7 +106,7 @@ export default function kpiComponent() {
                     .status("closed")
                     .editable(false)
                 
-                openProgressBars[d.key] = progressBarComponent()
+                openProgressBars[d.key]  = progressBarComponent()
                     .status("open")
                     .editable(true)
             }
@@ -239,7 +239,6 @@ export default function kpiComponent() {
                                     .height(() => progressBarHeight)
                                     .margin(() => progressBarMargin)
                                 , { transitionEnter, transitionUpdate} )
-
                     })
 
             closedContentsG.exit().call(remove)
@@ -252,7 +251,6 @@ export default function kpiComponent() {
                     .merge(openContentsG)
                     .attr("transform", `translate(0,${titleDimns.height})`)
                     .each(function(d, j){
-                        console.log("d", d)
                         d3.select(this)
                             .call(openProgressBars[d.key]
                                 .width((d) => progressBarWidth)
