@@ -7,7 +7,7 @@ import { getValueForStat } from '../../../data/dataHelpers';
 import { emptyGoal, ball, goalWithBall, shiningCrystalBall, nonShiningCrystalBall } from "../../../../assets/icons/milestoneIcons.js"
 
 export default function kpisLayout(){
-    let format = "completion"; //actual, pc or completion
+    let format = "actual"; //actual
     let datasets = [];
     let targets = [];
     let withDeficitBar = false;
@@ -265,9 +265,8 @@ export default function kpisLayout(){
             }
             */
         })
-        const ctrlsData = KPI_CTRLS(format); 
 
-        return { kpisData, ctrlsData }
+        return { kpisData }
     }
 
     update.format = function (value) {

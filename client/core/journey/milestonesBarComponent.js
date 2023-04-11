@@ -191,7 +191,8 @@ export default function milestonesBarComponent() {
     const profiles = profileCardsComponent()
         .onCtrlClick((e,d) => { 
             ignoreNextWrapperClick = true;
-            onSetKpiFormat(d.key) 
+            //not needed anymore...kpisComponent handles it and nothing else changes
+            //onSetKpiFormat(d.key) 
         });
 
     let requiredSliderPosition = 0;

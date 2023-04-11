@@ -290,7 +290,7 @@ export default function progressBarComponent() {
     function progressBar(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
         updateDimns(selection.data());
-        console.log("progbar data", selection.data())
+        //console.log("progbar data", selection.data())
 
         selection
             .call(background()

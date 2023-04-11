@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10, TRANSITIONS } from "../constants";
+import { DIMNS, grey10, TRANSITIONS, KPI_CTRLS } from "../constants";
 import kpiComponent from './kpi/kpiComponent';
 import closeComponent from './kpi/closeComponent';
 import { getTransformationFromTrans } from '../helpers';
@@ -117,6 +117,7 @@ export default function kpisComponent() {
     let kpiFormat = "actual";
     let withTooltips = true;
     let withCtrls = true;
+    let displayFormat = "both";
     let selected;
     let isSelected = d => false;
     let statuses = {}; //closing, open, opening
@@ -174,7 +175,7 @@ export default function kpisComponent() {
                 openedKpiDiv = d3.select(`div#opened-kpi-${milestoneId}`)
             }
 
-            const ctrlsData = withCtrls ? data.ctrlsData : [];
+            const ctrlsData = withCtrls ? KPI_CTRLS(displayFormat) : [];
 
             const nrOfCtrlsButtons = ctrlsData?.length;
             const nrTooltipRowsAbove = kpisData[0] ? d3.max(kpisData[0].tooltipsData, d => d.rowNr) : 0;
@@ -450,7 +451,11 @@ export default function kpisComponent() {
                                 .attr("transform", (b,i) => `translate(${i * btnWidth * 1.1}, 0)`)
                                 .each(function(b){
                                     const btnG = d3.select(this)
-                                        .on("click", onCtrlClick);
+                                        .on("click", function(){
+                                            displayFormat = b.key;
+                                            containerG.call(kpis)
+                                            onCtrlClick();
+                                        });
                                         
                                     btnG.select("rect.hitbox")
                                         .attr("width", btnWidth)
