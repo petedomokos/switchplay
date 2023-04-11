@@ -10,9 +10,9 @@ export const getKpis = (userId, journeyId, groupId) => {
    const _journeyKpis = journeyKpis[journeyId]?.map(kpi => ({ ...kpi, level:"journey" })) || [];
    //journey kpis override user kpis, which overide groupkpis
    const allKpis = [..._groupKpis, ..._userKpis, ..._journeyKpis];
-   const datasetKpis = allKpis.filter(kpi => kpi.datasetId && kpi.statKey)
+   const datasetKpis = allKpis.filter(kpi => kpi.datasetKey && kpi.statKey)
    const uniqueDatasetKpis = filterUniqueByProperties(["datasetKey", "statKey"], datasetKpis)
-   const nonDatasetKpis = allKpis.filter(kpi => !kpi.datasetId);
+   const nonDatasetKpis = allKpis.filter(kpi => !kpi.datasetKey);
    const uniqueNonDatasetKpis = filterUniqueByProperties(["key"], nonDatasetKpis);
    return [ ...uniqueDatasetKpis, ...uniqueNonDatasetKpis ]
 }
