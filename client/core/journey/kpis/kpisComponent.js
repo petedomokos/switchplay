@@ -167,6 +167,7 @@ export default function kpisComponent() {
 
         // expression elements
         selection.each(function (data,i) {
+            //console.log("data", data)
             prevData = data;
             const { kpisData } = data;
             //useful references
@@ -175,7 +176,7 @@ export default function kpisComponent() {
                 openedKpiDiv = d3.select(`div#opened-kpi-${milestoneId}`)
             }
 
-            const ctrlsData = withCtrls ? KPI_CTRLS(displayFormat) : [];
+            const ctrlsData = withCtrls && milestoneId !== "current" ? KPI_CTRLS(displayFormat) : [];
 
             const nrOfCtrlsButtons = ctrlsData?.length;
             const nrTooltipRowsAbove = kpisData[0] ? d3.max(kpisData[0].tooltipsData, d => d.rowNr) : 0;

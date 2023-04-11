@@ -3,7 +3,7 @@ import { addDays } from '../util/TimeHelpers';
 
 //@todo - handle showTrailingZeros = false
 //@todo - handle accuracy >= 5...round to that number
-export const round = (value, accuracy, showTrailingZeros=true) => {
+export const round = (value, accuracy=0, showTrailingZeros=true) => {
     if(!value || isNaN(value)) { return value; }
     if(typeof accuracy === "undefined") { return value; }
     if(accuracy < 5){

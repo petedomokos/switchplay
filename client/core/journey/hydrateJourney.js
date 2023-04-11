@@ -39,7 +39,7 @@ export function hydrateJourneyData(data, user, datasets){
         const { bands, standards, accuracy } = getBandsAndStandards(kpi.datasetKey, kpi.statKey) || {};
         const min = bands[0] ? bands[0].min : null;
         const max = bands[0] ? bands[bands.length - 1].max : null;
-        return { ...kpi, min, max }
+        return { ...kpi, min, max, bands, standards, accuracy }
     });
     //console.log("kpis....................", kpis)
     const defaultTargets = getTargets(player._id, player.groupId);
@@ -333,7 +333,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
         isFuture,
         isActive,
         kpis:kpis.map((kpi,i) => {
-            //console.log("kpi", kpi)
+            console.log("kpi--------------------------", kpi)
             //KEYS/ID
             const { datasetKey, statKey, min, max, accuracy } = kpi;
             const key = kpi.key || `${datasetKey}-${statKey}`;
@@ -419,6 +419,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
 
             const achieved = isPast ? current : null;
             //note prevProfile has already been processed with a full key and values
+            console.log("ACCURACY----", accuracy)
             let expected = isPast ? null : calcExpected(kpi, start, { date, ...target }, now, { accuracy });
 
             let onTrackStatus;

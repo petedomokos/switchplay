@@ -76,13 +76,14 @@ export default function progressBarComponent() {
             //end tooltips
             //@todo next
             //tooltip and numbers heights can go all the way to the top ad bottom of progBar
+            const nrEndTooltips = tooltipsData.filter(t => t.tooltipType === "comparison").length;
             const endExpectedTooltipWidth = (endTooltipsHeight) / expectedTooltipAspectRatio;
             const endTargetTooltipWidth = endTooltipsHeight / targetTooltipAspectRatio;
             //open tooltips (top and bottom)
             const topExpectedTooltipWidth = (dynamicTooltipHeight) / expectedTooltipAspectRatio;
             const bottomTargetTooltipWidth = dynamicTooltipHeight / targetTooltipAspectRatio;
             
-            const endTooltipsWidth = endExpectedTooltipWidth + endTargetTooltipWidth + endToolTipsMarginLeft;
+            const endTooltipsWidth = nrEndTooltips === 0 ? 0 : endExpectedTooltipWidth + endTargetTooltipWidth + endToolTipsMarginLeft;
 
             //BAR COMPONENT (BAR AND NUMBERS)
             const barHeight = contentsHeight - topTooltipsHeight - bottomTooltipsHeight;

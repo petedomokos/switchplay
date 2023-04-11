@@ -116,9 +116,10 @@ export default function kpisLayout(){
             barData.start = format === "completion" ? 0 : (order === "highest is best" ? values.min : values.max);
             barData.end = format === "completion" ? 100 : (order === "highest is best" ? values.max : values.min);
 
-            const tooltipsData = [
+            const scaleTooltipsData = [
                 { 
                     progressBarType:"dataset",
+                    tooltipType:"scale",
                     key:"start", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
                     shouldDisplay:status => status === "open",
@@ -131,6 +132,7 @@ export default function kpisLayout(){
                 },
                 { 
                     progressBarType:"dataset",
+                    tooltipType:"scale",
                     key:"end", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
                     shouldDisplay:status => status === "open",
@@ -140,9 +142,14 @@ export default function kpisLayout(){
                     editable:false,
                     withDragValueAbove:false,
                     withInnerValue:true,
-                },
+                }
+            ]
+
+            //@todo - put different comparisons into current card eg compared to club expectations, or all players avg
+            const comparisonTooltipsData = isCurrent ? [] : [
                 { 
                     progressBarType:"dataset",
+                    tooltipType:"comparison",
                     key:"expected", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
                     shouldDisplay:status => !isPast && !!targetObj, //dont display if past or no future profiles
@@ -158,6 +165,7 @@ export default function kpisLayout(){
                 },
                 { 
                     progressBarType:"dataset",
+                    tooltipType:"comparison",
                     key:"target", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all
                     shouldDisplay:status => !!targetObj,
@@ -171,34 +179,30 @@ export default function kpisLayout(){
                     withInnerValue:true,
                     //if small space, just show the ball
                     //smallIcons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
-                },
-                //when completion, value below is 0
-                {
-                    progressBarType:"dataset",
-                    key:"current", milestoneId, kpiKey:key, datasetKey, statKey,
-                    label: values.achieved ? "Achieved" : "Current",
-                    rowNr:0, y:0,
-                    value:current,
-                    fill:colours.current,
-                    dataOrder: format === "completion" ? "highest is best" : order,
-                    accuracy,
-                    editable:isCurrent || isFuture,
-                    withDragValueAbove:false,
-                    withInnerValue:false,
-                    shouldDisplay:status => status === "open" && !isPast
                 }
             ];
+            const currentValueTooltipDatum = {
+                progressBarType:"dataset",
+                tooltipType:"value",
+                key:"current", milestoneId, kpiKey:key, datasetKey, statKey,
+                label: values.achieved ? "Achieved" : "Current",
+                rowNr:0, y:0,
+                value:current,
+                fill:colours.current,
+                dataOrder: format === "completion" ? "highest is best" : order,
+                accuracy,
+                editable:isCurrent || isFuture,
+                withDragValueAbove:false,
+                withInnerValue:false,
+                shouldDisplay:status => status === "open" && !isPast
+            };
 
-            if(kpi.datePhase === "future" && kpi.key.includes("pressUps")){
-                //console.log("kpi---",i,kpi.key, kpi)
-                //console.log("milestone", milestoneId)
-                //console.log("current", values.current)
-                //console.log("expected", values.expected)
-                //console.log("tooltips", tooltipsData)
-            }
+            const tooltipsData = [...scaleTooltipsData, ...comparisonTooltipsData, currentValueTooltipDatum]
             const numbersData = [currentDatum];
 
-            const stepsCurrentDatum = {
+            //steps - the steps progressBar display will not be on current 
+            //(although it will show the steps list for all steps on all future cards)
+            const stepsCurrentDatum = isCurrent ? null : {
                 progressBarType:"steps",
                 key:"current",
                 label: values.achieved ? "Achieved" : "Current",
@@ -209,23 +213,14 @@ export default function kpisLayout(){
                 fill:colours.stepsCurrent,
             }
 
-            const stepsBarData = [stepsCurrentDatum];
-            stepsBarData.start = 0;
-            stepsBarData.end = 100;
-            //console.log("key value", key, stepsValues.current.completion)
-            //console.log("steps", steps)
-
-            const stepsTooltipsData = [];
-            const stepsNumbersData = [];
-
-            if(datasetKey === "shuttles"){
-                //console.log("milestoneId", kpi.milestoneId)
-                //console.log("kpi", kpi)
-                //console.log("values", values)
-                //console.log("tooltipsData", tooltipsData)
-                //console.log("format ", format, current)
-
+            const stepsBarData = isCurrent ? null : [stepsCurrentDatum];
+            if(stepsBarData){
+                stepsBarData.start = 0;
+                stepsBarData.end = 100;
             }
+
+            const stepsTooltipsData = isCurrent ? null : [];
+            const stepsNumbersData = isCurrent ? null : [];
 
             return {
                 ...kpi,
