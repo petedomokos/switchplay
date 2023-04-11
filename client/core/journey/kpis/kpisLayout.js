@@ -16,30 +16,20 @@ export default function kpisLayout(){
 
     function update(data){
         //console.log("update kpisLayout------", data)
-        //console.log("datasets", datasets)
-        //const orderedData = sortAscending(data, d => d.date);
-        //console.log("ordered", orderedData)
-
-        //temp to increase data
-        /*
-        const _data = [...data, ...data, ...data, ...data]
-            .map((kpi,i) => {
-                if(i <= 1) { return kpi;}
-                return { ...kpi, key:`${i}-${kpi.key}`}
-            });*/
-        //1 only...const _data = [data[0]]
         const kpisData = data.map((kpi,i) => {
-            const { key, values, accuracy, order, isPast, isCurrent, isFuture, milestoneId, datasetKey, statKey,
+            if(kpi.datasetKey === "pressups"){
+                console.log("milestoneId kpi", milestoneId, kpi)
+            }
+            const { key, values, accuracy, order, isPast, isCurrent, isFuture,isActive, milestoneId, datasetKey, statKey,
                 steps, stepsValues } = kpi;
+            
+            const start = values.start?.actual;
+            const current = values.current?.actual;
+            const target = values.target?.actual;
+            const achieved = values.achieved?.actual;
+            const expected = values.expected?.actual;
+            const { min, max } = values;
             //console.log("kpi key datasetkey", key, datasetKey)
-            const dataset = datasets.find(dset => dset.key === datasetKey);
-            //can set all kpis to be active eg for an active profile card that doesnt have access to all data
-            const isActive = allKpisActive || kpi.isActive;
-            //helper
-            //const _pcCompletionValue = pcCompletion(previous.value, target.value, current.value);
-            //for now, we manually seyt this to test it renders as red. But should be based on linear interpolation
-            //const expectedCurrent = { date: date, value:(current?.value ? current.value * 1.3 : 0) };//calculateExpected(previous, target, date)
-            //const _pcCompletionExpectedValue = pcCompletion(previous.value, target.value, expectedCurrent.value);
             //bars
             const currentColour = grey10(7);// "#696969";
             const colours = {
@@ -50,72 +40,62 @@ export default function kpisLayout(){
                 stepsCurrent:"blue"
             }
 
-            //todo - fix bug why expected and current are showing as ontrack when they are not
-            //also refacotr the below logic
-
-            const start = values.start && typeof values.start[format] === "number" ? values.start[format] : null;
-            if(isCurrent && key === "shuttles-time"){
-            }
-            const end = values.end && typeof values.end[format] === "number" ? values.end[format] : null;
-            //console.log("values.curr", values.current)
-            const current = values.current && typeof values.current[format] === "number" ? values.current[format] : null;
             
-            if(kpi.datasetKey === "shuttles"){
-                //console.log("milestoneId--------------------", kpi.milestoneId)
-                //console.log("format ")
+            //if(milestoneId === "profile-5" && kpi.datasetKey === "shuttles"){
+                //console.log("milestoneId dset", milestoneId, datasetKey)
+            //}
 
-            }
-            
-            let expected;
-            let target;
-            //let proposedTarget;
-            const expectedObj = values.expected;
-            const targetObj = values.target;
-            //const proposedTargetObj = values.target;
-            if(!expectedObj) {
-                expected = null;
+            //Bar datums
+            const dataStart = order === "highest is best" ? min : max;
+            const dataEnd = order === "highest is best" ? max : min;
+            let barStart, barEnd;
+            if(isCurrent){
+                barStart = dataStart
+                barEnd = dataEnd;
             }else{
-                expected = expectedObj.unsaved ? expectedObj.unsaved[format] : expectedObj[format];
+                barStart = typeof start === "number" ? start : dataStart;
+                barEnd = typeof target === "number" ? target : dataEnd;
             }
-            if(!targetObj){
-                target = null;
-            }else{
-                target = targetObj.unsaved ? targetObj.unsaved[format] : targetObj[format];
-            }
-            /*
-            if(!proposedTargetObj){
-                proposedTarget = null;
-            }else{
-                proposedTarget = proposedTargetObj.unsaved ? proposedTargetObj.unsaved[format] : proposedTargetObj[format];
-            }*/
 
-            //datums
-            const targetDatum = {
-                progressBarType:"dataset",
-                key:"target",
-                label: "Target",
-                isAchieved:(order === "highest is best" || format === "completion") ? target <= current : target >= current,
-                startValue:format === "completion" ? 0 : (order === "highest is best" ? values.min : values.max), //may be undefined
-                value:target,
-                fill:colours.target,
-                format
+            //helper
+            //const best = (value1, value2) => order === "highest is best" ? d3.max([value1, value2]) : d3.min([value1, value2]);
+            //const worst = (value1, value2) => order === "highest is best" ? d3.min([value1, value2]) : d3.max([value1, value2]);
+
+            const isNumber = number => typeof number === "number";
+            const boundedValue = (value, bounds) => {
+                const lowerBound = d3.min(bounds);
+                const upperBound = d3.max(bounds);
+                if(!isNumber(value)){ return value; }
+                return d3.min([upperBound, d3.max([lowerBound, value])])
             }
-            const currentDatum = {
+
+            let currentToShow = current;
+            if(typeof current === "number" && current < barStart){ currentToShow = barStart; }
+            const currentBarDatum = {
                 progressBarType:"dataset",
                 key:"current",
                 label: values.achieved ? "Achieved" : "Current",
                 //@todo - remove isAchieved form this - is confusing and means nothing
                 isAchieved:!!values.achieved,
-                startValue: format === "completion" ? 0 : (order === "highest is best" ? values.min : values.max), //may be undefined
-                value:current,
+                startValue: barStart,
+                value: boundedValue(current, [barStart, barEnd]),
+                actualValue:current,
                 fill:colours.current,
                 format
             }
 
-            const barData = format === "completion" ? [currentDatum] : [targetDatum, currentDatum];
-            barData.start = format === "completion" ? 0 : (order === "highest is best" ? values.min : values.max);
-            barData.end = format === "completion" ? 100 : (order === "highest is best" ? values.max : values.min);
-
+            //then...add teh steps visual under the bars (not on current) and the 3 displayOptions
+            //then ...wire up the steps interactions
+            //then figure out a better way to set target value -> USER CAN JUST CLICK THE END SCALE TOOLTIP BELOW
+            //THIS OPENS UP THE OPTION TO ADJUST IT VIA A DRAG SCALE - MAY NEED TO MAKE THEN TOOLTIP LARGER,
+            //OR AT LEAST THE HITBOX
+            //and remove targetTooltip. 
+            //could have it at end of each bar, and the current datum becomes a football, so it goes into the net 
+            //once target is met! and target would be set by clicking it, that opens the target tooltip on a scale to set it
+            const barData = [currentBarDatum]// : [targetDatum, currentDatum];
+            barData.start = barStart;
+            barData.end = barEnd;
+            
             const scaleTooltipsData = [
                 { 
                     progressBarType:"dataset",
@@ -124,7 +104,7 @@ export default function kpisLayout(){
                     //if no targetObj, this means there is no future active profile at all so no expected
                     shouldDisplay:status => status === "open",
                     rowNr: -1, y: -1,
-                    value: barData.start, x:barData.start,
+                    value: barStart, x:barStart,
                     accuracy,
                     editable:false,
                     withDragValueAbove:false,
@@ -137,14 +117,16 @@ export default function kpisLayout(){
                     //if no targetObj, this means there is no future active profile at all so no expected
                     shouldDisplay:status => status === "open",
                     rowNr: -1, y: -1,
-                    value: barData.end, x:barData.end,
+                    value: barEnd, x:barEnd,
+                    isTarget:barEnd === target,
                     accuracy,
                     editable:false,
                     withDragValueAbove:false,
                     withInnerValue:true,
+                    subtext:milestoneId === "current" ? "" : barEnd === target ? "Edit" : "Set"
                 }
             ]
-
+            /*
             //@todo - put different comparisons into current card eg compared to club expectations, or all players avg
             const comparisonTooltipsData = isCurrent ? [] : [
                 { 
@@ -173,12 +155,12 @@ export default function kpisLayout(){
                     value:target, x:target,
                     dataOrder: format === "completion" ? "highest is best" : order,
                     accuracy,
-                    icons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
+                    icons: { achieved: ball, notAchieved: emptyGoal },
                     editable:isCurrent || isFuture,
                     withDragValueAbove:true,
                     withInnerValue:true,
                     //if small space, just show the ball
-                    //smallIcons: { achieved: ball /*goalWithBall*/, notAchieved: emptyGoal },
+                    //smallIcons: { achieved: ball, notAchieved: emptyGoal },
                 }
             ];
             const currentValueTooltipDatum = {
@@ -196,10 +178,11 @@ export default function kpisLayout(){
                 withInnerValue:false,
                 shouldDisplay:status => status === "open" && !isPast
             };
+            */
+            const tooltipsData = [...scaleTooltipsData, /*...comparisonTooltipsData, currentValueTooltipDatum*/]
+            const numbersData = [{ ...currentBarDatum, value:current }]; //dont amend the current value like we did for bar
 
-            const tooltipsData = [...scaleTooltipsData, ...comparisonTooltipsData, currentValueTooltipDatum]
-            const numbersData = [currentDatum];
-
+            /*
             //steps - the steps progressBar display will not be on current 
             //(although it will show the steps list for all steps on all future cards)
             const stepsCurrentDatum = isCurrent ? null : {
@@ -221,6 +204,7 @@ export default function kpisLayout(){
 
             const stepsTooltipsData = isCurrent ? null : [];
             const stepsNumbersData = isCurrent ? null : [];
+            */
 
             return {
                 ...kpi,
@@ -228,37 +212,10 @@ export default function kpisLayout(){
                 barData,
                 tooltipsData,
                 numbersData,
-                stepsBarData,
-                stepsTooltipsData,
-                stepsNumbersData
+                stepsBarData:[],
+                stepsTooltipsData:[],
+                stepsNumbersData:[]
             }
-            /*
-            return {
-                ...kpi,
-                //date,
-                //isActive,
-                //isFuture,
-                //stat full name stands alone without needing the dataset name before it
-                //name:stat.fullNameShort,
-                //longName:stat.fullNameLong,
-                //unit:stat.unit,
-                //barData,
-                //tooltipsData,
-                //numbersData,
-                //bands:bands.map(band => ({ ...band, min:+band.min, max:+band.max })),
-                //min,
-                //max,
-                //start,
-                //end,
-                //standards:standards.map(standard => ({ ...standard, value:+standard.value })),
-                //3 date-value objects for previous, current and target values
-                //previous,
-                //current:{ date: currentDatapoint.date, value: current.value },
-                //target: targetDatapoint ? { date: targetDatapoint.date, value: target.value } : undefined,
-                //expectedCurrent,
-                //actualDatapoints:actualDatapoints.map(d => ({ date:d.date, value:d.values.find(v => v.key === statKey).value }))
-            }
-            */
         })
 
         return { kpisData }

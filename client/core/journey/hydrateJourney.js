@@ -333,7 +333,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
         isFuture,
         isActive,
         kpis:kpis.map((kpi,i) => {
-            console.log("kpi--------------------------", kpi)
+            //console.log("kpi--------------------------", kpi)
             //KEYS/ID
             const { datasetKey, statKey, min, max, accuracy } = kpi;
             const key = kpi.key || `${datasetKey}-${statKey}`;
@@ -419,7 +419,6 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
 
             const achieved = isPast ? current : null;
             //note prevProfile has already been processed with a full key and values
-            console.log("ACCURACY----", accuracy)
             let expected = isPast ? null : calcExpected(kpi, start, { date, ...target }, now, { accuracy });
 
             let onTrackStatus;

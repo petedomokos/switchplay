@@ -239,7 +239,7 @@ export default function kpisComponent() {
                                 .attr("width", listWidth)
                                 .attr("height", listHeight)
                                 .attr("fill", "transparent")
-                                .attr("stroke", "black")// "none");
+                                .attr("stroke", "none");
 
                         //container that the listG zoom transforms are applied to
                         listG

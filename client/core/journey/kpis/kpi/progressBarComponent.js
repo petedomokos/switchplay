@@ -69,7 +69,8 @@ export default function progressBarComponent() {
             
             //we want expecetd icon to be a bit bigger die to its circular shape
             const expectedMultiplier = 1.3;
-            const boundsMultiplier = 0.3;
+            const boundsMultiplier = 0.6;
+            const boundsFontMultiplier = 1;
             //for now, hardcode aspect ratios as we know there are two tooltips
             const expectedTooltipAspectRatio = 1; //this is approx, as the shiny one is not exactly 1
             const targetTooltipAspectRatio = 42/56;
@@ -136,7 +137,7 @@ export default function progressBarComponent() {
 
             //define fontsize here so it is not increased by the expectedMultiplier
             const fontSize = status === "closed" ? endTooltipsHeight * 0.45 : dynamicTooltipHeight * 0.3;
-            const boundsFontsize = fontSize * 0.7
+            const boundsFontsize = fontSize * boundsFontMultiplier
             const tooltips = {
                 open:{
                     start: {
@@ -349,10 +350,6 @@ export default function progressBarComponent() {
                 .map(t => ({ ...t, progBarKey: d.key }))
                 .filter(d =>  d.shouldDisplay(status)))
 
-        //console.log("progBar status-----", status)
-        //console.log("selG", selection.node())
-        //console.log("sel numbers G", selection.select("g.numbers").data())
-
         //issue - the i in getX below is teh tooltip i, eg target, expected, rther than the kpi i,
         //which is what dimnns needs
         selection.select("g.tooltips")
@@ -369,6 +366,13 @@ export default function progressBarComponent() {
                         strokeOpacity:1,
                         opacity:0.3,
                         strokeWidth:0.2
+                    },
+                    text:{
+                        stroke:d.milestoneId !== "current" && d.key === "end" && !d.isTarget ? "red" : 
+                            (d.key === "expected" || d.key === "target" ? grey10(6) : grey10(4))
+                    },
+                    subtext:{
+                        stroke:d.milestoneId !== "current" && d.key === "end" && !d.isTarget ? "red" : grey10(4)
                     }
                 }))
                 //this is when open

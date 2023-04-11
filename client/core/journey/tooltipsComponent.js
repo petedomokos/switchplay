@@ -82,20 +82,18 @@ export default function tooltipsComponent() {
         //console.log("uT...data", selection.data())
         //const tooltipDimns = _tooltipDimns(data, i);
         selection.each(function(d,i){
-            //if(d.milestoneId === "current" && d.key === "target" && d.datasetKey === "pressUps"){
-                //console.log("d", d)
-                //console.log("unsaved", d.unsavedValue)
-            //}
-
             //decide the saem common pattern for tooltips - it should probably always be
             //an array, even if its top then bottom
             const tooltipG = d3.select(this);
             const { width, height, margin, fontSize } = tooltipDimns[d.key];
             const styles = _styles(d,i);
+            //if(d.milestoneId === "profile-6"&& d.datasetKey === "pressUps"){
+            //}
 
             const contentsWidth = width - margin.left - margin.right;
             const contentsHeight = height - margin.top - margin.bottom;
             const dragTextHeight = draggable && d.withDragValueAbove ? contentsHeight * 0.333 : 0;
+            const subtextHeight = contentsHeight * 0.4;
             const iconHeight = contentsHeight - dragTextHeight;
 
             const btnWidth = d3.max([40, contentsWidth]);
@@ -234,12 +232,22 @@ export default function tooltipsComponent() {
                     .attr("y", d.key === "expected" ? -contentsWidth * 0.05 : 0)
                     //temp - use width, not contentsW, so all tooltip fonts the same
                     .attr("font-size", fontSize)
-                    .attr("fill", d.key === "expected" || d.key === "target" ? styles.text.fill : styles.subtext.fill)
-                    .attr("stroke", d.key === "expected" || d.key === "target" ? styles.text.stroke : styles.subtext.stroke)
+                    .attr("fill", styles.text.stroke)
+                    .attr("stroke", styles.text.stroke)
                     .attr("stroke-width", 0.1)
                     .text(getValue(d))
 
             valueText.exit().remove();//need to also transition icon changes.call(remove)
+
+
+            //text-below
+            tooltipG.select("text.subtext")
+                .attr("y", contentsHeight/2)
+                .attr("fill", styles.subtext.stroke)
+                .attr("stroke", styles.subtext.stroke)
+                .attr("stroke-width", 0.1)
+                .attr("font-size", subtextHeight * 0.85)
+                .text(d.subtext)
         })                    
     }
 
@@ -401,7 +409,11 @@ export default function tooltipsComponent() {
                                 .attr("dominant-baseline", "central")
                                 .style("opacity", 0); //starts hidden
 
-                            d3.select(this).append("g").attr("class", "main-contents");
+                            d3.select(this).append("g").attr("class", "main-contents")
+
+                            d3.select(this).append("text").attr("class", "subtext")
+                                .attr("text-anchor", "middle")
+                                .attr("dominant-baseline", "central");
                             //hitbox must be on top, as contents under it will change              
                             d3.select(this).append("rect").attr("class", "hitbox");
                         })
