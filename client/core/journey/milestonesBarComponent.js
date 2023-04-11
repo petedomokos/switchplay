@@ -879,6 +879,7 @@ export default function milestonesBarComponent() {
                         .editable(swipable ? false : true)
                         .scrollable(swipable ? false : true)
                         .onSaveValue(onSaveValue)
+                        .onSetEditing(onSetEditingSVGComponent)
                         .onStartEditingPhotoTransform(function(milestoneId, locationKey){
                             milestoneBeingEdited = { id:milestoneId, desc:"photo" }
                             milestonesG

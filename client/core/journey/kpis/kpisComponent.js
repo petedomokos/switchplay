@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10, TRANSITIONS, KPI_CTRLS } from "../constants";
+import { DIMNS, grey10, TRANSITIONS, KPI_CTRLS, COLOURS } from "../constants";
 import kpiComponent from './kpi/kpiComponent';
 import closeComponent from './kpi/closeComponent';
 import { getTransformationFromTrans } from '../helpers';
@@ -118,6 +118,7 @@ export default function kpisComponent() {
     let withTooltips = true;
     let withCtrls = true;
     let displayFormat = "both";
+    let profileIsSelected = false;
     let selected;
     let isSelected = d => false;
     let statuses = {}; //closing, open, opening
@@ -150,6 +151,7 @@ export default function kpisComponent() {
     let handleZoom = function(){};
     let handleZoomEnd = function(){};
     let onSaveValue = function(){};
+    let onSetEditing = function(){};
 
     const zoom = d3.zoom();
 
@@ -384,7 +386,7 @@ export default function kpisComponent() {
                                 })
                                 .styles((d,i) => ({
                                     bg:{
-                                        fill:isSelected(d) ? grey10(1) : "transparent"
+                                        fill:profileIsSelected ? COLOURS.selectedMilestone : COLOURS.milestone
                                     },
                                     name:{
                                     }
@@ -418,6 +420,7 @@ export default function kpisComponent() {
                                     onEditStep(id, _dimns);
                                 })
                                 .onSaveValue(onSaveValue)
+                                .onSetEditing(onSetEditing)
                             )
 
                         //EXIT
@@ -747,6 +750,11 @@ export default function kpisComponent() {
         kpiFormat = value;
         return kpis;
     };
+    kpis.profileIsSelected = function (value) {
+        if (!arguments.length) { return profileIsSelected; }
+        profileIsSelected = value;
+        return kpis;
+    };
     kpis.editable = function (value) {
         if (!arguments.length) { return editable; }
         editable = value;
@@ -880,6 +888,13 @@ export default function kpisComponent() {
     kpis.onSaveValue = function (value) {
         if(typeof value === "function"){
             onSaveValue = value;
+        }
+        return kpis;
+    };
+    kpis.onSetEditing = function (value) {
+        if (!arguments.length) { return onSetEditing; }
+        if(typeof value === "function"){
+            onSetEditing = value;
         }
         return kpis;
     };

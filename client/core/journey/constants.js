@@ -145,6 +145,18 @@ export const TIME_SETTINGS = {
 }
 
 export const TRANSITIONS = {
+    DEFAULT_DURATIONS:{
+        SLIDE:{
+            FAST:200,
+            MED:400,
+            SLOW:600
+        },
+        FADE:{
+            FAST:50,
+            MED:200,
+            SLOW:400
+        }
+    },
     KPI:{
         FADE:{
             DURATION:400
@@ -383,7 +395,7 @@ export const COLOURS = {
         shinyBall:"#D4AF37",
         shinyCrystalBall:"#D4AF37"
 
-    }
+    },
     /*
     canvas:"#FAEBD7",
     planet:grey10(5),

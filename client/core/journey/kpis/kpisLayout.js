@@ -15,7 +15,7 @@ export default function kpisLayout(){
     let noKpisActive = false;
 
     function update(data){
-        //console.log("update kpisLayout------", data)
+        //console.log("update kpisLayout------")
         const kpisData = data.map((kpi,i) => {
             if(kpi.datasetKey === "pressups"){
                 console.log("milestoneId kpi", milestoneId, kpi)
@@ -69,8 +69,6 @@ export default function kpisLayout(){
                 return d3.min([upperBound, d3.max([lowerBound, value])])
             }
 
-            let currentToShow = current;
-            if(typeof current === "number" && current < barStart){ currentToShow = barStart; }
             const currentBarDatum = {
                 progressBarType:"dataset",
                 key:"current",
@@ -78,11 +76,27 @@ export default function kpisLayout(){
                 //@todo - remove isAchieved form this - is confusing and means nothing
                 isAchieved:!!values.achieved,
                 startValue: barStart,
+                /*
+                ive made this far too complicated - this should just be the value and thats it.
+                and the barComponent should cut it off 
+                */
                 value: boundedValue(current, [barStart, barEnd]),
                 actualValue:current,
+                fullScaleStartValue:dataStart,
+                fullScaleValue:current,
                 fill:colours.current,
                 format
             }
+
+            /*const targetDatum = {
+                key:"target",
+                label: "Target",
+                isAchieved:order === "highest is best" ? target <= current : target >= current,
+                startValue:barStart,
+                value:target,
+                fill:colours.target,
+                format
+            }*/
 
             //then...add teh steps visual under the bars (not on current) and the 3 displayOptions
             //then ...wire up the steps interactions
@@ -95,6 +109,8 @@ export default function kpisLayout(){
             const barData = [currentBarDatum]// : [targetDatum, currentDatum];
             barData.start = barStart;
             barData.end = barEnd;
+            barData.dataStart = dataStart;
+            barData.dataEnd = dataEnd;
             
             const scaleTooltipsData = [
                 { 
@@ -105,6 +121,7 @@ export default function kpisLayout(){
                     shouldDisplay:status => status === "open",
                     rowNr: -1, y: -1,
                     value: barStart, x:barStart,
+                    fullScaleValue:dataStart,
                     accuracy,
                     editable:false,
                     withDragValueAbove:false,
@@ -118,26 +135,25 @@ export default function kpisLayout(){
                     shouldDisplay:status => status === "open",
                     rowNr: -1, y: -1,
                     value: barEnd, x:barEnd,
+                    fullScaleValue:dataEnd, 
                     isTarget:barEnd === target,
                     accuracy,
                     editable:false,
                     withDragValueAbove:false,
                     withInnerValue:true,
-                    subtext:milestoneId === "current" ? "" : barEnd === target ? "Edit" : "Set"
                 }
             ]
-            /*
             //@todo - put different comparisons into current card eg compared to club expectations, or all players avg
             const comparisonTooltipsData = isCurrent ? [] : [
                 { 
                     progressBarType:"dataset",
                     tooltipType:"comparison",
                     key:"expected", milestoneId, kpiKey:key, datasetKey, statKey,
-                    //if no targetObj, this means there is no future active profile at all so no expected
-                    shouldDisplay:status => !isPast && !!targetObj, //dont display if past or no future profiles
+                    //temp disable when its an endTooltip
+                    shouldDisplay:(status, editing) => status === "open" && isFuture && !!target, //dont display if past or no future profiles
                     rowNr: 1, y: 1, current,
                     value: expected, x:expected,
-                    dataOrder: format === "completion" ? "highest is best" : order,
+                    dataOrder: order,
                     accuracy,
                     icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },
                     editable:false,//isCurrent || isFuture,
@@ -150,19 +166,26 @@ export default function kpisLayout(){
                     tooltipType:"comparison",
                     key:"target", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all
-                    shouldDisplay:status => !!targetObj,
+                    shouldDisplay:(status, editing) => !!editing,
                     rowNr: -1, y: -1, current,
-                    value:target, x:target,
-                    dataOrder: format === "completion" ? "highest is best" : order,
+                    value:typeof target === "number" ? target : dataEnd, 
+                    x:typeof target === "number" ? target : dataEnd, 
+                    dataOrder: order,
                     accuracy,
                     icons: { achieved: ball, notAchieved: emptyGoal },
-                    editable:isCurrent || isFuture,
+                    editable: isFuture,
                     withDragValueAbove:true,
                     withInnerValue:true,
                     //if small space, just show the ball
                     //smallIcons: { achieved: ball, notAchieved: emptyGoal },
                 }
             ];
+            if(milestoneId === "profile-5" && key === "pressUps-reps"){
+                console.log("milestoneId", milestoneId)
+                console.log("key", key)
+                console.log("compdata", comparisonTooltipsData)
+            }
+            /*
             const currentValueTooltipDatum = {
                 progressBarType:"dataset",
                 tooltipType:"value",
@@ -176,10 +199,10 @@ export default function kpisLayout(){
                 editable:isCurrent || isFuture,
                 withDragValueAbove:false,
                 withInnerValue:false,
-                shouldDisplay:status => status === "open" && !isPast
+                shouldDisplay:(status, editing) => status === "open" && !isPast
             };
             */
-            const tooltipsData = [...scaleTooltipsData, /*...comparisonTooltipsData, currentValueTooltipDatum*/]
+            const tooltipsData = [...scaleTooltipsData, ...comparisonTooltipsData, /*currentValueTooltipDatum*/]
             const numbersData = [{ ...currentBarDatum, value:current }]; //dont amend the current value like we did for bar
 
             /*

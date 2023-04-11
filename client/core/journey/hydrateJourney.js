@@ -249,8 +249,8 @@ const goBackByExpiryDurationFromDate = (duration, units) => date => {
 }
 
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
-    //if(profile.id === "profile-2")
-    //console.log("hydrateProfile------------", profile.id, profile.date, profile.created, profile)
+    if(profile.id === "profile-5")
+    console.log("hydrateProfile------------", profile.id, profile.date, profile.created, profile)
     const { now, rangeFormat } = options;
     const { id, customTargets=[], isCurrent, profileKpis=[] } = profile;
     const date = typeof profile.date === "string" ? new Date(profile.date) : profile.date;

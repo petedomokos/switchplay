@@ -105,6 +105,7 @@ export default function profileCardsComponent() {
     let onEditStep = function(){};
     let onStartEditingPhotoTransform = function(){};
     let onEndEditingPhotoTransform = function(){};
+    let onSetEditing = function(){};
 
     let onMilestoneWrapperPseudoDragStart = function(){};
     let onMilestoneWrapperPseudoDrag = function(){};
@@ -294,6 +295,7 @@ export default function profileCardsComponent() {
                             .kpiFormat(kpiFormat)
                             .editable(editable)
                             .scrollable(scrollable)
+                            .profileIsSelected(selected === d.id)
                             .onUpdateSelected((profileId, kpiKey, shouldUpdateScroll, shouldUpdateDom, dimns) => {
                                 const profileShouldUpdate = profile => profile.id === "current" || currentPage.key === "profile"; 
                                 data.filter(p => p.id !== profileId).forEach(p => {
@@ -343,6 +345,7 @@ export default function profileCardsComponent() {
                                 const requiredProfileId = profileId === "current" ? data.find(p => p.isFuture).id : profileId;
                                 onSaveValue(valueObj, requiredProfileId, datasetKey, statKey, key);
                             })
+                            .onSetEditing(onSetEditing)
                             //pass scroll events on any kpiComponent to all other kpiComponents
                             .onZoomStart(function(e){
                                 data.filter(p => p.id !== d.id).forEach(p => {
@@ -1036,6 +1039,13 @@ export default function profileCardsComponent() {
     profileCards.onEndEditingPhotoTransform = function (value) {
         if(typeof value === "function"){
             onEndEditingPhotoTransform = value;
+        }
+        return profileCards;
+    };
+    profileCards.onSetEditing = function (value) {
+        if (!arguments.length) { return onSetEditing; }
+        if(typeof value === "function"){
+            onSetEditing = value;
         }
         return profileCards;
     };

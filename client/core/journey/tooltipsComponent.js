@@ -1,9 +1,12 @@
 import * as d3 from 'd3';
 import textWrap from "./textWrap";
 import { fadeIn, remove, show, hide } from './domHelpers';
-import { grey10 } from './constants';
+import { grey10, COLOURS, TRANSITIONS } from './constants';
 import dragEnhancements from './enhancedDragHandler';
 import { getTransformationFromTrans } from './helpers';
+
+const MED_SLIDE_DURATION = TRANSITIONS.DEFAULT_DURATIONS.SLIDE.MED;
+const MED_FADE_DURATION = TRANSITIONS.DEFAULT_DURATIONS.SLIDE.MED;
 
 //helper
 const iconTranslate = (width, height, requiredWidth, requiredHeight) => {
@@ -28,6 +31,7 @@ export default function tooltipsComponent() {
     let getX = () => () => 0;
     let getY = () => () => 0;
     let getValue = d => d.value;
+    let getSubtext = d => "";
 
     const DEFAULT_TOOLTIP_DIMNS = { 
         target: { width:0, height: 0, margin:{left:0, right:0, top:0, bottom:0 } },
@@ -36,6 +40,9 @@ export default function tooltipsComponent() {
     let _tooltipDimns = () => DEFAULT_TOOLTIP_DIMNS;
     
     const defaultStyles = {
+        bg:{
+            fill:"transparent"
+        },
         text:{
             fill:grey10(6),
             stroke:grey10(6)
@@ -87,17 +94,24 @@ export default function tooltipsComponent() {
             const tooltipG = d3.select(this);
             const { width, height, margin, fontSize } = tooltipDimns[d.key];
             const styles = _styles(d,i);
-            //if(d.milestoneId === "profile-6"&& d.datasetKey === "pressUps"){
-            //}
 
             const contentsWidth = width - margin.left - margin.right;
             const contentsHeight = height - margin.top - margin.bottom;
             const dragTextHeight = draggable && d.withDragValueAbove ? contentsHeight * 0.333 : 0;
+            const mainContentsHeight = contentsHeight - dragTextHeight;
+            //this text below is not part of the normal dimns
             const subtextHeight = contentsHeight * 0.4;
-            const iconHeight = contentsHeight - dragTextHeight;
 
             const btnWidth = d3.max([40, contentsWidth]);
-            const btnHeight = iconHeight;
+            const btnHeight = mainContentsHeight;
+
+            //bg
+            tooltipG.select("rect.tooltip-bg")
+                .attr("x", -width/2)
+                .attr("y", -height/2)
+                .attr("width", width)
+                .attr("height", height)
+                .attr("fill", styles.bg.fill)// COLOURS.selectedMilestone)
 
             //saveBtn
             const saveBtnG = tooltipG.selectAll("g.save-btn").data(d.unsavedValue && !beingDragged(d) ? [1] : []);
@@ -145,12 +159,12 @@ export default function tooltipsComponent() {
                         //reset what is displayed (the save btn will disappear on update after save)
                         tooltipG.select("text.drag-value")
                             .transition()
-                            .duration(200)
+                            .duration(MED_SLIDE_DURATION)
                                 .style("opacity", 0);
                     
                         tooltipG.select("g.icon").select("text.value")
                             .transition()
-                            .duration(200)
+                            .duration(MED_SLIDE_DURATION)
                                 .style("opacity", 1);
 
                     })
@@ -164,6 +178,8 @@ export default function tooltipsComponent() {
                 .attr("y", -contentsHeight/2)
                 .attr("width", contentsWidth)
                 .attr("height", contentsHeight)
+                //ok, need a bg rect, and target opacity must be 1 an dbg must have fill same as bg to open-kpi
+                //so teh end tooltip doesnt show thru
                 .attr("fill", styles.hitbox.fill)
                 .attr("stroke", styles.hitbox.stroke)
                 .attr("stroke-width", styles.hitbox.strokeWidth)
@@ -180,7 +196,7 @@ export default function tooltipsComponent() {
                 .text(getValue(d))
 
             //tooltip settings
-            const isSmall = iconHeight < 10
+            const isSmall = mainContentsHeight < 10
             const iconObject = isSmall ? (d.smallIcons || d.icons) : d.icons;
             const icon = isAchieved(d) ? iconObject?.achieved : iconObject?.notAchieved;
             const shouldShowValue = d.withInnerValue && !isSmall && (!isAchieved(d) || hovered === d.key) && !beingDragged(d);
@@ -200,7 +216,7 @@ export default function tooltipsComponent() {
                         //if(d.key === "expected" && d.milestoneId === "current" && d.progBarKey === "pressUps-reps"){}
                         //todo - make the tooltips with and height based on iconAspect ratio
                         const iconG = d3.select(this)
-                            .attr("transform", iconTranslate(icon.width, icon.height, contentsWidth, iconHeight));
+                            .attr("transform", iconTranslate(icon.width, icon.height, contentsWidth, mainContentsHeight));
 
                         iconG.html(icon.html)
                         const innerG = iconG.select("g");
@@ -247,7 +263,7 @@ export default function tooltipsComponent() {
                 .attr("stroke", styles.subtext.stroke)
                 .attr("stroke-width", 0.1)
                 .attr("font-size", subtextHeight * 0.85)
-                .text(d.subtext)
+                .text(getSubtext(d,i))
         })                    
     }
 
@@ -264,7 +280,7 @@ export default function tooltipsComponent() {
                 //.attr("pointer-events", "none");
             
             //enter
-            if(containerG.select("g.tooltip-contents").empty()){ 
+            if(containerG.select("*").empty()){ 
                 //console.log("enter.......", i)
                 enter();
             }
@@ -277,7 +293,7 @@ export default function tooltipsComponent() {
                 containerG
                     .style("opacity", 0)
                     .transition()
-                        .duration(200)
+                        .duration(MED_SLIDE_DURATION)
                         .style("opacity", 1);
 
                 containerG
@@ -315,12 +331,17 @@ export default function tooltipsComponent() {
                     onClick.call(this, e, d)
                 }
 
+                function handleMouseover(e,d){
+                    //dont need to show value if not achieved as its showing anyway
+                    if(isAchieved(d)){ d3.select(this).select("text.drag-value").call(showText, 2000); }
+                }
+
                 function showText(text, expiryTime){
                     if(!text.attr("class").includes("transitioning") && text.style("opacity") !== 1) {
                         text
                             .classed("transitioning", true)
                             .transition()
-                            .duration(200)
+                            .duration(MED_FADE_DURATION)
                                 .style("opacity", 1)
                                 .on("end", function(){
                                     if(!expiryTime) { return; }
@@ -335,7 +356,7 @@ export default function tooltipsComponent() {
                     text
                         .classed("transitioning", true)
                         .transition()
-                        .duration(200)
+                        .duration(MED_FADE_DURATION)
                             .style("opacity", 0)
                             .on("end", function(){
                                 d3.select(this).classed("transitioning", false);
@@ -356,13 +377,13 @@ export default function tooltipsComponent() {
                     if(d.withDragValueAbove){
                         d3.select(this).select("text.drag-value")
                             .transition()
-                            .duration(200)
+                            .duration(MED_FADE_DURATION)
                                 .style("opacity", 0.7)
 
                         d3.select(this).select("g.icon").select("text.value")
                             .style("opacity", 1)
                             .transition()
-                            .duration(200)
+                            .duration(MED_FADE_DURATION)
                                 .style("opacity", 0)
                     }
                 }
@@ -379,12 +400,12 @@ export default function tooltipsComponent() {
                     /*
                     d3.select(this).select("text.drag-value")
                         .transition()
-                        .duration(200)
+                        .duration(MED_FADE_DURATION )
                             .style("opacity", 0);
                     
                     d3.select(this).select("g.icon").select("text.value")
                         .transition()
-                        .duration(200)
+                        .duration(MED_FADE_DURATION )
                             .style("opacity", 1);*/
 
                     //store the values as 'unsaved'
@@ -396,7 +417,7 @@ export default function tooltipsComponent() {
                 containerG.select("rect.tooltips-bg")
                     .attr("width", width)
                     .attr("height", height)
-                    .attr("fill", styles.bg?.fill || "none");
+                    .attr("fill", "none");
 
                 const tooltipG = containerG.selectAll("g.tooltip").data(data, d => d.key);
                 tooltipG.enter()
@@ -404,6 +425,9 @@ export default function tooltipsComponent() {
                         .attr("class", "tooltip")
                         .style("cursor", "pointer")
                         .each(function(d,i){
+                            if(d.key === "expected" && d.milestoneId === "profile-5")
+                            console.log("enter", d)
+                            d3.select(this).append("rect").attr("class", "tooltip-bg")
                             d3.select(this).append("text").attr("class", "drag-value")
                                 .attr("text-anchor", "middle")
                                 .attr("dominant-baseline", "central")
@@ -417,21 +441,57 @@ export default function tooltipsComponent() {
                             //hitbox must be on top, as contents under it will change              
                             d3.select(this).append("rect").attr("class", "hitbox");
                         })
+                        .attr("transform", (d,j) => `translate(${getX(d, i, j)}, ${getY(d, i, j)})`)
                         .merge(tooltipG)
-                        .each(function(d,i){
-                        })
                         .style("display", d => d.shouldDisplay ? null : "none")
                         //i is the data's i, not the tooltip datum's i
-                        .attr("transform", (d,j) => `translate(${getX(d, i, j)}, ${getY(d, i, j)})`)
+                        .call(updateTransform, { x: (d,j) => getX(d, i, j), y: (d,j) => getY(d, i, j), transition:{ duration:MED_SLIDE_DURATION } })
                         .call(updateTooltip, tooltipDimns)
                         .call(drag)
-                        .on("mouseover", handleClick);
+                        .on("mouseover", handleMouseover);
 
                 tooltipG.exit().remove();
             }
         })
 
         return selection;
+
+        function updateTransform(selection, options={}){
+            //console.log("updateTransform-----------------------")
+            const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
+            //console.log("transition", transition)
+            selection.each(function(d, i){
+                const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
+                if(Math.abs(translateX - x(d, i)) < 0.001 && Math.abs(translateY - y(d, i)) < 0.001){
+                    //already where it needs to be
+                    return;
+                }
+                if(d3.select(this).attr("class").includes("transitioning")){
+                    //already in transition - so we ignore the new request
+                    return;
+                }
+                if(transition){
+                    //console.log("updateTrans withTrans............", x(d, i))
+                    d3.select(this)
+                        .classed("transitioning", true)
+                        .transition()
+                        .ease(transition.ease || d3.easeLinear)
+                        .delay(transition.delay || null)
+                        .duration(transition.duration || MED_SLIDE_DURATION)
+                            .attr("transform", "translate("+x(d, i) +"," +y(d, i) +")")
+                            .on("end", function(d,i){
+                                d3.select(this).classed("transitioning", false);
+                                cb.call(this, d, i);
+                            });
+                }else{
+                    //console.log("updateTrans no transxxxxxxx", x(d, i))
+                    d3.select(this)
+                        .attr("transform", "translate("+x(d, i) +"," +y(d, i) +")");
+                    
+                    cb.call(this);
+                }
+            })
+        }
     }
 
     //api
@@ -455,6 +515,7 @@ export default function tooltipsComponent() {
         _styles = (d,i) => {
             const requiredStyles = func(d,i);
             return {
+                bg:{ ...defaultStyles.bg, ...requiredStyles.bg },
                 text:{ ...defaultStyles.text, ...requiredStyles.text },
                 subtext:{ ...defaultStyles.subtext, ...requiredStyles.subtext },
                 hitbox:{ ...defaultStyles.hitbox, ...requiredStyles.hitbox }
@@ -466,6 +527,11 @@ export default function tooltipsComponent() {
     tooltips.getValue = function (value) {
         if (!arguments.length) { return getValue; }
         getValue = value;
+        return tooltips;
+    };
+    tooltips.getSubtext = function (value) {
+        if (!arguments.length) { return getSubtext; }
+        getSubtext = value;
         return tooltips;
     };
     tooltips.getX = function (value) {

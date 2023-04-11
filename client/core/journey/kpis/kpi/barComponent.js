@@ -1,9 +1,11 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10 } from "../../constants";
+import { DIMNS, grey10, TRANSITIONS } from "../../constants";
 import dragEnhancements from '../../enhancedDragHandler';
 import container from './container';
 import background from './background';
 import remove from "./remove";
+
+const MED_SLIDE_DURATION = TRANSITIONS.DEFAULT_DURATIONS.SLIDE.MED;
 
 /*
 
@@ -21,6 +23,11 @@ export default function barComponent() {
     let _margin = () => DEFAULT_MARGIN;
 
     let _scale;
+
+    let getBarStart = barData => barData.start;
+    let getBarEnd = barData => barData.end;
+    let getStartValue = d => d.startValue;
+    let getValue = d => d.value;
 
     let dimns = [];
 
@@ -67,7 +74,7 @@ export default function barComponent() {
             if(!barData.find(d => d.key === "current").value){
                 //to undefined means no data
                 errorMesgs[i] = NO_DATA_ERROR_MESG;
-            }else if(typeof barData.start !== "number" || typeof barData.end !== "number"){
+            }else if(typeof getBarStart(barData) !== "number" || typeof getBarEnd(barData) !== "number"){
                 errorMesgs[i] = NO_MIN_MAX_ERROR_MESG;
             }else{
                 errorMesgs[i] = "";
@@ -141,7 +148,7 @@ export default function barComponent() {
                                 //error - scale(d.value) is neg
                                 //console.log("value...", d.value, scale(d.value))
                                 //console.log("start value...", d.startValue, scale(d.startValue))
-                                const sectionWidth = scale(d.value) - scale(d.startValue) || 0;
+                                const sectionWidth = scale(getValue(d)) - scale(getStartValue(d)) || 0;
                                 //console.log("setting sectw!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! to sectw", sectionWidth)
                                 //append rect
                                 d3.select(this)
@@ -153,15 +160,15 @@ export default function barComponent() {
                                         .attr("fill", d.fill);;
                             })
                             .merge(barSectionG)
-                            .attr("transform", (d,j) => `translate(${scale(d.startValue) || 0}, 0)`)
+                            .attr("transform", (d,j) => `translate(${scale(getStartValue(d)) || 0}, 0)`)
                             .each(function(d,j){
                                 //console.log("update bar i j editable",data, d, i, j, editable(data,i))
-                                const sectionWidth = scale(d.value) - scale(d.startValue) || 0;
+                                const sectionWidth = scale(getValue(d)) - scale(getStartValue(d)) || 0;
                                 //adjust rect width to end - start
                                 if(transitionUpdate){
                                     d3.select(this).select("rect.bar-section")
                                         .transition()
-                                        .duration(400)
+                                        .duration(MED_SLIDE_DURATION)
                                             .attr("width", sectionWidth)
                                             .attr("height", contentsHeight)
                                             .attr("fill", d.fill);
@@ -234,6 +241,26 @@ export default function barComponent() {
     bar.scale = function (value) {
         if (!arguments.length) { return _scale; }
         _scale = value;
+        return bar;
+    };
+    bar.getBarStart = function (func) {
+        if (!arguments.length) { return getBarStart; }
+        getBarStart = func;
+        return bar;
+    };
+    bar.getBarEnd = function (func) {
+        if (!arguments.length) { return getBarEnd; }
+        getBarEnd = func;
+        return bar;
+    };
+    bar.getStartValue = function (func) {
+        if (!arguments.length) { return getStartValue; }
+        getStartValue = func;
+        return bar;
+    };
+    bar.getValue = function (func) {
+        if (!arguments.length) { return getValue; }
+        getValue = func;
         return bar;
     };
     bar.handleHeightFactor = function (value) {

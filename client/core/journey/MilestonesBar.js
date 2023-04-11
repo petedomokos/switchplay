@@ -427,7 +427,7 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
         //console.log("mout")
       })//)
 
-  }, [stringifiedProfiles, screen, form, reactComponent, editingReactComponent, editingSVGComponent])
+  }, [stringifiedProfiles, screen, form, reactComponent, editingReactComponent])
 
   useEffect(() => {
     //it mustnt be swipable when we want it to be scrollable

@@ -105,10 +105,12 @@ export default function kpiComponent() {
                 closedProgressBars[d.key] = progressBarComponent()
                     .status("closed")
                     .editable(false)
+                    .onSetEditing(onSetEditing)
                 
                 openProgressBars[d.key]  = progressBarComponent()
                     .status("open")
                     .editable(true)
+                    .onSetEditing(onSetEditing)
             }
         })
     }
@@ -119,6 +121,7 @@ export default function kpiComponent() {
     let _name = d => d.name;
     let isEditable = () => false;
     let status = () => "closed";
+    let profileIsSelected = false;
 
     //API CALLBACKS
     let onClick = function(){};
@@ -134,6 +137,7 @@ export default function kpiComponent() {
     let onMouseout = function(){};
     let onDelete = function(){};
     let onSaveValue = function(){};
+    let onSetEditing = function(){};
 
     /*
     const enhancedDrag = dragEnhancements()
@@ -180,7 +184,8 @@ export default function kpiComponent() {
                 .height((d,i) => dimns[d.key].contentsHeight)
                 .styles((d, i) => ({
                     stroke:"none",
-                    fill:/*_styles(d).bg.fill || */"transparent"
+                    //need to trabnsition bg, but may aswell just be transparent
+                    fill:/*_styles(d).bg.fill ||*/ "transparent"
                 })))
             .call(container().className("name"))
             //.call(container().className("non-selected-progress-bar")
@@ -256,6 +261,7 @@ export default function kpiComponent() {
                                 .width((d) => progressBarWidth)
                                 .height((d) => progressBarHeight)
                                 .margin((d) => progressBarMargin)
+                                .styles(d => ({ bg:{ fill: _styles(d).bg.fill } }))
                                 .onSaveValue(onSaveValue))
 
                         const stepsData = d.steps;
@@ -382,6 +388,11 @@ export default function kpiComponent() {
         status = value;
         return kpi;
     };
+    kpi.profileIsSelected = function (value) {
+        if (!arguments.length) { return profileIsSelected; }
+        profileIsSelected = value;
+        return kpi;
+    };
     kpi.fontSizes = function (values) {
         if (!arguments.length) { return fontSizes; }
         fontSizes = { ...fontSizes, ...values };
@@ -489,6 +500,13 @@ export default function kpiComponent() {
     kpi.onSaveValue = function (value) {
         if(typeof value === "function"){
             onSaveValue = value;
+        }
+        return kpi;
+    };
+    kpi.onSetEditing = function (value) {
+        if (!arguments.length) { return onSetEditing; }
+        if(typeof value === "function"){
+            onSetEditing = value;
         }
         return kpi;
     };
