@@ -39,14 +39,18 @@ export default function progressBarComponent() {
         return kpisData.forEach((kpiD,i) => {
             //console.log("kpiD", kpiD)
             //each d is a milestone
-            const tooltipsData = kpiD.tooltipsData.filter(d => d.shouldDisplay(status, editing));
+            const tooltipsData = kpiD.tooltipsData.filter(d => d.shouldDisplay(status, editing, displayFormat));
+            //we dont want editing toggling to affect positions, so we fix editing to be false here,
+            //even though the numbersData in the render function removes the number
+            const numbersData = kpiD.numbersData.filter(d => d.shouldDisplay(status, false, displayFormat));
+
             const barData = { 
                 ...kpiD.barData, 
-                sectionsData:kpiD.barData.sectionsData.filter(d => d.shouldDisplay(status, editing))
+                sectionsData:kpiD.barData.sectionsData.filter(d => d.shouldDisplay(status, editing, displayFormat))
             };
-            //if(d.milestoneId === "profile-5" && d.key === "pressUps-reps"){
-                //console.log("tooltipsData",tooltipsData)
-            //}
+            if(kpiD.milestoneId === "current" && kpiD.key === "admin"){
+                console.log("nData", numbersData)
+            }
 
             const width = _width(kpiD,i)
             const height = _height(kpiD,i);
@@ -83,7 +87,7 @@ export default function progressBarComponent() {
             const barHeight = contentsHeight - expectedTooltipOpenHeight - targetTooltipOpenHeight;
             //numbers 
             //group numbers into 1, 2 or 3 cols
-            const nrNumbers = kpiD.numbersData.length
+            const nrNumbers = numbersData.length
             let nrNumberCols = nrNumbers;
             if(nrNumbers > 3){
                 nrNumberCols = nrNumberCols % 3 === 0 ? 3 :(nrNumbers % 2 === 0 ? 2 : 1)
@@ -100,7 +104,7 @@ export default function progressBarComponent() {
                 top:numbersMarginVert, 
                 bottom:numbersMarginVert, 
             };
-            const numbersWidth = numbersContentsWidth + numbersMargin.left + numbersMargin.right;
+            const numbersWidth = numbersData.length === 0 ? 0 : numbersContentsWidth + numbersMargin.left + numbersMargin.right;
             //@todo - numberheight mx should be in sync with barheight max
            
             const numbers = {
@@ -261,11 +265,11 @@ export default function progressBarComponent() {
 
     let status = "closed";
     let kpiFormat = "actual";
+    let displayFormat = "both";
     let editable = false;
     let editing = null;
 
     let display = () => null;
-
 
     //API CALLBACKS
     let onBarClick = function(){};
@@ -329,7 +333,7 @@ export default function progressBarComponent() {
                 ...d,
                 barData:{
                     ...d.barData,
-                    sectionsData:d.barData.sectionsData.filter(d => d.shouldDisplay(status, editing))
+                    sectionsData:d.barData.sectionsData.filter(d => d.shouldDisplay(status, editing, displayFormat))
                 }
             }))
             //console.log("sel data", selection.data())
@@ -343,11 +347,12 @@ export default function progressBarComponent() {
                 .margin((d,i) => dimns[i].bar.margin)
                 .scale((d,i) => xScales[d.key])
                 .editable(editable)
+                .displayFormat(displayFormat)
             , { transitionEnter, transitionUpdate} )
 
         const enrichedNumbersData = selection.data()
             .map(d => d.numbersData
-                .filter(numberD => numberD.shouldDisplay(status, editing)))
+                .filter(numberD => numberD.shouldDisplay(status, editing, displayFormat)))
                 
         selection.select("g.numbers")
             .data(enrichedNumbersData)
@@ -365,7 +370,7 @@ export default function progressBarComponent() {
         const enrichedTooltipsData = selection.data()
             .map(d => d.tooltipsData
                 .map(t => ({ ...t, progBarKey: d.key }))
-                .filter(d => d.shouldDisplay(status, editing)))
+                .filter(d => d.shouldDisplay(status, editing, displayFormat)))
 
         //issue - the i in getX below is teh tooltip i, eg target, expected, rther than the kpi i,
         //which is what dimnns needs
@@ -552,6 +557,11 @@ export default function progressBarComponent() {
     progressBar.kpiFormat = function (value) {
         if (!arguments.length) { return kpiFormat; }
         kpiFormat = value;
+        return progressBar;
+    };
+    progressBar.displayFormat = function (value) {
+        if (!arguments.length) { return displayFormat; }
+        displayFormat = value;
         return progressBar;
     };
     progressBar.editable = function (value) {

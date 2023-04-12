@@ -339,7 +339,12 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             const key = kpi.key || `${datasetKey}-${statKey}`;
 
             const profileKpi = profileKpis.find(pKpi => pKpi.key === key);
-            const steps = profileKpi?.steps || [{key:"1", desc:"Step 1", completed:true }, {key:"2", desc:"Step 2"}];
+            const steps = profileKpi?.steps || [
+                {key:"1", desc:"Step 1", completed:true }, 
+                {key:"2", desc:"Step 2", completed:true},
+                {key:"3", desc:"Step 3", completed:true},
+                {key:"4", desc:"Step 4"},
+            ];
             //console.log("kpi key", key)
             
             //VALUES
@@ -429,14 +434,20 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             }
 
             function calcStepsValues(startDate, date, steps=[]){
-                const start = { completion:0 };
-                const target = { completion:100 };
                 const nrSteps = steps.length;
                 if(nrSteps === 0){ return {}; }
+                const start = { actual:0, completion:0 };
+                const target = { actual:nrSteps, completion:100 };
                 const nrCompletedSteps = steps.filter(s => s.completed).length;
-                const current = { completion: Math.round((nrCompletedSteps/nrSteps) * 100) } 
+                const current = { 
+                    actual:nrCompletedSteps,
+                    completion: Math.round((nrCompletedSteps/nrSteps) * 100) 
+                } 
                 //@todo - impl expected
-                const expected = { completion:0 }
+                const expected = {
+                    actual:Math.round(nrCompletedSteps/2),
+                    completion:50 
+                }
                 return { start, current, target, expected }
             }
 
@@ -524,7 +535,7 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
         id:"current", isCurrent:true, dataType:"profile",
         kpis:kpis.map((kpi,i) => {
             //console.log("kpi...", kpi)
-            const { datasetKey, statKey, min, max, values, accuracy, key, steps, stepsValues, stepsOnTrackStatus } = kpi;
+            const { datasetKey, statKey, name, min, max, values, accuracy, key, stepsValues, stepsOnTrackStatus } = kpi;
             const milestoneId = "current";
             
             const dataset = datasets.find(dset => dset.key === datasetKey);
@@ -556,6 +567,12 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
             if(expected?.actual){
                 onTrackStatus = targetIsAchieved(current, expected, stat.order) ? "onTrack" : "offTrack";
             }
+            //names
+            const datasetName = dataset?.name || "";
+            const statName = stat?.name || "";
+
+            //all steps (special case for current)
+            const steps = orderedProfiles.map(p => p.kpis.find(kpi => kpi.key === key).steps || [])
 
             return {
                 ...kpi,
@@ -577,12 +594,12 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
                 },
                 onTrackStatus,
                 //other info
-                datasetName:dataset?.name || "",
-                statName:stat?.name || "",
+                datasetName,
+                statName,
                 unit:stat?.unit || "",
                 steps,
                 stepsValues,
-                stepsOnTrackStatus
+                stepsOnTrackStatus,
             }
         })
     }

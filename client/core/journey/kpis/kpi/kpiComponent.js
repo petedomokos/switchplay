@@ -122,6 +122,7 @@ export default function kpiComponent() {
     let isEditable = () => false;
     let status = () => "closed";
     let profileIsSelected = false;
+    let displayFormat = "both"
 
     //API CALLBACKS
     let onClick = function(){};
@@ -243,6 +244,7 @@ export default function kpiComponent() {
                                     .width(() => progressBarWidth)
                                     .height(() => progressBarHeight)
                                     .margin(() => progressBarMargin)
+                                    .displayFormat(displayFormat)
                                 , { transitionEnter, transitionUpdate} )
                     })
 
@@ -262,9 +264,20 @@ export default function kpiComponent() {
                                 .height((d) => progressBarHeight)
                                 .margin((d) => progressBarMargin)
                                 .styles(d => ({ bg:{ fill: _styles(d).bg.fill } }))
+                                .displayFormat(displayFormat)
                                 .onSaveValue(onSaveValue))
 
-                        const stepsData = d.steps;
+                        //const stepsData = d.steps;
+                        console.log("d.steps", d.steps)
+                        //temp -  this repeats here and in barComp twice!
+                        //also, for now, current card just flattens allSteps, and is not draggable
+                        //@todo - keep them nested, and allow dragging between profiles
+                        let stepsData;
+                        if(d.steps[0] && Array.isArray(d.steps[0])){
+                            stepsData = d.steps.reduce((a, b) => [...a, ...b], []);
+                        }else{
+                            stepsData = d.steps || [];
+                        }
                         const kpiStepsG = d3.select(this).selectAll("g.kpi-steps").data([stepsData]);
                         kpiStepsG.enter()
                             .append("g")
@@ -391,6 +404,11 @@ export default function kpiComponent() {
     kpi.profileIsSelected = function (value) {
         if (!arguments.length) { return profileIsSelected; }
         profileIsSelected = value;
+        return kpi;
+    };
+    kpi.displayFormat = function (value) {
+        if (!arguments.length) { return displayFormat; }
+        displayFormat = value;
         return kpi;
     };
     kpi.fontSizes = function (values) {

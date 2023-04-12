@@ -1,9 +1,6 @@
 import * as d3 from 'd3';
-import { addDays, addWeeks } from "../../../util/TimeHelpers"
-import { pcCompletion } from "../../../util/NumberHelpers"
 import { grey10, KPI_CTRLS } from '../constants';
-import { getBandsAndStandards } from "../../../data/bandsAndStandards";
-import { getValueForStat } from '../../../data/dataHelpers';
+import { isNumber } from '../../../data/dataHelpers';
 import { emptyGoal, ball, goalWithBall, shiningCrystalBall, nonShiningCrystalBall } from "../../../../assets/icons/milestoneIcons.js"
 
 export default function kpisLayout(){
@@ -16,12 +13,16 @@ export default function kpisLayout(){
 
     function update(data){
         //console.log("update kpisLayout------")
+        //flag
+        const nrDatasetKpis = data.filter(kpi => kpi.datasetKey).length;
         const kpisData = data.map((kpi,i) => {
-            //if(kpi.datasetKey === "pressups"){
+            const { key, values, accuracy, order, isPast, isCurrent, isFuture,isActive, milestoneId, datasetKey, statKey,
+                steps, stepsValues, allSteps=[] } = kpi;
+
+            //if(kpi.datasetKey === "pressUps"){
                 //console.log("milestoneId kpi", milestoneId, kpi)
             //}
-            const { key, values, accuracy, order, isPast, isCurrent, isFuture,isActive, milestoneId, datasetKey, statKey,
-                steps, stepsValues } = kpi;
+                
             
             const start = values.start?.actual;
             const current = values.current?.actual;
@@ -34,7 +35,7 @@ export default function kpisLayout(){
             const currentColour = grey10(7);// "#696969";
             const colours = {
                 current: currentColour,
-                target:grey10(4),// "#DCDCDC",
+                target:grey10(2),// "#DCDCDC",
                 expectedBehind:"red",
                 expectedAhead:currentColour,
                 stepsCurrent:"blue"
@@ -85,16 +86,18 @@ export default function kpisLayout(){
                 format
             }
 
-            //next 2 - add currentTooltip back in (and change key to currentDragHandle)
-            //3 - wire up the steps interactions
-            //4 - add the steps visual under the bars (not on current) and the 3 displayOptions
+            //steps bar data
+            //steps - the steps progressBar display will not be on current 
+            //(although it will show the steps list for all steps on all future cards)
+            const stepsBarData = steps && (!isCurrent || nrDatasetKpis === 0) ? steps : [];
 
             const barData = {
                 start:barStart,
                 end:barEnd,
                 dataStart,
                 dataEnd,
-                sectionsData:[targetBarDatum, currentBarDatum]
+                sectionsData:[targetBarDatum, currentBarDatum],
+                stepsData:stepsBarData
             }
             
             const scaleTooltipsData = [
@@ -103,7 +106,7 @@ export default function kpisLayout(){
                     tooltipType:"scale",
                     key:"start", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
-                    shouldDisplay:status => status === "open",
+                    shouldDisplay:(status, editing, displayFormat) => status === "open" && displayFormat !== "steps",
                     rowNr: -1, y: -1,
                     value: barStart, x:barStart,
                     fullScaleValue:dataStart,
@@ -117,7 +120,7 @@ export default function kpisLayout(){
                     tooltipType:"scale",
                     key:"end", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
-                    shouldDisplay:status => status === "open",
+                    shouldDisplay:(status,editing, displayFormat) => status === "open" && displayFormat !== "steps",
                     rowNr: -1, y: -1,
                     value: barEnd, x:barEnd,
                     fullScaleValue:dataEnd, 
@@ -132,7 +135,7 @@ export default function kpisLayout(){
                     tooltipType:"scale",
                     key:"currentValue", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
-                    shouldDisplay:(status, editing) => editing?.desc === "target",
+                    shouldDisplay:(status, editing, displayFormat) => editing?.desc === "target" && displayFormat !== "steps",
                     rowNr: -1, y: -1,
                     value: current, x:current,
                     accuracy,
@@ -148,7 +151,8 @@ export default function kpisLayout(){
                     tooltipType:"comparison",
                     key:"expected", milestoneId, kpiKey:key, datasetKey, statKey,
                     //temp disable when its an endTooltip
-                    shouldDisplay:(status, editing) => status === "open" && isFuture && !!target, //dont display if past or no future profiles
+                    //dont display if past or no future profiles
+                    shouldDisplay:(status, editing, displayFormat) => status === "open" && isFuture && isNumber(target) && displayFormat !== "steps", 
                     rowNr: 1, y: 1, current,
                     value: expected, x:expected,
                     dataOrder: order,
@@ -164,7 +168,7 @@ export default function kpisLayout(){
                     tooltipType:"comparison",
                     key:"target", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all
-                    shouldDisplay:(status, editing) => !!editing,
+                    shouldDisplay:(status, editing, displayFormat) => !!editing && displayFormat !== "steps",
                     rowNr: -1, y: -1, current,
                     value:typeof target === "number" ? target : dataEnd, 
                     x:typeof target === "number" ? target : dataEnd, 
@@ -183,7 +187,7 @@ export default function kpisLayout(){
                 progressBarType:"dataset",
                 tooltipType:"value",
                 key:"current", milestoneId, kpiKey:key, datasetKey, statKey,
-                shouldDisplay:status => !isPast && status === "open",
+                shouldDisplay:(status, editing, displayFormat) => !isPast && status === "open" && displayFormat !== "steps",
                 label: values.achieved ? "Achieved" : "Current",
                 rowNr:0, y:0,
                 value:current,
@@ -203,7 +207,7 @@ export default function kpisLayout(){
             const currentNumberDatum = {
                 progressBarType:"dataset",
                 key:"current",
-                shouldDisplay:(status, editing) => editing?.desc !== "target",
+                shouldDisplay:(status, editing, displayFormat) => editing?.desc !== "target" && displayFormat !== "steps",
                 label: values.achieved ? "Achieved" : "Current",
                 value: current,
                 fill:colours.current,
@@ -213,20 +217,6 @@ export default function kpisLayout(){
             const numbersData = [currentNumberDatum]; //dont amend the current value like we did for bar
 
             /*
-            //steps - the steps progressBar display will not be on current 
-            //(although it will show the steps list for all steps on all future cards)
-            const stepsCurrentDatum = isCurrent ? null : {
-                progressBarType:"steps",
-                key:"current",
-                label: values.achieved ? "Achieved" : "Current",
-                //@todo - remove isAchieved form this - is confusing and means nothing
-                isAchieved:!!values.achieved,
-                startValue: 0,
-                value:stepsValues.current.completion,
-                fill:colours.stepsCurrent,
-            }
-
-            const stepsBarData = isCurrent ? null : [stepsCurrentDatum];
             if(stepsBarData){
                 stepsBarData.start = 0;
                 stepsBarData.end = 100;

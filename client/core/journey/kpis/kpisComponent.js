@@ -177,8 +177,11 @@ export default function kpisComponent() {
                 milestoneId = kpisData[0].milestoneId;
                 openedKpiDiv = d3.select(`div#opened-kpi-${milestoneId}`)
             }
-
-            const ctrlsData = withCtrls && milestoneId !== "current" ? KPI_CTRLS(displayFormat) : [];
+            const nrDatasetKpis = kpisData.filter(kpi => kpi.datasetKey).length;
+            const ctrlsData = withCtrls && milestoneId !== "current" && nrDatasetKpis !== 0 ? KPI_CTRLS(displayFormat) : [];
+            if(nrDatasetKpis === 0){
+                displayFormat = "steps";
+            }
 
             const nrOfCtrlsButtons = ctrlsData?.length;
             const nrTooltipRowsAbove = kpisData[0] ? d3.max(kpisData[0].tooltipsData, d => d.rowNr) : 0;
@@ -373,6 +376,7 @@ export default function kpisComponent() {
                                 .width(() => kpiWidth)
                                 .height((d,i) => status(d) === "open" || status(d) === "closing" ? openedKpiHeight : kpiHeight)
                                 .status(d => status(d) || "closed")
+                                .displayFormat(displayFormat)
                                 .margin(() => kpiMargin)
                                 .titleDimns((d) => {
                                     //need contentsWidth and Height to work out name dimns and fontsize so it doesnt change based on status in general update

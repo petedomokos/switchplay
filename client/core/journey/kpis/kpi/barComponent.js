@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10, TRANSITIONS } from "../../constants";
+import { COLOURS, DIMNS, grey10, TRANSITIONS } from "../../constants";
 import dragEnhancements from '../../enhancedDragHandler';
 import container from './container';
 import background from './background';
@@ -40,17 +40,35 @@ export default function barComponent() {
     function updateDimns(data, options ={}){
         dimns = []
         return data.forEach((d,i) => {
-            //console.log("d", d)
             const { barData } = d;
             const { sectionsData } = barData;
+            console.log("d", d)
+            const shouldDisplayBar = displayFormat === "stats" || displayFormat === "both";
+            const shouldDisplaySteps = d.milestoneId !== "current" && (displayFormat === "steps" || displayFormat === "both");
+
+            //temp -  this repeats here and later down!
+            //also, for now, current card just flattens allSteps, and is not draggable
+            //@todo - keep them nested, and allow dragging between profiles
+            let stepsData;
+            if(barData.stepsData[0] && Array.isArray(barData.stepsData[0])){
+                stepsData = barData.stepsData.reduce((a, b) => [...a, ...b], []);
+            }else{
+                stepsData = barData.stepsData || [];
+            }
+
             const width = _width(d,i)
             const height = _height(d,i);
             const margin = _margin(d,i);
             const contentsWidth = width - margin.left - margin.right;
             const contentsHeight = height - margin.top - margin.bottom;
 
+            const barHeight = shouldDisplaySteps ? contentsHeight * 0.75 : contentsHeight;
+            const stepHeight = contentsHeight;
+
+            const stepWidth = stepsData.length === 0 ? 0 : contentsWidth/stepsData.length;
+
             dimns.push({
-                width, height, margin, contentsWidth, contentsHeight,
+                width, height, margin, contentsWidth, contentsHeight, barHeight, stepWidth, stepHeight
             })
 
             //scales - can either be passed in via _scale or is determined here
@@ -89,6 +107,7 @@ export default function barComponent() {
     let _className = (d, i) => `bar-${d.key || i}`;
 
     let editable = false;
+    let displayFormat = "both";
     //API CALLBACKS
     let onClick = function(){};
     let onDblClick = function(){};
@@ -102,6 +121,8 @@ export default function barComponent() {
 
     function bar(selection, options={}) {
         const { transitionEnter=false, transitionUpdate=false, log} = options;
+        const shouldDisplayBar = displayFormat === "stats" || displayFormat === "both";
+        const shouldDisplaySteps = displayFormat === "steps" || displayFormat === "both";
 
         updateDimns(selection.data());
         // expression elements
@@ -123,13 +144,60 @@ export default function barComponent() {
             .each(function(data,i){
                 const { barData } = data;
                 const { sectionsData } = barData;
-                const { contentsWidth, contentsHeight } = dimns[i];
+                const { contentsWidth, contentsHeight, barHeight, stepWidth, stepHeight } = dimns[i];
                 const scale = scales[i];
                 const styles = _styles(data,i);
+
+                //temp - for now, current card just flattens allSteps, and is not draggable
+                //@todo - keep them nested, and allow dragging between profiles
+                let stepsData;
+                if(barData.stepsData[0] && Array.isArray(barData.stepsData[0])){
+                    stepsData = barData.stepsData.reduce((a, b) => [...a, ...b], []);
+                }else{
+                    stepsData = barData.stepsData || [];
+                }
                 //helper
                 const bound = boundValue(scale.domain());
 
                 const barContentsG = d3.select(this);
+
+                //steps
+                const stepsG = barContentsG.selectAll("g.steps").data(shouldDisplaySteps ? [1] : []);
+                stepsG.enter()
+                    .append("g")
+                        .attr("class", "steps")
+                        .call(fadeIn)
+                            .each(function(d,j){
+                            })
+                            .merge(stepsG)
+                            .attr("display", displayFormat !== "stats" ? null : "none")
+                            .each(function(d,j){
+                                const stepG = d3.select(this).selectAll("g.step").data(stepsData);
+                                stepG.enter()
+                                    .append("g")
+                                        .attr("class", "step")
+                                        .each(function(d){
+                                            d3.select(this).append("rect").attr("class", "step-bg")
+                                                .attr("rx", 3)
+                                                .attr("ry", 3)
+                                                .attr("stroke-width", 0.2)
+                                        })
+                                        .merge(stepG)
+                                        .attr("transform", (d,i) => `translate(${i * stepWidth})`)
+                                        .each(function(d){
+                                            d3.select(this).select("rect.step-bg")
+                                                .attr("width", stepWidth)
+                                                .attr("height", stepHeight)
+                                                .attr("fill", d.completed ? COLOURS.step.bar : "transparent")
+                                                .attr("stroke", "white")
+                                        })
+
+                                stepG.exit().call(remove);
+                            
+                            })
+
+                stepsG.exit().call(remove);
+
 
                 //sections
                 const barSectionG = barContentsG.selectAll("g.bar-section").data(sectionsData, d => d.key);
@@ -145,10 +213,11 @@ export default function barComponent() {
                                         .attr("class", "bar-section")
                                         .attr("pointer-events", "none")
                                         .attr("width", sectionWidth || 0)
-                                        .attr("height", contentsHeight)
+                                        .attr("height", barHeight)
                                         .attr("fill", d.fill);;
                             })
                             .merge(barSectionG)
+                            .attr("display", displayFormat !== "steps" ? null : "none")
                             .each(function(d,j){
                                 const sectionWidth = scale(bound(d.endValue)) - scale.range()[0];
                                 //adjust rect width to end - start
@@ -157,12 +226,12 @@ export default function barComponent() {
                                         .transition()
                                         .duration(MED_SLIDE_DURATION)
                                             .attr("width", sectionWidth || 0)
-                                            .attr("height", contentsHeight)
+                                            .attr("height", barHeight)
                                             .attr("fill", d.fill);
                                 }else{
                                     d3.select(this).select("rect.bar-section")
                                         .attr("width", sectionWidth || 0)
-                                        .attr("height", contentsHeight)
+                                        .attr("height", barHeight)
                                         .attr("fill", d.fill);
                                 }
                             })
@@ -174,6 +243,7 @@ export default function barComponent() {
                 barContentsG.selectAll("text.error-mesg").data(errorMesgData)
                     .join("text")
                         .attr("class", "error-mesg")
+                        .attr("display", displayFormat !== "steps" ? null : "none")
                         .attr("text-anchor", "middle")
                         .attr("dominant-baseline", "central")
                         .attr("pointer-events", "none")
@@ -266,6 +336,11 @@ export default function barComponent() {
     bar.editable = function (value) {
         if (!arguments.length) { return editable; }
         editable = value;
+        return bar;
+    };
+    bar.displayFormat = function (value) {
+        if (!arguments.length) { return displayFormat; }
+        displayFormat = value;
         return bar;
     };
     bar._name = function (value) {

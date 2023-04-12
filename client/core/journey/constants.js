@@ -385,7 +385,10 @@ export const COLOURS = {
     potentialLink:grey10(3),
     barMenuItem:"none",
     selectedBarMenuItem:"white",
-    
+    step:{
+        bar:grey10(4),
+        list:grey10(2)
+    },
     btnIcons:{
         default:grey10(5),
         expand: grey10(5),

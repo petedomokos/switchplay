@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10 } from "../../constants";
+import { DIMNS, grey10, COLOURS } from "../../constants";
 import dragEnhancements from '../../enhancedDragHandler';
 import barComponent from './barComponent';
 import numbersComponent from './numbersComponent';
@@ -366,7 +366,7 @@ export default function listComponent() {
                             //bg rect is only on contentsG so margin gaps are seen
                             itemContentsG.append("rect").attr("class", "item-bg")
                                 .attr("stroke", "none")
-                                .attr("fill", grey10(2));
+                                .attr("fill", COLOURS.step.list);
                             
     
                             const symbolG = itemContentsG.append("g").attr("class", "symbol") ;
@@ -429,6 +429,7 @@ export default function listComponent() {
     
                             const checkboxG = itemContentsG.select("g.checkbox")
                                 .attr("transform", (d,i) => `translate(${symbolWidth + descWidth + checkboxMargin.left}, 0)`)
+                                .attr("display", d.id === "newItem" ? "none" : null)
     
                             checkboxG.select("rect")
                                 .attr("width", checkboxContentsWidth)
