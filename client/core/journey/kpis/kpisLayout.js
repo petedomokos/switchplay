@@ -17,9 +17,9 @@ export default function kpisLayout(){
     function update(data){
         //console.log("update kpisLayout------")
         const kpisData = data.map((kpi,i) => {
-            if(kpi.datasetKey === "pressups"){
-                console.log("milestoneId kpi", milestoneId, kpi)
-            }
+            //if(kpi.datasetKey === "pressups"){
+                //console.log("milestoneId kpi", milestoneId, kpi)
+            //}
             const { key, values, accuracy, order, isPast, isCurrent, isFuture,isActive, milestoneId, datasetKey, statKey,
                 steps, stepsValues } = kpi;
             
@@ -72,6 +72,7 @@ export default function kpisLayout(){
             const currentBarDatum = {
                 progressBarType:"dataset",
                 key:"current",
+                shouldDisplay:() => true,
                 label: values.achieved ? "Achieved" : "Current",
                 //@todo - remove isAchieved form this - is confusing and means nothing
                 isAchieved:!!values.achieved,
@@ -80,37 +81,38 @@ export default function kpisLayout(){
                 ive made this far too complicated - this should just be the value and thats it.
                 and the barComponent should cut it off 
                 */
-                value: boundedValue(current, [barStart, barEnd]),
-                actualValue:current,
+                endValue: boundedValue(current, [barStart, barEnd]),
                 fullScaleStartValue:dataStart,
-                fullScaleValue:current,
+                fullScaleEndValue:current,
                 fill:colours.current,
                 format
             }
 
-            /*const targetDatum = {
+            const targetBarDatum = {
                 key:"target",
                 label: "Target",
+                shouldDisplay:() => true,
+                shouldDisplay:(status, editing) => editing?.desc === "target",
                 isAchieved:order === "highest is best" ? target <= current : target >= current,
                 startValue:barStart,
-                value:target,
+                fullScaleStartValue:dataStart,
+                endValue:target,
                 fill:colours.target,
                 format
-            }*/
+            }
 
-            //then...add teh steps visual under the bars (not on current) and the 3 displayOptions
-            //then ...wire up the steps interactions
-            //then figure out a better way to set target value -> USER CAN JUST CLICK THE END SCALE TOOLTIP BELOW
-            //THIS OPENS UP THE OPTION TO ADJUST IT VIA A DRAG SCALE - MAY NEED TO MAKE THEN TOOLTIP LARGER,
-            //OR AT LEAST THE HITBOX
-            //and remove targetTooltip. 
-            //could have it at end of each bar, and the current datum becomes a football, so it goes into the net 
-            //once target is met! and target would be set by clicking it, that opens the target tooltip on a scale to set it
-            const barData = [currentBarDatum]// : [targetDatum, currentDatum];
-            barData.start = barStart;
-            barData.end = barEnd;
-            barData.dataStart = dataStart;
-            barData.dataEnd = dataEnd;
+            // 1. next - add targetBardatum back in when user is editing
+            //2 - add currentTooltip back in 
+            //3 - wire up the steps interactions
+            //4 - add the steps visual under the bars (not on current) and the 3 displayOptions
+
+            const barData = {
+                start:barStart,
+                end:barEnd,
+                dataStart,
+                dataEnd,
+                sectionsData:[targetBarDatum, currentBarDatum]
+            }
             
             const scaleTooltipsData = [
                 { 
@@ -137,6 +139,19 @@ export default function kpisLayout(){
                     value: barEnd, x:barEnd,
                     fullScaleValue:dataEnd, 
                     isTarget:barEnd === target,
+                    accuracy,
+                    editable:false,
+                    withDragValueAbove:false,
+                    withInnerValue:true,
+                },
+                { 
+                    progressBarType:"dataset",
+                    tooltipType:"scale",
+                    key:"currentValue", milestoneId, kpiKey:key, datasetKey, statKey,
+                    //if no targetObj, this means there is no future active profile at all so no expected
+                    shouldDisplay:(status, editing) => editing?.desc === "target",
+                    rowNr: -1, y: -1,
+                    value: current, x:current,
                     accuracy,
                     editable:false,
                     withDragValueAbove:false,
@@ -180,16 +195,12 @@ export default function kpisLayout(){
                     //smallIcons: { achieved: ball, notAchieved: emptyGoal },
                 }
             ];
-            if(milestoneId === "profile-5" && key === "pressUps-reps"){
-                console.log("milestoneId", milestoneId)
-                console.log("key", key)
-                console.log("compdata", comparisonTooltipsData)
-            }
             /*
             const currentValueTooltipDatum = {
                 progressBarType:"dataset",
                 tooltipType:"value",
                 key:"current", milestoneId, kpiKey:key, datasetKey, statKey,
+                shouldDisplay:() => true,
                 label: values.achieved ? "Achieved" : "Current",
                 rowNr:0, y:0,
                 value:current,
@@ -203,7 +214,19 @@ export default function kpisLayout(){
             };
             */
             const tooltipsData = [...scaleTooltipsData, ...comparisonTooltipsData, /*currentValueTooltipDatum*/]
-            const numbersData = [{ ...currentBarDatum, value:current }]; //dont amend the current value like we did for bar
+            
+            //numbers
+            const currentNumberDatum = {
+                progressBarType:"dataset",
+                key:"current",
+                shouldDisplay:(status, editing) => editing?.desc !== "target",
+                label: values.achieved ? "Achieved" : "Current",
+                value: current,
+                fill:colours.current,
+                format
+            }
+            
+            const numbersData = [currentNumberDatum]; //dont amend the current value like we did for bar
 
             /*
             //steps - the steps progressBar display will not be on current 

@@ -33,17 +33,24 @@ export default function progressBarComponent() {
     let xScales = {};
 
     //per datum
-    function updateDimns(data){
+    function updateDimns(kpisData){
         dimns = [];
-        return data.forEach((d,i) => {
-            const { barData, numbersData } = d;
-            const tooltipsData = d.tooltipsData.filter(d => d.shouldDisplay(status, editing));
-            //@todo - make this dynamic
-            const nrTooltips = 2; //@todo - change default to 0
 
-            const width = _width(d,i)
-            const height = _height(d,i);
-            const margin = _margin(d,i);
+        return kpisData.forEach((kpiD,i) => {
+            //console.log("kpiD", kpiD)
+            //each d is a milestone
+            const tooltipsData = kpiD.tooltipsData.filter(d => d.shouldDisplay(status, editing));
+            const barData = { 
+                ...kpiD.barData, 
+                sectionsData:kpiD.barData.sectionsData.filter(d => d.shouldDisplay(status, editing))
+            };
+            //if(d.milestoneId === "profile-5" && d.key === "pressUps-reps"){
+                //console.log("tooltipsData",tooltipsData)
+            //}
+
+            const width = _width(kpiD,i)
+            const height = _height(kpiD,i);
+            const margin = _margin(kpiD,i);
             const contentsWidth = width - margin.left - margin.right;
             const contentsHeight = height - margin.top - margin.bottom;
 
@@ -58,45 +65,17 @@ export default function progressBarComponent() {
             const expectedTooltipOpenWidth = expectedTooltipOpenHeight / expectedTooltipAspectRatio;
             const targetTooltipOpenWidth = targetTooltipOpenHeight / targetTooltipAspectRatio;
 
-
-            //@todo - can expand to have two top tooltips eg when we want current value to be editable
-            //and can expand end to include more than 2
-            //Note: we need height of open tooltips, and width of endTooltips, for other calculations
-            //note - we make open TooltipHeight 0 too, so it doesnt incorrectly affect calculations lower down
-            /*
-            const nrTopTooltips = status === "closed" ? 0 : 1;
-            const nrBottomTooltips = status === "closed" ? 0 : 1;
-            let dynamicTooltipHeight = 0;
-            if(status === "open"){
-                const tooltipHeightMultiplier = nrTooltips <= 2 ? 0.33 : 0.25;
-                const standardTooltipHeight = contentsHeight * tooltipHeightMultiplier;
-                const minTooltipHeight = vertSpaceForTooltips / nrTooltips;
-                dynamicTooltipHeight = d3.max([standardTooltipHeight, minTooltipHeight])
-            } 
-            */
             const endTooltipsHeight = status === "closed" ? contentsHeight : 0;
             const endToolTipsMarginLeft = status === "closed"? 10 : 0;
-
-            //const expectedTooltipOpenHeight = dynamicTooltipHeight * nrTopTooltips;
-            //const bottomTooltipsHeight = dynamicTooltipHeight * nrBottomTooltips;
             
             //we want expecetd icon to be a bit bigger due to its circular shape
             const expectedMultiplier = 1.3;
             const boundsMultiplier = 0.6;
             const boundsFontMultiplier = 1;
-            //for now, hardcode aspect ratios as we know there are two tooltips
-            //const expectedTooltipAspectRatio = 1; //this is approx, as the shiny one is not exactly 1
-            //const targetTooltipAspectRatio = 42/56;
             //end tooltips
-            //@todo next
-            //tooltip and numbers heights can go all the way to the top ad bottom of progBar
             const nrEndTooltips = tooltipsData.filter(t => t.tooltipType === "comparison").length;
             const endExpectedTooltipWidth = (endTooltipsHeight) / expectedTooltipAspectRatio;
             const endTargetTooltipWidth = endTooltipsHeight / targetTooltipAspectRatio;
-            //open tooltips (top and bottom)
-            //const topExpectedTooltipWidth = (dynamicTooltipHeight) / expectedTooltipAspectRatio;
-            //const bottomTargetTooltipWidth = dynamicTooltipHeight / targetTooltipAspectRatio;
-            
             const endTooltipsWidth = nrEndTooltips === 0 ? 0 : endExpectedTooltipWidth + endTargetTooltipWidth + endToolTipsMarginLeft;
 
             //BAR COMPONENT (BAR AND NUMBERS)
@@ -104,7 +83,7 @@ export default function progressBarComponent() {
             const barHeight = contentsHeight - expectedTooltipOpenHeight - targetTooltipOpenHeight;
             //numbers 
             //group numbers into 1, 2 or 3 cols
-            const nrNumbers = numbersData.length
+            const nrNumbers = kpiD.numbersData.length
             let nrNumberCols = nrNumbers;
             if(nrNumbers > 3){
                 nrNumberCols = nrNumberCols % 3 === 0 ? 3 :(nrNumbers % 2 === 0 ? 2 : 1)
@@ -156,6 +135,17 @@ export default function progressBarComponent() {
             const tooltips = {
                 open:{
                     start: {
+                        width: targetTooltipOpenWidth * boundsMultiplier,
+                        height:targetTooltipOpenHeight * boundsMultiplier,
+                        margin: { 
+                            left:0,
+                            right:0,
+                            top:0,
+                            bottom:0
+                        },
+                        fontSize:boundsFontsize
+                    },
+                    currentValue: {
                         width: targetTooltipOpenWidth * boundsMultiplier,
                         height:targetTooltipOpenHeight * boundsMultiplier,
                         margin: { 
@@ -246,10 +236,10 @@ export default function progressBarComponent() {
             //SCALES
             //xScale (ie bar scale) set here as it is used by tooltips too
             //init
-            if(!xScales[d.key]){ xScales[d.key] = d3.scaleLinear(); }
+            if(!xScales[kpiD.key]){ xScales[kpiD.key] = d3.scaleLinear(); }
             //update
             const extent = editing?.desc === "target" ? [barData.dataStart, barData.dataEnd] : [barData.start, barData.end]
-            xScales[d.key]
+            xScales[kpiD.key]
                 .domain(extent)
                 .range([0, barContentsWidth])
 
@@ -334,21 +324,37 @@ export default function progressBarComponent() {
                 .transform((d,i) => `translate(${dimns[i].bar.margin.left},0)`))
         
         const editingTarget = editing?.desc === "target";
+        const dataWithEnrichedBarData = selection.data()
+            .map(d => ({ 
+                ...d,
+                barData:{
+                    ...d.barData,
+                    sectionsData:d.barData.sectionsData.filter(d => d.shouldDisplay(status, editing))
+                }
+            }))
+            //console.log("sel data", selection.data())
+            //console.log("enriched", dataWithEnrichedBarData)
+
         selection.select("g.bar")
+            .data(dataWithEnrichedBarData)
             .call(bar
                 .width((d,i) => dimns[i].bar.width)
                 .height((d,i) => dimns[i].bar.height)
                 .margin((d,i) => dimns[i].bar.margin)
                 .scale((d,i) => xScales[d.key])
-                .getBarStart(barData => editingTarget ? barData.start : barData.dataStart)
-                .getBarEnd(barData => editingTarget ? barData.end : barData.dataEnd)
-                .getStartValue((d,i) => editingTarget && typeof d.fullScaleStartValue === "number" ? d.fullScaleStartValue : d.startValue)
-                .getValue((d,i) => editingTarget && typeof d.fullScaleValue === "number" ? d.fullScaleValue : d.value)
+                .getBarStart(barDataWrapper => editingTarget ? barDataWrapper.start : barDataWrapper.dataStart)
+                .getBarEnd(barDataWrapper => editingTarget ? barDataWrapper.end : barDataWrapper.dataEnd)
+                .getSectionStartValue((d,i) => editingTarget && typeof d.fullScaleStartValue === "number" ? d.fullScaleStartValue : d.startValue)
+                .getSectionEndValue((d,i) => editingTarget && typeof d.fullScaleEndValue === "number" ? d.fullScaleEndValue : d.endValue)
                 .editable(editable)
             , { transitionEnter, transitionUpdate} )
 
+        const enrichedNumbersData = selection.data()
+            .map(d => d.numbersData
+                .filter(numberD => numberD.shouldDisplay(status, editing)))
+                
         selection.select("g.numbers")
-            .data(selection.data().map(d => d.numbersData))
+            .data(enrichedNumbersData)
             .call(numbers
                 .width((d,i) => dimns[i].numbers.width)
                 .height((d,i) => dimns[i].numbers.height)
@@ -399,6 +405,7 @@ export default function progressBarComponent() {
                 .getX((d,i,j) =>{
                     //i is kpi index, j is tooltip datum index
                     if(status === "open"){
+                        //in open format, all tooptips are positioned according to the x scale
                         const value = getTooltipValue(d);
                         const scale = xScales[d.progBarKey];
                         //if(d.milestoneId === "current" && d.key === "target" && d.progBarKey === "longJump-distance-left"){ }
@@ -417,7 +424,7 @@ export default function progressBarComponent() {
                         if(d.key === "current"){
                             return expectedTooltipOpenHeight + bar.height/2;
                         }
-                        if(d.key === "start" || d.key === "end"){
+                        if(d.tooltipType === "scale"){
                             return expectedTooltipOpenHeight + bar.height - bar.margin.bottom + tooltips.open.start.height/2;
                         }
                         if(d.key === "expected"){
@@ -454,7 +461,6 @@ export default function progressBarComponent() {
                     }
                 })
                 .onDrag(function(e,d, tooltipDimns){
-                    //console.log("drag", d)
                     //update tooltip position
                     const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                     const newX = translateX + e.dx;
@@ -462,8 +468,8 @@ export default function progressBarComponent() {
 
                     //update tooltip value
                     const scale = xScales[d.progBarKey];
-                    const newValue = round(Number(scale.invert(newX)), d.accuracy);
-                    d.unsavedValue = newValue;
+                    const newEndValue = round(Number(scale.invert(newX)), d.accuracy);
+                    d.unsavedEndValue = newEndValue;
                     //we need to update alltooltips so index for dimns is maintained
                     //@todo - go back to using a key instead of array for dimns?
                     const tooltipsG = d3.select(this.parentNode);
@@ -471,22 +477,22 @@ export default function progressBarComponent() {
 
                     //update corresponding bar section
                     const barG = d3.select(this.parentNode.parentNode).select("g.bar")
-                    //@todo - can assume only 1 datum here, but cant always do this for a reusabel component
-                    const _d = barG.data()[0]
-                    const newBarData = _d.barData.map(barD => {
-                        if(barD.key !== d.key) { return barD; }
-                        return {
-                            ...barD,
-                            value:newValue
+                    //@todo - for now, we assume only 1 kpi datum here, but cant always do this for a reusabel component
+                    const kpiDatum = barG.data()[0];
+                    const newKpiDatum = {
+                        ...kpiDatum,
+                        barData:{
+                            ...kpiDatum.barData,
+                            sectionsData:kpiDatum.barData.sectionsData.map(sectionD => {
+                                if(sectionD.key !== d.key) { return sectionD; }
+                                return {
+                                    ...sectionD,
+                                    endValue:newEndValue
+                                }
+                            })
                         }
-                    });
-                    newBarData.start = _d.barData.start;
-                    newBarData.end = _d.barData.end;
-                    const newD = {
-                        ..._d,
-                        barData:newBarData
                     }
-                    barG.datum(newD).call(bar)
+                    barG.datum(newKpiDatum).call(bar)
 
                     //numbers
                     //WARNING: when we grab the numbersG from selection.select("g.numbers"), it doesnt have the numbersData it has the kpi data

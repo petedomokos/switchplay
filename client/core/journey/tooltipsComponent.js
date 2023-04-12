@@ -425,8 +425,6 @@ export default function tooltipsComponent() {
                         .attr("class", "tooltip")
                         .style("cursor", "pointer")
                         .each(function(d,i){
-                            if(d.key === "expected" && d.milestoneId === "profile-5")
-                            console.log("enter", d)
                             d3.select(this).append("rect").attr("class", "tooltip-bg")
                             d3.select(this).append("text").attr("class", "drag-value")
                                 .attr("text-anchor", "middle")
