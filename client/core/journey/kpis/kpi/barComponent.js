@@ -42,7 +42,6 @@ export default function barComponent() {
         return data.forEach((d,i) => {
             const { barData } = d;
             const { sectionsData } = barData;
-            console.log("d", d)
             const shouldDisplayBar = displayFormat === "stats" || displayFormat === "both";
             const shouldDisplaySteps = d.milestoneId !== "current" && (displayFormat === "steps" || displayFormat === "both");
 

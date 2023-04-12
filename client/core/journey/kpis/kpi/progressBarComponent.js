@@ -48,9 +48,6 @@ export default function progressBarComponent() {
                 ...kpiD.barData, 
                 sectionsData:kpiD.barData.sectionsData.filter(d => d.shouldDisplay(status, editing, displayFormat))
             };
-            if(kpiD.milestoneId === "current" && kpiD.key === "admin"){
-                console.log("nData", numbersData)
-            }
 
             const width = _width(kpiD,i)
             const height = _height(kpiD,i);

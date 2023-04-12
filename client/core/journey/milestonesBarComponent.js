@@ -488,21 +488,23 @@ export default function milestonesBarComponent() {
                     */
                     .onDblClick(handleMilestoneWrapperClick) //see note about chrome on mobile
                     .onLongpressStart(function(e, d){
-                        //@TODO - INSTEAD, WE WILL IMPL THIS IN TEH LITTLE LABEL OUTSIDE THE PROFILE AT TOP
-                        /*
                         //remove any open forms
                         setForm(null);
 
                         const pt = adjustPtForData(e);
                         const milestone = milestoneContainingPt(pt, positionedData);
+                        if(!milestone){
+                            createMilestonePlaceholder(prevCard(pt.x), nextCard(pt.x));
+                        }
+                        /*
+                        //DELETE
+                        //@TODO - INSTEAD, WE WILL IMPL THIS IN TEH LITTLE LABEL OUTSIDE THE PROFILE AT TOP
                         if(milestone?.id === "current"){
                             alert("You can't delete your current profile.");
                             return;
                         }
                         if(milestone){
                             startDeleteMilestone(milestone)
-                        }else{
-                            createMilestonePlaceholder(prevCard(pt.x), nextCard(pt.x))
                         }
                         */
                     })
@@ -636,6 +638,7 @@ export default function milestonesBarComponent() {
                 //dragging
                 let dragStartX;
                 function dragStart(e,d){
+                    console.log("ds")
                     onSetEditingReactComponent(null);
                     setForm(null);
                     if(!swipable) { return; }
@@ -826,7 +829,7 @@ export default function milestonesBarComponent() {
                 const labelY = data.length === 0 ? 0 : -currentCard.height/2 - 10;
                 datePhasesData = [
                     { label:"<-- Past", x:endOfLastPastCard, y:labelY, textAnchor:"end", },
-                    //{ label: "Current", x:currentCard?.x, y:labelY, textAnchor:"middle"},
+                    { label: "Current", x:currentCard?.x, y:labelY, textAnchor:"middle"},
                     { label: "Future -->", x:startOfFirstFutureCard, y:labelY, textAnchor:"start" }
                 ]
                 milestonesG.select("g.phase-labels")
