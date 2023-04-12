@@ -61,14 +61,6 @@ export default function kpisLayout(){
             //const best = (value1, value2) => order === "highest is best" ? d3.max([value1, value2]) : d3.min([value1, value2]);
             //const worst = (value1, value2) => order === "highest is best" ? d3.min([value1, value2]) : d3.max([value1, value2]);
 
-            const isNumber = number => typeof number === "number";
-            const boundedValue = (value, bounds) => {
-                const lowerBound = d3.min(bounds);
-                const upperBound = d3.max(bounds);
-                if(!isNumber(value)){ return value; }
-                return d3.min([upperBound, d3.max([lowerBound, value])])
-            }
-
             const currentBarDatum = {
                 progressBarType:"dataset",
                 key:"current",
@@ -77,13 +69,7 @@ export default function kpisLayout(){
                 //@todo - remove isAchieved form this - is confusing and means nothing
                 isAchieved:!!values.achieved,
                 startValue: barStart,
-                /*
-                ive made this far too complicated - this should just be the value and thats it.
-                and the barComponent should cut it off 
-                */
-                endValue: boundedValue(current, [barStart, barEnd]),
-                fullScaleStartValue:dataStart,
-                fullScaleEndValue:current,
+                endValue: current,
                 fill:colours.current,
                 format
             }
@@ -91,18 +77,15 @@ export default function kpisLayout(){
             const targetBarDatum = {
                 key:"target",
                 label: "Target",
-                shouldDisplay:() => true,
                 shouldDisplay:(status, editing) => editing?.desc === "target",
                 isAchieved:order === "highest is best" ? target <= current : target >= current,
                 startValue:barStart,
-                fullScaleStartValue:dataStart,
                 endValue:target,
                 fill:colours.target,
                 format
             }
 
-            // 1. next - add targetBardatum back in when user is editing
-            //2 - add currentTooltip back in 
+            //next 2 - add currentTooltip back in (and change key to currentDragHandle)
             //3 - wire up the steps interactions
             //4 - add the steps visual under the bars (not on current) and the 3 displayOptions
 
@@ -195,25 +178,26 @@ export default function kpisLayout(){
                     //smallIcons: { achieved: ball, notAchieved: emptyGoal },
                 }
             ];
-            /*
+
             const currentValueTooltipDatum = {
                 progressBarType:"dataset",
                 tooltipType:"value",
                 key:"current", milestoneId, kpiKey:key, datasetKey, statKey,
-                shouldDisplay:() => true,
+                shouldDisplay:status => !isPast && status === "open",
                 label: values.achieved ? "Achieved" : "Current",
                 rowNr:0, y:0,
                 value:current,
-                fill:colours.current,
-                dataOrder: format === "completion" ? "highest is best" : order,
+                fill:grey10(3),
+                opacity:0.3,
+                stroke:grey10(6),
+                strokeWidth:0.1,
+                dataOrder: order,
                 accuracy,
                 editable:isCurrent || isFuture,
                 withDragValueAbove:false,
                 withInnerValue:false,
-                shouldDisplay:(status, editing) => status === "open" && !isPast
             };
-            */
-            const tooltipsData = [...scaleTooltipsData, ...comparisonTooltipsData, /*currentValueTooltipDatum*/]
+            const tooltipsData = [...scaleTooltipsData, ...comparisonTooltipsData, currentValueTooltipDatum]
             
             //numbers
             const currentNumberDatum = {

@@ -111,7 +111,10 @@ export default function tooltipsComponent() {
                 .attr("y", -height/2)
                 .attr("width", width)
                 .attr("height", height)
-                .attr("fill", styles.bg.fill)// COLOURS.selectedMilestone)
+                .attr("fill", d.fill || styles.bg.fill)// COLOURS.selectedMilestone)
+                .attr("stroke", d.stroke || "none")
+                .attr("stroke", d.strokeWidth || null)
+                .attr("opacity", d.opacity || null)
 
             //saveBtn
             const saveBtnG = tooltipG.selectAll("g.save-btn").data(d.unsavedValue && !beingDragged(d) ? [1] : []);
@@ -152,7 +155,6 @@ export default function tooltipsComponent() {
                         const date = new Date();
                         const valueObj = { 
                             actual: `${d.unsavedValue}`, 
-                            completion:null,
                             date
                         }
                         onSaveValue(valueObj, d.milestoneId, d.datasetKey, d.statKey, d.key);

@@ -342,10 +342,6 @@ export default function progressBarComponent() {
                 .height((d,i) => dimns[i].bar.height)
                 .margin((d,i) => dimns[i].bar.margin)
                 .scale((d,i) => xScales[d.key])
-                .getBarStart(barDataWrapper => editingTarget ? barDataWrapper.start : barDataWrapper.dataStart)
-                .getBarEnd(barDataWrapper => editingTarget ? barDataWrapper.end : barDataWrapper.dataEnd)
-                .getSectionStartValue((d,i) => editingTarget && typeof d.fullScaleStartValue === "number" ? d.fullScaleStartValue : d.startValue)
-                .getSectionEndValue((d,i) => editingTarget && typeof d.fullScaleEndValue === "number" ? d.fullScaleEndValue : d.endValue)
                 .editable(editable)
             , { transitionEnter, transitionUpdate} )
 
@@ -461,6 +457,11 @@ export default function progressBarComponent() {
                     }
                 })
                 .onDrag(function(e,d, tooltipDimns){
+                    //i think the bar is wrong coz getEndValue and getValue etc funcs are not updating??
+                    //also what happend if w drag the currnt valeu out of range of the 
+                    //normal start to target range -> then need to redo the boundedValue....
+                    //so need to rethink where boundedvalue is calculated -maybe just do it in barComponent
+                    //using the domain() to display it correct
                     //update tooltip position
                     const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                     const newX = translateX + e.dx;
@@ -468,8 +469,8 @@ export default function progressBarComponent() {
 
                     //update tooltip value
                     const scale = xScales[d.progBarKey];
-                    const newEndValue = round(Number(scale.invert(newX)), d.accuracy);
-                    d.unsavedEndValue = newEndValue;
+                    const newValue = round(Number(scale.invert(newX)), d.accuracy);
+                    d.unsavedValue = newValue;
                     //we need to update alltooltips so index for dimns is maintained
                     //@todo - go back to using a key instead of array for dimns?
                     const tooltipsG = d3.select(this.parentNode);
@@ -478,7 +479,7 @@ export default function progressBarComponent() {
                     //update corresponding bar section
                     const barG = d3.select(this.parentNode.parentNode).select("g.bar")
                     //@todo - for now, we assume only 1 kpi datum here, but cant always do this for a reusabel component
-                    const kpiDatum = barG.data()[0];
+                    const kpiDatum = dataWithEnrichedBarData[0];
                     const newKpiDatum = {
                         ...kpiDatum,
                         barData:{
@@ -487,7 +488,7 @@ export default function progressBarComponent() {
                                 if(sectionD.key !== d.key) { return sectionD; }
                                 return {
                                     ...sectionD,
-                                    endValue:newEndValue
+                                    endValue:newValue
                                 }
                             })
                         }

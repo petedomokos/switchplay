@@ -5,6 +5,7 @@ import container from './container';
 import background from './background';
 import remove from "./remove";
 import { fadeIn } from "../../domHelpers";
+import { boundValue, isNumber } from '../../../../data/dataHelpers';
 
 const MED_SLIDE_DURATION = TRANSITIONS.DEFAULT_DURATIONS.SLIDE.MED;
 
@@ -25,18 +26,13 @@ export default function barComponent() {
 
     let _scale;
 
-    let getBarStart = barData => barData.start;
-    let getBarEnd = barData => barData.end;
-    let getSectionStartValue = sectionD => sectionD.startValue;
-    let getSectionEndValue = sectionD => sectionD.endValue;
-
     let dimns = [];
 
     let scales = {};
     let fixedDomain = [0,100]
     let _domain;
 
-    const NO_MIN_MAX_ERROR_MESG = "no min/max";
+    const NO_MIN_MAX_ERROR_MESG = "no start or end";
     const NO_DATA_ERROR_MESG = "no data";
     const NO_TARGET_ERROR_MESG = "no target";
     let errorMesgs = {};
@@ -72,12 +68,13 @@ export default function barComponent() {
                     .domain(extent)
                     .range([0, contentsWidth])*/
             }
+            const scale = scales[i];
             
             //error mesg
-            if(typeof sectionsData.find(d => d.key === "current").startValue !== "number"){
+            if(!isNumber(sectionsData.find(d => d.key === "current").endValue)){
                 //to undefined means no data
                 errorMesgs[i] = NO_DATA_ERROR_MESG;
-            }else if(typeof getBarStart(barData) !== "number" || typeof getBarEnd(barData) !== "number"){
+            }else if(!isNumber(scale.domain()[0]) || !isNumber(scale.domain()[1])){
                 errorMesgs[i] = NO_MIN_MAX_ERROR_MESG;
             }else{
                 errorMesgs[i] = "";
@@ -129,6 +126,9 @@ export default function barComponent() {
                 const { contentsWidth, contentsHeight } = dimns[i];
                 const scale = scales[i];
                 const styles = _styles(data,i);
+                //helper
+                const bound = boundValue(scale.domain());
+
                 const barContentsG = d3.select(this);
 
                 //sections
@@ -138,37 +138,30 @@ export default function barComponent() {
                         .attr("class", "bar-section")
                         .call(fadeIn)
                             .each(function(d,j){
-                                //console.log("key scale",d.key, scale.domain(), scale.range())
-                                //error - scale(d.value) is neg
-                                //console.log("value...", d.value, scale(d.value))
-                                //console.log("start value...", d.startValue, scale(d.startValue))
-                                const sectionWidth = scale(getSectionEndValue(d)) - scale(getSectionStartValue(d)) || 0;
-                                //console.log("setting sectw!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! to sectw", sectionWidth)
+                                const sectionWidth = scale(bound(d.endValue)) - scale.range()[0];
                                 //append rect
                                 d3.select(this)
                                     .append("rect")
                                         .attr("class", "bar-section")
                                         .attr("pointer-events", "none")
-                                        .attr("width", sectionWidth)
+                                        .attr("width", sectionWidth || 0)
                                         .attr("height", contentsHeight)
                                         .attr("fill", d.fill);;
                             })
                             .merge(barSectionG)
-                            .attr("transform", (d,j) => `translate(${scale(getSectionStartValue(d)) || 0}, 0)`)
                             .each(function(d,j){
-                                //console.log("update bar i j editable",data, d, i, j, editable(data,i))
-                                const sectionWidth = scale(getSectionEndValue(d)) - scale(getSectionStartValue(d)) || 0;
+                                const sectionWidth = scale(bound(d.endValue)) - scale.range()[0];
                                 //adjust rect width to end - start
                                 if(transitionUpdate){
                                     d3.select(this).select("rect.bar-section")
                                         .transition()
                                         .duration(MED_SLIDE_DURATION)
-                                            .attr("width", sectionWidth)
+                                            .attr("width", sectionWidth || 0)
                                             .attr("height", contentsHeight)
                                             .attr("fill", d.fill);
                                 }else{
                                     d3.select(this).select("rect.bar-section")
-                                        .attr("width", sectionWidth)
+                                        .attr("width", sectionWidth || 0)
                                         .attr("height", contentsHeight)
                                         .attr("fill", d.fill);
                                 }
@@ -235,26 +228,6 @@ export default function barComponent() {
     bar.scale = function (value) {
         if (!arguments.length) { return _scale; }
         _scale = value;
-        return bar;
-    };
-    bar.getBarStart = function (func) {
-        if (!arguments.length) { return getBarStart; }
-        getBarStart = func;
-        return bar;
-    };
-    bar.getBarEnd = function (func) {
-        if (!arguments.length) { return getBarEnd; }
-        getBarEnd = func;
-        return bar;
-    };
-    bar.getSectionStartValue = function (func) {
-        if (!arguments.length) { return getSectionStartValue; }
-        getSectionStartValue = func;
-        return bar;
-    };
-    bar.getSectionEndValue = function (func) {
-        if (!arguments.length) { return getSectionEndValue; }
-        getSectionEndValue = func;
         return bar;
     };
     bar.handleHeightFactor = function (value) {

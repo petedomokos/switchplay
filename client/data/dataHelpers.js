@@ -44,6 +44,14 @@ export const getGreatestValueForStat = statKey => datapoints => {
         ?.value;
 }
 
+export const isNumber = number => typeof number === "number";
+export const boundValue = bounds => value => {
+    const lowerBound = d3.min(bounds);
+    const upperBound = d3.max(bounds);
+    if(!isNumber(value)){ return value; }
+    return d3.min([upperBound, d3.max([lowerBound, value])])
+}
+
 
 //helper - can move out of here
 export const getRangeFormat = granularity => {
