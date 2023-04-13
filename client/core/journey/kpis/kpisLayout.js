@@ -17,7 +17,7 @@ export default function kpisLayout(){
         const nrDatasetKpis = data.filter(kpi => kpi.datasetKey).length;
         const kpisData = data.map((kpi,i) => {
             const { key, values, accuracy, order, isPast, isCurrent, isFuture,isActive, milestoneId, datasetKey, statKey,
-                steps, stepsValues, allSteps=[] } = kpi;
+                steps=[], stepsValues, allSteps=[] } = kpi;
 
             //if(kpi.datasetKey === "pressUps"){
                 //console.log("milestoneId kpi", milestoneId, kpi)
@@ -89,7 +89,7 @@ export default function kpisLayout(){
             //steps bar data
             //steps - the steps progressBar display will not be on current 
             //(although it will show the steps list for all steps on all future cards)
-            const stepsBarData = steps && (!isCurrent || nrDatasetKpis === 0) ? steps : [];
+            const stepsBarData = !isCurrent || nrDatasetKpis === 0 ? steps : [];
 
             const barData = {
                 start:barStart,
@@ -147,12 +147,32 @@ export default function kpisLayout(){
             //@todo - put different comparisons into current card eg compared to club expectations, or all players avg
             const comparisonTooltipsData = isCurrent ? [] : [
                 { 
+                    progressBarType:"steps",
+                    tooltipType:"comparison",
+                    key:"expectedSteps", milestoneId, kpiKey:key, datasetKey, statKey,
+                    //temp disable when its an endTooltip
+                    //dont display if past or no future profiles
+                    shouldDisplay:(status, editing, displayFormat) => 
+                        status === "open" && isFuture && isNumber(stepsValues.expected?.actual) && displayFormat === "steps", 
+                    rowNr: 1, y: 1, current,
+                    value: stepsValues.expected?.completion, x:stepsValues.expected?.completion,
+                    actualStepsValue:stepsValues.expected?.actualSteps,
+                    current:stepsValues.current?.actual,
+                    dataOrder: "highest is best",
+                    accuracy:2,
+                    icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },
+                    editable:false,//isCurrent || isFuture,
+                    withDragValueAbove:true,
+                    withInnerValue:true,
+                    //smallIcons: expectedAchieved ? emptyGoal : emptyGoal,
+                },
+                { 
                     progressBarType:"dataset",
                     tooltipType:"comparison",
                     key:"expected", milestoneId, kpiKey:key, datasetKey, statKey,
                     //temp disable when its an endTooltip
                     //dont display if past or no future profiles
-                    shouldDisplay:(status, editing, displayFormat) => status === "open" && isFuture && isNumber(target) && displayFormat !== "steps", 
+                    shouldDisplay:(status, editing, displayFormat) => status === "open" && isFuture && isNumber(expected) && displayFormat !== "steps", 
                     rowNr: 1, y: 1, current,
                     value: expected, x:expected,
                     dataOrder: order,

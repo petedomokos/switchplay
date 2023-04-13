@@ -267,18 +267,7 @@ export default function kpiComponent() {
                                 .displayFormat(displayFormat)
                                 .onSaveValue(onSaveValue))
 
-                        //const stepsData = d.steps;
-                        console.log("d.steps", d.steps)
-                        //temp -  this repeats here and in barComp twice!
-                        //also, for now, current card just flattens allSteps, and is not draggable
-                        //@todo - keep them nested, and allow dragging between profiles
-                        let stepsData;
-                        if(d.steps[0] && Array.isArray(d.steps[0])){
-                            stepsData = d.steps.reduce((a, b) => [...a, ...b], []);
-                        }else{
-                            stepsData = d.steps || [];
-                        }
-                        const kpiStepsG = d3.select(this).selectAll("g.kpi-steps").data([stepsData]);
+                        const kpiStepsG = d3.select(this).selectAll("g.kpi-steps").data([d.steps]);
                         kpiStepsG.enter()
                             .append("g")
                                 .attr("class", "kpi-steps")

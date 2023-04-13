@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import textWrap from "./textWrap";
 import { fadeIn, remove, show, hide } from './domHelpers';
+import { isNumber } from '../../data/dataHelpers';
 import { grey10, COLOURS, TRANSITIONS } from './constants';
 import dragEnhancements from './enhancedDragHandler';
 import { getTransformationFromTrans } from './helpers';
@@ -65,7 +66,11 @@ export default function tooltipsComponent() {
     let hovered;
 
     let isAchieved = d => {
-        if(typeof d.current !== "number" || typeof getValue(d) !== "number"){ return false; }
+        if(d.key === "expectedSteps"){
+            if(!isNumber(d.actualStepsValue) || !isNumber(d.current)) { return false; }
+            return d.current >= d.actualStepsValue;
+        }
+        if(!isNumber(d.current) || !isNumber(getValue(d))) { return false; }
         return d.dataOrder === "highest is best" ? d.current >= getValue(d) : d.current <= getValue(d);
     }
 
@@ -89,10 +94,15 @@ export default function tooltipsComponent() {
         //console.log("uT...data", selection.data())
         //const tooltipDimns = _tooltipDimns(data, i);
         selection.each(function(d,i){
+            //console.log("d", d)
+            //console.log("dimns", tooltipDimns[d.key])
+            //next - position the tooltip properly - why is it so high? 
+            //and what is tyhe scale?it seems to be correct on x axis, but not sure why
             //decide the saem common pattern for tooltips - it should probably always be
             //an array, even if its top then bottom
             const tooltipG = d3.select(this);
             const { width, height, margin, fontSize } = tooltipDimns[d.key];
+
             const styles = _styles(d,i);
 
             const contentsWidth = width - margin.left - margin.right;

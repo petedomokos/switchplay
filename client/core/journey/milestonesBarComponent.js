@@ -638,7 +638,6 @@ export default function milestonesBarComponent() {
                 //dragging
                 let dragStartX;
                 function dragStart(e,d){
-                    console.log("ds")
                     onSetEditingReactComponent(null);
                     setForm(null);
                     if(!swipable) { return; }
@@ -720,9 +719,10 @@ export default function milestonesBarComponent() {
                                 newDate.setUTCMinutes(0); 
                                 newDate.setUTCSeconds(0); 
                                 newDate.setUTCMilliseconds(0); 
-                                console.log("new Date after reset", newDate)
+                                //console.log("new Date after reset", newDate)
 
-                                handleCreateMilestone(key, newDate, calcNewMilestoneNr(prev, next));
+                                //for now, we assume all milestones are profiles
+                                handleCreateMilestone("profile", newDate, calcNewMilestoneNr(prev, next));
                             }
                         }
 

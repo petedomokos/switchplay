@@ -6,6 +6,7 @@ import { getTargets, findDefaultTarget } from "../../data/targets";
 import { convertToPC, round, roundDown, roundUp, getRangeFormat, dateIsInRange, getValueForStat, getGreatestValueForStat } from "../../data/dataHelpers";
 import { linearProjValue } from "./helpers";
 import { pcCompletion } from "../../util/NumberHelpers"
+import { isNumber } from '../../data/dataHelpers';
 import { JOURNEY_SETTINGS, JOURNEY_SETTINGS_INFO, createFutureProfile } from './constants';
 import { getBandsAndStandards } from "../../data/bandsAndStandards";
 
@@ -157,9 +158,24 @@ function getLastSessionDate(datasets){
     return max;
 }
 
+function calcStepsValues(startDate, date, steps=[]){
+    const nrSteps = steps.length;
+    const start = { actual:0, completion:0, date:startDate };
+    const target = { actual:nrSteps, completion:100 };
+    const nrCompletedSteps = steps.filter(s => s.completed).length;
+    const current = { 
+        actual:nrCompletedSteps,
+        completion: nrSteps === 0 ? 0 : Math.round((nrCompletedSteps/nrSteps) * 100) 
+    } 
+    //@todo - impl showTrailingZeros in round function so we can set it to false
+    const _expected = calcExpected(start, { ...target, date }, new Date(), { accuracy:2, /*showTrailingZeros:false*/ });
+    const expected = { ..._expected, actualSteps:Math.floor(_expected.actual) }
+    return { start, current, target, expected }
+}
+
 //@todo - custom expected when user drags
-function calcExpected(kpi, start, target, now, options={}){
-    if(!start || !start.actual || !target.actual){ 
+function calcExpected(start, target, now, options={}){
+    if(!start || !isNumber(start.actual) || !isNumber(target.actual)){ 
         return { actual:null, completion:null }; 
     }
     const { accuracy, showTrailingZeros=true } = options;
@@ -339,6 +355,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             const key = kpi.key || `${datasetKey}-${statKey}`;
 
             const profileKpi = profileKpis.find(pKpi => pKpi.key === key);
+            //WARNING - WHEN I REMOVE MOCK, KEEP THE [] AS DEFAULT
             const steps = profileKpi?.steps || [
                 {key:"1", desc:"Step 1", completed:true }, 
                 {key:"2", desc:"Step 2", completed:true},
@@ -424,31 +441,13 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
 
             const achieved = isPast ? current : null;
             //note prevProfile has already been processed with a full key and values
-            let expected = isPast ? null : calcExpected(kpi, start, { date, ...target }, now, { accuracy });
+            let expected = isPast ? null : calcExpected(start, { date, ...target }, now, { accuracy });
 
             let onTrackStatus;
             if(isPast && target?.actual){
                 onTrackStatus = targetIsAchieved(achieved, target, stat.order) ? "onTrack" : "offTrack";
             }else if(expected?.actual){
                 onTrackStatus = targetIsAchieved(current, expected, stat.order) ? "onTrack" : "offTrack";
-            }
-
-            function calcStepsValues(startDate, date, steps=[]){
-                const nrSteps = steps.length;
-                if(nrSteps === 0){ return {}; }
-                const start = { actual:0, completion:0 };
-                const target = { actual:nrSteps, completion:100 };
-                const nrCompletedSteps = steps.filter(s => s.completed).length;
-                const current = { 
-                    actual:nrCompletedSteps,
-                    completion: Math.round((nrCompletedSteps/nrSteps) * 100) 
-                } 
-                //@todo - impl expected
-                const expected = {
-                    actual:Math.round(nrCompletedSteps/2),
-                    completion:50 
-                }
-                return { start, current, target, expected }
             }
 
             //steps
@@ -571,8 +570,20 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
             const datasetName = dataset?.name || "";
             const statName = stat?.name || "";
 
-            //all steps (special case for current)
-            const steps = orderedProfiles.map(p => p.kpis.find(kpi => kpi.key === key).steps || [])
+            //flatten all steps for this kpi (special case for current)
+            //@todo - keep them flat, but adjust listComponent so it nests them, or, nest them here 
+            //and adjust list so it can handle it to allow draggin to move steps between milestones
+            const steps = orderedProfiles
+                .map(p => p.kpis.find(kpi => kpi.key === key).steps
+                    .map(step => ({
+                        milestoneId:p.id,
+                        name,
+                        datasetName,
+                        statName,
+                        ...step
+                    }))
+                )
+                .reduce((a, b) => [...a, ...b], []);
 
             return {
                 ...kpi,

@@ -8,7 +8,7 @@ import ctrlsComponent from '../../ctrlsComponent';
 import container from './container';
 import background from './background';
 import { getTransformationFromTrans } from '../../helpers';
-import { round } from "../../../../data/dataHelpers";
+import { round, isNumber } from "../../../../data/dataHelpers";
 
 /*
 
@@ -169,6 +169,17 @@ export default function progressBarComponent() {
                         fontSize:boundsFontsize
                     },
                     expected: {
+                        width:expectedTooltipOpenWidth,
+                        height:expectedTooltipOpenWidth,
+                        margin: { 
+                            left:0,
+                            right:0,
+                            top:3,//expectedTooltipOpenHeight * 0.15,
+                            bottom:3//expectedTooltipOpenHeight * 0.15
+                        },
+                        fontSize
+                    },
+                    expectedSteps: {
                         width:expectedTooltipOpenWidth,
                         height:expectedTooltipOpenWidth,
                         margin: { 
@@ -401,13 +412,18 @@ export default function progressBarComponent() {
                 })
                 .getValue(getTooltipValue)
                 .getX((d,i,j) =>{
+                    if(d.key === "expectedSteps"){
+                        const { width, margin } = dimns[i].bar;
+                        const barContentsWidth = width - margin.left - margin.right
+                        return barContentsWidth * (d.value/100);
+                    }
                     //i is kpi index, j is tooltip datum index
                     if(status === "open"){
                         //in open format, all tooptips are positioned according to the x scale
                         const value = getTooltipValue(d);
                         const scale = xScales[d.progBarKey];
                         //if(d.milestoneId === "current" && d.key === "target" && d.progBarKey === "longJump-distance-left"){ }
-                        return value ? scale(value) : scale.range()[0];
+                        return isNumber(value) ? scale(value) : scale.range()[0];
                     }
                     const extraHorizGap = 0;// 20;
                     if(d.key === "expected"){
@@ -430,6 +446,9 @@ export default function progressBarComponent() {
                         }
                         if(d.key === "target"){
                             return contentsHeight - 0.5 * tooltips.open.target.height;
+                        }
+                        if(d.key === "expectedSteps"){
+                            return tooltips.open.expectedSteps.height * 0.5;
                         }
                         return 0;
                     }

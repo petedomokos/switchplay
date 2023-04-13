@@ -156,12 +156,13 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       customExpected:[],
       ...props //will be just the date if from milestonesBar
     }
-    //console.log("new profile", profile)
     const _profiles = [ ...profiles, profile];
     save({ ...data, profiles:_profiles });
   },[stringifiedProfiles, user._id])
 
   const handleCreateContract = useCallback((props) => {
+    return;
+    /*
     const contract = {
       //put in some default values in case not specified
       yPC:50,
@@ -171,7 +172,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     }
     const _contracts = [ ...contracts, contract];
     save({ ...data, contracts:_contracts });
-    
+    */
   }, [stringifiedContracts, user._id]);
 
   const handleCreateMilestone = useCallback((dataType, date) => {

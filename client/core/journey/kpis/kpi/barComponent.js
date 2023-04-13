@@ -41,19 +41,9 @@ export default function barComponent() {
         dimns = []
         return data.forEach((d,i) => {
             const { barData } = d;
-            const { sectionsData } = barData;
+            const { sectionsData, stepsData } = barData;
             const shouldDisplayBar = displayFormat === "stats" || displayFormat === "both";
             const shouldDisplaySteps = d.milestoneId !== "current" && (displayFormat === "steps" || displayFormat === "both");
-
-            //temp -  this repeats here and later down!
-            //also, for now, current card just flattens allSteps, and is not draggable
-            //@todo - keep them nested, and allow dragging between profiles
-            let stepsData;
-            if(barData.stepsData[0] && Array.isArray(barData.stepsData[0])){
-                stepsData = barData.stepsData.reduce((a, b) => [...a, ...b], []);
-            }else{
-                stepsData = barData.stepsData || [];
-            }
 
             const width = _width(d,i)
             const height = _height(d,i);
@@ -142,19 +132,12 @@ export default function barComponent() {
             )
             .each(function(data,i){
                 const { barData } = data;
-                const { sectionsData } = barData;
+                const { sectionsData, stepsData } = barData;
                 const { contentsWidth, contentsHeight, barHeight, stepWidth, stepHeight } = dimns[i];
                 const scale = scales[i];
                 const styles = _styles(data,i);
+                const nrCompletedSteps = stepsData.filter(s => s.completed).length;
 
-                //temp - for now, current card just flattens allSteps, and is not draggable
-                //@todo - keep them nested, and allow dragging between profiles
-                let stepsData;
-                if(barData.stepsData[0] && Array.isArray(barData.stepsData[0])){
-                    stepsData = barData.stepsData.reduce((a, b) => [...a, ...b], []);
-                }else{
-                    stepsData = barData.stepsData || [];
-                }
                 //helper
                 const bound = boundValue(scale.domain());
 
@@ -163,7 +146,7 @@ export default function barComponent() {
                 //steps
                 const stepsG = barContentsG.selectAll("g.steps").data(shouldDisplaySteps ? [1] : []);
                 stepsG.enter()
-                    .append("g")
+                    .insert("g", "g.bar-section")
                         .attr("class", "steps")
                         .call(fadeIn)
                             .each(function(d,j){
@@ -183,12 +166,12 @@ export default function barComponent() {
                                         })
                                         .merge(stepG)
                                         .attr("transform", (d,i) => `translate(${i * stepWidth})`)
-                                        .each(function(d){
+                                        .each(function(d,i){
                                             d3.select(this).select("rect.step-bg")
                                                 .attr("width", stepWidth)
                                                 .attr("height", stepHeight)
-                                                .attr("fill", d.completed ? COLOURS.step.bar : "transparent")
-                                                .attr("stroke", "white")
+                                                .attr("fill", i < nrCompletedSteps ? COLOURS.step.bar : "transparent")
+                                                .attr("stroke", grey10(5))// "white")
                                         })
 
                                 stepG.exit().call(remove);

@@ -1,6 +1,13 @@
 import * as d3 from 'd3';
 import { addDays } from '../util/TimeHelpers';
 
+export const isNumber = number => typeof number === "number";
+export const boundValue = bounds => value => {
+    const lowerBound = d3.min(bounds);
+    const upperBound = d3.max(bounds);
+    if(!isNumber(value)){ return value; }
+    return d3.min([upperBound, d3.max([lowerBound, value])])
+}
 //@todo - handle showTrailingZeros = false
 //@todo - handle accuracy >= 5...round to that number
 export const round = (value, accuracy=0, showTrailingZeros=true) => {
@@ -42,14 +49,6 @@ export const getGreatestValueForStat = statKey => datapoints => {
         ?.values
         ?.find(v => v.key === statKey)
         ?.value;
-}
-
-export const isNumber = number => typeof number === "number";
-export const boundValue = bounds => value => {
-    const lowerBound = d3.min(bounds);
-    const upperBound = d3.max(bounds);
-    if(!isNumber(value)){ return value; }
-    return d3.min([upperBound, d3.max([lowerBound, value])])
 }
 
 
