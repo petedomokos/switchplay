@@ -266,13 +266,14 @@ export default function kpiComponent() {
                                     .width(kpiInfoWidth)
                                     .height(kpiInfoHeight)
                                     .margin({ left:0, right: 0, top:kpiInfoHeight * 0.1, bottom:kpiInfoHeight * 0.1 })
-                                    .newItemDesc("Add Step")
+                                    .orderEditable(d.milestoneId !== "current")
+                                    .newItemDatum(d.milestoneId === "current" ? null : { desc:"Add Step" })
                                     .onCreateItem(() => {
                                         onCreateStep(d.milestoneId, d.key)
                                     })
                                     //.onUpdateItem(onUpdateStep)
                                     //@todo - edit
-                                    .onEditItem(function(id, dimns){
+                                    .onEditItem(function(d, dimns){
                                         const { translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                                         const _dimns = {
                                             widths:dimns.widths,
@@ -285,7 +286,7 @@ export default function kpiComponent() {
                                             }
                                         }
 
-                                        onEditStep(id, _dimns)
+                                        onEditStep(d, _dimns)
                                     })
                                     .onUpdateItem(step => {
                                         if(d.milestoneId === "current"){

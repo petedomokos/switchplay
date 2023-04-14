@@ -97,6 +97,8 @@ export default function listComponent() {
     let onUpdateItems = function(){};
     let onDeleteItem = () => {};
 
+    let orderEditable = true;
+
     let scrollMin = -50;
     const scrollMax = 0;
     let draggedDeltaY = 0;
@@ -218,7 +220,7 @@ export default function listComponent() {
                     widths: { item: itemWidth, itemContents: itemContentsWidth, symbol:symbolWidth, descContents:descContentsWidth },
                     margins: { item: itemMargin, list:margin, desc:descMargin }
                 }
-                onEditItem.call(this, d.id, dimns);
+                onEditItem.call(this, d, dimns);
             }
             function endEditItem(){
             }
@@ -231,6 +233,7 @@ export default function listComponent() {
 
             let prospectivePosition;
             let initDraggedPos;
+            //pairs of each items position in the array, along with its y transform value
             const posYPairs = [...data.map((d,i) => [i, i * itemHeight]), [data.length, data.length * itemHeight]];
 
             let initPos;
@@ -285,10 +288,14 @@ export default function listComponent() {
                 const itemG = d3.select(this);
                 const { translateX, translateY } = getTransformationFromTrans(itemG.attr("transform"));
 
-                if(isHorizSwipe || (deltaXMax > deltaYMax && deltaYMax < 5 && deltaXMax > 20)){
+                //CASE 1: HORIZONTAL SWIPE TO DELETE
+                //if vert drag to re-order is also enabled, then we need to place some limits to distinguish between the two actions
+                const horizDeleteYMax = orderEditable ? 5 : 20;
+                const horizDeleteXMin = orderEditable ? 20 : 0;
+                if(isHorizSwipe || (deltaXMax > deltaYMax && deltaYMax < horizDeleteYMax && deltaXMax > horizDeleteXMin)){
                     isHorizSwipe = true;
                     //@todo - transform on x axis, and put y back to where to was in case its move a bit, then put it all back in dragEnd if not deleted
-                    //console.log("hoz")
+                    console.log("hoz")
                     if(deltaX > itemWidth/2){
                         //console.log("delete----------------------")
                         deleteTriggered = true;
@@ -300,6 +307,8 @@ export default function listComponent() {
                     return;
                 }
                 //console.log("lpDragged initPos", console.log("initDraggedPos", initDraggedPos))
+                //CASE 2: RE-ORDERING
+                if(!orderEditable){ return; }
                
                 const newY = translateY + e.dy
                 //console.log("newY", newY)
@@ -307,6 +316,7 @@ export default function listComponent() {
                 prospectivePosition = calcProspectivePosition(newY, d.id);
                 const distanceToNearestSlot = d3.min(posYPairs, d => Math.abs(d[1] - newY))
                 //console.log("dist", distanceToNearestSlot)
+                //CASE 3: DRAG OUT OF LIST TO DELETE (only if we also allow re-ordering)
                 const standardDeletionDragSpeedReached = enhancedDrag.distanceDragged() > 200 && enhancedDrag.avgSpeed() > 0.08;
                 const draggedFarAwayFromList = Math.abs(distanceToNearestSlot) > 5 * itemHeight;
                 if(draggedFarAwayFromList || standardDeletionDragSpeedReached){
@@ -369,6 +379,7 @@ export default function listComponent() {
                     //didnt swipe enough to delete - need to put back
                     //@todo - ---put it back i think
                 }
+                if(!orderEditable) { return; }
                 d3.select(this).select("rect.item-bg").attr("stroke", "none");
                 //re-order the data and update
                 const itemsBeforeNewPos = data.slice(0, prospectivePosition + 1).filter(it => it.id !== d.id);
@@ -400,7 +411,7 @@ export default function listComponent() {
                 .call(zoom);
             
             itemsG = zoomG.select("g.items");
-            const listData = [...data, newItemDatum]
+            const listData = newItemDatum ? [...data, newItemDatum] : data;
             
             const itemG = itemsG.selectAll("g.item").data(listData, d => d.id);
             itemG.enter()
@@ -462,7 +473,7 @@ export default function listComponent() {
                         symbolG.select("rect")
                             .attr("width", symbolContentsWidth)
                             .attr("height", itemContentsHeight)
-                            .attr("fill","none")// "red")
+                            .attr("fill","none")
                         
                         symbolG.select("text")
                             .attr("y", itemContentsHeight * 0.8)
@@ -475,7 +486,7 @@ export default function listComponent() {
                         descG.select("rect")
                             .attr("width", descContentsWidth)
                             .attr("height", itemContentsHeight)
-                            .attr("fill","none")// "yellow")
+                            .attr("fill","none")
                         
                         descG.select("text")
                             .attr("y", itemContentsHeight * 0.8)
@@ -549,9 +560,14 @@ export default function listComponent() {
         };
         return list;
     };
-    list.newItemDesc = function (value) {
+    list.orderEditable = function (value) {
+        if (!arguments.length) { return orderEditable; }
+        orderEditable  = value;
+        return list;
+    };
+    list.newItemDatum = function (value) {
         if (!arguments.length) { return newItemDatum.desc; }
-        newItemDatum = { ...newItemDatum, desc:value }
+        newItemDatum = value === null ? null : { ...newItemDatum, ...value }
         return list;
     };
     list.onCreateItem = function (f) {

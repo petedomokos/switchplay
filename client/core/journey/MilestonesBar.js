@@ -290,7 +290,11 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
   //}, [editingReactComponent]);
 
   const handleSaveForm = useCallback(e => {
-      //if current, it will have already saved when button pressed
+      console.log("save form.......", form)
+      if(form.formType === "step"){
+        handleUpdateStep(form.milestoneId, form.kpiKey, form.value)
+      }
+      //????????if current, it will have already saved when button pressed?????
       if(form.milestoneId === "current"){
         handleCancelForm();
         return; 
@@ -336,18 +340,10 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
   }, [form]);
 
   const handleCreateStep = useCallback((milestoneId, kpiKey) => {
-    //temp so we see a desc
-    const id = createId(allJourneySteps.map(s => s.id), "steps");
-    const updatedSteps = [
-      ...allKpiSteps(kpiKey, milestoneId),
-      { id, desc:id }
-    ]
-    /*
     const updatedSteps = [
       ...allKpiSteps(kpiKey, milestoneId),
       { id:createId(allJourneySteps.map(s => s.id), "steps"), }
-    ]
-    */
+    ];
     onUpdateMilestone(milestoneId, "steps", kpiKey, updatedSteps)
   }, [allJourneySteps]);
 
@@ -355,10 +351,9 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
     const updatedSteps = allKpiSteps(kpiKey, milestoneId)
       .map(step => step.id === updatedStep.id ? updatedStep : step);
     onUpdateMilestone(milestoneId, "steps", kpiKey, updatedSteps)
-  }, [allJourneySteps]);
+  }, [allJourneySteps, form]);
 
   const handleUpdateSteps = useCallback((milestoneId, kpiKey, updatedSteps) => {
-    console.log("updateSteps.........", updatedSteps)
     onUpdateMilestone(milestoneId, "steps", kpiKey, updatedSteps)
   }, [allJourneySteps]);
 
@@ -366,6 +361,16 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
     const updatedSteps = allKpiSteps(kpiKey, milestoneId).filter(step => step.id !== stepId);
     onUpdateMilestone(milestoneId, "steps", kpiKey, updatedSteps)
   }, [allJourneySteps]);
+
+  //keypresses
+  useEffect(() => {
+    d3.select("body").on("keypress", (e) => {
+      if(e.keyCode === "13" || e.key === "Enter"){
+        e.preventDefault();
+        handleSaveForm()
+      }
+    })
+  }, [form, stringifiedProfiles])
 
   //init
   //decide what needs to update on setSelectedMilestone, and only have that inteh depArray 
@@ -523,7 +528,7 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
   }, [selectedMilestone, screen.isLarge])
 
   const saveStepValue = value => {
-    console.log("saveStepValue", value)
+    setForm(prevState => ({ ...prevState, value:{ ...prevState.value, desc:value } }))
   }
 
   return (
@@ -555,7 +560,7 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
       <div className={`${classes.formOuterContainer} form-outer-container`} ref={formRef}>
         <div className={classes.formContainer}>
             {form?.formType === "step" && 
-              <StepForm fontSize={form.height * 0.5} save={saveStepValue} />
+              <StepForm step={form.value} fontSize={form.height * 0.5} save={saveStepValue} />
             }
             {form?.formType === "date" &&
               (form.milestoneId === "current" ?

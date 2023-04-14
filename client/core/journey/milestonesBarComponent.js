@@ -1002,9 +1002,8 @@ export default function milestonesBarComponent() {
                                 onSetSelectedKpi({ profileId, key, dimns:_dimns });
                             }
                         })
-                        .onEditStep((stepId, dimns) => {
-                            console.log("editStep", stepId)
-                            if(!stepId){ 
+                        .onEditStep((step, dimns) => {
+                            if(!step.id){ 
                                 //close any stepform if it is open
                                 setForm(null);
                                 return; 
@@ -1036,7 +1035,8 @@ export default function milestonesBarComponent() {
                             const form = {
                                 formType:"step",
                                 milestoneType:milestone.dataType, 
-                                milestoneId:milestone.id,
+                                milestoneId:milestone.id === "current" ? step.milestoneId : milestone.id,
+                                kpiKey:kpi.key,
                                 outerContainerLeft,
                                 outerContainerTop,
                                 outerContainerWidth:milestone.width,
@@ -1047,6 +1047,7 @@ export default function milestonesBarComponent() {
                                 height,//calcStepHeight(dimns)
                                 //left:currentSliderOffset + x - (width/2) * k,
                                 //top:topBarHeight + y - (height/2) * k
+                                value:step
                             }
                             //console.log("form..........", form)
                             //set form for the profile, kpi and stepId

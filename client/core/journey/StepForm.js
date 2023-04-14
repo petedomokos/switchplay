@@ -47,9 +47,7 @@ export function splitMultilineString(str){
 }
 
 export default function StepForm({ step, fontSize, save }) {
-  //console.log("StepForm")
-  const { _id, desc="Step 1" } = step;
-  const [value, setValue] = useState(desc)
+  const [value, setValue] = useState(step.desc)
   const [editing, setEditing] = useState(false);
   //const descLines = desc ? splitMultilineString(desc) : ["No Desc"];
   const styleProps = {
@@ -78,6 +76,6 @@ export default function StepForm({ step, fontSize, save }) {
 }
 
 StepForm.defaultProps = {
-  step:{},
+  step:{ desc:"" },
   fontSize:"11px"
 }
