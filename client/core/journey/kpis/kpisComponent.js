@@ -131,7 +131,13 @@ export default function kpisComponent() {
     //API CALLBACKS
     let onUpdateSelected = function(){};
     let onClickKpi = function(){};
+
+    let onCreateStep = function(){};
     let onEditStep = function(){};
+    let onUpdateStep = function(){};
+    let onUpdateSteps = function(){};
+    let onDeleteStep = function(){};
+
     let onDblClickKpi = function(){};
     let onDragStart = function(){};
     let onDrag = function() {};
@@ -408,6 +414,7 @@ export default function kpisComponent() {
                                         onUpdateSelected(d.milestoneId, d.key, true, true, dimns);
                                     }
                                 })
+                                .onCreateStep(onCreateStep)
                                 .onEditStep((id, dimns) => {
                                     const _dimns = {
                                         widths:dimns.widths,
@@ -423,6 +430,9 @@ export default function kpisComponent() {
                                     }
                                     onEditStep(id, _dimns);
                                 })
+                                .onUpdateStep(onUpdateStep)
+                                .onUpdateSteps(onUpdateSteps)
+                                .onDeleteStep(onDeleteStep)
                                 .onSaveValue(onSaveValue)
                                 .onSetEditing(onSetEditing)
                             )
@@ -461,8 +471,9 @@ export default function kpisComponent() {
                                     const btnG = d3.select(this)
                                         .on("click", function(){
                                             displayFormat = b.key;
-                                            containerG.call(kpis)
-                                            onCtrlClick();
+                                            //update is triggered from profileCards so it aplies to all cards
+                                            //containerG.call(kpis)
+                                            onCtrlClick(b.key);
                                         });
                                         
                                     btnG.select("rect.hitbox")
@@ -754,6 +765,11 @@ export default function kpisComponent() {
         kpiFormat = value;
         return kpis;
     };
+    kpis.displayFormat = function (value) {
+        if (!arguments.length) { return displayFormat; }
+        displayFormat = value;
+        return kpis;
+    };
     kpis.profileIsSelected = function (value) {
         if (!arguments.length) { return profileIsSelected; }
         profileIsSelected = value;
@@ -795,9 +811,29 @@ export default function kpisComponent() {
         onClickKpi = value;
         return kpis;
     };
+    kpis.onCreateStep = function (value) {
+        if (!arguments.length) { return onCreateStep; }
+        onCreateStep = value;
+        return kpis;
+    };
     kpis.onEditStep = function (value) {
         if (!arguments.length) { return onEditStep; }
         onEditStep = value;
+        return kpis;
+    };
+    kpis.onUpdateStep = function (value) {
+        if (!arguments.length) { return onUpdateStep; }
+        onUpdateStep = value;
+        return kpis;
+    };
+    kpis.onUpdateSteps = function (value) {
+        if (!arguments.length) { return onUpdateSteps; }
+        onUpdateSteps = value;
+        return kpis;
+    };
+    kpis.onDeleteStep = function (value) {
+        if (!arguments.length) { return onDeleteStep; }
+        onDeleteStep = value;
         return kpis;
     };
     kpis.onDblClickKpi = function (value) {

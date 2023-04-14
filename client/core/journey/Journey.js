@@ -250,18 +250,30 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   }, [stringifiedProfiles, user._id]);
 
   const handleUpdateMilestone = useCallback((profileId, desc, locationKey, updates) => {
-    console.log("updateMilestone", profileId, desc, locationKey);
-    console.log("updates--------", updates);
+    console.log("updateMilestone",profileId, locationKey, desc);
+    if(desc === "steps"){
+      //in this case, locationKey is the kpi key
+      const _profiles = profiles.map(p => p.id !== profileId ? p : ({
+        ...p,
+        kpis:p.kpis.map(kpi => kpi.key !== locationKey ? kpi : ({
+          ...kpi,
+          steps:updates
+        }))
+      }))
+      console.log("new profiles", _profiles);
+      save({ ...data, profiles:_profiles });
+      return;
+    }
     //note atm media is always a photo, but its about its transform etc
     //helper
     const updatedMediaArr = mediaArr => mediaArr.map(m => m.locationKey !== locationKey ?  m : { ...m, ...updates })
     if(desc === "media"){
       const _profiles = profiles.map(p => {
         if(p.id !== profileId){ return p; }
-        console.log("updating prof", p.id)
+        //console.log("updating prof", p.id)
         //update medpia
         const updatedMedia = updatedMediaArr(p.media, locationKey, updates);
-        console.log("updatedProfileMedia", updatedMedia)
+        //console.log("updatedProfileMedia", updatedMedia)
         return {
           ...p,
           media:updatedMedia

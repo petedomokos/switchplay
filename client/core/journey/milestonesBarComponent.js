@@ -160,6 +160,12 @@ export default function milestonesBarComponent() {
     let onReleaseScreen = () => {};
     let onSaveValue = function(){};
 
+    let onCreateStep = function(){};
+    let onEditStep = function(){};
+    let onUpdateStep = function(){};
+    let onUpdateSteps = function(){};
+    let onDeleteStep = function(){};
+
     const drag = d3.drag();
     const enhancedDrag = dragEnhancements();
     let oscillator = Oscillator({ k:1.01, dx:10 });
@@ -882,6 +888,11 @@ export default function milestonesBarComponent() {
                         .editable(swipable ? false : true)
                         .scrollable(swipable ? false : true)
                         .onSaveValue(onSaveValue)
+                        .onCreateStep(onCreateStep)
+                        .onEditStep(onEditStep)
+                        .onUpdateStep(onUpdateStep)
+                        .onUpdateSteps(onUpdateSteps)
+                        .onDeleteStep(onDeleteStep)
                         .onSetEditing(onSetEditingSVGComponent)
                         .onStartEditingPhotoTransform(function(milestoneId, locationKey){
                             milestoneBeingEdited = { id:milestoneId, desc:"photo" }
@@ -992,7 +1003,7 @@ export default function milestonesBarComponent() {
                             }
                         })
                         .onEditStep((stepId, dimns) => {
-                            //console.log("editStep dimns", dimns)
+                            console.log("editStep", stepId)
                             if(!stepId){ 
                                 //close any stepform if it is open
                                 setForm(null);
@@ -1435,6 +1446,32 @@ export default function milestonesBarComponent() {
     milestonesBar.setForm = function (value) {
         if (!arguments.length) { return setForm; }
         setForm = value;
+        return milestonesBar;
+    };
+    milestonesBar.onCreateStep = function (value) {
+        if (!arguments.length) { return onCreateStep; }
+        onCreateStep = value;
+        return milestonesBar;
+    };
+    milestonesBar.onEditStep = function (value) {
+        if(typeof value === "function"){
+            onEditStep = value;
+        }
+        return milestonesBar;
+    };
+    milestonesBar.onUpdateStep = function (value) {
+        if (!arguments.length) { return onUpdateStep; }
+        onUpdateStep = value;
+        return milestonesBar;
+    };
+    milestonesBar.onUpdateSteps = function (value) {
+        if (!arguments.length) { return onUpdateSteps; }
+        onUpdateSteps = value;
+        return milestonesBar;
+    };
+    milestonesBar.onDeleteStep = function (value) {
+        if (!arguments.length) { return onDeleteStep; }
+        onDeleteStep = value;
         return milestonesBar;
     };
     milestonesBar.onClick = function (value) {

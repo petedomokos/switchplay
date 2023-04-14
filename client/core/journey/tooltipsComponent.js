@@ -66,9 +66,16 @@ export default function tooltipsComponent() {
     let hovered;
 
     let isAchieved = d => {
+        //if(d.milestoneId === "profile-5"){
+            //console.log("isAchieved...", d.key)
+        //}
         if(d.key === "expectedSteps"){
-            if(!isNumber(d.actualStepsValue) || !isNumber(d.current)) { return false; }
-            return d.current >= d.actualStepsValue;
+            if(!isNumber(d.currentActualSteps) || !isNumber(d.expectedActualSteps)) { return false; }
+            //if(d.milestoneId === "profile-5"){
+                //console.log("ach? d", d)
+                //console.log(d.currentActualSteps >= d.expectedActualSteps)
+            //}
+            return d.currentActualSteps >= d.expectedActualSteps;
         }
         if(!isNumber(d.current) || !isNumber(getValue(d))) { return false; }
         return d.dataOrder === "highest is best" ? d.current >= getValue(d) : d.current <= getValue(d);
@@ -94,7 +101,9 @@ export default function tooltipsComponent() {
         //console.log("uT...data", selection.data())
         //const tooltipDimns = _tooltipDimns(data, i);
         selection.each(function(d,i){
-            //console.log("d", d)
+            //if(d.key === "expectedSteps")
+            //if(d.milestoneId === "profile-5")
+               // console.log("d", d.key)
             //console.log("dimns", tooltipDimns[d.key])
             //next - position the tooltip properly - why is it so high? 
             //and what is tyhe scale?it seems to be correct on x axis, but not sure why
@@ -205,7 +214,7 @@ export default function tooltipsComponent() {
                 .attr("stroke", styles.text.stroke)
                 .attr("font-size", dragTextHeight * 0.8)
                 .attr("display", draggable && d.withDragValueAbove ? null : "none")
-                .text(getValue(d))
+                .text(`${getValue(d)}${d.unit || ""}`)
 
             //tooltip settings
             const isSmall = mainContentsHeight < 10
@@ -259,11 +268,11 @@ export default function tooltipsComponent() {
                     .merge(valueText)
                     .attr("y", d.key === "expected" ? -contentsWidth * 0.05 : 0)
                     //temp - use width, not contentsW, so all tooltip fonts the same
-                    .attr("font-size", fontSize)
+                    .attr("font-size", d.unit ? fontSize * 0.9 : fontSize)
                     .attr("fill", styles.text.stroke)
                     .attr("stroke", styles.text.stroke)
                     .attr("stroke-width", 0.1)
-                    .text(getValue(d))
+                    .text(`${getValue(d)}${d.unit || ""}`)
 
             valueText.exit().remove();//need to also transition icon changes.call(remove)
 

@@ -165,6 +165,7 @@ function calcStepsValues(startDate, date, steps=[]){
     const nrCompletedSteps = steps.filter(s => s.completed).length;
     const current = { 
         actual:nrCompletedSteps,
+        actualSteps:nrCompletedSteps,
         completion: nrSteps === 0 ? 0 : Math.round((nrCompletedSteps/nrSteps) * 100) 
     } 
     //@todo - impl showTrailingZeros in round function so we can set it to false
@@ -357,12 +358,15 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             const profileKpi = profileKpis.find(pKpi => pKpi.key === key);
             //WARNING - WHEN I REMOVE MOCK, KEEP THE [] AS DEFAULT
             const steps = profileKpi?.steps || [
-                {key:"1", desc:"Step 1", completed:true }, 
-                {key:"2", desc:"Step 2", completed:true},
-                {key:"3", desc:"Step 3", completed:true},
-                {key:"4", desc:"Step 4"},
+                {id:"step-1", desc:"Step 1", completed:true }, 
+                {id:"step-2", desc:"Step 2", completed:true},
+                {id:"step-3", desc:"Step 3", completed:true},
+                {id:"step-4", desc:"Step 4"},
             ];
-            //console.log("kpi key", key)
+            if(profile.id === "profile-5" && (key === "admin" || key === "pressUps-reps")){
+                //console.log("kpi key", key)
+                //console.log("steps", steps)
+            }
             
             //VALUES
             //helper
@@ -577,7 +581,7 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
                 .map(p => p.kpis.find(kpi => kpi.key === key).steps
                     .map(step => ({
                         milestoneId:p.id,
-                        name,
+                        kpiName:name,
                         datasetName,
                         statName,
                         ...step

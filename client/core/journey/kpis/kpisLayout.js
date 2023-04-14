@@ -145,6 +145,11 @@ export default function kpisLayout(){
                 }
             ]
             //@todo - put different comparisons into current card eg compared to club expectations, or all players avg
+            if(milestoneId === "profile-5" && (key === "admin" || key === "pressUps-reps")){
+                //console.log("kpi key", key)
+                //console.log("stepsValues", stepsValues)
+                //need to loko at why expected steps is 0
+            }
             const comparisonTooltipsData = isCurrent ? [] : [
                 { 
                     progressBarType:"steps",
@@ -155,9 +160,12 @@ export default function kpisLayout(){
                     shouldDisplay:(status, editing, displayFormat) => 
                         status === "open" && isFuture && isNumber(stepsValues.expected?.actual) && displayFormat === "steps", 
                     rowNr: 1, y: 1, current,
+                    //value is required on all tooltips for positioning - we want it to be positioned by completion %
                     value: stepsValues.expected?.completion, x:stepsValues.expected?.completion,
-                    actualStepsValue:stepsValues.expected?.actualSteps,
-                    current:stepsValues.current?.actual,
+                    unit:"%",
+                    //actual steps are used in this tooltip for comparison
+                    expectedActualSteps:stepsValues.expected?.actualSteps,
+                    currentActualSteps:stepsValues.current?.actualSteps,
                     dataOrder: "highest is best",
                     accuracy:2,
                     icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },

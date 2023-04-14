@@ -14,22 +14,6 @@ const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
 const AUTO_SCROLL_DURATION = TRANSITIONS.KPIS.AUTO_SCROLL.DURATION;
 
 const MAX_PROGRESS_BAR_HEIGHT = 100;
-
-
-const mockSteps = [
-    { id:"1", desc:"Step 1", complete:false },
-    { id:"2", desc:"Step 2", complete:false },
-    { id:"3", desc:"Step 3", complete:false },
-    { id:"4", desc:"Step 4", complete:false },
-    { id:"5", desc:"Step 5", complete:false },
-    { id:"6", desc:"Step 6", complete:false },
-    { id:"7", desc:"Step 7", complete:false },
-    { id:"8", desc:"Step 8", complete:false },
-    { id:"9", desc:"Step 9", complete:false },
-    { id:"10", desc:"Step 10", complete:false }
-  ]
-
-
 /*
 
 */
@@ -80,7 +64,6 @@ export default function kpiComponent() {
             const historyWidth = 110;
             const historyHeight = 15;
             const kpiInfoHeight = contentsHeight - titleDimns.height - progressBarHeight - historyHeight;
-            
             const progressBarMargin = { 
                 //@todo - decide if we need a margin when closed
                 left:status(d) === "open" ? 0 : progressBarWidth * 0, 
@@ -126,7 +109,13 @@ export default function kpiComponent() {
 
     //API CALLBACKS
     let onClick = function(){};
+
+    let onCreateStep = function(){};
     let onEditStep = function(){};
+    let onUpdateStep = function(){};
+    let onUpdateSteps = function(){};
+    let onDeleteStep = function(){};
+
     let onDblClick = function(){};
     let onDragStart = function(){};
     let onDrag = function() {};
@@ -279,8 +268,10 @@ export default function kpiComponent() {
                                     .margin({ left:0, right: 0, top:kpiInfoHeight * 0.1, bottom:kpiInfoHeight * 0.1 })
                                     .newItemDesc("Add Step")
                                     .onCreateItem(() => {
-                                        //console.log("create new step...")
+                                        onCreateStep(d.milestoneId, d.key)
                                     })
+                                    //.onUpdateItem(onUpdateStep)
+                                    //@todo - edit
                                     .onEditItem(function(id, dimns){
                                         const { translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                                         const _dimns = {
@@ -293,14 +284,32 @@ export default function kpiComponent() {
                                                 stepsAbove:translateY,
                                             }
                                         }
+
                                         onEditStep(id, _dimns)
                                     })
-                                    .onDeleteItem((id) => {
-                                        //console.log("delete step...", id)
+                                    .onUpdateItem(step => {
+                                        if(d.milestoneId === "current"){
+                                            //pass through the milestone that the step was actually created in
+                                            onUpdateStep(step.milestoneId, d.key, step)
+                                        }else{
+                                            onUpdateStep(d.milestoneId, d.key, step)
+                                        }
                                     })
-                                    .onToggleItemCompletion(id => {
-                                        //console.log("toggle compl", id)
-
+                                    .onUpdateItems(steps => {
+                                        if(d.milestoneId === "current"){
+                                            //pass through the milestone that the step was actually created in
+                                            onUpdateSteps(step.milestoneId, d.key, steps)
+                                        }else{
+                                            onUpdateSteps(d.milestoneId, d.key, steps)
+                                        }
+                                    })
+                                    .onDeleteItem(step => {
+                                        if(d.milestoneId === "current"){
+                                            //pass through the milestone that the step was actually created in
+                                            onDeleteStep(step.milestoneId, d.key, step.id)
+                                        }else{
+                                            onDeleteStep(d.milestoneId, d.key, step.id)
+                                        }
                                     }))
                         
                         kpiStepsG.exit().call(remove);
@@ -431,9 +440,29 @@ export default function kpiComponent() {
         onClick = value;
         return kpi;
     };
+    kpi.onCreateStep = function (value) {
+        if (!arguments.length) { return onCreateStep; }
+        onCreateStep = value;
+        return kpi;
+    };
     kpi.onEditStep = function (value) {
         if (!arguments.length) { return onEditStep; }
         onEditStep = value;
+        return kpi;
+    };
+    kpi.onUpdateStep = function (value) {
+        if (!arguments.length) { return onUpdateStep; }
+        onUpdateStep = value;
+        return kpi;
+    };
+    kpi.onUpdateSteps = function (value) {
+        if (!arguments.length) { return onUpdateSteps; }
+        onUpdateSteps = value;
+        return kpi;
+    };
+    kpi.onDeleteStep = function (value) {
+        if (!arguments.length) { return onDeleteStep; }
+        onDeleteStep = value;
         return kpi;
     };
     kpi.onDblClick = function (value) {

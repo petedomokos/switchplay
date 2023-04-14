@@ -15,6 +15,7 @@ import milestonesLayout from "./milestonesLayout";
 import milestonesBarComponent from "./milestonesBarComponent";
 import { DIMNS, FONTSIZES, grey10, JOURNEY_SETTINGS_INFO, OVERLAY, getURLForUser } from './constants';
 import { sortAscending, sortDescending } from '../../util/ArrayHelpers';
+import { createId } from './helpers';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -147,6 +148,12 @@ const useStyles = makeStyles((theme) => ({
 const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onUpdateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo, onSaveSetting, onSavePhoto }) => {
   const { media=[], player={}, profiles=[], contracts=[], settings=[] } = data;
   const allMilestones = [ ...profiles, ...contracts ];
+  const currentProfile = profiles.find(p => p.id === "current");
+  const allJourneySteps = currentProfile.kpis.map(kpi => kpi.steps).reduce((a,b) => [...a, ...b], []);
+  const allKpiSteps = (kpiKey, milestoneId) => {
+    const kpiSteps = currentProfile.kpis.find(kpi => kpi.key === kpiKey).steps;
+    return milestoneId ? kpiSteps.filter(s => s.milestoneId === milestoneId) : kpiSteps;
+  } 
   //console.log("MBar", kpiFormat)
   //local state
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
@@ -328,6 +335,29 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
     setForm(null);
   }, [form]);
 
+  const handleCreateStep = useCallback((milestoneId, kpiKey) => {
+    const updatedSteps = [
+      ...allKpiSteps(kpiKey, milestoneId),
+      { id:createId(allJourneySteps.map(s => s.id), "steps") }
+    ]
+    onUpdateMilestone(milestoneId, "steps", kpiKey, updatedSteps)
+  }, [allJourneySteps]);
+
+  const handleUpdateStep = useCallback((milestoneId, kpiKey, updatedStep) => {
+    const updatedSteps = allKpiSteps(kpiKey, milestoneId)
+      .map(step => step.id === updatedStep.id ? updatedStep : step);
+    onUpdateMilestone(milestoneId, "steps", kpiKey, updatedSteps)
+  }, [allJourneySteps]);
+
+  const handleUpdateSteps = useCallback((milestoneId, kpiKey, updatedSteps) => {
+    onUpdateMilestone(milestoneId, "steps", kpiKey, updatedSteps)
+  }, [allJourneySteps]);
+
+  const handleDeleteStep = useCallback((milestoneId, kpiKey, stepId) => {
+    const updatedSteps = allKpiSteps(kpiKey, milestoneId).filter(step => step.id !== stepId);
+    onUpdateMilestone(milestoneId, "steps", kpiKey, updatedSteps)
+  }, [allJourneySteps]);
+
   //init
   //decide what needs to update on setSelectedMilestone, and only have that inteh depArray 
   //or alternatively only have that processed in milestoneslayout/kpiLayout
@@ -403,6 +433,10 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
           //addProfile
         //}
       //})
+      .onCreateStep(handleCreateStep)
+      .onUpdateStep(handleUpdateStep)
+      .onUpdateSteps(handleUpdateSteps)
+      .onDeleteStep(handleDeleteStep)
       .setForm(newForm => {
         //todo - handle if current - value is not set, and also may need the key??
         if(!newForm){ milestonesBar.updateDatesShown(allMilestones); }

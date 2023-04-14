@@ -40,6 +40,7 @@ export default function progressBarComponent() {
             //console.log("kpiD", kpiD)
             //each d is a milestone
             const tooltipsData = kpiD.tooltipsData.filter(d => d.shouldDisplay(status, editing, displayFormat));
+            //console.log("dispFormat", displayFormat)
             //we dont want editing toggling to affect positions, so we fix editing to be false here,
             //even though the numbersData in the render function removes the number
             const numbersData = kpiD.numbersData.filter(d => d.shouldDisplay(status, false, displayFormat));

@@ -102,7 +102,13 @@ export default function profileCardsComponent() {
     let onDelete = function() {};
     let onSaveValue = function(){};
     let onUpdateSelectedKpi = function(){};
+
+    let onCreateStep = function(){};
     let onEditStep = function(){};
+    let onUpdateStep = function(){};
+    let onUpdateSteps = function(){};
+    let onDeleteStep = function(){};
+
     let onStartEditingPhotoTransform = function(){};
     let onEndEditingPhotoTransform = function(){};
     let onSetEditing = function(){};
@@ -324,6 +330,7 @@ export default function profileCardsComponent() {
                                 }
                                 onUpdateSelectedKpi(profileId, kpiKey, _dimns);
                             })
+                            .onCreateStep(onCreateStep)
                             .onEditStep((id, dimns) => {
                                 //console.log("editStep selcetdProfile", selected)
                                 //assume only one selected milestone
@@ -339,7 +346,18 @@ export default function profileCardsComponent() {
                                 }
                                 onEditStep(id, _dimns)
                             })
-                            .onCtrlClick(onCtrlClick)
+                            .onUpdateStep(onUpdateStep)
+                            .onUpdateSteps(onUpdateSteps)
+                            .onDeleteStep(onDeleteStep)
+                            .onCtrlClick(function(newDisplayFormat){
+                                data.filter(profile => profile.id !== d.id).forEach(p => {
+                                    kpisComponents[p.id].displayFormat(newDisplayFormat);
+                                })
+                                //trigger update across all cards
+                                containerG.call(profileCards)
+                                //pass to parent
+                                onCtrlClick(newDisplayFormat);
+                            })
                             .onSaveValue((valueObj, profileId, datasetKey, statKey, key) => {
                                 //if profileid is current, swap it for the first future profile
                                 const requiredProfileId = profileId === "current" ? data.find(p => p.isFuture).id : profileId;
@@ -1055,10 +1073,30 @@ export default function profileCardsComponent() {
         }
         return profileCards;
     };
+    profileCards.onCreateStep = function (value) {
+        if (!arguments.length) { return onCreateStep; }
+        onCreateStep = value;
+        return profileCards;
+    };
     profileCards.onEditStep = function (value) {
         if(typeof value === "function"){
             onEditStep = value;
         }
+        return profileCards;
+    };
+    profileCards.onUpdateStep = function (value) {
+        if (!arguments.length) { return onUpdateStep; }
+        onUpdateStep = value;
+        return profileCards;
+    };
+    profileCards.onUpdateSteps = function (value) {
+        if (!arguments.length) { return onUpdateSteps; }
+        onUpdateSteps = value;
+        return profileCards;
+    };
+    profileCards.onDeleteStep = function (value) {
+        if (!arguments.length) { return onDeleteStep; }
+        onDeleteStep = value;
         return profileCards;
     };
     profileCards.applyOverlay = function(selection, options={}){

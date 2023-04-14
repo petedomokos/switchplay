@@ -8,7 +8,7 @@ function dateIsValid(date) {
 }
 
 const transformJourneyForServer = journey => {
-	console.log("transformJourneyForServer", journey)
+	//console.log("transformJourneyForServer", journey)
 	const { playerId, coachId, media, name="", desc="" } = journey;
 	//dont think we need to store anything on channels, or could just be the setting "monthly"
 	//if we want to persist the users last zoom level. Or maybe just preserve the zoom level then?
@@ -34,7 +34,15 @@ const transformJourneyForServer = journey => {
 				yPC:p.yPC,
 				customTargets:p.customTargets,
 				customExpected:p.customExpected,
-				kpis:p.kpis
+				//kpis are not stored on server - so mayebe they shouldnt be here - but really we shouldnt be 
+				//converting profiles unto server version for the store, as its inefficient as hydrateJourney is 
+				//being performed fully on every update
+				kpis:p.kpis,
+				profileKpis:p.kpis.map(kpi => ({ 
+					//kpis are currently stored on front-end so just the kpiKey is needed to identify what kpi the steps are for
+					key:kpi.key,
+					steps:kpi.steps.map(step => ({ id:step.id, desc:step.desc, completed:step.completed }))
+				}))
 			};
 			return profile;
 		});
@@ -174,6 +182,7 @@ export const saveJourney = (journey, shouldPersist=true, shouldUpdateStoreBefore
 	//@todo - clarify the pattern im using -> ie server is saem as store?
 	dispatch(saveJourneyToStore(serverJourney));
 	if(!shouldPersist){ return; }
+	return;
     //2. save to server
     //3. on response, undo if errors, add id (if new) or anything else from server to store
 	//const serverJourney = transformJourneyForServer(journey);
