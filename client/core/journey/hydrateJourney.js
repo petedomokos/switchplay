@@ -21,7 +21,7 @@ const targetIsAchieved = (value, target, order) => {
 
 export function hydrateJourneyData(data, user, datasets){
     const now = new Date();
-    //console.log("hydrateJourneyData", data)
+    console.log("hydrateJourneyData", data)
     const player = user.player;
     const nonCurrentProfiles = data.profiles.filter(p => p.id !== "current");
 
@@ -357,12 +357,12 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
 
             const profileKpi = profileKpis.find(pKpi => pKpi.key === key);
             //WARNING - WHEN I REMOVE MOCK, KEEP THE [] AS DEFAULT
-            const steps = profileKpi?.steps || [
+            const steps = profileKpi?.steps || []/*
                 {id:"step-1", desc:"Step 1", completed:true }, 
                 {id:"step-2", desc:"Step 2", completed:true},
                 {id:"step-3", desc:"Step 3", completed:true},
                 {id:"step-4", desc:"Step 4"},
-            ];
+            ];*/
             if(profile.id === "profile-5" && (key === "admin" || key === "pressUps-reps")){
                 //console.log("kpi key", key)
                 //console.log("steps", steps)

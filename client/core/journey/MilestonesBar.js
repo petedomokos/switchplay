@@ -336,10 +336,18 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
   }, [form]);
 
   const handleCreateStep = useCallback((milestoneId, kpiKey) => {
+    //temp so we see a desc
+    const id = createId(allJourneySteps.map(s => s.id), "steps");
     const updatedSteps = [
       ...allKpiSteps(kpiKey, milestoneId),
-      { id:createId(allJourneySteps.map(s => s.id), "steps") }
+      { id, desc:id }
     ]
+    /*
+    const updatedSteps = [
+      ...allKpiSteps(kpiKey, milestoneId),
+      { id:createId(allJourneySteps.map(s => s.id), "steps"), }
+    ]
+    */
     onUpdateMilestone(milestoneId, "steps", kpiKey, updatedSteps)
   }, [allJourneySteps]);
 
@@ -350,6 +358,7 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
   }, [allJourneySteps]);
 
   const handleUpdateSteps = useCallback((milestoneId, kpiKey, updatedSteps) => {
+    console.log("updateSteps.........", updatedSteps)
     onUpdateMilestone(milestoneId, "steps", kpiKey, updatedSteps)
   }, [allJourneySteps]);
 

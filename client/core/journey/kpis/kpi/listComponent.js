@@ -232,12 +232,21 @@ export default function listComponent() {
             let prospectivePosition;
             let initDraggedPos;
             const posYPairs = [...data.map((d,i) => [i, i * itemHeight]), [data.length, data.length * itemHeight]];
+
+            let initPos;
+            const calcDeltaX = e => Math.round(Math.abs(e.x - initPos?.x));
+            const calcDeltaY = e => Math.round(Math.abs(e.y - initPos?.y));
+            let isHorizSwipe = false;
+            let deltaXMax = 0;
+            let deltaYMax = 0;
             function longpressStart(e , d){
                 //console.log("lp start")
+                console.log("lpstart x,y", Math.round(e.x), Math.round(e.y))
                 if(d.id === "newItem"){
                     createNewItem();
                     return;
                 }
+                initPos = e;
                 d3.select(this).raise();
                 d3.select(this).select("rect.item-bg").attr("stroke", "aqua");
                 initDraggedPos = getTransformationFromTrans(d3.select(this).attr("transform")).translateY;
@@ -261,14 +270,37 @@ export default function listComponent() {
             let itemGAfterOrigTransform;
             */
             function longpressDragged(e , d){
+                //console.log("x,y", Math.round(e.x), Math.round(e.y))
+                const deltaX = calcDeltaX(e);
+                const deltaY = calcDeltaY(e);
+                if(deltaX > deltaXMax){ deltaXMax = deltaX; }
+                if(deltaY > deltaYMax){ deltaYMax = deltaY; }
+
+                //console.log("deltaX", deltaXMax,"deltaY", deltaYMax)
                 if(d.id === "newItem"){ return; }
                 if(deleteTriggered){ 
-                    console.log("drg....delete already trg!!!!!!!!!!!!!!!!!!!!!")
+                    //console.log("deleteAlreadyTrg")
                     return; 
                 }
-                //console.log("lpDragged initPos", console.log("initDraggedPos", initDraggedPos))
                 const itemG = d3.select(this);
-                const { translateY } = getTransformationFromTrans(itemG.attr("transform"));
+                const { translateX, translateY } = getTransformationFromTrans(itemG.attr("transform"));
+
+                if(isHorizSwipe || (deltaXMax > deltaYMax && deltaYMax < 5 && deltaXMax > 20)){
+                    isHorizSwipe = true;
+                    //@todo - transform on x axis, and put y back to where to was in case its move a bit, then put it all back in dragEnd if not deleted
+                    //console.log("hoz")
+                    if(deltaX > itemWidth/2){
+                        //console.log("delete----------------------")
+                        deleteTriggered = true;
+                        deleteItem(d);
+                        return;
+                    }
+                    const newX = translateX + e.dx
+                    itemG.attr("transform", `translate(${newX},${translateY})`);
+                    return;
+                }
+                //console.log("lpDragged initPos", console.log("initDraggedPos", initDraggedPos))
+               
                 const newY = translateY + e.dy
                 //console.log("newY", newY)
                 itemG.attr("transform", `translate(0, ${newY})`);
@@ -278,11 +310,12 @@ export default function listComponent() {
                 const standardDeletionDragSpeedReached = enhancedDrag.distanceDragged() > 200 && enhancedDrag.avgSpeed() > 0.08;
                 const draggedFarAwayFromList = Math.abs(distanceToNearestSlot) > 5 * itemHeight;
                 if(draggedFarAwayFromList || standardDeletionDragSpeedReached){
-                    console.log("setting delete to triggered!!!!!!!!!!!")
+                    //console.log("setting delete to triggered!!!!!!!!!!!")
                     deleteTriggered = true;
                     deleteItem(d);
                 }
                 /*
+                //@todo - fix this animaiton to show the prospective order change
                 if(prospectivePosition !== prevProspectivePosition){
                     //reset old
                     if(itemGBefore){
@@ -329,13 +362,22 @@ export default function listComponent() {
                     deleteTriggered = false;
                     return; 
                 }
+                if(isHorizSwipe){
+                    console.log("PUT IT BACK!!!!!!!!!!!!!!!!!!!!");
+                    isHorizSwipe = false;
+                    return;
+                    //didnt swipe enough to delete - need to put back
+                    //@todo - ---put it back i think
+                }
                 d3.select(this).select("rect.item-bg").attr("stroke", "none");
                 //re-order the data and update
                 const itemsBeforeNewPos = data.slice(0, prospectivePosition + 1).filter(it => it.id !== d.id);
                 const itemsAfterNewPos = data.slice(prospectivePosition + 1, data.length).filter(it => it.id !== d.id);
                 const updatedData = [...itemsBeforeNewPos, d, ...itemsAfterNewPos];
-                console.log("updateddata", updatedData)
+                //console.log("updateddata", updatedData)
                 selection.data([updatedData]).call(list)
+                //persist
+                onUpdateItems(updatedData)
 
                 //if(enhancedDrag.isClick()) { return; }
             }
