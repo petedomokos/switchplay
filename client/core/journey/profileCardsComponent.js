@@ -411,33 +411,23 @@ export default function profileCardsComponent() {
                         
                         const innerContentsG = contentsG.select("g.profile-card-inner-contents")
 
-                        const getStrokeWidth = status => {
-                            if(status === "fullyOnTrack"){
-                                return 10; 
-                            }
-                            if(status === "mostlyOnTrack"){
-                                return 5;
-                            }
-                            return 0;
-                        }
-                        const currentColorSchemeOrange = "#D4AF37"
+                        //status
+                        //const currentColorSchemeOrange = "#D4AF37"
                         const lightGold = "#c9b037";
-                        const darkGold = "#af9500"
+                        //const darkGold = "#af9500"
                         const lightSilver = "#d7d7d7";
-                        const darkSilver = "b4b4b4";
-
+                        //const darkSilver = "b4b4b4";
                         const gold = lightGold;
                         const silver = lightSilver;
-
-                        const getStroke = status => {
-                            if(status === "fullyOnTrack"){
-                                return gold; 
-                            }
-                            if(status === "mostlyOnTrack"){
-                                return silver;
-                            }
-                            return "none";
+                        const stroke = {
+                            "fullyAchieved":{ stroke:gold, strokeWidth:15 },
+                            "fullyOnTrack":{ stroke:gold, strokeWidth:10 },
+                            "mostlyOnTrack":{ stroke:silver, strokeWidth:10 },
+                            "partlyOnTrack":{ stroke:silver, strokeWidth:2.5 },
+                            "offTrack":{ stroke:"none", strokeWidth:0 },
+                            "severelyOffTrack":{ stroke:"none", strokeWidth:0 }
                         }
+
                         //rect sizes
                         innerContentsG.selectAll("rect.profile-card-bg")
                             .attr("width", contentsWidth)
@@ -452,8 +442,8 @@ export default function profileCardsComponent() {
                         contentsG.selectAll("rect.profile-card-border")
                             .attr("width", contentsWidth)
                             .attr("height", contentsHeight)
-                            .attr("stroke-width", getStrokeWidth(d.onTrackStatus))
-                            .attr("stroke", getStroke(d.onTrackStatus))
+                            .attr("stroke-width", stroke[d.profileProgressInfo?.status]?.strokeWidth || 0)
+                            .attr("stroke", stroke[d.profileProgressInfo?.status]?.stroke || "none")
                             .call(updateFill, { fill:d => "none", transition:{ duration: 300 } })
                             .attr("filter", "url(#shine)")
                             

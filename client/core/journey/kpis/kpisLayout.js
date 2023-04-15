@@ -12,12 +12,11 @@ export default function kpisLayout(){
     let noKpisActive = false;
 
     function update(data){
-        //console.log("update kpisLayout------")
         //flag
         const nrDatasetKpis = data.filter(kpi => kpi.datasetKey).length;
         const kpisData = data.map((kpi,i) => {
             const { key, values, accuracy, order, isPast, isCurrent, isFuture,isActive, milestoneId, datasetKey, statKey,
-                steps=[], stepsValues, allSteps=[] } = kpi;
+                steps=[], stepsValues, allSteps=[], statProgressStatus, stepsProgressStatus } = kpi;
 
             //if(kpi.datasetKey === "pressUps"){
                 //console.log("milestoneId kpi", milestoneId, kpi)
@@ -45,6 +44,9 @@ export default function kpisLayout(){
             //if(milestoneId === "profile-5" && kpi.datasetKey === "shuttles"){
                 //console.log("milestoneId dset", milestoneId, datasetKey)
             //}
+            if(milestoneId === "profile-5" && key === "longJump-distance-left"){
+                //console.log("kpi", kpi)
+            }
 
             //Bar datums
             const dataStart = order === "highest is best" ? min : max;
@@ -107,6 +109,7 @@ export default function kpisLayout(){
                     key:"start", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
                     shouldDisplay:(status, editing, displayFormat) => status === "open" && displayFormat !== "steps",
+                    location:"below",
                     rowNr: -1, y: -1,
                     value: barStart, x:barStart,
                     fullScaleValue:dataStart,
@@ -121,6 +124,7 @@ export default function kpisLayout(){
                     key:"end", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
                     shouldDisplay:(status,editing, displayFormat) => status === "open" && displayFormat !== "steps",
+                    location:"below",
                     rowNr: -1, y: -1,
                     value: barEnd, x:barEnd,
                     fullScaleValue:dataEnd, 
@@ -136,6 +140,7 @@ export default function kpisLayout(){
                     key:"currentValue", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all so no expected
                     shouldDisplay:(status, editing, displayFormat) => editing?.desc === "target" && displayFormat !== "steps",
+                    location:"below",
                     rowNr: -1, y: -1,
                     value: current, x:current,
                     accuracy,
@@ -147,28 +152,76 @@ export default function kpisLayout(){
             //@todo - put different comparisons into current card eg compared to club expectations, or all players avg
             if(milestoneId === "profile-5" && (key === "admin" || key === "pressUps-reps")){
                 //console.log("kpi key", key)
-                //console.log("stepsValues", stepsValues)
+                //console.log("stepsValues-----------------------------------", stepsValues)
+                //console.log("prog stepPro", progressStatus, stepsProgressStatus)
                 //need to loko at why expected steps is 0
             }
+
+            const getProgressIcon = status => {
+                if(status === "fullyAchieved"){ return }
+                if(status === "fullyOnTrack"){ return }
+                if(status === "mostlyOnTrack"){ return }
+                if(status === "partlyOnTrack"){ return }
+                if(status === "offTrack"){ return }
+                if(status === "severelyOffTrack"){ return }
+                return emptyGoal;
+            }
+
             const comparisonTooltipsData = isCurrent ? [] : [
+                { 
+                    progressBarType:"dataset",
+                    tooltipType:"comparison",
+                    key:"stepsProgress", milestoneId, kpiKey:key, datasetKey, statKey,
+                    shouldDisplay:(status, editing, displayFormat) => status === "closed" && displayFormat !== "stats", 
+                    location:"end",
+                    position:1,
+                    rowNr: 1, y: 1, current,
+                    status:stepsProgressStatus,
+                    icons: { achieved: ball, onTrack: shiningCrystalBall, offTrack: nonShiningCrystalBall, noTarget:emptyGoal },
+                    editable:false,//isCurrent || isFuture,
+                    withDragValueAbove:true,
+                    withInnerValue:true,
+                },
+                { 
+                    progressBarType:"dataset",
+                    tooltipType:"comparison",
+                    key:"statProgress", milestoneId, kpiKey:key, datasetKey, statKey,
+                    shouldDisplay:(status, editing, displayFormat) => status === "closed" && displayFormat !== "steps", 
+                    location:"end",
+                    position:2,
+                    rowNr: 1, y: 1, current,
+                    status:statProgressStatus,
+                    icons: { achieved: ball, onTrack: shiningCrystalBall, offTrack: nonShiningCrystalBall, noTarget:emptyGoal },
+                    editable:false,//isCurrent || isFuture,
+                    withDragValueAbove:true,
+                    withInnerValue:true,
+                },
                 { 
                     progressBarType:"steps",
                     tooltipType:"comparison",
                     key:"expectedSteps", milestoneId, kpiKey:key, datasetKey, statKey,
                     //temp disable when its an endTooltip
                     //dont display if past or no future profiles
+                    //note - if no steps, then target will be 0 so this wont show
                     shouldDisplay:(status, editing, displayFormat) => 
-                        status === "open" && isFuture && isNumber(stepsValues.expected?.actual) && displayFormat === "steps", 
-                    rowNr: 1, y: 1, current,
+                        status === "open" && isFuture && !!stepsValues.target.actual && isNumber(stepsValues.expected?.actual) 
+                        //note - if there is no expected value for stats, then we show this even if displayFornat isnt steps-only
+                        //but if there is an expected value for stats, tehn we show that instead - as long as expected progress is linear, then it will be in same pos anyway
+                        //&& (displayFormat === "steps" || (displayFormat === "both" && !isNumber(expected))),
+                        && displayFormat !== "stat", 
+                    location:"below",
+                    rowNr: -1, y: 1, current,
                     //value is required on all tooltips for positioning - we want it to be positioned by completion %
-                    value: stepsValues.expected?.completion, x:stepsValues.expected?.completion,
-                    unit:"%",
+                    value: stepsValues.expected?.actualSteps, x:stepsValues.expected?.completion,
                     //actual steps are used in this tooltip for comparison
                     expectedActualSteps:stepsValues.expected?.actualSteps,
                     currentActualSteps:stepsValues.current?.actualSteps,
                     dataOrder: "highest is best",
                     accuracy:2,
-                    icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },
+                    //@todo - maybe we only show the expected icons here, so if achieved, we still show just the shining crystal ball
+                    status:stepsProgressStatus,
+                    icons: { achieved: shiningCrystalBall, onTrack: shiningCrystalBall, offTrack: nonShiningCrystalBall, noTarget:nonShiningCrystalBall },
+                    //icons: { achieved: ball, onTrack: shiningCrystalBall, offTrack: nonShiningCrystalBall, noTarget:emptyGoal },
                     editable:false,//isCurrent || isFuture,
                     withDragValueAbove:true,
                     withInnerValue:true,
@@ -181,6 +234,7 @@ export default function kpisLayout(){
                     //temp disable when its an endTooltip
                     //dont display if past or no future profiles
                     shouldDisplay:(status, editing, displayFormat) => status === "open" && isFuture && isNumber(expected) && displayFormat !== "steps", 
+                    location:"above",
                     rowNr: 1, y: 1, current,
                     value: expected, x:expected,
                     dataOrder: order,
@@ -196,8 +250,10 @@ export default function kpisLayout(){
                     tooltipType:"comparison",
                     key:"target", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all
-                    shouldDisplay:(status, editing, displayFormat) => !!editing && displayFormat !== "steps",
-                    rowNr: -1, y: -1, current,
+                    shouldDisplay:(status, editing, displayFormat) =>  status === "open" && !!editing && displayFormat !== "steps",
+                    location:"above",
+                    rowNr: 1, y: 1, current,
+                    //rowNr: -1, y: -1, current,
                     value:typeof target === "number" ? target : dataEnd, 
                     x:typeof target === "number" ? target : dataEnd, 
                     dataOrder: order,
@@ -217,6 +273,7 @@ export default function kpisLayout(){
                 key:"current", milestoneId, kpiKey:key, datasetKey, statKey,
                 shouldDisplay:(status, editing, displayFormat) => !isPast && status === "open" && displayFormat !== "steps",
                 label: values.achieved ? "Achieved" : "Current",
+                location:"on",
                 rowNr:0, y:0,
                 value:current,
                 fill:grey10(3),

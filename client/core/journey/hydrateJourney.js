@@ -9,15 +9,27 @@ import { pcCompletion } from "../../util/NumberHelpers"
 import { isNumber } from '../../data/dataHelpers';
 import { JOURNEY_SETTINGS, JOURNEY_SETTINGS_INFO, createFutureProfile } from './constants';
 import { getBandsAndStandards } from "../../data/bandsAndStandards";
+import { getProfileStatusInfo } from './profileStatus';
 
 //helper
-const targetIsAchieved = (value, target, order) => {
-    if(typeof value?.actual !== "number" || typeof target?.actual !== "number"){ return false; }
-    if(order === "highest is best"){ 
-        return value.actual >= target.actual 
+const requiredValueIsAchieved = (value, required, options={}) => {
+    const { order="highest is best", log, useSteps } = options;
+    if(log){ 
+        //console.log("tia..val", value)
+        //console.log("tia..req", required)
     }
-    return value.actual <= target.actual;
+    if(!isNumber(value?.actual) || !isNumber(required?.actual)){ return false; }
+    if(order === "highest is best"){ 
+        if(log){
+            //console.log("res", useSteps ? value.actual >= required.actualSteps : value.actual >= required.actual )
+        }
+        return useSteps ? value.actual >= required.actualSteps : value.actual >= required.actual 
+    }
+    return value.actual <= required.actual;
 }
+
+const targetIsAchieved = (values, options) => requiredValueIsAchieved(values.current, values.target, options);
+const expectedIsAchieved = (values, options) => requiredValueIsAchieved(values.current, values.expected, options);
 
 export function hydrateJourneyData(data, user, datasets){
     const now = new Date();
@@ -82,25 +94,20 @@ export function hydrateJourneyData(data, user, datasets){
     const futureProfiles = hydratedProfiles.filter(p => p.isFuture).map((p,i) => ({ ...p, nr:i + 1 }));
 
     const allProfiles = [ ...pastProfiles, currentProfile, ...futureProfiles];
-    //onTrackStatus
-    const onlyIncludeKpisWithTargets = settings.find(s => s.key === "onTrackStatusOnlyIncludesKpisWithTargets")?.value
+
     const enrichedProfiles = allProfiles.map(p => {
-        const kpisToInclude = onlyIncludeKpisWithTargets  ? p.kpis.filter(kpi => kpi.onTrackStatus) : p.kpis;
-        const pcKpisOnTrack = kpisToInclude.length === 0 ? 0 : Math.round((kpisToInclude.filter(kpi => kpi.onTrackStatus === "onTrack").length / kpisToInclude.length) * 100);
+        //profileProgressStatus
+        const onlyIncludeKpisWithTargets = settings.find(s => s.key === "progressStatusOnlyIncludesKpisWithTargets")?.value
+        const profileProgressInfo = p.id === "current" ? undefined : getProfileStatusInfo(p, { onlyIncludeKpisWithTargets })
+
         return {
             ...p,
             playerAge:calcAge(player.dob, p.date),
             goalPhotoLabel:p.goalPhotoLabel || "goal-default",
             profilePhotoLabel:p.profilePhotoLabel || (p.isCurrent ? "main" : "profile-default"),
-            pcKpisOnTrack,
-            onTrackStatus: pcKpisOnTrack === 100 ? "fullyOnTrack" : 
-                (pcKpisOnTrack >= 75 ? "mostlyOnTrack" : 
-                (pcKpisOnTrack >= 50 ?"partlyOnTrack" : 
-                "offTrack"))
+            profileProgressInfo,
         }
     })
-    //console.log("enriched", enrichedProfiles)
-        //.map(p => addExpected(p, currentProfile));
 
     return {
         //for now, asume all users are players
@@ -161,7 +168,11 @@ function getLastSessionDate(datasets){
 function calcStepsValues(startDate, date, steps=[]){
     const nrSteps = steps.length;
     const start = { actual:0, completion:0, date:startDate };
-    const target = { actual:nrSteps, completion:100 };
+    const target = { 
+        actual:nrSteps,
+        actualSteps:nrSteps, 
+        completion:100 
+    };
     const nrCompletedSteps = steps.filter(s => s.completed).length;
     const current = { 
         actual:nrCompletedSteps,
@@ -378,6 +389,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //add accuracy to teh stat - note that the stat has only stable metadata, whereas the kpi
             //is dependent on context, so level of accuracy to display is defined in kpi not stat
             const stat = { ...dataset?.stats.find(s => s.key === statKey), accuracy };
+            const { order } = stat;
 
             const getValue = getValueForStat(stat.key, stat.accuracy);
             //@todo - pass these dateValue pairs into calCurrent so not repeating work
@@ -436,8 +448,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 current = calcCurrent(stat, datapoints, dateRange, achievedValueDataMethod, start, target); 
             }
             else if(currentValueDataMethod !== "specificSession"){
-                const log = profile.id === "profile-5" && datasetKey === "pressUps";
-                current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod, start, target, log);
+                current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod, start, target);
             }else{
                 //it must be a future card and current value is based purely on a specificSession
                 current = getValueForSession(stat, datapoints, specificDate, start, target)
@@ -447,23 +458,58 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //note prevProfile has already been processed with a full key and values
             let expected = isPast ? null : calcExpected(start, { date, ...target }, now, { accuracy });
 
-            let onTrackStatus;
-            if(isPast && target?.actual){
-                onTrackStatus = targetIsAchieved(achieved, target, stat.order) ? "onTrack" : "offTrack";
-            }else if(expected?.actual){
-                onTrackStatus = targetIsAchieved(current, expected, stat.order) ? "onTrack" : "offTrack";
+            const values = {
+                //min/max are just values
+                min, max, start, current, expected, achieved, target, //proposedTarget,
+            }
+
+            //statProgressStatus is either achieved, onTrack, offTrack, or undefined
+            let statProgressStatus;
+            if(!isNumber(target.actual)){
+                statProgressStatus = "noTarget";
+            } else if(isPast){
+                statProgressStatus = targetIsAchieved(values, { order }) ? "achieved" : "notAchieved";
+            } else {
+                //future
+                if(targetIsAchieved(values, { order })){
+                    statProgressStatus = "achieved";
+                }else if(expectedIsAchieved(values, { order })){
+                    statProgressStatus = "onTrack";
+                }else {
+                    //note - no data will also mean offTrack
+                    statProgressStatus = "offTrack";
+                }
             }
 
             //steps
+            const log = false;//milestoneId === "profile-5" && key === "longJump-distance-left";
             const stepsValues = calcStepsValues(profileStart.date, date, steps);
-            let stepsOnTrackStatus;
-            if(steps?.length !== 0){
-                if(isPast && target?.actual){
-                    stepsOnTrackStatus = targetIsAchieved(stepsValues.achieved, stepsValues.target) ? "onTrack" : "offTrack";
-                }else if(expected?.actual){
-                    stepsOnTrackStatus = targetIsAchieved(stepsValues.current, stepsValues.expected) ? "onTrack" : "offTrack";
-                }
+            if(log){
+                console.log("kpi...............................", key)
+                //console.log("steps", steps)
+                //console.log("stepsValues", stepsValues)
             }
+            let stepsProgressStatus;
+            if(steps?.length === 0){
+                //if(log){ console.log("set no target-----")}
+                stepsProgressStatus = "noTarget"
+            }else if(isPast){
+                //if(log){ console.log("set past card-----???")}
+                stepsProgressStatus = targetIsAchieved(stepsValues, { useSteps:true, log }) ? "achieved" : "notAchieved";
+            }else{
+                //future
+                if(targetIsAchieved(stepsValues, { useSteps:true, log })){
+                    //if(log){ console.log("set achieved-----")}
+                    stepsProgressStatus = "achieved";
+                }else if(expectedIsAchieved(stepsValues, { useSteps:true, log })){
+                    //if(log){ console.log("set onTrack------")}
+                    stepsProgressStatus = "onTrack";
+                }else{
+                    //if(log){ console.log("set offTrack-------")}
+                    stepsProgressStatus = "offTrack";
+                };
+            }
+
             return {
                 ...kpi, key, milestoneId,
                 //dates
@@ -474,12 +520,9 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 isPast, isCurrent, isFuture, isActive,
                 lastDataUpdate,
                 //values
-                values:{
-                    //min/max are just values
-                    min, max, start, current, expected, achieved, target, //proposedTarget,
-                },
-                onTrackStatus,
-                order:stat.order,
+                values,
+                statProgressStatus,
+                order,
                 accuracy,
                 //other info
                 datasetName:dataset?.name || "",
@@ -487,7 +530,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 unit:stat?.unit || "",
                 steps,
                 stepsValues,
-                stepsOnTrackStatus
+                stepsProgressStatus
             }
         })
     }
@@ -538,7 +581,7 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
         id:"current", isCurrent:true, dataType:"profile",
         kpis:kpis.map((kpi,i) => {
             //console.log("kpi...", kpi)
-            const { datasetKey, statKey, name, min, max, values, accuracy, key, stepsValues, stepsOnTrackStatus } = kpi;
+            const { datasetKey, statKey, name, min, max, accuracy, key } = kpi;
             const milestoneId = "current";
             
             const dataset = datasets.find(dset => dset.key === datasetKey);
@@ -552,24 +595,15 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
 
             const lastDataUpdate = d3.max(dateValuePairs, d => d[0]);
             //START & END
-            //@todo - if user has given a fixed startTime for a profile, then get value at that point
-            const prevAchieved = lastPastProfile?.kpis.find(kpi => kpi.key === key)?.values.achieved;
-
-            const expected = activeProfileValues(kpi)?.expected;
-            const target = activeProfileValues(kpi)?.target;
             const start = activeProfileValues(kpi)?.start;
             let current;
             if(currentValueDataMethod !== "specificSession"){
-                current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod, start, target);
+                current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod, start);
             }else{
                 //it must be a future card and current value is based purely on a specificSession
                 current = getValueForSession(stat, datapoints, specificDate)
             }
-            //status may be different to activeProfile status as current may be different
-            let onTrackStatus;
-            if(expected?.actual){
-                onTrackStatus = targetIsAchieved(current, expected, stat.order) ? "onTrack" : "offTrack";
-            }
+
             //names
             const datasetName = dataset?.name || "";
             const statName = stat?.name || "";
@@ -603,18 +637,16 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
                 values:{
                     //min/max just values
                     min, max,
-                    expected,
-                    target,
+                    //expected,
+                    //target,
                     current
                 },
-                onTrackStatus,
                 //other info
                 datasetName,
                 statName,
                 unit:stat?.unit || "",
                 steps,
-                stepsValues,
-                stepsOnTrackStatus,
+                //stepsValues,
             }
         })
     }

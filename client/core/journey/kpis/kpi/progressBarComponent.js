@@ -38,7 +38,7 @@ export default function progressBarComponent() {
 
         return kpisData.forEach((kpiD,i) => {
             //console.log("kpiD", kpiD)
-            //each d is a milestone
+            //each d is a milestone 
             const tooltipsData = kpiD.tooltipsData.filter(d => d.shouldDisplay(status, editing, displayFormat));
             //console.log("dispFormat", displayFormat)
             //we dont want editing toggling to affect positions, so we fix editing to be false here,
@@ -57,7 +57,7 @@ export default function progressBarComponent() {
             const contentsHeight = height - margin.top - margin.bottom;
 
             const MAX_BAR_HEIGHT = 25;
-            const vertSpaceForTooltips = contentsHeight - MAX_BAR_HEIGHT;
+            const vertSpaceForTooltips = d3.max([0,contentsHeight - MAX_BAR_HEIGHT]);
             const expectedTooltipOpenHeight = vertSpaceForTooltips * 0.55;
             const targetTooltipOpenHeight = vertSpaceForTooltips * 0.45;
 
@@ -66,26 +66,34 @@ export default function progressBarComponent() {
 
             const expectedTooltipOpenWidth = expectedTooltipOpenHeight / expectedTooltipAspectRatio;
             const targetTooltipOpenWidth = targetTooltipOpenHeight / targetTooltipAspectRatio;
-
-            const endTooltipsHeight = status === "closed" ? contentsHeight : 0;
-            const endToolTipsMarginLeft = status === "closed"? 10 : 0;
             
             //we want expecetd icon to be a bit bigger due to its circular shape
             const expectedMultiplier = 1.3;
             const boundsMultiplier = 0.6;
             const boundsFontMultiplier = 1;
-            //end tooltips
-            const nrEndTooltips = tooltipsData.filter(t => t.tooltipType === "comparison").length;
-            const endExpectedTooltipWidth = (endTooltipsHeight) / expectedTooltipAspectRatio;
-            const endTargetTooltipWidth = endTooltipsHeight / targetTooltipAspectRatio;
-            const endTooltipsWidth = nrEndTooltips === 0 ? 0 : endExpectedTooltipWidth + endTargetTooltipWidth + endToolTipsMarginLeft;
+            //end tooltips - these will all be the same
+            const endTooltipAspectRatio = 1;
+            const extraSpaceBeforeTooltips = status === "closed" && kpiD.milestoneId !== "current" ? 10 : 0;
+            //width is based on height, because height must be same as contentsHeight
+            const endTooltipsHeight = status === "closed" ? contentsHeight : 0;
+
+            const endTooltipHeight = endTooltipsHeight;
+            const endTooltipMarginTop = 0;
+            const endTooltipMarginBottom = 0;
+            const endTooltipContentsHeight = endTooltipHeight - endTooltipMarginTop - endTooltipMarginBottom;
+            const endTooltipContentsWidth = endTooltipContentsHeight / endTooltipAspectRatio;
+            const endTooltipHorizMargin = endTooltipContentsWidth * 0.15;
+            const endTooltipWidth = endTooltipContentsWidth + 2 * endTooltipHorizMargin;
+            //total all tooltips
+            //console.log("nrEndTs", nrEndTooltips)
+            const endTooltipsWidth = nrEndTooltips  * endTooltipWidth;
 
             //BAR COMPONENT (BAR AND NUMBERS)
             //const barHeight = contentsHeight - expectedTooltipOpenHeight - bottomTooltipsHeight;
             const barHeight = contentsHeight - expectedTooltipOpenHeight - targetTooltipOpenHeight;
             //numbers 
             //group numbers into 1, 2 or 3 cols
-            const nrNumbers = numbersData.length
+            //const nrNumbers = numbersData.length
             let nrNumberCols = nrNumbers;
             if(nrNumbers > 3){
                 nrNumberCols = nrNumberCols % 3 === 0 ? 3 :(nrNumbers % 2 === 0 ? 2 : 1)
@@ -112,10 +120,10 @@ export default function progressBarComponent() {
             }
 
             //bar
-            //const horizMarginToSeeDynamicTooltips = d3.max([topExpectedTooltipWidth, bottomTargetTooltipWidth]) / 2;
+            //need an extra space in case user slides tooltip right to teh end so it is still seen
             const horizMarginToSeeDynamicTooltips = d3.max([expectedTooltipOpenWidth, targetTooltipOpenWidth]) / 2;
             const extraMarginRight = d3.max([0, horizMarginToSeeDynamicTooltips - numbersWidth]); 
-            const barWidth = contentsWidth - endTooltipsWidth - numbersWidth;
+            const barWidth = contentsWidth - endTooltipsWidth - numbersWidth - extraSpaceBeforeTooltips;
             const barMarginLeft = status === "closed" ? 0 : horizMarginToSeeDynamicTooltips;
             const barMarginRight = status === "closed" ? 0 : extraMarginRight;
             //need this for scale here
@@ -217,25 +225,25 @@ export default function progressBarComponent() {
                     }
                 },
                 closed:{
-                    expected:{
-                        width:endExpectedTooltipWidth * expectedMultiplier,
-                        height:endTooltipsHeight * expectedMultiplier,
+                    statProgress:{
+                        width:endTooltipWidth,
+                        height:endTooltipHeight,
                         margin: { 
-                            left:endExpectedTooltipWidth * 0.15,
-                            right:endExpectedTooltipWidth * 0.15,
-                            top:0,//endTooltipsHeight * 0.15,
-                            bottom:0//endTooltipsHeight * 0.15
+                            left:endTooltipHorizMargin,
+                            right:endTooltipHorizMargin,
+                            top:endTooltipMarginTop,
+                            bottom:endTooltipMarginBottom
                         },
                         fontSize
                     },
-                    target:{
-                        width:endTargetTooltipWidth,
-                        height:endTooltipsHeight,
+                    stepsProgress:{
+                        width:endTooltipWidth,
+                        height:endTooltipHeight,
                         margin: { 
-                            left:endTargetTooltipWidth * 0.15,
-                            right:endTargetTooltipWidth * 0.15,
-                            top:0,//endTooltipsHeight * 0.15,
-                            bottom:0//endTooltipsHeight * 0.15
+                            left:endTooltipHorizMargin,
+                            right:endTooltipHorizMargin,
+                            top:endTooltipMarginTop,
+                            bottom:endTooltipMarginBottom
                         },
                         fontSize
                     }
@@ -244,7 +252,7 @@ export default function progressBarComponent() {
 
             dimns.push({
                 width, height, margin, contentsWidth, contentsHeight,
-                bar, numbers, tooltips, expectedTooltipOpenHeight, endToolTipsMarginLeft
+                bar, numbers, tooltips, expectedTooltipOpenHeight, extraSpaceBeforeTooltips
             })
             //SCALES
             //xScale (ie bar scale) set here as it is used by tooltips too
@@ -277,6 +285,8 @@ export default function progressBarComponent() {
     let displayFormat = "both";
     let editable = false;
     let editing = null;
+    let nrEndTooltips = 0;
+    let nrNumbers = 0;
 
     let display = () => null;
 
@@ -413,10 +423,11 @@ export default function progressBarComponent() {
                 })
                 .getValue(getTooltipValue)
                 .getX((d,i,j) =>{
+                    const { bar, numbers, extraSpaceBeforeTooltips, tooltips } = dimns[0];
                     if(d.key === "expectedSteps"){
-                        const { width, margin } = dimns[i].bar;
+                        const { width, margin } = bar;
                         const barContentsWidth = width - margin.left - margin.right
-                        return barContentsWidth * (d.value/100);
+                        return barContentsWidth * (d.x/100);
                     }
                     //i is kpi index, j is tooltip datum index
                     if(status === "open"){
@@ -427,10 +438,22 @@ export default function progressBarComponent() {
                         return isNumber(value) ? scale(value) : scale.range()[0];
                     }
                     const extraHorizGap = 0;// 20;
-                    if(d.key === "expected"){
-                        return dimns[i].bar.width + dimns[i].numbers.width + dimns[i].endToolTipsMarginLeft + dimns[i].tooltips.closed.expected.width/2;
+
+                    //closed options - statProgress and stepsProgress
+                    //note - barMarginleft is already applied to g.tooltips so that scale works for other tooltips
+                    const restOfBar = bar.width - bar.margin.left;
+                    const widthBeforeTooltips = restOfBar + numbers.width + extraSpaceBeforeTooltips;
+                    if(d.key === "stepsProgress"){
+                        return widthBeforeTooltips + tooltips.closed.stepsProgress.width/2;
                     }
-                    return dimns[i].bar.width + dimns[i].numbers.width + dimns[i].endToolTipsMarginLeft + dimns[i].tooltips.closed.expected.width + dimns[i].tooltips.closed.target.width/2;
+                    if(d.key === "statProgress"){
+                        if(displayFormat === "stats"){
+                            //it will be the only tooltip
+                            return widthBeforeTooltips + tooltips.closed.statProgress.width/2;
+                        }
+                        return widthBeforeTooltips + tooltips.closed.stepsProgress.width + tooltips.closed.statProgress.width/2;
+                    }
+                    return 0;
                 })
                 //y is 1 or -1
                 .getY((d,i) => {
@@ -439,25 +462,23 @@ export default function progressBarComponent() {
                         if(d.key === "current"){
                             return expectedTooltipOpenHeight + bar.height/2;
                         }
+                        const heightAboveBottomTooltips = expectedTooltipOpenHeight + bar.height - bar.margin.bottom;
                         if(d.tooltipType === "scale"){
-                            return expectedTooltipOpenHeight + bar.height - bar.margin.bottom + tooltips.open.start.height/2;
+                            return heightAboveBottomTooltips + tooltips.open.start.height/2;
                         }
                         if(d.key === "expected"){
                             return tooltips.open.expected.height * 0.5;
                         }
                         if(d.key === "target"){
-                            return contentsHeight - 0.5 * tooltips.open.target.height;
+                            return tooltips.open.target.height/2;
                         }
                         if(d.key === "expectedSteps"){
-                            return tooltips.open.expectedSteps.height * 0.5;
+                            return heightAboveBottomTooltips + tooltips.open.expectedSteps.height/2;
                         }
                         return 0;
                     }
                     //closed
-                    if(d.key === "expected" || d.key === "target"){
-                        return tooltips.open.expected.height + bar.height/2;
-                    }
-                    return 0;
+                    return tooltips.open.expected.height + bar.height/2;
                 })
                 .draggable(editable)
                 .onClick(function(e,d){
@@ -579,6 +600,16 @@ export default function progressBarComponent() {
     progressBar.displayFormat = function (value) {
         if (!arguments.length) { return displayFormat; }
         displayFormat = value;
+        return progressBar;
+    };
+    progressBar.nrEndTooltips = function (value) {
+        if (!arguments.length) { return nrEndTooltips; }
+        nrEndTooltips = value;
+        return progressBar;
+    };
+    progressBar.nrNumbers = function (value) {
+        if (!arguments.length) { return nrNumbers; }
+        nrNumbers = value;
         return progressBar;
     };
     progressBar.editable = function (value) {

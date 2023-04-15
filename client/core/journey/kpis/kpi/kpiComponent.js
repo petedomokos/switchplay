@@ -107,6 +107,9 @@ export default function kpiComponent() {
     let profileIsSelected = false;
     let displayFormat = "both"
 
+    let getNrEndTooltips = (status, displayFormat) => 0;
+    let getNrNumbers = (status, displayFormat) => 0;
+
     //API CALLBACKS
     let onClick = function(){};
 
@@ -234,6 +237,8 @@ export default function kpiComponent() {
                                     .height(() => progressBarHeight)
                                     .margin(() => progressBarMargin)
                                     .displayFormat(displayFormat)
+                                    .nrEndTooltips(getNrEndTooltips("closed", displayFormat))
+                                    .nrNumbers(getNrNumbers("closed", displayFormat))
                                 , { transitionEnter, transitionUpdate} )
                     })
 
@@ -254,6 +259,8 @@ export default function kpiComponent() {
                                 .margin((d) => progressBarMargin)
                                 .styles(d => ({ bg:{ fill: _styles(d).bg.fill } }))
                                 .displayFormat(displayFormat)
+                                .nrEndTooltips(getNrEndTooltips("open", displayFormat))
+                                .nrNumbers(getNrNumbers("open", displayFormat))
                                 .onSaveValue(onSaveValue))
 
                         const kpiStepsG = d3.select(this).selectAll("g.kpi-steps").data([d.steps]);
@@ -433,6 +440,20 @@ export default function kpiComponent() {
         if (!arguments.length) { return _name; }
         if(typeof value === "function"){
             _name = value;
+        }
+        return kpi;
+    };
+    kpi.getNrNumbers = function (f) {
+        if (!arguments.length) { return getNrNumbers; }
+        if(typeof f === "function"){
+            getNrNumbers = f;
+        }
+        return kpi;
+    };
+    kpi.getNrEndTooltips = function (f) {
+        if (!arguments.length) { return getNrEndTooltips; }
+        if(typeof f === "function"){
+            getNrEndTooltips = f;
         }
         return kpi;
     };

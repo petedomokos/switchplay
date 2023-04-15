@@ -70,6 +70,7 @@ export default function tooltipsComponent() {
             //console.log("isAchieved...", d.key)
         //}
         if(d.key === "expectedSteps"){
+            //note - this tooltip wont even show if there are no steps
             if(!isNumber(d.currentActualSteps) || !isNumber(d.expectedActualSteps)) { return false; }
             //if(d.milestoneId === "profile-5"){
                 //console.log("ach? d", d)
@@ -102,8 +103,12 @@ export default function tooltipsComponent() {
         //const tooltipDimns = _tooltipDimns(data, i);
         selection.each(function(d,i){
             //if(d.key === "expectedSteps")
-            //if(d.milestoneId === "profile-5")
-               // console.log("d", d.key)
+            const log = d.milestoneId === "profile-5" && d.key === "stepsProgress" && d.kpiKey === "longJump-distance-left";// "pressUps-reps"
+            if(log){
+                //console.log("kpi", d.kpiKey)
+                //console.log("...............................", d.status)
+
+            }
             //console.log("dimns", tooltipDimns[d.key])
             //next - position the tooltip properly - why is it so high? 
             //and what is tyhe scale?it seems to be correct on x axis, but not sure why
@@ -130,9 +135,9 @@ export default function tooltipsComponent() {
                 .attr("y", -height/2)
                 .attr("width", width)
                 .attr("height", height)
-                .attr("fill", d.fill || styles.bg.fill)// COLOURS.selectedMilestone)
+                .attr("fill","transparent")// d.fill || styles.bg.fill)// COLOURS.selectedMilestone)
                 .attr("stroke", d.stroke || "none")
-                .attr("stroke", d.strokeWidth || null)
+                .attr("stroke-width", d.strokeWidth || null)
                 .attr("opacity", d.opacity || null)
 
             //saveBtn
@@ -213,14 +218,15 @@ export default function tooltipsComponent() {
                 .attr("fill", styles.text.fill)
                 .attr("stroke", styles.text.stroke)
                 .attr("font-size", dragTextHeight * 0.8)
-                .attr("display", draggable && d.withDragValueAbove ? null : "none")
+                .attr("display", draggable && d.withDragValueAbove && isNumber(getValue(d)) ? null : "none")
                 .text(`${getValue(d)}${d.unit || ""}`)
 
             //tooltip settings
             const isSmall = mainContentsHeight < 10
             const iconObject = isSmall ? (d.smallIcons || d.icons) : d.icons;
-            const icon = isAchieved(d) ? iconObject?.achieved : iconObject?.notAchieved;
-            const shouldShowValue = d.withInnerValue && !isSmall && (!isAchieved(d) || hovered === d.key) && !beingDragged(d);
+            //icon is first selected by status, and if no status, then by isAchieved 
+            const icon = d.status ? iconObject[d.status] : (isAchieved(d) ? iconObject?.achieved : iconObject?.notAchieved);
+            const shouldShowValue = isNumber(getValue(d)) && d.withInnerValue && !isSmall && (!isAchieved(d) || hovered === d.key) && !beingDragged(d);
 
             const mainContentsG = tooltipG.select("g.main-contents")
                 .attr("transform", `translate(0, ${dragTextHeight/2})`)
@@ -279,6 +285,7 @@ export default function tooltipsComponent() {
 
             //text-below
             tooltipG.select("text.subtext")
+                .attr("display", getSubtext(d,i) ? null : "none")
                 .attr("y", contentsHeight/2)
                 .attr("fill", styles.subtext.stroke)
                 .attr("stroke", styles.subtext.stroke)
@@ -385,6 +392,7 @@ export default function tooltipsComponent() {
                 }
 
                 function dragStart(e,d){
+                    d3.select(this).raise();
                     if(!d.editable) { 
                         if(d.key === "expected"){
                             alert("The expected value can't be changed. It is calculated based on your target.")
@@ -431,7 +439,9 @@ export default function tooltipsComponent() {
 
                     //store the values as 'unsaved'
                     onDragEnd.call(this, e, d)
-                    //
+                    //make sure target is on top as expected may have been dragged and hence raised
+                    const targetTooltipG = d3.select(this.parentNode).select("g.tooltip-target");
+                    if(targetTooltipG){ targetTooltipG.raise(); }
                     d3.select(this.parentNode).selectAll("g.tooltip").call(updateTooltip, tooltipDimns); 
                 }
 
@@ -480,6 +490,7 @@ export default function tooltipsComponent() {
             const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
             //console.log("transition", transition)
             selection.each(function(d, i){
+                //console.log("d", d)
                 const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                 if(Math.abs(translateX - x(d, i)) < 0.001 && Math.abs(translateY - y(d, i)) < 0.001){
                     //already where it needs to be

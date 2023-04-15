@@ -189,6 +189,30 @@ export default function kpisComponent() {
                 displayFormat = "steps";
             }
 
+            //we dont want lack of a target or numbers to affect positioning of some progressBars differently, so we will work out the 
+            //nr of end tooltips and of numbers here and pass it through as a setting
+
+            //we also fix 'editing' to be null so that toggling editing modes doesnt adjust overall positions
+            //and we know that only closed bars have end tooltips, so we can assume its closed
+
+            const getNrEndTooltips = (status, displayFormat) => {
+                if(data.milestoneId === "current") { return 0; }
+                const nrPerKpi = kpisData.map(kpiD => kpiD.tooltipsData
+                    .filter(d => d.shouldDisplay(status, null, displayFormat))
+                    .filter(t => t.tooltipType === "comparison")
+                    .length
+                )
+                return d3.max(nrPerKpi)
+            }
+
+            const getNrNumbers = (status, displayFormat) => {
+                const nrPerKpi = kpisData.map(kpiD => kpiD.numbersData
+                    .filter(d => d.shouldDisplay("closed", null, displayFormat))
+                    .length
+                )
+                return d3.max(nrPerKpi)
+            }
+
             const nrOfCtrlsButtons = ctrlsData?.length;
             const nrTooltipRowsAbove = kpisData[0] ? d3.max(kpisData[0].tooltipsData, d => d.rowNr) : 0;
             //console.log("rowsAb", nrTooltipRowsAbove)
@@ -383,6 +407,11 @@ export default function kpisComponent() {
                                 .height((d,i) => status(d) === "open" || status(d) === "closing" ? openedKpiHeight : kpiHeight)
                                 .status(d => status(d) || "closed")
                                 .displayFormat(displayFormat)
+                                //we pass thru the 2 geNrNumbers and getNrEndTooltips funcs here, and then the open/closed progressbars can use it to calc 
+                                //the space rrequired, even though some of them wont actually display anything
+                                //no need to pass through the editing status as we dont want that to afect any positions
+                                .getNrEndTooltips(getNrEndTooltips)
+                                .getNrNumbers(getNrNumbers)
                                 .margin(() => kpiMargin)
                                 .titleDimns((d) => {
                                     //need contentsWidth and Height to work out name dimns and fontsize so it doesnt change based on status in general update

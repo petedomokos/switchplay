@@ -23,11 +23,10 @@ export default function milestonesLayout(){
         //console.log("update milestonesLayout data----------------------------", data)
         return data.map((m,i) => {
             //console.log("milestone------", i, m.id, m)
-            const { id, date, media, dateCount, playerAge, dataType, isPast, isCurrent, isFuture, settings, specificDate, onTrackStatus, goalPhotoLabel, profilePhotoLabel } = m;
+            const { id, date, media, dateCount, playerAge, dataType, isPast, isCurrent, isFuture, settings, specificDate, profileProgressInfo, goalPhotoLabel, profilePhotoLabel } = m;
             //add any profile properties onto kpis if required
             const kpis = m.kpis?.map(kpi => ({ 
                 ...kpi, /* what do we need? */ }));
-            //console.log("kpis", kpis)
 
             if(dataType === "profile"){
                 myKpisLayout
@@ -53,7 +52,7 @@ export default function milestonesLayout(){
                         settings, 
                         specificDate 
                     },
-                    goal:{ ...m.goal, onTrackStatus, ctrlsData:GOAL_CTRLS() },
+                    goal:{ ...m.goal, progressStatus:profileProgressInfo?.status, ctrlsData:GOAL_CTRLS() },
                     kpis:myKpisLayout(kpis),
                 }
             }else{

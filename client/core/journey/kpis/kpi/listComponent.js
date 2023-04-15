@@ -244,7 +244,7 @@ export default function listComponent() {
             let deltaYMax = 0;
             function longpressStart(e , d){
                 //console.log("lp start")
-                console.log("lpstart x,y", Math.round(e.x), Math.round(e.y))
+                //console.log("lpstart x,y", Math.round(e.x), Math.round(e.y))
                 if(d.id === "newItem"){
                     createNewItem();
                     return;
@@ -404,7 +404,7 @@ export default function listComponent() {
                 .attr("width", contentsWidth)
                 .attr("height", contentsHeight)
 
-            //contentsG.attr('clip-path', `url(#list-clip-${i})`)
+            contentsG.attr('clip-path', `url(#list-clip-${i})`)
 
             //ITEMS
             zoomG = contentsG.select("g.items-zoom")
