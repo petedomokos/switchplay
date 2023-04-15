@@ -488,9 +488,7 @@ export default function tooltipsComponent() {
         function updateTransform(selection, options={}){
             //console.log("updateTransform-----------------------")
             const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
-            //console.log("transition", transition)
             selection.each(function(d, i){
-                //console.log("d", d)
                 const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                 if(Math.abs(translateX - x(d, i)) < 0.001 && Math.abs(translateY - y(d, i)) < 0.001){
                     //already where it needs to be
@@ -501,7 +499,6 @@ export default function tooltipsComponent() {
                     return;
                 }
                 if(transition){
-                    //console.log("updateTrans withTrans............", x(d, i))
                     d3.select(this)
                         .classed("transitioning", true)
                         .transition()
@@ -514,7 +511,6 @@ export default function tooltipsComponent() {
                                 cb.call(this, d, i);
                             });
                 }else{
-                    //console.log("updateTrans no transxxxxxxx", x(d, i))
                     d3.select(this)
                         .attr("transform", "translate("+x(d, i) +"," +y(d, i) +")");
                     

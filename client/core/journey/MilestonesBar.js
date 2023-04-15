@@ -145,7 +145,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onUpdateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo, onSaveSetting, onSavePhoto }) => {
+const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpiFormat, onSelectKpiSet, onCreateMilestone, onUpdateMilestone, onDeleteMilestone, takeOverScreen, releaseScreen, screen, availWidth, availHeight, onSaveValue, onSaveInfo, onSaveSetting, onSavePhoto }) => {
   const { media=[], player={}, profiles=[], contracts=[], settings=[] } = data;
   const allMilestones = [ ...profiles, ...contracts ];
   const currentProfile = profiles.find(p => p.id === "current");
@@ -377,6 +377,11 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
   //or alternatively only have that processed in milestoneslayout/kpiLayout
   //so we are not doing teh epensive operations each time
   useEffect(() => {
+    console.log("uE layout-------------")
+    if(asyncProcesses.creating.datapoints){ 
+      console.log("saving datapoint so dont update")
+      return; 
+    }
     layout
       .format(kpiFormat)
       .datasets(datasets)
@@ -391,6 +396,10 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
   }, [stringifiedProfiles, kpiFormat])
 
   useEffect(() => {
+    if(asyncProcesses.creating.datapoints){ 
+      console.log("saving datapoint so dont update")
+      return; 
+    }
     const totalAvailHeightStr = d3.select("div.milestone-bar-root").style("height");
     const totalAvailHeight = totalAvailHeightStr.slice(0, totalAvailHeightStr.length - 2);
     const height = d3.min([DIMNS.milestonesBar.maxHeight, totalAvailHeight - bottomCtrlsBarHeight])
@@ -486,6 +495,11 @@ const MilestonesBar = ({ user, data, datasets, kpiFormat, setKpiFormat, onSelect
   //render
   //@todo - consider having a shouldRender state, and this could also contain info on transition requirements
   useEffect(() => {
+    console.log("uE render-------------")
+    if(asyncProcesses.creating.datapoints){ 
+      console.log("saving datapoint so dont update")
+      return; 
+    }
     d3.select(containerRef.current).call(milestonesBar);
   }, [selectedMilestone, stringifiedProfiles, screen, kpiFormat])
 

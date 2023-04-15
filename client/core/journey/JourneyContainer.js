@@ -76,7 +76,8 @@ const mockProfiles = [
 
 
 const mapStateToProps = (state, ownProps) => {
-	//console.log("JourneyContainer..........state", state.user)
+	console.log("JourneyContainer..........state.async", state.asyncProcesses)
+	const { asyncProcesses } = state;
     //const { journeyId }  = ownProps.match.params;state,
 	//for now, assume player is user, but need to attach playerId/coachId or groupId to each journey
 	const { _id, username, firstname, surname, photo, photos, journeys=[], homeJourney, loadedDatasets, datasetsMemberOf } = state.user;
@@ -127,6 +128,7 @@ const mapStateToProps = (state, ownProps) => {
 		screen:window._screen,
         width:window._screen.width,
         height:window._screen.height - 90,
+		asyncProcesses
         //temp put the ? until backend is implemented - will eventually do same as users - we just send a summary at first
 		//journey:state.user.journeys?.find(j => j.id === journeyId),
 		//loading:state.asyncProcesses.loading.journey,

@@ -95,7 +95,7 @@ const initChannels = d3.range(numberMonths)
   })
 
 //width and height may be full screen, but may not be
-const Journey = ({ user, data, datasets, availableJourneys, screen, width, height, save, saveDatapoint, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile, savePhoto }) => {
+const Journey = ({ user, data, datasets, availableJourneys, screen, width, height, asyncProcesses, save, saveDatapoint, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile, savePhoto }) => {
   console.log("Journey.......", data)
   //console.log("Journey.......", datasets?.find(dset => dset.key === "pressUps")?.datapoints)
   //bug - although only 6 profs are saved, we end up with 7 ie two currents
@@ -383,6 +383,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
               screen={screen}
               availWidth={width}
               availHeight={height}
+              asyncProcesses={asyncProcesses}
               
             />
           }

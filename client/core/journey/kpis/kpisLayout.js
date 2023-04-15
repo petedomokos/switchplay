@@ -157,16 +157,6 @@ export default function kpisLayout(){
                 //need to loko at why expected steps is 0
             }
 
-            const getProgressIcon = status => {
-                if(status === "fullyAchieved"){ return }
-                if(status === "fullyOnTrack"){ return }
-                if(status === "mostlyOnTrack"){ return }
-                if(status === "partlyOnTrack"){ return }
-                if(status === "offTrack"){ return }
-                if(status === "severelyOffTrack"){ return }
-                return emptyGoal;
-            }
-
             const comparisonTooltipsData = isCurrent ? [] : [
                 { 
                     progressBarType:"dataset",
@@ -267,6 +257,9 @@ export default function kpisLayout(){
                 }
             ];
 
+            if(milestoneId === "current" && datasetKey === "pressUps"){
+                console.log("current", current)
+            }
             const currentValueTooltipDatum = {
                 progressBarType:"dataset",
                 tooltipType:"value",
