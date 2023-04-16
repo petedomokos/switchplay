@@ -183,7 +183,11 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
   useEffect(() => {
     const newNrSteps = allJourneySteps.length;
     if(newNrSteps !== nrStepsRef.current){
-      console.log("nrstepschanged!!!!!!!!!!!!!!!!!!!", nrStepsRef.current, newNrSteps)
+      if(nrStepsRef.current < newNrSteps){
+        console.log("step added.....")
+        //call setForm for 
+        //pass down the d3 components so onEditStep stuff can be enacted
+      }
       nrStepsRef.current = newNrSteps;
     }
   })
