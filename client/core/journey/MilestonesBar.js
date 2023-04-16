@@ -16,6 +16,7 @@ import milestonesBarComponent from "./milestonesBarComponent";
 import { DIMNS, FONTSIZES, grey10, JOURNEY_SETTINGS_INFO, OVERLAY, getURLForUser } from './constants';
 import { sortAscending, sortDescending } from '../../util/ArrayHelpers';
 import { createId } from './helpers';
+import { isNumber } from '../../data/dataHelpers';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -154,7 +155,6 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
     const kpiSteps = currentProfile.kpis.find(kpi => kpi.key === kpiKey).steps;
     return milestoneId ? kpiSteps.filter(s => s.milestoneId === milestoneId) : kpiSteps;
   } 
-  //console.log("MBar", kpiFormat)
   //local state
   const [firstMilestoneInView, setFirstMilestoneInView] = useState(0);
   const [bgMenuLocation, setBgMenuLocation] = useState("");
@@ -166,6 +166,7 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
   const [editingReactComponent, setEditingReactComponent] = useState("");
   const [editingSVGComponent, setEditingSVGComponent] = useState(null);
   const [form, setForm] = useState(null);
+  console.log("MBar", form?.formType)
   const formMilestone = allMilestones.find(m => m._id === form?.milestoneId);
   let getSelectedPhotoId = () => {
     if(!form?.formType === "photo"){ return ""; }
@@ -178,21 +179,6 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
   }
 
   const dragStartXRef = useRef(null);
-  const allJourneyStepsRef = useRef(null);
-
-  useEffect(() => {
-    const prevNrSteps = allJourneyStepsRef.current?.length;
-    const newNrSteps = allJourneySteps.length;
-    if(newNrSteps !== prevNrSteps){
-      if(newNrSteps > prevNrSteps){
-        console.log("step added.....")
-        //identify which step has been added
-        //call setForm for 
-        //pass down the d3 components so onEditStep stuff can be enacted
-      }
-      allJourneyStepsRef.current = allJourneySteps;
-    }
-  })
 
   const moreSettings = sortAscending(settings
     .filter(s => s.key !== "currentValueDataMethod")

@@ -111,6 +111,8 @@ export default function listComponent() {
     const itemDrag = d3.drag();
     let shouldIgnoreNextItemClick = false;
 
+    let prevData;
+
     function list(selection, options={}) {
        // console.log("list",)
         const { transitionEnter=true, transitionUpdate=true, log} = options;
@@ -295,7 +297,6 @@ export default function listComponent() {
                 if(isHorizSwipe || (deltaXMax > deltaYMax && deltaYMax < horizDeleteYMax && deltaXMax > horizDeleteXMin)){
                     isHorizSwipe = true;
                     //@todo - transform on x axis, and put y back to where to was in case its move a bit, then put it all back in dragEnd if not deleted
-                    console.log("hoz")
                     if(deltaX > itemWidth/2){
                         //console.log("delete----------------------")
                         deleteTriggered = true;
@@ -367,13 +368,13 @@ export default function listComponent() {
             //note: newX and Y should be stored as d.x and d.y
             function longpressEnd(e, d){
                 if(d.id === "newItem"){ return; }
-                console.log("lp end deleteTriggered????", deleteTriggered)
+                //console.log("lp end deleteTriggered????", deleteTriggered)
                 if(deleteTriggered){ 
                     deleteTriggered = false;
                     return; 
                 }
                 if(isHorizSwipe){
-                    console.log("PUT IT BACK!!!!!!!!!!!!!!!!!!!!");
+                    //console.log("PUT IT BACK!!!!!!!!!!!!!!!!!!!!");
                     isHorizSwipe = false;
                     return;
                     //didnt swipe enough to delete - need to put back
@@ -416,7 +417,7 @@ export default function listComponent() {
             const itemG = itemsG.selectAll("g.item").data(listData, d => d.id);
             itemG.enter()
                 .append("g")
-                    .attr("class",(d,i) => `item item-${i} ${d.id === "newItem" ? "new-item" : "regular-item"}`)
+                    .attr("class",(d,i) => `item item-${i} item-${d.id} ${d.id === "newItem" ? "new-item" : "regular-item"}`)
                     .attr("pointer-events", "none")
                     .each(function(d,i){
                         const itemG = d3.select(this);
@@ -514,15 +515,23 @@ export default function listComponent() {
                     //.on("click", () => { console.log("item clicked")})
                     .call(itemDrag)
 
-                    itemG.exit().call(remove)
+            itemG.exit().call(remove)
 
-                    function initItem(contentsG, data, i){
-                        contentsG
-                            .append("defs")
-                                .append('clipPath')
-                                    .attr("id", `list-clip-${i}`)
-                                        .append('rect')
-                    }
+            function initItem(contentsG, data, i){
+                contentsG
+                    .append("defs")
+                        .append('clipPath')
+                            .attr("id", `list-clip-${i}`)
+                                .append('rect')
+            }
+
+
+            //set any new item into edit mode
+            if(prevData?.length < data.length){
+                //new step has been added onto the end
+                editItem.call(containerG.select(`g.item-${data.length - 1}`).node(), data[data.length - 1])
+            }
+            prevData = data;
         })
 
         return selection;
