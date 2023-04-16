@@ -166,7 +166,7 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
   const [editingReactComponent, setEditingReactComponent] = useState("");
   const [editingSVGComponent, setEditingSVGComponent] = useState(null);
   const [form, setForm] = useState(null);
-  console.log("MBar", form?.formType)
+  //console.log("MBar", form?.formType)
   const formMilestone = allMilestones.find(m => m._id === form?.milestoneId);
   let getSelectedPhotoId = () => {
     if(!form?.formType === "photo"){ return ""; }
@@ -275,8 +275,8 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
 
   //const onSetEditingReactComponent = useCallback((newEditing) => {
   const onSetEditingReactComponent = newEditing => {
-    //console.log("onSetERC........", editingReactComponent)
-    //console.log("new", newEditing)
+    console.log("onSetERC........", editingReactComponent)
+    console.log("new", newEditing)
     const changedProfile = editingReactComponent?.milestoneId !== newEditing?.milestoneId;
     const changedKey = editingReactComponent?.key !== newEditing?.key;
     //console.log("editing? changed?",!!editingReactComponent, changedProfile || changedKey)
@@ -368,10 +368,16 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
     d3.select("body").on("keypress", (e) => {
       if(e.keyCode === "13" || e.key === "Enter"){
         e.preventDefault();
-        handleSaveForm()
+        if(form){
+          handleSaveForm()
+        }
+        if(editingReactComponent){
+          //this will save and exit the form
+          onSetEditingReactComponent(null);
+        }
       }
     })
-  }, [form, stringifiedProfiles])
+  }, [form, stringifiedProfiles, editingReactComponent, onSaveInfo, handleSaveForm])
 
   //init
   //decide what needs to update on setSelectedMilestone, and only have that inteh depArray 

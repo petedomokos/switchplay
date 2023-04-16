@@ -76,7 +76,7 @@ const mockProfiles = [
 
 
 const mapStateToProps = (state, ownProps) => {
-	console.log("JourneyContainer..........state.async", state.asyncProcesses)
+	//console.log("JourneyContainer..........state.async", state.asyncProcesses)
 	const { asyncProcesses } = state;
     //const { journeyId }  = ownProps.match.params;state,
 	//for now, assume player is user, but need to attach playerId/coachId or groupId to each journey

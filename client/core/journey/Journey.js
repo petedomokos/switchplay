@@ -288,10 +288,10 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       return;
     }
     
-  }, [stringifiedContracts, user._id]);
+  }, [stringifiedProfiles, user._id]);
 
   const onSaveInfo = useCallback((profileId, key) => value => {
-    //console.log("saveinfo", profileId, key, value);
+    console.log("saveinfo", profileId, key, value);
     //special case - date need formatting
     if(key === "date"){
       //@todo - remove creation of Date here - can just store as a string
@@ -319,10 +319,10 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     
     //default case
     const _profiles = profiles.map(p => p.id === profileId ? ({ ...p, [key]: value }) : p);
-    console.log("save profiles", _profiles)
+    console.log("saving _profiles", _profiles)
     save({ ...data, profiles:_profiles });
     
-  }, [stringifiedContracts, user._id]);
+  }, [stringifiedProfiles, user._id]);
 
   const onSaveSetting = useCallback(newSetting => {
     //console.log("onSaveSetting", newSetting)
