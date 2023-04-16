@@ -177,7 +177,16 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
     return milestone.media.find(m => m.locationKey === form.location)?.mediaId || "";
   }
 
-  const dragStartXRef = useState(null);
+  const dragStartXRef = useRef(null);
+  const nrStepsRef = useRef(null);
+
+  useEffect(() => {
+    const newNrSteps = allJourneySteps.length;
+    if(newNrSteps !== nrStepsRef.current){
+      console.log("nrstepschanged!!!!!!!!!!!!!!!!!!!", nrStepsRef.current, newNrSteps)
+      nrStepsRef.current = newNrSteps;
+    }
+  })
 
   const moreSettings = sortAscending(settings
     .filter(s => s.key !== "currentValueDataMethod")
@@ -377,7 +386,7 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
   //or alternatively only have that processed in milestoneslayout/kpiLayout
   //so we are not doing teh epensive operations each time
   useEffect(() => {
-    console.log("uE layout-------------")
+    //console.log("uE layout-------------")
     if(asyncProcesses.creating.datapoints){ 
       console.log("saving datapoint so dont update")
       return; 
@@ -495,7 +504,7 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
   //render
   //@todo - consider having a shouldRender state, and this could also contain info on transition requirements
   useEffect(() => {
-    console.log("uE render-------------")
+    //console.log("uE render-------------")
     if(asyncProcesses.creating.datapoints){ 
       console.log("saving datapoint so dont update")
       return; 

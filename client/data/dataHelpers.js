@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { addDays } from '../util/TimeHelpers';
 
-export const isNumber = number => typeof number === "number";
+export const isNumber = number => typeof number === "number" && !isNaN(number);
 export const boundValue = bounds => value => {
     const lowerBound = d3.min(bounds);
     const upperBound = d3.max(bounds);

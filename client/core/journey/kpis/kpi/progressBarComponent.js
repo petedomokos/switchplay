@@ -434,7 +434,6 @@ export default function progressBarComponent() {
                         //in open format, all tooptips are positioned according to the x scale
                         const value = getTooltipValue(d);
                         const scale = xScales[d.progBarKey];
-                        //if(d.milestoneId === "current" && d.key === "target" && d.progBarKey === "longJump-distance-left"){ }
                         return isNumber(value) ? scale(value) : scale.range()[0];
                     }
                     const extraHorizGap = 0;// 20;

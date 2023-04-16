@@ -257,9 +257,9 @@ export default function kpisLayout(){
                 }
             ];
 
-            if(milestoneId === "current" && datasetKey === "pressUps"){
-                console.log("current", current)
-            }
+            //if(milestoneId === "current" && datasetKey === "pressUps"){
+                //console.log("current", current)
+            //}
             const currentValueTooltipDatum = {
                 progressBarType:"dataset",
                 tooltipType:"value",
