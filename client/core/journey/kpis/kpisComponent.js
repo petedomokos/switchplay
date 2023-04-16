@@ -48,6 +48,7 @@ export default function kpisComponent() {
     let kpiMargin;
 
     let fixedKpiHeight;
+    let maxKpiHeight = 40;
     let kpiHeight;
     let gapBetweenKpis;
 
@@ -86,8 +87,13 @@ export default function kpisComponent() {
         kpiWidth = contentsWidth;
 
         //height
+        //@todo
+        //if we have eg 8kpis, and the max kpihwight doesnt take up all space esp on large screen 
+        //then increase margin a little -> but read not on line 106 - dont want kpimargin change to affect
+        //title to create a little jump
+        //but also we should make 
         listHeight = contentsHeight - ctrlsHeight;
-        kpiHeight = fixedKpiHeight || listHeight/5;
+        kpiHeight = fixedKpiHeight || d3.min([maxKpiHeight, listHeight/5]);
         //selectedKpi must expand for tooltip rows, by 0.75 of kpiHeight per tooltip
         const expandedContentsHeight = expandedHeight - margin.top - margin.bottom;
         //const expandedListHeight = expandedContentsHeight - ctrlsHeight;
@@ -105,7 +111,8 @@ export default function kpisComponent() {
         closeBtnWidth = 40;// contentsWidth * 0.1;
         closeBtnHeight = closeBtnWidth;
         closeBtnOuterMargin = { 
-            right: closeBtnWidth * 0.2, top:closeBtnHeight * 0.2
+            //@todo work out what this extra is that I neeed to subtract
+            right:0 /*closeBtnWidth/2*/, top:margin.top - 10
         }
     }
 
@@ -428,6 +435,12 @@ export default function kpisComponent() {
                                         fill:profileIsSelected ? COLOURS.selectedMilestone : COLOURS.milestone
                                     },
                                     name:{
+                                    },
+                                    step:{
+                                        fill:"transparent",
+                                        //fill:profileIsSelected ? COLOURS.selectedMilestone : COLOURS.milestone
+                                        stroke:profileIsSelected ? grey10(5) : grey10(6),
+                                        strokeWidth:0.1,
                                     }
                                 }))
                                 .onDblClick(onDblClickKpi)

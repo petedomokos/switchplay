@@ -70,7 +70,7 @@ export default function closeComponent() {
 
                     contentsG.append("path")
                         .attr("stroke", "#292929")
-                        .attr("opacity", 0.7)
+                        .attr("opacity", 0.35)
                         .attr("stroke-width", "1.5")
                         .attr("stroke-linecap", "round")
                         .attr("stroke-linejoin", "round")

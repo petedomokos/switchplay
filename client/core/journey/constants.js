@@ -387,7 +387,7 @@ export const COLOURS = {
     selectedBarMenuItem:"white",
     step:{
         bar:grey10(4),
-        list:grey10(2)
+        list:grey10(3)
     },
     btnIcons:{
         default:grey10(5),

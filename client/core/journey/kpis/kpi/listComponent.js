@@ -146,6 +146,7 @@ export default function listComponent() {
         selection.each(function(data,i){
             //console.log("list", data)
             const containerG = d3.select(this);
+            const styles = _styles(data,i);
 
             //@todo - learn why these are not working as expected
             //.extent([[0,0], [contentsWidth, contentsHeight]])
@@ -430,8 +431,7 @@ export default function listComponent() {
 
                         //bg rect is only on contentsG so margin gaps are seen
                         itemContentsG.append("rect").attr("class", "item-bg")
-                            .attr("stroke", "none")
-                            .attr("fill", COLOURS.step.list);
+                            .attr("stroke", "none");
                         
 
                         const symbolG = itemContentsG.append("g").attr("class", "symbol") ;
@@ -465,6 +465,9 @@ export default function listComponent() {
                         itemContentsG.select("rect.item-bg")
                             .attr("width", itemContentsWidth)
                             .attr("height", itemContentsHeight)
+                            .attr("fill", styles.item?.fill || COLOURS.step.list)
+                            .attr("stroke", styles.item.stroke || "none")
+                            .attr("stroke-width", styles.item.strokeWidth || 0.5);
                         
                         const symbolG = itemContentsG.select("g.symbol")
                             .attr("transform", (d,i) => `translate(${symbolMargin.left}, 0)`)
@@ -501,7 +504,8 @@ export default function listComponent() {
                         checkboxG.select("rect")
                             .attr("width", checkboxContentsWidth)
                             .attr("height", itemContentsHeight)
-                            .attr("stroke", grey10(5))
+                            .attr("stroke", styles.item.stroke || "none")
+                            .attr("stroke-width", styles.item.strokeWidth || 0.5)
                             .attr("fill", d.completed ? "#D4AF37" : "transparent")
                             .on("click", (e,d) => {
                                 shouldIgnoreNextItemClick = true;
@@ -563,7 +567,8 @@ export default function listComponent() {
         _styles = (d,i) => {
             const requiredStyles = func(d,i);
             return {
-                name:{ ...defaultStyles.name, ...requiredStyles.name },
+                ...requiredStyles,
+                item:{ ...defaultStyles.item, ...requiredStyles.item },
                 //others here
             }
         };

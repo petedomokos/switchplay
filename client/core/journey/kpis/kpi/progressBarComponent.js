@@ -38,13 +38,6 @@ export default function progressBarComponent() {
 
         return kpisData.forEach((kpiD,i) => {
             //console.log("kpiD", kpiD)
-            //each d is a milestone 
-            const tooltipsData = kpiD.tooltipsData.filter(d => d.shouldDisplay(status, editing, displayFormat));
-            //console.log("dispFormat", displayFormat)
-            //we dont want editing toggling to affect positions, so we fix editing to be false here,
-            //even though the numbersData in the render function removes the number
-            const numbersData = kpiD.numbersData.filter(d => d.shouldDisplay(status, false, displayFormat));
-
             const barData = { 
                 ...kpiD.barData, 
                 sectionsData:kpiD.barData.sectionsData.filter(d => d.shouldDisplay(status, editing, displayFormat))
@@ -102,7 +95,7 @@ export default function progressBarComponent() {
             const numbersHeight = status === "closed" ?  contentsHeight : barHeight;// d3.min([35, contentsHeight]);
             const maxNumbersContentsHeight = 40;
             const numbersMarginVert = d3.max([0, (numbersHeight - maxNumbersContentsHeight)/2]);
-            const numberWidth = status === "closed" ? contentsWidth * 0.2 : contentsWidth * 0.1;
+            const numberWidth = contentsWidth * 0.2;
             const numbersContentsWidth = nrNumberCols * numberWidth;
             const numbersMargin = { 
                 left: numbersContentsWidth * 0.1, 
@@ -110,7 +103,7 @@ export default function progressBarComponent() {
                 top:numbersMarginVert, 
                 bottom:numbersMarginVert, 
             };
-            const numbersWidth = numbersData.length === 0 ? 0 : numbersContentsWidth + numbersMargin.left + numbersMargin.right;
+            const numbersWidth = nrNumbers === 0 ? 0 : numbersContentsWidth + numbersMargin.left + numbersMargin.right;
             //@todo - numberheight mx should be in sync with barheight max
            
             const numbers = {

@@ -9,6 +9,7 @@ import progressBarComponent from './progressBarComponent';
 import listComponent from './listComponent';
 import container from './container';
 import background from './background';
+import { styles } from '@material-ui/pickers/views/Calendar/Calendar';
 
 const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
 const AUTO_SCROLL_DURATION = TRANSITIONS.KPIS.AUTO_SCROLL.DURATION;
@@ -218,6 +219,8 @@ export default function kpiComponent() {
             const { contentsHeight, titleDimns, progressBarWidth, progressBarHeight, progressBarMargin, 
                 kpiInfoWidth, kpiInfoHeight, historyWidth, historyHeight } = dimns[data.key];
 
+            const styles = _styles(data,i);
+
             const closedData = status(data) === "closed" ? [data] : [];
             const openData = status(data) === "open" ? [data] : [];
             //components
@@ -273,6 +276,7 @@ export default function kpiComponent() {
                                     .width(kpiInfoWidth)
                                     .height(kpiInfoHeight)
                                     .margin({ left:0, right: 0, top:kpiInfoHeight * 0.1, bottom:kpiInfoHeight * 0.1 })
+                                    .styles((d,i) => ({ item:styles.step }))
                                     .orderEditable(d.milestoneId !== "current")
                                     .newItemDatum(d.milestoneId === "current" ? null : { desc:"Add Step" })
                                     .onCreateItem(() => {

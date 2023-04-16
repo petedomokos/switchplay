@@ -7,6 +7,7 @@ import kpisComponent from './kpis/kpisComponent';
 import goalComponent from './goal/goalComponent';
 import { Oscillator } from './domHelpers';
 import { getTransformationFromTrans } from './helpers';
+import { AllOutSharp } from '@material-ui/icons';
 const noop = () => {};
 
 const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
@@ -25,24 +26,26 @@ export default function profileCardsComponent() {
     let contentsWidth;
     let contentsHeight;
 
-    let infoHeight;
-    let bottomHeight;
-
     let kpiHeight;
 
     let profileCtrlsWidth = 150;
     let profileCtrlsHeight = 40;
 
-    let getTextInfoHeight = () => 0;
+    let getTextInfoHeight = d => 0;
+    let getTopHeight = d => 0;
+    let getBottomHeight = d => 0;
 
     function updateDimns(){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
-        infoHeight = contentsHeight/2;
-        bottomHeight = contentsHeight/2;
 
-        const borderHeight = d3.max([45, infoHeight * 0.2]);
-        getTextInfoHeight = d => d.isCurrent || currentPage.key === "profile" ? borderHeight : 0;
+        const withMedia = d => d.isCurrent || currentPage.key === "goal";
+        getTopHeight = d => withMedia(d) ? contentsHeight/2 : 0;
+        getBottomHeight = d => withMedia(d) ? contentsHeight/2 : contentsHeight;
+        getTextInfoHeight = d => {
+            const borderHeight = d3.max([45, getTopHeight(d) * 0.2]);
+            return withMedia(d) ? borderHeight : 0;
+        };
     }
 
     let fontSizes = {
@@ -70,6 +73,7 @@ export default function profileCardsComponent() {
     let kpiFormat = "actual";
     let expanded = [];
     let selected = "";
+    let selectedKpiKey = "";
     let editable = false;
     let movable = true;
     let scrollable = false;
@@ -222,7 +226,7 @@ export default function profileCardsComponent() {
                         //set transform here rather than update so it doesnt reset whilst a kpi is selected
                         //alternative is ot update it based on selectedKpi too
                         const bottomG = innerContentsG.append("g").attr("class", "bottom")
-                            .attr("transform", "translate(0," +(contentsHeight/2) +")")
+                            //.attr("transform", "translate(0," +(getBottomHeight(d)) +")")
 
                         innerContentsG.append("g").attr("class", "top-right-ctrls")
                         innerContentsG.append("g").attr("class", "bot-right-ctrls")
@@ -260,6 +264,9 @@ export default function profileCardsComponent() {
                         transition:transformTransition.update 
                     })
                     .each(function(d){
+                        const topHeight = getTopHeight(d);
+                        const bottomHeight = getBottomHeight(d);
+
                         const profileCtrlsG = d3.select(this).select("g.profile-ctrls")
                             .attr("transform", `translate(${-(profileCtrlsWidth/3)}, ${-contentsHeight/2 - profileCtrlsHeight+5})`)
                             .call(drag)
@@ -271,7 +278,7 @@ export default function profileCardsComponent() {
                         const profileInfo = profileInfoComponents[d.id]
                             .currentPage(currentPage)
                             .width(contentsWidth)
-                            .height(infoHeight)
+                            .height(topHeight)
                             .fontSizes(fontSizes.info)
                             .editable(editable)
                             .onStartEditingPhotoTransform(onStartEditingPhotoTransform)
@@ -283,7 +290,7 @@ export default function profileCardsComponent() {
 
                         const goal = goalComponents[d.id]
                             .width(contentsWidth)
-                            .height(contentsHeight/2)
+                            .height(bottomHeight)
                             .fontSizes(fontSizes.goal)
                             //.editable(editable)
                             //.scrollable(scrollable)
@@ -294,7 +301,8 @@ export default function profileCardsComponent() {
 
                         const kpis = kpisComponents[d.id]
                             .width(contentsWidth)
-                            .height(bottomHeight)
+                            .height(bottomHeight) //will be full contentsheight if no media at top
+                            //textinfoHeight is 0 if no media so its full contentsHeight in that case, same as bottomHeight
                             .expandedHeight(contentsHeight - getTextInfoHeight(d))
                             .kpiHeight(kpiHeight) //may be undefined
                             .fontSizes(fontSizes.kpis)
@@ -303,22 +311,30 @@ export default function profileCardsComponent() {
                             .scrollable(scrollable)
                             .profileIsSelected(selected === d.id)
                             .onUpdateSelected((profileId, kpiKey, shouldUpdateScroll, shouldUpdateDom, dimns) => {
-                                const profileShouldUpdate = profile => profile.id === "current" || currentPage.key === "profile"; 
+                                selectedKpiKey = kpiKey;
+                                //in reality, if profile pages have no media except the current page, then only that will updatedimns
+                                //the 2nd condition checks if kpis are on the page, as otherwise it wont need to open anything
+                                const profileDimnsShouldUpdate = profile => {
+                                    const profileContainsKpis = currentPage.key === "profile" || profile.id === "current";
+                                    return profileContainsKpis && getTopHeight(profile) !== 0;
+                                }; 
+
                                 data.filter(p => p.id !== profileId).forEach(p => {
                                     kpisComponents[p.id].selected(kpiKey, shouldUpdateScroll, shouldUpdateDom);
                                 })
-                                //slide stuff up on every card (not just this one) 
-                                containerG.selectAll("g.profile-card").filter(d => profileShouldUpdate(d)).selectAll("g.top")
+
+                                //slide stuff up on every card that needs to update (atm will only be current card)
+                                containerG.selectAll("g.profile-card").filter(d => profileDimnsShouldUpdate(d)).selectAll("g.top")
                                     .transition()
                                     .duration(AUTO_SCROLL_DURATION)
                                     .delay(CONTENT_FADE_DURATION)
                                         .attr("transform", d => `translate(0,${kpiKey ? -contentsHeight/2 + getTextInfoHeight(d) : 0})`);
                                 
-                                containerG.selectAll("g.profile-card").filter(d => profileShouldUpdate(d)).selectAll("g.bottom")
+                                containerG.selectAll("g.profile-card").filter(d => profileDimnsShouldUpdate(d)).selectAll("g.bottom")
                                     .transition()
                                     .duration(AUTO_SCROLL_DURATION)
                                     .delay(CONTENT_FADE_DURATION)
-                                       .attr("transform", d => `translate(0,${kpiKey ? getTextInfoHeight(d) : contentsHeight/2})`);
+                                       .attr("transform", d => `translate(0,${kpiKey ? getTextInfoHeight(d) : getTopHeight(d)})`);
 
                                 //parent needs to know so it can control how to handle the wrapperClick event
                                 const profile = data.find(p => p.id === profileId);
@@ -396,13 +412,13 @@ export default function profileCardsComponent() {
                         
                         d3.select(this).select("rect.top-overlay")
                             .attr("width", width)
-                            .attr("height", height/2)
+                            .attr("height", topHeight)
                             .style("fill", OVERLAY.FILL)
                             .style("opacity", OVERLAY.OPACITY)
                             
                         d3.select(this).select("rect.bottom-overlay")
                             .attr("width", width)
-                            .attr("height", height/2)
+                            .attr("height", bottomHeight)
                             .style("fill", OVERLAY.FILL)
                             .style("opacity", OVERLAY.OPACITY)
 
@@ -450,6 +466,7 @@ export default function profileCardsComponent() {
                     
                         // why is this too far down
                         innerContentsG.selectAll("g.info")
+                            .attr("display", topHeight === 0 ? "none" : null)
                             .datum(d.info)
                             .call(profileInfo)
 
@@ -458,8 +475,30 @@ export default function profileCardsComponent() {
                         //soln 1 - used now - just do on enter
                         //soln 2 - could get selectedKpi from kpiscomponent, and adjust transform here accordingly
                         //for soln 2, prob best to move selectedKpi to this level too, and pass it through
+
+                        //The cod below is because we need to keep the openKpi positions if an update occurs eg if user closes the card 
+                        //but teh kpi is still selected -> then we want it to stay in the slided-up state
+                        //FOR NOW, we copy the code from updateSelectedKpi handler above, but need to sort this.
+                        //Also it may cause an issue with an update
+                        const profileDimnsShouldUpdate = profile => {
+                            const profileContainsKpis = currentPage.key === "profile" || profile.id === "current";
+                            return profileContainsKpis && getTopHeight(profile) !== 0;
+                        }; 
+                        containerG.selectAll("g.profile-card").filter(d => profileDimnsShouldUpdate(d)).selectAll("g.top")
+                            //.transition()
+                            //.duration(AUTO_SCROLL_DURATION)
+                            //.delay(CONTENT_FADE_DURATION)
+                                .attr("transform", d => `translate(0,${selectedKpiKey ? -contentsHeight/2 + getTextInfoHeight(d) : 0})`);
+                                
+                        containerG.selectAll("g.profile-card").filter(d => profileDimnsShouldUpdate(d)).selectAll("g.bottom")
+                            //.transition()
+                            //.duration(AUTO_SCROLL_DURATION)
+                            //.delay(CONTENT_FADE_DURATION)
+                                .attr("transform", d => `translate(0,${selectedKpiKey ? getTextInfoHeight(d) : getTopHeight(d)})`);
+
                         const bottomG = innerContentsG.select("g.bottom")
-                            //.attr("transform", "translate(0," +(contentsHeight/2) +")");
+                        //THIS WAS COMMENTED OUT!!!!!!!!!!!!!! MAYBE IT CAUSES A JUMP
+                            .attr("transform", "translate(0," +(topHeight) +")");
 
                         const kpisG = bottomG.select("g.kpis-area").selectAll("g.kpis").data(currentPage.key === "profile" || d.isCurrent ? [1] : []);
                         kpisG.enter()
@@ -509,7 +548,7 @@ export default function profileCardsComponent() {
                                 .each(function(b){
                                     d3.select(this).select("rect")
                                         .attr("width", btnWidth)
-                                        .attr("height", btnHeight)
+                                        .attr("height", btnHeight);
 
                                     d3.select(this).select("path")
                                         .attr("d", b.icon.d)
