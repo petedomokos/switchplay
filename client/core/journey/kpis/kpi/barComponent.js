@@ -51,7 +51,7 @@ export default function barComponent() {
             const contentsWidth = width - margin.left - margin.right;
             const contentsHeight = height - margin.top - margin.bottom;
 
-            const barHeight = shouldDisplaySteps ? contentsHeight * 0.75 : contentsHeight;
+            const barHeight = shouldDisplaySteps ? contentsHeight * 0.65 : contentsHeight;
             const stepHeight = contentsHeight;
 
             const stepWidth = stepsData.length === 0 ? 0 : contentsWidth/stepsData.length;
