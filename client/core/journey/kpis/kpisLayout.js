@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { grey10, KPI_CTRLS } from '../constants';
 import { isNumber } from '../../../data/dataHelpers';
 import { emptyGoal, ball, goalWithBall, shiningCrystalBall, nonShiningCrystalBall } from "../../../../assets/icons/milestoneIcons.js"
+import { ContactSupportOutlined } from '@material-ui/icons';
 
 export default function kpisLayout(){
     let format = "actual"; //actual
@@ -34,20 +35,28 @@ export default function kpisLayout(){
             const currentColour = grey10(7);// "#696969";
             const colours = {
                 current: currentColour,
+                currentMaintanence: "#98AFC7",
                 target:grey10(2),// "#DCDCDC",
                 expectedBehind:"red",
                 expectedAhead:currentColour,
                 stepsCurrent:"blue"
             }
 
-            
-            //if(milestoneId === "profile-5" && kpi.datasetKey === "shuttles"){
-                //console.log("milestoneId dset", milestoneId, datasetKey)
-            //}
-            if(milestoneId === "profile-5" && key === "longJump-distance-left"){
-                //console.log("kpi", kpi)
-            }
 
+            //helper for special case of maintanence goals (ie target is actaully same or  worse than starting value)
+            const calc20PCWorseThanTarget = (extent, target, keepInRange=false) => {
+                const domainDiff = extent[1] - extent[0];
+                //note - if decr4asing, then diff will be neg, so subtracting a neg will be an increase
+                const _20PC = 0.1 * domainDiff;
+                const _20PCWorseThanTarget = target - _20PC;
+                //if decreasing, then its out of range if the value is above extent[0], otherwise it is if its less than
+                const outOfRange = domainDiff < 0 ? _20PCWorseThanTarget > extent[0] : _20PCWorseThanTarget < extent[0];
+                return outOfRange && keepInRange ? extent[0] : _20PCWorseThanTarget;
+            }
+            const isMaintenanceTarget = isNumber(target) && isNumber(start) && (order === "highest is best" ? target <= start : target >= start);
+            //note - this is used for maintancenGoals, so we assume if no current then assume its still at the required value
+            const maintenanceTargetHasSlipped = isNumber(current) && isNumber(target) && (order === "highest is best" ? target > current : target < current);
+            
             //Bar datums
             const dataStart = order === "highest is best" ? min : max;
             const dataEnd = order === "highest is best" ? max : min;
@@ -56,13 +65,10 @@ export default function kpisLayout(){
                 barStart = dataStart
                 barEnd = dataEnd;
             }else{
-                barStart = typeof start === "number" ? start : dataStart;
-                barEnd = typeof target === "number" ? target : dataEnd;
+                //3 cases - target worse than start, no start value, or normal
+                barStart = isMaintenanceTarget ? calc20PCWorseThanTarget([dataStart, dataEnd], target) : (isNumber(start) ? start : dataStart);
+                barEnd = isNumber(target) ? target : dataEnd;
             }
-
-            //helper
-            //const best = (value1, value2) => order === "highest is best" ? d3.max([value1, value2]) : d3.min([value1, value2]);
-            //const worst = (value1, value2) => order === "highest is best" ? d3.min([value1, value2]) : d3.max([value1, value2]);
 
             const currentBarDatum = {
                 progressBarType:"dataset",
@@ -73,8 +79,10 @@ export default function kpisLayout(){
                 isAchieved:!!values.achieved,
                 startValue: barStart,
                 endValue: current,
-                fill:colours.current,
-                format
+                fill:isMaintenanceTarget ? colours.currentMaintanence : colours.current,
+                opacity:isMaintenanceTarget ? 0.5 : 1,
+                format,
+                isMaintenanceTarget
             }
 
             const targetBarDatum = {
@@ -85,7 +93,7 @@ export default function kpisLayout(){
                 startValue:barStart,
                 endValue:target,
                 fill:colours.target,
-                format
+                format,
             }
 
             //steps bar data
@@ -149,13 +157,19 @@ export default function kpisLayout(){
                     withInnerValue:true,
                 }
             ]
+
+            //@todo - move out of here and move all kpiprogrss stuff into same file as profilePrgStatus stuff
+            const progressStatusForMaintenanceTarget = () => {
+                if(maintenanceTargetHasSlipped){ return "offTrack"; }
+                return "achieved";
+            }
             //@todo - put different comparisons into current card eg compared to club expectations, or all players avg
-            if(milestoneId === "profile-5" && (key === "admin" || key === "pressUps-reps")){
+            //if(milestoneId === "profile-5" && (key === "admin" || key === "pressUps-reps")){
                 //console.log("kpi key", key)
-                //console.log("stepsValues-----------------------------------", stepsValues)
+                //console.log("value", values)
                 //console.log("prog stepPro", progressStatus, stepsProgressStatus)
                 //need to loko at why expected steps is 0
-            }
+            //}
 
             const comparisonTooltipsData = isCurrent ? [] : [
                 { 
@@ -180,7 +194,7 @@ export default function kpisLayout(){
                     location:"end",
                     position:2,
                     rowNr: 1, y: 1, current,
-                    status:statProgressStatus,
+                    status:isMaintenanceTarget? progressStatusForMaintenanceTarget() : statProgressStatus,
                     icons: { achieved: ball, onTrack: shiningCrystalBall, offTrack: nonShiningCrystalBall, noTarget:emptyGoal },
                     editable:false,//isCurrent || isFuture,
                     withDragValueAbove:true,
@@ -223,7 +237,9 @@ export default function kpisLayout(){
                     key:"expected", milestoneId, kpiKey:key, datasetKey, statKey,
                     //temp disable when its an endTooltip
                     //dont display if past or no future profiles
-                    shouldDisplay:(status, editing, displayFormat) => status === "open" && isFuture && isNumber(expected) && displayFormat !== "steps", 
+                    //dont display if its a maintance goal ie taregt is same or worse then start
+                    shouldDisplay:(status, editing, displayFormat) => 
+                        status === "open" && isFuture && isNumber(expected) && displayFormat !== "steps" && !isMaintenanceTarget, 
                     location:"above",
                     rowNr: 1, y: 1, current,
                     value: expected, x:expected,

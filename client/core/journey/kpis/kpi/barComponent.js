@@ -209,12 +209,14 @@ export default function barComponent() {
                                         .duration(MED_SLIDE_DURATION)
                                             .attr("width", sectionWidth || 0)
                                             .attr("height", barHeight)
-                                            .attr("fill", d.fill);
+                                            .attr("fill", d.fill)
+                                            .attr("opacity", d.opacity || 1);
                                 }else{
                                     d3.select(this).select("rect.bar-section")
                                         .attr("width", sectionWidth || 0)
                                         .attr("height", barHeight)
-                                        .attr("fill", d.fill);
+                                        .attr("fill", d.fill || "transparent")
+                                        .attr("opacity", d.opacity || 1);
                                 }
                             })
 

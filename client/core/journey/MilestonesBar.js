@@ -275,11 +275,8 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
 
   //const onSetEditingReactComponent = useCallback((newEditing) => {
   const onSetEditingReactComponent = newEditing => {
-    console.log("onSetERC........", editingReactComponent)
-    console.log("new", newEditing)
     const changedProfile = editingReactComponent?.milestoneId !== newEditing?.milestoneId;
     const changedKey = editingReactComponent?.key !== newEditing?.key;
-    //console.log("editing? changed?",!!editingReactComponent, changedProfile || changedKey)
     //save any existing value
     if(editingReactComponent && (changedProfile || changedKey)){
       const { milestoneId, key, value } = editingReactComponent;
@@ -291,7 +288,6 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
   //}, [editingReactComponent]);
 
   const handleSaveForm = useCallback(e => {
-      console.log("save form.......", form)
       if(form.formType === "step"){
         handleUpdateStep(form.milestoneId, form.kpiKey, form.value)
       }
@@ -386,7 +382,7 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
   useEffect(() => {
     //console.log("uE layout-------------")
     if(asyncProcesses.creating.datapoints){ 
-      console.log("saving datapoint so dont update")
+      //saving datapoint so dont update
       return; 
     }
     layout
@@ -404,7 +400,7 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
 
   useEffect(() => {
     if(asyncProcesses.creating.datapoints){ 
-      console.log("saving datapoint so dont update")
+      //saving datapoint so dont update
       return; 
     }
     const totalAvailHeightStr = d3.select("div.milestone-bar-root").style("height");
@@ -434,15 +430,6 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
       .onSetSelectedMilestone(setSelectedMilestone)
       .selectedKpi(selectedKpi?.key)
       .onSetSelectedKpi(setSelectedKpi)
-      /*
-      .onSetSelectedStep((stepId => {
-        console.log("setStep", stepId)
-        console.log("selectedM", selectedMilestone)
-        console.log("selectedKpi", selectedKpi)
-        //setSelectedStep
-        //setForm
-      })
-      */
       .onSetKpiFormat(setKpiFormat)
       .onSelectKpiSet((e,kpi) => { 
           onSelectKpiSet(kpi); 
@@ -504,7 +491,7 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
   useEffect(() => {
     //console.log("uE render-------------")
     if(asyncProcesses.creating.datapoints){ 
-      console.log("saving datapoint so dont update")
+      //saving datapoint so dont update
       return; 
     }
     d3.select(containerRef.current).call(milestonesBar);
