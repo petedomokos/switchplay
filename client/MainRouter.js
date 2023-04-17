@@ -87,6 +87,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
       <Switch>
           <Route path="/profile" component={Profile}/>
           <PrivateRoute path="/import" component={ImportDataContainer} />
+          <PrivateRoute path="/datasets/new" component={CreateDatasetContainer}/>
           {jwt ?
             <Route exact path="/" component={UserHomeContainer} />
             :

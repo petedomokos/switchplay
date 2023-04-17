@@ -196,6 +196,8 @@ export default function kpisComponent() {
                 displayFormat = "steps";
             }
 
+            const listClipPathId = `kpis-list-clip-${data.milestoneId}`;
+
             //we dont want lack of a target or numbers to affect positioning of some progressBars differently, so we will work out the 
             //nr of end tooltips and of numbers here and pass it through as a setting
 
@@ -297,10 +299,8 @@ export default function kpisComponent() {
                         listG
                             .append("defs")
                                 .append('clipPath')
-                                    .attr('id', "kpis-list-clip")
+                                    .attr('id', listClipPathId)
                                         .append('rect')
-                                            .attr('width', 1000)
-                                            .attr('height', listHeight);
 
                         contentsG
                             .append("g")
@@ -327,7 +327,11 @@ export default function kpisComponent() {
                         //todo - 1. put clipPath in place
                         //2. put extent in place so it doesnt scroll beyond the start and end 
                         const listG = contentsG.select("g.kpis-list")
-                            .attr('clip-path', "url(#kpis-list-clip)")
+                            .attr('clip-path', `url(#${listClipPathId})`)
+
+                        listG.select("defs").select(`clipPath#${listClipPathId}`).select("rect")
+                            .attr('width', 1000)
+                            .attr('height', listHeight);
 
                         if(scrollEnabled){
                             //this is a temp fix - we need to be able to toggle it 

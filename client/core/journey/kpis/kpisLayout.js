@@ -11,6 +11,7 @@ export default function kpisLayout(){
     let withDeficitBar = false;
     let allKpisActive = false;
     let noKpisActive = false;
+    let milestoneId = "";
 
     function update(data){
         //flag
@@ -332,7 +333,7 @@ export default function kpisLayout(){
             }
         })
 
-        return { kpisData }
+        return { kpisData, milestoneId }
     }
 
     update.format = function (value) {
@@ -350,6 +351,11 @@ export default function kpisLayout(){
     update.withDeficitBar = function (value) {
         if (!arguments.length) { return withDeficitBar; }
         withDeficitBar = value;
+        return update;
+    };
+    update.milestoneId = function (value) {
+        if (!arguments.length) { return milestoneId; }
+        milestoneId = value;
         return update;
     };
     update.allKpisActive = function (value) {

@@ -12,11 +12,14 @@ import {Link, withRouter} from 'react-router-dom'
 import { slide as ElasticMenu } from 'react-burger-menu'
 import { show, hide } from './journey/domHelpers';
 
-const isActive = (history, path) => {
-  if (history.location.pathname == path)
-    return {color: '#ff4081'}
-  else
-    return {color: '#ffffff'}
+const activeStyles = { color: "#ff4081" }
+const inactiveStyles = { color: "#ffffff" };
+const getDynamicStyles = (history, path) => {
+  if (history.location.pathname == path){
+    return activeStyles;
+  }else{
+    return inactiveStyles;
+  }
 }
 
 
@@ -107,21 +110,21 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
         <Link to="/">
           <IconButton 
               aria-label="Home" 
-              style={isActive(history, "/")}>
+              style={getDynamicStyles(history, "/")}>
               <HomeIcon
                   className={classes.homeIcon}/>
           </IconButton>
         </Link>
-        <Link to="/profile">
+        <Link to="/datasets/new">
             <Button 
               className={classes.menuBtn}
-              style={isActive(history, "/profile")}>Profile
+              style={getDynamicStyles(history, "/datasets/new")}>Dataset+
             </Button>
         </Link>
         {user && <Link to="/import">
             <Button 
               className={classes.menuBtn}
-              style={isActive(history, "/import")}>Import
+              style={getDynamicStyles(history, "/import")}>Import
             </Button>
         </Link>}
         {
@@ -129,13 +132,13 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
             <Link to="/signup">
               <Button
                 className={classes.menuBtn}
-                style={isActive(history, "/signup")}>Sign up
+                style={getDynamicStyles(history, "/signup")}>Sign up
               </Button>
           </Link>
           <Link to="/signin">
             <Button 
               className={classes.menuBtn}
-              style={isActive(history, "/signin")}>Sign In
+              style={getDynamicStyles(history, "/signin")}>Sign In
             </Button>
           </Link>
           </span>)
@@ -145,7 +148,7 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
             <Link to={"/user/" + auth.isAuthenticated().user._id}>
               <Button
                 className={classes.menuBtn}
-                style={isActive(history, "/user/" + auth.isAuthenticated().user._id)}>My Profile
+                style={getDynamicStyles(history, "/user/" + auth.isAuthenticated().user._id)}>My Profile
               </Button>
             </Link>
           </span>)
@@ -155,7 +158,7 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
             <Link to={"/user/" + auth.isAuthenticated().user._id+"/dashboard"}>
               <Button
                 className={classes.menuBtn}
-                style={isActive(history, "/user/" + auth.isAuthenticated().user._id+"/dashboard")}>My Dashboard
+                style={getDynamicStyles(history, "/user/" + auth.isAuthenticated().user._id+"/dashboard")}>My Dashboard
               </Button>
             </Link>
           </span>)
@@ -164,7 +167,7 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
           user && (<span>
             <Button
               className={classes.menuBtn}
-              color="inherit" 
+              style={inactiveStyles}
               onClick={() => onSignout(history)}>Sign out
             </Button>
           </span>)

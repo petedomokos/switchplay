@@ -25,6 +25,17 @@ const generalKpis = [
  - All kpis can have steps given to them for a particular profile
 */
 const userKpis = {
+   //pd
+   "643d79844aa4af07d60f394c":[
+      { key:"admin", name:"Admin" },
+      { key:"money", name:"Money" },
+      { key:"fitness", name:"Fitness" },
+      { key:"customers", name:"Customers" },
+      { key:"product", name:"Product" },
+      { key:"fitness1", name:"Fitness1" },
+      { key:"customers1", name:"Customers1" },
+      { key:"product1", name:"Product1" },
+   ],
    //Lewis
    "606b2f1f3eecde47d8864798":[
       { datasetKey:"pressUps", statKey:"reps" },

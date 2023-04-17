@@ -30,6 +30,7 @@ export default function milestonesLayout(){
 
             if(dataType === "profile"){
                 myKpisLayout
+                    .milestoneId(m.id)
                     .format(format)
                     .datasets(datasets)
                     .allKpisActive(m.isActive);
