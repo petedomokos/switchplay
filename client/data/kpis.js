@@ -37,6 +37,18 @@ const userKpis = {
       { key:"customers", name:"Customers" },
       { key:"product", name:"Product" },
    ],
+   //pd heroku
+   "643d81262b7e4f0015e55bb6":[
+      { key: "sleep", name:"Sleep" },
+      { key:"meditation", name:"Meditation" },
+      { key:"nutrition", name:"Nutrition" },
+      { key:"exercise", name:"Exercise" },
+      { key: "social", name:"Social" },
+      { key:"admin", name:"Admin" },
+      { key:"money", name:"Money" },
+      { key:"customers", name:"Customers" },
+      { key:"product", name:"Product" },
+   ],
    //Lewis
    "606b2f1f3eecde47d8864798":[
       { datasetKey:"pressUps", statKey:"reps" },
