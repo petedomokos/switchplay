@@ -597,7 +597,7 @@ export const system = (state={}, act) => {
 			//if temp, then it is this journey so update with its actual id
 			return {
 				...state,
-				activeJourney:activeJourney === "temp" ? _id : activeJourney
+				activeJourney:state.activeJourney === "temp" ? _id : state.activeJourney
 			}
 		}
 		case C.SAVE_JOURNEY:{

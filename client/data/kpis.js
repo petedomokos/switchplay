@@ -27,14 +27,15 @@ const generalKpis = [
 const userKpis = {
    //pd
    "643d79844aa4af07d60f394c":[
+      { key: "sleep", name:"Sleep" },
+      { key:"meditation", name:"Meditation" },
+      { key:"nutrition", name:"Nutrition" },
+      { key:"exercise", name:"Exercise" },
+      { key: "social", name:"Social" },
       { key:"admin", name:"Admin" },
       { key:"money", name:"Money" },
-      { key:"fitness", name:"Fitness" },
       { key:"customers", name:"Customers" },
       { key:"product", name:"Product" },
-      { key:"fitness1", name:"Fitness1" },
-      { key:"customers1", name:"Customers1" },
-      { key:"product1", name:"Product1" },
    ],
    //Lewis
    "606b2f1f3eecde47d8864798":[
