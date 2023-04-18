@@ -84,9 +84,30 @@ export const JOURNEY_SETTINGS_INFO = {
             { key:"dataExpiryTimeUnits", value:"years", label:"years" }
         ]
     },
+     //note - this does not apply to newly created pastcards - these always use the prevCard date as a start date, 
+    //and if no prev card, then 1 month before the card date.
+    defaultProfileStartDate:{
+        //note - this does not update, it is set at the time of the cards creation
+        label:"Default Start Date",
+        desc:"...",
+        valueType:"string",
+        positionInCurrentCardSettings:5,
+        displayFormat:"buttons",
+        options:[
+            //note - fixed means it is set at the time of creation and then doesnt change, 
+            //       even if new cards are created, deleted or move from future to past
+            //note - both lastPast and chain settings default to creationDate if no pastCard (or no prevcard for chain)
+            { key:"defaultProfileStartDate", value: "creationDate", label:"Creation Date", desc:"desc..." },
+            { key:"defaultProfileStartDate", value: "lastPastFixed", label:"Most Recent Past Card Date (fixed)", desc:"desc..." },
+            { key:"defaultProfileStartDate", value: "lastPastDynamic", label:"Most Recent Past Card Date (dynamic)", desc:"desc..." },
+            { key:"defaultProfileStartDate", value: "prevCardFixed",/*defaults to last session*/ label:"Previous Card (fixed)", desc:"desc..." },
+            { key:"defaultProfileStartDate", value: "prevCardDynamic",/*defaults to last session*/ label:"Previous Card (dynamic)", desc:"desc..." },
+        ]
+    },
 }
 
 export const JOURNEY_SETTINGS = [
+    { key:"defaultProfileStartDate", defaultValue: "creationDate" },
     { key:"currentValueDataMethod", defaultValue: "best" },
     { key:"achievedValueDataMethod", defaultValue: "best" },
     { key:"dataExpiryTimeNumber", defaultValue: 2 },

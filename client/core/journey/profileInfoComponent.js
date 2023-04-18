@@ -410,7 +410,6 @@ export default function profileInfoComponent() {
                 .append("g")
                     .attr("class", "text-info")
                     .each(function(d){
-    
                         const textInfoG = d3.select(this);
 
                         textInfoG.append("rect")

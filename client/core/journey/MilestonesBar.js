@@ -9,6 +9,7 @@ import Button from '@material-ui/core/Button'
 import SelectDate from "../../util/SelectDate";
 import Settings from "../../util/Settings";
 import Goal from "./Goal";
+import MilestoneDate from "./MilestoneDate";
 import Photos from "./Photos";
 import StepForm from "./StepForm";
 import milestonesLayout from "./milestonesLayout";
@@ -166,7 +167,7 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
   const [editingReactComponent, setEditingReactComponent] = useState("");
   const [editingSVGComponent, setEditingSVGComponent] = useState(null);
   const [form, setForm] = useState(null);
-  //console.log("MBar", form?.formType)
+  //console.log("MBar", form)
   const formMilestone = allMilestones.find(m => m._id === form?.milestoneId);
   let getSelectedPhotoId = () => {
     if(!form?.formType === "photo"){ return ""; }
@@ -259,10 +260,10 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
 
   const stringifiedProfiles = JSON.stringify(profiles);
 
-  const handleDateChange = useCallback(e => {
+  const handleDateChange = useCallback(dateKey => e => {
     if(!e.target?.value){ return; }
-    const value = e.target.value; //must declare it before the setform call as the cb messes the timing of updates up
-    setForm(prevState => ({ ...prevState, hasChanged:true, value }))
+    const dateValue = e.target.value; //must declare it before the setform call as the cb messes the timing of updates up
+    setForm(prevState => ({ ...prevState, hasChanged:true, value:{ ...prevState.value, [dateKey]:dateValue } }))
   }, [form]);
 
   const handleClickSettingOption = useCallback((key, value) => {
@@ -297,9 +298,21 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
         return; 
       }
       if(form.formType === "date"){
+        console.log("save form", form)
+        const newStartDateValue = form.value.startDate;
+        const newDateValue = form.value.date;
         //new pos of milestone
         const now = new Date();
-        const newDate = new Date(form.value);
+        const newDate = new Date(newDateValue);
+        newDate.setUTCHours(21);
+        const newStartDate = new Date(newStartDateValue);
+        newStartDate.setUTCHours(21);
+        if(newDate < newStartDate){
+          alert("The start date must be earlier than the target date.")
+          return;
+        }
+
+        //adjust the card order if required
         const newDateIsPast = newDate < now;
         let newPosition;
         if(newDateIsPast){
@@ -323,7 +336,7 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
           .updateDatesShown(allMilestones);
 
         setForm(null);
-        onSaveInfo(form.milestoneId, "date")(form.value);
+        onSaveInfo(form.milestoneId, "date")({ ...form.value, date:newDate, startDate:newStartDate });
         return;
       }
       //all other cases, just cancel
@@ -586,21 +599,10 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
                   {form.more && <div>more.....</div>}
                 </>
                 :
-                <>
-                  <SelectDate
-                    classes={classes}
-                    withLabel={false}
-                    dateFormat="YYYY-MM-DD"
-                    type="date"
-                    defaultValue={form.value}
-                    handleChange={handleDateChange}/>
-
-                  {form.hasChanged && !shouldAutosaveForm &&
-                    <div className={classes.formCtrls}>
-                      <Button color="primary" variant="contained" onClick={handleCancelForm} className={classes.cancel}>Cancel</Button>
-                      <Button color="primary" variant="contained" onClick={handleSaveForm} className={classes.submit}>Save</Button>
-                    </div>}
-                </>
+                <MilestoneDate 
+                  date={form.value.date} startDate={form.value.startDate} classes={classes}
+                  handleDateChange={handleDateChange} handleCancelForm={handleCancelForm} handleSaveForm={handleSaveForm}
+                  hasChanged={form.hasChanged} shouldAutosaveForm={shouldAutosaveForm} />
               )
             }
             {form?.formType === "photo" &&

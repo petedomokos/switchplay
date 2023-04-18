@@ -119,10 +119,14 @@ export const transformJourneyForClient = journey => {
 		contracts:contracts? contracts.map(c => ({
 			...c,
 			date:new Date(c.date),
+			created:c.created ? new Date(c.date) : null,
+			customStartDate:c.customStartDate ? new Date(c.customStartdate) : null
 		})) : [],
 		profiles:profiles? profiles.map(p => ({
 			...p,
 			date:new Date(p.date),
+			created:p.created ? new Date(p.date) : null,
+			customStartDate:p.customStartDate ? new Date(p.customStartdate) : null,
 			yPC:+p.yPC,
 			profileKpis:p.profileKpis || []
 		})) : [],

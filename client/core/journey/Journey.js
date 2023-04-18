@@ -177,9 +177,10 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
 
   const handleCreateMilestone = useCallback((dataType, date) => {
     if(dataType === "profile"){
-      handleCreateProfile({ date });
+      //creation date is needed before it returns from server so we set it here
+      handleCreateProfile({ date, created:new Date() });
     }else{
-      handleCreateContract({ date });
+      handleCreateContract({ date, created:new Date() });
     }
   }, [stringifiedProfiles, stringifiedContracts, user._id]);
 
@@ -291,13 +292,13 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   }, [stringifiedProfiles, user._id]);
 
   const onSaveInfo = useCallback((profileId, key) => value => {
-    console.log("saveinfo", profileId, key, value);
+    //todo - adjust as we are now sending a date in the form raher than a string, and
+    //also we now have an object that has dtae and startdate, and need to save both 
+    //console.log("saveinfo", profileId, key, value);
     //special case - date need formatting
     if(key === "date"){
-      //@todo - remove creation of Date here - can just store as a string
-      const newDate = new Date(value);
-      newDate.setUTCHours(21);
-      const _profiles = profiles.map(p => p.id === profileId ? ({ ...p, date: newDate }) : p);
+      //value will contain date and startDate
+      const _profiles = profiles.map(p => p.id === profileId ? ({ ...p, ...value }) : p);
       save({ ...data, profiles:_profiles });
       return;
     }else if(key === "photo"){

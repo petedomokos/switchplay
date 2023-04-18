@@ -721,7 +721,7 @@ export default function milestonesBarComponent() {
                                 const newDate = prev && next ? interpolator(0.5) :
                                     (prev ? addMonths(1, prev.date) : addMonths(-1, next.date))
 
-                                newDate.setUTCHours(22); 
+                                newDate.setUTCHours(21); 
                                 newDate.setUTCMinutes(0); 
                                 newDate.setUTCSeconds(0); 
                                 newDate.setUTCMilliseconds(0); 
@@ -936,7 +936,7 @@ export default function milestonesBarComponent() {
                         .onClickInfo(function(e, d, data, desc, location){
                             ignoreNextWrapperClick = true;
                             const milestone = positionedData.find(m => m.id === data.id);
-                            const { id, x, y, date, width, height, dataType } = milestone;
+                            const { id, x, y, date, startDate, width, height, dataType } = milestone;
                             if(desc === "date"){
                                 //need to calc left so it includes all transforms eg offset
                                 const k = isSelected(id) ? availableScale : 1;
@@ -948,7 +948,11 @@ export default function milestonesBarComponent() {
                                     left: currentSliderOffset + x - (width/2) *k, 
                                     top: topBarHeight + y - (height/2) * k
                                 }
-                                const dateForm = id === "current" ? { ...commonProps, key:"settings" } : { ...commonProps, value: date };
+                                const dateForm = id === "current" ? { ...commonProps, key:"settings" } : 
+                                    { 
+                                        ...commonProps, 
+                                        value: { date, startDate }
+                                    };
 
                                 //hide date-info for this milestone, and show others
                                 milestonesG.selectAll("g.milestone")

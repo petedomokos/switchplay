@@ -283,6 +283,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
     const { id, customTargets=[], isCurrent, profileKpis=[] } = profile;
     const date = typeof profile.date === "string" ? new Date(profile.date) : profile.date;
     const created = typeof profile.created === "string" ? new Date(profile.created) : profile.created;
+    const customStartDate = !profile.customStartDate ? null : (typeof profile.customStartDate === "string" ? new Date(profile.customStartDate) : profile.customStartDate);
     const milestoneId = id;
     //startDate
     //helper
@@ -291,6 +292,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
     const expiryUnits = settings.find(s => s.key === "dataExpiryTimeUnits").value;
     const goBackByExpiryDuration = goBackByExpiryDurationFromDate(expiryDuration, expiryUnits);
 
+    const defaultProfileStartDate = settings.find(s => s.key === "defaultProfileStartDate");
     const restrictDataToWindow = settings.find(s => s.key === "dataToIncludeInMilestones").value === "fromStart";
     const currentValueDataMethod = settings.find(s => s.key === "currentValueDataMethod").value
     const achievedValueDataMethod = settings.find(s => s.key === "achievedValueDataMethod").value
@@ -311,29 +313,40 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
     //the target for a previous future card
 
     //note - after this line, we never refer directly to prevProfile or lastPastProfile
-    const prevProfileToUse = isPast ? prevProfile : lastPastProfile;
-    const profileStart = {};
-    if(profile.startDate){
-        profileStart.type = "custom";
-        profileStart.date = profile.startDate;
-    }else if(prevProfileToUse){
+    //const prevProfileToUse = isPast ? prevProfile : lastPastProfile;
+    //profile.startDate is set on the card at the time of creation if it was set to creationDate, pastCardFixed, or prevCardFixed
+    //the startDateSetting is also stored on the profile so it is not affected by any change to the setting after it's creation
+    //profile.startdate is also set at any time that the user changes the date manually
+
+    const startDate = customStartDate || (created < date ? created : addMonths(-1, date))
+    //const startDateType = customStartDate ? "custom" : (created < date ? "creationDate" : "monthBefore");
+    startDate.setUTCHours(21); 
+    startDate.setUTCMinutes(0); 
+    startDate.setUTCSeconds(0); 
+    startDate.setUTCMilliseconds(0); 
+    /*else if(prevProfileToUse){
         profileStart.type = "prev";
+        //if this profile is past, then it will use the prev profile to it (rather than the lastPast
+        //but it doesnt really matter - i think we shold remove this option as it complicates things.
+        //for past profiles, there is either a custom date, or none at all. Unless teh user specifies in their
+        //settings that they want to chain them (but this option cant be changed atm)
         profileStart.prevProfileType = isPast ? "prev" : "lastPast";
         profileStart.date = prevProfileToUse.date;
     }else{
+        //there is no custom startDate, and no pastProfile or prevProfile to base their start date on
         profileStart.type = "default";
         const creationDate = new Date(created);
         profileStart.date = creationDate < date ? creationDate : goBackByExpiryDuration(date);
-        //all profile dates default to 22:00
-        profileStart.date.setUTCHours(22); 
+        //all profile dates default to 21:00
+        profileStart.date.setUTCHours(21); 
         profileStart.date.setUTCMinutes(0); 
         profileStart.date.setUTCSeconds(0); 
         profileStart.date.setUTCMilliseconds(0); 
-    }
+    }*/
    
     let dateRange;
     if(restrictDataToWindow){
-        dateRange = calcDateRange(profileStart.date, date);
+        dateRange = calcDateRange(startDate, date);
     }else if(isFuture){
         dateRange = calcDateRange(goBackByExpiryDuration(now), now)
     }else{
@@ -352,9 +365,8 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             ...profileGoal
         },
         dateCount:calcDateCount(now, date),
-        start:profileStart,
-        //legacy  - @todo - remove references to startDate for profile, replace with start.date
-        startDate:profileStart.date, //must remove
+        startDate,
+        //startDateType,
         dateRange,
         datePhase,
         isPast,
@@ -400,16 +412,16 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             const lastDataUpdate = isPast ? null : d3.max(dateValuePairs, d => d[0]);
 
             //START
-            let start;
-            if(profileStart.type === "custom" || profileStart.type === "default"){
-                const startDateRange = calcDateRange(goBackByExpiryDuration(profileStart.date), profileStart.date);
-                start = {
-                    ...profileStart,
-                    //note - we pass in the achieved data method, as this will always be in the past
-                    ...calcCurrent(stat, datapoints, startDateRange, achievedValueDataMethod), //put params in for the custom startDate
-                    completion:0
-                }
-            }else{
+            //let start;
+            //if(profileStart.type === "custom" || profileStart.type === "default"){
+            const startDateRange = calcDateRange(goBackByExpiryDuration(startDate), startDate);
+            const start = {
+                date:startDate,
+                //note - we pass in the achieved data method, as this will always be in the past
+                ...calcCurrent(stat, datapoints, startDateRange, achievedValueDataMethod), //put params in for the custom startDate
+                completion:0
+            }
+            /*}else{
                 //its based on a prev profile 
                 //@todo - date should actually be the date of the last datapoint entered within the relevant window
                 //rather than the end date of the profile, so that it is more accurate when making predictions
@@ -418,7 +430,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                     { ...profileStart, ...prevValuesToUse.achieved, completion:0 } 
                     : 
                     { ...profileStart, ...prevValuesToUse.start, completion:0 } //date is overriden in this case    
-            }
+            }*/
 
             //TARGET
             const customTargetsForStat = customTargets
@@ -483,7 +495,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
 
             //steps
             const log = false;//milestoneId === "profile-5" && key === "longJump-distance-left";
-            const stepsValues = calcStepsValues(profileStart.date, date, steps);
+            const stepsValues = calcStepsValues(startDate, date, steps);
             if(log){
                 console.log("kpi...............................", key)
                 //console.log("steps", steps)
@@ -514,7 +526,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 ...kpi, key, milestoneId,
                 //dates
                 date, 
-                startDate: profileStart.date, //this may be different from values.start.date
+                startDate, //this may be different from values.start.date
                 dateRange, 
                 datePhase,
                 isPast, isCurrent, isFuture, isActive,
@@ -561,20 +573,11 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
     //@todo - use session id (or date and time). For now, default to the last session date
     const specificDate = currentValueDataMethod === "specificSession" ? getLastSessionDate(datasets) : null;
 
-    //10 was scored in 20th apr 2021 so not within 3 months and not since last card
-    //it seems startdate is more than 3 months ago
-    //note - current always only takes values from last 3 months
-    //@todo - implement other starts for current card eg this week / this season etc
-    const profileStart = {
-        type:"default",
-        date:goBackByExpiryDuration(now)
-    };
+    const startDate = goBackByExpiryDuration(now);
     const datePhase = "current";
-    const dateRange = calcDateRange(profileStart.date, now);
+    const dateRange = calcDateRange(startDate, now);
     return {
-        start:profileStart,
-        //legacy - remove
-        startDate:profileStart.date,
+        startDate,
         settings,
         specificDate,
         date:now, dateRange, datePhase,
@@ -629,7 +632,7 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
                 milestoneId,
                 //dates
                 date:now, 
-                startDate:profileStart.date,
+                startDate,
                 dateRange, datePhase, isCurrent:true,
                 order:stat.order,
                 accuracy,
