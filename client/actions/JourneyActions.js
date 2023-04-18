@@ -31,6 +31,7 @@ const transformJourneyForServer = journey => {
 				media:p.media,
 				created:p.created,
 				date:p.date,
+				customStartDate:p.customStartDate,
 				yPC:p.yPC,
 				customTargets:p.customTargets,
 				customExpected:p.customExpected,
@@ -120,13 +121,13 @@ export const transformJourneyForClient = journey => {
 			...c,
 			date:new Date(c.date),
 			created:c.created ? new Date(c.date) : null,
-			customStartDate:c.customStartDate ? new Date(c.customStartdate) : null
+			customStartDate:c.customStartDate ? new Date(c.customStartDate) : null
 		})) : [],
 		profiles:profiles? profiles.map(p => ({
 			...p,
 			date:new Date(p.date),
 			created:p.created ? new Date(p.date) : null,
-			customStartDate:p.customStartDate ? new Date(p.customStartdate) : null,
+			customStartDate:p.customStartDate ? new Date(p.customStartDate) : null,
 			yPC:+p.yPC,
 			profileKpis:p.profileKpis || []
 		})) : [],

@@ -294,7 +294,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   const onSaveInfo = useCallback((profileId, key) => value => {
     //todo - adjust as we are now sending a date in the form raher than a string, and
     //also we now have an object that has dtae and startdate, and need to save both 
-    //console.log("saveinfo", profileId, key, value);
+    console.log("saveinfo", profileId, key, value);
     //special case - date need formatting
     if(key === "date"){
       //value will contain date and startDate

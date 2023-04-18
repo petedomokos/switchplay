@@ -263,7 +263,13 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
   const handleDateChange = useCallback(dateKey => e => {
     if(!e.target?.value){ return; }
     const dateValue = e.target.value; //must declare it before the setform call as the cb messes the timing of updates up
-    setForm(prevState => ({ ...prevState, hasChanged:true, value:{ ...prevState.value, [dateKey]:dateValue } }))
+    if(dateKey === "startDate"){
+      //save it as a startdate and a custom date too
+      setForm(prevState => ({ ...prevState, hasChanged:true, value:{ ...prevState.value, startDate:dateValue, customStartDate:dateValue } }))
+    }else{
+      //its just a date
+      setForm(prevState => ({ ...prevState, hasChanged:true, value:{ ...prevState.value, date:dateValue } }))
+    }
   }, [form]);
 
   const handleClickSettingOption = useCallback((key, value) => {
@@ -336,7 +342,13 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
           .updateDatesShown(allMilestones);
 
         setForm(null);
-        onSaveInfo(form.milestoneId, "date")({ ...form.value, date:newDate, startDate:newStartDate });
+        if(form.value.customStartDate){
+          //startDate has been changed so save it as a custom, aswell as the date in case it has changed
+          onSaveInfo(form.milestoneId, "date")({ date:newDate, customStartDate:newStartDate });
+        }else{
+          //only the date has changed
+          onSaveInfo(form.milestoneId, "date")({ date:newDate });
+        }
         return;
       }
       //all other cases, just cancel
