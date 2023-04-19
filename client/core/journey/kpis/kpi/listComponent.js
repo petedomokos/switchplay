@@ -31,6 +31,7 @@ export default function listComponent() {
     let itemMargin = DIMNS.list.item.margin;
     let itemContentsWidth;
     let itemContentsHeight;
+    let newItemContentsHeight;
 
     //item dimns
     let symbolWidth = 20;
@@ -60,6 +61,7 @@ export default function listComponent() {
         itemWidth = contentsWidth;
         itemContentsWidth = itemWidth - itemMargin.left - itemMargin.right;
         itemContentsHeight = itemHeight - itemMargin.top - itemMargin.bottom;
+        newItemContentsHeight = 2 * itemHeight - itemMargin.top - itemMargin.bottom;
         //item dimns
         descWidth = contentsWidth - symbolWidth - checkboxWidth;
 
@@ -67,7 +69,8 @@ export default function listComponent() {
         descContentsWidth = descWidth - descMargin.left - descMargin.right;
         checkboxContentsWidth = checkboxWidth - checkboxMargin.left - checkboxMargin.right;
 
-        const actualListHeight = (data.length + 1) * itemHeight;
+        //newItem datum is twice the height of others, so +2
+        const actualListHeight = (data.length + 2) * itemHeight;
         scrollMin = -actualListHeight + contentsHeight;
     }
 
@@ -459,19 +462,19 @@ export default function listComponent() {
                         //hitbox  - takes up full item height, not just contents, but width doesnt include checkboxes
                         itemG.select("rect.item-hitbox")
                             .attr("width", itemWidth - itemMargin.right - checkboxWidth)
-                            .attr("height", itemHeight)
+                            .attr("height", d.id !== "newItem" ? itemHeight : itemHeight * 2)
 
                         //contents
                         itemContentsG.select("rect.item-bg")
                             .attr("width", itemContentsWidth)
-                            .attr("height", itemContentsHeight)
+                            .attr("height", d.id !== "newItem" ? itemContentsHeight : newItemContentsHeight)
                             .attr("fill", styles.item?.fill || COLOURS.step.list)
-                            .attr("stroke", styles.item.stroke || "none")
+                            .attr("stroke", d.id !== "newItem" ? (styles.item.stroke || "none") : "none")
                             .attr("stroke-width", styles.item.strokeWidth || 0.5);
                         
                         const symbolG = itemContentsG.select("g.symbol")
                             .attr("transform", (d,i) => `translate(${symbolMargin.left}, 0)`)
-                            .attr("display", d.id === "newItem" ? "none" : null)
+                            .attr("display", d.id !== "newItem" ? null : "none")
 
 
                         symbolG.select("rect")
@@ -489,17 +492,19 @@ export default function listComponent() {
 
                         descG.select("rect")
                             .attr("width", descContentsWidth)
-                            .attr("height", itemContentsHeight)
+                            .attr("height", d.id !== "newItem" ? itemContentsHeight : newItemContentsHeight)
                             .attr("fill","none")
                         
                         descG.select("text")
-                            .attr("y", itemContentsHeight * 0.8)
+                            .attr("y", d.id !== "newItem" ?  itemContentsHeight * 0.8 : newItemContentsHeight * 0.5)
                             .attr("font-size", styles.desc?.fontSize || itemContentsHeight * 0.5)
+                            .attr("dominant-baseline", d.id !== "newItem" ? null : "central")
+                            .attr("text-anchor", d.id !== "newItem" ? null : "middle")
                             .text(d.desc);
         
                         const checkboxG = itemContentsG.select("g.checkbox")
                             .attr("transform", (d,i) => `translate(${symbolWidth + descWidth + checkboxMargin.left}, 0)`)
-                            .attr("display", d.id === "newItem" ? "none" : null)
+                            .attr("display", d.id !== "newItem" ? null : "none")
 
                         checkboxG.select("rect")
                             .attr("width", checkboxContentsWidth)

@@ -78,13 +78,20 @@ export default function barComponent() {
             const scale = scales[i];
             
             //error mesg
-            if(!isNumber(sectionsData.find(d => d.key === "current").endValue)){
-                //to undefined means no data
-                errorMesgs[i] = NO_DATA_ERROR_MESG;
-            }else if(!isNumber(scale.domain()[0]) || !isNumber(scale.domain()[1])){
-                errorMesgs[i] = NO_MIN_MAX_ERROR_MESG;
+            if(displayFormat === "steps"){
+                if(stepsData.length === 0){
+                    errorMesgs[i] = "No Steps Yet"
+                }
+
             }else{
-                errorMesgs[i] = "";
+                if(!isNumber(sectionsData.find(d => d.key === "current").endValue)){
+                    //to undefined means no data
+                    errorMesgs[i] = NO_DATA_ERROR_MESG;
+                }else if(!isNumber(scale.domain()[0]) || !isNumber(scale.domain()[1])){
+                    errorMesgs[i] = NO_MIN_MAX_ERROR_MESG;
+                }else{
+                    errorMesgs[i] = "";
+                }
             }
         })
     }
@@ -125,7 +132,7 @@ export default function barComponent() {
                 .width((d,i) => dimns[i].contentsWidth)
                 .height((d,i) => dimns[i].contentsHeight)
                 .styles((d, i) => ({
-                    stroke:"grey",
+                    stroke:d.barData.start ? "grey" : "none",
                     strokeWidth:0.1,
                     fill:"transparent"
                 })), { transitionEnter, transitionUpdate} 
@@ -227,7 +234,7 @@ export default function barComponent() {
                 barContentsG.selectAll("text.error-mesg").data(errorMesgData)
                     .join("text")
                         .attr("class", "error-mesg")
-                        .attr("display", displayFormat !== "steps" ? null : "none")
+                        //.attr("display", displayFormat !== "steps" ? null : "none")
                         .attr("text-anchor", "middle")
                         .attr("dominant-baseline", "central")
                         .attr("pointer-events", "none")
