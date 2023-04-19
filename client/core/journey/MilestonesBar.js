@@ -530,6 +530,7 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
   }
 
   useEffect(() => {
+    console.log("reactdragUseEff")
     //todo - need to have the sme logic as in milestonesbarComponent for determining if its slideForward or back or nothing,
     //and call the relevant functions to slide it
     //This soln seems to work, but it breaks ifyou drag above or below the blue box.

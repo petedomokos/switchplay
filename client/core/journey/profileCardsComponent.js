@@ -645,7 +645,7 @@ export default function profileCardsComponent() {
                                 .style("top", `${y(d)}px`)
                                 */
                                 .style("width", `${contentsWidth}px`)
-                                .style("height", `${height/2}px`)
+                                .style("height", `${height/2 - 50}px`)
                                 .style("left", `${x(d) - contentsWidth/2}px`)
                                 .style("top", `${y(d)}px`)
                                 .style("transform-origin", "top center")
@@ -664,7 +664,7 @@ export default function profileCardsComponent() {
                             .style("top", `${y(d)}px`)
                             */
                             .style("width", `${contentsWidth}px`)
-                            .style("height", `${height/2}px`)
+                            .style("height", `${height/2 - 50}px`)
                             .style("left", `${x(d) - contentsWidth/2}px`)
                             .style("top", `${y(d)}px`)
                             .style("transform-origin", "top center")
