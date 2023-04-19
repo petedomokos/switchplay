@@ -215,7 +215,6 @@ export default function kpiComponent() {
     
         //open and closed contents
         kpiContentsG.each(function(data,i){
-            //console.log("data-----------------------", data)
             const { contentsHeight, titleDimns, progressBarWidth, progressBarHeight, progressBarMargin, 
                 kpiInfoWidth, kpiInfoHeight, historyWidth, historyHeight } = dimns[data.key];
 

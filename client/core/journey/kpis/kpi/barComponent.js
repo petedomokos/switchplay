@@ -80,7 +80,9 @@ export default function barComponent() {
             //error mesg
             if(displayFormat === "steps"){
                 if(stepsData.length === 0){
-                    errorMesgs[i] = "No Steps Yet"
+                    errorMesgs[i] = "No Steps Yet";
+                }else{
+                    errorMesgs[i] = null;
                 }
 
             }else{
@@ -138,6 +140,8 @@ export default function barComponent() {
                 })), { transitionEnter, transitionUpdate} 
             )
             .each(function(data,i){
+                if(data.key === "nutrition" && data.milrstoneId === "profile-1")
+                console.log("data", data)
                 const { barData } = data;
                 const { sectionsData, stepsData } = barData;
                 const { contentsWidth, contentsHeight, barHeight, stepWidth, stepHeight } = dimns[i];

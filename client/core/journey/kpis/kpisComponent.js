@@ -176,6 +176,8 @@ export default function kpisComponent() {
     //dom
     let containerG;
     let openedKpiDiv;
+    let listClipPathId;
+
     function kpis(selection, options={}) {
         //console.log("kpis update..............")
         const { transitionEnter=true, transitionUpdate=true, log } = options;
@@ -184,19 +186,15 @@ export default function kpisComponent() {
         selection.each(function (data,i) {
             //console.log("data", data)
             prevData = data;
-            const { kpisData } = data;
-            //useful references
-            if(kpisData[0]){
-                milestoneId = kpisData[0].milestoneId;
-                openedKpiDiv = d3.select(`div#opened-kpi-${milestoneId}`)
-            }
+            const { kpisData, milestoneId } = data;
+            openedKpiDiv = d3.select(`div#opened-kpi-${milestoneId}`)
             const nrDatasetKpis = kpisData.filter(kpi => kpi.datasetKey).length;
             const ctrlsData = withCtrls && milestoneId !== "current" && nrDatasetKpis !== 0 ? KPI_CTRLS(displayFormat) : [];
             if(nrDatasetKpis === 0){
                 displayFormat = "steps";
             }
 
-            const listClipPathId = `kpis-list-clip-${data.milestoneId}`;
+            listClipPathId = `kpis-list-clip-${data.milestoneId}`;
 
             //we dont want lack of a target or numbers to affect positioning of some progressBars differently, so we will work out the 
             //nr of end tooltips and of numbers here and pass it through as a setting
@@ -275,7 +273,6 @@ export default function kpisComponent() {
                                 .attr("fill", "transparent")
                                 .attr("stroke", "none");
                                 
-
                         const listG = contentsG.append("g").attr("class", "kpis-list");
                         listG
                             .append("rect")
@@ -327,7 +324,7 @@ export default function kpisComponent() {
                         //todo - 1. put clipPath in place
                         //2. put extent in place so it doesnt scroll beyond the start and end 
                         const listG = contentsG.select("g.kpis-list")
-                            .attr('clip-path', `url(#${listClipPathId})`)
+                            .attr('clip-path', `url(#${listClipPathId})`);
 
                         listG.select("defs").select(`clipPath#${listClipPathId}`).select("rect")
                             .attr('width', 1000)
@@ -605,7 +602,7 @@ export default function kpisComponent() {
                     .duration(AUTO_SCROLL_DURATION)
                         .attr("height", listHeight)
     
-                containerG.select("clipPath#kpis-list-clip").select('rect')
+                containerG.select(`clipPath#${listClipPathId}`).select('rect')
                     .transition()
                     .delay(CONTENT_FADE_DURATION)
                     .duration(AUTO_SCROLL_DURATION)
@@ -695,7 +692,7 @@ export default function kpisComponent() {
                 .duration(AUTO_SCROLL_DURATION)
                     .attr("height", expandedListHeight)
 
-            containerG.select("clipPath#kpis-list-clip").select('rect')
+            containerG.select(`clipPath#${listClipPathId}`).select('rect')
                 .transition()
                 .delay(CONTENT_FADE_DURATION)
                 .duration(AUTO_SCROLL_DURATION)

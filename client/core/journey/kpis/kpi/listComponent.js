@@ -8,7 +8,7 @@ import ctrlsComponent from '../../ctrlsComponent';
 import container from './container';
 import background from './background';
 import { getTransformationFromTrans } from '../../helpers';
-import { round } from "../../../../data/dataHelpers";
+import { round, isNumber } from "../../../../data/dataHelpers";
 import { Oscillator, fadeIn, remove } from '../../domHelpers';
 /*
 
@@ -117,7 +117,7 @@ export default function listComponent() {
     let prevData;
 
     function list(selection, options={}) {
-       // console.log("list",)
+       //console.log("list", selection.data())
         const { transitionEnter=true, transitionUpdate=true, log} = options;
 
         updateDimns(selection.data());
@@ -240,7 +240,11 @@ export default function listComponent() {
             let prospectivePosition;
             let initDraggedPos;
             //pairs of each items position in the array, along with its y transform value
-            const posYPairs = [...data.map((d,i) => [i, i * itemHeight]), [data.length, data.length * itemHeight]];
+            const posYPairs = [
+                ...data.map((d,i) => [i, i * itemHeight]), 
+                //newItem at end
+                [data.length, data.length * itemHeight]
+            ];
 
             let initPos;
             const calcDeltaX = e => Math.round(Math.abs(e.x - initPos?.x));
@@ -249,7 +253,6 @@ export default function listComponent() {
             let deltaXMax = 0;
             let deltaYMax = 0;
             function longpressStart(e , d){
-                //console.log("lp start")
                 //console.log("lpstart x,y", Math.round(e.x), Math.round(e.y))
                 if(d.id === "newItem"){
                     createNewItem();
@@ -257,16 +260,19 @@ export default function listComponent() {
                 }
                 initPos = e;
                 d3.select(this).raise();
-                d3.select(this).select("rect.item-bg").attr("stroke", "aqua");
+                d3.select(this).select("rect.item-bg")
+                    .attr("stroke", "aqua")
+                    .attr("stroke-width", 1);
+
                 initDraggedPos = getTransformationFromTrans(d3.select(this).attr("transform")).translateY;
                 //todo - clipPath shouldnt apply to the dragged item, so we can see the delete animation 
                 //but still need the clipPath for the rest
 
             }
             function calcProspectivePosition(y){
-                const _y = y - itemHeight/2;
+                const middleOfBarY = y + itemHeight/2;
                 //then simply return the position that y is closest to
-                const least = d3.least(posYPairs, d => Math.abs(d[1] - _y));
+                const least = d3.least(posYPairs, d => Math.abs(d[1] - middleOfBarY));
                 return least[0];
             }
 
@@ -319,6 +325,7 @@ export default function listComponent() {
                 //console.log("newY", newY)
                 itemG.attr("transform", `translate(0, ${newY})`);
                 prospectivePosition = calcProspectivePosition(newY, d.id);
+                //console.log("pos", prospectivePosition)
                 const distanceToNearestSlot = d3.min(posYPairs, d => Math.abs(d[1] - newY))
                 //console.log("dist", distanceToNearestSlot)
                 //CASE 3: DRAG OUT OF LIST TO DELETE (only if we also allow re-ordering)
@@ -372,28 +379,36 @@ export default function listComponent() {
             //note: newX and Y should be stored as d.x and d.y
             function longpressEnd(e, d){
                 if(d.id === "newItem"){ return; }
-                //console.log("lp end deleteTriggered????", deleteTriggered)
+                d3.select(this).select("rect.item-bg").attr("stroke", "none");
                 if(deleteTriggered){ 
                     deleteTriggered = false;
+                    prospectivePosition = null;
                     return; 
                 }
                 if(isHorizSwipe){
-                    //console.log("PUT IT BACK!!!!!!!!!!!!!!!!!!!!");
+                    console.log("isHorizSwipe");
                     isHorizSwipe = false;
+                    prospectivePosition = null;
                     return;
                     //didnt swipe enough to delete - need to put back
                     //@todo - ---put it back i think
                 }
-                if(!orderEditable) { return; }
-                d3.select(this).select("rect.item-bg").attr("stroke", "none");
+                if(!orderEditable) {
+                    console.log("order not editable") 
+                    prospectivePosition = null;
+                    return; 
+                }
+
+                if(!isNumber(prospectivePosition)){ return; }
                 //re-order the data and update
-                const itemsBeforeNewPos = data.slice(0, prospectivePosition + 1).filter(it => it.id !== d.id);
-                const itemsAfterNewPos = data.slice(prospectivePosition + 1, data.length).filter(it => it.id !== d.id);
+                const itemsBeforeNewPos = data.slice(0, prospectivePosition).filter(it => it.id !== d.id);
+                const itemsAfterNewPos = data.slice(prospectivePosition, data.length).filter(it => it.id !== d.id);
                 const updatedData = [...itemsBeforeNewPos, d, ...itemsAfterNewPos];
-                //console.log("updateddata", updatedData)
+                prospectivePosition = null;
+
                 selection.data([updatedData]).call(list)
                 //persist
-                onUpdateItems(updatedData)
+                onUpdateItems(updatedData);
 
                 //if(enhancedDrag.isClick()) { return; }
             }

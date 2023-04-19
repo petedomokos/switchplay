@@ -514,7 +514,6 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
   //render
   //@todo - consider having a shouldRender state, and this could also contain info on transition requirements
   useEffect(() => {
-    //console.log("uE render-------------")
     if(asyncProcesses.creating.datapoints){ 
       //saving datapoint so dont update
       return; 
