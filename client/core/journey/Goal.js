@@ -18,12 +18,14 @@ const mockDesc = " ewiof efojjew fewfjew xxxx xccxx eiofj efj fewiof efojjew few
 const useStyles = makeStyles(theme => ({
   root: {
     width:"100%",
-    height:"100%",
+    height:"95%",
+    paddingTop:"5%",
     textAlign: 'center',
     display:"flex",
     flexDirection:"column",
     alignItems:"center",
-    background:"none"
+    background:"none",
+    border:"solid"
   },
   cardContent:{
     width:"100%",
