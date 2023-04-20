@@ -379,7 +379,10 @@ export default function listComponent() {
             //note: newX and Y should be stored as d.x and d.y
             function longpressEnd(e, d){
                 if(d.id === "newItem"){ return; }
-                d3.select(this).select("rect.item-bg").attr("stroke", "none");
+                d3.select(this).select("rect.item-bg")
+                    .attr("stroke", d.id !== "newItem" ? (styles.item.stroke || "none") : "none")
+                    .attr("stroke-width", styles.item.strokeWidth || 0.5);
+                    
                 if(deleteTriggered){ 
                     deleteTriggered = false;
                     prospectivePosition = null;
@@ -448,8 +451,7 @@ export default function listComponent() {
                             .attr("pointer-events", "all");
 
                         //bg rect is only on contentsG so margin gaps are seen
-                        itemContentsG.append("rect").attr("class", "item-bg")
-                            .attr("stroke", "none");
+                        itemContentsG.append("rect").attr("class", "item-bg");
                         
 
                         const symbolG = itemContentsG.append("g").attr("class", "symbol") ;
