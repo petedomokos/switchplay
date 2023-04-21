@@ -204,6 +204,18 @@ export default function progressBarComponent() {
                         fontSize
             
                     },
+                    profileStart: {
+                        width:targetTooltipOpenWidth,
+                        height:targetTooltipOpenHeight,
+                        margin: { 
+                            left:0,//bottomTargetTooltipWidth * 0.15,
+                            right:0,//bottomTargetTooltipWidth * 0.15,
+                            top:3,//bottomTooltipsHeight * 0.15,
+                            bottom:3,//bottomTooltipsHeight * 0.15
+                        },
+                        fontSize
+            
+                    },
                     current: {
                         width:10,
                         height:barHeight,
@@ -252,7 +264,7 @@ export default function progressBarComponent() {
             //init
             if(!xScales[kpiD.key]){ xScales[kpiD.key] = d3.scaleLinear(); }
             //update
-            const extent = editing?.desc === "target" ? [barData.dataStart, barData.dataEnd] : [barData.start, barData.end]
+            const extent = editing ? [barData.dataStart, barData.dataEnd] : [barData.start, barData.end]
             xScales[kpiD.key]
                 .domain(extent)
                 .range([0, barContentsWidth])
@@ -339,7 +351,6 @@ export default function progressBarComponent() {
             .call(container("tooltips")
                 .transform((d,i) => `translate(${dimns[i].bar.margin.left},0)`))
         
-        const editingTarget = editing?.desc === "target";
         const dataWithEnrichedBarData = selection.data()
             .map(d => ({ 
                 ...d,
@@ -374,16 +385,17 @@ export default function progressBarComponent() {
                 .margin((d,i) => dimns[i].numbers.margin));
 
         //helper to get value
-        const getTooltipScaleValue = d => editingTarget && typeof d.fullScaleValue === "number" ? d.fullScaleValue : d.value;
+        const getTooltipScaleValue = d => editing && isNumber(d.fullScaleValue) ? d.fullScaleValue : d.value;
         const getTooltipValue = d => {
             if(d.tooltipType === "scale"){ return getTooltipScaleValue(d) }
             return typeof d.unsavedValue === "number" ? d.unsavedValue : d.value;
         }
+
         const enrichedTooltipsData = selection.data()
             .map(d => d.tooltipsData
                 .map(t => ({ ...t, progBarKey: d.key }))
                 .filter(d => d.shouldDisplay(status, editing, displayFormat)))
-
+        
         //issue - the i in getX below is teh tooltip i, eg target, expected, rther than the kpi i,
         //which is what dimnns needs
         selection.select("g.tooltips")
@@ -403,16 +415,24 @@ export default function progressBarComponent() {
                         strokeWidth:0.2
                     },
                     text:{
-                        stroke:d.milestoneId !== "current" && d.key === "end" && !d.isTarget ? "red" : 
+                        stroke:d.milestoneId !== "current" && !d.isSet ? "red" : 
                             (d.key === "expected" || d.key === "target" ? grey10(6) : grey10(4))
                     },
                     subtext:{
-                        stroke: editing || !d.isTarget ? "red" : grey10(4)
+                        stroke: editing || !d.isSet? "red" : grey10(4)
                     }
                 }))
                 .getSubtext((d,i) => {
-                    if(d.key !== "end" || (d.milestoneId === "current" && !editing)){ return ""; }
-                    return editing?.desc === "target" ? "End Edit" : (d.isTarget ? "Edit" : "Set")
+                    if(d.milestoneId === "current"){
+                        return "";
+                    }
+                    if(d.key === "start"){
+                        return editing?.desc === "start" ? "End Edit" : (d.isSet ? "Edit" : "Set")
+                    }
+                    if(d.key === "end"){
+                        return editing?.desc === "target" ? "End Edit" : (d.isSet ? "Edit" : "Set")
+                    }
+                    return "";
                 })
                 .getValue(getTooltipValue)
                 .getX((d,i,j) =>{
@@ -451,20 +471,20 @@ export default function progressBarComponent() {
                 .getY((d,i) => {
                     const { contentsHeight, expectedTooltipOpenHeight, tooltips, bar,  } = dimns[i];
                     if(status === "open"){
-                        if(d.key === "current"){
+                        //current
+                        if(d.rowNr === 0){
                             return expectedTooltipOpenHeight + bar.height/2;
                         }
                         const heightAboveBottomTooltips = expectedTooltipOpenHeight + bar.height - bar.margin.bottom;
                         if(d.tooltipType === "scale"){
                             return heightAboveBottomTooltips + tooltips.open.start.height/2;
                         }
-                        if(d.key === "expected"){
-                            return tooltips.open.expected.height * 0.5;
+                        //start (editing), target and expectedStats
+                        if(d.rowNr === 1){
+                            return tooltips.open.expected.height/2;
                         }
-                        if(d.key === "target"){
-                            return tooltips.open.target.height/2;
-                        }
-                        if(d.key === "expectedSteps"){
+                        //expectedSteps
+                        if(d.rowNr === -1){
                             return heightAboveBottomTooltips + tooltips.open.expectedSteps.height/2;
                         }
                         return 0;
@@ -474,17 +494,35 @@ export default function progressBarComponent() {
                 })
                 .draggable(editable)
                 .onClick(function(e,d){
-                    if(d.key !== "end") { return; }
-                    //start editing
-                    if(!editing && d.milestoneId !== "current"){
+                    if(d.milestoneId === "current"){ return; }
+                    if(d.key !== "start" && d.key !== "end") { return; }
+                    if(d.key === "start"){
+                        //start editing the "start" value
+                        if(editing?.desc !== "start"){
+                            editing = { milestoneId:d.milestoneId, desc:"start" }
+                            selection.call(progressBar)
+                            //tell react so overlay can be applied
+                            onSetEditing(editing);
+                            return;
+                        } else{
+                            //cancel editing
+                            editing = null
+                            selection.call(progressBar)
+                            //tell react so overlay can be removed
+                            onSetEditing(null)
+                        }
+                        return;
+                    }
+                    //it must be the end tooltip
+                    //start editing the "end" value
+                    if(editing?.desc !== "target"){
                         editing = { milestoneId:d.milestoneId, desc:"target" }
                         selection.call(progressBar)
                         //tell react so overlay can be applied
                         onSetEditing(editing);
                         return;
-                    }
-                    //cancel if editing
-                    if(editing){
+                    }else{
+                        //cancel editing
                         editing = null
                         selection.call(progressBar)
                         //tell react so overlay can be removed

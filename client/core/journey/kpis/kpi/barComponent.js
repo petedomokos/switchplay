@@ -33,7 +33,9 @@ export default function barComponent() {
     let _domain;
 
     const NO_MIN_MAX_ERROR_MESG = "no start or end";
-    const NO_DATA_ERROR_MESG = "no data";
+    const NO_STEPS_ERROR_MESG = "No Steps";
+    const NO_DATA_ERROR_MESG = "No Data";
+    const NO_STEPS_OR_DATA_ERROR_MESG = "No Steps or Data";
     const NO_TARGET_ERROR_MESG = "no target";
     let errorMesgs = {};
 
@@ -75,25 +77,19 @@ export default function barComponent() {
                     .domain(extent)
                     .range([0, contentsWidth])*/
             }
-            const scale = scales[i];
             
             //error mesg
-            if(displayFormat === "steps"){
-                if(stepsData.length === 0){
-                    errorMesgs[i] = "No Steps Yet";
-                }else{
-                    errorMesgs[i] = null;
-                }
-
-            }else{
-                if(!isNumber(sectionsData.find(d => d.key === "current").endValue)){
-                    //to undefined means no data
-                    errorMesgs[i] = NO_DATA_ERROR_MESG;
-                }else if(!isNumber(scale.domain()[0]) || !isNumber(scale.domain()[1])){
-                    errorMesgs[i] = NO_MIN_MAX_ERROR_MESG;
-                }else{
-                    errorMesgs[i] = "";
-                }
+            const isStepOnly = displayFormat === "steps" || !d.statKey;
+            const currentValueExists = isNumber(sectionsData.find(d => d.key === "current").endValue);
+            if(isStepOnly && stepsData.length === 0){
+                errorMesgs[i] =  NO_STEPS_ERROR_MESG;
+            } else if (displayFormat === "stats" && !currentValueExists){
+                errorMesgs[i] = NO_DATA_ERROR_MESG;
+            } else if(!currentValueExists && stepsData.length === 0){
+                //steps and stats displayed, so only show error if there are no steps and no data
+                errorMesgs[i] = NO_STEPS_OR_DATA_ERROR_MESG;
+            } else {
+                errorMesgs[i] = null;
             }
         })
     }
@@ -134,14 +130,13 @@ export default function barComponent() {
                 .width((d,i) => dimns[i].contentsWidth)
                 .height((d,i) => dimns[i].contentsHeight)
                 .styles((d, i) => ({
-                    stroke:d.barData.start ? "grey" : "none",
+                    //if all datasets will have the start and end defined for bar
+                    stroke:d.statKey ? "grey" : "none",
                     strokeWidth:0.1,
                     fill:"transparent"
                 })), { transitionEnter, transitionUpdate} 
             )
             .each(function(data,i){
-                if(data.key === "nutrition" && data.milrstoneId === "profile-1")
-                console.log("data", data)
                 const { barData } = data;
                 const { sectionsData, stepsData } = barData;
                 const { contentsWidth, contentsHeight, barHeight, stepWidth, stepHeight } = dimns[i];

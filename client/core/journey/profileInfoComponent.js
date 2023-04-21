@@ -257,14 +257,23 @@ export default function profileInfoComponent() {
             const dateMargin = 10;
             //const fDate = format(data.date);
             //if its a single digit day, then remove first space
-            const nrChars = fDate => fDate[0] === " " ? fDate.length - 1 : fDate.length;
+
+            //Next: I changed setting to use latest datapointm nd now this line below causes a bug
+            //also, manually changing teh setting by oressing btn doesnt work anymore!!
+            const nrChars = formattedDate => formattedDate[0] === " " ? formattedDate.length - 1 : formattedDate.length;
             //todo- make a pseudo text element and use getComputerTxtlngth, instead of this bodge to make TODAY work
             const calcLength = (text, fontSize, isUpperCase=false) =>  nrChars(text) * fontSize * (isUpperCase ? 0.7 : 0.47);
-            const length = d => calcLength((d.isCurrent ? currentValueDataMethod.selectedLabel() : format(d.date)), fontSizes.date, d.isCurrent);
+            const length = d => {
+                const text = d.isCurrent ? currentValueDataMethod.selectedLabel() : format(d.date);
+                return calcLength(text, fontSizes.date, d.isCurrent);
+            }
+            //date dimns
             const dateHeight = fontSizes.date;
             const horizandVertLength = d => length(d) * Math.sin(Math.PI/4);
             const x = d => dateMargin + horizandVertLength(d)/2;
-            const y = d => dateMargin + horizandVertLength(d)/2
+            const y = d => dateMargin + horizandVertLength(d)/2;
+            //datCount dimns
+            const horizandVertLengthOfDateCount = d => calcLength(d.label, fontSizes.date, false) * Math.sin(Math.PI/4);
             
             //settings are only defined for current card
             const currentValueDataMethod = settings?.find(s => s.key === "currentValueDataMethod");
@@ -367,7 +376,7 @@ export default function profileInfoComponent() {
                     .attr("transform", d => `translate(${dateMargin},${dateMargin})`) //rotates from start
                     .attr("pointer-events", showDateCount ? "all" : "none")
                     .each(function(d){
-                        const width = horizandVertLength(d) * 1.25;
+                        const width = horizandVertLengthOfDateCount(d) * 1.25;
                         const height = width;
                         const margin = { top: height * 0.1, bottom: height * 0.3 }
                         const contentsHeight = height - margin.top - margin.bottom;
@@ -376,6 +385,8 @@ export default function profileInfoComponent() {
 
                         const numberFontSize = d3.min([20, fontSizes.date * 1.5]);
                         const wordsFontSize = numberFontSize * 0.75;
+
+                        const extraGap = 8;
 
                         d3.select(this).select("text.number")
                             .attr("x", width/2)
@@ -386,7 +397,7 @@ export default function profileInfoComponent() {
 
                         d3.select(this).select("text.words")
                             .attr("x", width/2)
-                            .attr("y", margin.top + numberHeight + wordsHeight / 2)
+                            .attr("y", margin.top + numberHeight + wordsHeight / 2 + extraGap)
                             .attr("font-size", wordsFontSize)
                             //.attr("fill", isFuture ? "grey" : "white")
                             .text(d => `${d.label} ${d.value < 0 ? "ago" : ""}`)

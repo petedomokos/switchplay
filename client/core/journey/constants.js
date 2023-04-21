@@ -38,7 +38,7 @@ export const JOURNEY_SETTINGS_INFO = {
         options:[
             { key:"currentValueDataMethod", value: "best", label:"BEST", desc:"desc..." },
             { key:"currentValueDataMethod", value: "specificSession",/*defaults to last session*/ label:"SESSION", desc:"desc..." },
-            { key:"currentValueDataMethod", value: "latestValue", label:"LATEST", desc:"desc..." }
+            { key:"currentValueDataMethod", value: "latest", label:"LATEST", desc:"desc..." }
         ]
     },
     achievedValueDataMethod:{
@@ -49,7 +49,7 @@ export const JOURNEY_SETTINGS_INFO = {
         options:[
             { key:"achievedValueDataMethod", value: "best", label:"BEST", desc:"desc..." },
             { key:"achievedDataMethod", value: "specificSession",/*defaults to last session*/ label:"SESSION", desc:"desc..." },
-            { key:"achievedValueDataMethod", value: "latestValue", label:"LATEST", desc:"desc..." },
+            { key:"achievedValueDataMethod", value: "latest", label:"LATEST", desc:"desc..." },
         ]
     },
     dataToIncludeInMilestones:{
@@ -108,8 +108,8 @@ export const JOURNEY_SETTINGS_INFO = {
 
 export const JOURNEY_SETTINGS = [
     { key:"defaultProfileStartDate", defaultValue: "creationDate" },
-    { key:"currentValueDataMethod", defaultValue: "best" },
-    { key:"achievedValueDataMethod", defaultValue: "best" },
+    { key:"currentValueDataMethod", defaultValue: "latest" },
+    { key:"achievedValueDataMethod", defaultValue: "latest" },
     { key:"dataExpiryTimeNumber", defaultValue: 2 },
 	{ key:"dataExpiryTimeUnits", defaultValue: "months" },
 	{ key:"dataToIncludeInMilestones", defaultValue: "all" },

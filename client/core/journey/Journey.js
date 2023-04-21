@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react'
 import * as d3 from 'd3';
 import { makeStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
+import { addDays } from "../../util/TimeHelpers"
 
 import { withLoader } from '../../util/HOCs';
 
@@ -198,13 +199,42 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     }
   }, [stringifiedProfiles]);
 
-  const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => {
-    console.log("savevalue valueObj", valueObj)
-    console.log("savevalue", key)
+  const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, kpiKey, key) => {
+    console.log("savevalue------------------------------- valueObj", valueObj)
+    console.log("datasetKey", datasetKey)
+    console.log("statKey", statKey)
+    console.log("kpiKey", kpiKey)
+    console.log("key", key)
+    //a current value
     if(key === "current"){
       onSaveDatapoint(valueObj, datasetKey, statKey);
-    } else{
+      return;
+    }
+    //a custom start value
+    if(key === "profileStart"){
+      //creste a datapoint one day before the startDate of the profile
+      const _profiles = profiles.map(p => {
+        if(p.id !== profileId){ return p; };
+        return {
+          ...p,
+          //note - can assume profileKpi exists as hydrateJourney sets a default if needed
+          profileKpis:p.profileKpis.map(pKpi => {
+            if(pKpi.key !== kpiKey){ return pKpi; }
+            return { 
+              ...pKpi,
+              customStartValue:valueObj.actual
+            }
+          })
+        }
+      })
+      console.log("update profiles", _profiles)
+      save({ ...data, profiles:_profiles });
+      return;
+    }
+    //a custom target or expected value
+    if(key === "target" || key === "expected") {
       onSaveTargetOrExpectedValue(valueObj, profileId, datasetKey, statKey, key)
+      return;
     }
   }, [stringifiedProfiles, user._id]);
 
@@ -246,6 +276,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       player:player._id,
       date:valueObj.date,
       values:[{ key:statKey, value: valueObj.actual }],
+      source:"manual"
     }
     saveDatapoint(datasetId, datapoint);
   }, [stringifiedProfiles, user._id]);

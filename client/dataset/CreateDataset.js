@@ -55,7 +55,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 function CreateDataset({ user, availableMeasures, creating, error, success, open, submit, closeDialog }) {
-  console.log("open", open)
+  console.log("CreateDset", user)
   const classes = useStyles()
   const initState = {
       name: '', //must be unique to this user
@@ -66,10 +66,11 @@ function CreateDataset({ user, availableMeasures, creating, error, success, open
       datasetType:'',
       measures:[],
       calculations:[],
-      admin:[user._id]
+      admin:[]
   }
 
   const [values, setValues] = useState(initState)
+  console.log("values", values)
 
   //useEffect to reset dialog and error when unmounting (in case user moves away from component)
   //if this doesnt work, we can always reset in useEffcet itself if need be, although thats a bit wierd
@@ -112,8 +113,10 @@ function CreateDataset({ user, availableMeasures, creating, error, success, open
         //we dont save measure._id to server, as it is given an _id in db
         measures: values.measures.map(m => ({ ...m, _id:undefined })),
         calculations: values.calculations.map(c => ({ ...c, _id:undefined })),
-        admin:values.admin || [user._id]
+        admin:[...values.admin, user._id],
+        createdBy:[user._id]
       };
+      console.log("submitting", dataset)
 
       submit(dataset);
     }

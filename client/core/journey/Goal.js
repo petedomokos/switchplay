@@ -24,8 +24,7 @@ const useStyles = makeStyles(theme => ({
     display:"flex",
     flexDirection:"column",
     alignItems:"center",
-    background:"none",
-    border:"solid"
+    background:"none"
   },
   cardContent:{
     width:"100%",

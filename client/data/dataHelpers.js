@@ -78,12 +78,21 @@ export const roundUp = (date, granularity="day", format) => {
     return date;
 }
 
+const datesAreOnSameDay = (date1, date2) => 
+    date1.getUTCFullYear() === date2.getUTCFullYear() &&
+    date1.getUTCMonth() === date2.getUTCMonth() &&
+    date1.getUTCDate() === date2.getUTCDate();
+
 export const dateIsInRange = (date, range, options={}) => {
-    const { includeStart = true, includeEnd = false } = options;
+    const { includeStartDay = true, includeEndDay = true } = options;
     if(!date || !range || !range[1]) { return false; }
-    if(includeStart && includeEnd){ return date >= range[0] && date <= range[1]; }
-    if(includeStart){ return date >= range[0] && date < range[1]; }
-    return date > range[0] && date <= range[1];
+
+    const isBelowUpperBound = date <= range[1];
+    const isAboveLowerBound = date >= range[0];
+    const lowerBoundConditionMet = includeStartDay ? isAboveLowerBound || datesAreOnSameDay(date, range[0]) : isAboveLowerBound;
+    const upperBoundConditionMet = includeEndDay ? isBelowUpperBound || datesAreOnSameDay(date, range[1]) : isBelowUpperBound;
+
+    return lowerBoundConditionMet && upperBoundConditionMet;
 }
 
 /*

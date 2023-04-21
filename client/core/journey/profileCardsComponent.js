@@ -374,10 +374,10 @@ export default function profileCardsComponent() {
                                 //pass to parent
                                 onCtrlClick(newDisplayFormat);
                             })
-                            .onSaveValue((valueObj, profileId, datasetKey, statKey, key) => {
+                            .onSaveValue((valueObj, profileId, datasetKey, statKey, kpiKey, key) => {
                                 //if profileid is current, swap it for the first future profile
                                 const requiredProfileId = profileId === "current" ? data.find(p => p.isFuture).id : profileId;
-                                onSaveValue(valueObj, requiredProfileId, datasetKey, statKey, key);
+                                onSaveValue(valueObj, requiredProfileId, datasetKey, statKey, kpiKey, key);
                             })
                             .onSetEditing(onSetEditing)
                             //pass scroll events on any kpiComponent to all other kpiComponents

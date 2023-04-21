@@ -25,13 +25,16 @@ export default function listComponent() {
     let contentsHeight = 0;
     let listWidth;
     let listHeight;
+    let actualListHeight;
+
+    let noItemsMesgHeight;
+    let newItemAreaHeight;
 
     let itemWidth;
     let itemHeight = DIMNS.list.item.height;
     let itemMargin = DIMNS.list.item.margin;
     let itemContentsWidth;
     let itemContentsHeight;
-    let newItemContentsHeight;
 
     //item dimns
     let symbolWidth = 20;
@@ -58,20 +61,26 @@ export default function listComponent() {
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
-        itemWidth = contentsWidth;
+        noItemsMesgHeight = data.length === 0 && noItemsMesg ? 40 : 0;
+        newItemAreaHeight = newItemDatum ? 50 : 0;
+
+        listWidth = contentsWidth;
+        listHeight = contentsHeight - noItemsMesgHeight - newItemAreaHeight;
+
+        itemWidth = listWidth;
         itemContentsWidth = itemWidth - itemMargin.left - itemMargin.right;
         itemContentsHeight = itemHeight - itemMargin.top - itemMargin.bottom;
-        newItemContentsHeight = 2 * itemHeight - itemMargin.top - itemMargin.bottom;
+
         //item dimns
-        descWidth = contentsWidth - symbolWidth - checkboxWidth;
+        descWidth = listWidth - symbolWidth - checkboxWidth;
 
         symbolContentsWidth = symbolWidth - symbolMargin.left - symbolMargin.right;
         descContentsWidth = descWidth - descMargin.left - descMargin.right;
         checkboxContentsWidth = checkboxWidth - checkboxMargin.left - checkboxMargin.right;
 
         //newItem datum is twice the height of others, so +2
-        const actualListHeight = (data.length + 2) * itemHeight;
-        scrollMin = -actualListHeight + contentsHeight;
+        actualListHeight = data.length * itemHeight;
+        scrollMin = -actualListHeight + listHeight;
     }
 
     const defaultStyles = {
@@ -100,8 +109,11 @@ export default function listComponent() {
     let onUpdateItems = function(){};
     let onDeleteItem = () => {};
 
+    //api settings
     let orderEditable = true;
+    let noItemsMesg = "";
 
+    //state
     let scrollMin = -50;
     const scrollMax = 0;
     let draggedDeltaY = 0;
@@ -120,7 +132,7 @@ export default function listComponent() {
        //console.log("list", selection.data())
         const { transitionEnter=true, transitionUpdate=true, log} = options;
 
-        updateDimns(selection.data());
+        updateDimns(selection.data()[0]);
 
         selection
             .call(background("list-bg")
@@ -131,11 +143,11 @@ export default function listComponent() {
                     stroke:"none",
                     fill:_styles(d).bg?.fill || "transparent"
                 })))
-            .call(container("list-contents")
+            .call(container("list-component-contents")
                 .transform((d,i) => `translate(${margin.left},${margin.top})`));
 
-        selection.selectAll("g.list-contents")
-            .call(background("list-contents-bg")
+        selection.selectAll("g.list-component-contents")
+            .call(background("list-component-contents-bg")
                 .width((d,i) => contentsWidth)
                 .height((d,i) => contentsHeight)
                 .styles((d, i) => ({
@@ -149,6 +161,7 @@ export default function listComponent() {
         selection.each(function(data,i){
             //console.log("list", data)
             const containerG = d3.select(this);
+            const contentsG = containerG.select("g.list-component-contents");
             const styles = _styles(data,i);
 
             //@todo - learn why these are not working as expected
@@ -222,6 +235,7 @@ export default function listComponent() {
             }
             function editItem(d){
                 const dimns = {
+                    //note - if editing an item, tehn we knwo the noItemMesg height must be 0 so dont pass it through
                     heights:{ item: itemHeight, itemContents: itemContentsHeight },
                     widths: { item: itemWidth, itemContents: itemContentsWidth, symbol:symbolWidth, descContents:descContentsWidth },
                     margins: { item: itemMargin, list:margin, desc:descMargin }
@@ -389,7 +403,6 @@ export default function listComponent() {
                     return; 
                 }
                 if(isHorizSwipe){
-                    console.log("isHorizSwipe");
                     isHorizSwipe = false;
                     prospectivePosition = null;
                     return;
@@ -397,7 +410,6 @@ export default function listComponent() {
                     //@todo - ---put it back i think
                 }
                 if(!orderEditable) {
-                    console.log("order not editable") 
                     prospectivePosition = null;
                     return; 
                 }
@@ -416,7 +428,6 @@ export default function listComponent() {
                 //if(enhancedDrag.isClick()) { return; }
             }
                 
-            const contentsG = containerG.select("g.list-contents");
             //INIT
             if(contentsG.select("defs").empty()){
                 contentsG.call(initItem, data, i);
@@ -429,17 +440,38 @@ export default function listComponent() {
 
             contentsG.attr('clip-path', `url(#list-clip-${i})`)
 
+            //no item mesg
+            const noItemsG = contentsG.selectAll("g.no-items").data(noItemsMesg && data.length === 0 ? [noItemsMesg] : []);
+            noItemsG.enter()
+                .append("g")
+                    .attr("class", "no-items")
+                    .each(function(){
+                        d3.select(this).append("text")
+                            .attr("dominant-baseline", "central");
+                    })
+                    .merge(noItemsG)
+                    .attr("transform", `translate(0, ${noItemsMesgHeight/2})`)
+                    .each(function(){
+                        d3.select(this).select("text")
+                            .attr("font-size", styles.desc?.fontSize || itemContentsHeight * 0.5)
+                            .attr("stroke", grey10(7))
+                            .attr("fill", grey10(7))
+                            .attr("stroke-width", 0.1)
+                            .text(noItemsMesg);
+                    })
+
+            noItemsG.exit().call(remove)
+
             //ITEMS
             zoomG = contentsG.select("g.items-zoom")
                 .call(zoom);
             
             itemsG = zoomG.select("g.items");
-            const listData = newItemDatum ? [...data, newItemDatum] : data;
             
-            const itemG = itemsG.selectAll("g.item").data(listData, d => d.id);
+            const itemG = itemsG.selectAll("g.item").data(data, d => d.id);
             itemG.enter()
                 .append("g")
-                    .attr("class",(d,i) => `item item-${i} item-${d.id} ${d.id === "newItem" ? "new-item" : "regular-item"}`)
+                    .attr("class",(d,i) => `item item-${i} item-${d.id}`)
                     .attr("pointer-events", "none")
                     .each(function(d,i){
                         const itemG = d3.select(this);
@@ -479,19 +511,18 @@ export default function listComponent() {
                         //hitbox  - takes up full item height, not just contents, but width doesnt include checkboxes
                         itemG.select("rect.item-hitbox")
                             .attr("width", itemWidth - itemMargin.right - checkboxWidth)
-                            .attr("height", d.id !== "newItem" ? itemHeight : itemHeight * 2)
+                            .attr("height", itemHeight)
 
                         //contents
                         itemContentsG.select("rect.item-bg")
                             .attr("width", itemContentsWidth)
-                            .attr("height", d.id !== "newItem" ? itemContentsHeight : newItemContentsHeight)
+                            .attr("height", itemContentsHeight)
                             .attr("fill", styles.item?.fill || COLOURS.step.list)
-                            .attr("stroke", d.id !== "newItem" ? (styles.item.stroke || "none") : "none")
+                            .attr("stroke", styles.item.stroke || "none")
                             .attr("stroke-width", styles.item.strokeWidth || 0.5);
                         
                         const symbolG = itemContentsG.select("g.symbol")
-                            .attr("transform", (d,i) => `translate(${symbolMargin.left}, 0)`)
-                            .attr("display", d.id !== "newItem" ? null : "none")
+                            .attr("transform", (d,i) => `translate(${symbolMargin.left}, 0)`);
 
 
                         symbolG.select("rect")
@@ -509,19 +540,16 @@ export default function listComponent() {
 
                         descG.select("rect")
                             .attr("width", descContentsWidth)
-                            .attr("height", d.id !== "newItem" ? itemContentsHeight : newItemContentsHeight)
+                            .attr("height", itemContentsHeight)
                             .attr("fill","none")
                         
                         descG.select("text")
-                            .attr("y", d.id !== "newItem" ?  itemContentsHeight * 0.8 : newItemContentsHeight * 0.5)
+                            .attr("y", itemContentsHeight * 0.8)
                             .attr("font-size", styles.desc?.fontSize || itemContentsHeight * 0.5)
-                            .attr("dominant-baseline", d.id !== "newItem" ? null : "central")
-                            .attr("text-anchor", d.id !== "newItem" ? null : "middle")
                             .text(d.desc);
         
                         const checkboxG = itemContentsG.select("g.checkbox")
-                            .attr("transform", (d,i) => `translate(${symbolWidth + descWidth + checkboxMargin.left}, 0)`)
-                            .attr("display", d.id !== "newItem" ? null : "none")
+                            .attr("transform", (d,i) => `translate(${symbolWidth + descWidth + checkboxMargin.left}, 0)`);
 
                         checkboxG.select("rect")
                             .attr("width", checkboxContentsWidth)
@@ -542,6 +570,37 @@ export default function listComponent() {
                     .call(itemDrag)
 
             itemG.exit().call(remove)
+
+            const newItemG = contentsG.selectAll("g.new-item").data(newItemDatum ? [newItemDatum] : []);
+            newItemG.enter()
+                .append("g")
+                    .attr("class", "new-item")
+                    .each(function(){
+                        d3.select(this).append("rect").attr("class", "new-item-hitbox")
+                            .attr("fill", "transparent")
+                        //@todo - replace text with an icon
+                        d3.select(this).append("text")
+                            .attr("dominant-baseline", "central")
+                            .attr("stroke", grey10(7))
+                            .attr("fill", grey10(7))
+                            .attr("stroke-width", 0.1)
+                    })
+                    .merge(newItemG)
+                    .attr("transform", `translate(0,${noItemsMesgHeight + actualListHeight})`)
+                    .each(function(){
+                        d3.select(this).select("rect.new-item-hitbox")
+                            .attr("width", contentsWidth)
+                            .attr("height", newItemAreaHeight);
+
+                        d3.select(this).select("text")
+                            .attr("x", 20)
+                            .attr("y", newItemAreaHeight/2)
+                            .attr("font-size", 14)
+                            .text("Add New")
+                    })
+                    .call(itemDrag)
+
+            newItemG.exit().call(remove)
 
             function initItem(contentsG, data, i){
                 contentsG
@@ -599,6 +658,11 @@ export default function listComponent() {
     list.orderEditable = function (value) {
         if (!arguments.length) { return orderEditable; }
         orderEditable  = value;
+        return list;
+    };
+    list.noItemsMesg = function (value) {
+        if (!arguments.length) { return noItemsMesg; }
+        noItemsMesg  = value;
         return list;
     };
     list.newItemDatum = function (value) {

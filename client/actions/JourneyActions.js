@@ -39,11 +39,8 @@ const transformJourneyForServer = journey => {
 				//converting profiles unto server version for the store, as its inefficient as hydrateJourney is 
 				//being performed fully on every update
 				kpis:p.kpis,
-				profileKpis:p.kpis?.map(kpi => ({ 
-					//kpis are currently stored on front-end so just the kpiKey is needed to identify what kpi the steps are for
-					key:kpi.key,
-					steps:kpi.steps.map(step => ({ id:step.id, desc:step.desc, completed:step.completed }))
-				}) || [])
+				//add a default profileKpi if one is not defined
+				profileKpis:p.kpis.map(kpi => (p.profileKpis.find(pKpi => pKpi.key === kpi.key) || { key:kpi.key }))
 			};
 			return profile;
 		});
@@ -129,7 +126,10 @@ export const transformJourneyForClient = journey => {
 			created:p.created ? new Date(p.date) : null,
 			customStartDate:p.customStartDate ? new Date(p.customStartDate) : null,
 			yPC:+p.yPC,
-			profileKpis:p.profileKpis || []
+			profileKpis:p.profileKpis?.map(pKpi => ({ 
+				...pKpi, 
+				customStartValue: pKpi.customStartValue ? +pKpi.customStartValue : null 
+			})) || []
 		})) : [],
 		aims:aims.map(a => ({
 			...a,

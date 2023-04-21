@@ -22,6 +22,10 @@ attempts to create a new dataset in in db.
   const create = async (req, res) => {
     const dataset = new Dataset(req.body)
     console.log('creating dset', dataset)
+    if(!dataset.initials){
+      dataset.initials = dataset.name.slice(0, 5)
+    }
+    res.status(400)
     try {
         await dataset.save()
         console.log('success')

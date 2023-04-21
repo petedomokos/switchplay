@@ -27,7 +27,7 @@ const generalKpis = [
 const userKpis = {
    //pd
    "643d79844aa4af07d60f394c":[
-      { key: "sleep", name:"Sleep" },
+      { datasetKey:"sleep", statKey:"score" },
       { key:"meditation", name:"Meditation" },
       { key:"nutrition", name:"Nutrition" },
       { key:"exercise", name:"Exercise" },

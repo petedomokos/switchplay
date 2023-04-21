@@ -5,6 +5,7 @@ import { status, parseResponse, logError,
 
 	
 export const createDataset = dataset => dispatch => {
+	console.log("createDataset", dataset)
 	fetchThenDispatch(dispatch, 
 		'creating.dataset',
 		{

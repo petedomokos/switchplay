@@ -102,18 +102,6 @@ export default function tooltipsComponent() {
         //console.log("uT...data", selection.data())
         //const tooltipDimns = _tooltipDimns(data, i);
         selection.each(function(d,i){
-            //if(d.key === "expectedSteps")
-            const log = d.milestoneId === "profile-5" && d.key === "stepsProgress" && d.kpiKey === "longJump-distance-left";// "pressUps-reps"
-            if(log){
-                //console.log("kpi", d.kpiKey)
-                //console.log("...............................", d.status)
-
-            }
-            //console.log("dimns", tooltipDimns[d.key])
-            //next - position the tooltip properly - why is it so high? 
-            //and what is tyhe scale?it seems to be correct on x axis, but not sure why
-            //decide the saem common pattern for tooltips - it should probably always be
-            //an array, even if its top then bottom
             const tooltipG = d3.select(this);
             const { width, height, margin, fontSize } = tooltipDimns[d.key];
 
@@ -181,7 +169,7 @@ export default function tooltipsComponent() {
                             actual: `${d.unsavedValue}`, 
                             date
                         }
-                        onSaveValue(valueObj, d.milestoneId, d.datasetKey, d.statKey, d.key);
+                        onSaveValue(valueObj, d.milestoneId, d.datasetKey, d.statKey, d.kpiKey, d.key);
                         //reset what is displayed (the save btn will disappear on update after save)
                         tooltipG.select("text.drag-value")
                             .transition()
@@ -472,7 +460,11 @@ export default function tooltipsComponent() {
                         })
                         .attr("transform", (d,j) => `translate(${getX(d, i, j)}, ${getY(d, i, j)})`)
                         .merge(tooltipG)
-                        .style("display", d => d.shouldDisplay ? null : "none")
+                        /*.style("display", d => {
+                            if(d.key === "end")
+                            console.log("shouldDisp?", d)
+                            //d.shouldDisplay(status, editing, displayFormat) ? null : "none"
+                        })*/
                         //i is the data's i, not the tooltip datum's i
                         .call(updateTransform, { x: (d,j) => getX(d, i, j), y: (d,j) => getY(d, i, j), transition:{ duration:MED_SLIDE_DURATION } })
                         .call(updateTooltip, tooltipDimns)

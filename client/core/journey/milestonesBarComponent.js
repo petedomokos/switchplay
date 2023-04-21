@@ -721,7 +721,7 @@ export default function milestonesBarComponent() {
                                 const newDate = prev && next ? interpolator(0.5) :
                                     (prev ? addMonths(1, prev.date) : addMonths(-1, next.date))
 
-                                newDate.setUTCHours(21); 
+                                newDate.setUTCHours(12); 
                                 newDate.setUTCMinutes(0); 
                                 newDate.setUTCSeconds(0); 
                                 newDate.setUTCMilliseconds(0); 

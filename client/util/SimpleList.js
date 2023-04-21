@@ -66,7 +66,6 @@ const useStyles = makeStyles(theme => ({
  linkPath - an accessor function to get the 'to' property for each (item,index) pair
 */
 export default function SimpleList({ title, emptyMesg, items, itemActions, actionButtons, primaryText, secondaryText, styles}) {
-  console.log("SimpleList....")
   const nrOfExtraItemActions = itemActions.other ? itemActions.other.length : 0;
   const stylesProps = {...styles, extraItemButtonsWidth:nrOfExtraItemActions * 40}
   const classes = useStyles(stylesProps);
