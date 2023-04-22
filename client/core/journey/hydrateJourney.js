@@ -413,7 +413,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 minStandard = { key:"minimum", label:"Minimum", value:d3.mean([min, max]) }
             }
 
-            const shouldLog = key === "exercise-score";
+            const shouldLog = false;//key === "exercise-score";
             if(shouldLog){
                 //console.log("kpi key........................", key)
                 //console.log("customMin", customMinStandard)
