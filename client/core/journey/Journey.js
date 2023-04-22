@@ -201,11 +201,10 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
 
   const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, kpiKey, key) => {
     console.log("savevalue------------------------------- valueObj", valueObj)
-    /*
     console.log("datasetKey", datasetKey)
     console.log("statKey", statKey)
     console.log("kpiKey", kpiKey)
-    console.log("key", key)*/
+    console.log("key", key)
     //a current value
     if(key === "current"){
       onSaveDatapoint(valueObj, datasetKey, statKey);
@@ -221,6 +220,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
           //note - can assume profileKpi exists as hydrateJourney sets a default if needed
           profileKpis:p.profileKpis.map(pKpi => {
             if(pKpi.key !== kpiKey){ return pKpi; }
+            console.log("setting start to ", valueObj.actual)
             return { 
               ...pKpi,
               customStartValue:valueObj.actual
@@ -228,6 +228,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
           })
         }
       })
+      console.log("save start", _profiles)
       save({ ...data, profiles:_profiles });
       return;
     }

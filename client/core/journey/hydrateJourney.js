@@ -240,7 +240,8 @@ function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target, log
             return typeof d[1] === "number"
         })
     if(log){
-        //console.log("pairs", dateValuePairs)
+        console.log("dataMethod", dataMethod)
+        console.log("pairs", dateValuePairs)
     }
 
     const values = dateValuePairs.map(d => d[1]);
@@ -250,6 +251,11 @@ function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target, log
     const getOverallValue = values => {
         if(dataMethod === "best"){ return getBest(values); }
         if(dataMethod === "latest") {
+            if(log){
+                console.log("pairs for gettting latest", dateValuePairs)
+                const greatestPair = d3.greatest(dateValuePairs, d => d[0])
+                console.log("greatest", greatestPair)
+            }
             return dateValuePairs[0] ? d3.greatest(dateValuePairs, d => d[0])[1] : null 
         }
         return 0;
@@ -289,7 +295,7 @@ const goBackByExpiryDurationFromDate = (duration, units) => date => {
 
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
     //if(profile.id === "profile-5")
-    //console.log("hydrateProfile------------", profile.id, profile.date, profile.customStartDate)
+    console.log("hydrateProfile------------", profile.id, profile.date, profile.customStartDate)
     const { now, rangeFormat } = options;
     const { id, customTargets=[], isCurrent, profileKpis=[] } = profile;
     const date = typeof profile.date === "string" ? new Date(profile.date) : profile.date;
@@ -390,9 +396,10 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //KEYS/ID
             const { datasetKey, statKey, min, max, accuracy, standards, orientationFocus } = kpi;
             const key = kpi.key || `${datasetKey}-${statKey}`;
+            //console.log("kpi--------------------------", key)
 
 
-            const profileKpi = profileKpis.find(pKpi => pKpi.key === key);
+            const profileKpi = profileKpis.find(pKpi => pKpi.key === key) || {};
             const { customMinStandard, customStartValue, steps=[] } = profileKpi;
 
             //minStandard - may be custom, may be general for kpi, or may be undefined,
@@ -406,11 +413,11 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 minStandard = { key:"minimum", label:"Minimum", value:d3.mean([min, max]) }
             }
 
-            const shouldLog = key === "sleep-score";
+            const shouldLog = key === "exercise-score";
             if(shouldLog){
-                console.log("kpi key........................", key)
+                //console.log("kpi key........................", key)
                 //console.log("customMin", customMinStandard)
-                console.log("min", minStandard)
+                //console.log("min", minStandard)
             }
             
             //VALUES
@@ -418,6 +425,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //issue - surely we should also filter for datasetKey
             //need to take ll this into the calcCurrent func
             const dataset = datasets.find(dset => dset.key === datasetKey);
+            //console.log("dataset", dataset)
             const datapoints = dataset?.datapoints || [];
                 
             //add accuracy to teh stat - note that the stat has only stable metadata, whereas the kpi
@@ -438,6 +446,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //if(profileStart.type === "custom" || profileStart.type === "default"){
             const startDateRange = calcDateRange(goBackByExpiryDuration(startDate), startDate);
             if(shouldLog){
+                console.log("datapoints", datapoints)
                 //console.log("getting start value", profileKpi)
             }
             const actualStart = customStartValue || calcCurrent(stat, datapoints, startDateRange, achievedValueDataMethod, undefined, undefined, shouldLog).actual;

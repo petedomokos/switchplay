@@ -206,7 +206,10 @@ export default function kpiComponent() {
 
                     }
                 }))
-                .primaryTitle(d => d.name ? `${d.nr}. ${d.name}` : `${d.nr}. ${d.datasetName} (${d.statName})`)
+                .primaryTitle(d => {
+                    if(d.name){ return `${d.nr}. ${d.name}`; }
+                    return d.statName !== "Score" ? `${d.nr}. ${d.datasetName} (${d.statName})` : `${d.nr}. ${d.datasetName}`
+                })
                 //@todo - make statName a sec title, and measure length of primaryTitle
                 //.secondaryTitle(d => d.statName)
                 .textDirection("horiz")

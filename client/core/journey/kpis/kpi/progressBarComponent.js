@@ -595,7 +595,10 @@ export default function progressBarComponent() {
                                 //@todo - refactor - not sure why value doesnt  get updated on this d, 
                                 //so we are using a totalValueDelta instead. Although this may be ok, but tehn we should 
                                 //tidy up the code above as some is repeated/unnecc
-                                value:standD.value + totalValueDelta
+
+                                //note - we assume here that if target is being dragged and standarsData is being shown, then it must be 
+                                //a defence kpi so target is the minStandard
+                                value:d.key === "target" ? standD.value + totalValueDelta : standD.value
                             }))
                         }
                     }

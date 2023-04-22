@@ -5,6 +5,7 @@ import { isNumber } from '../../data/dataHelpers';
 import { grey10, COLOURS, TRANSITIONS } from './constants';
 import dragEnhancements from './enhancedDragHandler';
 import { getTransformationFromTrans } from './helpers';
+import { AccountBalance } from '@material-ui/icons';
 
 const MED_SLIDE_DURATION = TRANSITIONS.DEFAULT_DURATIONS.SLIDE.MED;
 const MED_FADE_DURATION = TRANSITIONS.DEFAULT_DURATIONS.SLIDE.MED;
@@ -167,7 +168,7 @@ export default function tooltipsComponent() {
                         const date = new Date();
                         const valueObj = { 
                             //actual: `${d.unsavedValue}`,
-                            actual:d.unsavedValue, 
+                            actual:Number(d.unsavedValue.toFixed(d.accuracy || 1)), 
                             date,
                             orientationFocus:d.orientationFocus
                         }

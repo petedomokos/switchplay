@@ -31,7 +31,7 @@ export default function kpisLayout(){
             const currentColour = grey10(7);// "#696969";
             const colours = {
                 current: currentColour,
-                currentMaintanence: "#98AFC7",
+                currentMaintanence: "#483d8b",
                 target:grey10(2),// "#DCDCDC",
                 expectedBehind:"red",
                 expectedAhead:currentColour,
@@ -73,7 +73,7 @@ export default function kpisLayout(){
             }else if(isMaintenanceTarget){
                 //case 3: non-current card, maintanence target
                 const endToUse = isNumber(target) ? target : dataEnd
-                barStart = calcPCIntervalsFromValue(20, [dataStart, dataEnd], endToUse)[0];
+                barStart = Number((calcPCIntervalsFromValue(20, [dataStart, dataEnd], endToUse)[0]).toFixed(accuracy || 1));
                 barEnd = endToUse;
             }else {
                 //case 3: non-current card normal target
@@ -344,7 +344,8 @@ export default function kpisLayout(){
                 tooltipType:"value",
                 key:"current", milestoneId, kpiKey:key, datasetKey, statKey,
                 shouldDisplay:(status, editing, displayFormat) => 
-                    (valueIsInDomain(current, [barStart, barEnd]) || editing) 
+                    //show it if possible, ie always if scale is full scale, else only show if its in the domain
+                    (valueIsInDomain(current, [barStart, barEnd]) || editing || milestoneId === "current") 
                     && !isPast && status === "open" && displayFormat !== "steps" && statKey,
                 label: values.achieved ? "Achieved" : "Current",
                 location:"on",
