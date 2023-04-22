@@ -106,7 +106,7 @@ export default function kpiComponent() {
     let isEditable = () => false;
     let status = () => "closed";
     let profileIsSelected = false;
-    let displayFormat = "both"
+    let displayFormat = "both";
 
     let getNrEndTooltips = (status, displayFormat) => 0;
     let getNrNumbers = (status, displayFormat) => 0;
@@ -419,6 +419,13 @@ export default function kpiComponent() {
     kpi.displayFormat = function (value) {
         if (!arguments.length) { return displayFormat; }
         displayFormat = value;
+        return kpi;
+    };
+    kpi.editing = function (value) {
+        //get the openKpi progressBar component and get/set ediitng value from uit
+        //if (!arguments.length) { return data.forEach(); }
+        Object.values(closedProgressBars).forEach(progressBar => { progressBar.editing(value) })
+        Object.values(openProgressBars).forEach(progressBar => { progressBar.editing(value) })
         return kpi;
     };
     kpi.fontSizes = function (values) {

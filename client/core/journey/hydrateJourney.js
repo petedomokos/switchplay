@@ -28,7 +28,14 @@ const requiredValueIsAchieved = (value, required, options={}) => {
     return value.actual <= required.actual;
 }
 
-const targetIsAchieved = (values, options) => requiredValueIsAchieved(values.current, values.target, options);
+const targetIsAchieved = (values, options={}) => {
+    const { orientationFocus="attack", minStandard, shouldLog } = options;
+    if(orientationFocus === "attack"){
+        return requiredValueIsAchieved(values.current, values.target, options);
+    }
+    const requiredValue = minStandard ? { actual:minStandard.value } : { actual: values.max/2 }
+    return requiredValueIsAchieved(values.current, requiredValue, options);
+}
 const expectedIsAchieved = (values, options) => requiredValueIsAchieved(values.current, values.expected, options);
 
 export function hydrateJourneyData(data, user, datasets){
@@ -218,7 +225,7 @@ function getValueForSession(stat, datapoints, sessionDate, start, target){
 
 function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target, log){
     if(log){
-        console.log("calcCurrent stat", stat)
+        //console.log("calcCurrent stat", stat)
     }
     //if dataset unavailable, stat will be undefined
     if(!stat){ return { actual:undefined, completion:null } }
@@ -233,7 +240,7 @@ function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target, log
             return typeof d[1] === "number"
         })
     if(log){
-        console.log("pairs", dateValuePairs)
+        //console.log("pairs", dateValuePairs)
     }
 
     const values = dateValuePairs.map(d => d[1]);
@@ -381,20 +388,30 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
         kpis:kpis.map((kpi,i) => {
             //console.log("kpi--------------------------", kpi)
             //KEYS/ID
-            const { datasetKey, statKey, min, max, accuracy } = kpi;
+            const { datasetKey, statKey, min, max, accuracy, standards, orientationFocus } = kpi;
             const key = kpi.key || `${datasetKey}-${statKey}`;
 
+
             const profileKpi = profileKpis.find(pKpi => pKpi.key === key);
-            //WARNING - WHEN I REMOVE MOCK, KEEP THE [] AS DEFAULT
-            const steps = profileKpi?.steps || []/*
-                {id:"step-1", desc:"Step 1", completed:true }, 
-                {id:"step-2", desc:"Step 2", completed:true},
-                {id:"step-3", desc:"Step 3", completed:true},
-                {id:"step-4", desc:"Step 4"},
-            ];*/
-            const shouldLog = false;// key === "sleep-score";
-            if(shouldLog)
-            console.log("kpi key........................", key)
+            const { customMinStandard, customStartValue, steps=[] } = profileKpi;
+
+            //minStandard - may be custom, may be general for kpi, or may be undefined,
+            let minStandard = standards.find(st => st.key === "minimum");
+            //overide with custom
+            if(customMinStandard){
+                minStandard = { key:"minimum", label:"Minimum", value:customMinStandard }
+            }
+            //ensure there is a minStandard if its a defence kpi
+            if(!minStandard && orientationFocus === "defence"){
+                minStandard = { key:"minimum", label:"Minimum", value:d3.mean([min, max]) }
+            }
+
+            const shouldLog = key === "sleep-score";
+            if(shouldLog){
+                console.log("kpi key........................", key)
+                //console.log("customMin", customMinStandard)
+                console.log("min", minStandard)
+            }
             
             //VALUES
             //helper
@@ -420,17 +437,19 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //let start;
             //if(profileStart.type === "custom" || profileStart.type === "default"){
             const startDateRange = calcDateRange(goBackByExpiryDuration(startDate), startDate);
-            if(shouldLog)
-            console.log("getting start value", profileKpi)
-            const actualStart = profileKpi?.customStartValue || calcCurrent(stat, datapoints, startDateRange, achievedValueDataMethod, undefined, undefined, shouldLog).actual;
+            if(shouldLog){
+                //console.log("getting start value", profileKpi)
+            }
+            const actualStart = customStartValue || calcCurrent(stat, datapoints, startDateRange, achievedValueDataMethod, undefined, undefined, shouldLog).actual;
             const start = {
                 date:startDate,
                 //note - we pass in the achieved data method, as this will always be in the past
                 actual:actualStart,
                 completion:0
             }
-            if(shouldLog)
-            console.log("start", start)
+            if(shouldLog){
+                //console.log("start", start)
+            }
             /*}else{
                 //its based on a prev profile 
                 //@todo - date should actually be the date of the last datapoint entered within the relevant window
@@ -461,6 +480,9 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 actual:round(nonRoundedTarget.actual, accuracy),
                 completion:100
             }
+            if(shouldLog){
+                //console.log("target", target)
+            }
 
             //CURRENT
             //note - for current profile, the range is last twenty years so all will be included anyway
@@ -470,15 +492,17 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 current = calcCurrent(stat, datapoints, dateRange, achievedValueDataMethod, start, target); 
             }
             else if(currentValueDataMethod !== "specificSession"){
-                if(shouldLog)
-                console.log("calculating current value")
+                if(shouldLog){
+                    //console.log("calculating current value")
+                }
                 current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod, start, target, shouldLog);
             }else{
                 //it must be a future card and current value is based purely on a specificSession
                 current = getValueForSession(stat, datapoints, specificDate, start, target)
             }
-            if(shouldLog)
-            console.log("current", current)
+            if(shouldLog){
+                console.log("current", current)
+            }
 
             const achieved = isPast ? current : null;
             //note prevProfile has already been processed with a full key and values
@@ -491,13 +515,14 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
 
             //statProgressStatus is either achieved, onTrack, offTrack, or undefined
             let statProgressStatus;
-            if(!isNumber(target.actual)){
+            if(!isNumber(target.actual) && orientationFocus !== "defence"){
                 statProgressStatus = "noTarget";
             } else if(isPast){
-                statProgressStatus = targetIsAchieved(values, { order }) ? "achieved" : "notAchieved";
+                statProgressStatus = targetIsAchieved(values, { order, orientationFocus, minStandard }) ? "achieved" : "notAchieved";
             } else {
                 //future
-                if(targetIsAchieved(values, { order })){
+                if(shouldLog){ console.log("checking if targ met...")}
+                if(targetIsAchieved(values, { order, orientationFocus, minStandard, shouldLog })){
                     statProgressStatus = "achieved";
                 }else if(expectedIsAchieved(values, { order })){
                     statProgressStatus = "onTrack";
@@ -505,6 +530,9 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                     //note - no data will also mean offTrack
                     statProgressStatus = "offTrack";
                 }
+            }
+            if(shouldLog){
+                console.log("statProg", statProgressStatus)
             }
 
             //steps
@@ -545,6 +573,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 datePhase,
                 isPast, isCurrent, isFuture, isActive,
                 lastDataUpdate,
+                minStandard,
                 //values
                 values,
                 statProgressStatus,
@@ -614,18 +643,10 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
             //current value
             let current;
             if(currentValueDataMethod !== "specificSession"){
-                if(key === "---sleep-score"){
-                    console.log("datapoints", datapoints)
-                    console.log("range", dateRange)
-                }
                 current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod, undefined, undefined);
             }else{
                 //it must be a future card and current value is based purely on a specificSession
                 current = getValueForSession(stat, datapoints, specificDate)
-            }
-
-            if(key === "---sleep-score"){
-                console.log("current", current)
             }
 
             //names

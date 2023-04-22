@@ -166,8 +166,10 @@ export default function tooltipsComponent() {
                         //@todo - handle case of a very late close-to-midnight time.
                         const date = new Date();
                         const valueObj = { 
-                            actual: `${d.unsavedValue}`, 
-                            date
+                            //actual: `${d.unsavedValue}`,
+                            actual:d.unsavedValue, 
+                            date,
+                            orientationFocus:d.orientationFocus
                         }
                         onSaveValue(valueObj, d.milestoneId, d.datasetKey, d.statKey, d.kpiKey, d.key);
                         //reset what is displayed (the save btn will disappear on update after save)
@@ -384,10 +386,12 @@ export default function tooltipsComponent() {
                     if(!d.editable) { 
                         if(d.key === "expected"){
                             alert("The expected value can't be changed. It is calculated based on your target.")
+                            return;
                         }
                         if(d.key === "target"){
                             //must be a past card
                             alert("You can only change future targets. This card is in the past.")
+
                         }
                         return; }
                     beingDragged = t => t.progBarKey === d.progBarKey && t.key === d.key;

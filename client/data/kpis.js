@@ -1,8 +1,13 @@
-import { filterUniqueByProperties } from "../util/ArrayHelpers"
+import { filterUniqueByProperties, sortDescending } from "../util/ArrayHelpers"
+
+const orderByOrientation = kpis => {
+   const orientedKpis = kpis.map(kpi => ({ ...kpi, orientationFocus:kpi.orientationFocus || "attack" }))
+   return sortDescending(orientedKpis, d => d.orientationFocus);
+}
 
 export const getKpis = (userId, journeyId, groupId) => {
    if(!userId && !journeyId && !groupId){
-      return generalKpis;
+      return orderByOrientation(generalKpis);
    }
    //can have kpis for a journey, and for a user for all their journeys too, and for a group
    const _groupKpis = groupKpis[groupId]?.map(kpi => ({ ...kpi, level:"group" })) || [];
@@ -14,7 +19,8 @@ export const getKpis = (userId, journeyId, groupId) => {
    const uniqueDatasetKpis = filterUniqueByProperties(["datasetKey", "statKey"], datasetKpis)
    const nonDatasetKpis = allKpis.filter(kpi => !kpi.datasetKey);
    const uniqueNonDatasetKpis = filterUniqueByProperties(["key"], nonDatasetKpis);
-   return [ ...uniqueDatasetKpis, ...uniqueNonDatasetKpis ]
+
+   return orderByOrientation([ ...uniqueDatasetKpis, ...uniqueNonDatasetKpis ])
 }
 const generalKpis = [
    { datasetKey:"pressUps", statKey:"reps" }
@@ -27,7 +33,7 @@ const generalKpis = [
 const userKpis = {
    //pd
    "643d79844aa4af07d60f394c":[
-      { datasetKey:"sleep", statKey:"score" },
+      { datasetKey:"sleep", statKey:"score", orientationFocus:"defence" },
       { key:"meditation", name:"Meditation" },
       { key:"nutrition", name:"Nutrition" },
       { key:"exercise", name:"Exercise" },

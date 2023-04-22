@@ -1,8 +1,7 @@
 import * as d3 from 'd3';
 import { grey10, KPI_CTRLS } from '../constants';
-import { isNumber } from '../../../data/dataHelpers';
+import { isNumber, valueIsInDomain, calcPCIntervalsFromValue } from '../../../data/dataHelpers';
 import { emptyGoal, ball, goalWithBall, shiningCrystalBall, nonShiningCrystalBall } from "../../../../assets/icons/milestoneIcons.js"
-import { ContactSupportOutlined } from '@material-ui/icons';
 
 export default function kpisLayout(){
     let format = "actual"; //actual
@@ -18,11 +17,12 @@ export default function kpisLayout(){
         const nrDatasetKpis = data.filter(kpi => kpi.datasetKey).length;
         const kpisData = data.map((kpi,i) => {
             const { key, values, accuracy, order, isPast, isCurrent, isFuture,isActive, milestoneId, datasetKey, statKey,
-                steps=[], stepsValues, allSteps=[], statProgressStatus, stepsProgressStatus } = kpi; 
+                steps=[], stepsValues, allSteps=[], statProgressStatus, stepsProgressStatus, minStandard, orientationFocus } = kpi; 
             
+            const shouldLog = false;// milestoneId !== "current" && key === "sleep-score"
             const start = values.start?.actual;
             const current = values.current?.actual;
-            const target = values.target?.actual;
+            const target = orientationFocus === "defence" ? minStandard.value : values.target?.actual;
             const achieved = values.achieved?.actual;
             const expected = values.expected?.actual;
             const { min, max } = values;
@@ -35,20 +35,23 @@ export default function kpisLayout(){
                 target:grey10(2),// "#DCDCDC",
                 expectedBehind:"red",
                 expectedAhead:currentColour,
-                stepsCurrent:"blue"
+                stepsCurrent:"blue",
+                currentDefence:"#dcf3ff",
+                redZone:"red"
             }
 
 
             //helper for special case of maintanence goals (ie target is actaully same or  worse than starting value)
-            const calc20PCWorseThanTarget = (extent, target, keepInRange=false) => {
+            const calcPCWorseThanTarget = (pc, extent, target, keepInRange=true) => {
                 const domainDiff = extent[1] - extent[0];
                 //note - if decr4asing, then diff will be neg, so subtracting a neg will be an increase
-                const _20PC = 0.1 * domainDiff;
+                const _20PC = (pc/100) * domainDiff;
                 const _20PCWorseThanTarget = target - _20PC;
                 //if decreasing, then its out of range if the value is above extent[0], otherwise it is if its less than
                 const outOfRange = domainDiff < 0 ? _20PCWorseThanTarget > extent[0] : _20PCWorseThanTarget < extent[0];
                 return outOfRange && keepInRange ? extent[0] : _20PCWorseThanTarget;
             }
+
             const isMaintenanceTarget = isNumber(target) && isNumber(start) && (order === "highest is best" ? target <= start : target >= start);
             //note - this is used for maintancenGoals, so we assume if no current then assume its still at the required value
             const maintenanceTargetHasSlipped = isNumber(current) && isNumber(target) && (order === "highest is best" ? target > current : target < current);
@@ -57,12 +60,24 @@ export default function kpisLayout(){
             const dataStart = order === "highest is best" ? min : max;
             const dataEnd = order === "highest is best" ? max : min;
             let barStart, barEnd;
+            //4 cases
             if(isCurrent){
+                //case 1: current card any orientation - use full scale
                 barStart = dataStart
                 barEnd = dataEnd;
-            }else{
-                //3 cases - target worse than start, no start value, or normal
-                barStart = isMaintenanceTarget ? calc20PCWorseThanTarget([dataStart, dataEnd], target) : (isNumber(start) ? start : dataStart);
+            }else if(orientationFocus === "defence"){
+                //case 2: non-current card, defence kpis go from -20% to +20%
+                const pcIntervals = calcPCIntervalsFromValue(20, [dataStart, dataEnd], minStandard.value);
+                barStart = pcIntervals[0];
+                barEnd = pcIntervals[1];
+            }else if(isMaintenanceTarget){
+                //case 3: non-current card, maintanence target
+                const endToUse = isNumber(target) ? target : dataEnd
+                barStart = calcPCIntervalsFromValue(20, [dataStart, dataEnd], endToUse)[0];
+                barEnd = endToUse;
+            }else {
+                //case 3: non-current card normal target
+                barStart = isNumber(start) ? start : dataStart;
                 barEnd = isNumber(target) ? target : dataEnd;
             }
 
@@ -75,7 +90,7 @@ export default function kpisLayout(){
                 isAchieved:!!values.achieved,
                 startValue: barStart,
                 endValue: current,
-                fill:isMaintenanceTarget ? colours.currentMaintanence : colours.current,
+                fill:orientationFocus === "defence" ? colours.currentDefence : (isMaintenanceTarget ? colours.currentMaintanence : colours.current),
                 opacity:isMaintenanceTarget ? 0.5 : 1,
                 format,
                 isMaintenanceTarget
@@ -84,11 +99,12 @@ export default function kpisLayout(){
             const targetBarDatum = {
                 key:"target",
                 label: "Target",
-                shouldDisplay:(status, editing) => editing?.desc === "target",
+                shouldDisplay:(status, editing) => orientationFocus === "defence" || editing?.desc === "target",
                 isAchieved:order === "highest is best" ? target <= current : target >= current,
                 startValue:barStart,
-                endValue:target,
-                fill:colours.target,
+                endValue:orientationFocus === "defence" ? minStandard.value : target,
+                fill:orientationFocus === "defence" ? colours.redZone : colours.target,
+                opacity: 0.7,
                 format,
             }
 
@@ -97,12 +113,17 @@ export default function kpisLayout(){
             //(although it will show the steps list for all steps on all future cards)
             const stepsBarData = !isCurrent || nrDatasetKpis === 0 ? steps : [];
 
+            const standardsData = !minStandard ? [] : [
+                { ...minStandard, strokeWidth:1 },
+                { key:"minimumPlus10PC", label:"", value: calcPCIntervalsFromValue(10, [dataStart, dataEnd], minStandard.value)[1] }
+            ]
             const barData = {
                 start:barStart,
                 end:barEnd,
                 dataStart,
                 dataEnd,
-                sectionsData:[targetBarDatum, currentBarDatum],
+                standardsData,
+                sectionsData: [targetBarDatum, currentBarDatum],
                 stepsData:stepsBarData
             }
             
@@ -233,7 +254,7 @@ export default function kpisLayout(){
                     //dont display if past or no future profiles
                     //dont display if its a maintance goal ie taregt is same or worse then start
                     shouldDisplay:(status, editing, displayFormat) => 
-                        status === "open" && isFuture && isNumber(expected) 
+                        valueIsInDomain(expected, [barStart, barEnd]) && status === "open" && isFuture
                         && displayFormat !== "steps" && !isMaintenanceTarget && !editing, 
                     location:"above",
                     rowNr: 1, y: 1, current,
@@ -262,6 +283,7 @@ export default function kpisLayout(){
                     accuracy,
                     icons: { achieved: ball, notAchieved: emptyGoal },
                     editable: isFuture,
+                    orientationFocus,
                     withDragValueAbove:true,
                     withInnerValue:true,
                     //if small space, just show the ball
@@ -286,18 +308,44 @@ export default function kpisLayout(){
                     withInnerValue:true,
                     //if small space, just show the ball
                     //smallIcons: { achieved: ball, notAchieved: emptyGoal },
-                }
+                },
+                /*
+                //THIS IS FOR WHEN WE WANT TO ENABLE SETTING A CUSTOM MIN STANDARD BY CLICKING THE MIN LINE AND DRAGGING THIS TOOLTIP THAT APPEARS ABOVE
+                { 
+                    progressBarType:"dataset",
+                    tooltipType:"comparison",
+                    key:"minStandard", milestoneId, kpiKey:key, datasetKey, statKey,
+                    //if no targetObj, this means there is no future active profile at all
+                    shouldDisplay:(status, editing) => displayFormat !== "steps" && editing?.desc === "minStandard",
+                    location:"above",
+                    rowNr: 1, y: 1, current,
+                    //rowNr: -1, y: -1, current,
+                    value:isNumber(minStandard.value) ? minStandard.value : dataStart, 
+                    x:isNumber(minStandard.value) ? minStandard.value : dataStart, 
+                    dataOrder: order,
+                    accuracy,
+                    icons: { achieved: ball, notAchieved: emptyGoal },
+                    editable: isFuture,
+                    withDragValueAbove:true,
+                    withInnerValue:true,
+                    //if small space, just show the ball
+                    //smallIcons: { achieved: ball, notAchieved: emptyGoal },
+                },
+                */
+
             ];
 
             //if(milestoneId === "current" && datasetKey === "pressUps"){
                 //console.log("current", current)
             //}
-            const currentValueTooltipDatum = {
+
+            const currentTooltipDatum = {
                 progressBarType:"dataset",
                 tooltipType:"value",
                 key:"current", milestoneId, kpiKey:key, datasetKey, statKey,
                 shouldDisplay:(status, editing, displayFormat) => 
-                    !isPast && status === "open" && displayFormat !== "steps" && statKey,
+                    (valueIsInDomain(current, [barStart, barEnd]) || editing) 
+                    && !isPast && status === "open" && displayFormat !== "steps" && statKey,
                 label: values.achieved ? "Achieved" : "Current",
                 location:"on",
                 rowNr:0, y:0,
@@ -311,14 +359,15 @@ export default function kpisLayout(){
                 editable:isCurrent || isFuture,
                 withDragValueAbove:false,
                 withInnerValue:false,
-            };
-            const tooltipsData = [...scaleTooltipsData, ...comparisonTooltipsData, currentValueTooltipDatum]
+            }
+
+            const tooltipsData = [...scaleTooltipsData, ...comparisonTooltipsData, currentTooltipDatum]
             
             //numbers
             const currentNumberDatum = {
                 progressBarType:"dataset",
                 key:"current",
-                shouldDisplay:(status, editing, displayFormat) => editing?.desc !== "target" && displayFormat !== "steps",
+                shouldDisplay:(status, editing, displayFormat) => /*editing?.desc !== "target" &&*/ displayFormat !== "steps",
                 label: values.achieved ? "Achieved" : "Current",
                 value: current,
                 fill:colours.current,

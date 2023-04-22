@@ -23,6 +23,7 @@ export default function barComponent() {
     let _width = () => DEFAULT_WIDTH;
     let _height = () => DEFAULT_HEIGHT;
     let _margin = () => DEFAULT_MARGIN;
+    let _statBarHeight = () => 0.4;
 
     let _scale;
 
@@ -44,8 +45,6 @@ export default function barComponent() {
         return data.forEach((d,i) => {
             const { barData } = d;
             const { sectionsData, stepsData } = barData;
-            const shouldDisplayBar = displayFormat === "stats" || displayFormat === "both";
-            const shouldDisplaySteps = d.milestoneId !== "current" && (displayFormat === "steps" || displayFormat === "both");
 
             const width = _width(d,i)
             const height = _height(d,i);
@@ -53,7 +52,8 @@ export default function barComponent() {
             const contentsWidth = width - margin.left - margin.right;
             const contentsHeight = height - margin.top - margin.bottom;
 
-            const barHeight = shouldDisplaySteps ? contentsHeight * 0.65 : contentsHeight;
+            //proportion will be 1 if we are not displaying steps
+            const barHeight = _statBarHeight(d,i);
             const stepHeight = contentsHeight;
 
             const stepWidth = stepsData.length === 0 ? 0 : contentsWidth/stepsData.length;
@@ -102,6 +102,7 @@ export default function barComponent() {
 
     let editable = false;
     let displayFormat = "both";
+    let _withStandards = () => true;
     //API CALLBACKS
     let onClick = function(){};
     let onDblClick = function(){};
@@ -137,12 +138,13 @@ export default function barComponent() {
                 })), { transitionEnter, transitionUpdate} 
             )
             .each(function(data,i){
-                const { barData } = data;
+                const { barData, milestoneId } = data;
                 const { sectionsData, stepsData } = barData;
-                const { contentsWidth, contentsHeight, barHeight, stepWidth, stepHeight } = dimns[i];
+                const { contentsWidth, contentsHeight, barHeight, stepWidth, stepHeight, margin } = dimns[i];
                 const scale = scales[i];
                 const styles = _styles(data,i);
                 const nrCompletedSteps = stepsData.filter(s => s.completed).length;
+                const withStandards = _withStandards(data);
 
                 //helper
                 const bound = boundValue(scale.domain());
@@ -245,6 +247,47 @@ export default function barComponent() {
                         .attr("fill", grey10(3))
                         .text(d => d);
 
+                //standards
+                const { standardsData } = barData;
+                const standardsG = barContentsG.selectAll("g.standards").data(withStandards ? [1] : []);
+                const extraLineLength = d3.min([margin.top, 3])
+                standardsG.enter()
+                    .append("g")
+                        .attr("class", "standards")
+                        .call(fadeIn)
+                        .merge(standardsG)
+                        .attr("transform", `translate(0, ${-extraLineLength})`)
+                        //.attr("transform", `translate(0, ${-margin.top})`)
+                        .each(function(){
+                            const standardG = d3.select(this).selectAll("g.standard").data(standardsData, d => d.key);
+                            standardG.enter()
+                                .append("g")
+                                    .attr("class", d => `standard standard-${d.key}`)
+                                    .call(fadeIn)
+                                    .each(function(d){
+                                        d3.select(this).append("line")
+                                            .attr("stroke", "black")
+                                            .attr("stroke-opacity", 0.7)
+                                            .attr("stroke-width", d.strokeWidth || 0.2)
+                                            .attr("stroke-dasharray", d.key === "minimum" ? null : 1.5)
+                                    })
+                                    .merge(standardG)
+                                    .attr("transform", d => `translate(${scale(d.value)}, 0)`)
+                                    .each(function(d){
+                                        //if(milestoneId !== "current")
+                                           // console.log("update stand--------", d.value)
+                                        d3.select(this).select("line")
+                                            .attr("x1", 0)
+                                            .attr("y1", 0)
+                                            .attr("x2", 0)
+                                            //.attr("y2", margin.top + barHeight)
+                                            .attr("y2", barHeight + 2 * extraLineLength)
+                                    })
+                            standardG.exit().call(remove);
+                        })
+                standardsG.exit().call(remove);
+
+
             })
 
         return selection;
@@ -283,6 +326,11 @@ export default function barComponent() {
     bar.margin = function (func) {
         if (!arguments.length) { return _margin; }
         _margin = (d,i) => ({ ...DEFAULT_MARGIN, ...func(d,i) })
+        return bar;
+    };
+    bar.statBarHeight = function (func) {
+        if (!arguments.length) { return _statBarHeight; }
+        _statBarHeight = func;
         return bar;
     };
     bar.scale = function (value) {
@@ -326,6 +374,11 @@ export default function barComponent() {
     bar.editable = function (value) {
         if (!arguments.length) { return editable; }
         editable = value;
+        return bar;
+    };
+    bar.withStandards = function (func) {
+        if (!arguments.length) { return _withStandards; }
+        _withStandards = func;
         return bar;
     };
     bar.displayFormat = function (value) {

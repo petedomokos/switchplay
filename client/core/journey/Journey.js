@@ -201,10 +201,11 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
 
   const onSaveValue = useCallback((valueObj, profileId, datasetKey, statKey, kpiKey, key) => {
     console.log("savevalue------------------------------- valueObj", valueObj)
+    /*
     console.log("datasetKey", datasetKey)
     console.log("statKey", statKey)
     console.log("kpiKey", kpiKey)
-    console.log("key", key)
+    console.log("key", key)*/
     //a current value
     if(key === "current"){
       onSaveDatapoint(valueObj, datasetKey, statKey);
@@ -227,18 +228,42 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
           })
         }
       })
-      console.log("update profiles", _profiles)
       save({ ...data, profiles:_profiles });
       return;
     }
     //a custom target or expected value
     if(key === "target" || key === "expected") {
-      onSaveTargetOrExpectedValue(valueObj, profileId, datasetKey, statKey, key)
+      if(valueObj.orientationFocus === "defence"){
+        onSaveCustomMinStandard(profileId, kpiKey, valueObj.actual)
+      }else{
+        onSaveTargetOrExpectedValue(valueObj, profileId, datasetKey, statKey, key);
+      }
       return;
     }
   }, [stringifiedProfiles, user._id]);
 
-  //trouble - the unsaved value gets removed, and tehn an update to tooltips occurs
+  const onSaveCustomMinStandard = useCallback((profileId, kpiKey, value) => {
+    console.log("savecustomMinStandard", profileId, kpiKey, value)
+    const _profiles = profiles.map(p => {
+      if(p.id !== profileId){ return p; };
+      return {
+        ...p,
+        //note - can assume profileKpi exists as hydrateJourney sets a default if needed
+        profileKpis:p.profileKpis.map(pKpi => {
+          if(pKpi.key !== kpiKey){ return pKpi; }
+          return { 
+            ...pKpi,
+            customMinStandard:value
+          }
+        })
+      }
+    })
+    save({ ...data, profiles:_profiles });
+    return;
+    //also when dragging target tooltip in defnec case, must update the bar standards line and the defenceRedZone bar end
+  }, [stringifiedProfiles, user._id]);
+
+  //trouble - the unsaved value gets removed, and then an update to tooltips occurs
   //before the saved value has been adjusted.
   //profile wont ever be current here, as that is dynamically created ratehr than stored
   const onSaveTargetOrExpectedValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => {
@@ -287,8 +312,8 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
       //in this case, locationKey is the kpi key
       const _profiles = profiles.map(p => p.id !== profileId ? p : ({
         ...p,
-        kpis:p.kpis.map(kpi => kpi.key !== locationKey ? kpi : ({
-          ...kpi,
+        profileKpis:p.profileKpis.map(pKpi => pKpi.key !== locationKey ? pKpi : ({
+          ...pKpi,
           steps:updates
         }))
       }))

@@ -128,7 +128,8 @@ export const transformJourneyForClient = journey => {
 			yPC:+p.yPC,
 			profileKpis:p.profileKpis?.map(pKpi => ({ 
 				...pKpi, 
-				customStartValue: pKpi.customStartValue ? +pKpi.customStartValue : null 
+				customStartValue: pKpi.customStartValue ? +pKpi.customStartValue : null ,
+				customMinStandard: pKpi.customMinStandard ? +pKpi.customMinStandard : null 
 			})) || []
 		})) : [],
 		aims:aims.map(a => ({

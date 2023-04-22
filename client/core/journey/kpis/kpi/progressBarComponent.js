@@ -113,23 +113,29 @@ export default function progressBarComponent() {
             }
 
             //bar
+            //current card bars dont show steps as there will be too many and doesnt make sense. The steps list is still shown.
+            const shouldDisplaySteps = kpiD.milestoneId !== "current" && displayFormat !== "stats";
             //need an extra space in case user slides tooltip right to teh end so it is still seen
             const horizMarginToSeeDynamicTooltips = d3.max([expectedTooltipOpenWidth, targetTooltipOpenWidth]) / 2;
             const extraMarginRight = d3.max([0, horizMarginToSeeDynamicTooltips - numbersWidth]); 
             const barWidth = contentsWidth - endTooltipsWidth - numbersWidth - extraSpaceBeforeTooltips;
             const barMarginLeft = status === "closed" ? 0 : horizMarginToSeeDynamicTooltips;
             const barMarginRight = status === "closed" ? 0 : extraMarginRight;
+            const barMarginTop = barHeight * 0.15;
+            const barMarginBottom  = barHeight * 0.15;
             //need this for scale here
             const barContentsWidth = barWidth - barMarginLeft - barMarginRight;
+            const barContentsHeight = barHeight - barMarginTop - barMarginBottom;
             const bar = {
                 width:barWidth,
                 height:barHeight,
                 margin:{ 
                     left: barMarginLeft,
                     right: barMarginRight,
-                    top:barHeight * 0.15,
-                    bottom:barHeight * 0.15
-                }
+                    top:barMarginTop,
+                    bottom:barMarginBottom
+                },
+                statBarHeight:shouldDisplaySteps ? 0.4 * barContentsHeight  : barContentsHeight
             }
 
             //define fontsize here so it is not increased by the expectedMultiplier
@@ -218,7 +224,7 @@ export default function progressBarComponent() {
                     },
                     current: {
                         width:10,
-                        height:barHeight,
+                        height:d3.max([20, bar.statBarHeight * 1.25]),
                         margin: { 
                             left:0,
                             right:0,
@@ -368,8 +374,10 @@ export default function progressBarComponent() {
                 .width((d,i) => dimns[i].bar.width)
                 .height((d,i) => dimns[i].bar.height)
                 .margin((d,i) => dimns[i].bar.margin)
+                .statBarHeight((d,i) => dimns[i].bar.statBarHeight)
                 .scale((d,i) => xScales[d.key])
                 .editable(editable)
+                .withStandards(d => d.orientationFocus === "attack" ? false : true)
                 .displayFormat(displayFormat)
             , { transitionEnter, transitionUpdate} )
 
@@ -398,6 +406,8 @@ export default function progressBarComponent() {
         
         //issue - the i in getX below is teh tooltip i, eg target, expected, rther than the kpi i,
         //which is what dimnns needs
+
+        let totalValueDelta = 0;
         selection.select("g.tooltips")
             .data(enrichedTooltipsData)
             .call(tooltips
@@ -472,8 +482,9 @@ export default function progressBarComponent() {
                     const { contentsHeight, expectedTooltipOpenHeight, tooltips, bar,  } = dimns[i];
                     if(status === "open"){
                         //current
-                        if(d.rowNr === 0){
-                            return expectedTooltipOpenHeight + bar.height/2;
+                        if(d.key === "current"){
+                            //we want it centred on teh statBar not the whole bar
+                            return expectedTooltipOpenHeight + bar.margin.top + bar.statBarHeight/2; //+ bar.height/2;
                         }
                         const heightAboveBottomTooltips = expectedTooltipOpenHeight + bar.height - bar.margin.bottom;
                         if(d.tooltipType === "scale"){
@@ -535,14 +546,26 @@ export default function progressBarComponent() {
                     //normal start to target range -> then need to redo the boundedValue....
                     //so need to rethink where boundedvalue is calculated -maybe just do it in barComponent
                     //using the domain() to display it correct
+
                     //update tooltip position
                     const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                     const newX = translateX + e.dx;
                     d3.select(this).attr("transform", `translate(${newX},${translateY})`)
+                    //update bar standardsLine position
+                    /*
+                    const progBarG = this.parentNode.parentNode;
+                    d3.select(progBarG).select("g.standards").selectAll("g.standard").each(function(d,i){
+                        const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
+                        const newX = translateX + e.dx;
+                        d3.select(this).attr("transform", `translate(${newX},${translateY})`)
+                    })
+                    */
 
                     //update tooltip value
                     const scale = xScales[d.progBarKey];
                     const newValue = round(Number(scale.invert(newX)), d.accuracy);
+                    const valueDelta = scale.invert(e.dx);
+                    totalValueDelta += valueDelta;
                     d.unsavedValue = newValue;
                     //we need to update alltooltips so index for dimns is maintained
                     //@todo - go back to using a key instead of array for dimns?
@@ -551,8 +574,11 @@ export default function progressBarComponent() {
 
                     //update corresponding bar section
                     const barG = d3.select(this.parentNode.parentNode).select("g.bar")
+
+                    //helper
                     //@todo - for now, we assume only 1 kpi datum here, but cant always do this for a reusabel component
-                    const kpiDatum = dataWithEnrichedBarData[0];
+                    //const kpiDatum = dataWithEnrichedBarData[0];
+                    const kpiDatum = barG.datum();
                     const newKpiDatum = {
                         ...kpiDatum,
                         barData:{
@@ -561,9 +587,16 @@ export default function progressBarComponent() {
                                 if(sectionD.key !== d.key) { return sectionD; }
                                 return {
                                     ...sectionD,
-                                    endValue:newValue
+                                    endValue:newValue,
                                 }
-                            })
+                            }),
+                            standardsData:kpiDatum.barData.standardsData.map(standD => ({
+                                ...standD,
+                                //@todo - refactor - not sure why value doesnt  get updated on this d, 
+                                //so we are using a totalValueDelta instead. Although this may be ok, but tehn we should 
+                                //tidy up the code above as some is repeated/unnecc
+                                value:standD.value + totalValueDelta
+                            }))
                         }
                     }
                     barG.datum(newKpiDatum).call(bar)
@@ -579,6 +612,9 @@ export default function progressBarComponent() {
                         .data(newNumbersData)
                         .call(numbers)
 
+                })
+                .onDragEnd(() => {
+                    totalValueDelta = 0;
                 })
                 .onSaveValue(onSaveValue)
                 .onMouseover(function(e,d){
@@ -630,6 +666,11 @@ export default function progressBarComponent() {
     progressBar.displayFormat = function (value) {
         if (!arguments.length) { return displayFormat; }
         displayFormat = value;
+        return progressBar;
+    };
+    progressBar.editing = function (value) {
+        if (!arguments.length) { return editing; }
+        editing = value;
         return progressBar;
     };
     progressBar.nrEndTooltips = function (value) {

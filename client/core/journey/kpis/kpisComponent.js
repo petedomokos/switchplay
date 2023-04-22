@@ -187,6 +187,11 @@ export default function kpisComponent() {
             //console.log("data", data)
             prevData = data;
             const { kpisData, milestoneId } = data;
+            const nrDefenceKpis = kpisData.filter(kpi => kpi.orientationFocus === "defence").length;
+            //const attackKpisData = kpisData.filter(kpi => kpi.orientationFocus === "attack")
+            //console.log("def", defenceKpisData)
+            //next - go down this file implementing two nest lists instead, 
+            //but all one list just display with a label before each nest
             openedKpiDiv = d3.select(`div#opened-kpi-${milestoneId}`)
             const nrDatasetKpis = kpisData.filter(kpi => kpi.datasetKey).length;
             const ctrlsData = withCtrls && milestoneId !== "current" && nrDatasetKpis !== 0 ? KPI_CTRLS(displayFormat) : [];
@@ -277,10 +282,17 @@ export default function kpisComponent() {
                         listG
                             .append("rect")
                                 .attr("class", "list-bg")
-                                .attr("width", listWidth)
-                                .attr("height", listHeight)
+                                    .attr("width", listWidth)
+                                    .attr("height", listHeight)
+                                    .attr("fill", "transparent")
+                                    .attr("stroke", "none");
+
+                        listG
+                            .append("rect")
+                                .attr("class", "defence-list-bg")
                                 .attr("fill", "transparent")
-                                .attr("stroke", "none");
+                                .attr("stroke", "none")
+                                .attr("opacity", 0.2);
 
                         //container that the listG zoom transforms are applied to
                         listG
@@ -329,6 +341,11 @@ export default function kpisComponent() {
                         listG.select("defs").select(`clipPath#${listClipPathId}`).select("rect")
                             .attr('width', 1000)
                             .attr('height', listHeight);
+
+                        listG.select("rect.defence-list-bg")
+                            .attr('width', listWidth)
+                            .attr('height', nrDefenceKpis * kpiHeight)
+                            .attr("display", selected ? "none" : null)
 
                         if(scrollEnabled){
                             //this is a temp fix - we need to be able to toggle it 
@@ -572,6 +589,9 @@ export default function kpisComponent() {
         //console.log("selected----", selected)
         //1. UPDATE STATUS TO OPENING/CLOSING
         if(selected === key) { return; }
+
+        //set editing to null in all cases
+        kpi.editing(null)
 
         //todo next - check this works with statusses , once i implement it in chldren
         //if currently somethign is selected, we will deselct and close

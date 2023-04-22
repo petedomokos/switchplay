@@ -78,6 +78,28 @@ export const roundUp = (date, granularity="day", format) => {
     return date;
 }
 
+export const calcPCIntervalsFromValue = (requiredPC, extent, refValue, keepInRange=false) => {
+    const domainDiff = extent[1] - extent[0];
+    const isIncreasing = domainDiff > 0;
+    //note - if decr4asing, then diff will be neg, so subtracting a neg will be an increase
+    const pc = (requiredPC/100) * domainDiff;
+    const pcWorseThanTarget = refValue - pc;
+    const pcBetterThanTarget = refValue + pc
+    //if decreasing, then its out of range if the value is above extent[0], otherwise it is if its less than
+    const worseIsOutOfRange = isIncreasing ? pcWorseThanTarget < extent[0] : pcWorseThanTarget > extent[0];
+    const worseValueToUse = worseIsOutOfRange && keepInRange ? extent[0] : pcWorseThanTarget;
+    const betterIsOutOfRange = isIncreasing ? pcBetterThanTarget > extent[1] : pcBetterThanTarget < extent[1];
+    const betterValueToUse = betterIsOutOfRange && keepInRange ? extent[1] : pcBetterThanTarget;
+    return [worseValueToUse, betterValueToUse]
+}
+
+export const valueIsInDomain = (value, domain) => {
+    if(!isNumber(value)){ return false; }
+    const isIncreasing = domain[1] - domain[0] > 0;
+    if(isIncreasing){ return domain[0] <= value && value <= domain[1] }
+    return domain[0] >= value && value >= domain[1];
+}
+
 const datesAreOnSameDay = (date1, date2) => 
     date1.getUTCFullYear() === date2.getUTCFullYear() &&
     date1.getUTCMonth() === date2.getUTCMonth() &&
