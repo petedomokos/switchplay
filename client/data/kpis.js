@@ -47,15 +47,16 @@ const userKpis = {
    ],
    //pd heroku
    "643d81262b7e4f0015e55bb6":[
-      { key: "sleep", name:"Sleep" },
-      { key:"meditation", name:"Meditation" },
-      { key:"nutrition", name:"Nutrition" },
-      { key:"exercise", name:"Exercise" },
-      { key: "social", name:"Social" },
-      { key:"admin", name:"Admin" },
-      { key:"money", name:"Money" },
-      { key:"customers", name:"Customers" },
-      { key:"product", name:"Product" },
+      { datasetKey:"admin", statKey:"score", orientationFocus:"defence" },
+      { datasetKey:"money", statKey:"score", orientationFocus:"defence" },
+      { datasetKey:"sleep", statKey:"score", orientationFocus:"defence" },
+      { datasetKey:"meditation", statKey:"score", orientationFocus:"defence" },
+      { datasetKey:"nutrition", statKey:"score", orientationFocus:"defence" },
+      { datasetKey:"exercise", statKey:"score" },
+      { datasetKey: "social", statKey:"score" },
+      { datasetKey:"customers", statKey:"score" },
+      { datasetKey:"product", statKey:"score" },
+      { datasetKey:"network", statKey:"score" }
    ],
    //Lewis
    "606b2f1f3eecde47d8864798":[
