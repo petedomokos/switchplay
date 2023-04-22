@@ -530,6 +530,9 @@ export default function kpisComponent() {
                                 .each(function(b){
                                     const btnG = d3.select(this)
                                         .on("click", function(){
+                                            //stop any eiditng that is happening in a kpi
+                                            kpi.editing(null)
+
                                             displayFormat = b.key;
                                             //update is triggered from profileCards so it aplies to all cards
                                             //containerG.call(kpis)
