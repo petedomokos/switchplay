@@ -288,6 +288,7 @@ export default function kpiComponent() {
                                     //.onUpdateItem(onUpdateStep)
                                     //@todo - edit
                                     .onEditItem(function(d, dimns){
+                                        console.log("edit this", this)
                                         const { translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
                                         const _dimns = {
                                             widths:dimns.widths,
