@@ -40,18 +40,6 @@ export default function kpisLayout(){
                 redZone:"red"
             }
 
-
-            //helper for special case of maintanence goals (ie target is actaully same or  worse than starting value)
-            const calcPCWorseThanTarget = (pc, extent, target, keepInRange=true) => {
-                const domainDiff = extent[1] - extent[0];
-                //note - if decr4asing, then diff will be neg, so subtracting a neg will be an increase
-                const _20PC = (pc/100) * domainDiff;
-                const _20PCWorseThanTarget = target - _20PC;
-                //if decreasing, then its out of range if the value is above extent[0], otherwise it is if its less than
-                const outOfRange = domainDiff < 0 ? _20PCWorseThanTarget > extent[0] : _20PCWorseThanTarget < extent[0];
-                return outOfRange && keepInRange ? extent[0] : _20PCWorseThanTarget;
-            }
-
             const isMaintenanceTarget = isNumber(target) && isNumber(start) && (order === "highest is best" ? target <= start : target >= start);
             //note - this is used for maintancenGoals, so we assume if no current then assume its still at the required value
             const maintenanceTargetHasSlipped = isNumber(current) && isNumber(target) && (order === "highest is best" ? target > current : target < current);
@@ -67,13 +55,13 @@ export default function kpisLayout(){
                 barEnd = dataEnd;
             }else if(orientationFocus === "defence"){
                 //case 2: non-current card, defence kpis go from -20% to +20%
-                const pcIntervals = calcPCIntervalsFromValue(20, [dataStart, dataEnd], minStandard.value);
-                barStart = pcIntervals[0];
-                barEnd = pcIntervals[1];
+                const pcIntervals = calcPCIntervalsFromValue(20, [dataStart, dataEnd], minStandard.value, { accuracy });
+                barStart = valueIsInDomain(pcIntervals[0], [dataStart, dataEnd]) ? pcIntervals[0] : dataStart;
+                barEnd = valueIsInDomain(pcIntervals[1], [dataStart, dataEnd]) ? pcIntervals[1] : dataEnd;
             }else if(isMaintenanceTarget){
                 //case 3: non-current card, maintanence target
                 const endToUse = isNumber(target) ? target : dataEnd
-                barStart = Number((calcPCIntervalsFromValue(20, [dataStart, dataEnd], endToUse)[0]).toFixed(accuracy || 1));
+                barStart = calcPCIntervalsFromValue(20, [dataStart, dataEnd], endToUse, { accuracy })[0];
                 barEnd = endToUse;
             }else {
                 //case 3: non-current card normal target
@@ -115,7 +103,7 @@ export default function kpisLayout(){
 
             const standardsData = !minStandard ? [] : [
                 { ...minStandard, strokeWidth:1 },
-                { key:"minimumPlus10PC", label:"", value: calcPCIntervalsFromValue(10, [dataStart, dataEnd], minStandard.value)[1] }
+                { key:"minimumPlus10PC", label:"", value: calcPCIntervalsFromValue(10, [dataStart, dataEnd], minStandard.value, { accuracy })[1] }
             ]
             const barData = {
                 start:barStart,

@@ -78,7 +78,8 @@ export const roundUp = (date, granularity="day", format) => {
     return date;
 }
 
-export const calcPCIntervalsFromValue = (requiredPC, extent, refValue, keepInRange=false) => {
+export const calcPCIntervalsFromValue = (requiredPC, extent, refValue, options={}) => {
+    const { keepInRange=false, accuracy=0 } = options;
     const domainDiff = extent[1] - extent[0];
     const isIncreasing = domainDiff > 0;
     //note - if decr4asing, then diff will be neg, so subtracting a neg will be an increase
@@ -90,7 +91,7 @@ export const calcPCIntervalsFromValue = (requiredPC, extent, refValue, keepInRan
     const worseValueToUse = worseIsOutOfRange && keepInRange ? extent[0] : pcWorseThanTarget;
     const betterIsOutOfRange = isIncreasing ? pcBetterThanTarget > extent[1] : pcBetterThanTarget < extent[1];
     const betterValueToUse = betterIsOutOfRange && keepInRange ? extent[1] : pcBetterThanTarget;
-    return [worseValueToUse, betterValueToUse]
+    return [Number(worseValueToUse.toFixed(accuracy)), Number(betterValueToUse.toFixed(accuracy))]
 }
 
 export const valueIsInDomain = (value, domain) => {
