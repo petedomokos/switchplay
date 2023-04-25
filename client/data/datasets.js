@@ -20,7 +20,7 @@ export function hydrateDataset(dataset){
     console.log("getting derived...")
     const derivedMeasures = isDeep ? getDerivedMeasures(key) : null;
     console.log("derived", derivedMeasures)
-    console.log("getting raw...")
+    console.log("getting raw.....")
     const rawMeasures = dataset.measures?.map(m => hydrateMeasure(m));
     console.log("raw", rawMeasures)
     const datapoints = isDeep ? hydrateDatapoints(dataset.datapoints, rawMeasures, derivedMeasures) : null;
@@ -41,8 +41,8 @@ export function hydrateDatapoints(datapoints, hydratedRawMeasures, hydratedDeriv
     console.log("hydrateDatapoints", datapoints)
     console.log("raw derived", hydratedRawMeasures, hydratedDerivedMeasures)
     return datapoints
-        .map(d => hydrateDatapoint(d, hydratedRawMeasures, hydratedDerivedMeasures)
-        .filter(d => !d.key || !d.value));
+        .map(d => hydrateDatapoint(d, hydratedRawMeasures, hydratedDerivedMeasures))
+        .filter(d => !d.key || !d.value);
 }
 
 export function hydrateDatapoint(datapoint, hydratedRawMeasures, hydratedDerivedMeasures){
