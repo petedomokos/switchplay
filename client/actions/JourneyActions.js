@@ -198,6 +198,9 @@ export const saveJourney = (journey, shouldPersist=true, shouldUpdateStoreBefore
 	const journeyIsNew = !serverJourney._id;
 	if(journeyIsNew){
 		console.log("SAVING A NEW JOURNEY!!!!!!!!!!!!!!")
+		alert(`new journey_id-${serverJourney._id}-id-${journey.id}`)
+		//dont persist for now
+		return;
 	}
 	//console.log("id is", serverJourney._id)
 	const url = '/api/users/'+jwt.user._id+'/journey' +(serverJourney._id ? "/"+serverJourney._id : "")
