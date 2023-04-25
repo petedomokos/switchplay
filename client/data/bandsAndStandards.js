@@ -21,10 +21,10 @@ const bandsAndStandards = {
     //PD personal
     //defence
     "sleep":{
-        "hoursPastBedtime":{
+        "hoursPastSleeptime":{
             bands:[ { min:0, max:6 } ],
             //note - minimum standard is actually a maximum value here due to order
-            standards:[ { key:"minimum", label:"Minimum", value:2 }],
+            standards:[ { key:"minimum", label:"Minimum", value:1 }],
             accuracy:1
         }
     },

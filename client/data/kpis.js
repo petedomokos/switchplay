@@ -48,7 +48,7 @@ const userKpis = {
    //pd heroku (note journeyId is 643ed66c2282a800159e659d)... query for it is { _id: ObjectId('643ed66c2282a800159e659d')  }
    "643d81262b7e4f0015e55bb6":[
       //Personal KPIs
-      { datasetKey:"sleep", statKey:"hoursPastBedtime", orientationFocus:"defence" },
+      { datasetKey:"sleep", statKey:"hoursPastSleeptime", orientationFocus:"defence" },
       { datasetKey:"meditation", statKey:"timeDaily", orientationFocus:"defence" },
       { datasetKey:"nourishment", statKey:"healthyMealsDaily", orientationFocus:"defence" },
       { datasetKey:"organisation", statKey:"offTrackTasks", orientationFocus:"defence" },
