@@ -38,16 +38,21 @@ export function hydrateDataset(dataset){
 }
 
 export function hydrateDatapoints(datapoints, hydratedRawMeasures, hydratedDerivedMeasures){
-    return datapoints.map(d => hydrateDatapoint(d, hydratedRawMeasures, hydratedDerivedMeasures));
+    console.log("hydrateDatapoints", datapoints)
+    console.log("raw derived", hydratedRawMeasures, hydratedDerivedMeasures)
+    return datapoints
+        .map(d => hydrateDatapoint(d, hydratedRawMeasures, hydratedDerivedMeasures)
+        .filter(d => !d.key || !d.value));
 }
 
 export function hydrateDatapoint(datapoint, hydratedRawMeasures, hydratedDerivedMeasures){
+    console.log("hydrateD", datapoint)
     //add measure key to rawMeasure values (server stores the measure id instead - need to change)
     const enteredKeyedValues = datapoint.values.map(v => {
         //v.measure is measure _id - we convert it to its key
         return {
             //value could be for a rawmeasure or could be for a raw or derivedMeasure using the key
-            key:hydratedRawMeasures.find(m => m._id === v.measure || m.key === v.key).key || hydratedDerivedMeasures.find(m => m.key === v.key).key,
+            key:hydratedRawMeasures.find(m => m._id === v.measure || m.key === v.key)?.key || hydratedDerivedMeasures.find(m => m.key === v.key)?.key,
             value:v.value,
             wasCalculated:false
         }

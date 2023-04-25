@@ -6,7 +6,7 @@ export function getBandsAndStandards(datasetKey, statKey){
     const emptyDefault = { 
         bands:[ { min:0, max: 10 }], 
         standards:isNumber(minStandards[datasetKey]) ? [ { key:"minimum", label:"Minimum", value:minStandards[datasetKey] }] : [], 
-        accuracy:1 
+        accuracy:0
     };
     if(!datasetBandsAndStandards) { return emptyDefault; }
     //if statKey not specified, just return entire dataset object, which may have gaps in it
@@ -18,6 +18,77 @@ const minStandards = {
 }
 
 const bandsAndStandards = {
+    //PD personal
+    //defence
+    "sleep":{
+        "hoursPastBedtime":{
+            bands:[ { min:0, max:6 } ],
+            //note - minimum standard is actually a maximum value here due to order
+            standards:[ { key:"minimum", label:"Minimum", value:2 }],
+            accuracy:1
+        }
+    },
+    "meditation":{
+        "timeDaily":{
+            bands:[ { min:0, max:60 } ],
+            standards:[ { key:"minimum", label:"Minimum", value:5 }],
+            accuracy:0
+        }
+    },
+    "nourishment":{
+        "healthyMealsDaily":{
+            bands:[ { min:0, max:3 } ],
+            standards:[ { key:"minimum", label:"Minimum", value:3 }],
+            accuracy:0
+        }
+    },
+    "organisation":{
+        "offTrackTasks":{
+            bands:[ { min:0, max:10 } ],
+            //note - minimum standard is actually a maximum value here due to order
+            standards:[ { key:"minimum", label:"Minimum", value:0 }],
+            accuracy:0
+        }
+    },
+    "money":{
+        "spendMonthly":{
+            bands:[ { min:0, max:3000 } ],
+            standards:[ { key:"minimum", label:"Minimum", value:800 }],
+            accuracy:0
+        }
+    },
+    //attack
+    "fitness":{
+        "sessionsWeekly":{
+            bands:[ { min:0, max:5 } ],
+            standards:[ { key:"minimum", label:"Minimum", value:3 }],
+            accuracy:1
+        }
+    },
+    //Switchplay
+    //attack
+    "users":{
+        "active":{
+            bands:[ { min:0, max:50 } ],
+            standards:[],
+            accuracy:0
+        }
+    },
+    "customers":{
+        "score":{
+            bands:[ { min:0, max:50 } ],
+            standards:[],
+            accuracy:0
+        }
+    },
+    "network":{
+        "score":{
+            bands:[ { min:0, max:50 } ],
+            standards:[],
+            accuracy:0
+        }
+    },
+    //sports 
     "pressUps":{
         "reps":{
             bands:[ { min:0, max:120 } ],

@@ -55,13 +55,13 @@ const userKpis = {
       { datasetKey:"money", statKey:"spendMonthly", orientationFocus:"defence" },
       { datasetKey:"fitness", statKey:"sessionsWeekly" },
       { datasetKey: "connection", statKey:"score" },
-      //Business KPIs
+      //Switchplay KPIs
+      { datasetKey:"product", statKey:"score" },
       { datasetKey:"users", statKey:"active" }, 
       //customers
       //1 pt = have expressed interest, 2 pts = have booked or had a meeting, 3 pts = have agreed in principle to a trial, 
       //4 = trial dates agreed or in active, 5 = trial success - want to continue using beyond trial, or are continuing to use
       { datasetKey:"customers", statKey:"score" },
-      { datasetKey:"product", statKey:"score" },
       { datasetKey:"network", statKey:"score" }
    ],
    //Lewis
