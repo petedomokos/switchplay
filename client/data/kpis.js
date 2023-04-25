@@ -45,7 +45,7 @@ const userKpis = {
       { datasetKey:"network", statKey:"score" },
       { key:"nonDatasetKpi", name:"NonDatasetKpi" },
    ],
-   //pd heroku
+   //pd heroku (note journeyId is 643ed66c2282a800159e659d)
    "643d81262b7e4f0015e55bb6":[
       { datasetKey:"organisation", statKey:"offTrackTasks", orientationFocus:"defence" },
       { datasetKey:"money", statKey:"monthlySpend", orientationFocus:"defence" },
@@ -54,7 +54,10 @@ const userKpis = {
       { datasetKey:"nutrition", statKey:"healthyMeals", orientationFocus:"defence" },
       { datasetKey:"exercise", statKey:"score" },
       { datasetKey: "social", statKey:"score" },
-      //{ datasetKey:"users", statKey:"active" },
+      { datasetKey:"users", statKey:"active" }, 
+      //customers
+      //1 pt = have expressed interest, 2 pts = have booked or had a meeting, 3 pts = have agreed in principle to a trial, 
+      //4 = trial dates agreed or in active, 5 = trial success - want to continue using beyond trial, or are continuing to use
       { datasetKey:"customers", statKey:"score" },
       { datasetKey:"product", statKey:"score" },
       { datasetKey:"network", statKey:"score" }
