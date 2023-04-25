@@ -40,7 +40,7 @@ const transformJourneyForServer = journey => {
 				//being performed fully on every update
 				kpis:p.kpis,
 				//add a default profileKpi if one is not defined
-				profileKpis:p.kpis.map(kpi => (p.profileKpis.find(pKpi => pKpi.key === kpi.key) || { key:kpi.key }))
+				profileKpis:p.kpis?.map(kpi => (p.profileKpis.find(pKpi => pKpi.key === kpi.key) || { key:kpi.key })) || []
 			};
 			return profile;
 		});
