@@ -8,7 +8,7 @@ export function hydrateDatasets(datasets){
 }
 //may be shallow or deep
 export function hydrateDataset(dataset){
-    console.log("hydrate Dset", dataset)
+    //console.log("hydrate Dset", dataset)
     const isDeep = !!dataset.datapoints;
     //key - legacy - some dsets have no key
     const key = dataset.key || toCamelCase(dataset.name);
@@ -17,14 +17,14 @@ export function hydrateDataset(dataset){
 
     //we dont bother with some properties if its a shallow version eg no datapoints or measures
     const startDate = isDeep ? getStartDate(dataset) : null;
-    console.log("getting derived...")
+    //console.log("getting derived...")
     const derivedMeasures = isDeep ? getDerivedMeasures(key) : null;
-    console.log("derived", derivedMeasures)
-    console.log("getting raw.....")
+    //console.log("derived", derivedMeasures)
+    //console.log("getting raw.....")
     const rawMeasures = dataset.measures?.map(m => hydrateMeasure(m));
-    console.log("raw", rawMeasures)
+    //console.log("raw", rawMeasures)
     const datapoints = isDeep ? hydrateDatapoints(dataset.datapoints, rawMeasures, derivedMeasures) : null;
-    console.log("ds", datapoints)
+    //console.log("ds", datapoints)
     return {
         ...dataset,
         key,
@@ -38,15 +38,15 @@ export function hydrateDataset(dataset){
 }
 
 export function hydrateDatapoints(datapoints, hydratedRawMeasures, hydratedDerivedMeasures){
-    console.log("hydrateDatapoints", datapoints)
-    console.log("raw derived", hydratedRawMeasures, hydratedDerivedMeasures)
+    //console.log("hydrateDatapoints", datapoints)
+    //console.log("raw derived", hydratedRawMeasures, hydratedDerivedMeasures)
     return datapoints
         .map(d => hydrateDatapoint(d, hydratedRawMeasures, hydratedDerivedMeasures))
         .filter(d => !d.key || !d.value);
 }
 
 export function hydrateDatapoint(datapoint, hydratedRawMeasures, hydratedDerivedMeasures){
-    console.log("hydrateD", datapoint)
+    //console.log("hydrateD", datapoint)
     //add measure key to rawMeasure values (server stores the measure id instead - need to change)
     const enteredKeyedValues = datapoint.values.map(v => {
         //v.measure is measure _id - we convert it to its key

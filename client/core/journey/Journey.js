@@ -205,6 +205,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     console.log("statKey", statKey)
     console.log("kpiKey", kpiKey)
     console.log("key", key)
+    return;
     //a current value
     if(key === "current"){
       onSaveDatapoint(valueObj, datasetKey, statKey);

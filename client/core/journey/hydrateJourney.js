@@ -608,6 +608,7 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
     const { now, rangeFormat } = options;
     const activeProfile = d3.least(orderedProfiles.filter(p => p.isFuture), p => p.date);
     const { kpis } = activeProfile;
+    //console.log("kpis", kpis)
     //@todo - current profile should show all kpis that are used in any future profile, grouped by profile?
     //for now, current profile just shpows the kpis for the active profile
     const activeProfileValues = kpi => kpis

@@ -110,13 +110,13 @@ export default function tooltipsComponent() {
 
             const contentsWidth = width - margin.left - margin.right;
             const contentsHeight = height - margin.top - margin.bottom;
-            const dragTextHeight = draggable && d.withDragValueAbove ? contentsHeight * 0.333 : 0;
+            const dragTextHeight = draggable && d.withDragValueAbove ? 12 : 0;
             const mainContentsHeight = contentsHeight - dragTextHeight;
             //this text below is not part of the normal dimns
             const subtextHeight = contentsHeight * 0.4;
 
             const btnWidth = d3.max([40, contentsWidth]);
-            const btnHeight = mainContentsHeight;
+            const btnHeight = contentsHeight;
 
             //bg
             tooltipG.select("rect.tooltip-bg")
@@ -130,7 +130,7 @@ export default function tooltipsComponent() {
                 .attr("opacity", d.opacity || null)
 
             //saveBtn
-            const saveBtnG = tooltipG.selectAll("g.save-btn").data(d.unsavedValue && !beingDragged(d) ? [1] : []);
+            const saveBtnG = tooltipG.selectAll("g.save-btn").data(isNumber(d.unsavedValue) && !beingDragged(d) ? [1] : []);
             saveBtnG.enter()
                 .append("g")
                     .attr("class", "save-btn")
@@ -205,10 +205,11 @@ export default function tooltipsComponent() {
 
             //dragtext
             tooltipG.select("text.drag-value")
-                .attr("y", -contentsHeight/2 + dragTextHeight/2)
-                .attr("fill", styles.text.fill)
+                .attr("y", -contentsHeight/2 - 3)
+                .attr("fill", styles.text.stroke)
                 .attr("stroke", styles.text.stroke)
-                .attr("font-size", dragTextHeight * 0.8)
+                .attr("stroke-width", 0.1)
+                .attr("font-size", dragTextHeight)
                 .attr("display", draggable && d.withDragValueAbove && isNumber(getValue(d)) ? null : "none")
                 .text(`${getValue(d)}${d.unit || ""}`)
 
@@ -400,7 +401,7 @@ export default function tooltipsComponent() {
                         d3.select(this).select("text.drag-value")
                             .transition()
                             .duration(MED_FADE_DURATION)
-                                .style("opacity", 0.7)
+                                .style("opacity", 1)
 
                         d3.select(this).select("g.icon").select("text.value")
                             .style("opacity", 1)
@@ -452,7 +453,7 @@ export default function tooltipsComponent() {
                             d3.select(this).append("rect").attr("class", "tooltip-bg")
                             d3.select(this).append("text").attr("class", "drag-value")
                                 .attr("text-anchor", "middle")
-                                .attr("dominant-baseline", "central")
+                                .attr("dominant-baseline", "auto")
                                 .style("opacity", 0); //starts hidden
 
                             d3.select(this).append("g").attr("class", "main-contents")

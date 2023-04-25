@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import { DIMNS, grey10 } from "../../constants";
+import { isNumber } from "../../../../data/dataHelpers";
 import dragEnhancements from '../../enhancedDragHandler';
 import container from './container';
 import background from './background';
@@ -112,7 +113,7 @@ export default function numberComponent() {
                         .attr("fill", styles.fill)
                         .attr("stroke", styles.stroke)
                         .attr("stroke-width", 0.1)// styles.strokeWidth)
-                        .text(d.value || "")
+                        .text(isNumber(d.value) ? d.value : "")
 
                 }))
 

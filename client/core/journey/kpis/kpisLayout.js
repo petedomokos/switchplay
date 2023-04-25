@@ -19,13 +19,16 @@ export default function kpisLayout(){
             const { key, values, accuracy, order, isPast, isCurrent, isFuture,isActive, milestoneId, datasetKey, statKey,
                 steps=[], stepsValues, allSteps=[], statProgressStatus, stepsProgressStatus, minStandard, orientationFocus } = kpi; 
             
-            const shouldLog = false;// milestoneId !== "current" && key === "sleep-score"
+            const shouldLog = false;// milestoneId === "current" && datasetKey === "sleep"
             const start = values.start?.actual;
             const current = values.current?.actual;
             const target = orientationFocus === "defence" ? minStandard.value : values.target?.actual;
             const achieved = values.achieved?.actual;
             const expected = values.expected?.actual;
             const { min, max } = values;
+            //if(shouldLog){
+                //console.log("min", milestoneId, minStandard)
+            //}
             //console.log("kpi key datasetkey", key, datasetKey)
             //bars
             const currentColour = grey10(7);// "#696969";
@@ -346,7 +349,7 @@ export default function kpisLayout(){
                 dataOrder: order,
                 accuracy,
                 editable:isCurrent || isFuture,
-                withDragValueAbove:false,
+                withDragValueAbove:true,
                 withInnerValue:false,
             }
 

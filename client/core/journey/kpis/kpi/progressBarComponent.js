@@ -426,7 +426,7 @@ export default function progressBarComponent() {
                     },
                     text:{
                         stroke:d.milestoneId !== "current" && !d.isSet ? "red" : 
-                            (d.key === "expected" || d.key === "target" ? grey10(6) : grey10(4))
+                            (d.key === "expected" || d.key === "target" ? grey10(6) : grey10(6))
                     },
                     subtext:{
                         stroke: editing || !d.isSet? "red" : grey10(4)
