@@ -37,7 +37,7 @@ const userKpis = {
       { datasetKey:"money", statKey:"score", orientationFocus:"defence" },
       { datasetKey:"sleep", statKey:"score", orientationFocus:"defence" },
       { datasetKey:"meditation", statKey:"score", orientationFocus:"defence" },
-      { datasetKey:"nutrition", statKey:"score", orientationFocus:"defence" },
+      { datasetKey:"nutrition", statKey:"meals", orientationFocus:"defence" },
       { datasetKey:"exercise", statKey:"score" },
       { datasetKey: "social", statKey:"score" },
       { datasetKey:"customers", statKey:"score" },
@@ -47,13 +47,14 @@ const userKpis = {
    ],
    //pd heroku
    "643d81262b7e4f0015e55bb6":[
-      { datasetKey:"admin", statKey:"score", orientationFocus:"defence" },
-      { datasetKey:"money", statKey:"score", orientationFocus:"defence" },
-      { datasetKey:"sleep", statKey:"score", orientationFocus:"defence" },
-      { datasetKey:"meditation", statKey:"score", orientationFocus:"defence" },
-      { datasetKey:"nutrition", statKey:"score", orientationFocus:"defence" },
+      { datasetKey:"organisation", statKey:"offTrackTasks", orientationFocus:"defence" },
+      { datasetKey:"money", statKey:"monthlySpend", orientationFocus:"defence" },
+      { datasetKey:"sleep", statKey:"hoursPastBedtime", orientationFocus:"defence" },
+      { datasetKey:"meditation", statKey:"time", orientationFocus:"defence" },
+      { datasetKey:"nutrition", statKey:"healthyMeals", orientationFocus:"defence" },
       { datasetKey:"exercise", statKey:"score" },
       { datasetKey: "social", statKey:"score" },
+      //{ datasetKey:"users", statKey:"active" },
       { datasetKey:"customers", statKey:"score" },
       { datasetKey:"product", statKey:"score" },
       { datasetKey:"network", statKey:"score" }
