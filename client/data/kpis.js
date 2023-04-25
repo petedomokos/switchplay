@@ -45,15 +45,17 @@ const userKpis = {
       { datasetKey:"network", statKey:"score" },
       { key:"nonDatasetKpi", name:"NonDatasetKpi" },
    ],
-   //pd heroku (note journeyId is 643ed66c2282a800159e659d)
+   //pd heroku (note journeyId is 643ed66c2282a800159e659d)... query for it is { _id: ObjectId('643ed66c2282a800159e659d')  }
    "643d81262b7e4f0015e55bb6":[
-      { datasetKey:"organisation", statKey:"offTrackTasks", orientationFocus:"defence" },
-      { datasetKey:"money", statKey:"monthlySpend", orientationFocus:"defence" },
+      //Personal KPIs
       { datasetKey:"sleep", statKey:"hoursPastBedtime", orientationFocus:"defence" },
-      { datasetKey:"meditation", statKey:"time", orientationFocus:"defence" },
-      { datasetKey:"nutrition", statKey:"healthyMeals", orientationFocus:"defence" },
-      { datasetKey:"exercise", statKey:"score" },
-      { datasetKey: "social", statKey:"score" },
+      { datasetKey:"meditation", statKey:"timeDaily", orientationFocus:"defence" },
+      { datasetKey:"nourishment", statKey:"healthyMealsDaily", orientationFocus:"defence" },
+      { datasetKey:"organisation", statKey:"offTrackTasks", orientationFocus:"defence" },
+      { datasetKey:"money", statKey:"spendMonthly", orientationFocus:"defence" },
+      { datasetKey:"fitness", statKey:"sessionsWeekly" },
+      { datasetKey: "connection", statKey:"score" },
+      //Business KPIs
       { datasetKey:"users", statKey:"active" }, 
       //customers
       //1 pt = have expressed interest, 2 pts = have booked or had a meeting, 3 pts = have agreed in principle to a trial, 
