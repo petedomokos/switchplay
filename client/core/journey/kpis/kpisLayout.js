@@ -19,7 +19,7 @@ export default function kpisLayout(){
             const { key, values, accuracy, order, isPast, isCurrent, isFuture,isActive, milestoneId, datasetKey, statKey,
                 steps=[], stepsValues, allSteps=[], statProgressStatus, stepsProgressStatus, minStandard, orientationFocus } = kpi; 
             
-            const shouldLog = false;// milestoneId === "current" && datasetKey === "sleep"
+            const shouldLog = false;// milestoneId === "profile-2" && datasetKey === "meditation"
             const start = values.start?.actual;
             const current = values.current?.actual;
             const target = orientationFocus === "defence" ? minStandard.value : values.target?.actual;
@@ -35,6 +35,7 @@ export default function kpisLayout(){
             const colours = {
                 current: currentColour,
                 currentMaintanence: "#483d8b",
+                currentNoData:grey10(5),
                 target:grey10(2),// "#DCDCDC",
                 expectedBehind:"red",
                 expectedAhead:currentColour,
@@ -330,6 +331,14 @@ export default function kpisLayout(){
                 //console.log("current", current)
             //}
 
+            let getFill = () => {
+                if(!isNumber(current)){ return colours.currentNoData; }
+                if(orientationFocus === "defence"){
+                    return statProgressStatus === "offTrack" ? "red" : colours.currentDefence;
+                }
+                return isMaintenanceTarget ? colours.currentMaintanence : colours.current
+            }
+
             const currentTooltipDatum = {
                 progressBarType:"dataset",
                 tooltipType:"value",
@@ -337,20 +346,17 @@ export default function kpisLayout(){
                 shouldDisplay:(status, editing, displayFormat) => 
                     //show on current if open, but not if closed because bars are showing
                     //(!isCurrent || status === "open") &&
-                    (valueIsInDomain(current, [barStart, barEnd]) || editing || milestoneId === "current") 
+                    (valueIsInDomain(current, [barStart, barEnd]) || editing || status === "open") 
                     /*&& !isPast && status === "open"*/ && displayFormat !== "steps" && statKey,
                 label: values.achieved ? "Achieved" : "Current",
                 location:"on",
                 rowNr:0, y:0,
                 value:current,
                 //fill:grey10(3),
-                fill:orientationFocus === "defence" ? 
-                    (statProgressStatus === "offTrack" ? "red" : colours.currentDefence) 
-                    : 
-                    (isMaintenanceTarget ? colours.currentMaintanence : colours.current),
+                fill:getFill(),
                 //opacity:0.3,
                 //if current, the bars are showing too so reduces opacity
-                opacity:0.8,//isCurrent ? 0.3 : 0.8,
+                opacity:isNumber(current) ? 0.8 : 0.3,//isCurrent ? 0.3 : 0.8,
                 stroke:grey10(6),
                 strokeWidth:0.1,
                 dataOrder: order,
@@ -359,6 +365,10 @@ export default function kpisLayout(){
                 withDragValueAbove:true,
                 withInnerValue:false,
             }
+
+            //if(shouldLog){
+                //console.log("id current", milestoneId, current)
+            //}
 
             const tooltipsData = [...scaleTooltipsData, ...comparisonTooltipsData, currentTooltipDatum]
             
