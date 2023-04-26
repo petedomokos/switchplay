@@ -16,7 +16,7 @@ export default function kpisLayout(){
         //flag
         const nrDatasetKpis = data.filter(kpi => kpi.datasetKey).length;
         const kpisData = data.map((kpi,i) => {
-            const { key, values, accuracy, order, isPast, isCurrent, isFuture,isActive, milestoneId, datasetKey, statKey,
+            const { key, values, accuracy, order, isPast, isCurrent, isFuture, isActive, milestoneId, datasetKey, statKey,
                 steps=[], stepsValues, allSteps=[], statProgressStatus, stepsProgressStatus, minStandard, orientationFocus } = kpi; 
             
             const shouldLog = false;// milestoneId === "profile-2" && datasetKey === "meditation"
@@ -133,6 +133,7 @@ export default function kpisLayout(){
                     isSet:isNumber(start),
                     accuracy,
                     editable:false,
+                    clickableToEdit:isFuture && orientationFocus === "attack",
                     withDragValueAbove:false,
                     withInnerValue:true,
                 },
@@ -149,6 +150,23 @@ export default function kpisLayout(){
                     isSet:isNumber(target),
                     accuracy,
                     editable:false,
+                    clickableToEdit:isFuture && orientationFocus === "attack",
+                    withDragValueAbove:false,
+                    withInnerValue:true,
+                },
+                { 
+                    progressBarType:"dataset",
+                    tooltipType:"scale",
+                    key:"minStandard", milestoneId, kpiKey:key, datasetKey, statKey,
+                    //if no targetObj, this means there is no future active profile at all so no expected
+                    shouldDisplay:(status, editing, displayFormat) => status === "open" && displayFormat !== "steps" && orientationFocus === "defence",
+                    location:"below",
+                    rowNr: -1, y: -1,
+                    value: minStandard?.value, x:minStandard?.value,
+                    isSet:true, //default to true because it will be the exception not the rule for user to customised this per profile
+                    accuracy,
+                    editable:false,
+                    clickableToEdit:isFuture,
                     withDragValueAbove:false,
                     withInnerValue:true,
                 },
@@ -163,6 +181,7 @@ export default function kpisLayout(){
                     value: current, x:current,
                     accuracy,
                     editable:false,
+                    clickableToEdit:false,
                     withDragValueAbove:false,
                     withInnerValue:true,
                 }
@@ -193,6 +212,7 @@ export default function kpisLayout(){
                     status:stepsProgressStatus,
                     icons: { achieved: ball, onTrack: shiningCrystalBall, offTrack: nonShiningCrystalBall, noTarget:emptyGoal },
                     editable:false,//isCurrent || isFuture,
+                    clickableToEdit:false,
                     withDragValueAbove:true,
                     withInnerValue:true,
                 },
@@ -207,6 +227,7 @@ export default function kpisLayout(){
                     status:isMaintenanceTarget? progressStatusForMaintenanceTarget() : statProgressStatus,
                     icons: { achieved: ball, onTrack: shiningCrystalBall, offTrack: nonShiningCrystalBall, noTarget:emptyGoal },
                     editable:false,//isCurrent || isFuture,
+                    clickableToEdit:false,
                     withDragValueAbove:true,
                     withInnerValue:true,
                 },
@@ -234,6 +255,7 @@ export default function kpisLayout(){
                     icons: { achieved: shiningCrystalBall, onTrack: shiningCrystalBall, offTrack: nonShiningCrystalBall, noTarget:nonShiningCrystalBall },
                     //icons: { achieved: ball, onTrack: shiningCrystalBall, offTrack: nonShiningCrystalBall, noTarget:emptyGoal },
                     editable:false,//isCurrent || isFuture,
+                    clickableToEdit:false,
                     withDragValueAbove:true,
                     withInnerValue:true,
                     //smallIcons: expectedAchieved ? emptyGoal : emptyGoal,
@@ -255,6 +277,7 @@ export default function kpisLayout(){
                     accuracy,
                     icons: { achieved: shiningCrystalBall, notAchieved: nonShiningCrystalBall },
                     editable:false,//isCurrent || isFuture,
+                    clickableToEdit:false,
                     withDragValueAbove:true,
                     withInnerValue:true,
                     //smallIcons: expectedAchieved ? emptyGoal : emptyGoal,
@@ -264,8 +287,7 @@ export default function kpisLayout(){
                     tooltipType:"comparison",
                     key:"target", milestoneId, kpiKey:key, datasetKey, statKey,
                     //if no targetObj, this means there is no future active profile at all
-                    shouldDisplay:(status, editing) =>
-                        status === "open" && editing?.desc === "target",
+                    shouldDisplay:(status, editing) => status === "open" && editing?.desc === "target",
                     location:"above",
                     rowNr: 1, y: 1, current,
                     //rowNr: -1, y: -1, current,
@@ -275,6 +297,29 @@ export default function kpisLayout(){
                     accuracy,
                     icons: { achieved: ball, notAchieved: emptyGoal },
                     editable: isFuture,
+                    clickableToEdit:false,
+                    orientationFocus,
+                    withDragValueAbove:true,
+                    withInnerValue:true,
+                    //if small space, just show the ball
+                    //smallIcons: { achieved: ball, notAchieved: emptyGoal },
+                },
+                { 
+                    progressBarType:"dataset",
+                    tooltipType:"comparison",
+                    key:"minStandardEdit", milestoneId, kpiKey:key, datasetKey, statKey,
+                    //if no targetObj, this means there is no future active profile at all
+                    shouldDisplay:(status, editing) => status === "open" && editing?.desc === "minStandard",
+                    location:"above",
+                    rowNr: 1, y: 1, current,
+                    //rowNr: -1, y: -1, current,
+                    value:minStandard?.value, // will always be defined but need the ? so this file doesnt error 
+                    x:minStandard?.value, 
+                    dataOrder: order,
+                    accuracy,
+                    icons: { achieved: ball, notAchieved: emptyGoal },
+                    editable: isFuture,
+                    clickableToEdit:false,
                     orientationFocus,
                     withDragValueAbove:true,
                     withInnerValue:true,

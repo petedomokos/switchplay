@@ -228,18 +228,15 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
           })
         }
       })
-      console.log("save start", _profiles)
       save({ ...data, profiles:_profiles });
       return;
     }
+    if(key === "minStandardEdit"){ 
+      onSaveCustomMinStandard(profileId, kpiKey, valueObj.actual)
+    }
     //a custom target or expected value
     if(key === "target" || key === "expected") {
-      if(valueObj.orientationFocus === "defence"){
-        onSaveCustomMinStandard(profileId, kpiKey, valueObj.actual)
-      }else{
-        onSaveTargetOrExpectedValue(valueObj, profileId, datasetKey, statKey, key);
-      }
-      return;
+      onSaveTargetOrExpectedValue(valueObj, profileId, datasetKey, statKey, key);
     }
   }, [stringifiedProfiles, user._id]);
 

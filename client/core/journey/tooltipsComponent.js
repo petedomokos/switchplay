@@ -433,7 +433,9 @@ export default function tooltipsComponent() {
 
                     //store the values as 'unsaved'
                     onDragEnd.call(this, e, d)
-                    //make sure target is on top as expected may have been dragged and hence raised
+                    //make sure target/minStandard is on top as expected may have been dragged and hence raised
+                    const minStandardTooltipG = d3.select(this.parentNode).select("g.tooltip-minStandard");
+                    if(minStandardTooltipG){ minStandardTooltipG.raise(); }
                     const targetTooltipG = d3.select(this.parentNode).select("g.tooltip-target");
                     if(targetTooltipG){ targetTooltipG.raise(); }
                     d3.select(this.parentNode).selectAll("g.tooltip").call(updateTooltip, tooltipDimns); 

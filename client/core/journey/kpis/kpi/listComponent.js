@@ -127,6 +127,7 @@ export default function listComponent() {
     let shouldIgnoreNextItemClick = false;
 
     let prevData;
+    let reloadingData = false;
 
     function list(selection, options={}) {
        //console.log("list", selection.data())
@@ -474,6 +475,10 @@ export default function listComponent() {
                     .attr("class",(d,i) => `item item-${i} item-${d.id}`)
                     .attr("pointer-events", "none")
                     .each(function(d,i){
+                        //workaround - sometimes, it appears that a new item is added when itemData goes from empty to full,
+                        //because the whole component is not always removed
+                        //soln - flag it as a reload if more than 2 item entered, as only one can be added at a time by the user
+                        if(i === 1){ reloadingData = true; }
                         const itemG = d3.select(this);
                         const itemContentsG = itemG.append("g").attr("class", "item-contents");
                         //hitbox on outer G so margin drags still respond
@@ -612,11 +617,12 @@ export default function listComponent() {
 
 
             //set any new item into edit mode
-            const newItem = prevData && data.find(it => !prevData.find(item => item.id === it.id))
+            const newItem = prevData && !reloadingData && data.find(it => !prevData.find(item => item.id === it.id))
             if(newItem){ 
                 editItem.call(containerG.select(`g.item-${newItem.id}`).node(), newItem) 
             }
             prevData = data;
+            reloadingData = false;
         })
 
         return selection;

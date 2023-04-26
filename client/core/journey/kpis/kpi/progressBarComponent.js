@@ -165,6 +165,17 @@ export default function progressBarComponent() {
                         },
                         fontSize:boundsFontsize
                     },
+                    minStandard: {
+                        width:targetTooltipOpenWidth * boundsMultiplier,
+                        height:targetTooltipOpenHeight * boundsMultiplier,
+                        margin: { 
+                            left:0,
+                            right:0,
+                            top:0,
+                            bottom:0
+                        },
+                        fontSize:boundsFontsize
+                    },
                     end: {
                         width:targetTooltipOpenWidth * boundsMultiplier,
                         height:targetTooltipOpenHeight * boundsMultiplier,
@@ -199,6 +210,18 @@ export default function progressBarComponent() {
                         fontSize
                     },
                     target: {
+                        width:targetTooltipOpenWidth,
+                        height:targetTooltipOpenHeight,
+                        margin: { 
+                            left:0,//bottomTargetTooltipWidth * 0.15,
+                            right:0,//bottomTargetTooltipWidth * 0.15,
+                            top:3,//bottomTooltipsHeight * 0.15,
+                            bottom:3,//bottomTooltipsHeight * 0.15
+                        },
+                        fontSize
+            
+                    },
+                    minStandardEdit: {
                         width:targetTooltipOpenWidth,
                         height:targetTooltipOpenHeight,
                         margin: { 
@@ -447,16 +470,15 @@ export default function progressBarComponent() {
                     }
                 }))
                 .getSubtext((d,i) => {
-                    if(d.milestoneId === "current"){
-                        return "";
-                    }
-                    if(d.key === "start"){
-                        return editing?.desc === "start" ? "End Edit" : (d.isSet ? "Edit" : "Set")
-                    }
+                    if(!d.clickableToEdit){ return ""; }
+                    //@todo - refactor...temp - must handle target separately as it is piggy backing on the 'end' tooltip
                     if(d.key === "end"){
-                        return editing?.desc === "target" ? "End Edit" : (d.isSet ? "Edit" : "Set")
+                        if(editing?.desc === "target"){ return "End Edit"; }
+                        return d.isSet ? "Edit" : "Set"
                     }
-                    return "";
+                    //other cases
+                    if(editing?.desc === d.key){ return "End Edit"}
+                    return d.isSet ? "Edit" : "Set";
                 })
                 .getValue(getTooltipValue)
                 .getX((d,i,j) =>{
@@ -520,8 +542,30 @@ export default function progressBarComponent() {
                 })
                 .draggable(editable)
                 .onClick(function(e,d){
-                    if(d.milestoneId === "current"){ return; }
-                    if(d.key !== "start" && d.key !== "end") { return; }
+                    if(!d.clickableToEdit) { return; }
+                    //@todo - impl the code below, by refactoring the way tooltips are keyed so teh key that you click 
+                    //(eg end) is same as the key that gets set to editing (eg target)
+                    //so should have same key name, but have another property to determine if its the editing version or the display version
+                    /*
+                    if(editing?.desc !== d.key){
+                        editing = { milestoneId:d.milestoneId, desc:d.key }
+                        console.log("set edit to ", editing)
+                        selection.call(progressBar)
+                        //tell react so overlay can be applied
+                        onSetEditing(editing);
+                        return;
+                    } else{
+                        //cancel editing
+                        editing = null
+                        selection.call(progressBar)
+                        //tell react so overlay can be removed
+                        onSetEditing(null)
+                    }
+                    */
+
+                    //for now, handle each case separately
+                    //CASE 1 - START
+                    //start editing the "start" value
                     if(d.key === "start"){
                         //start editing the "start" value
                         if(editing?.desc !== "start"){
@@ -539,20 +583,41 @@ export default function progressBarComponent() {
                         }
                         return;
                     }
-                    //it must be the end tooltip
-                    //start editing the "end" value
-                    if(editing?.desc !== "target"){
-                        editing = { milestoneId:d.milestoneId, desc:"target" }
-                        selection.call(progressBar)
-                        //tell react so overlay can be applied
-                        onSetEditing(editing);
-                        return;
-                    }else{
-                        //cancel editing
-                        editing = null
-                        selection.call(progressBar)
-                        //tell react so overlay can be removed
-                        onSetEditing(null)
+                    //CASE 2 - END (FOR TARGET)
+                    if(d.key === "end"){
+                        //start editing the "end" value
+                        if(editing?.desc !== "target"){
+                            editing = { milestoneId:d.milestoneId, desc:"target" }
+                            selection.call(progressBar)
+                            //tell react so overlay can be applied
+                            onSetEditing(editing);
+                            return;
+                        }else{
+                            //cancel editing
+                            editing = null
+                            selection.call(progressBar)
+                            //tell react so overlay can be removed
+                            onSetEditing(null)
+                        }
+
+                    }
+                    //CASE 3 - MINSTANDARD (FOR MINSTANDARDEDIT)
+                    if(d.key === "minStandard"){
+                        //start editing the "minStandard" value (ie display minStandardEdit tooltip)
+                        if(editing?.desc !== "minStandard"){
+                            editing = { milestoneId:d.milestoneId, desc:"minStandard" }
+                            selection.call(progressBar)
+                            //tell react so overlay can be applied
+                            onSetEditing(editing);
+                            return;
+                        }else{
+                            //cancel editing
+                            editing = null
+                            selection.call(progressBar)
+                            //tell react so overlay can be removed
+                            onSetEditing(null)
+                        }
+
                     }
                 })
                 .onDrag(function(e,d, tooltipDimns){
@@ -611,9 +676,7 @@ export default function progressBarComponent() {
                                 //so we are using a totalValueDelta instead. Although this may be ok, but tehn we should 
                                 //tidy up the code above as some is repeated/unnecc
 
-                                //note - we assume here that if target is being dragged and standarsData is being shown, then it must be 
-                                //a defence kpi so target is the minStandard
-                                value:d.key === "target" ? standD.value + totalValueDelta : standD.value
+                                value:d.key === "minStandardEdit" ? standD.value + totalValueDelta : standD.value
                             }))
                         }
                     }
