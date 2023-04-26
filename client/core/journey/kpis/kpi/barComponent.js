@@ -116,8 +116,6 @@ export default function barComponent() {
 
     function bar(selection, options={}) {
         const { transitionEnter=false, transitionUpdate=false, log} = options;
-        const shouldDisplayBar = displayFormat === "stats" || displayFormat === "both";
-        const shouldDisplaySteps = displayFormat === "steps" || displayFormat === "both";
 
         updateDimns(selection.data());
         // expression elements
@@ -132,7 +130,7 @@ export default function barComponent() {
                 .height((d,i) => dimns[i].contentsHeight)
                 .styles((d, i) => ({
                     //if all datasets will have the start and end defined for bar
-                    stroke:d.statKey ? "grey" : "none",
+                    stroke:"none",//d.statKey ? "grey" : "none",
                     strokeWidth:0.1,
                     fill:"transparent"
                 })), { transitionEnter, transitionUpdate} 
@@ -140,11 +138,14 @@ export default function barComponent() {
             .each(function(data,i){
                 const { barData, milestoneId } = data;
                 const { sectionsData, stepsData } = barData;
-                const { contentsWidth, contentsHeight, barHeight, stepWidth, stepHeight, margin } = dimns[i];
+                const { height, contentsWidth, contentsHeight, barHeight, stepWidth, stepHeight, margin } = dimns[i];
                 const scale = scales[i];
                 const styles = _styles(data,i);
                 const nrCompletedSteps = stepsData.filter(s => s.completed).length;
                 const withStandards = _withStandards(data);
+
+                const shouldDisplayBar = displayFormat === "stats" || displayFormat === "both";
+                const shouldDisplaySteps = (displayFormat === "steps" || displayFormat === "both");//&& milestoneId !== "current";
 
                 //helper
                 const bound = boundValue(scale.domain());
@@ -189,6 +190,24 @@ export default function barComponent() {
                 stepsG.exit().call(remove);
 
 
+                //line
+                const scaleLine = barContentsG.selectAll("line.scale").data(shouldDisplaySteps && stepsData.length === 0 ? [1] : []);
+                scaleLine.enter()
+                    .append("line")
+                        .attr("class", "scale")
+                        .call(fadeIn)
+                        .merge(scaleLine)
+                        .attr("x1", 0)
+                        .attr("x2", contentsWidth)
+                        .attr("y1", contentsHeight/2)
+                        .attr("y2", contentsHeight/2)
+                        .attr("stroke-width", 0.5)
+                        .attr("stroke", grey10(4))
+                        
+
+                scaleLine.exit().call(remove);
+
+
                 //sections
                 const barSectionG = barContentsG.selectAll("g.bar-section").data(sectionsData, d => d.key);
                 barSectionG.enter()
@@ -207,7 +226,10 @@ export default function barComponent() {
                                         .attr("fill", d.fill);;
                             })
                             .merge(barSectionG)
-                            .attr("display", displayFormat !== "steps" ? null : "none")
+                            .attr("transform", `translate(0,${(contentsHeight-barHeight)/2})`)
+                            //.attr("display", displayFormat !== "steps" ? null : "none")
+                            //this was the new one when line was created .attr("display", milestoneId === "current" || displayFormat === "steps" ? null : "none")
+                            .attr("display", "none")
                             .each(function(d,j){
                                 const sectionWidth = scale(bound(d.endValue)) - scale.range()[0];
                                 //adjust rect width to end - start
@@ -235,6 +257,7 @@ export default function barComponent() {
                 barContentsG.selectAll("text.error-mesg").data(errorMesgData)
                     .join("text")
                         .attr("class", "error-mesg")
+                        .attr("display", "none")
                         //.attr("display", displayFormat !== "steps" ? null : "none")
                         .attr("text-anchor", "middle")
                         .attr("dominant-baseline", "central")
@@ -248,16 +271,22 @@ export default function barComponent() {
                         .text(d => d);
 
                 //standards
+
+                // next - make standards line same size and pos as current tooltip
+                //then - make bar sections and contents bg appear in middle, and reduce height down to very thin so its like a line
+                //then - only show the bar sections (ie line) if there are no steps
+                //but my be worth just maing it a line and keeping it the same colour for consistency, so the only thing 
+                //that changes colour is the current tooltip
                 const { standardsData } = barData;
                 const standardsG = barContentsG.selectAll("g.standards").data(withStandards ? [1] : []);
-                const extraLineLength = d3.min([margin.top, 3])
+                const extraLineLength = margin.top + 1.5;//d3.min([margin.top, 3])
                 standardsG.enter()
                     .append("g")
                         .attr("class", "standards")
                         .call(fadeIn)
                         .merge(standardsG)
-                        .attr("transform", `translate(0, ${-extraLineLength})`)
-                        //.attr("transform", `translate(0, ${-margin.top})`)
+                        //.attr("transform", `translate(0, ${-extraLineLength})`)
+                        .attr("transform", `translate(0, ${-margin.top})`)
                         .each(function(){
                             const standardG = d3.select(this).selectAll("g.standard").data(standardsData, d => d.key);
                             standardG.enter()
@@ -267,7 +296,7 @@ export default function barComponent() {
                                     .each(function(d){
                                         d3.select(this).append("line")
                                             .attr("stroke", "black")
-                                            .attr("stroke-opacity", 0.7)
+                                            .attr("stroke-opacity", 0.5)
                                             .attr("stroke-width", d.strokeWidth || 0.2)
                                             .attr("stroke-dasharray", d.key === "minimum" ? null : 1.5)
                                     })
@@ -281,7 +310,7 @@ export default function barComponent() {
                                             .attr("y1", 0)
                                             .attr("x2", 0)
                                             //.attr("y2", margin.top + barHeight)
-                                            .attr("y2", barHeight + 2 * extraLineLength)
+                                            .attr("y2", height)
                                     })
                             standardG.exit().call(remove);
                         })

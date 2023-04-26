@@ -197,11 +197,11 @@ export default function tooltipsComponent() {
                 .attr("height", contentsHeight)
                 //ok, need a bg rect, and target opacity must be 1 an dbg must have fill same as bg to open-kpi
                 //so teh end tooltip doesnt show thru
-                .attr("fill", styles.hitbox.fill)
-                .attr("stroke", styles.hitbox.stroke)
-                .attr("stroke-width", styles.hitbox.strokeWidth)
-                .attr("opacity", styles.hitbox.opacity)
-                .attr("stroke-opacity", styles.hitbox.strokeOpacity)
+                .attr("fill", d.fill || styles.hitbox.fill)
+                .attr("stroke", d.stroke || styles.hitbox.stroke)
+                .attr("stroke-width",d.strokeWidth || styles.hitbox.strokeWidth)
+                .attr("opacity", d.opacity || styles.hitbox.opacity)
+                .attr("stroke-opacity", d.strokeOpacity || styles.hitbox.strokeOpacity)
 
             //dragtext
             tooltipG.select("text.drag-value")

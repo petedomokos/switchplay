@@ -105,7 +105,7 @@ export default function kpisLayout(){
             const stepsBarData = !isCurrent || nrDatasetKpis === 0 ? steps : [];
 
             const standardsData = !minStandard ? [] : [
-                { ...minStandard, strokeWidth:1 },
+                { ...minStandard, strokeWidth:0.6 },
                 { key:"minimumPlus10PC", label:"", value: calcPCIntervalsFromValue(10, [dataStart, dataEnd], minStandard.value, { accuracy })[1] }
             ]
             const barData = {
@@ -335,15 +335,22 @@ export default function kpisLayout(){
                 tooltipType:"value",
                 key:"current", milestoneId, kpiKey:key, datasetKey, statKey,
                 shouldDisplay:(status, editing, displayFormat) => 
-                    //show it if possible, ie always if scale is full scale, else only show if its in the domain
+                    //show on current if open, but not if closed because bars are showing
+                    //(!isCurrent || status === "open") &&
                     (valueIsInDomain(current, [barStart, barEnd]) || editing || milestoneId === "current") 
-                    && !isPast && status === "open" && displayFormat !== "steps" && statKey,
+                    /*&& !isPast && status === "open"*/ && displayFormat !== "steps" && statKey,
                 label: values.achieved ? "Achieved" : "Current",
                 location:"on",
                 rowNr:0, y:0,
                 value:current,
-                fill:grey10(3),
-                opacity:0.3,
+                //fill:grey10(3),
+                fill:orientationFocus === "defence" ? 
+                    (statProgressStatus === "offTrack" ? "red" : colours.currentDefence) 
+                    : 
+                    (isMaintenanceTarget ? colours.currentMaintanence : colours.current),
+                //opacity:0.3,
+                //if current, the bars are showing too so reduces opacity
+                opacity:0.8,//isCurrent ? 0.3 : 0.8,
                 stroke:grey10(6),
                 strokeWidth:0.1,
                 dataOrder: order,

@@ -159,7 +159,7 @@ export default function listComponent() {
         selection.selectAll("g.items-zoom").call(container("items"));
 
         selection.each(function(data,i){
-            console.log("list", data)
+            //console.log("list", data)
             const containerG = d3.select(this);
             const contentsG = containerG.select("g.list-component-contents");
             const styles = _styles(data,i);
@@ -612,8 +612,10 @@ export default function listComponent() {
 
 
             //set any new item into edit mode
-            const newItem = data.find(it => !prevData?.find(item => item.id === it.id))
-            if(newItem){ editItem.call(containerG.select(`g.item-${newItem.id}`).node(), newItem) }
+            const newItem = prevData && data.find(it => !prevData.find(item => item.id === it.id))
+            if(newItem){ 
+                editItem.call(containerG.select(`g.item-${newItem.id}`).node(), newItem) 
+            }
             prevData = data;
         })
 

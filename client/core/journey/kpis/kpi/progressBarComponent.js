@@ -224,7 +224,8 @@ export default function progressBarComponent() {
                     },
                     current: {
                         width:10,
-                        height:d3.max([20, bar.statBarHeight * 1.25]),
+                        //height:d3.max([20, bar.statBarHeight * 1.25]),
+                        height:barHeight,
                         margin: { 
                             left:0,
                             right:0,
@@ -236,6 +237,19 @@ export default function progressBarComponent() {
                     }
                 },
                 closed:{
+                    current: {
+                        width:10,
+                        //height:d3.max([20, bar.statBarHeight * 1.25]),
+                        height:barHeight,
+                        margin: { 
+                            left:0,
+                            right:0,
+                            top:0,
+                            bottom:0
+                        },
+                        fontSize
+            
+                    },
                     statProgress:{
                         width:endTooltipWidth,
                         height:endTooltipHeight,
@@ -453,7 +467,7 @@ export default function progressBarComponent() {
                         return barContentsWidth * (d.x/100);
                     }
                     //i is kpi index, j is tooltip datum index
-                    if(status === "open"){
+                    if(status === "open" || d.key === "current"){
                         //in open format, all tooptips are positioned according to the x scale
                         const value = getTooltipValue(d);
                         const scale = xScales[d.progBarKey];
@@ -484,7 +498,8 @@ export default function progressBarComponent() {
                         //current
                         if(d.key === "current"){
                             //we want it centred on teh statBar not the whole bar
-                            return expectedTooltipOpenHeight + bar.margin.top + bar.statBarHeight/2; //+ bar.height/2;
+                            //return expectedTooltipOpenHeight + bar.margin.top + bar.statBarHeight/2; //+ bar.height/2;
+                            return expectedTooltipOpenHeight + bar.height/2;
                         }
                         const heightAboveBottomTooltips = expectedTooltipOpenHeight + bar.height - bar.margin.bottom;
                         if(d.tooltipType === "scale"){
