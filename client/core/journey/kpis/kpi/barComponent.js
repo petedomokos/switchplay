@@ -191,7 +191,7 @@ export default function barComponent() {
 
 
                 //line
-                const scaleLine = barContentsG.selectAll("line.scale").data(shouldDisplaySteps && stepsData.length === 0 ? [1] : []);
+                const scaleLine = barContentsG.selectAll("line.scale").data(!shouldDisplaySteps || stepsData.length === 0 ? [1] : []);
                 scaleLine.enter()
                     .append("line")
                         .attr("class", "scale")

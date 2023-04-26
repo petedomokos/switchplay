@@ -525,7 +525,7 @@ export default function profileCardsComponent() {
                         let btnHeight = 25;
 
                         const topRightBtnG = innerContentsG.select("g.top-right-ctrls")
-                            .attr("transform", `translate(${contentsWidth * 0.98}, ${contentsHeight * 0.02})`)
+                            .attr("transform", `translate(${contentsWidth}, ${0})`)
                             .selectAll("g.top-right-btn")
                             .data(ctrls(d).topRight, b => b.label)
                     
@@ -547,10 +547,12 @@ export default function profileCardsComponent() {
                                 .attr("transform", (b,i) => `translate(${-(i + 1) * btnWidth})`)
                                 .each(function(b){
                                     d3.select(this).select("rect")
-                                        .attr("width", btnWidth)
-                                        .attr("height", btnHeight);
+                                        .attr("x", -20)
+                                        .attr("width", btnWidth + 20)
+                                        .attr("height", btnHeight + 20);
 
                                     d3.select(this).select("path")
+                                        .attr("transform", `translate(-15,10)`)
                                         .attr("d", b.icon.d)
                                 })
                                 .style("cursor", "pointer")

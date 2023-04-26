@@ -414,7 +414,7 @@ export default function progressBarComponent() {
                 .statBarHeight((d,i) => dimns[i].bar.statBarHeight)
                 .scale((d,i) => xScales[d.key])
                 .editable(editable)
-                .withStandards(d => d.orientationFocus === "attack" ? false : true)
+                .withStandards(d => d.orientationFocus === "attack" || displayFormat === "steps" ? false : true)
                 .displayFormat(displayFormat)
             , { transitionEnter, transitionUpdate} )
 
