@@ -367,7 +367,7 @@ export default function progressBarComponent() {
                 .width((d,i) => dimns[i].width)
                 .height((d,i) => dimns[i].height)
                 .styles((d, i) => ({
-                    stroke:"none",//"blue",//"none",
+                    stroke:"none",
                     fill:_styles(d).bg?.fill || "transparent"
                 }))
             )
@@ -462,11 +462,11 @@ export default function progressBarComponent() {
                         strokeWidth:0.2
                     },
                     text:{
-                        stroke:d.milestoneId !== "current" && !d.isSet ? "red" : 
+                        stroke:d.milestoneId !== "current" && d.isDefault ? "red" : 
                             (d.key === "expected" || d.key === "target" ? grey10(6) : grey10(6))
                     },
                     subtext:{
-                        stroke: editing || !d.isSet? "red" : grey10(4)
+                        stroke: editing || d.isDefault? "red" : grey10(4)
                     }
                 }))
                 .getSubtext((d,i) => {
@@ -474,11 +474,11 @@ export default function progressBarComponent() {
                     //@todo - refactor...temp - must handle target separately as it is piggy backing on the 'end' tooltip
                     if(d.key === "end"){
                         if(editing?.desc === "target"){ return "End Edit"; }
-                        return d.isSet ? "Edit" : "Set"
+                        return d.isDefault ? "Set" : "Edit"
                     }
                     //other cases
                     if(editing?.desc === d.key){ return "End Edit"}
-                    return d.isSet ? "Edit" : "Set";
+                    return d.isDefault ? "Set" : "Edit";
                 })
                 .getValue(getTooltipValue)
                 .getX((d,i,j) =>{

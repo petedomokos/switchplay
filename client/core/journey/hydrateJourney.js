@@ -192,12 +192,16 @@ function calcStepsValues(startDate, date, steps=[]){
 
 //@todo - custom expected when user drags
 function calcExpected(start, target, now, options={}){
+    //console.log("start", start)
+    //console.log("target", target)
+    const completion = Math.round(linearProjValue(start.date.getTime(), 0, target.date.getTime(), 100, now.getTime()));
+    //console.log("completion", completion)
     if(!start || !isNumber(start.actual) || !isNumber(target.actual)){ 
-        return { actual:null, completion:null }; 
+        return { actual:null, completion }; 
     }
     const { accuracy, showTrailingZeros=true } = options;
-    const actual = linearProjValue(start.date.getTime(), start.actual, target.date.getTime(), target.actual, now.getTime())
-    const completion = convertToPC(start.actual, target.actual)(actual);
+    const actual = linearProjValue(start.date.getTime(), start.actual, target.date.getTime(), target.actual, now.getTime());
+    //const completion = convertToPC(start.actual, target.actual)(actual);
     return { 
         actual: round(actual, accuracy, showTrailingZeros), 
         completion
@@ -239,10 +243,6 @@ function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target, log
         .filter(d => {
             return typeof d[1] === "number"
         })
-    if(log){
-        console.log("dataMethod", dataMethod)
-        console.log("pairs", dateValuePairs)
-    }
 
     const values = dateValuePairs.map(d => d[1]);
     
@@ -251,11 +251,6 @@ function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target, log
     const getOverallValue = values => {
         if(dataMethod === "best"){ return getBest(values); }
         if(dataMethod === "latest") {
-            if(log){
-                console.log("pairs for gettting latest", dateValuePairs)
-                const greatestPair = d3.greatest(dateValuePairs, d => d[0])
-                console.log("greatest", greatestPair)
-            }
             return dateValuePairs[0] ? d3.greatest(dateValuePairs, d => d[0])[1] : null 
         }
         return 0;
@@ -271,10 +266,7 @@ function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target, log
 
 function createTargetFromDefault(datasetKey, statKey, date, defaultTargets){
     const defaultTarget = findDefaultTarget(defaultTargets, datasetKey, statKey, date);
-    return {
-        actual:defaultTarget?.value || null,
-        completion:defaultTarget?.completion || null,
-    }
+    return defaultTarget?.value || null;
 }
 
 function twentyYearsAgo(now){ return addMonths(-240, now); }
@@ -295,7 +287,7 @@ const goBackByExpiryDurationFromDate = (duration, units) => date => {
 
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
     //if(profile.id === "profile-5")
-    //console.log("hydrateProfile------------", profile.id, profile.date, profile.customStartDate)
+    console.log("hydrateProfile------------", profile.id, profile.date, profile.customStartDate)
     const { now, rangeFormat } = options;
     const { id, customTargets=[], isCurrent, profileKpis=[] } = profile;
     const date = typeof profile.date === "string" ? new Date(profile.date) : profile.date;
@@ -320,6 +312,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
     //if not startdate and no past profile, then we start from when any non-expired data could exist
     //@todo - deal with profile cards that have date set to eg morning of today - should still be future
     const datePhase = date < now ? "past" : "future";
+
     const isPast = datePhase === "past";
     const isFuture = datePhase === "future";
     const isActive = isFuture && prevProfile?.isPast;
@@ -396,7 +389,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //KEYS/ID
             const { datasetKey, statKey, min, max, accuracy, standards, orientationFocus } = kpi;
             const key = kpi.key || `${datasetKey}-${statKey}`;
-            //console.log("kpi--------------------------", key)
+            console.log("kpi--------------------------", key)
 
 
             const profileKpi = profileKpis.find(pKpi => pKpi.key === key) || {};
@@ -413,9 +406,9 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 minStandard = { key:"minimum", label:"Minimum", value:d3.mean([min, max]) }
             }
 
-            const shouldLog = false;//key === "exercise-score";
+            const shouldLog = key === "social-score";
             if(shouldLog){
-                //console.log("kpi key........................", key)
+                console.log("kpi key........................", key)
                 //console.log("customMin", customMinStandard)
                 //console.log("min", minStandard)
             }
@@ -441,6 +434,9 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
 
             const lastDataUpdate = isPast ? null : d3.max(dateValuePairs, d => d[0]);
 
+            const dataStart = order === "highest is best" ? min : max;
+            const dataEnd = order === "highest is best" ? max : min;
+
             //START
             //let start;
             //if(profileStart.type === "custom" || profileStart.type === "default"){
@@ -453,11 +449,13 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             const start = {
                 date:startDate,
                 //note - we pass in the achieved data method, as this will always be in the past
-                actual:actualStart,
-                completion:0
+                actual:isNumber(actualStart) ? actualStart : dataStart,
+                completion:0,
+                startType: !isNumber(actualStart) ? "dataStart" : (isNumber(customStartValue) ? "custom" : "datapoint"),
+                isDefault: !isNumber(actualStart)
             }
             if(shouldLog){
-                //console.log("start", start)
+                console.log("start", start)
             }
             /*}else{
                 //its based on a prev profile 
@@ -477,20 +475,22 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
 
             const customTarget = d3.greatest(customTargetsForStat, d => d.created);
             const k = customTarget ? Number(customTarget.actual) : null;
-            const parsedCustomTarget = customTarget ? { actual: Number(customTarget.actual), completion:100 } : null;
+            const parsedCustomTarget = customTarget ? customTarget.actual : null;
             
             //2 possible causes of new targ not getting picked up
             //date of new targ that hasnt gone thru server os a Date not a string
             //actual and pc are numbers not strings
-            const nonRoundedTarget = parsedCustomTarget || createTargetFromDefault(datasetKey, statKey, date, defaultTargets);
+            const nonRoundedTarget = isNumber(parsedCustomTarget) ? parsedCustomTarget : createTargetFromDefault(datasetKey, statKey, date, defaultTargets);
+            const actualTarget = round(nonRoundedTarget, accuracy);
             //we must round, because accuracy is contextual so a target may not be rounded to the required level
             const target = {
-                ...nonRoundedTarget,
-                actual:round(nonRoundedTarget.actual, accuracy),
-                completion:100
+                actual:isNumber(actualTarget) ? actualTarget : dataEnd,
+                completion:100,
+                targetType:!isNumber(actualTarget) ? "dataEnd" : (parsedCustomTarget ? "custom" : "stored"),
+                isDefault:!isNumber(actualTarget)
             }
             if(shouldLog){
-                //console.log("target", target)
+                console.log("target", target)
             }
 
             //CURRENT
@@ -510,16 +510,23 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 current = getValueForSession(stat, datapoints, specificDate, start, target)
             }
             if(shouldLog){
-                console.log("current", current)
+                //console.log("current", current)
             }
 
             const achieved = isPast ? current : null;
+            if(shouldLog)
+            console.log("calcing expected......")
             //note prevProfile has already been processed with a full key and values
             let expected = isPast ? null : calcExpected(start, { date, ...target }, now, { accuracy });
+            //why is this {null}
 
             const values = {
                 //min/max are just values
                 min, max, start, current, expected, achieved, target, //proposedTarget,
+            }
+            if(shouldLog){
+                console.log("date", date)
+                console.log("values", values)
             }
 
             //statProgressStatus is either achieved, onTrack, offTrack, or undefined
@@ -582,8 +589,10 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 datePhase,
                 isPast, isCurrent, isFuture, isActive,
                 lastDataUpdate,
+                //data
+                dataStart,
+                dataEnd,
                 minStandard,
-                //values
                 values,
                 statProgressStatus,
                 order,
@@ -592,6 +601,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 datasetName:dataset?.name || "",
                 statName:stat?.name || "",
                 unit:stat?.unit || "",
+                //steps
                 steps,
                 stepsValues,
                 stepsProgressStatus
@@ -685,7 +695,8 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
                 //dates
                 date:now, 
                 startDate,
-                dateRange, datePhase, isCurrent:true,
+                dateRange, datePhase, 
+                isCurrent:true, isPast:false, isFuture:false,
                 order:stat.order,
                 accuracy,
                 lastDataUpdate,

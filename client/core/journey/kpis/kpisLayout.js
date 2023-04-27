@@ -17,7 +17,9 @@ export default function kpisLayout(){
         const nrDatasetKpis = data.filter(kpi => kpi.datasetKey).length;
         const kpisData = data.map((kpi,i) => {
             const { key, values, accuracy, order, isPast, isCurrent, isFuture, isActive, milestoneId, datasetKey, statKey,
-                steps=[], stepsValues, allSteps=[], statProgressStatus, stepsProgressStatus, minStandard, orientationFocus } = kpi; 
+                steps=[], stepsValues, allSteps=[], statProgressStatus, stepsProgressStatus, minStandard, orientationFocus,
+                dataStart, dataEnd 
+            } = kpi; 
             
             const shouldLog = false;// milestoneId === "profile-2" && datasetKey === "meditation"
             const start = values.start?.actual;
@@ -49,8 +51,6 @@ export default function kpisLayout(){
             const maintenanceTargetHasSlipped = isNumber(current) && isNumber(target) && (order === "highest is best" ? target > current : target < current);
             
             //Bar datums
-            const dataStart = order === "highest is best" ? min : max;
-            const dataEnd = order === "highest is best" ? max : min;
             let barStart, barEnd;
             //4 cases
             if(isCurrent){
@@ -130,7 +130,7 @@ export default function kpisLayout(){
                     rowNr: -1, y: -1,
                     value: barStart, x:barStart,
                     fullScaleValue:dataStart,
-                    isSet:isNumber(start),
+                    isDefault:values.start?.isDefault,
                     accuracy,
                     editable:false,
                     clickableToEdit:isFuture && orientationFocus === "attack",
@@ -147,7 +147,7 @@ export default function kpisLayout(){
                     rowNr: -1, y: -1,
                     value: barEnd, x:barEnd,
                     fullScaleValue:dataEnd, 
-                    isSet:isNumber(target),
+                    isDefault:values.target?.isDefault,
                     accuracy,
                     editable:false,
                     clickableToEdit:isFuture && orientationFocus === "attack",
@@ -163,7 +163,7 @@ export default function kpisLayout(){
                     location:"below",
                     rowNr: -1, y: -1,
                     value: minStandard?.value, x:minStandard?.value,
-                    isSet:true, //default to true because it will be the exception not the rule for user to customised this per profile
+                    isDefault:false, //always uses the stored value or a custom value, never a default
                     accuracy,
                     editable:false,
                     clickableToEdit:isFuture,
@@ -193,12 +193,6 @@ export default function kpisLayout(){
                 return "achieved";
             }
             //@todo - put different comparisons into current card eg compared to club expectations, or all players avg
-            //if(milestoneId === "profile-5" && (key === "admin" || key === "pressUps-reps")){
-                //console.log("kpi key", key)
-                //console.log("value", values)
-                //console.log("prog stepPro", progressStatus, stepsProgressStatus)
-                //need to loko at why expected steps is 0
-            //}
 
             const comparisonTooltipsData = isCurrent ? [] : [
                 { 
@@ -231,6 +225,7 @@ export default function kpisLayout(){
                     withDragValueAbove:true,
                     withInnerValue:true,
                 },
+                /*
                 { 
                     progressBarType:"steps",
                     tooltipType:"comparison",
@@ -260,6 +255,7 @@ export default function kpisLayout(){
                     withInnerValue:true,
                     //smallIcons: expectedAchieved ? emptyGoal : emptyGoal,
                 },
+                */
                 { 
                     progressBarType:"dataset",
                     tooltipType:"comparison",
@@ -270,8 +266,8 @@ export default function kpisLayout(){
                     shouldDisplay:(status, editing, displayFormat) => 
                         valueIsInDomain(expected, [barStart, barEnd]) && status === "open" && isFuture
                         && displayFormat !== "steps" && !isMaintenanceTarget && !editing, 
-                    location:"above",
-                    rowNr: 1, y: 1, current,
+                    location:"below",
+                    rowNr: -1, y: -1, current,
                     value: expected, x:expected,
                     dataOrder: order,
                     accuracy,

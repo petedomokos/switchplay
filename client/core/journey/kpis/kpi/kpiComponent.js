@@ -196,7 +196,7 @@ export default function kpiComponent() {
                 .styles((d,i) => ({
                     primaryTitle:{ 
                         fontSize:dimns[d.key].titleDimns.fontSize,
-                        strokeWidth:0.2,
+                        strokeWidth:0.1,
                         ..._styles(d,i).name,
                         dominantBaseline:"central",
                         fontFamily:"helvetica, sans-serifa",
