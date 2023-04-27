@@ -124,6 +124,8 @@ export default function listComponent() {
     const zoom = d3.zoom();
     let enhancedDrag = dragEnhancements();
     const itemDrag = d3.drag();
+    let enhancedNewItemLongpress = dragEnhancements();
+    const newItemLongpress = d3.drag();
     let shouldIgnoreNextItemClick = false;
 
     let prevData;
@@ -152,7 +154,7 @@ export default function listComponent() {
                 .width((d,i) => contentsWidth)
                 .height((d,i) => contentsHeight)
                 .styles((d, i) => ({
-                    stroke:"none",
+                    stroke:"blue",//none",
                     fill:_styles(d).bg?.fill || "transparent"
                 })))
             .call(container("items-zoom"));
@@ -185,6 +187,22 @@ export default function listComponent() {
                 }
                 */
                     //});
+
+            enhancedNewItemLongpress
+                .onLongpressStart(newItemLongpressStart);
+
+            newItemLongpress
+                .on("start", enhancedNewItemLongpress())
+                .on("drag", enhancedNewItemLongpress())
+                .on("end", enhancedNewItemLongpress())
+
+            function newItemLongpressStart(){
+                if(orderEditable){
+                    console.log("lp firstItemG", contentsG.select("g.item").attr("transform"))
+                    console.log("lp newItemG", contentsG.select("g.new-item").attr("transform"))
+                }
+                createNewItem();
+            }
 
             enhancedDrag
                 //.onDblClick(onDblClick)
@@ -222,6 +240,12 @@ export default function listComponent() {
                     if(i === 0){ draggedDeltaY = translateY + e.dy - itemMargin.top; }
                     itemG.attr("transform", `translate(0, ${translateY + e.dy})`);
                 })
+
+                const newItemG = contentsG.select("g.new-item");
+                const newItemGTransY = getTransformationFromTrans(newItemG.attr("transform")).translateY;
+                newItemG.attr("transform", `translate(0, ${newItemGTransY + e.dy})`);
+
+
             }
             //note: newX and Y should be stored as d.x and d.y
             function dragEnd(e, d){
@@ -268,11 +292,6 @@ export default function listComponent() {
             let deltaXMax = 0;
             let deltaYMax = 0;
             function longpressStart(e , d){
-                //console.log("lpstart x,y", Math.round(e.x), Math.round(e.y))
-                if(d.id === "newItem"){
-                    createNewItem();
-                    return;
-                }
                 initPos = e;
                 d3.select(this).raise();
                 d3.select(this).select("rect.item-bg")
@@ -282,8 +301,8 @@ export default function listComponent() {
                 initDraggedPos = getTransformationFromTrans(d3.select(this).attr("transform")).translateY;
                 //todo - clipPath shouldnt apply to the dragged item, so we can see the delete animation 
                 //but still need the clipPath for the rest
-
             }
+
             function calcProspectivePosition(y){
                 const middleOfBarY = y + itemHeight/2;
                 //then simply return the position that y is closest to
@@ -306,8 +325,6 @@ export default function listComponent() {
                 if(deltaX > deltaXMax){ deltaXMax = deltaX; }
                 if(deltaY > deltaYMax){ deltaYMax = deltaY; }
 
-                //console.log("deltaX", deltaXMax,"deltaY", deltaYMax)
-                if(d.id === "newItem"){ return; }
                 if(deleteTriggered){ 
                     //console.log("deleteAlreadyTrg")
                     return; 
@@ -393,7 +410,6 @@ export default function listComponent() {
 
             //note: newX and Y should be stored as d.x and d.y
             function longpressEnd(e, d){
-                if(d.id === "newItem"){ return; }
                 d3.select(this).select("rect.item-bg")
                     .attr("stroke", d.id !== "newItem" ? (styles.item.stroke || "none") : "none")
                     .attr("stroke-width", styles.item.strokeWidth || 0.5);
@@ -580,30 +596,31 @@ export default function listComponent() {
             newItemG.enter()
                 .append("g")
                     .attr("class", "new-item")
-                    .each(function(){
-                        d3.select(this).append("rect").attr("class", "new-item-hitbox")
-                            .attr("fill", "transparent")
+                    .each(function(d){
                         //@todo - replace text with an icon
                         d3.select(this).append("text")
                             .attr("dominant-baseline", "central")
                             .attr("stroke", grey10(7))
                             .attr("fill", grey10(7))
                             .attr("stroke-width", 0.1)
+
+                        d3.select(this).append("rect").attr("class", "new-item-hitbox")
+                            .attr("fill", "transparent")
                     })
                     .merge(newItemG)
-                    .attr("transform", `translate(0,${noItemsMesgHeight + actualListHeight})`)
-                    .each(function(){
-                        d3.select(this).select("rect.new-item-hitbox")
-                            .attr("width", contentsWidth)
-                            .attr("height", newItemAreaHeight);
-
+                    .attr("transform", `translate(0,${draggedDeltaY + noItemsMesgHeight + actualListHeight})`)
+                    .each(function(d){
                         d3.select(this).select("text")
                             .attr("x", 20)
                             .attr("y", newItemAreaHeight/2)
                             .attr("font-size", 14)
                             .text("Add New")
+
+                        d3.select(this).select("rect.new-item-hitbox")
+                            .attr("width", contentsWidth)
+                            .attr("height", newItemAreaHeight);
                     })
-                    .call(itemDrag)
+                    .call(newItemLongpress)
 
             newItemG.exit().call(remove)
 

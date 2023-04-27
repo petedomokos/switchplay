@@ -279,7 +279,8 @@ export default function kpiComponent() {
                                     .height(kpiInfoHeight)
                                     .margin({ left:0, right: 0, top:kpiInfoHeight * 0.1, bottom:kpiInfoHeight * 0.1 })
                                     .styles((d,i) => ({ item:styles.step }))
-                                    .orderEditable(d.milestoneId !== "current")
+                                    //.orderEditable(d.milestoneId !== "current")
+                                    .orderEditable(d.milestoneId === "profile-2")
                                     .noItemsMesg("No Steps Yet")
                                     .newItemDatum(d.milestoneId === "current" ? null : { desc:"Add Step" })
                                     .onCreateItem(() => {
