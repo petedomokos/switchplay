@@ -234,7 +234,7 @@ export default function kpiComponent() {
                     .call(fadeIn)
                     .merge(closedContentsG)
                     //closedkpi doesnt show info so that space is just turned into an extra margin
-                    .attr("transform", `translate(0,${titleDimns.height})`)
+                    .attr("transform", `translate(10,${titleDimns.height})`)
                     .each(function(d){
                         d3.select(this)
                             .call(closedProgressBars[d.key]

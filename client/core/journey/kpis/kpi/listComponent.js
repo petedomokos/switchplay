@@ -154,7 +154,7 @@ export default function listComponent() {
                 .width((d,i) => contentsWidth)
                 .height((d,i) => contentsHeight)
                 .styles((d, i) => ({
-                    stroke:"blue",//none",
+                    stroke:"none",
                     fill:_styles(d).bg?.fill || "transparent"
                 })))
             .call(container("items-zoom"));
