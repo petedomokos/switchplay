@@ -151,7 +151,7 @@ export default function tooltipsComponent() {
                                     .text("SAVE")
                     })
                     .merge(saveBtnG)
-                    .attr("transform", `translate(${-btnWidth/2}, ${-contentsHeight/2 + dragTextHeight})`)
+                    .attr("transform", `translate(${-btnWidth/2}, ${-contentsHeight/2 + dragTextHeight/2})`)
                     .each(function(){
                         d3.select(this).select("rect.save-btn-bg")
                             .attr("width", btnWidth)
