@@ -42,7 +42,8 @@ export default function kpisLayout(){
                 expectedBehind:"red",
                 expectedAhead:currentColour,
                 stepsCurrent:"blue",
-                currentDefence:"#dcf3ff",
+                currentDefenceTooltip:"#dcf3ff",
+                currentDefenceNumber:"#90d9ff",
                 redZone:"red"
             }
 
@@ -53,16 +54,16 @@ export default function kpisLayout(){
             //Bar datums
             let barStart, barEnd;
             //4 cases
-            if(isCurrent){
+            if(isCurrent || orientationFocus === "defence"){
                 //case 1: current card any orientation - use full scale
                 barStart = dataStart
                 barEnd = dataEnd;
-            }else if(orientationFocus === "defence"){
+            }/*else if(orientationFocus === "defence"){
                 //case 2: non-current card, defence kpis go from -20% to +20%
                 const pcIntervals = calcPCIntervalsFromValue(20, [dataStart, dataEnd], minStandard.value, { accuracy });
                 barStart = valueIsInDomain(pcIntervals[0], [dataStart, dataEnd]) ? pcIntervals[0] : dataStart;
                 barEnd = valueIsInDomain(pcIntervals[1], [dataStart, dataEnd]) ? pcIntervals[1] : dataEnd;
-            }else if(isMaintenanceTarget){
+            }*/else if(isMaintenanceTarget){
                 //case 3: non-current card, maintanence target
                 const endToUse = isNumber(target) ? target : dataEnd
                 barStart = calcPCIntervalsFromValue(20, [dataStart, dataEnd], endToUse, { accuracy })[0];
@@ -82,7 +83,7 @@ export default function kpisLayout(){
                 isAchieved:!!values.achieved,
                 startValue: barStart,
                 endValue: current,
-                fill:orientationFocus === "defence" ? colours.currentDefence : (isMaintenanceTarget ? colours.currentMaintanence : colours.current),
+                fill:orientationFocus === "defence" ? colours.currentDefenceBar : (isMaintenanceTarget ? colours.currentMaintanence : colours.current),
                 opacity:isMaintenanceTarget ? 0.5 : 1,
                 format,
                 isMaintenanceTarget
@@ -105,16 +106,20 @@ export default function kpisLayout(){
             //(although it will show the steps list for all steps on all future cards)
             const stepsBarData = !isCurrent || nrDatasetKpis === 0 ? steps : [];
 
-            const standardsData = !minStandard ? [] : [
-                { ...minStandard, strokeWidth:0.6 },
-                { key:"minimumPlus10PC", label:"", value: calcPCIntervalsFromValue(10, [dataStart, dataEnd], minStandard.value, { accuracy })[1] }
-            ]
+            let getStandardsData = () => {
+                if(!minStandard){ return []; }
+                const minDatum = { ...minStandard, strokeWidth:0.6 };
+                const plus10PCValue = calcPCIntervalsFromValue(10, [dataStart, dataEnd], minStandard.value, { accuracy })[1];
+                const minPlus10Datum = { key:"minimumPlus10PC", label:"", value: plus10PCValue }
+                return valueIsInDomain(plus10PCValue, [dataStart, dataEnd]) ? [minDatum, minPlus10Datum] : [minDatum];
+            }
+
             const barData = {
                 start:barStart,
                 end:barEnd,
                 dataStart,
                 dataEnd,
-                standardsData,
+                standardsData:getStandardsData(),
                 sectionsData: [targetBarDatum, currentBarDatum],
                 stepsData:stepsBarData
             }
@@ -270,7 +275,8 @@ export default function kpisLayout(){
                     //dont display if its a maintance goal ie taregt is same or worse then start
                     shouldDisplay:(status, editing, displayFormat) => 
                         valueIsInDomain(expected, [barStart, barEnd]) && status === "open" && isFuture
-                        && displayFormat !== "steps" && !isMaintenanceTarget && !editing, 
+                        && displayFormat !== "steps" && !isMaintenanceTarget && !editing
+                        && orientationFocus === "attack", 
                     location:"below",
                     rowNr: -1, y: -1, current,
                     value: expected, x:expected,
@@ -377,10 +383,13 @@ export default function kpisLayout(){
                 //console.log("current", current)
             //}
 
-            let getFill = () => {
+            let getFill = (itemType) => {
                 if(!isNumber(current)){ return colours.currentNoData; }
-                if(orientationFocus === "defence"){
-                    return statProgressStatus === "offTrack" ? "red" : colours.currentDefence;
+                if(orientationFocus === "defence" && itemType === "tooltip"){
+                    return statProgressStatus === "offTrack" ? "red" : colours.currentDefenceTooltip;
+                }
+                if(orientationFocus === "defence" && itemType === "number"){
+                    return statProgressStatus === "offTrack" ? "red" : colours.currentDefenceNumber;
                 }
                 return isMaintenanceTarget ? colours.currentMaintanence : colours.current
             }
@@ -399,7 +408,7 @@ export default function kpisLayout(){
                 rowNr:0, y:0,
                 value:current,
                 //fill:grey10(3),
-                fill:getFill(),
+                fill:getFill("tooltip"),
                 //opacity:0.3,
                 //if current, the bars are showing too so reduces opacity
                 opacity:isNumber(current) ? 0.8 : 0.3,//isCurrent ? 0.3 : 0.8,
@@ -420,12 +429,14 @@ export default function kpisLayout(){
             
             //numbers
             const currentNumberDatum = {
+                milestoneId,
                 progressBarType:"dataset",
                 key:"current",
                 shouldDisplay:(status, editing, displayFormat) => /*editing?.desc !== "target" &&*/ displayFormat !== "steps",
                 label: values.achieved ? "Achieved" : "Current",
                 value: current,
-                fill:colours.current,
+                //fill:colours.current,
+                fill:getFill("number"),
                 format
             }
             

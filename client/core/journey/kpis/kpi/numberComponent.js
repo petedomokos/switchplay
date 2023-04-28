@@ -110,12 +110,13 @@ export default function numberComponent() {
                         .attr("x", contentsWidth/2)
                         .attr("y", contentsHeight/2)
                         .attr("font-size", styles.fontSize)
-                        .attr("fill", styles.fill)
-                        .attr("stroke", styles.stroke)
+                        .attr("fill", d.fill || styles.fill)
+                        .attr("stroke", d.fill || styles.stroke)
                         .attr("stroke-width", 0.1)// styles.strokeWidth)
                         .text(isNumber(d.value) ? d.value : "")
 
                 }))
+            .on("click", onClick)
 
         /*
         const numberG = numberContentsG.selectAll("g.number").data(d.numberData, n => n.key);

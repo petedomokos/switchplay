@@ -427,7 +427,24 @@ export default function progressBarComponent() {
             .call(numbers
                 .width((d,i) => dimns[i].numbers.width)
                 .height((d,i) => dimns[i].numbers.height)
-                .margin((d,i) => dimns[i].numbers.margin));
+                .margin((d,i) => dimns[i].numbers.margin)
+                .onClick((e,numberD) => {
+                    if(status === "closed") { return; }
+                    if(editing?.desc !== "current"){
+                        console.log("set editing to current")
+                        editing = { milestoneId:numberD.milestoneId, desc:"current" }
+                        selection.call(progressBar)
+                        //tell react so overlay can be applied
+                        onSetEditing(editing);
+                        return;
+                    } else {
+                        //cancel editing
+                        editing = null
+                        selection.call(progressBar)
+                        //tell react so overlay can be removed
+                        onSetEditing(null)
+                    }
+                }));
 
         //helper to get value
         const getTooltipScaleValue = d => editing && isNumber(d.fullScaleValue) ? d.fullScaleValue : d.value;
@@ -524,17 +541,20 @@ export default function progressBarComponent() {
                             return expectedTooltipOpenHeight + bar.height/2;
                         }
                         const heightAboveBottomTooltips = expectedTooltipOpenHeight + bar.height - bar.margin.bottom;
-                        if(d.tooltipType === "scale"){
-                            return heightAboveBottomTooltips + tooltips.open.start.height/2;
+                        if(d.tooltipType === "scale" || d.rowNr === -1){
+                            const extraSpaceForMinStandardLine = 3;
+                            return heightAboveBottomTooltips + tooltips.open.start.height/2 + extraSpaceForMinStandardLine;
                         }
                         //start (editing), target and expectedStats
                         if(d.rowNr === 1){
                             return tooltips.open.expected.height/2;
                         }
                         //expectedSteps
+                        /*
                         if(d.rowNr === -1){
                             return heightAboveBottomTooltips + tooltips.open.expectedSteps.height/2;
                         }
+                        */
                         return 0;
                     }
                     //closed

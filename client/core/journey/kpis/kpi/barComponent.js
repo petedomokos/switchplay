@@ -279,7 +279,7 @@ export default function barComponent() {
                 //that changes colour is the current tooltip
                 const { standardsData } = barData;
                 const standardsG = barContentsG.selectAll("g.standards").data(withStandards ? [1] : []);
-                const extraLineLength = margin.top + 1.5;//d3.min([margin.top, 3])
+                const extraLineLength = margin.top + 1;//d3.min([margin.top, 3])
                 standardsG.enter()
                     .append("g")
                         .attr("class", "standards")
@@ -301,7 +301,7 @@ export default function barComponent() {
                                             .attr("stroke-dasharray", d.key === "minimum" ? null : 1.5)
                                     })
                                     .merge(standardG)
-                                    .attr("transform", d => `translate(${scale(d.value)}, 0)`)
+                                    .attr("transform", d => `translate(${scale(d.value)}, ${-extraLineLength/2})`)
                                     .each(function(d){
                                         //if(milestoneId !== "current")
                                            // console.log("update stand--------", d.value)
@@ -310,7 +310,7 @@ export default function barComponent() {
                                             .attr("y1", 0)
                                             .attr("x2", 0)
                                             //.attr("y2", margin.top + barHeight)
-                                            .attr("y2", height)
+                                            .attr("y2", height + extraLineLength)
                                     })
                             standardG.exit().call(remove);
                         })

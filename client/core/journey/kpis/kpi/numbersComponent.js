@@ -110,7 +110,8 @@ export default function numbersComponent() {
                             .width(numberWidth)
                             .height(numberHeight)
                             .margin(numberMargin)
-                            .styles({ fontSize }));
+                            .styles({ fontSize })
+                            .onClick(onClick));
             })
     
         /*
