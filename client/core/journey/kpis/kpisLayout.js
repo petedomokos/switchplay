@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { grey10, KPI_CTRLS } from '../constants';
 import { isNumber, valueIsInDomain, calcPCIntervalsFromValue } from '../../../data/dataHelpers';
-import { iceCrystals, ice, meltingIce, emptyGoal, ball, goalWithBall, shiningCrystalBall, nonShiningCrystalBall } from "../../../../assets/icons/milestoneIcons.js"
+import { fireworks1, fire, waterOnFire, iceCrystals, ice, meltingIce, emptyGoal, ball, goalWithBall, shiningCrystalBall, nonShiningCrystalBall } from "../../../../assets/icons/milestoneIcons.js"
 
 export default function kpisLayout(){
     let format = "actual"; //actual
@@ -202,7 +202,7 @@ export default function kpisLayout(){
             const progressIcons = orientationFocus === "defence" ?
                 { achieved: iceCrystals, onTrack: ice, offTrack: meltingIce, noTarget:null }
                 :
-                { achieved: ball, onTrack: shiningCrystalBall, offTrack: nonShiningCrystalBall, noTarget:emptyGoal };
+                { achieved: fireworks1, onTrack: fire, offTrack: waterOnFire, noTarget:null };
 
             const comparisonTooltipsData = isCurrent ? [] : [
                 { 
