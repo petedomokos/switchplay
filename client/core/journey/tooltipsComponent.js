@@ -246,6 +246,7 @@ export default function tooltipsComponent() {
                             iconG.selectAll("*").style("fill", icon.styles.fill)
                         }
                         iconG.select(".inner-overlay").attr("display", shouldShowValue ? null : "none")
+                        iconG.select(".blocker").style("fill", styles.bg?.fill || "transparent")
                         
                         iconG.selectAll(".net").style("fill", "#f0f0f0")
                         iconG.select(".posts").style("fill", "#afafaf")

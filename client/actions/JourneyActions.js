@@ -126,6 +126,8 @@ export const transformJourneyForClient = journey => {
 			created:p.created ? new Date(p.date) : null,
 			customStartDate:p.customStartDate ? new Date(p.customStartDate) : null,
 			yPC:+p.yPC,
+			customTargets:p.customTargets.map(t => ({ ...t, actual:+t.actual, date:new Date(t.date) })),
+			customExpected:p.customExpected.map(e => ({ ...e, actual:+t.actual, date:new Date(t.date) })),
 			profileKpis:p.profileKpis?.map(pKpi => ({ 
 				...pKpi, 
 				customStartValue: pKpi.customStartValue ? +pKpi.customStartValue : null ,

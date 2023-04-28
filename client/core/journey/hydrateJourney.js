@@ -286,8 +286,8 @@ const goBackByExpiryDurationFromDate = (duration, units) => date => {
 }
 
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
-    //if(profile.id === "profile-5")
-    //console.log("hydrateProfile------------", profile.id, profile.date, profile.customStartDate)
+    if(profile.id === "profile-2")
+    console.log("hydrateProfile------------", profile.id, profile.date, profile)
     const { now, rangeFormat } = options;
     const { id, customTargets=[], isCurrent, profileKpis=[] } = profile;
     const date = typeof profile.date === "string" ? new Date(profile.date) : profile.date;
@@ -406,9 +406,9 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 minStandard = { key:"minimum", label:"Minimum", value:d3.mean([min, max]) }
             }
 
-            const shouldLog = false;// key === "social-score";
+            const shouldLog = false; id === "profile-2" && datasetKey === "customers";
             if(shouldLog){
-                console.log("kpi key........................", key)
+                //console.log("kpi key........................", key)
                 //console.log("customMin", customMinStandard)
                 //console.log("min", minStandard)
             }
@@ -442,7 +442,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //if(profileStart.type === "custom" || profileStart.type === "default"){
             const startDateRange = calcDateRange(goBackByExpiryDuration(startDate), startDate);
             if(shouldLog){
-                console.log("datapoints", datapoints)
+                //console.log("datapoints", datapoints)
                 //console.log("getting start value", profileKpi)
             }
             const actualStart = customStartValue || calcCurrent(stat, datapoints, startDateRange, achievedValueDataMethod, undefined, undefined, shouldLog).actual;
@@ -455,7 +455,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 isDefault: !isNumber(actualStart)
             }
             if(shouldLog){
-                console.log("start", start)
+                //console.log("start", start)
             }
             /*}else{
                 //its based on a prev profile 
@@ -471,7 +471,12 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //TARGET
             const customTargetsForStat = customTargets
                 .filter(t => t.datasetKey === datasetKey && t.statKey === statKey)
-                .filter(t => typeof Number(t.actual) === "number" && !Number.isNaN(Number(t.actual)));
+                .filter(t => isNumber(t.actual));
+
+            if(shouldLog){
+                //console.log("customTargets", customTargets)
+                //console.log("customTargsForStat", customTargetsForStat)
+            }
 
             const customTarget = d3.greatest(customTargetsForStat, d => d.created);
             const k = customTarget ? Number(customTarget.actual) : null;
@@ -490,7 +495,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 isDefault:!isNumber(actualTarget)
             }
             if(shouldLog){
-                console.log("target", target)
+                //console.log("target", target)
             }
 
             //CURRENT
@@ -514,8 +519,8 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             }
 
             const achieved = isPast ? current : null;
-            if(shouldLog)
-            console.log("calcing expected......")
+            //if(shouldLog)
+            //console.log("calcing expected......")
             //note prevProfile has already been processed with a full key and values
             let expected = isPast ? null : calcExpected(start, { date, ...target }, now, { accuracy });
             //why is this {null}
@@ -525,8 +530,8 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 min, max, start, current, expected, achieved, target, //proposedTarget,
             }
             if(shouldLog){
-                console.log("date", date)
-                console.log("values", values)
+                //console.log("date", date)
+                //console.log("values", values)
             }
 
             //statProgressStatus is either achieved, onTrack, offTrack, or undefined
@@ -537,7 +542,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 statProgressStatus = targetIsAchieved(values, { order, orientationFocus, minStandard }) ? "achieved" : "notAchieved";
             } else {
                 //future
-                if(shouldLog){ console.log("checking if targ met...")}
+                //if(shouldLog){ console.log("checking if targ met...")}
                 if(targetIsAchieved(values, { order, orientationFocus, minStandard, shouldLog })){
                     statProgressStatus = "achieved";
                 }else if(expectedIsAchieved(values, { order })){
@@ -548,7 +553,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 }
             }
             if(shouldLog){
-                console.log("statProg", statProgressStatus)
+                //console.log("statProg", statProgressStatus)
             }
 
             //steps

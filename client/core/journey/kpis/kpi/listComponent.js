@@ -197,10 +197,6 @@ export default function listComponent() {
                 .on("end", enhancedNewItemLongpress())
 
             function newItemLongpressStart(){
-                if(orderEditable){
-                    console.log("lp firstItemG", contentsG.select("g.item").attr("transform"))
-                    console.log("lp newItemG", contentsG.select("g.new-item").attr("transform"))
-                }
                 createNewItem();
             }
 

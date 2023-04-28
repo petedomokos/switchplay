@@ -265,11 +265,8 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
   //before the saved value has been adjusted.
   //profile wont ever be current here, as that is dynamically created ratehr than stored
   const onSaveTargetOrExpectedValue = useCallback((valueObj, profileId, datasetKey, statKey, key) => {
-    console.log("save target/exp value")
-    const profile = profileId === "current" ? 
-      profiles.find(p => p.isFuture)
-      :
-      profiles.find(p => p.id === profileId);
+    console.log("saveTarget/exp key", key)
+    const profile = profiles.find(p => p.id === profileId);
 
     let obj = {
       ...valueObj,
@@ -288,7 +285,6 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     //cant use profileId as it may be 'current' which is not updated
     const otherProfiles = profiles.filter(p => p.id !== updatedProfile.id);
     const _profiles = [ ...otherProfiles, updatedProfile]
-    //console.log("saving targ or expected value", obj)
     save({ ...data, profiles:_profiles });
   }, [stringifiedProfiles, user._id]);
 
