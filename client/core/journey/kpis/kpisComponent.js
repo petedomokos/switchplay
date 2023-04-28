@@ -105,7 +105,7 @@ export default function kpisComponent() {
         scrollMax = 0;
 
         //kpi margin (top must be constant so title pos doesnt shift when opening a kpi)
-        gapBetweenKpis = kpiHeight * 0.3;// 0.15;
+        gapBetweenKpis = kpiHeight * 0.5;// 0.15;
         kpiMargin = { top: 0, bottom: gapBetweenKpis, left:0, right:0 }
 
         closeBtnWidth = 40;// contentsWidth * 0.1;

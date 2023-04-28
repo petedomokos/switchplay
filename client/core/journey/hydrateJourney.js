@@ -287,7 +287,7 @@ const goBackByExpiryDurationFromDate = (duration, units) => date => {
 
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
     //if(profile.id === "profile-5")
-    console.log("hydrateProfile------------", profile.id, profile.date, profile.customStartDate)
+    //console.log("hydrateProfile------------", profile.id, profile.date, profile.customStartDate)
     const { now, rangeFormat } = options;
     const { id, customTargets=[], isCurrent, profileKpis=[] } = profile;
     const date = typeof profile.date === "string" ? new Date(profile.date) : profile.date;
@@ -389,7 +389,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //KEYS/ID
             const { datasetKey, statKey, min, max, accuracy, standards, orientationFocus } = kpi;
             const key = kpi.key || `${datasetKey}-${statKey}`;
-            console.log("kpi--------------------------", key)
+            //console.log("kpi--------------------------", key)
 
 
             const profileKpi = profileKpis.find(pKpi => pKpi.key === key) || {};
@@ -406,7 +406,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 minStandard = { key:"minimum", label:"Minimum", value:d3.mean([min, max]) }
             }
 
-            const shouldLog = key === "social-score";
+            const shouldLog = false;// key === "social-score";
             if(shouldLog){
                 console.log("kpi key........................", key)
                 //console.log("customMin", customMinStandard)

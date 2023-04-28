@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { grey10, KPI_CTRLS } from '../constants';
 import { isNumber, valueIsInDomain, calcPCIntervalsFromValue } from '../../../data/dataHelpers';
-import { emptyGoal, ball, goalWithBall, shiningCrystalBall, nonShiningCrystalBall } from "../../../../assets/icons/milestoneIcons.js"
+import { iceCrystals, ice, meltingIce, emptyGoal, ball, goalWithBall, shiningCrystalBall, nonShiningCrystalBall } from "../../../../assets/icons/milestoneIcons.js"
 
 export default function kpisLayout(){
     let format = "actual"; //actual
@@ -194,6 +194,11 @@ export default function kpisLayout(){
             }
             //@todo - put different comparisons into current card eg compared to club expectations, or all players avg
 
+            const progressIcons = orientationFocus === "defence" ?
+                { achieved: iceCrystals, onTrack: ice, offTrack: meltingIce, noTarget:null }
+                :
+                { achieved: ball, onTrack: shiningCrystalBall, offTrack: nonShiningCrystalBall, noTarget:emptyGoal };
+
             const comparisonTooltipsData = isCurrent ? [] : [
                 { 
                     progressBarType:"dataset",
@@ -204,7 +209,7 @@ export default function kpisLayout(){
                     position:1,
                     rowNr: 1, y: 1, current,
                     status:stepsProgressStatus,
-                    icons: { achieved: ball, onTrack: shiningCrystalBall, offTrack: nonShiningCrystalBall, noTarget:emptyGoal },
+                    icons: progressIcons,
                     editable:false,//isCurrent || isFuture,
                     clickableToEdit:false,
                     withDragValueAbove:true,
@@ -219,7 +224,7 @@ export default function kpisLayout(){
                     position:2,
                     rowNr: 1, y: 1, current,
                     status:isMaintenanceTarget? progressStatusForMaintenanceTarget() : statProgressStatus,
-                    icons: { achieved: ball, onTrack: shiningCrystalBall, offTrack: nonShiningCrystalBall, noTarget:emptyGoal },
+                    icons: progressIcons,
                     editable:false,//isCurrent || isFuture,
                     clickableToEdit:false,
                     withDragValueAbove:true,
