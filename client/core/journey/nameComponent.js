@@ -22,7 +22,7 @@ export default function nameComponent(containerG, options={}){
 
     enhancedDrag
         .onClick((e, d) => { 
-            console.log("clk", onClick)
+
             onClick(e, d)
         })
         .onDblClick(onDblClick)
