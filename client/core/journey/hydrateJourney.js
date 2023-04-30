@@ -107,10 +107,6 @@ export function hydrateJourneyData(data, user, datasets){
         }
     })
 
-    enrichedProfiles.forEach(p => {
-        console.log("id date status", p.id, p.date, p.profileProgressInfo)
-    })
-
     return {
         //for now, asume all users are players
         player,
@@ -426,13 +422,10 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 plus10PC:calcPCIntervalsFromValue(10, [dataStart, dataEnd], minStandard.value, { accuracy })[1]
             }
 
-            const shouldLog = id === "profile-2" && datasetKey === "nutrition";
+            const shouldLog = false;// id === "profile-2" && datasetKey === "nutrition";
             if(shouldLog){
-                console.log("kpi key........................", key)
+                //console.log("kpi key........................", key)
                 //console.log("customMin", customMinStandard)
-                console.log("min", minStandard)
-                console.log("dataset", dataset)
-                console.log("stat", stat)
             }
             
             //VALUES

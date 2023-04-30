@@ -26,7 +26,9 @@ export function getProfileStatusInfo(p, options={}){
         getStatus:kpi => kpi.statProgressStatus, 
         statusesToInclude:["offTrack"]
     });
-    console.log("defenceStatsoffTrack", defenceStatsOffTrack)
+
+    const attackStats = p.kpis.filter(kpi => kpi.orientationFocus === "attack");
+    const nrAttackStatsWithTargets = attackStats.filter(kpi => kpi.statProgressStatus !== "noTarget").length
 
     //next = move this out form here, and then check it works properly
     //5 levels - no shine, small silver, med silver, med gold, large gold
@@ -86,6 +88,8 @@ export function getProfileStatusInfo(p, options={}){
         //statsAchieved,
         //stepsOnTrack,
         //statsOnTrack,
+        nrAttackStats:attackStats.length,
+        nrAttackStatsWithTargets,
         totalValuesIncludedForAchieved,
         totalAchieved,
         totalPCAchieved,

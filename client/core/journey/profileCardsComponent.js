@@ -459,7 +459,8 @@ export default function profileCardsComponent() {
                             .attr("width", contentsWidth)
                             .attr("height", contentsHeight)
                             .attr("stroke-width", stroke[d.profileProgressInfo?.status]?.strokeWidth || 0)
-                            .attr("stroke", stroke[d.profileProgressInfo?.status]?.stroke || "none")
+                            .attr("stroke", (d.profileProgressInfo?.nrAttackStats !== 0 && d.profileProgressInfo?.nrAttackStatsWithTargets === 0) ? "none" 
+                                : (stroke[d.profileProgressInfo?.status]?.stroke || "none"))
                             .call(updateFill, { fill:d => "none", transition:{ duration: 300 } })
                             .attr("filter", "url(#shine)")
                             
