@@ -109,7 +109,7 @@ export default function kpisLayout(){
             let getStandardsData = () => {
                 if(!minStandard){ return []; }
                 const minDatum = { ...minStandard, strokeWidth:0.6 };
-                const plus10PCValue = calcPCIntervalsFromValue(10, [dataStart, dataEnd], minStandard.value, { accuracy })[1];
+                const plus10PCValue = minStandard.plus10PC;
                 const minPlus10Datum = { key:"minimumPlus10PC", label:"", value: plus10PCValue }
                 return valueIsInDomain(plus10PCValue, [dataStart, dataEnd]) ? [minDatum, minPlus10Datum] : [minDatum];
             }

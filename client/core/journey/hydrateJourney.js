@@ -6,7 +6,7 @@ import { getTargets, findDefaultTarget } from "../../data/targets";
 import { convertToPC, round, roundDown, roundUp, getRangeFormat, dateIsInRange, getValueForStat, getGreatestValueForStat } from "../../data/dataHelpers";
 import { linearProjValue } from "./helpers";
 import { pcCompletion } from "../../util/NumberHelpers"
-import { isNumber } from '../../data/dataHelpers';
+import { isNumber, calcPCIntervalsFromValue } from '../../data/dataHelpers';
 import { JOURNEY_SETTINGS, JOURNEY_SETTINGS_INFO, createFutureProfile } from './constants';
 import { getBandsAndStandards } from "../../data/bandsAndStandards";
 import { getProfileStatusInfo } from './profileStatus';
@@ -28,14 +28,7 @@ const requiredValueIsAchieved = (value, required, options={}) => {
     return value.actual <= required.actual;
 }
 
-const targetIsAchieved = (values, options={}) => {
-    const { orientationFocus="attack", minStandard, shouldLog } = options;
-    if(orientationFocus === "attack"){
-        return requiredValueIsAchieved(values.current, values.target, options);
-    }
-    const requiredValue = minStandard ? { actual:minStandard.value } : { actual: values.max/2 }
-    return requiredValueIsAchieved(values.current, requiredValue, options);
-}
+const targetIsAchieved = (values, options) => requiredValueIsAchieved(values.current, values.target, options);
 const expectedIsAchieved = (values, options) => requiredValueIsAchieved(values.current, values.expected, options);
 
 export function hydrateJourneyData(data, user, datasets){
@@ -286,8 +279,7 @@ const goBackByExpiryDurationFromDate = (duration, units) => date => {
 }
 
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
-    if(profile.id === "profile-2")
-    console.log("hydrateProfile------------", profile.id, profile.date, profile)
+    //console.log("hydrateProfile------------", profile.id, profile.date, profile)
     const { now, rangeFormat } = options;
     const { id, customTargets=[], isCurrent, profileKpis=[] } = profile;
     const date = typeof profile.date === "string" ? new Date(profile.date) : profile.date;
@@ -395,32 +387,9 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             const profileKpi = profileKpis.find(pKpi => pKpi.key === key) || {};
             const { customMinStandard, customStartValue, steps=[] } = profileKpi;
 
-            //minStandard - may be custom, may be general for kpi, or may be undefined,
-            let minStandard = standards.find(st => st.key === "minimum");
-            //overide with custom
-            if(customMinStandard){
-                minStandard = { key:"minimum", label:"Minimum", value:customMinStandard }
-            }
-            //ensure there is a minStandard if its a defence kpi
-            if(!minStandard && orientationFocus === "defence"){
-                minStandard = { key:"minimum", label:"Minimum", value:d3.mean([min, max]) }
-            }
-
-            const shouldLog = false; id === "profile-2" && datasetKey === "customers";
-            if(shouldLog){
-                //console.log("kpi key........................", key)
-                //console.log("customMin", customMinStandard)
-                //console.log("min", minStandard)
-            }
-            
-            //VALUES
-            //helper
-            //issue - surely we should also filter for datasetKey
-            //need to take ll this into the calcCurrent func
             const dataset = datasets.find(dset => dset.key === datasetKey);
-            //console.log("dataset", dataset)
             const datapoints = dataset?.datapoints || [];
-                
+
             //add accuracy to teh stat - note that the stat has only stable metadata, whereas the kpi
             //is dependent on context, so level of accuracy to display is defined in kpi not stat
             const stat = { ...dataset?.stats.find(s => s.key === statKey), accuracy };
@@ -436,6 +405,31 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
 
             const dataStart = order === "highest is best" ? min : max;
             const dataEnd = order === "highest is best" ? max : min;
+
+            //minStandard - may be custom, may be general for kpi, or may be undefined,
+            let minStandard = standards.find(st => st.key === "minimum");
+            //overide with custom
+            if(customMinStandard){
+                minStandard = { key:"minimum", label:"Minimum", value:customMinStandard }
+            }
+            //ensure there is a minStandard if its a defence kpi
+            if(!minStandard && orientationFocus === "defence"){
+                minStandard = { key:"minimum", label:"Minimum", value:d3.mean([min, max]) }
+            }
+
+            const enrichedMinStandard = !minStandard ? null : {
+                ...minStandard,
+                plus10PC:calcPCIntervalsFromValue(10, [dataStart, dataEnd], minStandard.value, { accuracy })[1]
+            }
+
+            const shouldLog = false; id === "profile-2" && datasetKey === "customers";
+            if(shouldLog){
+                //console.log("kpi key........................", key)
+                //console.log("customMin", customMinStandard)
+                //console.log("min", minStandard)
+            }
+            
+            //VALUES
 
             //START
             //let start;
@@ -535,25 +529,27 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             }
 
             //statProgressStatus is either achieved, onTrack, offTrack, or undefined
+            let statProgressOptions = { order };
             let statProgressStatus;
-            if(!isNumber(target.actual) && orientationFocus !== "defence"){
-                statProgressStatus = "noTarget";
-            } else if(isPast){
-                statProgressStatus = targetIsAchieved(values, { order, orientationFocus, minStandard }) ? "achieved" : "notAchieved";
-            } else {
-                //future
-                //if(shouldLog){ console.log("checking if targ met...")}
-                if(targetIsAchieved(values, { order, orientationFocus, minStandard, shouldLog })){
+            if(orientationFocus === "defence"){
+                if(requiredValueIsAchieved(values.current, { actual: enrichedMinStandard.plus10PC }, statProgressOptions)){
                     statProgressStatus = "achieved";
-                }else if(expectedIsAchieved(values, { order })){
+                }else if(requiredValueIsAchieved(values.current, { actual: minStandard.value }, statProgressOptions)){
                     statProgressStatus = "onTrack";
-                }else {
-                    //note - no data will also mean offTrack
+                }else{
+                     //note - no data will also mean offTrack
                     statProgressStatus = "offTrack";
                 }
-            }
-            if(shouldLog){
-                //console.log("statProg", statProgressStatus)
+
+            } else if(target.isDefault){
+                statProgressStatus = "noTarget";
+            } else if(targetIsAchieved(values, statProgressOptions)){
+                statProgressStatus = "achieved";
+            } else if(expectedIsAchieved(values, statProgressOptions)){
+                statProgressStatus = "onTrack";
+            } else {
+                //note - no data will also mean offTrack
+                statProgressStatus = "offTrack";
             }
 
             //steps
@@ -597,7 +593,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 //data
                 dataStart,
                 dataEnd,
-                minStandard,
+                minStandard:enrichedMinStandard,
                 values,
                 statProgressStatus,
                 order,

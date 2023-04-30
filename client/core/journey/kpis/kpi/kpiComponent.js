@@ -369,7 +369,7 @@ export default function kpiComponent() {
                             .text("Last data:")
 
                         mainRowG.select("text.date")
-                            .attr("x", 40)
+                            .attr("x", 45)
                             .attr("font-size", 9)
                             .text(d3.timeFormat("%_d %b, %y")(d.lastDataUpdate))
                     })
