@@ -12,8 +12,8 @@ export function getProfileStatusInfo(p, options={}){
         const kpisWithStatus = kpisToInclude.filter(kpi => statusesToInclude.includes(getStatus(kpi)));
         const pc = kpisToInclude === 0 ? 0 : Math.round((kpisWithStatus.length /kpisToInclude.length) * 100)
         return { 
-            kpis:kpisWithStatus,
-            kpisIncluded:kpisToInclude,  
+            kpis:kpisWithStatus.map(kpi => kpi.key),
+            kpisIncluded:kpisToInclude.map(kpi => kpi.key),  
             pc, 
             amount:kpisWithStatus.length, 
             amountIncluded:kpisToInclude.length 
@@ -26,6 +26,7 @@ export function getProfileStatusInfo(p, options={}){
         getStatus:kpi => kpi.statProgressStatus, 
         statusesToInclude:["offTrack"]
     });
+    console.log("defenceStatsoffTrack", defenceStatsOffTrack)
 
     //next = move this out form here, and then check it works properly
     //5 levels - no shine, small silver, med silver, med gold, large gold
@@ -63,7 +64,7 @@ export function getProfileStatusInfo(p, options={}){
 
     let profileProgressStatus;
     //if even 1 defence kpi is off track, then entire card is severely off track
-    if(defenceStatsOffTrack.length !== 0){ profileProgressStatus = "severelyOffTrack" }
+    if(defenceStatsOffTrack.amount !== 0){ profileProgressStatus = "severelyOffTrack" }
     else if(totalPCAchieved === 100){ profileProgressStatus = "fullyAchieved"; }
     else if(totalPCOnTrack === 100){ profileProgressStatus = "fullyOnTrack"; }
     else if(totalPCOnTrack >= 75) { profileProgressStatus = "mostlyOnTrack"; }
@@ -91,6 +92,7 @@ export function getProfileStatusInfo(p, options={}){
         totalValuesIncludedForOnTrack,
         totalOnTrack,
         totalPCOnTrack,
+        defenceStatsOffTrack:defenceStatsOffTrack,
         status:/*fake[p.id] ||*/ profileProgressStatus
     }
 }
