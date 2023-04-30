@@ -443,9 +443,9 @@ export default function kpisComponent() {
                                     const kpiContentsWidth = kpiWidth - kpiMargin.left - kpiMargin.right;
                                     const kpiContentsHeight = kpiHeight - kpiMargin.top - kpiMargin.bottom;
                                     const width = kpiContentsWidth * 0.5;
-                                    const height = d3.min([kpiContentsHeight * 0.4, 10]);
+                                    const height = d3.min([kpiContentsHeight * 0.5, 14]);
                                     const margin = { top: height * 0.1, bottom: height * 0.4 };
-                                    const fontSize = status(d) === "open" || status(d) === "opening" ? height * 0.9 : height * 0.6;
+                                    const fontSize = status(d) === "open" || status(d) === "opening" ? height * 0.8 : height * 0.5;
                                     return { width, height, margin, fontSize }
                                 })
                                 .styles((d,i) => ({
