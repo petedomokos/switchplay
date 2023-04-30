@@ -3,6 +3,11 @@ import { DIMNS, PROFILE_PAGES, grey10, OVERLAY } from "./constants";
 import container from './kpis/kpi/container';
 import dragEnhancements from './enhancedDragHandler';
 
+//helpers
+const isSportsman = personType => ["footballer", "athlete", "boxer"].includes(personType);
+//note - for some user eg adults, the profile pages wont even render this info component
+const shouldShowTextInfo = (pageKey, personType) => pageKey === "profile" && (isSportsman(personType) || personType === "child");
+
 /*
 
 */
@@ -11,18 +16,13 @@ export default function profileInfoComponent() {
     // dimensions
     let width = DIMNS.profile.width;
     let height = DIMNS.profile.height / 2;
-    let topBorderHeight;
-    let bottomBorderHeight;
+    let withTextInfo = false;
     let textInfoHeight;
     let photoHeight;
 
     function updateDimns(data){
-        //console.log("data", data)
-        const borderHeight = d3.max([45, height * 0.2]);
-        topBorderHeight = 0;// data.isCurrent || currentPage.key === "profile" ? borderHeight : 0;
-        bottomBorderHeight = data.isCurrent || currentPage.key === "profile" ? borderHeight : 0;// topBorderHeight * 0.3;
-        textInfoHeight = bottomBorderHeight;
-        photoHeight = height - topBorderHeight - bottomBorderHeight;
+        textInfoHeight = withTextInfo ? d3.max([45, height * 0.2]) : 0;
+        photoHeight = height - textInfoHeight;
     }
 
     let fontSizes = {
@@ -78,6 +78,8 @@ export default function profileInfoComponent() {
 
         // expression elements
         selection.each(function (data) {
+            const pageKey = data.isCurrent ? "profile" : currentPage.key;
+            withTextInfo = shouldShowTextInfo(pageKey, data.personType)
             updateDimns(data);
             containerG = d3.select(this);
             //update
@@ -85,7 +87,7 @@ export default function profileInfoComponent() {
         })
 
         function update(data){
-            const { id, firstname, surname, age, position, isCurrent, isFuture, settings } = data;
+            const { id, firstname, surname, age, position, isCurrent, isFuture, settings, personType } = data;
             const photosData = isCurrent ? data.photos["profile"] : data.photos[currentPage.key];
 
             const bgRect = containerG.selectAll("rect.info-bg").data([1]);
@@ -95,9 +97,10 @@ export default function profileInfoComponent() {
                     .merge(bgRect)
                     .attr("width", width)
                     .attr("height", height)
-                    .attr("fill", currentPage.key === "goal" && !isCurrent ? "none" : "black")
+                    .attr("fill", withTextInfo ? "black" : "none")
                     .attr("rx", 3)
                     .attr("ry", 3)
+
             //can use same enhancements object for outer and inner as click is same for both
             /*
             enhancedDrag
@@ -138,7 +141,6 @@ export default function profileInfoComponent() {
                             .attr('class', "photo-border")
                     })
                     .merge(photoG)
-                    .attr("transform", d => `translate(0, ${topBorderHeight})`)
                     .each(function(d){
                         d3.select("svg#milestones-bar").select(`#photo-clip-${id}`)
                             .select("rect")
@@ -416,7 +418,7 @@ export default function profileInfoComponent() {
                 })
                 .remove();
 
-            const textInfoG = containerG.selectAll("g.text-info").data(currentPage.key === "goal" && !isCurrent ? [] : [data]);
+            const textInfoG = containerG.selectAll("g.text-info").data(withTextInfo ? [data] : []);
             textInfoG.enter()
                 .append("g")
                     .attr("class", "text-info")
@@ -474,7 +476,7 @@ export default function profileInfoComponent() {
 
                     })
                     .merge(textInfoG)
-                    .attr("transform", d => `translate(0, ${topBorderHeight + photoHeight})`)
+                    .attr("transform", d => `translate(0, ${photoHeight})`)
                     .each(function(d){
                         const maxNrLetters = d3.max([d.firstname, d.surname], d => d.length);
                         const marginReductionPerLetter = 0.02;

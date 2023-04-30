@@ -4,7 +4,8 @@ import extend from 'lodash/extend'
 import errorHandler from './../helpers/dbErrorHandler'
 import formidable from 'formidable'
 import fs from 'fs'
-import defaultImage from './../../assets/defaultPhoto.png';
+import defaultImage from './../../assets/manOnMountain.png';
+//import defaultImage from './../../assets/defaultPhoto.png';
 
 
 /*

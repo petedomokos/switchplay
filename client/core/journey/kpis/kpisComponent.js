@@ -112,7 +112,7 @@ export default function kpisComponent() {
         closeBtnHeight = closeBtnWidth;
         closeBtnOuterMargin = { 
             //@todo work out what this extra is that I neeed to subtract
-            right:0 /*closeBtnWidth/2*/, top:margin.top - 10
+            right:0 /*closeBtnWidth/2*/, top:margin.top + 10
         }
     }
 

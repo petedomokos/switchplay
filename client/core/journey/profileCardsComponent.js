@@ -35,17 +35,21 @@ export default function profileCardsComponent() {
     let getTopHeight = d => 0;
     let getBottomHeight = d => 0;
 
-    function updateDimns(){
+    function updateDimns(data){
+        const isSportsman = data[0] && ["footballer", "athlete", "boxer"].includes(data[0].info.personType)
+        const isChild = data[0] && data[0].info.personType === "child";
+
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
+        const pageKey = d => d.isCurrent ? "profile" : currentPage.key;
+
+        const shouldShowTextInfo = d => pageKey(d) === "profile" && (isSportsman || isChild);
+
         const withMedia = d => d.isCurrent || currentPage.key === "goal";
-        getTopHeight = d => withMedia(d) ? contentsHeight/2 : 0;
-        getBottomHeight = d => withMedia(d) ? contentsHeight/2 : contentsHeight;
-        getTextInfoHeight = d => {
-            const borderHeight = d3.max([45, getTopHeight(d) * 0.2]);
-            return withMedia(d) ? borderHeight : 0;
-        };
+        getTopHeight = d => !withMedia(d) ? 0 : (d.isCurrent && !isSportsman && !isChild ? contentsHeight/3 : contentsHeight/2)
+        getBottomHeight = d => contentsHeight - getTopHeight(d);
+        getTextInfoHeight = d => shouldShowTextInfo(d) ? d3.max([45, getTopHeight(d) * 0.2]) : 0;
     }
 
     let fontSizes = {
@@ -148,7 +152,7 @@ export default function profileCardsComponent() {
         }
             // expression elements
         selection.each(function (data) {
-            updateDimns();
+            updateDimns(data);
             //plan - dont update dom twice for name form
             //or have a transitionInProgress flag
             containerG = d3.select(this);
@@ -553,7 +557,7 @@ export default function profileCardsComponent() {
                                         .attr("height", btnHeight + 20);
 
                                     d3.select(this).select("path")
-                                        .attr("transform", `translate(-15,10)`)
+                                        .attr("transform", `translate(${selected === d.id ? -7.5 : -15},10)`)
                                         .attr("d", b.icon.d)
                                 })
                                 .style("cursor", "pointer")

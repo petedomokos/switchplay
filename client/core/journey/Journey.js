@@ -97,7 +97,6 @@ const initChannels = d3.range(numberMonths)
 
 //width and height may be full screen, but may not be
 const Journey = ({ user, data, datasets, availableJourneys, screen, width, height, asyncProcesses, save, saveDatapoint, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile, savePhoto }) => {
-  console.log("Journey.......", data)
   //console.log("Journey.......", datasets?.find(dset => dset.key === "pressUps")?.datapoints)
   //bug - although only 6 profs are saved, we end up with 7 ie two currents
   const { _id, player, name, media, contracts, profiles, aims, goals, links, measures, settings, kpis } = data;
@@ -292,7 +291,7 @@ const Journey = ({ user, data, datasets, availableJourneys, screen, width, heigh
     const datasetId = datasets.find(dset => dset.key === datasetKey)._id;
     //@todo - if valueObj has completion, then need to convert it to actual
     const datapoint = {
-      player:player._id,
+      player:player ? player._id : user._id,
       date:valueObj.date,
       values:[{ key:statKey, value: valueObj.actual }],
       source:"manual"
