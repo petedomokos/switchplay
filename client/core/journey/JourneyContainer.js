@@ -29,7 +29,7 @@ const mapStateToProps = (state, ownProps) => {
 	//@todo - put this back once datasetsMemberOf is up to date in the way it works when datasets are created.
 	//for now, just use all loadedDatasets (datapoints have alreayd been filtered in controller)
 	const datasets = loadedDatasets;//temp -  datasetsMemberOf.map(dataset => loadedDatasets.find(ds => ds._id === dataset._id))
-	//console.log("datasets", datasets)
+	console.log("JC...datasets", datasets)
 	//console.log("data", data)
 	//next - bug - teh new datapoint is not being hydrated after saving, so therefore has no player object with _id etc
 	const fullyLoadedDatasets = datasets
