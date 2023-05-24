@@ -31,6 +31,15 @@ const generalKpis = [
  - All kpis can have steps given to them for a particular profile
 */
 const userKpis = {
+   //samuel
+   "646e5379f10b150015aec87f":[
+      { datasetKey:"plank", statKey:"time", orientationFocus:"defence" },
+      { datasetKey:"bridge", statKey:"time", orientationFocus:"defence" },
+      { datasetKey:"touch", statKey:"score", orientationFocus:"defence" },
+      { datasetKey:"standingHighJump", statKey:"distance" },
+      { datasetKey: "shuttles", statKey:"time" },
+      { datasetKey:"quickFeetWithBall", statKey:"total" },
+   ],
    //pd
    "643d79844aa4af07d60f394c":[
       { datasetKey:"admin", statKey:"score", orientationFocus:"defence" },

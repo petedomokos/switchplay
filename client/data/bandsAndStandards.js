@@ -18,6 +18,44 @@ const minStandards = {
 }
 
 const bandsAndStandards = {
+    //samuel
+    //defence
+    "plank":{
+        "time":{
+            bands:[ { min:0, max:120 } ],
+            standards:[ { key:"minimum", label:"Minimum", value:120 }],
+            accuracy:0
+        }
+    },
+    "bridge":{
+        "time":{
+            bands:[ { min:0, max:120 } ],
+            standards:[ { key:"minimum", label:"Minimum", value:120 }],
+            accuracy:0
+        }
+    },
+    "touch":{
+        "score":{
+            bands:[ { min:0, max:100 } ],
+            standards:[ { key:"minimum", label:"Minimum", value:70 }],
+            accuracy:0
+        }
+    },
+    //attack
+    "standingHighJump":{
+        "distance":{
+            bands:[ { min:0, max:100 } ],
+            standards:[ /*{ key:"minimum", label:"Minimum", value:50 }*/],
+            accuracy:1
+        }
+    },
+    "quickFeetWithBall":{
+        "total":{
+            bands:[ { min:0, max:20 } ],
+            standards:[],
+            accuracy:1
+        }
+    },
     //PD personal
     //defence
     "sleep":{
