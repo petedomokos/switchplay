@@ -78,6 +78,7 @@ export function hydrateJourneyData(data, user, datasets){
     //STEP 1: HYDRATE PROFILES
     const options = { now, rangeFormat };
     const hydratedProfiles = hydrateProfiles(profiles, datasets, kpis, defaultTargets, settings, options);
+    console.log("hydratedProfiles", hydratedProfiles)
 
     //STEP 2: CREATE CURRENT PROFILE, including expected values
     const currentProfile = { 
@@ -85,7 +86,7 @@ export function hydrateJourneyData(data, user, datasets){
         nr:0,
         media:data.media || []
     };
-    //console.log("currentprofile", currentProfile)
+    console.log("currentprofile", currentProfile)
 
     //SEP 3: EMBELLISH PROFILES BASED ON CURRENT PROFILE INFO
     const pastProfiles = hydratedProfiles.filter(p => p.isPast).map((p,i, data) => ({ ...p, nr:i - data.length }));
@@ -279,7 +280,7 @@ const goBackByExpiryDurationFromDate = (duration, units) => date => {
 }
 
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
-    //console.log("hydrateProfile------------", profile.id, profile.date, profile)
+    console.log("hydrateProfile------------", profile.id, profile.date, profile)
     const { now, rangeFormat } = options;
     const { id, customTargets=[], isCurrent, profileKpis=[] } = profile;
     const date = typeof profile.date === "string" ? new Date(profile.date) : profile.date;
@@ -377,11 +378,11 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
         isFuture,
         isActive,
         kpis:kpis.map((kpi,i) => {
-            //console.log("kpi--------------------------", kpi)
             //KEYS/ID
             const { datasetKey, statKey, min, max, accuracy, standards, orientationFocus } = kpi;
             const key = kpi.key || `${datasetKey}-${statKey}`;
-            //console.log("kpi--------------------------", key)
+            console.log("kpi key--------------------------", key)
+            console.log("kpi--------------------------", kpi)
 
 
             const profileKpi = profileKpis.find(pKpi => pKpi.key === key) || {};
