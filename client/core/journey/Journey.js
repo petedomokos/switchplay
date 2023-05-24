@@ -98,7 +98,7 @@ const initChannels = d3.range(numberMonths)
 //width and height may be full screen, but may not be
 const Journey = ({ user, data, datasets, availableJourneys, screen, width, height, asyncProcesses, save, saveDatapoint, setActive, closeDialog, takeOverScreen, releaseScreen, onUpdateProfile, savePhoto }) => {
   console.log("Journey.......data", data)
-  console.log("Journey...datasets", datasets)
+  //console.log("Journey...datasets", datasets)
   //bug - although only 6 profs are saved, we end up with 7 ie two currents
   const { _id, player, name, media, contracts, profiles, aims, goals, links, measures, settings, kpis } = data;
   const [journey, setJourney] = useState(null);

@@ -224,7 +224,8 @@ function getValueForSession(stat, datapoints, sessionDate, start, target){
 
 function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target, log){
     console.log("calcCurrent......", stat.key)
-    console.log("nrdatapoints", datapoints.length)
+    console.log("datapoints", datapoints)
+    console.log("dateRange", dateRange)
     if(log){
         //console.log("calcCurrent stat", stat)
     }
@@ -238,6 +239,7 @@ function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target, log
         .filter(d => !d.isTarget)
         .map(d => [d.date, getValue(d)])
         .filter(d => {
+            console.log("d", d)
             return typeof d[1] === "number"
         })
     console.log("nrpairs", dateValuePairs.length)
