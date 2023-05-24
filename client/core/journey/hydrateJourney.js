@@ -392,6 +392,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             const { customMinStandard, customStartValue, steps=[] } = profileKpi;
 
             const dataset = datasets.find(dset => dset.key === datasetKey);
+            console.log("dataset", dataset)
             const datapoints = dataset?.datapoints || [];
             console.log("datapoints", datapoints)
 
