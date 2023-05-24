@@ -239,7 +239,7 @@ function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target, log
         .filter(d => {
             return typeof d[1] === "number"
         })
-    console.log("nrpairs", pairs.length)
+    console.log("nrpairs", dateValuePairs.length)
 
     const values = dateValuePairs.map(d => d[1]);
     
