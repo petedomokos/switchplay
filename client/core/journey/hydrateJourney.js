@@ -222,6 +222,8 @@ function getValueForSession(stat, datapoints, sessionDate, start, target){
 }
 
 function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target, log){
+    console.log("calcCurrent......", stat.key)
+    console.log("nrdatapoints", datapoints.length)
     if(log){
         //console.log("calcCurrent stat", stat)
     }
@@ -237,6 +239,7 @@ function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target, log
         .filter(d => {
             return typeof d[1] === "number"
         })
+    console.log("nrpairs", pairs.length)
 
     const values = dateValuePairs.map(d => d[1]);
     
@@ -390,6 +393,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
 
             const dataset = datasets.find(dset => dset.key === datasetKey);
             const datapoints = dataset?.datapoints || [];
+            console.log("datapoints", datapoints)
 
             //add accuracy to teh stat - note that the stat has only stable metadata, whereas the kpi
             //is dependent on context, so level of accuracy to display is defined in kpi not stat
@@ -508,9 +512,9 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 //it must be a future card and current value is based purely on a specificSession
                 current = getValueForSession(stat, datapoints, specificDate, start, target)
             }
-            if(shouldLog){
+            //if(shouldLog){
                 console.log("current", current)
-            }
+            //}
 
             const achieved = isPast ? current : null;
             //if(shouldLog)
@@ -615,7 +619,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
 //current profile is dynamically created, so it doesnt need hydrating
 //note - this is nely created each time, so nothing must be stored on it
 function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
-    //console.log("createcurrentprofile----------------------------------")
+    console.log("createcurrentprofile----------------------------------")
     const { now, rangeFormat } = options;
     const activeProfile = d3.least(orderedProfiles.filter(p => p.isFuture), p => p.date);
     const { kpis } = activeProfile;
@@ -647,12 +651,13 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
         date:now, dateRange, datePhase,
         id:"current", isCurrent:true, dataType:"profile",
         kpis:kpis.map((kpi,i) => {
-            //console.log("kpi...", kpi)
+            console.log("kpi...", kpi)
             const { datasetKey, statKey, name, min, max, accuracy, key } = kpi;
             const milestoneId = "current";
             
             const dataset = datasets.find(dset => dset.key === datasetKey);
             const datapoints = dataset?.datapoints || [];
+            console.log("datapoints", datapoints)
             const stat = { ...dataset?.stats.find(s => s.key === statKey), accuracy };
             const getValue = getValueForStat(stat.key, stat.accuracy);
             //@todo - pass these dateValue pairs into calCurrent so not repeating work
@@ -665,6 +670,7 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
             let current;
             if(currentValueDataMethod !== "specificSession"){
                 current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod, undefined, undefined);
+                console.log("calced current", current)
             }else{
                 //it must be a future card and current value is based purely on a specificSession
                 current = getValueForSession(stat, datapoints, specificDate)
