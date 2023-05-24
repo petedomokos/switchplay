@@ -34,6 +34,7 @@ const expectedIsAchieved = (values, options) => requiredValueIsAchieved(values.c
 export function hydrateJourneyData(data, user, datasets){
     const now = new Date();
     console.log("hydrateJourneyData", data)
+    console.log("datasets", datasets)
     const player = user.player;
     const nonCurrentProfiles = data.profiles.filter(p => p.id !== "current");
 
@@ -284,6 +285,7 @@ const goBackByExpiryDurationFromDate = (duration, units) => date => {
 
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
     console.log("hydrateProfile------------", profile.id, profile.date, profile)
+    console.log("datasets", datasets)
     const { now, rangeFormat } = options;
     const { id, customTargets=[], isCurrent, profileKpis=[] } = profile;
     const date = typeof profile.date === "string" ? new Date(profile.date) : profile.date;
@@ -391,6 +393,8 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             const profileKpi = profileKpis.find(pKpi => pKpi.key === key) || {};
             const { customMinStandard, customStartValue, steps=[] } = profileKpi;
 
+            console.log("datasets", datasets)
+            console.log("datasetKey", datasetKey)
             const dataset = datasets.find(dset => dset.key === datasetKey);
             console.log("dataset", dataset)
             const datapoints = dataset?.datapoints || [];
