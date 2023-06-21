@@ -121,6 +121,12 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
               style={getDynamicStyles(history, "/datasets/new")}>Dataset+
             </Button>
         </Link>
+        <Link to="/visuals">
+            <Button 
+              className={classes.menuBtn}
+              style={getDynamicStyles(history, "/visuals")}>Visuals
+            </Button>
+        </Link>
         {user && <Link to="/import">
             <Button 
               className={classes.menuBtn}
