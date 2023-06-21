@@ -464,7 +464,7 @@ export default function kpisLayout(){
             }
         })
 
-        console.log("kpisData", kpisData)
+        //console.log("kpisData", kpisData)
 
         return { kpisData, milestoneId }
     }

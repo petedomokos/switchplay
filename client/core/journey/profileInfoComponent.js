@@ -254,6 +254,50 @@ export default function profileInfoComponent() {
 
             photoG.exit().remove();
 
+            //TITLE
+            const titleWidth = width - 100;
+            const titleHeight = 30;
+            const titleG = containerG.selectAll("g.card-title").data([data])
+            titleG.enter()
+                .append("g")
+                    .attr("class", "card-title")
+                    .each(function(d){
+                        d3.select(this)
+                            .append("rect")
+                                .attr("class", "hitbox")
+                                .attr("fill", "transparent");
+
+
+                        d3.select(this)
+                            .append("text")
+                                .attr("class", "primary")
+                                .attr("dominant-baseline", "central")
+                                .attr("text-anchor", "middle")
+                                .style("font-family", "helvetica, sans-serifa")
+                                .attr("stroke", grey10(7))
+                                .attr("stroke-width", 0.5)
+                                .attr("fill", grey10(7))
+                        
+                    })
+                    .merge(titleG)
+                    .attr("transform", `translate(${width/2},${0})`)
+                    .each(function(d){
+                        d3.select(this).select("rect.hitbox")
+                            .attr("x", -titleWidth/2)
+                            .attr("width", titleWidth)
+                            .attr("height", titleHeight)
+                            //.on("click", (e,d) => { onClick.call(this, e, d, data, "date") })
+
+                        d3.select(this).select("text.primary")
+                            .attr("y", titleHeight/2)
+                            .attr("font-size", titleHeight * 0.5)
+                            //.attr("fill", d.isFuture ? "grey" : "white")
+                            .text(d.title || d.id)
+                    })
+
+
+            //DATE
+
             const format = d3.timeFormat("%_d %b, %y");
 
             const dateMargin = 10;

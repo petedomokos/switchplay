@@ -51,7 +51,8 @@ export default function milestonesLayout(){
                         isCurrent, isPast, isFuture, 
                         date, dateCount, 
                         settings, 
-                        specificDate 
+                        specificDate,
+                        title:m.title
                     },
                     goal:{ ...m.goal, progressStatus:profileProgressInfo?.status, ctrlsData:GOAL_CTRLS() },
                     kpis:myKpisLayout(kpis),
