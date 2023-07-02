@@ -88,171 +88,6 @@ export default function profileInfoComponent() {
 
         function update(data){
             const { id, firstname, surname, age, position, isCurrent, isFuture, settings, personType } = data;
-            const photosData = isCurrent ? data.photos["profile"] : data.photos[currentPage.key];
-
-            const bgRect = containerG.selectAll("rect.info-bg").data([1]);
-            bgRect.enter()
-                .append("rect")
-                    .attr("class", "info-bg")
-                    .merge(bgRect)
-                    .attr("width", width)
-                    .attr("height", height)
-                    .attr("fill", withTextInfo ? "black" : "none")
-                    .attr("rx", 3)
-                    .attr("ry", 3)
-
-            //can use same enhancements object for outer and inner as click is same for both
-            /*
-            enhancedDrag
-                .onDblClick(onDblClick)
-                .onClick(onClick);
-
-            const drag = d3.drag()
-                .on("start", enhancedDrag())
-                .on("drag", enhancedDrag())
-                .on("end", enhancedDrag());*/
-
-            // todo - append photo, name, age, pos
-            //helper
-            //todo next - new url
-
-            //const photoUrl = d => (`/users/${firstname}_${surname}/${d.label}.png`).toLowerCase();
-
-            //next - try a clipPath over the image
-            //also, longpress at bottom of kpiscoponent to create a new kpi
-            //and target completion
-            const photoG = containerG.selectAll("g.photo").data(photosData);
-            photoG.enter()
-                .append("g")
-                    .attr("class", "photo")
-                    .each(function(d){
-                        d3.select("svg#milestones-bar").select('defs')
-                            .append('clipPath')
-                                .attr('id', `photo-clip-${id}`)
-                                    .append('rect');
-                            
-                        d3.select(this)
-                            .insert("image","text");
-                        
-                        d3.select(this)
-                            .attr('clip-path', `url(#photo-clip-${id})`)
-
-                        d3.select(this).append("rect")
-                            .attr('class', "photo-border")
-                    })
-                    .merge(photoG)
-                    .each(function(d){
-                        d3.select("svg#milestones-bar").select(`#photo-clip-${id}`)
-                            .select("rect")
-                                .attr("width", width)
-                                .attr("height", photoHeight)
-
-                        d3.select(this).select("rect.photo-border")
-                            .attr("width", width)
-                            .attr("height", photoHeight)
-                            .attr("fill", "none")
-                            .attr("stroke", beingEdited === "photo" ? "orange" : "none")
-                            .attr("stroke-width", 5)
-
-                        const img = d3.select(this).select("image")  
-                            //.attr("width", width)
-                            .attr("xlink:href", d.url)
-                            //.attr("height", photoHeight)
-
-                        //console.log("actual w h", img.attr("width"), img.attr("height"))
-                    })
-                    //.on("click", (e,d) => {
-                        //console.log("native photo click")
-                        //const locationKey = isCurrent ? "profile" : currentPage.key;
-                        //onClick.call(this, e, d, data, "photo", locationKey) 
-                    //})
-                    .on("contextmenu", (e) => { 
-                        //console.log("photo contextmenu event")
-                        e.preventDefault(); 
-                    })
-                    .call(photoDrag)
-                    .call(photoZoom);
-        
-            photoZoom.on("zoom", function(e, d){
-                
-                if(beingEdited !== "photo"){ return; }
-                //origin is centre otherwise if its based on sourceEvent it jumps
-        
-                //const cX = width/2;
-                //const cY = photoHeight/2;
-                const { x, y, k } = e.transform;
-                d3.select(this).select("image")
-                    //.attr("transform-origin",`${cX} ${cY}`)
-                    .attr("transform", `translate(${x},${y}) scale(${k})`)
-
-                //todo - apply transfrorm in same way as below and see if this means teh transfrom objkect is correct
-                //when saving at the end in milestonesBarComponent
-            })
-            //init zoom
-            //for now, we just assume there is only one photo
-            if(!initZoomApplied){
-                beingEdited = "photo";
-                const { x=0, y=0, k=1 } = photosData[0];
-                const identity = d3.zoomIdentity;
-                const requiredTransformState = identity.translate(x, y).scale(k);
-                containerG.select("g.photo").call(photoZoom.transform, requiredTransformState)
-                //flags
-                beingEdited = "";
-                initZoomApplied = true;
-            }
-
-
-            enhancedDrag
-                .onClick((e,d) => {
-                    const locationKey = isCurrent ? "profile" : currentPage.key;
-                    onClick.call(this, e, d, data, "photo", locationKey) 
-                })
-                .onLongpressStart(startEditing);
-
-            function startEditing(){
-                onStartEditingPhotoTransform(id, currentPage.key);
-                beingEdited = "photo";
-                update(data);
-            }
-            //todo - make this available via api
-            function endEditing(){
-                //shouldnt call parent if its being triggered from the parent
-                onEndEditingPhotoTransform(id, currentPage.key);
-                beingEdited = "";
-                update(data);
-            }
-
-
-            photoDrag
-                .on("start", enhancedDrag(function(e, d){
-                    if(!beingEdited){
-                        onMilestoneWrapperPseudoDragStart.call(this, e, d);
-                        return;
-                    }
-                }))
-                .on("drag", enhancedDrag(function(e, d){
-                    if(!beingEdited){
-                        onMilestoneWrapperPseudoDrag.call(this, e, d)
-                        return;
-                    }
-                    if(beingEdited === "photo"){
-                        const transformState = d3.zoomTransform(this);
-                        //console.log("transformState", transformState)
-                        //need to divide to undo the scale effect to keep the drag effect consistent
-                        const { k } = transformState;
-                        const newTransformState = transformState.translate(e.dx/k, e.dy/k);
-                        d3.select(this)
-                            .call(photoZoom.transform, newTransformState)
-                    }
-                }))
-                .on("end", enhancedDrag(function(e, d){
-                    if(!beingEdited){
-                        onMilestoneWrapperPseudoDragEnd.call(this, e, d)
-                        return;
-                    }
-                }))
-
-            photoG.exit().remove();
 
             //TITLE
             const titleWidth = width - 100;
@@ -346,9 +181,9 @@ export default function profileInfoComponent() {
 
 
                         d3.select(this).selectAll("text")
-                            .attr("stroke","black")// grey10(5))
+                            .attr("stroke", grey10(7))
                             .attr("stroke-width", 0.5)
-                            .attr("fill", grey10(5))
+                            .attr("fill", grey10(7))
                         
                         d3.select(this)
                                 .append("rect")
@@ -410,9 +245,9 @@ export default function profileInfoComponent() {
                             .attr("dominant-baseline", "central")
                             .attr("text-anchor", "middle")
                             .style("font-family", "helvetica, sans-serifa")
-                            .attr("stroke", "black")// grey10(5))
+                            .attr("stroke", grey10(7))
                             .attr("stroke-width", 0.5)
-                            .attr("fill", grey10(5))
+                            .attr("fill", grey10(7))
                         
                         d3.select(this).append("rect").attr("class", "hitbox")
                             .attr("fill", "transparent")

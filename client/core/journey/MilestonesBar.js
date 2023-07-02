@@ -419,7 +419,7 @@ const MilestonesBar = ({ user, data, datasets, asyncProcesses, kpiFormat, setKpi
     //profiles go before contracts of same date
     const orderedData = sortAscending([ ...profiles, ...contracts], d => d.date);
 
-    d3.select(containerRef.current).datum(layout(orderedData))
+    d3.select(containerRef.current).datum(layout(orderedData.slice(2,7)))
 
   }, [stringifiedProfiles, kpiFormat])
 
