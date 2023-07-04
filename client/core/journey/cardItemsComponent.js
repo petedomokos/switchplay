@@ -52,7 +52,10 @@ export default function cardItemsComponent() {
         radius = actualContentsLength/2 - longestItemLength/2;
     }
 
-    //API CALLBACKS
+    let styles = {
+        lineStrokeWidth:5
+    }
+;    //API CALLBACKS
     let onClick = function(){};
     let onDblClick = function(){};
     let onMouseover = function(){};
@@ -100,7 +103,7 @@ export default function cardItemsComponent() {
 
             const vertices = pentagonVertices({ r:radius });
 
-            const itemG = centreG.selectAll("g.card-item").data(data);
+            /*const itemG = centreG.selectAll("g.card-item").data(data);
             itemG.enter()
                 .append("g")
                     .attr("class", "card-item")
@@ -124,19 +127,19 @@ export default function cardItemsComponent() {
 
                     })
 
-            itemG.exit().remove();
+            itemG.exit().remove();*/
 
             const chainSectionLine = centreG.selectAll("line.chain-section").data(data);
             chainSectionLine.enter()
                     .append("line")
                         .attr("class", "chain-section")
-                        .attr("stroke", grey10(2))
-                        .attr("stroke-width", 5)
                         .merge(chainSectionLine)
                         .attr("x1", (d,i) => vertices[i][0])
                         .attr("y1", (d,i) => vertices[i][1])
                         .attr("x2", (d,i) => vertices[i + 1] ? vertices[i+1][0] : vertices[0][0])
                         .attr("y2", (d,i) => vertices[i + 1] ? vertices[i+1][1] : vertices[0][1])
+                        .attr("stroke", d => d === 2 ? "gold" : (d === 1 ? grey10(2) : "#C8C8C8"))
+                        .attr("stroke-width", styles.lineStrokeWidth)
 
             chainSectionLine.exit().remove();
 
@@ -154,6 +157,14 @@ export default function cardItemsComponent() {
     cardItems.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
+        return cardItems;
+    };
+    cardItems.styles = function (obj) {
+        if (!arguments.length) { return styles; }
+        styles = {
+            ...styles,
+            ...obj,
+        };
         return cardItems;
     };
     cardItems.onClick = function (value) {

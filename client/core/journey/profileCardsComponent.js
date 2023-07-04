@@ -161,8 +161,6 @@ export default function profileCardsComponent() {
                         const contentsG = d3.select(this)
                             .append("g")
                                 .attr("class", "contents card-contents")
-                        //contentsG
-                            //.attr("transform", `scale(${d.isHeld ? 1 : placedCardHeight/height})`)
 
                         contentsG
                             .append("rect")
@@ -200,6 +198,7 @@ export default function profileCardsComponent() {
                             .onClick(onClickInfo)
 
                         const cardItems = cardItemsComponents[d.id]
+                            .styles({ lineStrokeWidth: d.isHeld || d.isSelected ? 5 : 10 })
                             .width(contentsWidth)
                             .height(itemsAreaHeight)
                     
@@ -212,38 +211,22 @@ export default function profileCardsComponent() {
                             .datum(d.info)
                             .call(cardInfo);
 
-                        const itemsData = [{}, {}, {}, {}, {}];
                         contentsG.select("g.items-area")
                             .attr("transform", `translate(0, ${infoHeight})`)
-                            .datum(itemsData)
+                            .datum(d.itemsData)
                             .call(cardItems)
                     })
                     .call(drag)
-                    /*
-                    .on("click", function(e,d){
-                        //raise
 
-                        //move to centre and enlarge ie transform translate and scale
-
-
-                        onClick.call(this, e, d);
-                        return;
-
-                        //and then clicking can enlarge the active front card to take over whole cardsArea,
-                        //going over the placedcards and the stacked cards behind it
-
-                        //then, move date to top-right, and put nrs 1 to 5 in top-left
-
-                        //design idea - remove the squares from the chain, instead just have words at teh right angles and
-                        //positions to make the pentagon. could even make different shape, ro a letter eg S for success,
-                        
-                    })*/
+                    //next - increase date fontsize. (keep it top left for now)
+                    //and improve chain design... idea - remove the squares from the chain, 
+                    //instead just have words at teh right angles and
+                    //positions to make the pentagon. could even make different shape, ro a letter eg S for success,
 
             //EXIT
             cardG.exit().call(remove);
 
             function dragStart(e , d){
-                console.log("ds")
                 //onDragStart.call(this, e, d)
             }
             let swipeTriggered = false;

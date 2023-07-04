@@ -96,6 +96,13 @@ export default function milestonesBarComponent() {
 
 
     let activeCardNr = 0; //0 is the first card of 5
+    let allItemsData = [
+        [2,2,2,1,0],
+        [2,1,2,1,0],
+        [2,1,0,0,0],
+        [0,0,0,0,0],
+        [0,0,0,0,0]
+    ];
 
     let swipable = true;
     let currentPage = PROFILE_PAGES[0];
@@ -207,14 +214,15 @@ export default function milestonesBarComponent() {
 
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
             function update(data, options={}){
-                const { milestoneTransition } = options;
+                const { } = options;
                 //dimns for specific chart
                 const cardsData = data
                     .filter(m => m.dataType === "profile")
                     .map((p,i) => ({ 
                         ...p,
                         i,
-                        isHeld:i >= activeCardNr
+                        isHeld:i >= activeCardNr,
+                        itemsData:allItemsData[i]
                     }))
                     .reverse();
                 //console.log("cardsData", cardsData.map(d => ({ i: d.i, isHeld: d.isHeld })))
