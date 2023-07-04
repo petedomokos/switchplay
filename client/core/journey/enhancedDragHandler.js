@@ -6,7 +6,7 @@ export default function dragEnhancements() {
     // consts
 
     // settings
-    let dragThreshold = 10;
+    let dragThreshold = 0;
     let longpressThreshold = 500;
     let isDragEnabled = true;
     let withLongpress = false;
@@ -83,7 +83,6 @@ export default function dragEnhancements() {
                         break;
                     }
 
-                    const minDistance = withClick ? dragThreshold : 0;
                     // CHECK ITS REACHED THE DRAG THRESHOLD
                     const currentPoint = getClientPoint(e);
                     if(!startPoint) { startPoint = currentPoint; }
@@ -91,10 +90,9 @@ export default function dragEnhancements() {
                     elapsedTime = e.sourceEvent.timeStamp - startTime;
                     avgSpeed = distanceDragged / elapsedTime;
                     //console.log("distanceDragged", distanceDragged)
-                    if (distanceDragged < minDistance) {
+                    if (distanceDragged < dragThreshold) {
                         break;
                     }
-                    //console.log("was moved")
                     wasMoved = true;
                     //cannot be dbl-clik if dragged
                     //prevStart = null;

@@ -26,7 +26,7 @@ export default function cardItemsComponent() {
     // dimensions
     let width = DIMNS.profile.width;
     let height = DIMNS.profile.height / 2;
-    let margin = { left: 20, right: 20, top:10, bottom:10 };
+    let margin;
     let extraHorizMargin;
     let extraVertMargin;
     let contentsWidth;
@@ -37,6 +37,7 @@ export default function cardItemsComponent() {
     let radius;
 
     function updateDimns(){
+        margin = { left: width * 0.1, right:width * 0.1, top:height * 0.1, bottom:height * 0.1 }
         const availContentsWidth = width - margin.left - margin.right;
         const availContentsHeight = height - margin.top - margin.bottom;
         const actualContentsLength = d3.min([availContentsWidth, availContentsHeight]);
@@ -45,8 +46,8 @@ export default function cardItemsComponent() {
         extraHorizMargin = availContentsWidth - contentsWidth;
         extraVertMargin = availContentsHeight - contentsHeight;
 
-        itemWidth = 60;
-        itemHeight = 60;
+        itemWidth = contentsWidth/4.5;
+        itemHeight = itemWidth;
         const longestItemLength = d3.max([itemWidth, itemHeight]);
         radius = actualContentsLength/2 - longestItemLength/2;
     }
@@ -92,6 +93,7 @@ export default function cardItemsComponent() {
             contentsG.select("rect.card-items-contents-bg")
                 .attr("width", contentsWidth)
                 .attr("height", contentsHeight)
+                .attr("fill", "none")
 
             const centreG = contentsG.select("g.centre")
                 .attr("transform", `translate(${contentsWidth/2},${contentsHeight/2})`);

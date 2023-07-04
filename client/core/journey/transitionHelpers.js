@@ -3,7 +3,7 @@ import { getTransformationFromTrans } from './helpers';
 
 export function updateTransform(selection, options={}){
     //console.log("updateTransform-----------------------")
-    const { x = d => d.x, y = d => d.y, transition, cb = () => {} } = options;
+    const { x = d => d.x, y = d => d.y, k= () => 1, transition, cb = () => {} } = options;
     selection.each(function(d, i){
         const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
         if(Math.abs(translateX - x(d, i)) < 0.001 && Math.abs(translateY - y(d, i)) < 0.001){
@@ -18,17 +18,17 @@ export function updateTransform(selection, options={}){
             d3.select(this)
                 .classed("transitioning", true)
                 .transition()
-                .ease(transition.ease || d3.easeLinear)
-                .delay(transition.delay || null)
-                .duration(transition.duration || MED_SLIDE_DURATION)
-                    .attr("transform", "translate("+x(d, i) +"," +y(d, i) +")")
+                .ease(typeof transition.ease() === "function" ? transition.ease(d,i) : (transition.ease || d3.easeLinear))
+                .delay(typeof transition.delay === "function" ? transition.delay(d,i) : (transition.delay || null))
+                .duration(typeof transition.duration === "function" ? transition.duration(d,i) : (transition.duration || MED_SLIDE_DURATION))
+                    .attr("transform", `translate(${x(d, i)},${y(d, i)}) scale(${k(d, i)})`)
                     .on("end", function(d,i){
                         d3.select(this).classed("transitioning", false);
                         cb.call(this, d, i);
                     });
         }else{
             d3.select(this)
-                .attr("transform", "translate("+x(d, i) +"," +y(d, i) +")");
+                .attr("transform", `translate(${x(d, i)},${y(d, i)}) scale(${k(d, i)})`);
             
             cb.call(this);
         }

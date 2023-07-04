@@ -32,35 +32,59 @@ export default function milestonesBarComponent() {
     // dimensions
     let width = 800;
     let height = DIMNS.milestonesBar.minHeight
-    let margin = { left: 20, right: 20, top: 20, bottom: 20 };
+    let margin = { left: 40, right: 40, top: 20, bottom: 20 };
     let contentsWidth;
     let contentsHeight;
-    const topSpaceHeight = 80;
-    let milestonesAreaWidth;
-    let milestonesAreaHeight;
 
-    let cardWidth;
-    let cardHeight;
-    let profileMargin = { top:0, bottom: 0, left:0, right:0 };
+    let cardsAreaWidth;
+    let topSpaceHeight;
+    let cardsAreaHeight;
+    let botSpaceHeight;
 
-    let nonVisibleCardWidth;
-    let nonVisibleCardHeight;
+    let heldCardsAreaHeight;
+    let placedCardsAreaHeight;
 
-    const horizCardGap = 15;
-    const vertCardGap = 50;
+    let heldCardWidth;
+    let heldCardHeight;
+
+    let placedCardWidth;
+    let placedCardHeight;
+    let placedCardMarginVert;
+    let placedCardHorizGap;
+
+    //increments
+    let vertCardInc;
+    let horizCardInc;
 
     function updateDimns(){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
-        //helper
-        cardWidth = 280;
-        cardHeight = 370;
-        nonVisibleCardWidth = 28;
-        nonVisibleCardHeight = 37;
+        cardsAreaWidth = contentsWidth;
+        topSpaceHeight = contentsHeight * 0.1;
+        cardsAreaHeight = contentsHeight * 0.8;
+        botSpaceHeight = contentsHeight * 0.1;
 
-        milestonesAreaWidth = contentsWidth;
-        milestonesAreaHeight = cardHeight + 4 * vertCardGap;
+        heldCardsAreaHeight = cardsAreaHeight * (9/11);
+        placedCardsAreaHeight = cardsAreaHeight * (2/11);
+
+        //we want vertGap to be 1/7 of heldCardHeight, so 11/7 * heldCardHeight = heldCardsAreaHeight 
+        // => heldCardHeight = 7/11 * heldCardsAreaHeight
+        heldCardHeight = (7/11) * heldCardsAreaHeight;
+        vertCardInc = (1/7) * heldCardHeight;
+
+        //aspect-ratio of cards is 0.7
+        heldCardWidth = heldCardHeight * 0.7;
+
+        const horizSpaceForIncs = (contentsWidth - heldCardWidth)/2;
+        horizCardInc = horizSpaceForIncs / 4;
+
+        //placed cards
+        placedCardMarginVert = placedCardsAreaHeight * 0.25, 
+        placedCardHeight = placedCardsAreaHeight - 2 * placedCardMarginVert;
+        //keep aspect-ratio same as placedCards
+        placedCardWidth = placedCardHeight * (heldCardWidth/heldCardHeight);
+        placedCardHorizGap = (cardsAreaWidth - 5 * placedCardWidth) / 4;
     }
     let DEFAULT_STYLES = {
         profiles:{ info:{ date:{ fontSize:9 } }, kpis:{}, goal:{} },
@@ -68,12 +92,9 @@ export default function milestonesBarComponent() {
     let _styles = () => DEFAULT_STYLES;
 
 
-    //let activeCardNr = 1; //0 is the first card of 5
-
-    let positionedData = [];
+    let activeCardNr = 0; //0 is the first card of 5
     let swipable = true;
     let currentPage = PROFILE_PAGES[0];
-    let milestoneBeingEdited = null;
 
     //state
     let selectedMilestone;
@@ -123,9 +144,8 @@ export default function milestonesBarComponent() {
 
     let containerG;
     let contentsG;
-    let milestonesAreaG;
-    let visibleCardsG;
-    let nonVisibleCardsG;
+    let topSpaceG;
+    let cardsG;
 
     //components
     const profiles = profileCardsComponent()
@@ -166,72 +186,41 @@ export default function milestonesBarComponent() {
                     .attr("class", "mbar-contents-bg")
                     .attr("fill","transparent");
 
-                milestonesAreaG = contentsG
+                topSpaceG = contentsG
                     .append("g")
-                    .attr("class", "milestones-area")
-                    .style("cursor", "pointer")
+                    .attr("class", "top-space");
 
-                milestonesAreaG.append("rect")
-                    .attr("class", "milestones-area-bg")
+                cardsG = contentsG
+                    .append("g")
+                    .attr("class", "cards")
+                    .style("cursor", "pointer");
+
+                cardsG.append("rect")
+                    .attr("class", "cards-bg")
                     .attr("fill", "transparent")
-                    .attr("stroke", "grey");
-
-                visibleCardsG = milestonesAreaG.append("g").attr("class", "visible-cards");
-                //prevCardsG starts at bottom and cards pile upwards
-                nonVisibleCardsG = milestonesAreaG.append("g").attr("class", "non-visible-cards");
-                nonVisibleCardsG.append("rect").attr("class", "non-visible-cards-bg").attr("opacity", 0.2)
+                    .attr("stroke", "none");
             }
 
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
             function update(data, options={}){
                 const { milestoneTransition } = options;
-                //next...its working, but will be better logic if it justkeeps all cards
-                //in one array, and positions and sizes them on enter only, based 
-                //on whether it is vis or not. then just updates teh pos of them
-                //and the internal visibility of the card contents whenever user
-                //drags them.
-                
-                //can make cards that are below others non draggable in the nonVis
-                //so it is only the top one that can be dragged.
-
-
-                //re. updates, we just need to update the profileCard component so it
-                //can update what contents are displayed based on visibility
-
-
                 //dimns for specific chart
-                const activeCardNr = 3;
-                const indexedCardsData = positionedData
+                const cardsData = data
                     .filter(m => m.dataType === "profile")
-                    .map((p,i) => ({ ...p, cardIndex:i }));
+                    .map((p,i) => ({ 
+                        ...p,
+                        i,
+                        isHeld:i >= activeCardNr
+                    }))
+                    .reverse();
+                //console.log("cardsData", cardsData.map(d => ({ i: d.i, isHeld: d.isHeld })))
 
-                const visibleCardsData = indexedCardsData.slice(activeCardNr, indexedCardsData.length);
-                const nonVisibleCardsData = indexedCardsData.slice(0, activeCardNr);
-                //console.log("cData", indexedCardsData)
-                //console.log("visibleCData", visibleCardsData)
-                //console.log("nonVisCData", nonVisibleCardsData)
-                const visibleCardsHeight = cardHeight + (visibleCardsData.length - 1) * vertCardGap;
-                const nonVisibleCardsHeight = milestonesAreaHeight - visibleCardsHeight;
-                const y0 = vertCardGap * (data.length - 1);
-
-                //milestone positioning
-                const calcX = calcMilestoneX(data);
-                const calcY = calcMilestoneY(data);
-                positionedData = data.map(m => ({ 
-                    ...m, 
-                    x: calcX(m.nr), 
-                    y: calcY(m.nr),
-                    width:cardWidth,
-                    height:cardHeight
-                }));
-
-                //console.log("positionedData", positionedData)
+                //dimns specific to this chart
+                const y0 = vertCardInc * 4;
 
                 //gs
                 contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
-                milestonesAreaG.attr("transform", `translate(${0}, ${topSpaceHeight})`)
-                nonVisibleCardsG.attr("transform", `translate(${0}, ${visibleCardsHeight})`)
-                //prevCardsG.attr("transform", `translate(${10}, ${10})`)
+                cardsG.attr("transform", `translate(${0}, ${topSpaceHeight})`)
 
                 containerG.select("rect.mbar-container-bg")
                     .call(updateRectDimns, { 
@@ -241,20 +230,12 @@ export default function milestonesBarComponent() {
                     })
 
                 contentsG
-                    .select("rect.milestones-area-bg")
+                    .select("rect.cards-bg")
                     .call(updateRectDimns, { 
-                        width: () => milestonesAreaWidth, 
-                        height:() => milestonesAreaHeight,
+                        width: () => cardsAreaWidth, 
+                        height:() => cardsAreaHeight,
                         transition:transformTransition
                     })
-
-                milestonesAreaG
-                    .select("rect.milestones-area-bg")
-                        .call(updateRectDimns, { 
-                            width: () => milestonesAreaWidth, 
-                            height:() => milestonesAreaHeight,
-                            transition:transformTransition
-                        })
 
                 enhancedDrag
                     .onLongpressStart(function(e, d){ })
@@ -272,43 +253,76 @@ export default function milestonesBarComponent() {
                 function dragged(e,d){}
                 function dragEnd(e,d){}
 
-                visibleCardsG
-                    .datum(visibleCardsData)
+                //next - position the placedCards and size them properly
+                cardsG
+                    .datum(cardsData)
                     .call(profiles
-                        .width(cardWidth)
-                        .height(cardHeight)
-                        .margin(profileMargin)
-                        .x((d,i) => d.cardIndex * horizCardGap)
-                        .y((d,i) => y0 - d.cardIndex * vertCardGap)
+                        .width(heldCardWidth)
+                        .height(heldCardHeight)
+                        //.margin(profileMargin)
+                        .placedCardWidth(placedCardWidth)
+                        .placedCardHeight(placedCardHeight)
+                        .x((d,i) => {
+                            if(d.isHeld){
+                                return (cardsAreaWidth - heldCardWidth)/2 + (d.i - activeCardNr) * horizCardInc
+                            }
+                            return d.i * (placedCardWidth + placedCardHorizGap);
+                        })
+                        .y((d,i) => {
+                            if(d.isHeld){
+                                return y0 - (d.i - activeCardNr) * vertCardInc
+                            }
+                            return heldCardsAreaHeight + placedCardMarginVert;;
+                        })
+                        .onClick(function(e,d){
+                            //console.log("clicked", d.i, d.isHeld)
+                            const swipeDirection = d.isHeld ? "down" : "up"; //temp logic
+                            if(swipeDirection === "down"){
+                                activeCardNr += 1;
+                                update(data.map((dat,i) => ({ 
+                                    ...dat, 
+                                    statusChanging:activeCardNr - 1 === i
+                                })));
+                            }else{
+                                activeCardNr -= 1;
+                                update(data.map((dat,i) => ({ 
+                                    ...dat, 
+                                    statusChanging:activeCardNr === i
+                                })));
+                            }
+                            return;
+
+                            console.log("swipeDir", swipeDirection)
+                            if(d.isHeld){
+                                activeCardNr += 1;
+                            }else{
+                                activeCardNr -= 1;
+                            }
+                            update(data.map((dat,i) => ({ 
+                                ...dat, 
+                                statusChanging:(swipeDirection === "down" && activeCardNr - 1 === i) 
+                                    || (swipeDirection === "up" && activeCardNr === i)
+                            })));
+                        })
+                        .onPickUp(function(d){
+                            const prevActiveCardNr = activeCardNr;
+                            activeCardNr = d.i;
+
+                            update(data.map((dat,i) => ({ 
+                                ...dat,
+                                statusChanging:dat.i < prevActiveCardNr && dat.i >= activeCardNr
+                            })));
+                        })
+                        .onPutDown(function(d){
+                            const prevActiveCardNr = activeCardNr;
+                            activeCardNr = d.i + 1;
+                            update(data.map((dat,i) => ({ 
+                                ...dat, 
+                                statusChanging:dat.i >= prevActiveCardNr && dat.i < activeCardNr
+                            })));
+                        })
                         .currentPage(currentPage)
                         .selected(selectedMilestone))
-                
-                //temp bg
-                nonVisibleCardsG.select("rect.non-visible-cards-bg")
-                    .attr("width", milestonesAreaWidth)
-                    .attr("height", nonVisibleCardsHeight)
-                    .attr("fill", "yellow");
-
-                const nonVisibleCardG = nonVisibleCardsG.selectAll("g.non-visible-card").data(nonVisibleCardsData);
-                nonVisibleCardG.enter()
-                    .append("g")
-                        .attr("class", "non-visible-card")
-                        .each(function(){
-                            d3.select(this).append("rect")
-                        })
-                        .merge(nonVisibleCardG)
-                        .attr("transform", (d,i) => `translate(${i * 5}, ${nonVisibleCardsHeight - nonVisibleCardHeight - (i * 10)})`)
-                        .each(function(){
-                            d3.select(this).select("rect")
-                                .attr("width", nonVisibleCardWidth)
-                                .attr("height", nonVisibleCardHeight)
-                                .attr("rx", 2)
-                                .attr("ry", 2)
-                                .attr("fill", grey10(4))
-                                .attr("stroke", "white")
-                        })
-
-                nonVisibleCardG.exit().remove();
 
             }
 

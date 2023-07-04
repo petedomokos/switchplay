@@ -20,6 +20,13 @@ export default function profileCardsComponent() {
     let margin = { top:0, bottom: 0, left:0, right:0 }
     let contentsWidth;
     let contentsHeight;
+
+    let placedCardWidth = 0;
+    let placedCardHeight = 0;
+
+    //next - make info height smaller, adn add an extra margin between info and items
+    //then make info height reduce, or it just disappears altogether, if card is sufficiently smalled eg placed
+    //we dont need an info component in this case
     const infoHeight = 80;
     let itemsAreaHeight;
 
@@ -63,10 +70,19 @@ export default function profileCardsComponent() {
     let scrollable = false;
     let currentPage = PROFILE_PAGES[0];
 
-    let transformTransition = { enter: null, update: null };
+    let transformTransition = { 
+        enter: null, 
+        update: { duration:d => d.statusChanging ? 200 : 500,
+            delay:d => d.statusChanging ? 0 : 100,
+            ease:d3.easeQuadInOut
+        } 
+    };
 
     //API CALLBACKS
     let onClick = function(){};
+    let onPickUp = function(){};
+    let onPutDown = function(){};
+
     let onCtrlClick = () => {};
     let onClickKpi = () => {};
     let onDblClickKpi = function(){};
@@ -113,6 +129,7 @@ export default function profileCardsComponent() {
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
+                .dragThreshold(100)
                 .onDblClick(onDblClick)
                 .onClick(onClick)
                 .onLongpressStart(longpressStart)
@@ -123,19 +140,23 @@ export default function profileCardsComponent() {
                 .on("start", enhancedDrag(dragStart))
                 .on("drag", enhancedDrag(dragged))
                 .on("end", enhancedDrag(dragEnd))
+            
+            containerG.selectAll("g.cards")
 
             const cardG = containerG.selectAll("g.card").data(data, d => d.id);
             cardG.enter()
-                .insert("g", ":first-child")
+                //.insert("g", ":first-child")
+                .append("g")
                     .attr("class", d => `card card-${d.id}`)
                     .each(function(d,i){
-                        //console.log("enter card", i, d)
                         cardInfoComponents[d.id] = profileInfoComponent();
                         cardItemsComponents[d.id] = cardItemsComponent();
                         //ENTER
                         const contentsG = d3.select(this)
                             .append("g")
                                 .attr("class", "contents card-contents")
+                        //contentsG
+                            //.attr("transform", `scale(${d.isHeld ? 1 : placedCardHeight/height})`)
 
                         contentsG
                             .append("rect")
@@ -147,15 +168,22 @@ export default function profileCardsComponent() {
 
                         contentsG.append("g").attr("class", "info")
                         contentsG.append("g").attr("class", "items-area")
-
-                        contentsG.append("g").attr("class", "top-right-ctrls")
     
                     })
-                    .call(updateTransform, { x, y, transition:transformTransition.enter })
+                    .call(updateTransform, { 
+                        x, 
+                        y,
+                        k:d => d.isHeld ? 1 : placedCardHeight/height,  
+                        transition:transformTransition.enter
+                    })
                     .merge(cardG)
-                    .call(updateTransform, { x, y, transition:transformTransition.update })
+                    .call(updateTransform, { 
+                        x, 
+                        y, 
+                        k:d => d.isHeld ? 1 : placedCardHeight/height,
+                        transition:transformTransition.update 
+                    })
                     .each(function(d,i){
-                        //console.log("update", d.id)
                         //components
                         const cardInfo = cardInfoComponents[d.id]
                             .currentPage(currentPage)
@@ -170,8 +198,6 @@ export default function profileCardsComponent() {
                             .height(itemsAreaHeight)
                     
                         const contentsG = d3.select(this).select("g.card-contents")
-                            //.attr("transform", d =>  `translate(${-contentsWidth/2},${-contentsHeight/2})`)
-                        
                         contentsG.select("rect.card-bg")
                             .attr("width", contentsWidth)
                             .attr("height", contentsHeight)
@@ -181,78 +207,65 @@ export default function profileCardsComponent() {
                             .call(cardInfo);
 
                         const itemsData = [{}, {}, {}, {}, {}];
-                        if(i === 0){
-                            contentsG.select("g.items-area")
-                                .attr("transform", `translate(0, ${infoHeight})`)
-                                .datum(itemsData)
-                                .call(cardItems)
-                        }
-
-
-                        //top right ctrls (dependent on each card)
-                        let btnWidth = 25;
-                        let btnHeight = 25;
-
-                        const topRightBtnG = contentsG.select("g.top-right-ctrls")
-                            .attr("transform", `translate(${contentsWidth}, ${0})`)
-                            .selectAll("g.top-right-btn")
-                            .data(ctrls(d).topRight, b => b.label)
-                    
-                        topRightBtnG.enter()
-                            .append("g")
-                                .attr("class", "top-right-btn")
-                                .each(function(b){
-                                    d3.select(this)
-                                        .append("rect")
-                                            .attr("fill", "transparent");
-
-                                    d3.select(this)
-                                        .append("path")
-                                            .attr("transform", b.icon.transform || null)
-                                            .attr("fill", COLOURS.btnIcons.default)
-                                            .attr("stroke", COLOURS.btnIcons.default)
-                                })
-                                .merge(topRightBtnG)
-                                .attr("transform", (b,i) => `translate(${-(i + 1) * btnWidth})`)
-                                .each(function(b){
-                                    d3.select(this).select("rect")
-                                        .attr("x", -20)
-                                        .attr("width", btnWidth + 20)
-                                        .attr("height", btnHeight + 20);
-
-                                    d3.select(this).select("path")
-                                        .attr("transform", `translate(${selected === d.id ? -7.5 : -15},10)`)
-                                        .attr("d", b.icon.d)
-                                })
-                                .style("cursor", "pointer")
-                                .on("click",(e,b) => { if(b.onClick){ b.onClick(b)} })
-                                .on("mouseover", (e,b) => { if(b.onMouseover){ b.onMouseover(b)} })
-                                .on("mouseout", (e,b) => { if(b.onMouseout){ b.onMouseout(b)} })
-
-                        topRightBtnG.exit().remove(); 
-
-
-
+                        contentsG.select("g.items-area")
+                            .attr("transform", `translate(0, ${infoHeight})`)
+                            .datum(itemsData)
+                            .call(cardItems)
                     })
+                    .call(drag)
+                    /*
+                    .on("click", function(e,d){
+                        //raise
+
+                        //move to centre and enlarge ie transform translate and scale
+
+
+                        onClick.call(this, e, d);
+                        return;
+
+                        //and then clicking can enlarge the active front card to take over whole cardsArea,
+                        //going over the placedcards and the stacked cards behind it
+
+                        //then, move date to top-right, and put nrs 1 to 5 in top-left
+
+                        //design idea - remove the squares from the chain, instead just have words at teh right angles and
+                        //positions to make the pentagon. could even make different shape, ro a letter eg S for success,
+                        
+                    })*/
 
             //EXIT
             cardG.exit().call(remove);
 
             function dragStart(e , d){
-                if(movable){
+                console.log("ds")
+                /*if(movable){
                     d3.select(this).raise();
                 }
-                onDragStart.call(this, e, d)
+                */
+                //onDragStart.call(this, e, d)
             }
+            let swipeTriggered = false;
             function dragged(e , d){
-                onDrag.call(this, e, d)
+                if(swipeTriggered){ return; }
+                //console.log("drg", e.dy)
+                if(e.dy <= 0 && !d.isHeld){ 
+                    onPickUp(d);
+                    swipeTriggered = true;
+                }
+                if(e.dy >= 0 && d.isHeld){
+                    onPutDown(d);
+                    swipeTriggered = true;
+                }
+                //onDrag.call(this, e, d)
             }
     
             //note: newX and Y should be stored as d.x and d.y
             function dragEnd(e, d){
                 if(enhancedDrag.isClick()) { return; }
+                //reset
+                swipeTriggered = false;
     
-                onDragEnd.call(this, e, d);
+                //onDragEnd.call(this, e, d);
             }
 
             //DELETION
@@ -289,6 +302,16 @@ export default function profileCardsComponent() {
     profileCards.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
+        return profileCards;
+    };
+    profileCards.placedCardWidth = function (value) {
+        if (!arguments.length) { return placedCardWidth; }
+        placedCardWidth = value;
+        return profileCards;
+    };
+    profileCards.placedCardHeight = function (value) {
+        if (!arguments.length) { return placedCardHeight; }
+        placedCardHeight = value;
         return profileCards;
     };
     profileCards.margin = function (value) {
@@ -399,6 +422,16 @@ export default function profileCardsComponent() {
     profileCards.onClick = function (value) {
         if (!arguments.length) { return onClick; }
         onClick = value;
+        return profileCards;
+    };
+    profileCards.onPickUp = function (value) {
+        if (!arguments.length) { return onPickUp; }
+        onPickUp = value;
+        return profileCards;
+    };
+    profileCards.onPutDown = function (value) {
+        if (!arguments.length) { return onPutDown; }
+        onPutDown = value;
         return profileCards;
     };
     profileCards.onClickInfo = function (value) {
