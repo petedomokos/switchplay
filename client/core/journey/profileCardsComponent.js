@@ -24,6 +24,9 @@ export default function profileCardsComponent() {
     let placedCardWidth = 0;
     let placedCardHeight = 0;
 
+    let selectedCardWidth = width;
+    let selectedCardHeight = height;
+
     //next - make info height smaller, adn add an extra margin between info and items
     //then make info height reduce, or it just disappears altogether, if card is sufficiently smalled eg placed
     //we dont need an info component in this case
@@ -34,6 +37,8 @@ export default function profileCardsComponent() {
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
         itemsAreaHeight = contentsHeight - infoHeight;
+
+
     }
 
     let fontSizes = {
@@ -148,6 +153,7 @@ export default function profileCardsComponent() {
                 //.insert("g", ":first-child")
                 .append("g")
                     .attr("class", d => `card card-${d.id}`)
+                    .attr("opacity", 1)
                     .each(function(d,i){
                         cardInfoComponents[d.id] = profileInfoComponent();
                         cardItemsComponents[d.id] = cardItemsComponent();
@@ -173,14 +179,14 @@ export default function profileCardsComponent() {
                     .call(updateTransform, { 
                         x, 
                         y,
-                        k:d => d.isHeld ? 1 : placedCardHeight/height,  
+                        k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),  
                         transition:transformTransition.enter
                     })
                     .merge(cardG)
                     .call(updateTransform, { 
                         x, 
                         y, 
-                        k:d => d.isHeld ? 1 : placedCardHeight/height,
+                        k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),
                         transition:transformTransition.update 
                     })
                     .each(function(d,i){
@@ -238,16 +244,11 @@ export default function profileCardsComponent() {
 
             function dragStart(e , d){
                 console.log("ds")
-                /*if(movable){
-                    d3.select(this).raise();
-                }
-                */
                 //onDragStart.call(this, e, d)
             }
             let swipeTriggered = false;
             function dragged(e , d){
                 if(swipeTriggered){ return; }
-                //console.log("drg", e.dy)
                 if(e.dy <= 0 && !d.isHeld){ 
                     onPickUp(d);
                     swipeTriggered = true;
@@ -258,20 +259,16 @@ export default function profileCardsComponent() {
                 }
                 //onDrag.call(this, e, d)
             }
-    
-            //note: newX and Y should be stored as d.x and d.y
+
             function dragEnd(e, d){
                 if(enhancedDrag.isClick()) { return; }
                 //reset
                 swipeTriggered = false;
-    
                 //onDragEnd.call(this, e, d);
             }
 
             //DELETION
             let deleted = false;
-            const svg = d3.select("svg");
-
             //longpress
             function longpressStart(e, d) {
                 onLongpressStart.call(this, e, d)
@@ -312,6 +309,16 @@ export default function profileCardsComponent() {
     profileCards.placedCardHeight = function (value) {
         if (!arguments.length) { return placedCardHeight; }
         placedCardHeight = value;
+        return profileCards;
+    };
+    profileCards.selectedCardWidth = function (value) {
+        if (!arguments.length) { return selectedCardWidth; }
+        selectedCardWidth = value;
+        return profileCards;
+    };
+    profileCards.selectedCardHeight = function (value) {
+        if (!arguments.length) { return selectedCardHeight; }
+        selectedCardHeight = value;
         return profileCards;
     };
     profileCards.margin = function (value) {

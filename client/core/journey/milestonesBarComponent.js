@@ -37,8 +37,9 @@ export default function milestonesBarComponent() {
     let contentsHeight;
 
     let cardsAreaWidth;
-    let topSpaceHeight;
     let cardsAreaHeight;
+    let cardsAreaAspectRatio;
+    let topSpaceHeight;
     let botSpaceHeight;
 
     let heldCardsAreaHeight;
@@ -46,6 +47,7 @@ export default function milestonesBarComponent() {
 
     let heldCardWidth;
     let heldCardHeight;
+    let cardAspectRatio = 0.7;
 
     let placedCardWidth;
     let placedCardHeight;
@@ -64,6 +66,7 @@ export default function milestonesBarComponent() {
         topSpaceHeight = contentsHeight * 0.1;
         cardsAreaHeight = contentsHeight * 0.8;
         botSpaceHeight = contentsHeight * 0.1;
+        cardsAreaAspectRatio = cardsAreaWidth/cardsAreaHeight;
 
         heldCardsAreaHeight = cardsAreaHeight * (9/11);
         placedCardsAreaHeight = cardsAreaHeight * (2/11);
@@ -74,7 +77,7 @@ export default function milestonesBarComponent() {
         vertCardInc = (1/7) * heldCardHeight;
 
         //aspect-ratio of cards is 0.7
-        heldCardWidth = heldCardHeight * 0.7;
+        heldCardWidth = heldCardHeight * cardAspectRatio;
 
         const horizSpaceForIncs = (contentsWidth - heldCardWidth)/2;
         horizCardInc = horizSpaceForIncs / 4;
@@ -93,6 +96,7 @@ export default function milestonesBarComponent() {
 
 
     let activeCardNr = 0; //0 is the first card of 5
+
     let swipable = true;
     let currentPage = PROFILE_PAGES[0];
 
@@ -198,7 +202,7 @@ export default function milestonesBarComponent() {
                 cardsG.append("rect")
                     .attr("class", "cards-bg")
                     .attr("fill", "transparent")
-                    .attr("stroke", "none");
+                    .attr("stroke", grey10(3));
             }
 
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
@@ -253,7 +257,19 @@ export default function milestonesBarComponent() {
                 function dragged(e,d){}
                 function dragEnd(e,d){}
 
-                //next - position the placedCards and size them properly
+                //selected card dimns
+                //if cardsareaaspectratio is smaller, it means its narrower than the cards,
+                //so in that case we use the cardsAreaWidth as the marker
+                let selectedCardWidth;
+                let selectedCardHeight;
+                if(cardsAreaAspectRatio < cardAspectRatio){
+                    selectedCardWidth = cardsAreaWidth;
+                    selectedCardHeight = selectedCardWidth / cardAspectRatio;
+                }else{
+                    selectedCardHeight = cardsAreaHeight;
+                    selectedCardWidth = selectedCardHeight * cardAspectRatio;
+                }
+                
                 cardsG
                     .datum(cardsData)
                     .call(profiles
@@ -262,46 +278,38 @@ export default function milestonesBarComponent() {
                         //.margin(profileMargin)
                         .placedCardWidth(placedCardWidth)
                         .placedCardHeight(placedCardHeight)
+                        .selectedCardWidth(selectedCardWidth)
+                        .selectedCardHeight(selectedCardHeight)
                         .x((d,i) => {
+                            if(d.isSelected){
+                                //keep it centred
+                                return (cardsAreaWidth - selectedCardWidth)/2;
+                            }
                             if(d.isHeld){
                                 return (cardsAreaWidth - heldCardWidth)/2 + (d.i - activeCardNr) * horizCardInc
                             }
                             return d.i * (placedCardWidth + placedCardHorizGap);
                         })
                         .y((d,i) => {
+                            if(d.isSelected){
+                                return (cardsAreaHeight - selectedCardHeight)/2;
+                            }
                             if(d.isHeld){
                                 return y0 - (d.i - activeCardNr) * vertCardInc
                             }
                             return heldCardsAreaHeight + placedCardMarginVert;;
                         })
                         .onClick(function(e,d){
-                            //console.log("clicked", d.i, d.isHeld)
-                            const swipeDirection = d.isHeld ? "down" : "up"; //temp logic
-                            if(swipeDirection === "down"){
-                                activeCardNr += 1;
-                                update(data.map((dat,i) => ({ 
-                                    ...dat, 
-                                    statusChanging:activeCardNr - 1 === i
-                                })));
-                            }else{
-                                activeCardNr -= 1;
-                                update(data.map((dat,i) => ({ 
-                                    ...dat, 
-                                    statusChanging:activeCardNr === i
-                                })));
-                            }
-                            return;
+                            containerG.selectAll("g.card").filter(dat => dat.i !== d.i)
+                                .attr("pointer-events", d.isSelected ? null : "none")
+                                .transition()
+                                .duration(200)
+                                    .attr("opacity", d.isSelected ? 1 : 0)
 
-                            console.log("swipeDir", swipeDirection)
-                            if(d.isHeld){
-                                activeCardNr += 1;
-                            }else{
-                                activeCardNr -= 1;
-                            }
                             update(data.map((dat,i) => ({ 
-                                ...dat, 
-                                statusChanging:(swipeDirection === "down" && activeCardNr - 1 === i) 
-                                    || (swipeDirection === "up" && activeCardNr === i)
+                                ...dat,
+                                statusChanging:dat.i === d.i,
+                                isSelected:dat.i === d.i ? !dat.isSelected : dat.isSelected
                             })));
                         })
                         .onPickUp(function(d){
