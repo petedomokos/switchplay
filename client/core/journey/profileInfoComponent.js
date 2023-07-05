@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { DIMNS, PROFILE_PAGES, grey10, OVERLAY } from "./constants";
 import container from './kpis/kpi/container';
 import dragEnhancements from './enhancedDragHandler';
+import { trophy } from "../../../assets/icons/milestoneIcons.js"
 
 //helpers
 const isSportsman = personType => ["footballer", "athlete", "boxer"].includes(personType);
@@ -31,6 +32,9 @@ export default function profileInfoComponent() {
         position:8,
         date:8
     };
+    let styles = {
+        trophyTranslate:`translate(-3,3) scale(0.25)`
+    }
 
     let editable;
     let beingEdited = "";
@@ -142,7 +146,10 @@ export default function profileInfoComponent() {
                         d3.select(this)
                             .append("rect")
                                 .attr("class", "hitbox")
-                                //.attr("fill", "transparent");    
+                                //.attr("fill", "transparent");  
+                        d3.select(this).append("path")
+                            .attr("d", trophy.pathD)
+                            .attr("transform", styles.trophyTranslate);
                     })
                     .merge(progressSummaryG)
                     .attr("transform", `translate(${width - progressSummaryWidth},${0})`)
@@ -150,7 +157,15 @@ export default function profileInfoComponent() {
                         d3.select(this).select("rect.hitbox")
                             .attr("width", progressSummaryWidth)
                             .attr("height", progressSummaryHeight)
-                            .attr("fill", d.progressStatus === 2 ? "gold" : (d.progressStatus === 1 ? grey10(2) : "#989898"))
+                            .attr("fill", "transparent")
+                            .attr("stroke","none");
+
+                        d3.select(this).select("path") 
+                            .attr("fill", d.progressStatus === 2 ? "gold" : (d.progressStatus === 1 ? grey10(2) : grey10(5)))
+                            .transition()
+                            .delay(100)
+                            .duration(100)
+                                .attr("transform", styles.trophyTranslate);
                     })
 
 
@@ -450,6 +465,14 @@ export default function profileInfoComponent() {
     profileInfo.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
+        return profileInfo;
+    };
+    profileInfo.styles = function (obj) {
+        if (!arguments.length) { return styles; }
+        styles = {
+            ...styles,
+            ...obj,
+        };
         return profileInfo;
     };
     profileInfo.fontSizes = function (values) {

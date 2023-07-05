@@ -11,7 +11,7 @@ import { icons } from '../../util/icons';
 import { hide, show, Oscillator } from './domHelpers';
 import { getTransformationFromTrans } from './helpers';
 import { updateRectDimns } from './transitionHelpers';
-import { remove } from 'lodash';
+import { trophy } from "../../../assets/icons/milestoneIcons.js"
 
 const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
 const SLIDE_TRANSITION = { duration: 200 };
@@ -224,7 +224,10 @@ export default function milestonesBarComponent() {
                 topSpaceG.append("rect").attr("class", "top-space-bg")
                 const progressSummaryG = topSpaceG.append("g").attr("class", "cards-progress-summary");
                 progressSummaryG.append("rect").attr("class", "cards-progress-summary-hitbox");
-                progressSummaryG.append("path");
+                progressSummaryG.append("path")
+                    .attr("d", trophy.pathD)
+                    .attr("transform", "translate(-2.5,-5) scale(0.4)");
+                    
                 topSpaceG.append("text")
                     .attr("class", "cards-title")
                     .attr("dominant-baseline", "central")
@@ -306,6 +309,11 @@ export default function milestonesBarComponent() {
                 progressSummaryG.select("rect.cards-progress-summary-hitbox")
                     .attr("width", progressSummaryWidth)
                     .attr("height", progressSummaryHeight)
+                    .attr("fill", "transparent")
+                    .attr("stroke", "none");
+
+
+                progressSummaryG.select("path")
                     .attr("fill", cardsProgressStatus === 2 ? "gold" : (cardsProgressStatus === 1 ? grey10(2) : grey10(6)))
 
                 contentsG

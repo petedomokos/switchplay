@@ -202,6 +202,10 @@ export default function profileCardsComponent() {
                             .currentPage(currentPage)
                             .width(contentsWidth)
                             .height(infoHeight)
+                            .styles({
+                                trophyTranslate:d.isHeld || d.isSelected ? 
+                                    "translate(-3,3) scale(0.25)" : "translate(-45,3) scale(0.6)"
+                            })
                             .fontSizes(fontSizes.info)
                             .editable(editable)
                             .onClick(onClickInfo)
