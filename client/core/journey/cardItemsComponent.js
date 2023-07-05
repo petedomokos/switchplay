@@ -53,7 +53,8 @@ export default function cardItemsComponent() {
     }
 
     let styles = {
-        lineStrokeWidth:5
+        lineStrokeWidth:5,
+        _lineStroke:() => "white"
     }
 ;    //API CALLBACKS
     let onClick = function(){};
@@ -129,16 +130,32 @@ export default function cardItemsComponent() {
 
             itemG.exit().remove();*/
 
+            const chainSectionHitboxLine = centreG.selectAll("line.chain-section-hitbox").data(data);
+            chainSectionHitboxLine.enter()
+                    .append("line")
+                        .attr("class", "chain-section-hitbox")
+                        .merge(chainSectionHitboxLine)
+                        .attr("x1", (d,i) => vertices[i][0])
+                        .attr("y1", (d,i) => vertices[i][1])
+                        .attr("x2", (d,i) => vertices[i + 1] ? vertices[i+1][0] : vertices[0][0])
+                        .attr("y2", (d,i) => vertices[i + 1] ? vertices[i+1][1] : vertices[0][1])
+                        .attr("stroke","transparent")
+                        .attr("stroke-width", 60)
+                        .on("click", function(e,d){ onClick.call(this, e, d) })
+
+            chainSectionHitboxLine.exit().remove();
+
             const chainSectionLine = centreG.selectAll("line.chain-section").data(data);
             chainSectionLine.enter()
                     .append("line")
                         .attr("class", "chain-section")
+                        .attr("pointer-events", "none")
                         .merge(chainSectionLine)
                         .attr("x1", (d,i) => vertices[i][0])
                         .attr("y1", (d,i) => vertices[i][1])
                         .attr("x2", (d,i) => vertices[i + 1] ? vertices[i+1][0] : vertices[0][0])
                         .attr("y2", (d,i) => vertices[i + 1] ? vertices[i+1][1] : vertices[0][1])
-                        .attr("stroke", d => d === 2 ? "gold" : (d === 1 ? grey10(2) : "#C8C8C8"))
+                        .attr("stroke",(d,i) => styles._lineStroke(d,i))
                         .attr("stroke-width", styles.lineStrokeWidth)
 
             chainSectionLine.exit().remove();

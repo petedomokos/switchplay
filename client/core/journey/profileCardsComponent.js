@@ -46,7 +46,7 @@ export default function profileCardsComponent() {
             name:9,
             age:11,
             position:8,
-            date:5
+            date:7
         },
         kpis:{
             name:9,
@@ -85,6 +85,7 @@ export default function profileCardsComponent() {
 
     //API CALLBACKS
     let onClick = function(){};
+    let onLineClick = function(){};
     let onPickUp = function(){};
     let onPutDown = function(){};
 
@@ -126,6 +127,8 @@ export default function profileCardsComponent() {
     let cardInfoComponents = {};
     let cardItemsComponents = {};
 
+    let lineClicked = false;
+
     function profileCards(selection, options={}) {
         //check the height of info, make smaller if necc and create a bottom bar, so the pentagon is in centre
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
@@ -136,7 +139,13 @@ export default function profileCardsComponent() {
             enhancedDrag
                 .dragThreshold(100)
                 .onDblClick(onDblClick)
-                .onClick(onClick)
+                .onClick(function(e,d){
+                    if(lineClicked){
+                        lineClicked = false;
+                        return;
+                    }
+                    onClick.call(this, e, d);
+                })
                 .onLongpressStart(longpressStart)
                 .onLongpressDragged(longpressDragged)
                 .onLongpressEnd(longpressEnd);
@@ -168,7 +177,7 @@ export default function profileCardsComponent() {
                                 .attr("rx", 3)
                                 .attr("ry", 3)
                                 .attr("stroke", "white")
-                                .attr("fill", grey10(4))// "transparent")//d.id === selected ? COLOURS.selectedMilestone : COLOURS.milestone)
+                                .attr("fill", d.isSelected || d.isHeld ? grey10(6) : grey10(8))
 
                         contentsG.append("g").attr("class", "info")
                         contentsG.append("g").attr("class", "items-area")
@@ -198,17 +207,33 @@ export default function profileCardsComponent() {
                             .onClick(onClickInfo)
 
                         const cardItems = cardItemsComponents[d.id]
-                            .styles({ lineStrokeWidth: d.isHeld || d.isSelected ? 5 : 10 })
+                            .styles({ 
+                                lineStrokeWidth: d.isHeld || d.isSelected ? 5 : 10,
+                                _lineStroke:(lineD,i) => {
+                                    if(d.isHeld || d.isSelected){
+                                        return lineD.progressStatus === 2 ? "gold" : (lineD.progressStatus === 1 ? grey10(2) : "#989898")
+                                    }
+                                    return lineD.progressStatus === 2 ? "gold" : (lineD.progressStatus === 1 ? grey10(2) : grey10(6))
+                                }
+                            })
                             .width(contentsWidth)
                             .height(itemsAreaHeight)
+                            .onClick(function(e,d){
+                                lineClicked = true;
+                                onLineClick.call(this, e, d);
+                            })
                     
                         const contentsG = d3.select(this).select("g.card-contents")
                         contentsG.select("rect.card-bg")
                             .attr("width", contentsWidth)
                             .attr("height", contentsHeight)
+                            .transition()
+                            .duration(200)
+                                .attr("fill", d.isSelected || d.isHeld ? grey10(6) : grey10(8))
 
+                        const infoDatum = { ...d.info, level:d.i + 1, progressStatus:d.progressStatus };
                         contentsG.selectAll("g.info")
-                            .datum(d.info)
+                            .datum(infoDatum)
                             .call(cardInfo);
 
                         contentsG.select("g.items-area")
@@ -217,12 +242,7 @@ export default function profileCardsComponent() {
                             .call(cardItems)
                     })
                     .call(drag)
-
-                    //next - increase date fontsize. (keep it top left for now)
-                    //and improve chain design... idea - remove the squares from the chain, 
-                    //instead just have words at teh right angles and
-                    //positions to make the pentagon. could even make different shape, ro a letter eg S for success,
-
+  
             //EXIT
             cardG.exit().call(remove);
 
@@ -412,6 +432,11 @@ export default function profileCardsComponent() {
     profileCards.onClick = function (value) {
         if (!arguments.length) { return onClick; }
         onClick = value;
+        return profileCards;
+    };
+    profileCards.onLineClick = function (value) {
+        if (!arguments.length) { return onLineClick; }
+        onLineClick = value;
         return profileCards;
     };
     profileCards.onPickUp = function (value) {

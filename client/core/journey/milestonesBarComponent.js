@@ -42,6 +42,9 @@ export default function milestonesBarComponent() {
     let topSpaceHeight;
     let botSpaceHeight;
 
+    let progressSummaryWidth = 30;
+    let progressSummaryHeight = 30;
+
     let heldCardsAreaHeight;
     let placedCardsAreaHeight;
 
@@ -96,13 +99,30 @@ export default function milestonesBarComponent() {
 
 
     let activeCardNr = 0; //0 is the first card of 5
-    let allItemsData = [
+    let allItemsProgressData = [
         [2,2,2,1,0],
         [2,1,2,1,0],
         [2,1,0,0,0],
         [0,0,0,0,0],
         [0,0,0,0,0]
     ];
+
+    const itemsDataLayout = allItemsProgressData => 
+        allItemsProgressData.map((itemsProgressData,i) =>
+            itemsProgressData.map((progressStatus, j) => 
+                ({ cardNr:i, itemNr:j, progressStatus })))
+    
+
+    const calcCardProgressStatus = items => {
+        if(items.filter(it => it.progressStatus !== 2).length === 0){ return 2; }
+        if(items.filter(it => it.progressStatus !== 2).length <= 2) { return 1; }
+        return 0;
+    }
+    const calcCardsProgressStatus = cards => {
+        if(cards.filter(c => c.progressStatus !== 2).length === 0){ return 2; }
+        if(cards.filter(c => c.progressStatus !== 2).length <= 2) { return 1; }
+        return 0;
+    }
 
     let swipable = true;
     let currentPage = PROFILE_PAGES[0];
@@ -201,6 +221,15 @@ export default function milestonesBarComponent() {
                     .append("g")
                     .attr("class", "top-space");
 
+                topSpaceG.append("rect").attr("class", "top-space-bg")
+                const progressSummaryG = topSpaceG.append("g").attr("class", "cards-progress-summary");
+                progressSummaryG.append("rect").attr("class", "cards-progress-summary-hitbox");
+                progressSummaryG.append("path");
+                topSpaceG.append("text")
+                    .attr("class", "cards-title")
+                    .attr("dominant-baseline", "central")
+                    .attr("text-anchor", "middle")
+
                 cardsG = contentsG
                     .append("g")
                     .attr("class", "cards")
@@ -209,23 +238,38 @@ export default function milestonesBarComponent() {
                 cardsG.append("rect")
                     .attr("class", "cards-bg")
                     .attr("fill", "transparent")
-                    .attr("stroke", grey10(3));
+                    .attr("stroke", "none");
             }
 
+            //next - add a trophy icon into the top right of each card - which is 
+            //displayed without a fill when 3/5, and displayed with shiny fill when 5/5
+            //and an even better tropy into top right of screen for final prize
+            //make card trophy larger when card is placed on table so its visible
+            //can also add a 2nd icon to represent a bonus point if it was completed on time
+            //so overall, its out of 10. 
+
+            //then - add a number (1-5) and word along each line in the pentagon, facing inwards
+            //allo pentagon to be rotated by clicking the middle, so user can read 
+            //them all. The one that is horizonatl is teh one currently being worked on?
             //data can be passed in from a general update (ie dataWithDimns above) or from a listener (eg dataWithPlaceholder)
             function update(data, options={}){
                 const { } = options;
                 //dimns for specific chart
+                const allItemsData = itemsDataLayout(allItemsProgressData);
+                //console.log("allItemsData", allItemsData)
                 const cardsData = data
                     .filter(m => m.dataType === "profile")
                     .map((p,i) => ({ 
                         ...p,
                         i,
                         isHeld:i >= activeCardNr,
-                        itemsData:allItemsData[i]
+                        itemsData:allItemsData[i],
+                        progressStatus:calcCardProgressStatus(allItemsData[i])
                     }))
                     .reverse();
-                //console.log("cardsData", cardsData.map(d => ({ i: d.i, isHeld: d.isHeld })))
+                
+                const cardsProgressStatus = calcCardsProgressStatus(cardsData);
+                //console.log("cardsData", cardsData)
 
                 //dimns specific to this chart
                 const y0 = vertCardInc * 4;
@@ -240,6 +284,29 @@ export default function milestonesBarComponent() {
                         height:() => height,
                         transition:transformTransition
                     })
+                
+                topSpaceG.select("rect.top-space-bg")
+                    .attr("width", contentsWidth)
+                    .attr("height", topSpaceHeight)
+                    .attr("stroke", "none")
+                    .attr("fill", "none")
+
+                topSpaceG.select("text.cards-title")
+                    .attr("x", cardsAreaWidth/2)
+                    .attr("y", progressSummaryHeight/2)
+                    .attr("stroke-width", 0.3)
+                    .attr("stroke", grey10(5))
+                    .attr("fill", grey10(5))
+                    .attr("font-family", "Arial, Helvetica, sans-serif")
+                    .text("ENTER TITLE ...");
+
+                const progressSummaryG = topSpaceG.select("g.cards-progress-summary")
+                    .attr("transform", `translate(${cardsAreaWidth - progressSummaryWidth}, 0)`)
+                
+                progressSummaryG.select("rect.cards-progress-summary-hitbox")
+                    .attr("width", progressSummaryWidth)
+                    .attr("height", progressSummaryHeight)
+                    .attr("fill", cardsProgressStatus === 2 ? "gold" : (cardsProgressStatus === 1 ? grey10(2) : grey10(6)))
 
                 contentsG
                     .select("rect.cards-bg")
@@ -307,7 +374,22 @@ export default function milestonesBarComponent() {
                             }
                             return heldCardsAreaHeight + placedCardMarginVert;;
                         })
+                        .onLineClick(function(e,d){
+                            const { cardNr, itemNr, progressStatus } = d;
+                            //new status - todo - use mod 2
+                            const newProgressStatus = progressStatus === 0 ? 1 : (progressStatus === 1 ?  2 : 0)
+                            allItemsProgressData = allItemsProgressData
+                                .map((cardItemsData,i) => {
+                                    if(i !== cardNr) { return cardItemsData; }
+                                    return cardItemsData.map((progressStatus,j) => {
+                                        if(j !== itemNr) { return progressStatus; }
+                                        return newProgressStatus;
+                                    })
+                                })
+                            update(data);
+                        })
                         .onClick(function(e,d){
+                            //hide/show others
                             containerG.selectAll("g.card").filter(dat => dat.i !== d.i)
                                 .attr("pointer-events", d.isSelected ? null : "none")
                                 .transition()
@@ -330,15 +412,22 @@ export default function milestonesBarComponent() {
                             })));
                         })
                         .onPutDown(function(d){
+                            if(d.isSelected){
+                                //show other cards as we need to deselect the card too
+                                containerG.selectAll("g.card").filter(dat => dat.i !== d.i)
+                                    .attr("pointer-events", null)
+                                    .attr("opacity", 1)
+                            }
                             const prevActiveCardNr = activeCardNr;
                             activeCardNr = d.i + 1;
                             update(data.map((dat,i) => ({ 
                                 ...dat, 
-                                statusChanging:dat.i >= prevActiveCardNr && dat.i < activeCardNr
+                                statusChanging:dat.i >= prevActiveCardNr && dat.i < activeCardNr,
+                                isSelected:false
                             })));
                         })
                         .currentPage(currentPage)
-                        .selected(selectedMilestone))
+                        .selected(selectedMilestone)) 
 
             }
 

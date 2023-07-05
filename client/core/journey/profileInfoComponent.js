@@ -116,7 +116,7 @@ export default function profileInfoComponent() {
                     })
                     .merge(titleG)
                     .attr("transform", `translate(${width/2},${0})`)
-                    .each(function(d){
+                    .each(function(d,i){
                         d3.select(this).select("rect.hitbox")
                             .attr("x", -titleWidth/2)
                             .attr("width", titleWidth)
@@ -125,9 +125,32 @@ export default function profileInfoComponent() {
 
                         d3.select(this).select("text.primary")
                             .attr("y", titleHeight/2)
-                            .attr("font-size", titleHeight * 0.5)
+                            .attr("font-size", titleHeight * 0.4)
                             //.attr("fill", d.isFuture ? "grey" : "white")
-                            .text(d.title || d.id)
+                            //.text(d.title || d.id)
+                            .text(`Level ${d.level}`)
+                    })
+
+            //TITLE
+            const progressSummaryWidth = 30;
+            const progressSummaryHeight = 30;
+            const progressSummaryG = containerG.selectAll("g.progress-summary").data([data])
+            progressSummaryG.enter()
+                .append("g")
+                    .attr("class", "progress-summary")
+                    .each(function(d){
+                        d3.select(this)
+                            .append("rect")
+                                .attr("class", "hitbox")
+                                //.attr("fill", "transparent");    
+                    })
+                    .merge(progressSummaryG)
+                    .attr("transform", `translate(${width - progressSummaryWidth},${0})`)
+                    .each(function(d,i){
+                        d3.select(this).select("rect.hitbox")
+                            .attr("width", progressSummaryWidth)
+                            .attr("height", progressSummaryHeight)
+                            .attr("fill", d.progressStatus === 2 ? "gold" : (d.progressStatus === 1 ? grey10(2) : "#989898"))
                     })
 
 
