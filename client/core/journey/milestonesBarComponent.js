@@ -98,7 +98,7 @@ export default function milestonesBarComponent() {
     let _styles = () => DEFAULT_STYLES;
 
 
-    let activeCardNr = 0; //0 is the first card of 5
+    let frontCardNr = 0; //0 is the first card of 5
     let allItemsProgressData = [
         [2,2,2,1,0],
         [2,1,2,1,0],
@@ -265,7 +265,10 @@ export default function milestonesBarComponent() {
                     .map((p,i) => ({ 
                         ...p,
                         i,
-                        isHeld:i >= activeCardNr,
+                        isFront:i === frontCardNr,
+                        isNext:i - 1 === frontCardNr,
+                        isSecondNext:i - 2 === frontCardNr,
+                        isHeld:i >= frontCardNr,
                         itemsData:allItemsData[i],
                         progressStatus:calcCardProgressStatus(allItemsData[i])
                     }))
@@ -298,8 +301,8 @@ export default function milestonesBarComponent() {
                     .attr("x", cardsAreaWidth/2)
                     .attr("y", progressSummaryHeight/2)
                     .attr("stroke-width", 0.3)
-                    .attr("stroke", grey10(5))
-                    .attr("fill", grey10(5))
+                    .attr("stroke", grey10(7))
+                    .attr("fill", grey10(7))
                     .attr("font-family", "Arial, Helvetica, sans-serif")
                     .text("ENTER TITLE ...");
 
@@ -369,7 +372,12 @@ export default function milestonesBarComponent() {
                                 return (cardsAreaWidth - selectedCardWidth)/2;
                             }
                             if(d.isHeld){
-                                return (cardsAreaWidth - heldCardWidth)/2 + (d.i - activeCardNr) * horizCardInc
+                                const extraMarginLeft = (cardsAreaWidth - heldCardWidth)/2;
+                                const nrIncrements = d.i - frontCardNr;
+                                const a = 5;
+                                const b = 5;
+                                const inc = a * (nrIncrements**2) + b * nrIncrements;
+                                return extraMarginLeft + inc;
                             }
                             return d.i * (placedCardWidth + placedCardHorizGap);
                         })
@@ -378,7 +386,7 @@ export default function milestonesBarComponent() {
                                 return (cardsAreaHeight - selectedCardHeight)/2;
                             }
                             if(d.isHeld){
-                                return y0 - (d.i - activeCardNr) * vertCardInc
+                                return y0 - (d.i - frontCardNr) * vertCardInc
                             }
                             return heldCardsAreaHeight + placedCardMarginVert;;
                         })
@@ -411,12 +419,12 @@ export default function milestonesBarComponent() {
                             })));
                         })
                         .onPickUp(function(d){
-                            const prevActiveCardNr = activeCardNr;
-                            activeCardNr = d.i;
+                            const prevActiveCardNr = frontCardNr;
+                            frontCardNr = d.i;
 
                             update(data.map((dat,i) => ({ 
                                 ...dat,
-                                statusChanging:dat.i < prevActiveCardNr && dat.i >= activeCardNr
+                                statusChanging:dat.i < prevActiveCardNr && dat.i >= frontCardNr
                             })));
                         })
                         .onPutDown(function(d){
@@ -426,11 +434,11 @@ export default function milestonesBarComponent() {
                                     .attr("pointer-events", null)
                                     .attr("opacity", 1)
                             }
-                            const prevActiveCardNr = activeCardNr;
-                            activeCardNr = d.i + 1;
+                            const prevActiveCardNr = frontCardNr;
+                            frontCardNr = d.i + 1;
                             update(data.map((dat,i) => ({ 
                                 ...dat, 
-                                statusChanging:dat.i >= prevActiveCardNr && dat.i < activeCardNr,
+                                statusChanging:dat.i >= prevActiveCardNr && dat.i < frontCardNr,
                                 isSelected:false
                             })));
                         })

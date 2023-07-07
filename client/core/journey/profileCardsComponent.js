@@ -154,8 +154,40 @@ export default function profileCardsComponent() {
                 .on("start", enhancedDrag(dragStart))
                 .on("drag", enhancedDrag(dragged))
                 .on("end", enhancedDrag(dragEnd))
-            
-            containerG.selectAll("g.cards")
+
+            const getCardFill = d => { 
+                const { isSelected, isFront, isNext, isSecondNext, progressStatus } = d;
+                if(isFront || isSelected){ return grey10(3); }
+                if(isNext){ return grey10(5); }
+                if(isSecondNext){ return "#989898"; }
+                return (d.isHeld ? grey10(6) : grey10(8))
+            };
+
+            const getProgressStatusFill = d => { 
+                const { isSelected, isFront, isNext, isSecondNext, progressStatus } = d;
+                if(isFront || isSelected){ 
+                    return progressStatus === 2 ? "gold" : (progressStatus === 1 ? grey10(1) : grey10(2)) 
+                }
+                if(isNext){ 
+                    return progressStatus === 2 ? "gold" : (progressStatus === 1 ? grey10(2) : grey10(4))
+                }
+                if(isSecondNext){ 
+                    return progressStatus === 2 ? "gold" : (progressStatus === 1 ? grey10(2) : "#B0B0B0") //4.5 
+                }
+                if(d.isHeld){
+                    return progressStatus === 2 ? "gold" : (progressStatus === 1 ? grey10(2) : grey10(5))
+                }
+                //its placed
+                return progressStatus === 2 ? "gold" : (progressStatus === 1 ? grey10(2) : grey10(5))
+            };
+
+
+            const getCardStroke = d => {
+                if(d.isFront){ return grey10(1); }
+                if(d.isNext){ return grey10(2); }
+                if(d.isSecondNext){ return grey10(4); }
+                return (d.isSelected || d.isHeld ? grey10(5) : grey10(8))
+            }
 
             const cardG = containerG.selectAll("g.card").data(data, d => d.id);
             cardG.enter()
@@ -164,6 +196,7 @@ export default function profileCardsComponent() {
                     .attr("class", d => `card card-${d.id}`)
                     .attr("opacity", 1)
                     .each(function(d,i){
+                        console.log("i", i)
                         cardInfoComponents[d.id] = profileInfoComponent();
                         cardItemsComponents[d.id] = cardItemsComponent();
                         //ENTER
@@ -176,8 +209,8 @@ export default function profileCardsComponent() {
                                 .attr("class", "card-bg")
                                 .attr("rx", 3)
                                 .attr("ry", 3)
-                                .attr("stroke", "white")
-                                .attr("fill", d.isSelected || d.isHeld ? grey10(6) : grey10(8))
+                                .attr("stroke", getCardStroke(d))
+                                .attr("fill", getCardFill(d))
 
                         contentsG.append("g").attr("class", "info")
                         contentsG.append("g").attr("class", "items-area")
@@ -203,6 +236,7 @@ export default function profileCardsComponent() {
                             .width(contentsWidth)
                             .height(infoHeight)
                             .styles({
+                                progressStatusFill:getProgressStatusFill(d),
                                 trophyTranslate:d.isHeld || d.isSelected ? 
                                     "translate(-3,3) scale(0.25)" : "translate(-45,3) scale(0.6)"
                             })
@@ -222,7 +256,9 @@ export default function profileCardsComponent() {
                             })
                             .width(contentsWidth)
                             .height(itemsAreaHeight)
+                            .withLabels(d.isHeld || d.isSelected)
                             .onClick(function(e,d){
+                                if(!isHeld && !isSelected) { return; }
                                 lineClicked = true;
                                 onLineClick.call(this, e, d);
                             })
@@ -233,7 +269,8 @@ export default function profileCardsComponent() {
                             .attr("height", contentsHeight)
                             .transition()
                             .duration(200)
-                                .attr("fill", d.isSelected || d.isHeld ? grey10(6) : grey10(8))
+                                .attr("fill", getCardFill(d))
+                                .attr("stroke", getCardStroke(d))
 
                         const infoDatum = { ...d.info, level:d.i + 1, progressStatus:d.progressStatus };
                         contentsG.selectAll("g.info")

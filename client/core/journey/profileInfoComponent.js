@@ -33,6 +33,7 @@ export default function profileInfoComponent() {
         date:8
     };
     let styles = {
+        progressStatusFill:"white",
         trophyTranslate:`translate(-3,3) scale(0.25)`
     }
 
@@ -149,7 +150,8 @@ export default function profileInfoComponent() {
                                 //.attr("fill", "transparent");  
                         d3.select(this).append("path")
                             .attr("d", trophy.pathD)
-                            .attr("transform", styles.trophyTranslate);
+                            .attr("transform", styles.trophyTranslate)
+                            .attr("fill", styles.progressStatusFill);
                     })
                     .merge(progressSummaryG)
                     .attr("transform", `translate(${width - progressSummaryWidth},${0})`)
@@ -161,7 +163,7 @@ export default function profileInfoComponent() {
                             .attr("stroke","none");
 
                         d3.select(this).select("path") 
-                            .attr("fill", d.progressStatus === 2 ? "gold" : (d.progressStatus === 1 ? grey10(2) : grey10(5)))
+                            .attr("fill", styles.progressStatusFill)
                             .transition()
                             .delay(100)
                             .duration(100)

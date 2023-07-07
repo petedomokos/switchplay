@@ -11,14 +11,16 @@ import { toRadians } from './screenGeometryHelpers';
 //helper
 //always returns vertices s.t. first vertex angle from North is 0.
 function pentagonVertices(options={}){
-    const { r=1, centre=[0,0] } = options;
+    const { r=1, centre=[0,0], theta, n=5 } = options;
     const a = [centre[0], -r];
-    const b = [r * Math.cos(toRadians(18)), -r * Math.sin(toRadians(18))];
-    const c = [r * Math.cos(toRadians(-54)), -r * Math.sin(toRadians(-54))];
-    const d = [-c[0], c[1]];
-    const e = [-b[0], b[1]];
 
-    return [a,b,c,d,e];
+    return d3.range(n).map((pos,i) => {
+        const thetaVal = theta(i);
+        return [
+            a[0]+ r * Math.sin(toRadians(thetaVal)),
+            a[1] + r * (1 - Math.cos(toRadians(thetaVal)))
+        ]
+    })
 }
 
 export default function cardItemsComponent() {
@@ -49,13 +51,15 @@ export default function cardItemsComponent() {
         itemWidth = contentsWidth/4.5;
         itemHeight = itemWidth;
         const longestItemLength = d3.max([itemWidth, itemHeight]);
-        radius = actualContentsLength/2 - longestItemLength/2;
+        radius = (actualContentsLength/2 - longestItemLength/2) * (withLabels ? 0.5 : 1);
     }
 
     let styles = {
         lineStrokeWidth:5,
         _lineStroke:() => "white"
     }
+
+    let withLabels = true;
 ;    //API CALLBACKS
     let onClick = function(){};
     let onDblClick = function(){};
@@ -102,7 +106,14 @@ export default function cardItemsComponent() {
             const centreG = contentsG.select("g.centre")
                 .attr("transform", `translate(${contentsWidth/2},${contentsHeight/2})`);
 
-            const vertices = pentagonVertices({ r:radius });
+            const vertices = pentagonVertices({ 
+                r:radius,
+                theta:i => i * 72
+            });
+            const itemContentVertices = pentagonVertices({ 
+                r:radius + 35, 
+                theta:i => (i + 0.5) * 72
+            })
 
             /*const itemG = centreG.selectAll("g.card-item").data(data);
             itemG.enter()
@@ -130,6 +141,45 @@ export default function cardItemsComponent() {
 
             itemG.exit().remove();*/
 
+            const itemG = centreG.selectAll("g.item").data(data);
+            itemG.enter()
+                .append("g")
+                    .attr("class", "item")
+                    .each(function(){
+                        const itemG = d3.select(this);
+                        itemG.append("text")
+                            .attr("opacity", withLabels ? 1 : 0)
+                            .attr("text-anchor", "middle")
+                            .attr("dominant-baseline", "central")
+                            .attr("font-size", "10")
+                            .attr("stroke-width", 0.1)
+                            .attr("stroke", grey10(7))
+                            .attr("fill", grey10(7));
+
+                    })
+                    .attr("transform", (d,i) => `translate(${itemContentVertices[i][0]}, ${itemContentVertices[i][1]})`)
+                    .merge(itemG)
+                    .each(function(d, i){
+                        const itemG = d3.select(this);
+                        itemG
+                            .transition()
+                            .delay(100)
+                            .duration(100)
+                                .attr("transform", `translate(${itemContentVertices[i][0]}, ${itemContentVertices[i][1]})`)
+
+                        //hitbox line
+
+                        //visible line
+
+                        //text
+                        itemG.select("text")
+                            .text(`Goal/Task ${i + 1}`)
+                            .transition()
+                                .duration(200)
+                                .attr("opacity", withLabels ? 1 : 0);
+                    })
+                    
+
             const chainSectionHitboxLine = centreG.selectAll("line.chain-section-hitbox").data(data);
             chainSectionHitboxLine.enter()
                     .append("line")
@@ -139,24 +189,27 @@ export default function cardItemsComponent() {
                         .attr("y1", (d,i) => vertices[i][1])
                         .attr("x2", (d,i) => vertices[i + 1] ? vertices[i+1][0] : vertices[0][0])
                         .attr("y2", (d,i) => vertices[i + 1] ? vertices[i+1][1] : vertices[0][1])
-                        .attr("stroke","transparent")
-                        .attr("stroke-width", 60)
+                        .attr("stroke", "transparent")
+                        .attr("stroke-width", 40)
                         .on("click", function(e,d){ onClick.call(this, e, d) })
 
             chainSectionHitboxLine.exit().remove();
 
             const chainSectionLine = centreG.selectAll("line.chain-section").data(data);
             chainSectionLine.enter()
-                    .append("line")
-                        .attr("class", "chain-section")
-                        .attr("pointer-events", "none")
-                        .merge(chainSectionLine)
-                        .attr("x1", (d,i) => vertices[i][0])
-                        .attr("y1", (d,i) => vertices[i][1])
-                        .attr("x2", (d,i) => vertices[i + 1] ? vertices[i+1][0] : vertices[0][0])
-                        .attr("y2", (d,i) => vertices[i + 1] ? vertices[i+1][1] : vertices[0][1])
-                        .attr("stroke",(d,i) => styles._lineStroke(d,i))
-                        .attr("stroke-width", styles.lineStrokeWidth)
+                .append("line")
+                    .attr("class", "chain-section")
+                    .attr("pointer-events", "none")
+                    .merge(chainSectionLine)
+                    .transition()
+                        .delay(100)
+                        .duration(100)
+                            .attr("x1", (d,i) => vertices[i][0])
+                            .attr("y1", (d,i) => vertices[i][1])
+                            .attr("x2", (d,i) => vertices[i + 1] ? vertices[i+1][0] : vertices[0][0])
+                            .attr("y2", (d,i) => vertices[i + 1] ? vertices[i+1][1] : vertices[0][1])
+                            .attr("stroke", (d,i) => styles._lineStroke(d,i))
+                            .attr("stroke-width", styles.lineStrokeWidth)          
 
             chainSectionLine.exit().remove();
 
@@ -182,6 +235,11 @@ export default function cardItemsComponent() {
             ...styles,
             ...obj,
         };
+        return cardItems;
+    };
+    cardItems.withLabels = function (value) {
+        if (!arguments.length) { return withLabels; }
+        withLabels = value;
         return cardItems;
     };
     cardItems.onClick = function (value) {
