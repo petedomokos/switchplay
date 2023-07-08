@@ -127,6 +127,12 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
               style={getDynamicStyles(history, "/visuals")}>Visuals
             </Button>
         </Link>
+        <Link to="/cards">
+            <Button 
+              className={classes.menuBtn}
+              style={getDynamicStyles(history, "/cards")}>Cards
+            </Button>
+        </Link>
         {user && <Link to="/import">
             <Button 
               className={classes.menuBtn}
