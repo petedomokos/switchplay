@@ -32,7 +32,6 @@ export default function NonUserHome(){
   return (
       <div className={classes.root}>
         <Typography className={classes.strapline} type="body1" component="p">
-          For players that dream and coaches that care
         </Typography>
         {/**<VideoApp/>*/}
       </div>
