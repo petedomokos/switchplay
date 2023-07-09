@@ -18,7 +18,8 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(2)
   },
   strapline: {
-    padding:`${theme.spacing(1)}px ${theme.spacing(1)}px ${theme.spacing(1)}px`,
+    marginLeft:"30px",
+    padding:`${theme.spacing(0)}px ${theme.spacing(1)}px ${theme.spacing(1)}px`,
     color: theme.palette.openTitle,
     [theme.breakpoints.down('md')]: {
     },
@@ -32,6 +33,7 @@ export default function NonUserHome(){
   return (
       <div className={classes.root}>
         <Typography className={classes.strapline} type="body1" component="p">
+        SWITCHPLAY
         </Typography>
         {/**<VideoApp/>*/}
       </div>
