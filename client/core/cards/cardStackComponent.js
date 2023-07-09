@@ -23,7 +23,7 @@ export default function cardStackComponent() {
     let selectedCardWidth = width;
     let selectedCardHeight = height;
 
-    const infoHeight = 80;
+    const infoHeight = d3.max([40, contentsHeight * 0.2]);
     let itemsAreaHeight;
 
     function updateDimns(){
@@ -164,8 +164,16 @@ export default function cardStackComponent() {
                                 .attr("stroke", getCardStroke(d))
                                 .attr("fill", getCardFill(d))
 
-                        contentsG.append("g").attr("class", "info")
-                        contentsG.append("g").attr("class", "items-area")
+                        contentsG
+                            .append("g")
+                                .attr("class", "info")
+                                    .append("rect")
+                                        .attr("class", "info-bg")
+                        contentsG
+                            .append("g")
+                                .attr("class", "items-area")
+                                    .append("rect")
+                                        .attr("class", "items-area-bg")
     
                     })
                     .call(updateTransform, { 
@@ -224,6 +232,12 @@ export default function cardStackComponent() {
                                 .attr("fill", getCardFill(d))
                                 .attr("stroke", getCardStroke(d))
 
+                        contentsG.select("rect.info-bg")
+                            .attr("width", contentsWidth)
+                            .attr("height", infoHeight)
+                            .attr("fill", "red")
+                        
+
                         const infoDatum = { ...info, progressStatus };
                         contentsG.selectAll("g.info")
                             .datum(infoDatum)
@@ -233,6 +247,11 @@ export default function cardStackComponent() {
                             .attr("transform", `translate(0, ${infoHeight})`)
                             .datum(d.itemsData)
                             .call(cardItems)
+                        
+                        contentsG.select("rect.items-area-bg")
+                            .attr("width", contentsWidth)
+                            .attr("height", infoHeight)
+                            .attr("fill", "none")
                     })
                     .on("click", function(e,d){
                         onClick.call(this, e, d)

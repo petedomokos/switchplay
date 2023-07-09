@@ -99,7 +99,7 @@ export default function cardItemsComponent() {
             contentsG.select("rect.card-items-contents-bg")
                 .attr("width", contentsWidth)
                 .attr("height", contentsHeight)
-                .attr("fill", "none")
+                .attr("fill","yellow")// "none")
 
             const centreG = contentsG.select("g.centre")
                 .attr("transform", `translate(${contentsWidth/2},${contentsHeight/2})`);
@@ -165,13 +165,19 @@ export default function cardItemsComponent() {
                             .duration(200)
                                 .attr("transform", `translate(${itemContentVertices[i][0]}, ${itemContentVertices[i][1]})`)
 
-                        //hitbox line
-
-                        //visible line
+                        //text
+                        const shouldTruncate = contentsWidth < 150;
+                        const truncateIfNecc = text => shouldTruncate ? `${text.slice(0,7)}...` : text;
+                        let text;
+                        if(d.title){
+                            text = truncateIfNecc(d.title);
+                        } else {
+                            text = `${shouldTruncate ? "Goal" : "Goal/Task"} ${i + 1}`;
+                        }
 
                         //text
                         itemG.select("text")
-                            .text(`Goal/Task ${i + 1}`)
+                            .text(text)
                             .transition()
                                 .duration(200)
                                 .attr("opacity", withLabels ? 1 : 0);
