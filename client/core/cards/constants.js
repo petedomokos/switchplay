@@ -15,6 +15,8 @@ export const getURLForUser = userId => (photoId, locationKey) => {
     return `/api/users/photo/${userId}/${photoId}`
 }
 
+export const OVERLAY = { FILL:"black", OPACITY:0.5 }
+
 export const TIME_SETTINGS = {
     YEAR_END : { MONTH:4, DAY_OF_MONTH:31 },
     WEEK_END_DAY:0, //0 = sunday,
@@ -38,7 +40,7 @@ export const TRANSITIONS = {
     }
 }
 
-export const FONTSIZES = {
+export const FONTSIZES = { 
 }
 
 export const STYLES = {
@@ -49,4 +51,5 @@ export const DIMNS = {
 }
 
 export const COLOURS = {
+    GOLD:"#FFE10A"// brighter #ffd700,   darker #ccad00
 }

@@ -6,7 +6,7 @@ export default function cardsLayout(){
     let format = "profiles";
 
     function update(data){
-        return data.map((c,i) => {
+        const _data = data.map((c,i) => {
                 return {
                     ...c,
                     info:{ 
@@ -17,6 +17,11 @@ export default function cardsLayout(){
                     },
                 }
         })
+        if(_data[0] && _data[0].cardNr !== _data.length){
+            //hasnt been reversed yet
+            return _data.reverse();
+        }
+        return _data;
     }
 
     update.format = function (value) {

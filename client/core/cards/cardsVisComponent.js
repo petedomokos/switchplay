@@ -1,9 +1,12 @@
 import * as d3 from 'd3';
-import { grey10 } from "./constants";
+import { grey10, COLOURS } from "./constants";
 import cardStackComponent from './cardStackComponent';
 import dragEnhancements from '../journey/enhancedDragHandler';
-import { updateRectDimns } from './transitionHelpers';
-//import { trophy } from "../../../assets/icons/milestoneIcons.js"
+import { updateRectDimns } from '../journey/transitionHelpers';
+import { trophy } from "../../../assets/icons/milestoneIcons.js"
+
+const { GOLD } = COLOURS;
+console.log("gold.......................", GOLD)
 
 const transformTransition = { update: { duration: 1000 } };
 
@@ -11,7 +14,7 @@ const transformTransition = { update: { duration: 1000 } };
 
 */
 
-export default function cardsComponent() {
+export default function cardsVisComponent() {
     //API SETTINGS
     // dimensions
     let width = 300;
@@ -32,9 +35,11 @@ export default function cardsComponent() {
     let heldCardsAreaHeight;
     let placedCardsAreaHeight;
 
+    let vertSpaceForIncs;
+
     let heldCardWidth;
     let heldCardHeight;
-    let cardAspectRatio = 0.7;
+    const cardAspectRatio = 0.7;
 
     let placedCardWidth;
     let placedCardHeight;
@@ -53,28 +58,45 @@ export default function cardsComponent() {
         topSpaceHeight = contentsHeight * 0.1;
         cardsAreaHeight = contentsHeight * 0.8;
         botSpaceHeight = contentsHeight * 0.1;
+        //this aspectRatio is only needed to aid with selecting a card to takeover entire area
         cardsAreaAspectRatio = cardsAreaWidth/cardsAreaHeight;
 
-        heldCardsAreaHeight = cardsAreaHeight * (9/11);
-        placedCardsAreaHeight = cardsAreaHeight * (2/11);
+        heldCardWidth =  cardsAreaWidth * 0.65;
+        heldCardHeight = heldCardWidth / 0.7;
 
-        //we want vertGap to be 1/7 of heldCardHeight, so 11/7 * heldCardHeight = heldCardsAreaHeight 
-        // => heldCardHeight = 7/11 * heldCardsAreaHeight
-        heldCardHeight = (7/11) * heldCardsAreaHeight;
-        vertCardInc = (1/7) * heldCardHeight;
+        vertSpaceForIncs = (cardsAreaHeight - heldCardHeight)/2;
+        vertCardInc = i => {
+            const k = 30;
+            const remainingVertSpace = vertSpaceForIncs - (k * 4);
+            const incA = remainingVertSpace * 0.53;
+            const incB = remainingVertSpace * 0.27;
+            const incC = remainingVertSpace * 0.13;
+            const incD = remainingVertSpace * 0.07;
+            if(i === 0) { return 0; }
+            if(i === 1) { return k + incA }
+            if(i === 2) { return (k * 2) + incA + incB; }
+            if(i === 3) { return (k * 3) + incA + incB + incC; }
+            if(i === 4) { return (k * 4) + incA + incB + incC + incD; }
+        }
 
-        //aspect-ratio of cards is 0.7
-        heldCardWidth = heldCardHeight * cardAspectRatio;
+        heldCardsAreaHeight = heldCardHeight + vertSpaceForIncs;
+        placedCardsAreaHeight = cardsAreaHeight - heldCardsAreaHeight;
 
         const horizSpaceForIncs = (contentsWidth - heldCardWidth)/2;
-        horizCardInc = horizSpaceForIncs / 4;
+        horizCardInc = i => {
+            if(i === 0) { return 0; }
+            if(i === 1) { return horizSpaceForIncs * 0.07; }
+            if(i === 2) { return horizSpaceForIncs * (0.07 + 0.13); }
+            if(i === 3) { return horizSpaceForIncs * (0.07 + 0.13 + 0.27); }
+            if(i === 4) { return horizSpaceForIncs * (0.07 + 0.13 + 0.27 + 0.53); }
+        }
+        //@todo - replace the above with a quadratic function s.t. the total of the 4 incs is horizSpaceForIncs
 
         //placed cards
-        placedCardMarginVert = placedCardsAreaHeight * 0.25, 
-        placedCardHeight = placedCardsAreaHeight - 2 * placedCardMarginVert;
-        //keep aspect-ratio same as placedCards
-        placedCardWidth = placedCardHeight * (heldCardWidth/heldCardHeight);
+        placedCardWidth = d3.min([60, cardsAreaWidth * 0.8]); //ensure there is some gap between placed cards
+        placedCardHeight = placedCardWidth / cardAspectRatio;
         placedCardHorizGap = (cardsAreaWidth - 5 * placedCardWidth) / 4;
+        placedCardMarginVert = (placedCardsAreaHeight - placedCardHeight)/2;
     }
     let DEFAULT_STYLES = {
         stack:{ info:{ date:{ fontSize:9 } } },
@@ -108,16 +130,6 @@ export default function cardsComponent() {
         return 0;
     }
 
-    let swipable = true;
-    let currentPage = PROFILE_PAGES[0];
-
-    //state
-    let selectedMilestone;
-    let isSelected = milestoneId => false;
-    let selectedKpi;
-
-    let endMilestoneEdit = function(){}
-
     let format;
 
     const drag = d3.drag();
@@ -131,12 +143,9 @@ export default function cardsComponent() {
     let cardsG;
 
     //components
-    const stack = cardStackComponent()
-        .onCtrlClick((e,d) => { 
-            ignoreNextWrapperClick = true;
-        });
+    const stack = cardStackComponent();
 
-    function cards(selection, options={}) {
+    function cardsVis(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true } = options;
 
         updateDimns();
@@ -149,16 +158,16 @@ export default function cardsComponent() {
             if(containerG.select("g").empty()){
                 init();
             }
-            console.log("cardsComponent data", data)
 
-            //update(data, { slideTransition:SLIDE_TRANSITION });
+            update(data);
+
             function init(){
-                containerG.append("rect").attr("class", "mbar-container-bg")
+                containerG.append("rect").attr("class", "cards-vis-bg")
                     .attr("fill", "transparent");
-                contentsG = containerG.append("g").attr("class", "mbar-contents");
+                contentsG = containerG.append("g").attr("class", "cards-vis-contents");
                 contentsG.append("rect")
-                    .attr("class", "mbar-contents-bg")
-                    .attr("fill","transparent");
+                    .attr("class", "cards-vis-contents-bg")
+                    .attr("fill", "transparent");
 
                 topSpaceG = contentsG
                     .append("g")
@@ -168,7 +177,7 @@ export default function cardsComponent() {
                 const progressSummaryG = topSpaceG.append("g").attr("class", "cards-progress-summary");
                 progressSummaryG.append("rect").attr("class", "cards-progress-summary-hitbox");
                 progressSummaryG.append("path")
-                    //.attr("d", trophy.pathD)
+                    .attr("d", trophy.pathD)
                     .attr("transform", "translate(-2.5,-5) scale(0.4)");
                     
                 topSpaceG.append("text")
@@ -193,30 +202,32 @@ export default function cardsComponent() {
                 const allItemsData = itemsDataLayout(allItemsProgressData);
                 //console.log("allItemsData", allItemsData)
                 const cardsData = data
-                    .filter(m => m.dataType === "profile")
-                    .map((p,i) => ({ 
-                        ...p,
-                        i,
-                        isFront:i === frontCardNr,
-                        isNext:i - 1 === frontCardNr,
-                        isSecondNext:i - 2 === frontCardNr,
-                        isHeld:i >= frontCardNr,
-                        itemsData:allItemsData[i],
-                        progressStatus:calcCardProgressStatus(allItemsData[i])
-                    }))
-                    .reverse();
+                    .map((card,i) => { 
+                        const cardNr = data.length - 1 - i;
+                        return {
+                            ...card,
+                            cardNr,
+                            handPos:cardNr - frontCardNr,
+                            isFront:cardNr === frontCardNr,
+                            isNext:cardNr - 1 === frontCardNr,
+                            isSecondNext:cardNr - 2 === frontCardNr,
+                            isHeld:cardNr >= frontCardNr,
+                            itemsData:allItemsData[cardNr],
+                            progressStatus:calcCardProgressStatus(allItemsData[cardNr])
+                        }
+                    });
                 
                 const cardsProgressStatus = calcCardsProgressStatus(cardsData);
-                //console.log("cardsData", cardsData)
+                //console.log("cardsData...", cardsData)
 
                 //dimns specific to this chart
-                const y0 = vertCardInc * 4;
+                const y0 = vertSpaceForIncs;// vertCardInc * 4;
 
                 //gs
                 contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
                 cardsG.attr("transform", `translate(${0}, ${topSpaceHeight})`)
 
-                containerG.select("rect.mbar-container-bg")
+                containerG.select("rect.cards-vis-bg")
                     .call(updateRectDimns, { 
                         width: () => width, 
                         height:() => height,
@@ -249,7 +260,7 @@ export default function cardsComponent() {
 
 
                 progressSummaryG.select("path")
-                    .attr("fill", cardsProgressStatus === 2 ? "gold" : (cardsProgressStatus === 1 ? grey10(2) : grey10(6)))
+                    .attr("fill", cardsProgressStatus === 2 ? GOLD : (cardsProgressStatus === 1 ? grey10(2) : grey10(6)))
 
                 contentsG
                     .select("rect.cards-bg")
@@ -287,7 +298,7 @@ export default function cardsComponent() {
                     selectedCardHeight = cardsAreaHeight;
                     selectedCardWidth = selectedCardHeight * cardAspectRatio;
                 }
-                
+
                 cardsG
                     .datum(cardsData)
                     .call(stack
@@ -305,20 +316,17 @@ export default function cardsComponent() {
                             }
                             if(d.isHeld){
                                 const extraMarginLeft = (cardsAreaWidth - heldCardWidth)/2;
-                                const nrIncrements = d.i - frontCardNr;
-                                const a = 5;
-                                const b = 5;
-                                const inc = a * (nrIncrements**2) + b * nrIncrements;
-                                return extraMarginLeft + inc;
+                                const r = extraMarginLeft + horizCardInc(d.handPos)
+                                return r;
                             }
-                            return d.i * (placedCardWidth + placedCardHorizGap);
+                            return d.cardNr * (placedCardWidth + placedCardHorizGap);
                         })
                         .y((d,i) => {
                             if(d.isSelected){
                                 return (cardsAreaHeight - selectedCardHeight)/2;
                             }
                             if(d.isHeld){
-                                return y0 - (d.i - frontCardNr) * vertCardInc
+                                return y0 - vertCardInc(d.handPos)
                             }
                             return heldCardsAreaHeight + placedCardMarginVert;;
                         })
@@ -338,44 +346,49 @@ export default function cardsComponent() {
                         })
                         .onClick(function(e,d){
                             //hide/show others
-                            containerG.selectAll("g.card").filter(dat => dat.i !== d.i)
+                            containerG.selectAll("g.card").filter(dat => dat.id !== d.id)
                                 .attr("pointer-events", d.isSelected ? null : "none")
                                 .transition()
                                 .duration(200)
                                     .attr("opacity", d.isSelected ? 1 : 0)
 
-                            update(data.map((dat,i) => ({ 
+                            //todo next - sort out the confusion between data and cardsData... this use of i
+                            //is causing issues, when we use cardsdata below, teh selecion works but the 
+                            //opacities of 5th card is not 0. and then they all become about 0.6!
+
+                            //need to simplify the data processing, using layout instead of this component to label 
+                            //cardNr, and using cardNr instead of i so its clear. and then just thinking it through
+                            const newData = cardsData.map((dat,i) => ({ 
                                 ...dat,
-                                statusChanging:dat.i === d.i,
-                                isSelected:dat.i === d.i ? !dat.isSelected : dat.isSelected
-                            })));
+                                statusChanging:dat.id === d.id,
+                                isSelected:dat.id === d.id ? !dat.isSelected : dat.isSelected
+                            }))
+                            update(newData);
                         })
                         .onPickUp(function(d){
                             const prevActiveCardNr = frontCardNr;
-                            frontCardNr = d.i;
+                            frontCardNr = d.cardNr;
 
                             update(data.map((dat,i) => ({ 
                                 ...dat,
-                                statusChanging:dat.i < prevActiveCardNr && dat.i >= frontCardNr
+                                statusChanging:dat.cardNr < prevActiveCardNr && data.cardNr >= frontCardNr
                             })));
                         })
                         .onPutDown(function(d){
                             if(d.isSelected){
                                 //show other cards as we need to deselect the card too
-                                containerG.selectAll("g.card").filter(dat => dat.i !== d.i)
+                                containerG.selectAll("g.card").filter(dat => dat.id !== d.id)
                                     .attr("pointer-events", null)
                                     .attr("opacity", 1)
                             }
                             const prevActiveCardNr = frontCardNr;
-                            frontCardNr = d.i + 1;
+                            frontCardNr = d.cardNr + 1;
                             update(data.map((dat,i) => ({ 
                                 ...dat, 
-                                statusChanging:dat.i >= prevActiveCardNr && dat.i < frontCardNr,
+                                statusChanging:data.cardNr >= prevActiveCardNr && data.cardNr < frontCardNr,
                                 isSelected:false
                             })));
-                        })
-                        .currentPage(currentPage)
-                        .selected(selectedMilestone)) 
+                        })) 
 
             }
 
@@ -385,17 +398,17 @@ export default function cardsComponent() {
     }
     
     //api
-    cards.width = function (value) {
+    cardsVis.width = function (value) {
         if (!arguments.length) { return width; }
         width = value;
-        return cards;
+        return cardsVis;
     };
-    cards.height = function (value) {
+    cardsVis.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
-        return cards;
+        return cardsVis;
     };
-    cards.styles = function (value) {
+    cardsVis.styles = function (value) {
         if (!arguments.length) { return _styles; }
         if(typeof value === "function"){
             _styles = (d,i) => ({ ...DEFAULT_STYLES, ...value(d,i) });
@@ -403,17 +416,17 @@ export default function cardsComponent() {
             _styles = (d,i) => ({ ...DEFAULT_STYLES, ...value });
         }
         
-        return cards;
+        return cardsVis;
     };
-    cards.format = function (value) {
+    cardsVis.format = function (value) {
         if (!arguments.length) { return format; }
         format = value;
-        return cards;
+        return cardsVis;
     };
-    cards.setReactComponent = function (value) {
+    cardsVis.setReactComponent = function (value) {
         if (!arguments.length) { return setReactComponent; }
         setReactComponent = value;
-        return cards;
+        return cardsVis;
     };
-    return cards;
+    return cardsVis;
 }

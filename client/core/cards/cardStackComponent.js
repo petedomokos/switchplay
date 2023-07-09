@@ -1,16 +1,18 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10 } from "./constants";
+import { DIMNS, grey10, COLOURS } from "./constants";
 import dragEnhancements from '../journey/enhancedDragHandler';
-import profileInfoComponent from '../journey/profileInfoComponent';
-//import cardItemsComponent from './cardItemsComponent';
+import cardInfoComponent from './cardInfoComponent';
+import cardItemsComponent from './cardItemsComponent';
 import { remove } from '../journey/domHelpers';
 import { updateTransform } from '../journey/transitionHelpers';
+
+const { GOLD } = COLOURS;
 
 export default function cardStackComponent() {
     //API SETTINGS
     // dimensions
-    let width = DIMNS.profile.width * 1.2;
-    let height = DIMNS.profile.height * 1.2;
+    let width = 300;
+    let height = 600;
     let margin = { top:0, bottom: 0, left:0, right:0 }
     let contentsWidth;
     let contentsHeight;
@@ -117,19 +119,19 @@ export default function cardStackComponent() {
             const getProgressStatusFill = d => { 
                 const { isSelected, isFront, isNext, isSecondNext, progressStatus } = d;
                 if(isFront || isSelected){ 
-                    return progressStatus === 2 ? "gold" : (progressStatus === 1 ? grey10(1) : grey10(2)) 
+                    return progressStatus === 2 ? GOLD : (progressStatus === 1 ? grey10(1) : grey10(2)) 
                 }
                 if(isNext){ 
-                    return progressStatus === 2 ? "gold" : (progressStatus === 1 ? grey10(2) : grey10(4))
+                    return progressStatus === 2 ? GOLD : (progressStatus === 1 ? grey10(2) : grey10(4))
                 }
                 if(isSecondNext){ 
-                    return progressStatus === 2 ? "gold" : (progressStatus === 1 ? grey10(2) : "#B0B0B0") //4.5 
+                    return progressStatus === 2 ? GOLD : (progressStatus === 1 ? grey10(2) : "#B0B0B0") //4.5 
                 }
                 if(d.isHeld){
-                    return progressStatus === 2 ? "gold" : (progressStatus === 1 ? grey10(2) : grey10(5))
+                    return progressStatus === 2 ? GOLD : (progressStatus === 1 ? grey10(2) : grey10(5))
                 }
                 //its placed
-                return progressStatus === 2 ? "gold" : (progressStatus === 1 ? grey10(2) : grey10(5))
+                return progressStatus === 2 ? GOLD : (progressStatus === 1 ? grey10(2) : grey10(5))
             };
 
 
@@ -147,8 +149,8 @@ export default function cardStackComponent() {
                     .attr("class", d => `card card-${d.id}`)
                     .attr("opacity", 1)
                     .each(function(d,i){
-                        cardInfoComponents[d.id] = profileInfoComponent();
-                        //cardItemsComponents[d.id] = cardItemsComponent();
+                        cardInfoComponents[d.id] = cardInfoComponent();
+                        cardItemsComponents[d.id] = cardItemsComponent();
                         //ENTER
                         const contentsG = d3.select(this)
                             .append("g")
@@ -180,47 +182,49 @@ export default function cardStackComponent() {
                         transition:transformTransition.update 
                     })
                     .each(function(d,i){
+                        const { isHeld, isSelected, info, progressStatus } = d;
                         //components
                         const cardInfo = cardInfoComponents[d.id]
                             .width(contentsWidth)
                             .height(infoHeight)
                             .styles({
                                 progressStatusFill:getProgressStatusFill(d),
-                                trophyTranslate:d.isHeld || d.isSelected ? 
+                                trophyTranslate:isHeld || isSelected ? 
                                     "translate(-3,3) scale(0.25)" : "translate(-45,3) scale(0.6)"
                             })
                             .fontSizes(fontSizes.info)
                             .onClick(onClickInfo)
 
-                        /*const cardItems = cardItemsComponents[d.id]
+                        const cardItems = cardItemsComponents[d.id]
                             .styles({ 
-                                lineStrokeWidth: d.isHeld || d.isSelected ? 5 : 10,
+                                lineStrokeWidth: isHeld || isSelected ? 5 : 10,
                                 _lineStroke:(lineD,i) => {
-                                    if(d.isHeld || d.isSelected){
-                                        return lineD.progressStatus === 2 ? "gold" : (lineD.progressStatus === 1 ? grey10(2) : "#989898")
+                                    if(isHeld || isSelected){
+                                        return lineD.progressStatus === 2 ? GOLD : (lineD.progressStatus === 1 ? grey10(2) : "#989898")
                                     }
-                                    return lineD.progressStatus === 2 ? "gold" : (lineD.progressStatus === 1 ? grey10(2) : grey10(6))
+                                    return lineD.progressStatus === 2 ? GOLD : (lineD.progressStatus === 1 ? grey10(2) : grey10(6))
                                 }
                             })
                             .width(contentsWidth)
                             .height(itemsAreaHeight)
-                            .withLabels(d.isHeld || d.isSelected)
-                            .onClick(function(e,d){
+                            .withLabels(isHeld || isSelected)
+                            .onClick(function(e,clickedD){
                                 if(!isHeld && !isSelected) { return; }
                                 lineClicked = true;
-                                onLineClick.call(this, e, d);
-                            })*/
+                                onLineClick.call(this, e, clickedD);
+                            })
                     
                         const contentsG = d3.select(this).select("g.card-contents")
                         contentsG.select("rect.card-bg")
                             .attr("width", contentsWidth)
                             .attr("height", contentsHeight)
                             .transition()
-                            .duration(200)
+                            .delay(200)
+                            .duration(400)
                                 .attr("fill", getCardFill(d))
                                 .attr("stroke", getCardStroke(d))
 
-                        const infoDatum = { ...d.info, level:d.i + 1, progressStatus:d.progressStatus };
+                        const infoDatum = { ...info, progressStatus };
                         contentsG.selectAll("g.info")
                             .datum(infoDatum)
                             .call(cardInfo);
@@ -228,7 +232,7 @@ export default function cardStackComponent() {
                         contentsG.select("g.items-area")
                             .attr("transform", `translate(0, ${infoHeight})`)
                             .datum(d.itemsData)
-                            //.call(cardItems)
+                            .call(cardItems)
                     })
                     .call(drag)
   
@@ -236,6 +240,7 @@ export default function cardStackComponent() {
             cardG.exit().call(remove);
 
             function dragStart(e , d){
+                console.log("ds")
                 //onDragStart.call(this, e, d)
             }
             let swipeTriggered = false;
