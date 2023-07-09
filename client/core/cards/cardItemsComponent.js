@@ -108,8 +108,9 @@ export default function cardItemsComponent() {
                 r:radius,
                 theta:i => i * 72
             });
+            console.log("cw", contentsWidth)
             const itemContentVertices = pentagonVertices({ 
-                r:radius + 35, 
+                r:radius + contentsWidth * 0.15,// 35, 
                 theta:i => (i + 0.5) * 72
             })
 
