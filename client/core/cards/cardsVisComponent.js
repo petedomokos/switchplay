@@ -95,7 +95,7 @@ export default function cardsVisComponent() {
 
         const maxHeldCardWidth = cardsAreaWidth - (horizSpaceForIncs * 2); //need it to be symmetrical
         vertSpaceForIncs = vertCardInc(4);
-        placedCardsAreaHeight = 80;
+        placedCardsAreaHeight = d3.min([80, cardsAreaHeight/7]);
         const maxHeldCardHeight = cardsAreaHeight - vertSpaceForIncs - placedCardsAreaHeight;
         const heldCardDimns = maxDimns(maxHeldCardWidth, maxHeldCardHeight, cardAspectRatio);
         heldCardWidth = heldCardDimns.width;

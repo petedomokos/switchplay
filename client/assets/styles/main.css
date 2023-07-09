@@ -8,6 +8,7 @@ body{
   padding:0;
   -webkit-user-select: none;
   user-select: none;
+  /*-webkit-text-size-adjust: none;*/
 }
 /*MAIN-BURGER-MENU------------------------------*/
 /* Position and sizing of burger button */
