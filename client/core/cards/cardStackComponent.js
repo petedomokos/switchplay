@@ -238,6 +238,8 @@ export default function cardStackComponent() {
                         onClick.call(this, e, d)
                     })
                     .call(drag)
+                    
+            containerG.selectAll("text").attr("display", "none")
   
             //EXIT
             cardG.exit().call(remove);

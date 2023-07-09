@@ -92,7 +92,7 @@ export default function cardsVisComponent() {
             if(i === 4) { return horizSpaceForIncs * (0.07 + 0.13 + 0.27 + 0.53); }
         }
 
-        const maxHeldCardWidth = cardsAreaWidth - horizSpaceForIncs;
+        const maxHeldCardWidth = cardsAreaWidth - (horizSpaceForIncs * 2); //need it to be symmetrical
         vertSpaceForIncs = vertCardInc(4);
         placedCardsAreaHeight = 50;
         const maxHeldCardHeight = cardsAreaHeight - vertSpaceForIncs - placedCardsAreaHeight;
@@ -101,6 +101,7 @@ export default function cardsVisComponent() {
         heldCardHeight = heldCardDimns.height;
     
         heldCardsAreaHeight = heldCardHeight + vertSpaceForIncs;
+        //make margin 0 and see if it sorts out horiz overlap
         const cardsAreaMarginVert = (cardsAreaHeight - vertSpaceForIncs - heldCardHeight - placedCardsAreaHeight)/2;
         const cardsAreaMarginHoriz = (cardsAreaWidth - heldCardWidth)/2;
         cardsAreaMargin = { 
@@ -314,8 +315,7 @@ export default function cardsVisComponent() {
                             }
                             if(d.isHeld){
                                 const extraMarginLeft = (cardsAreaWidth - heldCardWidth)/2;
-                                const r = extraMarginLeft + horizCardInc(d.handPos)
-                                return r;
+                                return extraMarginLeft + horizCardInc(d.handPos);
                             }
                             return d.cardNr * (placedCardWidth + placedCardHorizGap);
                         })
