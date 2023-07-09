@@ -156,13 +156,9 @@ export default function cardStackComponent() {
                         cardInfoComponents[d.id] = cardInfoComponent();
                         cardItemsComponents[d.id] = cardItemsComponent();
                         //ENTER
-                        const contentsG = d3.select(this)
-                            .append("g")
-                                .attr("class", "contents card-contents")
+                        const contentsG = d3.select(this).append("g").attr("class", "contents card-contents")
 
-                        contentsG
-                            .append("rect")
-                                .attr("class", "card-bg")
+                        contentsG.append("rect").attr("class", "card-bg")
                                 .attr("rx", 3)
                                 .attr("ry", 3)
                                 .attr("stroke", getCardStroke(d))

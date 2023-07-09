@@ -65,6 +65,8 @@ export default function cardsVisComponent() {
         vertSpaceForIncs = (cardsAreaHeight - heldCardHeight)/2;
         vertCardInc = i => {
             const k = 30;
+            //todo - make 30 the min required to see text
+            //const remainingVertSpace = 0;
             const remainingVertSpace = vertSpaceForIncs - (k * 4);
             const incA = remainingVertSpace * 0.53;
             const incB = remainingVertSpace * 0.27;
@@ -193,7 +195,11 @@ export default function cardsVisComponent() {
                 cardsG.append("rect")
                     .attr("class", "cards-bg")
                     .attr("fill", "transparent")
-                    .attr("stroke", "none");
+                    .attr("stroke", "yellow")//none");
+
+                cardsG.append("rect").attr("class", "placed-cards-bg")
+                    .attr("stroke", "white")
+                    .attr("fill", "none")
             }
 
             function update(data, options={}){
@@ -262,11 +268,20 @@ export default function cardsVisComponent() {
                 progressSummaryG.select("path")
                     .attr("fill", cardsProgressStatus === 2 ? GOLD : (cardsProgressStatus === 1 ? grey10(2) : grey10(6)))
 
-                contentsG
+                cardsG
                     .select("rect.cards-bg")
                     .call(updateRectDimns, { 
                         width: () => cardsAreaWidth, 
                         height:() => cardsAreaHeight,
+                        transition:transformTransition
+                    })
+
+                cardsG
+                    .select("rect.placed-cards-bg")
+                    .attr("transform", `translate(0,${vertSpaceForIncs + heldCardHeight})`)
+                    .call(updateRectDimns, { 
+                        width: () => cardsAreaWidth, 
+                        height:() => placedCardsAreaHeight,
                         transition:transformTransition
                     })
 
