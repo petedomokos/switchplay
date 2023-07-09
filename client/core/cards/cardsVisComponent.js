@@ -59,7 +59,6 @@ export default function cardsVisComponent() {
     let horizCardInc;
 
     function updateDimns(){
-        console.log("height", height)
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
