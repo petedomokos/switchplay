@@ -354,12 +354,10 @@ export default function cardStackComponent() {
     };
     cardStack.transformTransition = function (value) {
         if (!arguments.length) { return transformTransition; }
-        //console.log("setting trans...", value)
         transformTransition = { 
             enter:value.enter,// || transformTransition.enter,
             update:value.update// || transformTransition.update
         }
-        //console.log("Trans is now", transformTransition)
         return cardStack;
     };
     cardStack.yScale = function (value, key) {

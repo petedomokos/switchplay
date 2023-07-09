@@ -8,6 +8,14 @@ const { GOLD } = COLOURS;
 
 const transformTransition = { update: { duration: 1000 } };
 
+function maxDimns(maxWidth, maxHeight, aspectRatio){
+    const potentialHeight = maxWidth * aspectRatio;
+    if(potentialHeight <= maxHeight){
+        return { width: maxWidth, height: potentialHeight }
+    }
+    return { width: maxHeight/aspectRatio, height: maxHeight }
+}
+
 /*
 
 */
@@ -18,11 +26,13 @@ export default function cardsVisComponent() {
     let width = 300;
     let height = 600
     let margin = { left: 40, right: 40, top: 20, bottom: 20 };
+    let extraMargin; //if cards dont take up full space
     let contentsWidth;
     let contentsHeight;
 
     let cardsAreaWidth;
     let cardsAreaHeight;
+    let cardsAreaMargin;
     let cardsAreaAspectRatio;
     let topSpaceHeight;
     let botSpaceHeight;
@@ -37,7 +47,7 @@ export default function cardsVisComponent() {
 
     let heldCardWidth;
     let heldCardHeight;
-    const cardAspectRatio = 0.7;
+    const cardAspectRatio = 88/62;
 
     let placedCardWidth;
     let placedCardHeight;
@@ -59,30 +69,21 @@ export default function cardsVisComponent() {
         //this aspectRatio is only needed to aid with selecting a card to takeover entire area
         cardsAreaAspectRatio = cardsAreaWidth/cardsAreaHeight;
 
-        heldCardWidth =  cardsAreaWidth * 0.65;
-        heldCardHeight = heldCardWidth / 0.7;
-
-        vertSpaceForIncs = (cardsAreaHeight - heldCardHeight)/2;
+        const minInc = 30;
         vertCardInc = i => {
-            const k = 30;
-            //todo - make 30 the min required to see text
-            //const remainingVertSpace = 0;
-            const remainingVertSpace = vertSpaceForIncs - (k * 4);
-            const incA = remainingVertSpace * 0.53;
-            const incB = remainingVertSpace * 0.27;
-            const incC = remainingVertSpace * 0.13;
-            const incD = remainingVertSpace * 0.07;
+            const incA = 16;
+            const incB = 10;
+            const incC = 4;
+            const incD = 0;
             if(i === 0) { return 0; }
-            if(i === 1) { return k + incA }
-            if(i === 2) { return (k * 2) + incA + incB; }
-            if(i === 3) { return (k * 3) + incA + incB + incC; }
-            if(i === 4) { return (k * 4) + incA + incB + incC + incD; }
+            if(i === 1) { return minInc + incA }
+            if(i === 2) { return (minInc * 2) + incA + incB; }
+            if(i === 3) { return (minInc * 3) + incA + incB + incC; }
+            if(i === 4) { return (minInc * 4) + incA + incB + incC + incD; }
         }
 
-        heldCardsAreaHeight = heldCardHeight + vertSpaceForIncs;
-        placedCardsAreaHeight = cardsAreaHeight - heldCardsAreaHeight;
-
-        const horizSpaceForIncs = (contentsWidth - heldCardWidth)/2;
+        const maxHorizSpaceForIncs = 50;
+        const horizSpaceForIncs = d3.min([cardsAreaWidth * 0.25, maxHorizSpaceForIncs]); 
         horizCardInc = i => {
             if(i === 0) { return 0; }
             if(i === 1) { return horizSpaceForIncs * 0.07; }
@@ -90,20 +91,30 @@ export default function cardsVisComponent() {
             if(i === 3) { return horizSpaceForIncs * (0.07 + 0.13 + 0.27); }
             if(i === 4) { return horizSpaceForIncs * (0.07 + 0.13 + 0.27 + 0.53); }
         }
-        //@todo - replace the above with a quadratic function s.t. the total of the 4 incs is horizSpaceForIncs
+
+        const maxHeldCardWidth = cardsAreaWidth - horizSpaceForIncs;
+        vertSpaceForIncs = vertCardInc(4);
+        placedCardsAreaHeight = 50;
+        const maxHeldCardHeight = cardsAreaHeight - vertSpaceForIncs - placedCardsAreaHeight;
+        const heldCardDimns = maxDimns(maxHeldCardWidth, maxHeldCardHeight, cardAspectRatio);
+        heldCardWidth = heldCardDimns.width;
+        heldCardHeight = heldCardDimns.height;
+    
+        heldCardsAreaHeight = heldCardHeight + vertSpaceForIncs;
+        const cardsAreaMarginVert = (cardsAreaHeight - vertSpaceForIncs - heldCardHeight - placedCardsAreaHeight)/2;
+        const cardsAreaMarginHoriz = (cardsAreaWidth - heldCardWidth)/2;
+        cardsAreaMargin = { 
+            top:cardsAreaMarginVert/2, bottom:cardsAreaMarginVert/2,
+            left:cardsAreaMarginHoriz/2, right:cardsAreaMarginHoriz/2
+        }
 
         //placed cards
         const maxPlacedCardHeight = placedCardsAreaHeight * 0.8;
-        const maxPlacedCardWidth = d3.min([60, (cardsAreaWidth/5) * 0.8]); //ensure there is some gap between placed cards
-        
-        const potentialPlacedCardHeight = maxPlacedCardWidth / cardAspectRatio;
-        if(potentialPlacedCardHeight <= maxPlacedCardHeight){
-            placedCardWidth = maxPlacedCardWidth;
-            placedCardHeight = potentialPlacedCardHeight;
-        }else{
-            placedCardWidth = maxPlacedCardHeight * cardAspectRatio;
-            placedCardHeight = maxPlacedCardHeight;
-        }
+        const maxPlacedCardWidth = d3.min([60, (cardsAreaWidth/5) * 0.8]); //ensure some gap
+        const placedCardDimns = maxDimns(maxPlacedCardWidth, maxPlacedCardHeight, cardAspectRatio)
+        placedCardWidth = placedCardDimns.width;
+        placedCardHeight = placedCardDimns.height;
+
         placedCardHorizGap = (cardsAreaWidth - 5 * placedCardWidth) / 4;
         placedCardMarginVert = (placedCardsAreaHeight - placedCardHeight)/2;
     }
@@ -224,14 +235,11 @@ export default function cardsVisComponent() {
                     });
                 
                 const cardsProgressStatus = calcCardsProgressStatus(cardsData);
-                //console.log("cardsData...", cardsData)
-
-                //dimns specific to this chart
-                const y0 = vertSpaceForIncs;// vertCardInc * 4;
+                const selectedCard = cardsData.find(c => c.isSelected)
 
                 //gs
                 contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
-                cardsG.attr("transform", `translate(${0}, ${topSpaceHeight})`)
+                cardsG.attr("transform", `translate(0, ${topSpaceHeight})`)
 
                 containerG.select("rect.cards-vis-bg")
                     .call(updateRectDimns, { 
@@ -286,24 +294,15 @@ export default function cardsVisComponent() {
                     })
 
                 //selected card dimns
-                //if cardsareaaspectratio is smaller, it means its narrower than the cards,
-                //so in that case we use the cardsAreaWidth as the marker
-                let selectedCardWidth;
-                let selectedCardHeight;
-                if(cardsAreaAspectRatio < cardAspectRatio){
-                    selectedCardWidth = cardsAreaWidth;
-                    selectedCardHeight = selectedCardWidth / cardAspectRatio;
-                }else{
-                    selectedCardHeight = cardsAreaHeight;
-                    selectedCardWidth = selectedCardHeight * cardAspectRatio;
-                }
+                const selectedCardDimns = maxDimns(cardsAreaWidth, cardsAreaHeight, cardAspectRatio)
+                const selectedCardWidth = selectedCardDimns.width;
+                const selectedCardHeight = selectedCardDimns.height;
 
                 cardsG
                     .datum(cardsData)
                     .call(stack
                         .width(heldCardWidth)
                         .height(heldCardHeight)
-                        //.margin(profileMargin)
                         .placedCardWidth(placedCardWidth)
                         .placedCardHeight(placedCardHeight)
                         .selectedCardWidth(selectedCardWidth)
@@ -325,7 +324,7 @@ export default function cardsVisComponent() {
                                 return (cardsAreaHeight - selectedCardHeight)/2;
                             }
                             if(d.isHeld){
-                                return y0 - vertCardInc(d.handPos)
+                                return vertSpaceForIncs - vertCardInc(d.handPos)
                             }
                             return heldCardsAreaHeight + placedCardMarginVert;;
                         })
