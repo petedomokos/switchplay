@@ -91,8 +91,17 @@ export default function cardsVisComponent() {
         //@todo - replace the above with a quadratic function s.t. the total of the 4 incs is horizSpaceForIncs
 
         //placed cards
-        placedCardWidth = d3.min([60, cardsAreaWidth * 0.8]); //ensure there is some gap between placed cards
-        placedCardHeight = placedCardWidth / cardAspectRatio;
+        const maxPlacedCardHeight = placedCardsAreaHeight * 0.8;
+        const maxPlacedCardWidth = d3.min([60, (cardsAreaWidth/5) * 0.8]); //ensure there is some gap between placed cards
+        
+        const potentialPlacedCardHeight = maxPlacedCardWidth / cardAspectRatio;
+        if(potentialPlacedCardHeight <= maxPlacedCardHeight){
+            placedCardWidth = maxPlacedCardWidth;
+            placedCardHeight = potentialPlacedCardHeight;
+        }else{
+            placedCardWidth = maxPlacedCardHeight * cardAspectRatio;
+            placedCardHeight = maxPlacedCardHeight;
+        }
         placedCardHorizGap = (cardsAreaWidth - 5 * placedCardWidth) / 4;
         placedCardMarginVert = (placedCardsAreaHeight - placedCardHeight)/2;
     }
@@ -320,7 +329,6 @@ export default function cardsVisComponent() {
                             update(data);
                         })
                         .onClick(function(e,d){
-                            console.log("onClick", d)
                             //hide/show others
                             containerG.selectAll("g.card").filter(dat => dat.id !== d.id)
                                 .attr("pointer-events", d.isSelected ? null : "none")
