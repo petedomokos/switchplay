@@ -1,12 +1,10 @@
 import * as d3 from 'd3';
 import { grey10, COLOURS } from "./constants";
 import cardStackComponent from './cardStackComponent';
-import dragEnhancements from '../journey/enhancedDragHandler';
 import { updateRectDimns } from '../journey/transitionHelpers';
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
 
 const { GOLD } = COLOURS;
-console.log("gold.......................", GOLD)
 
 const transformTransition = { update: { duration: 1000 } };
 
@@ -132,9 +130,6 @@ export default function cardsVisComponent() {
 
     let format;
 
-    const drag = d3.drag();
-    const enhancedDrag = dragEnhancements();
-
     let setReactComponent = function(){};
 
     let containerG;
@@ -165,9 +160,6 @@ export default function cardsVisComponent() {
                 containerG.append("rect").attr("class", "cards-vis-bg")
                     .attr("fill", "transparent");
                 contentsG = containerG.append("g").attr("class", "cards-vis-contents");
-                contentsG.append("rect")
-                    .attr("class", "cards-vis-contents-bg")
-                    .attr("fill", "transparent");
 
                 topSpaceG = contentsG
                     .append("g")
@@ -187,8 +179,7 @@ export default function cardsVisComponent() {
 
                 cardsG = contentsG
                     .append("g")
-                    .attr("class", "cards")
-                    .style("cursor", "pointer");
+                    .attr("class", "cards");
 
                 cardsG.append("rect")
                     .attr("class", "cards-bg")
@@ -270,22 +261,6 @@ export default function cardsVisComponent() {
                         transition:transformTransition
                     })
 
-                enhancedDrag
-                    .onLongpressStart(function(e, d){ })
-                    .onLongpressDragged(longpressDragged);
-                
-                function longpressDragged(e){}
-                
-                drag
-                    .on("start", enhancedDrag(dragStart))
-                    .on("drag", enhancedDrag(dragged))
-                    .on("end", enhancedDrag(dragEnd));
-
-                //dragging
-                function dragStart(e,d){}
-                function dragged(e,d){}
-                function dragEnd(e,d){}
-
                 //selected card dimns
                 //if cardsareaaspectratio is smaller, it means its narrower than the cards,
                 //so in that case we use the cardsAreaWidth as the marker
@@ -345,6 +320,7 @@ export default function cardsVisComponent() {
                             update(data);
                         })
                         .onClick(function(e,d){
+                            console.log("onClick", d)
                             //hide/show others
                             containerG.selectAll("g.card").filter(dat => dat.id !== d.id)
                                 .attr("pointer-events", d.isSelected ? null : "none")

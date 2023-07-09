@@ -92,13 +92,17 @@ export default function cardStackComponent() {
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
                 .dragThreshold(100)
+                /*
                 .onClick(function(e,d){
+                    console.log("cardClicked", d)
                     if(lineClicked){
+                        console.log("lineClicked...")
                         lineClicked = false;
                         return;
                     }
                     onClick.call(this, e, d);
                 })
+                */
                 .onLongpressStart(longpressStart)
                 .onLongpressDragged(longpressDragged)
                 .onLongpressEnd(longpressEnd);
@@ -234,13 +238,15 @@ export default function cardStackComponent() {
                             .datum(d.itemsData)
                             .call(cardItems)
                     })
+                    .on("click", function(e,d){
+                        onClick.call(this, e, d)
+                    })
                     .call(drag)
   
             //EXIT
             cardG.exit().call(remove);
 
             function dragStart(e , d){
-                console.log("ds")
                 //onDragStart.call(this, e, d)
             }
             let swipeTriggered = false;
@@ -258,7 +264,9 @@ export default function cardStackComponent() {
             }
 
             function dragEnd(e, d){
-                if(enhancedDrag.isClick()) { return; }
+                if(enhancedDrag.isClick()) {
+                    return; 
+                }
                 //reset
                 swipeTriggered = false;
                 //onDragEnd.call(this, e, d);
