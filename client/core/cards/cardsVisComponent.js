@@ -59,13 +59,14 @@ export default function cardsVisComponent() {
     let horizCardInc;
 
     function updateDimns(){
+        console.log("height", height)
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
         cardsAreaWidth = contentsWidth;
         topSpaceHeight = contentsHeight * 0.1;
-        cardsAreaHeight = contentsHeight * 0.8;
-        botSpaceHeight = contentsHeight * 0.1;
+        cardsAreaHeight = contentsHeight * 0.9;
+        botSpaceHeight = 0;// contentsHeight * 0.1;
         //this aspectRatio is only needed to aid with selecting a card to takeover entire area
         cardsAreaAspectRatio = cardsAreaWidth/cardsAreaHeight;
 
