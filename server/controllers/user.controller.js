@@ -140,6 +140,47 @@ const list = async (req, res) => {
   }
 }
 
+const createStack = async (req, res) => {
+  console.log('creating stack for.....', req.user._id)
+  return res.status(400)
+  /*let journey = req.journey;
+  //console.log("req journey", journey)
+  //console.log("body", req.body)
+  journey = extend(journey, req.body);
+  journey.updated = Date.now()
+  ///console.log("extended journey", journey.profiles.map(p => p.date))
+  try {
+    const result = await journey.save()
+    //console.log("res", result)
+    res.json(result)
+  } catch (err) {
+    return res.status(400).json({
+      error: errorHandler.getErrorMessage(err)
+    })
+  }
+  */
+}
+const updateStack = async (req, res) => {
+  console.log('updating stack for.....', req.user._id)
+  return res.status(400)
+  /*let journey = req.journey;
+  //console.log("req journey", journey)
+  //console.log("body", req.body)
+  journey = extend(journey, req.body);
+  journey.updated = Date.now()
+  ///console.log("extended journey", journey.profiles.map(p => p.date))
+  try {
+    const result = await journey.save()
+    //console.log("res", result)
+    res.json(result)
+  } catch (err) {
+    return res.status(400).json({
+      error: errorHandler.getErrorMessage(err)
+    })
+  }
+  */
+}
+
 const update = async (req, res) => {
   console.log('updating user....................')
   let form = new formidable.IncomingForm()
@@ -278,6 +319,8 @@ export default {
   list,
   remove,
   update,
+  createStack,
+  updateStack,
   photos,
   photo,
   defaultPhoto

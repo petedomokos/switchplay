@@ -4,6 +4,7 @@ export const InitialState = {
 	//but when creating a new user or group, they dont need to go into other.
 	user:{
 		settings:{},
+		stacks:[],
 		administeredUsers:[],
 		administeredGroups:[],
 		administeredDatasets:[],
@@ -18,7 +19,9 @@ export const InitialState = {
 			datasets:''
 		},
 		journeys:[],
-		homeJourney:""
+		homeJourney:"",
+		photos:[],
+		
 	},
 	asyncProcesses:{
 		error:{

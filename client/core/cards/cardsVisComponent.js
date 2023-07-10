@@ -124,36 +124,11 @@ export default function cardsVisComponent() {
     }
     let _styles = () => DEFAULT_STYLES;
 
-
     let frontCardNr = 0; //0 is the first card of 5
-    let allItemsProgressData = [
-        [2,2,2,1,0],
-        [2,1,2,1,0],
-        [2,1,0,0,0],
-        [0,0,0,0,0],
-        [0,0,0,0,0]
-    ];
-
-    const itemsDataLayout = allItemsProgressData => 
-        allItemsProgressData.map((itemsProgressData,i) =>
-            itemsProgressData.map((progressStatus, j) => 
-                ({ cardNr:i, itemNr:j, progressStatus })))
-    
-
-    const calcCardProgressStatus = items => {
-        if(items.filter(it => it.progressStatus !== 2).length === 0){ return 2; }
-        if(items.filter(it => it.progressStatus !== 2).length <= 2) { return 1; }
-        return 0;
-    }
-    const calcCardsProgressStatus = cards => {
-        if(cards.filter(c => c.progressStatus !== 2).length === 0){ return 2; }
-        if(cards.filter(c => c.progressStatus !== 2).length <= 2) { return 1; }
-        return 0;
-    }
-
     let format;
 
     let setReactComponent = function(){};
+    let updateItemStatus = function(){};
 
     let containerG;
     let contentsG;
@@ -168,7 +143,7 @@ export default function cardsVisComponent() {
 
         updateDimns();
         // expression elements
-        selection.each(function (data) {
+        selection.each(function (stackData) {
             containerG = d3.select(this)
                 .attr("width", width)
                 .attr("height", height);
@@ -177,7 +152,7 @@ export default function cardsVisComponent() {
                 init();
             }
 
-            update(data);
+            update(stackData);
 
             function init(){
                 containerG.append("rect").attr("class", "cards-vis-bg")
@@ -207,36 +182,30 @@ export default function cardsVisComponent() {
                 cardsG.append("rect")
                     .attr("class", "cards-bg")
                     .attr("fill", "transparent")
-                    .attr("stroke", "yellow")//none");
+                    .attr("stroke", "none");
 
                 cardsG.append("rect").attr("class", "placed-cards-bg")
-                    .attr("stroke", "white")
+                    .attr("stroke", "none")
                     .attr("fill", "none")
             }
 
-            function update(data, options={}){
+            function update(stackData, options={}){
                 const { } = options;
+                //console.log("update stackData", stackData)
                 //dimns for specific chart
-                const allItemsData = itemsDataLayout(allItemsProgressData);
-                //console.log("allItemsData", allItemsData)
-                const cardsData = data
+                const cardsData = stackData.cards
                     .map((card,i) => { 
-                        const cardNr = data.length - 1 - i;
+                        const { cardNr } = card;
                         return {
                             ...card,
-                            cardNr,
                             handPos:cardNr - frontCardNr,
                             isFront:cardNr === frontCardNr,
                             isNext:cardNr - 1 === frontCardNr,
                             isSecondNext:cardNr - 2 === frontCardNr,
                             isHeld:cardNr >= frontCardNr,
-                            itemsData:allItemsData[cardNr],
-                            progressStatus:calcCardProgressStatus(allItemsData[cardNr])
                         }
                     });
-                
-                const cardsProgressStatus = calcCardsProgressStatus(cardsData);
-                const selectedCard = cardsData.find(c => c.isSelected)
+                //console.log("cardsData", cardsData)
 
                 //gs
                 contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
@@ -274,8 +243,9 @@ export default function cardsVisComponent() {
                     .attr("stroke", "none");
 
 
+                //console.log("stackData status", stackData.status)
                 progressSummaryG.select("path")
-                    .attr("fill", cardsProgressStatus === 2 ? GOLD : (cardsProgressStatus === 1 ? grey10(2) : grey10(6)))
+                    .attr("fill", stackData.status === 2 ? GOLD : (stackData.status === 1 ? grey10(2) : grey10(6)))
 
                 cardsG
                     .select("rect.cards-bg")
@@ -329,18 +299,10 @@ export default function cardsVisComponent() {
                             return heldCardsAreaHeight + placedCardMarginVert;;
                         })
                         .onLineClick(function(e,d){
-                            const { cardNr, itemNr, progressStatus } = d;
+                            const { cardNr, itemNr, status } = d;
                             //new status - todo - use mod 2
-                            const newProgressStatus = progressStatus === 0 ? 1 : (progressStatus === 1 ?  2 : 0)
-                            allItemsProgressData = allItemsProgressData
-                                .map((cardItemsData,i) => {
-                                    if(i !== cardNr) { return cardItemsData; }
-                                    return cardItemsData.map((progressStatus,j) => {
-                                        if(j !== itemNr) { return progressStatus; }
-                                        return newProgressStatus;
-                                    })
-                                })
-                            update(data);
+                            const newStatus = status === 0 ? 1 : (status === 1 ?  2 : 0)
+                            updateItemStatus(cardNr, itemNr, newStatus)
                         })
                         .onClick(function(e,d){
                             //hide/show others
@@ -350,27 +312,22 @@ export default function cardsVisComponent() {
                                 .duration(200)
                                     .attr("opacity", d.isSelected ? 1 : 0)
 
-                            //todo next - sort out the confusion between data and cardsData... this use of i
-                            //is causing issues, when we use cardsdata below, teh selecion works but the 
-                            //opacities of 5th card is not 0. and then they all become about 0.6!
-
-                            //need to simplify the data processing, using layout instead of this component to label 
-                            //cardNr, and using cardNr instead of i so its clear. and then just thinking it through
-                            const newData = cardsData.map((dat,i) => ({ 
+                            const newCards = stackData.cards.map((dat,i) => ({ 
                                 ...dat,
                                 statusChanging:dat.id === d.id,
                                 isSelected:dat.id === d.id ? !dat.isSelected : dat.isSelected
                             }))
-                            update(newData);
+                            update({ ...stackData, cards:newCards });
                         })
                         .onPickUp(function(d){
                             const prevActiveCardNr = frontCardNr;
                             frontCardNr = d.cardNr;
 
-                            update(data.map((dat,i) => ({ 
+                            const newCards = stackData.cards.map((dat,i) => ({ 
                                 ...dat,
-                                statusChanging:dat.cardNr < prevActiveCardNr && data.cardNr >= frontCardNr
-                            })));
+                                statusChanging:dat.cardNr < prevActiveCardNr && stackData.cardNr >= frontCardNr
+                            }))
+                            update({ ...stackData, cards:newCards });
                         })
                         .onPutDown(function(d){
                             if(d.isSelected){
@@ -381,11 +338,13 @@ export default function cardsVisComponent() {
                             }
                             const prevActiveCardNr = frontCardNr;
                             frontCardNr = d.cardNr + 1;
-                            update(data.map((dat,i) => ({ 
+
+                            const newCards = stackData.cards.map((dat,i) => ({ 
                                 ...dat, 
-                                statusChanging:data.cardNr >= prevActiveCardNr && data.cardNr < frontCardNr,
+                                statusChanging:stackData.cardNr >= prevActiveCardNr && stackData.cardNr < frontCardNr,
                                 isSelected:false
-                            })));
+                            }))
+                            update({ ...stackData, cards:newCards });
                         })) 
 
             }
@@ -419,6 +378,11 @@ export default function cardsVisComponent() {
     cardsVis.format = function (value) {
         if (!arguments.length) { return format; }
         format = value;
+        return cardsVis;
+    };
+    cardsVis.updateItemStatus = function (value) {
+        if (!arguments.length) { return updateItemStatus; }
+        updateItemStatus = value;
         return cardsVis;
     };
     cardsVis.setReactComponent = function (value) {

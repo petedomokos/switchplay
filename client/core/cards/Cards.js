@@ -3,13 +3,13 @@ import * as d3 from 'd3';
 import { makeStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
 //import {  } from './constants';
-import cardsLayout from './cardsLayout';
+import cardStacksLayout from './cardStacksLayout';
 import cardsVisComponent from "./cardsVisComponent";
 import { sortAscending } from '../../util/ArrayHelpers';
+import { initStack } from '../../data/cards';
 //import { createId } from './helpers';
- import { mockCards } from './mockCards';
+
 import { grey10 } from './constants';
-import { mergeClasses } from '@material-ui/styles';
 
 const instructions = [
   { keyPhrase:"Swipe a card down", rest:" to put it down" },
@@ -64,13 +64,15 @@ const useStyles = makeStyles((theme) => ({
 
 }))
 
-const Cards = ({ user, data, datasets, asyncProcesses, screen }) => {
-  const { } = data;
-  //console.log("Cards user", user)
+const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen, save }) => {
+  //we dont user defaultProps as we want to pass through userId too
+  const stacksData = data && data.length !== 0 ? data : [initStack(user?._id)];
+  const activeStack = stacksData.find(s => s.id === customActiveStack) || stacksData[0];
+  console.log("Cards", stacksData)
   //console.log("screen", screen)
 
   const [showInstructions, setShowInstructions] = useState(true);
-  const [layout, setLayout] = useState(() => cardsLayout());
+  const [layout, setLayout] = useState(() => cardStacksLayout());
   const [cards, setCards] = useState(() => cardsVisComponent());
 
   let styleProps = {
@@ -83,16 +85,12 @@ const Cards = ({ user, data, datasets, asyncProcesses, screen }) => {
   const stringifiedData = JSON.stringify(data);
 
   useEffect(() => {
-    //console.log("uE layout-------------")
-    if(asyncProcesses.creating.datapoints){ 
-      //saving datapoint so dont update
-      return; 
-    }
+    //for now, just use active stack
+    //const orderedCardsData = sortAscending(activeStack.cards, d => d.date);
 
-    //profiles go before contracts of same date
-    const orderedData = sortAscending(data.cards, d => d.date);
-
-    d3.select(containerRef.current).datum(layout(orderedData))
+    const processedStacksData = layout(stacksData);
+    //just use first stack for now
+    d3.select(containerRef.current).datum(processedStacksData[0])
 
   }, [stringifiedData])
 
@@ -100,6 +98,7 @@ const Cards = ({ user, data, datasets, asyncProcesses, screen }) => {
     cards
       .width(screen.width || 300)
       .height(screen.height || 600)
+      .updateItemStatus(updateItemStatus)
 
   }, [stringifiedData, screen])
 
@@ -124,14 +123,43 @@ const Cards = ({ user, data, datasets, asyncProcesses, screen }) => {
           .on("end", () => { setShowInstructions(false); });
   }
 
+  const updateStack = useCallback(updatedStack => {
+    console.log("updateStack", updatedStack)
+    //const updatedStackData = stacksData.map(s => s.id !== updatedStack.id ? s : updatedStack);
+    //save(user._id, updatedStackData);
+    save(updatedStack);
+  }, [stringifiedData]);
+
+  const updateCard = useCallback((updatedCard) => {
+    console.log("updateCard", updatedCard)
+    const updatedCards = activeStack.cards.map(c => c.cardNr !== updatedCard.cardNr ? c : updatedCard);
+    updateStack({ ...activeStack, cards:updatedCards })
+  }, [stringifiedData]);
+
+  const updateItemTitle = useCallback((cardNr, itemNr, updatedTitle) => {
+    console.log("updateTitle", cardNr, itemNr, updatedTitle)
+    const cardToUpdate = activeStack.cards.find(c => c.cardNr === cardNr);
+    const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title: updatedTitle }));
+    updateCard({ ...cardToUpdate, items:updatedItems })
+  }, [stringifiedData]);
+
+  const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
+    console.log("updateItemStatus", cardNr, itemNr, updatedStatus)
+    const cardToUpdate = activeStack.cards.find(c => c.cardNr === cardNr);
+    const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, status: updatedStatus }));
+    //next - update it in store, with no persistance, and then persist
+    //then next after that, do the titles/react inputs
+    updateCard({ ...cardToUpdate, items:updatedItems })
+  }, [stringifiedData]);
+
   return (
     <div className={`cards-root ${classes.root}`}>
       <div className={classes.instructionsSection} ref={instructionsRef}
         style={{display:showInstructions ? null : "none"}}>
         <div className={classes.instructionsTitle}>How To Play</div>
         <div className={classes.instructions}>
-          {instructions.map(ins => 
-              <p className={classes.instruction}>
+          {instructions.map((ins,i) => 
+              <p className={classes.instruction} key={`ins-${i}`}>
                 <span className={classes.keyPhrase}>{ins.keyPhrase}</span>
                 {ins.rest}
               </p>
@@ -152,9 +180,6 @@ const Cards = ({ user, data, datasets, asyncProcesses, screen }) => {
 }
 
 Cards.defaultProps = {
-  data: {
-    cards:mockCards
-  },
   asyncProcesses:{},
   datasets: [], 
   screen: {}

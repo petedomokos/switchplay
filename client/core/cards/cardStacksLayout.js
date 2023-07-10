@@ -1,30 +1,30 @@
 import * as d3 from 'd3';
+import cardsLayout from "./cardsLayout";
 
-const calcCardStatus = items => {
-    if(items.filter(it => it.status !== 2).length === 0){ return 2; }
-    if(items.filter(it => it.status !== 2).length <= 2) { return 1; }
+const calcStackStatus = cards => {
+    if(cards.filter(c => c.info.status !== 2).length === 0){ return 2; }
+    if(cards.filter(c => c.info.status !== 2).length <= 2) { return 1; }
     return 0;
 }
 
-export default function cardsLayout(){
+export default function cardStacksLayout(){
     let datasets = [];
     let info = {};
     let format = "profiles";
 
-    function update(cardsData){
-        const _data = cardsData.map((c,i) => {
-            const { cardNr, title, date, items } = c;
-            return {
-                ...c,
-                items:c.items.map(it => ({ ...it, cardNr })),
-                info:{ 
-                    ...info,
-                    date,
-                    title,
-                    status:calcCardStatus(items)
-                },
-            }
+    const _cardsLayout = cardsLayout();
+
+    function update(stacksData){
+        const _data = stacksData.map((s,i) => {
+            const { cards } = s;
+            const processedCards = _cardsLayout(cards);
+                return {
+                    ...s,
+                    cards:processedCards,
+                    status:calcStackStatus(processedCards)
+                }
         })
+
         if(_data[0] && _data[0].cardNr !== _data.length){
             //hasnt been reversed yet
             return _data.reverse();

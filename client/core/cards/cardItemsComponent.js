@@ -99,7 +99,7 @@ export default function cardItemsComponent() {
             contentsG.select("rect.card-items-contents-bg")
                 .attr("width", contentsWidth)
                 .attr("height", contentsHeight)
-                .attr("fill","yellow")// "none")
+                .attr("fill", "none")
 
             const centreG = contentsG.select("g.centre")
                 .attr("transform", `translate(${contentsWidth/2},${contentsHeight/2})`);
@@ -172,7 +172,7 @@ export default function cardItemsComponent() {
                         if(d.title){
                             text = truncateIfNecc(d.title);
                         } else {
-                            text = `${shouldTruncate ? "Goal" : "Goal/Task"} ${i + 1}`;
+                            text = `Item ${d.itemNr + 1}`;
                         }
 
                         //text

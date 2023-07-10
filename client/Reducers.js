@@ -9,6 +9,7 @@ import { hydrateUser, hydrateUsers } from './user/userHelpers';
 
 //STORE
 export const user = (state=InitialState.user, act) =>{
+	console.log("useract", act)
 	switch(act.type){
 		//SIGNED IN USER
 		case C.SIGN_IN:{
@@ -40,14 +41,35 @@ export const user = (state=InitialState.user, act) =>{
 			return InitialState.user;
 		}
 		case C.UPDATE_SIGNEDIN_USER:{
+			const updatedUserPhotos = act.user.photos || [];
+			const updatedUserJourneys = act.user.journeys || [];
 			//note, photos and journeys arrays from server are always present but may not be complete, and may be empty
-			const otherPhotos = state.photos.filter(p => !act.user.photos.find(ph => ph._id === p._id));
-			const mergedPhotos = [...otherPhotos, ...act.user.photos];
-			const otherJourneys = state.journeys.filter(j => !act.user.journeys.find(jo => jo._id === j._id));
-			const mergedJourneys = [...otherJourneys, ...act.user.journeys];
+			const otherPhotos = state.photos.filter(p => !updatedUserPhotos.find(ph => ph._id === p._id));
+			const mergedPhotos = [...otherPhotos, ...updatedUserPhotos];
+			const otherJourneys = state.journeys.filter(j => !updatedUserJourneys.find(jo => jo._id === j._id));
+			const mergedJourneys = [...otherJourneys, ...updatedUserJourneys];
 			//this doesnt update administered users or groups, just basic details eg name, email,...
 			//aswell as photos and journeys
 			return { ...state, ...act.user, photos:mergedPhotos, journeys:mergedJourneys };
+		}
+		case C.CREATE_STACK:{
+			return {
+				...state,
+				//remove any temp stack that was created before the new stack was saved
+				stacks:[...state.stacks.filter(s => s.id !== "temp"), act.stack]
+			};
+		}
+		case C.UPDATE_STACK:{
+			return {
+				...state,
+				stacks:state.stacks.map(s => s.id !== act.stack.id ? s : ({ ...s, ...act.stack }))
+			};
+		}
+		case C.DELETE_STACK:{
+			return {
+				...state,
+				stacks:state.stacks.filter(s => s.id !== act.stackId)
+			};
 		}
 		case C.SAVE_JOURNEY:{
 			//const { journey } = act;

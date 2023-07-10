@@ -5,16 +5,25 @@ import auth from '../auth/auth-helper'
 import { signout } from './AuthActions.js';
 import { transformJourneyForClient } from "./JourneyActions"
 
+export const transformStackForClient = serverStack => {
+	return {
+		...serverStack,
+		id:serverStack._id
+	}
+}
+
+
 export const transformUserForClient = serverUser => {
 	console.log("transformUserForClient", serverUser)
-	const { journeys=[], photos=[] } = serverUser;
+	const { journeys=[], photos=[], stacks=[] } = serverUser;
 	const hydratedPhotos = photos.map(p => ({ ...p, added: new Date(p.added) }))
 	//@todo - check will we ever use this for updating journeys? I dont think we need it 
 	const hydratedJourneys = journeys.map(j => transformJourneyForClient(j))
 	return {
 		...serverUser,
 		photos:hydratedPhotos,
-		journeys:hydratedJourneys
+		journeys:hydratedJourneys,
+		stacks:stacks.map(s => transformStackForClient(s))
 	}
 }
 
@@ -104,6 +113,55 @@ export const updateUser = (id, formData, history) => dispatch => {
 		)
 	//}, 2000)
 }
+
+
+export const createStack = stack => dispatch => {
+	const jwt = auth.isAuthenticated();
+	//console.log("createStack", stack)
+	if(!jwt.user) {
+		console.log("no user signed in")
+		//todo - save to store anyway - note stack id will be "temp" and it wont have userId
+		dispatch({ type:C.CREATE_STACK, stack });
+		return;
+	}
+
+	fetchThenDispatch(dispatch, 
+		'updating.user',
+		{
+			url: `/api/users/${jwt.user._id}/stacks`,
+			method: 'POST',
+			body:JSON.stringify(stack),
+			requireAuth:true,
+			nextAction: data => {
+				return { type:C.CREATE_STACK, stack:transformStackForClient(data) }
+			}
+		}
+	)
+}
+
+export const updateStack = stack => dispatch => {
+	const jwt = auth.isAuthenticated();
+	if(!jwt.user) {
+		console.log("no user signed in")
+		dispatch({ type:C.UPDATE_STACK, stack });
+		return;
+	}
+
+	fetchThenDispatch(dispatch, 
+		'updating.user',
+		{
+			url: `/api/users/${jwt.user._id}/stacks`,
+			method: 'PUT',
+			body:JSON.stringify(stack),
+			requireAuth:true,
+			nextAction: data => {
+				return { type:C.UPDATE_STACK, stack:transformStackForClient(data)};
+			}
+		}
+	)
+}
+
+
 export const deleteUserAccount = (id, history) => dispatch => {
 	fetchThenDispatch(dispatch, 
 		'deleting.user',

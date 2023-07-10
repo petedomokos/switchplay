@@ -88,6 +88,7 @@ export default function cardStackComponent() {
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
         updateDimns();
         selection.each(function (data) {
+            //console.log("data", data)
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
@@ -96,7 +97,6 @@ export default function cardStackComponent() {
                 .onClick(function(e,d){
                     console.log("cardClicked", d)
                     if(lineClicked){
-                        console.log("lineClicked...")
                         lineClicked = false;
                         return;
                     }
@@ -113,7 +113,7 @@ export default function cardStackComponent() {
                 .on("end", enhancedDrag(dragEnd))
 
             const getCardFill = d => { 
-                const { isSelected, isFront, isNext, isSecondNext, progressStatus } = d;
+                const { isSelected, isFront, isNext, isSecondNext, status } = d;
                 if(isFront || isSelected){ return grey10(3); }
                 if(isNext){ return grey10(5); }
                 if(isSecondNext){ return "#989898"; }
@@ -121,21 +121,23 @@ export default function cardStackComponent() {
             };
 
             const getProgressStatusFill = d => { 
-                const { isSelected, isFront, isNext, isSecondNext, progressStatus } = d;
+                const { isSelected, isFront, isNext, isSecondNext, info } = d;
+                const { status } = info;
+
                 if(isFront || isSelected){ 
-                    return progressStatus === 2 ? GOLD : (progressStatus === 1 ? grey10(1) : grey10(2)) 
+                    return status === 2 ? GOLD : (status === 1 ? grey10(1) : grey10(2)) 
                 }
                 if(isNext){ 
-                    return progressStatus === 2 ? GOLD : (progressStatus === 1 ? grey10(2) : grey10(4))
+                    return status === 2 ? GOLD : (status === 1 ? grey10(2) : grey10(4))
                 }
                 if(isSecondNext){ 
-                    return progressStatus === 2 ? GOLD : (progressStatus === 1 ? grey10(2) : "#B0B0B0") //4.5 
+                    return status === 2 ? GOLD : (status === 1 ? grey10(2) : "#B0B0B0") //4.5 
                 }
                 if(d.isHeld){
-                    return progressStatus === 2 ? GOLD : (progressStatus === 1 ? grey10(2) : grey10(5))
+                    return status === 2 ? GOLD : (status === 1 ? grey10(2) : grey10(5))
                 }
                 //its placed
-                return progressStatus === 2 ? GOLD : (progressStatus === 1 ? grey10(2) : grey10(5))
+                return status === 2 ? GOLD : (status === 1 ? grey10(2) : grey10(5))
             };
 
 
@@ -190,13 +192,13 @@ export default function cardStackComponent() {
                         transition:transformTransition.update 
                     })
                     .each(function(d,i){
-                        const { isHeld, isSelected, info, progressStatus } = d;
+                        const { isHeld, isFront, isSelected, info, status, items } = d;
                         //components
                         const cardInfo = cardInfoComponents[d.id]
                             .width(contentsWidth)
                             .height(infoHeight)
                             .styles({
-                                progressStatusFill:getProgressStatusFill(d),
+                                statusFill:() => getProgressStatusFill(d),
                                 trophyTranslate:isHeld || isSelected ? 
                                     "translate(-3,3) scale(0.25)" : "translate(-45,3) scale(0.6)"
                             })
@@ -208,14 +210,14 @@ export default function cardStackComponent() {
                                 lineStrokeWidth: isHeld || isSelected ? 5 : 10,
                                 _lineStroke:(lineD,i) => {
                                     if(isHeld || isSelected){
-                                        return lineD.progressStatus === 2 ? GOLD : (lineD.progressStatus === 1 ? grey10(2) : "#989898")
+                                        return lineD.status === 2 ? GOLD : (lineD.status === 1 ? grey10(2) : "#989898")
                                     }
-                                    return lineD.progressStatus === 2 ? GOLD : (lineD.progressStatus === 1 ? grey10(2) : grey10(6))
+                                    return lineD.status === 2 ? GOLD : (lineD.status === 1 ? grey10(2) : grey10(6))
                                 }
                             })
                             .width(contentsWidth)
                             .height(itemsAreaHeight)
-                            .withLabels(isHeld || isSelected)
+                            .withLabels((isHeld && isFront) || isSelected)
                             .onClick(function(e,clickedD){
                                 if(!isHeld && !isSelected) { return; }
                                 lineClicked = true;
@@ -235,17 +237,17 @@ export default function cardStackComponent() {
                         contentsG.select("rect.info-bg")
                             .attr("width", contentsWidth)
                             .attr("height", infoHeight)
-                            .attr("fill", "red")
+                            .attr("fill","none")
                         
 
-                        const infoDatum = { ...info, progressStatus };
+                        const infoDatum = { ...info, status };
                         contentsG.selectAll("g.info")
                             .datum(infoDatum)
                             .call(cardInfo);
 
                         contentsG.select("g.items-area")
                             .attr("transform", `translate(0, ${infoHeight})`)
-                            .datum(d.itemsData)
+                            .datum(d.items)
                             .call(cardItems)
                         
                         contentsG.select("rect.items-area-bg")
@@ -254,6 +256,10 @@ export default function cardStackComponent() {
                             .attr("fill", "none")
                     })
                     .on("click", function(e,d){
+                        if(lineClicked){
+                            lineClicked = false;
+                            return;
+                        }
                         onClick.call(this, e, d)
                     })
                     .call(drag)
