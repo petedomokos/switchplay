@@ -59,7 +59,8 @@ export default function cardItemsComponent() {
 
     let withLabels = true;
 ;    //API CALLBACKS
-    let onClick = function(){};
+    let onClickItem = function(){};
+    let onClickLine = function(){};
     let onDblClick = function(){};
     let onMouseover = function(){};
     let onMouseout = function(){};
@@ -154,19 +155,33 @@ export default function cardItemsComponent() {
                             .attr("stroke", grey10(7))
                             .attr("fill", grey10(7));
 
+                        itemG.append("rect").attr("class", "item-hitbox")
+                            .attr("stroke", "none")
+                            .attr("fill", "transparent")
+
                     })
                     .attr("transform", (d,i) => `translate(${itemContentVertices[i][0]}, ${itemContentVertices[i][1]})`)
                     .merge(itemG)
                     .each(function(d, i){
                         const itemG = d3.select(this);
+
                         itemG
                             .transition()
                             .delay(300)
                             .duration(200)
                                 .attr("transform", `translate(${itemContentVertices[i][0]}, ${itemContentVertices[i][1]})`)
+                                .attr("opacity", withLabels ? 1 : 0);
+                        
+                        const shouldTruncate = contentsWidth < 150;
+                        const itemWidth = shouldTruncate ? 50 : contentsWidth * 0.5;
+                        const itemHeight = 40;
+                        itemG.select("rect.item-hitbox")
+                            .attr("x", -itemWidth/2)
+                            .attr("y", -itemHeight/2)
+                            .attr("width", itemWidth)
+                            .attr("height", itemHeight)
 
                         //text
-                        const shouldTruncate = contentsWidth < 150;
                         const truncateIfNecc = text => shouldTruncate ? `${text.slice(0,7)}...` : text;
                         let text;
                         if(d.title){
@@ -178,10 +193,8 @@ export default function cardItemsComponent() {
                         //text
                         itemG.select("text")
                             .text(text)
-                            .transition()
-                                .duration(200)
-                                .attr("opacity", withLabels ? 1 : 0);
                     })
+                    .on("click", function(e,d){ onClickItem.call(this, e, d)})
                     
 
             const chainSectionHitboxLine = centreG.selectAll("line.chain-section-hitbox").data(data);
@@ -195,7 +208,7 @@ export default function cardItemsComponent() {
                         .attr("y2", (d,i) => vertices[i + 1] ? vertices[i+1][1] : vertices[0][1])
                         .attr("stroke", "transparent")
                         .attr("stroke-width", 40)
-                        .on("click", function(e,d){ onClick.call(this, e, d) })
+                        .on("click", function(e,d){ onClickLine.call(this, e, d) })
 
             chainSectionHitboxLine.exit().remove();
 
@@ -246,9 +259,14 @@ export default function cardItemsComponent() {
         withLabels = value;
         return cardItems;
     };
-    cardItems.onClick = function (value) {
-        if (!arguments.length) { return onClick; }
-        onClick = value;
+    cardItems.onClickItem = function (value) {
+        if (!arguments.length) { return onClickItem; }
+        onClickItem = value;
+        return cardItems;
+    };
+    cardItems.onClickLine = function (value) {
+        if (!arguments.length) { return onClickLine; }
+        onClickLine = value;
         return cardItems;
     };
     cardItems.onDblClick = function (value) {

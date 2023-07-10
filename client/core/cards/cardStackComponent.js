@@ -59,7 +59,8 @@ export default function cardStackComponent() {
 
     //API CALLBACKS
     let onClick = function(){};
-    let onLineClick = function(){};
+    let onClickItem = function(){};
+    let onClickLine = function(){};
     let onPickUp = function(){};
     let onPutDown = function(){};
     let onClickInfo = function(){};
@@ -81,7 +82,7 @@ export default function cardStackComponent() {
     let cardInfoComponents = {};
     let cardItemsComponents = {};
 
-    let lineClicked = false;
+    let itemClicked = false;
 
     function cardStack(selection, options={}) {
         //check the height of info, make smaller if necc and create a bottom bar, so the pentagon is in centre
@@ -96,8 +97,8 @@ export default function cardStackComponent() {
                 /*
                 .onClick(function(e,d){
                     console.log("cardClicked", d)
-                    if(lineClicked){
-                        lineClicked = false;
+                    if(itemClicked){
+                        itemClicked = false;
                         return;
                     }
                     onClick.call(this, e, d);
@@ -218,10 +219,15 @@ export default function cardStackComponent() {
                             .width(contentsWidth)
                             .height(itemsAreaHeight)
                             .withLabels((isHeld && isFront) || isSelected)
-                            .onClick(function(e,clickedD){
+                            .onClickItem(function(e,clickedD){
                                 if(!isHeld && !isSelected) { return; }
-                                lineClicked = true;
-                                onLineClick.call(this, e, clickedD);
+                                //itemClicked = true;
+                                onClickItem.call(this, e, clickedD);
+                            })
+                            .onClickLine(function(e,clickedD){
+                                if(!isHeld && !isSelected) { return; }
+                                itemClicked = true;
+                                onClickLine.call(this, e, clickedD);
                             })
                     
                         const contentsG = d3.select(this).select("g.card-contents")
@@ -256,8 +262,8 @@ export default function cardStackComponent() {
                             .attr("fill", "none")
                     })
                     .on("click", function(e,d){
-                        if(lineClicked){
-                            lineClicked = false;
+                        if(itemClicked){
+                            itemClicked = false;
                             return;
                         }
                         onClick.call(this, e, d)
@@ -406,9 +412,14 @@ export default function cardStackComponent() {
         onClick = value;
         return cardStack;
     };
-    cardStack.onLineClick = function (value) {
-        if (!arguments.length) { return onLineClick; }
-        onLineClick = value;
+    cardStack.onClickItem = function (value) {
+        if (!arguments.length) { return onClickItem; }
+        onClickItem = value;
+        return cardStack;
+    };
+    cardStack.onClickLine = function (value) {
+        if (!arguments.length) { return onClickLine; }
+        onClickLine = value;
         return cardStack;
     };
     cardStack.onPickUp = function (value) {

@@ -5,6 +5,7 @@ import Button from '@material-ui/core/Button'
 //import {  } from './constants';
 import cardStacksLayout from './cardStacksLayout';
 import cardsVisComponent from "./cardsVisComponent";
+import ItemForm from "./forms/ItemForm";
 import { sortAscending } from '../../util/ArrayHelpers';
 import { initStack } from '../../data/cards';
 //import { createId } from './helpers';
@@ -53,6 +54,7 @@ const useStyles = makeStyles((theme) => ({
     margin:"25px 5px",
     width:"125px",
     height:"30px",
+    fontSize:"12px",
     color:grey10(2)
 
   },
@@ -61,22 +63,46 @@ const useStyles = makeStyles((theme) => ({
   },
   svg:{
   },
+  formContainer:{
+    position:"absolute",
+    left:"0px",
+    top:"0px",
+    width:props => `${props.form.width}px`,
+    height:props => `${props.form.height}px`,
+    display:props => props.form.display
+  }
 
 }))
+
+// next - position the form properly, need the topSpaceheight and margins so we can get to top left of selected card.
+// may change margins for selected so it expands even more to take entire screen
+// also then decide how to close the form and deselect if it wasnt selected before item was clicked
+// then impl the very basic form properly (just title), and how it saves, inc keyPress
+//also
+//Make a note somewhere for later to consider making it go to a list of all 5 items, as long as keyboard causes it to scroll up 
+//like trello so the one being edited is in screen
+//this way, we can enter 5 items as a list. but we lose the positional meaning of the 5 items eg 4 corner model for FA for example
 
 const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen, save }) => {
   //we dont user defaultProps as we want to pass through userId too
   const stacksData = data && data.length !== 0 ? data : [initStack(user?._id)];
   const activeStack = stacksData.find(s => s.id === customActiveStack) || stacksData[0];
-  console.log("Cards", stacksData)
+  //console.log("Cards", stacksData)
   //console.log("screen", screen)
 
   const [showInstructions, setShowInstructions] = useState(true);
   const [layout, setLayout] = useState(() => cardStacksLayout());
   const [cards, setCards] = useState(() => cardsVisComponent());
+  const [form, setForm] = useState(null);
+  //console.log("Form", form)
 
   let styleProps = {
-    screen
+    screen,
+    form:{ 
+      display: form ? null : "none",
+      width:screen.width || 300,
+      height:screen.height || 600 
+    }
   };
   const classes = useStyles(styleProps) 
   const containerRef = useRef(null);
@@ -99,6 +125,7 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
       .width(screen.width || 300)
       .height(screen.height || 600)
       .updateItemStatus(updateItemStatus)
+      .setForm(setForm)
 
   }, [stringifiedData, screen])
 
@@ -136,12 +163,13 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
     updateStack({ ...activeStack, cards:updatedCards })
   }, [stringifiedData]);
 
-  const updateItemTitle = useCallback((cardNr, itemNr, updatedTitle) => {
-    console.log("updateTitle", cardNr, itemNr, updatedTitle)
+  const updateItemTitle = useCallback(updatedTitle => {
+    console.log("updateTitle", updatedTitle, form)
+    const { cardNr, itemNr } = form.value;
     const cardToUpdate = activeStack.cards.find(c => c.cardNr === cardNr);
     const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title: updatedTitle }));
     updateCard({ ...cardToUpdate, items:updatedItems })
-  }, [stringifiedData]);
+  }, [stringifiedData, form]);
 
   const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
     console.log("updateItemStatus", cardNr, itemNr, updatedStatus)
@@ -150,7 +178,19 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
     //next - update it in store, with no persistance, and then persist
     //then next after that, do the titles/react inputs
     updateCard({ ...cardToUpdate, items:updatedItems })
-  }, [stringifiedData]);
+  }, [stringifiedData, form]);
+
+  //keypresses
+  useEffect(() => {
+    d3.select("body").on("keypress", (e) => {
+      if(e.keyCode === "13" || e.key === "Enter"){
+        e.preventDefault();
+        if(form){
+          setForm(null)
+        }
+      }
+    })
+  }, [form, stringifiedData])
 
   return (
     <div className={`cards-root ${classes.root}`}>
@@ -175,6 +215,12 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
           </filter>
         </defs>
       </svg>
+      {/**form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>*/}
+      <div className={classes.formContainer}>
+          {form?.formType === "item" && 
+            <ItemForm item={form.value} fontSize={form.height * 0.5} save={updateItemTitle} close={() => setForm(null)} />
+          }
+      </div>
     </div>
   )
 }

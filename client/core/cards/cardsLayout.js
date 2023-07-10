@@ -13,10 +13,10 @@ export default function cardsLayout(){
 
     function update(cardsData){
         const _data = cardsData.map((c,i) => {
-            const { cardNr, title, date, items } = c;
+            const { cardNr, title="", date, items } = c;
             return {
                 ...c,
-                items:c.items.map(it => ({ ...it, cardNr })),
+                items:c.items.map(it => ({ ...it, cardNr, title:it.title || "" })),
                 info:{ 
                     ...info,
                     date,

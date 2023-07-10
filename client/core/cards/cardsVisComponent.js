@@ -127,7 +127,7 @@ export default function cardsVisComponent() {
     let frontCardNr = 0; //0 is the first card of 5
     let format;
 
-    let setReactComponent = function(){};
+    let setForm = function(){};
     let updateItemStatus = function(){};
 
     let containerG;
@@ -298,7 +298,8 @@ export default function cardsVisComponent() {
                             }
                             return heldCardsAreaHeight + placedCardMarginVert;;
                         })
-                        .onLineClick(function(e,d){
+                        .onClickItem(function(e,d){ setForm({ formType: "item", value:d }) })  
+                        .onClickLine(function(e,d){
                             const { cardNr, itemNr, status } = d;
                             //new status - todo - use mod 2
                             const newStatus = status === 0 ? 1 : (status === 1 ?  2 : 0)
@@ -385,9 +386,9 @@ export default function cardsVisComponent() {
         updateItemStatus = value;
         return cardsVis;
     };
-    cardsVis.setReactComponent = function (value) {
-        if (!arguments.length) { return setReactComponent; }
-        setReactComponent = value;
+    cardsVis.setForm = function (value) {
+        if (!arguments.length) { return setForm; }
+        setForm = value;
         return cardsVis;
     };
     return cardsVis;
