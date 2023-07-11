@@ -51,8 +51,8 @@ export default function cardStackComponent() {
 
     let transformTransition = { 
         enter: null, 
-        update: { duration:d => d.statusChanging ? 200 : 500,
-            delay:d => d.statusChanging ? 0 : 100,
+        update: { duration:d => 200,// d.statusChanging ? 200 : 500,
+            delay:d => 0,//d => d.statusChanging ? 0 : 100,
             ease:d3.easeQuadInOut
         } 
     };
@@ -149,15 +149,15 @@ export default function cardStackComponent() {
                 return (d.isSelected || d.isHeld ? grey10(5) : grey10(8))
             }
 
-            const cardG = containerG.selectAll("g.card").data(data, d => d.id);
+            const cardG = containerG.selectAll("g.card").data(data, d => d.cardNr);
             cardG.enter()
                 //.insert("g", ":first-child")
                 .append("g")
-                    .attr("class", d => `card card-${d.id}`)
+                    .attr("class", d => `card card-${d.cardNr}`)
                     .attr("opacity", 1)
                     .each(function(d,i){
-                        cardInfoComponents[d.id] = cardInfoComponent();
-                        cardItemsComponents[d.id] = cardItemsComponent();
+                        cardInfoComponents[d.cardNr] = cardInfoComponent();
+                        cardItemsComponents[d.cardNr] = cardItemsComponent();
                         //ENTER
                         const contentsG = d3.select(this).append("g").attr("class", "contents card-contents")
 
@@ -195,7 +195,7 @@ export default function cardStackComponent() {
                     .each(function(d,i){
                         const { isHeld, isFront, isSelected, info, status, items } = d;
                         //components
-                        const cardInfo = cardInfoComponents[d.id]
+                        const cardInfo = cardInfoComponents[d.cardNr]
                             .width(contentsWidth)
                             .height(infoHeight)
                             .styles({
@@ -206,7 +206,7 @@ export default function cardStackComponent() {
                             .fontSizes(fontSizes.info)
                             .onClick(onClickInfo)
 
-                        const cardItems = cardItemsComponents[d.id]
+                        const cardItems = cardItemsComponents[d.cardNr]
                             .styles({ 
                                 lineStrokeWidth: isHeld || isSelected ? 5 : 10,
                                 _lineStroke:(lineD,i) => {
@@ -221,12 +221,16 @@ export default function cardStackComponent() {
                             .withLabels((isHeld && isFront) || isSelected)
                             .onClickItem(function(e,clickedD){
                                 if(!isHeld && !isSelected) { return; }
-                                //itemClicked = true;
+                                console.log("click item")
+                                itemClicked = true;
+                                console.log("set itemClicked to true?", itemClicked)
                                 onClickItem.call(this, e, clickedD);
                             })
                             .onClickLine(function(e,clickedD){
                                 if(!isHeld && !isSelected) { return; }
+                                console.log("click line")
                                 itemClicked = true;
+                                console.log("set itemClicked to true?", itemClicked)
                                 onClickLine.call(this, e, clickedD);
                             })
                     
@@ -262,10 +266,13 @@ export default function cardStackComponent() {
                             .attr("fill", "none")
                     })
                     .on("click", function(e,d){
+                        console.log("cardclick...itemClicked?", itemClicked)
                         if(itemClicked){
+                            console.log("not calling on click")
                             itemClicked = false;
                             return;
                         }
+                        console.log("calling on click")
                         onClick.call(this, e, d)
                     })
                     .call(drag)

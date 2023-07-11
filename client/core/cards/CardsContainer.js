@@ -6,6 +6,8 @@ const mapStateToProps = (state, ownProps) => {
 	//console.log("JourneyContainer..........state.async", state.asyncProcesses)
 	const { asyncProcesses, user, system } = state;
 	const stacks = user?.stacks;
+	console.log("CardsContainer stacks", user.stacks);
+	console.log("active", system.activeStack)
 
 	return{
 		user,

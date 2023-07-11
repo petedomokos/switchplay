@@ -125,6 +125,10 @@ export default function cardsVisComponent() {
     let _styles = () => DEFAULT_STYLES;
 
     let frontCardNr = 0; //0 is the first card of 5
+    let isSelected;
+    let setSelected = card => {
+        isSelected = d => d.nr === card?.cardNr;
+    }
     let format;
 
     let setForm = function(){};
@@ -279,7 +283,7 @@ export default function cardsVisComponent() {
                         .selectedCardWidth(selectedCardWidth)
                         .selectedCardHeight(selectedCardHeight)
                         .x((d,i) => {
-                            if(d.isSelected){
+                            if(isSelected(d)){
                                 //keep it centred
                                 return (cardsAreaWidth - selectedCardWidth)/2;
                             }
@@ -290,7 +294,7 @@ export default function cardsVisComponent() {
                             return d.cardNr * (placedCardWidth + placedCardHorizGap);
                         })
                         .y((d,i) => {
-                            if(d.isSelected){
+                            if(isSelected(d)){
                                 return (cardsAreaHeight - selectedCardHeight)/2;
                             }
                             if(d.isHeld){
@@ -306,46 +310,55 @@ export default function cardsVisComponent() {
                             updateItemStatus(cardNr, itemNr, newStatus)
                         })
                         .onClick(function(e,d){
+                            console.log("onClick card......")
                             //hide/show others
-                            containerG.selectAll("g.card").filter(dat => dat.id !== d.id)
-                                .attr("pointer-events", d.isSelected ? null : "none")
+                            containerG.selectAll("g.card").filter(dat => dat.cardNr !== d.cardNr)
+                                .attr("pointer-events", isSelected(d) ? null : "none")
                                 .transition()
                                 .duration(200)
-                                    .attr("opacity", d.isSelected ? 1 : 0)
+                                    .attr("opacity", isSelected(d) ? 1 : 0)
 
+                            setSelected(d);
+                            update(stackData);
+
+                            /*
                             const newCards = stackData.cards.map((dat,i) => ({ 
                                 ...dat,
-                                statusChanging:dat.id === d.id,
-                                isSelected:dat.id === d.id ? !dat.isSelected : dat.isSelected
-                            }))
+                                //statusChanging:dat.cardNr === d.cardNr,
+                                isSelected:dat.cardNr === d.cardNr ? !dat.isSelected : dat.isSelected
+                            }))*/
                             update({ ...stackData, cards:newCards });
                         })
                         .onPickUp(function(d){
                             const prevActiveCardNr = frontCardNr;
                             frontCardNr = d.cardNr;
-
+                            update(stackData);
+                            /*
                             const newCards = stackData.cards.map((dat,i) => ({ 
                                 ...dat,
-                                statusChanging:dat.cardNr < prevActiveCardNr && stackData.cardNr >= frontCardNr
+                                //statusChanging:dat.cardNr < prevActiveCardNr && stackData.cardNr >= frontCardNr
                             }))
-                            update({ ...stackData, cards:newCards });
+                            update({ ...stackData, cards:newCards });*/
                         })
                         .onPutDown(function(d){
-                            if(d.isSelected){
+                            if(isSelected(d)){
                                 //show other cards as we need to deselect the card too
-                                containerG.selectAll("g.card").filter(dat => dat.id !== d.id)
+                                containerG.selectAll("g.card").filter(dat => dat.cardNr !== d.cardNr)
                                     .attr("pointer-events", null)
                                     .attr("opacity", 1)
                             }
-                            const prevActiveCardNr = frontCardNr;
+                            //const prevActiveCardNr = frontCardNr;
                             frontCardNr = d.cardNr + 1;
-
+                            setSelected(null)
+                            update(stackData);
+                            /*
                             const newCards = stackData.cards.map((dat,i) => ({ 
                                 ...dat, 
-                                statusChanging:stackData.cardNr >= prevActiveCardNr && stackData.cardNr < frontCardNr,
+                                //statusChanging:stackData.cardNr >= prevActiveCardNr && stackData.cardNr < frontCardNr,
                                 isSelected:false
                             }))
                             update({ ...stackData, cards:newCards });
+                            */
                         })) 
 
             }

@@ -28,10 +28,6 @@ export default function kpisLayout(){
             const achieved = values.achieved?.actual;
             const expected = values.expected?.actual;
             const { min, max } = values;
-            //if(shouldLog){
-                //console.log("min", milestoneId, minStandard)
-            //}
-            //console.log("kpi key datasetkey", key, datasetKey)
             //bars
             const currentColour = grey10(7);// "#696969";
             const colours = {
@@ -379,10 +375,6 @@ export default function kpisLayout(){
 
             ];
 
-            //if(milestoneId === "current" && datasetKey === "pressUps"){
-                //console.log("current", current)
-            //}
-
             let getFill = (itemType) => {
                 if(!isNumber(current)){ return colours.currentNoData; }
                 if(orientationFocus === "defence" && itemType === "tooltip"){
@@ -420,10 +412,6 @@ export default function kpisLayout(){
                 withDragValueAbove:true,
                 withInnerValue:false,
             }
-
-            //if(shouldLog){
-                //console.log("id current", milestoneId, current)
-            //}
 
             const tooltipsData = [...scaleTooltipsData, ...comparisonTooltipsData, currentTooltipDatum]
             
@@ -463,8 +451,6 @@ export default function kpisLayout(){
                 stepsNumbersData:[]
             }
         })
-
-        console.log("kpisData", kpisData)
 
         return { kpisData, milestoneId }
     }

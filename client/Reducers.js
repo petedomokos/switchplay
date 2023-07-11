@@ -9,7 +9,6 @@ import { hydrateUser, hydrateUsers } from './user/userHelpers';
 
 //STORE
 export const user = (state=InitialState.user, act) =>{
-	console.log("useract", act)
 	switch(act.type){
 		//SIGNED IN USER
 		case C.SIGN_IN:{
@@ -52,11 +51,19 @@ export const user = (state=InitialState.user, act) =>{
 			//aswell as photos and journeys
 			return { ...state, ...act.user, photos:mergedPhotos, journeys:mergedJourneys };
 		}
+		//this is generally called before new stack is persisted to server
 		case C.CREATE_STACK:{
 			return {
 				...state,
-				//remove any temp stack that was created before the new stack was saved
-				stacks:[...state.stacks.filter(s => s.id !== "temp"), act.stack]
+				stacks:[act.stack, ...state.stacks]
+			};
+		}
+		//this is called after new stack is saved to server
+		case C.UPDATE_NEW_STACK_ID:{
+			return {
+				...state,
+				//replace the temp id (note, other changes could have been made eg more letters typed into title)
+				stacks:state.stacks.map(s => s.id !== "temp" ? s : ({ ...s, id:act.newStackId }))
 			};
 		}
 		case C.UPDATE_STACK:{
@@ -635,6 +642,13 @@ export const system = (state={}, act) => {
 				...state,
 				activeJourney:act._id
 			}
+		}
+		case C.CREATE_STACK:{
+			return { ...state, activeStack:act.stack.id };
+		}
+		case C.UPDATE_NEW_STACK_ID:{
+			//set the created stack as the actice stack so it will still show
+			return { ...state, activeStack:act.newStackId };
 		}
 		default:
 			return state

@@ -151,20 +151,20 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
   }
 
   const updateStack = useCallback(updatedStack => {
-    console.log("updateStack", updatedStack)
+    //console.log("updateStack", updatedStack)
     //const updatedStackData = stacksData.map(s => s.id !== updatedStack.id ? s : updatedStack);
     //save(user._id, updatedStackData);
     save(updatedStack);
   }, [stringifiedData]);
 
   const updateCard = useCallback((updatedCard) => {
-    console.log("updateCard", updatedCard)
+    //console.log("updateCard", updatedCard)
     const updatedCards = activeStack.cards.map(c => c.cardNr !== updatedCard.cardNr ? c : updatedCard);
     updateStack({ ...activeStack, cards:updatedCards })
   }, [stringifiedData]);
 
   const updateItemTitle = useCallback(updatedTitle => {
-    console.log("updateTitle", updatedTitle, form)
+    //console.log("updateTitle", updatedTitle, form)
     const { cardNr, itemNr } = form.value;
     const cardToUpdate = activeStack.cards.find(c => c.cardNr === cardNr);
     const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title: updatedTitle }));
@@ -172,11 +172,9 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
   }, [stringifiedData, form]);
 
   const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
-    console.log("updateItemStatus", cardNr, itemNr, updatedStatus)
+    //console.log("updateItemStatus", cardNr, itemNr, updatedStatus)
     const cardToUpdate = activeStack.cards.find(c => c.cardNr === cardNr);
     const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, status: updatedStatus }));
-    //next - update it in store, with no persistance, and then persist
-    //then next after that, do the titles/react inputs
     updateCard({ ...cardToUpdate, items:updatedItems })
   }, [stringifiedData, form]);
 

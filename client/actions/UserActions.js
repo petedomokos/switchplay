@@ -6,15 +6,31 @@ import { signout } from './AuthActions.js';
 import { transformJourneyForClient } from "./JourneyActions"
 
 export const transformStackForClient = serverStack => {
+	console.log("transformStackForClient", serverStack)
+	const { _id, created, updated, cards, ...clientStack } = serverStack;
+	return {
+		...clientStack,
+		created:new Date(created),
+		updated:updated ? new Date(updated) : null,
+		id:serverStack._id,
+		cards:JSON.parse(cards).map(c => ({
+			...c,
+			date:new Date(c.date),
+		}))
+	}
+}
+
+export const transformStackForServer = clientStack => {
+	const { id, cards, ...serverStack } = clientStack;
 	return {
 		...serverStack,
-		id:serverStack._id
+		cards:JSON.stringify(cards)
 	}
 }
 
 
 export const transformUserForClient = serverUser => {
-	console.log("transformUserForClient", serverUser)
+	//console.log("transformUserForClient", serverUser)
 	const { journeys=[], photos=[], stacks=[] } = serverUser;
 	const hydratedPhotos = photos.map(p => ({ ...p, added: new Date(p.added) }))
 	//@todo - check will we ever use this for updating journeys? I dont think we need it 
@@ -120,39 +136,49 @@ export const createStack = stack => dispatch => {
 	//console.log("createStack", stack)
 	if(!jwt.user) {
 		console.log("no user signed in")
-		//todo - save to store anyway - note stack id will be "temp" and it wont have userId
+		//save to store anyway - stack id will be "temp" and it wont have owner userId
 		dispatch({ type:C.CREATE_STACK, stack });
 		return;
 	}
-
+	const stackWithUserId = { ...stack, owner: jwt.user._id };
+	//save to store
+	dispatch({ type:C.CREATE_STACK, stack:stackWithUserId });
+	//persist
+	const serverStack = transformStackForServer(stackWithUserId);
 	fetchThenDispatch(dispatch, 
 		'updating.user',
 		{
 			url: `/api/users/${jwt.user._id}/stacks`,
 			method: 'POST',
-			body:JSON.stringify(stack),
+			body:JSON.stringify(serverStack),
 			requireAuth:true,
 			nextAction: data => {
-				return { type:C.CREATE_STACK, stack:transformStackForClient(data) }
+				console.log("response data", data)
+				return { type:C.UPDATE_NEW_STACK_ID, newStackId: data._id }
 			}
 		}
 	)
 }
 
 export const updateStack = stack => dispatch => {
+	//console.log("updateStack", stack)
+	//update in store
+	dispatch({ type:C.UPDATE_STACK, stack })
+
 	const jwt = auth.isAuthenticated();
 	if(!jwt.user) {
-		console.log("no user signed in")
-		dispatch({ type:C.UPDATE_STACK, stack });
+		console.log("no user signed in");
 		return;
 	}
+	return;
 
+	const serverStack = transformStackForServer(stack);
 	fetchThenDispatch(dispatch, 
 		'updating.user',
 		{
 			url: `/api/users/${jwt.user._id}/stacks`,
 			method: 'PUT',
-			body:JSON.stringify(stack),
+			body:JSON.stringify(serverStack),
 			requireAuth:true,
 			nextAction: data => {
 				return { type:C.UPDATE_STACK, stack:transformStackForClient(data)};
