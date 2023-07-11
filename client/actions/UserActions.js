@@ -170,7 +170,6 @@ export const updateStack = stack => dispatch => {
 		console.log("no user signed in");
 		return;
 	}
-	return;
 
 	const serverStack = transformStackForServer(stack);
 	fetchThenDispatch(dispatch, 

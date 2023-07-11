@@ -142,11 +142,8 @@ const list = async (req, res) => {
 }
 
 const createStack = async (req, res) => {
-  console.log('creating stack for.....', req.user._id)
-  console.log("body", req.body)
   const { user, body } = req;
   const stack = body;
-  //console.log("new stack...", stack)
   if(!user.stacks){
     console.log("stacks not defined - creating")
     user.stacks = [stack]
@@ -155,11 +152,9 @@ const createStack = async (req, res) => {
     user.stacks = [stack, ...user.stacks]
   }
   console.log("user stacks", user.stacks)
-  //return res.status(400)
   //save it and return the new stack id to replace "temp"
   try {
     const result = await user.save()
-    console.log("res", result)
     //res.json(stack._id) - tdo - replace with this line
     //the one that is added will always be the first one - need the saved version which will have _id
     res.json(result.stacks[0])
@@ -172,23 +167,22 @@ const createStack = async (req, res) => {
 
 const updateStack = async (req, res) => {
   console.log('updating stack for.....', req.user._id)
-  return res.status(400)
-  /*let journey = req.journey;
-  //console.log("req journey", journey)
-  //console.log("body", req.body)
-  journey = extend(journey, req.body);
-  journey.updated = Date.now()
-  ///console.log("extended journey", journey.profiles.map(p => p.date))
+  const { user, body } = req;
+  const stack = body;
+  user.stacks = user.stacks.map(s => s._id !== stack.id ? s : ({ ...s, ...stack }))
+  console.log("user stacks", user.stacks)
+  //save it and return the new stack id to replace "temp"
+  return res.status(200);
   try {
-    const result = await journey.save()
-    //console.log("res", result)
-    res.json(result)
+    const result = await user.save()
+    //res.json(stack._id) - tdo - replace with this line
+    //the one that is added will always be the first one - need the saved version which will have _id
+    res.json(result.stacks[0])
   } catch (err) {
     return res.status(400).json({
       error: errorHandler.getErrorMessage(err)
     })
   }
-  */
 }
 
 const update = async (req, res) => {
