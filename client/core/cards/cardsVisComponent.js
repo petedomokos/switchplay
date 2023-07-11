@@ -244,8 +244,6 @@ export default function cardsVisComponent() {
                     .attr("fill", "transparent")
                     .attr("stroke", "none");
 
-
-                //console.log("stackData status", stackData.status)
                 progressSummaryG.select("path")
                     .attr("fill", stackData.status === 2 ? GOLD : (stackData.status === 1 ? grey10(2) : grey10(6)))
 
@@ -308,7 +306,6 @@ export default function cardsVisComponent() {
                             updateItemStatus(cardNr, itemNr, newStatus)
                         })
                         .onClick(function(e,d){
-                            console.log("onClick card......")
                             //hide/show others
                             containerG.selectAll("g.card").filter(dat => dat.cardNr !== d.cardNr)
                                 .attr("pointer-events", d.isSelected ? null : "none")

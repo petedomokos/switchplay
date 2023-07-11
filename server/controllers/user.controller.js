@@ -168,16 +168,18 @@ const createStack = async (req, res) => {
 const updateStack = async (req, res) => {
   console.log('updating stack for.....', req.user._id)
   const { user, body } = req;
-  const stack = body;
-  user.stacks = user.stacks.map(s => s._id !== stack.id ? s : ({ ...s, ...stack }))
+  const updatedStack = body;
+  updatedStack.updated = Date.now()
+  console.log("updatedstack", updatedStack)
+  console.log("stack id", updatedStack._id)
+  console.log("staskso id", user.stacks[0]._id)
+  console.log("equals??????", user.stacks[0]._id.equals(updatedStack._id))
+  user.stacks = user.stacks.map(s => !s._id.equals(updatedStack._id) ? s : updatedStack);
+  user.updated = Date.now()
   console.log("user stacks", user.stacks)
-  //save it and return the new stack id to replace "temp"
-  return res.status(200);
   try {
-    const result = await user.save()
-    //res.json(stack._id) - tdo - replace with this line
-    //the one that is added will always be the first one - need the saved version which will have _id
-    res.json(result.stacks[0])
+    await user.save()
+    res.json(updatedStack)
   } catch (err) {
     return res.status(400).json({
       error: errorHandler.getErrorMessage(err)

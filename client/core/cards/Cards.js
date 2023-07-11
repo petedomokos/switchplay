@@ -87,10 +87,10 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
   //we dont user defaultProps as we want to pass through userId too
   const stacksData = data && data.length !== 0 ? data : [initStack(user?._id)];
   const activeStack = stacksData.find(s => s.id === customActiveStack) || stacksData[0];
-  //console.log("Cards", stacksData)
+  //console.log("Cards", activeStack)
   //console.log("screen", screen)
 
-  const [showInstructions, setShowInstructions] = useState(true);
+  const [showInstructions, setShowInstructions] = useState(activeStack.id === "temp");
   const [layout, setLayout] = useState(() => cardStacksLayout());
   const [cards, setCards] = useState(() => cardsVisComponent());
   const [form, setForm] = useState(null);
@@ -109,6 +109,10 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
   const instructionsRef = useRef(null);
 
   const stringifiedData = JSON.stringify(data);
+
+  useEffect(() => {
+    setShowInstructions(activeStack.id === "temp");
+  }, [activeStack._id])
 
   useEffect(() => {
     //for now, just use active stack

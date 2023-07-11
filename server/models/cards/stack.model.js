@@ -11,6 +11,7 @@ export default new mongoose.Schema({
   title:String,
   owner:{type:mongoose.Schema.ObjectId, ref:'User'},
   cards:String,
+  frontCardNr:{ type: Number, default: 0 },
   colour:String,
   tags:[String],
   updated: Date,

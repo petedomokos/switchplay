@@ -7,7 +7,7 @@ import { transformJourneyForClient } from "./JourneyActions"
 
 export const transformStackForClient = serverStack => {
 	console.log("transformStackForClient", serverStack)
-	const { _id, created, updated, cards, ...clientStack } = serverStack;
+	const { created, updated, cards, ...clientStack } = serverStack;
 	return {
 		...clientStack,
 		created:new Date(created),

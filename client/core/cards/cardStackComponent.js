@@ -94,16 +94,6 @@ export default function cardStackComponent() {
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
                 .dragThreshold(100)
-                /*
-                .onClick(function(e,d){
-                    console.log("cardClicked", d)
-                    if(itemClicked){
-                        itemClicked = false;
-                        return;
-                    }
-                    onClick.call(this, e, d);
-                })
-                */
                 .onLongpressStart(longpressStart)
                 .onLongpressDragged(longpressDragged)
                 .onLongpressEnd(longpressEnd);
@@ -221,16 +211,12 @@ export default function cardStackComponent() {
                             .withLabels((isHeld && isFront) || isSelected)
                             .onClickItem(function(e,clickedD){
                                 if(!isHeld && !isSelected) { return; }
-                                console.log("click item")
                                 itemClicked = true;
-                                console.log("set itemClicked to true?", itemClicked)
                                 onClickItem.call(this, e, clickedD);
                             })
                             .onClickLine(function(e,clickedD){
                                 if(!isHeld && !isSelected) { return; }
-                                console.log("click line")
                                 itemClicked = true;
-                                console.log("set itemClicked to true?", itemClicked)
                                 onClickLine.call(this, e, clickedD);
                             })
                     
@@ -266,13 +252,10 @@ export default function cardStackComponent() {
                             .attr("fill", "none")
                     })
                     .on("click", function(e,d){
-                        console.log("cardclick...itemClicked?", itemClicked)
                         if(itemClicked){
-                            console.log("not calling on click")
                             itemClicked = false;
                             return;
                         }
-                        console.log("calling on click")
                         onClick.call(this, e, d)
                     })
                     .call(drag)
