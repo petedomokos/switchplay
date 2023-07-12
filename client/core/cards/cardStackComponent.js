@@ -200,7 +200,12 @@ export default function cardStackComponent() {
 
                         const cardItems = cardItemsComponents[d.cardNr]
                             .styles({ 
-                                lineStrokeWidth: isHeld || isSelected ? 0.8 : 5,
+                                _lineStrokeWidth:lineD => {
+                                    if(isHeld || isSelected){
+                                        return lineD.status === 2 ? 5 : (lineD.status === 1 ? 2.5 : 0.8);
+                                    }
+                                    return lineD.status === 2 ? 10 : (lineD.status === 1 ? 5 : 2.5)
+                                },
                                 _lineStroke:(lineD,i) => {
                                     if(isHeld || isSelected){
                                         return lineD.status === 2 ? GOLD : (lineD.status === 1 ? grey10(2) : "#989898")

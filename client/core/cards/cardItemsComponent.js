@@ -40,7 +40,7 @@ export default function cardItemsComponent() {
     }
 
     let styles = {
-        lineStrokeWidth:5,
+        _lineStrokeWidth: () => 5,
         _lineStroke:() => "white"
     }
 

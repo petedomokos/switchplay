@@ -110,7 +110,6 @@ export default function pentagonComponent() {
                                 .attr("y1", innerVertices[i][1])
                                 .attr("x2", outerVertices[i][0])
                                 .attr("y2", outerVertices[i][1])
-                                .attr("stroke-width", styles.lineStrokeWidth)
 
                         //inner line
                         //delay needed so when card swiped the lines dont transition too soon
@@ -123,7 +122,6 @@ export default function pentagonComponent() {
                                 .attr("y1", innerVertices[i][1])
                                 .attr("x2", innerVertices[i + 1] ? innerVertices[i+1][0] : innerVertices[0][0])
                                 .attr("y2", innerVertices[i + 1] ? innerVertices[i+1][1] : innerVertices[0][1])
-                                .attr("stroke-width", styles.lineStrokeWidth)
 
                         //outer line
                         const outerLine = sectionG.select("line.outer");
@@ -135,7 +133,6 @@ export default function pentagonComponent() {
                                 .attr("y1", outerVertices[i][1])
                                 .attr("x2", outerVertices[i + 1] ? outerVertices[i+1][0] : outerVertices[0][0])
                                 .attr("y2", outerVertices[i + 1] ? outerVertices[i+1][1] : outerVertices[0][1])
-                                .attr("stroke-width", styles.lineStrokeWidth)
 
                         //outerLine hitbox
                         /*
@@ -158,6 +155,7 @@ export default function pentagonComponent() {
                             .transition("trans-stroke")
                             .duration(200)
                                 .attr("stroke", styles._lineStroke(d,i))
+                                .attr("stroke-width", styles._lineStrokeWidth(d,i))
 
                         sectionG.selectAll(".show-with-section")
                             .attr("pointer-events", withSections ? null : "none")
