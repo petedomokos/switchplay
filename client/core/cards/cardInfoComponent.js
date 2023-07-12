@@ -166,7 +166,7 @@ export default function profileInfoComponent() {
                                         .append("rect")
                                             .attr("class", "hitbox")
                                             .attr("fill", "transparent")
-                                            .attr("stroke", "black");  
+                                            .attr("stroke", "none");  
                                 })
                                 .merge(progressSummaryG)
                                 .attr("transform", `translate(${dateWidth + titleWidth},${0})`)
@@ -196,29 +196,22 @@ export default function profileInfoComponent() {
                         //DATE
 
                         const format = d3.timeFormat("%_d %b, %y");
-
-                        const dateMargin = 10;
-                        //const fDate = format(data.date);
-                        //if its a single digit day, then remove first space
-
-                        //Next: I changed setting to use latest datapointm nd now this line below causes a bug
-                        //also, manually changing teh setting by oressing btn doesnt work anymore!!
-                        const nrChars = formattedDate => formattedDate[0] === " " ? formattedDate.length - 1 : formattedDate.length;
+                        //const nrChars = formattedDate => formattedDate[0] === " " ? formattedDate.length - 1 : formattedDate.length;
                         //todo- make a pseudo text element and use getComputerTxtlngth, instead of this bodge to make TODAY work
-                        const calcLength = (text, fontSize, isUpperCase=false) =>  nrChars(text) * fontSize * (isUpperCase ? 0.7 : 0.47);
-                        const length = d => {
+                        //const calcLength = (text, fontSize, isUpperCase=false) =>  nrChars(text) * fontSize * (isUpperCase ? 0.7 : 0.47);
+                        /*const length = d => {
                             const text = d.isCurrent ? currentValueDataMethod.selectedLabel() : format(d.date);
                             return calcLength(text, fontSizes.date, d.isCurrent);
-                        }
+                        }*/
                         //date dimns
-                        const horizandVertLength = d => length(d) * Math.sin(Math.PI/4);
-                        const x = d => dateMargin + horizandVertLength(d)/2;
-                        const y = d => dateMargin + horizandVertLength(d)/2;
+                        //const horizandVertLength = d => length(d) * Math.sin(Math.PI/4);
+                        //const x = d => dateMargin + horizandVertLength(d)/2;
+                        //const y = d => dateMargin + horizandVertLength(d)/2;
                         //datCount dimns
-                        const horizandVertLengthOfDateCount = d => calcLength(d.label, fontSizes.date, false) * Math.sin(Math.PI/4);
+                        //const horizandVertLengthOfDateCount = d => calcLength(d.label, fontSizes.date, false) * Math.sin(Math.PI/4);
                         
                         //settings are only defined for current card
-                        const currentValueDataMethod = settings?.find(s => s.key === "currentValueDataMethod");
+                        //const currentValueDataMethod = settings?.find(s => s.key === "currentValueDataMethod");
                         
                         const dateG = contentsG.selectAll("g.date").data([data])
                         dateG.enter()
@@ -230,28 +223,18 @@ export default function profileInfoComponent() {
                                     contentsG
                                         .append("text")
                                             .attr("class", "primary")
-                                            .attr("dominant-baseline", "hanging")
+                                            .attr("dominant-baseline", "central")
                                             .attr("text-anchor", "middle")
                                             .style("font-family", "helvetica, sans-serifa")
-
-                                    contentsG
-                                        .append("text")
-                                            .attr("class", "secondary")
-                                            .attr("dominant-baseline", "hanging")
-                                            .attr("text-anchor", "middle")
-                                            .style("font-family", "helvetica, sans-serifa")
-
-
-                                    contentsG.selectAll("text")
-                                        .attr("stroke", grey10(7))
-                                        .attr("stroke-width", 0.5)
-                                        .attr("fill", grey10(7))
-                                        .attr("display", "none")
+                                            .attr("stroke", grey10(7))
+                                            .attr("stroke-width", 0.5)
+                                            .attr("fill", grey10(7))
                                     
                                     d3.select(this)
-                                            .append("rect")
-                                                .attr("class", "hitbox")
-                                                .attr("fill", "transparent");
+                                        .append("rect")
+                                            .attr("class", "hitbox")
+                                            .attr("fill", "transparent")
+                                            .attr("stroke", "none");
                                 })
                                 .merge(dateG)
                                 //.attr("transform", d => `translate(${x(d)},${y(d)}) rotate(-45)`) //rotates from start
@@ -261,15 +244,9 @@ export default function profileInfoComponent() {
                                         .attr("transform", `translate(${dateMargin.left},${dateMargin.top})`)
 
                                     contentsG.select("text.primary")
-                                        .attr("font-size", fontSizes.date)
-                                        //.attr("fill", d.isFuture ? "grey" : "white")
-                                        .text(d.isCurrent ? currentValueDataMethod.selectedLabel() : format(d.date))
-
-                                    contentsG.select("text.secondary")
-                                        .attr("y", dateHeight * 1.2)
-                                        .attr("font-size", fontSizes.date * 0.8)
-                                        //.attr("fill", d.isFuture ? "grey" : "white")
-                                        .text(d.specificDate ? format(d.specificDate) : "")
+                                        .attr("transform", d => `translate(${dateContentsWidth/2},${dateContentsHeight/2}) rotate(-45)`)
+                                        .attr("font-size", dateHeight * 0.25)
+                                        .text(format(d.date))
 
                                     d3.select(this).select("rect.hitbox")
                                         .attr("width", dateWidth)

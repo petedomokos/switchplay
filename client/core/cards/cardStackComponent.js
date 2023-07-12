@@ -200,7 +200,7 @@ export default function cardStackComponent() {
 
                         const cardItems = cardItemsComponents[d.cardNr]
                             .styles({ 
-                                lineStrokeWidth: isHeld || isSelected ? 5 : 10,
+                                lineStrokeWidth: isHeld || isSelected ? 0.8 : 5,
                                 _lineStroke:(lineD,i) => {
                                     if(isHeld || isSelected){
                                         return lineD.status === 2 ? GOLD : (lineD.status === 1 ? grey10(2) : "#989898")
@@ -210,7 +210,7 @@ export default function cardStackComponent() {
                             })
                             .width(contentsWidth)
                             .height(itemsAreaHeight)
-                            .withLabels((isHeld && isFront) || isSelected)
+                            .withSections((isHeld && isFront) || isSelected)
                             .onClickItem(function(e,clickedD){
                                 if(!isHeld && !isSelected) { return; }
                                 itemClicked = true;
@@ -243,10 +243,12 @@ export default function cardStackComponent() {
                             .datum(infoDatum)
                             .call(cardInfo);
 
-                        contentsG.select("g.items-area")
-                            .attr("transform", `translate(0, ${infoHeight})`)
-                            .datum(d.items)
-                            .call(cardItems)
+                        if(i === 4){
+                            contentsG.select("g.items-area")
+                                .attr("transform", `translate(0, ${infoHeight})`)
+                                .datum(d.items)
+                                .call(cardItems)
+                        }
                         
                         contentsG.select("rect.items-area-bg")
                             .attr("width", contentsWidth)
