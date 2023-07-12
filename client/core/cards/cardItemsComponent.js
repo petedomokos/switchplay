@@ -218,15 +218,25 @@ export default function cardItemsComponent() {
                     .attr("class", "chain-section")
                     .attr("pointer-events", "none")
                     .merge(chainSectionLine)
-                    .transition()
-                        .delay(300)
-                        .duration(200)
-                            .attr("x1", (d,i) => vertices[i][0])
-                            .attr("y1", (d,i) => vertices[i][1])
-                            .attr("x2", (d,i) => vertices[i + 1] ? vertices[i+1][0] : vertices[0][0])
-                            .attr("y2", (d,i) => vertices[i + 1] ? vertices[i+1][1] : vertices[0][1])
-                            .attr("stroke", (d,i) => styles._lineStroke(d,i))
-                            .attr("stroke-width", styles.lineStrokeWidth)          
+                    .each(function(d,i){
+                        //delay needed so when card swiped the lines dont transition too soon
+                        d3.select(this)
+                            .transition("trans1")
+                            .delay(300)
+                            .duration(200)
+                                .attr("x1", vertices[i][0])
+                                .attr("y1", vertices[i][1])
+                                .attr("x2", vertices[i + 1] ? vertices[i+1][0] : vertices[0][0])
+                                .attr("y2", vertices[i + 1] ? vertices[i+1][1] : vertices[0][1])
+                                .attr("stroke-width", styles.lineStrokeWidth)
+
+                        //no delay for pressing line
+                        d3.select(this)
+                            .transition("trans2")
+                            .duration(200)
+                                .attr("stroke", styles._lineStroke(d,i))
+
+                    })
 
             chainSectionLine.exit().remove();
 

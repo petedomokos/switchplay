@@ -23,7 +23,7 @@ export default function cardStackComponent() {
     let selectedCardWidth = width;
     let selectedCardHeight = height;
 
-    const infoHeight = d3.max([40, contentsHeight * 0.2]);
+    const infoHeight = d3.max([30, contentsHeight * 0.2]);
     let itemsAreaHeight;
 
     function updateDimns(){
@@ -184,6 +184,8 @@ export default function cardStackComponent() {
                     })
                     .each(function(d,i){
                         const { isHeld, isFront, isSelected, info, status, items } = d;
+                        //console.log("infoH", infoHeight);
+                        //const infoHeight;
                         //components
                         const cardInfo = cardInfoComponents[d.cardNr]
                             .width(contentsWidth)

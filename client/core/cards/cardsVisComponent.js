@@ -47,7 +47,8 @@ export default function cardsVisComponent() {
 
     let heldCardWidth;
     let heldCardHeight;
-    const cardAspectRatio = 88/62;
+    //const cardAspectRatio = 88/62; - normal cards
+    const cardAspectRatio = (88/62) * 0.925; //wider
 
     let placedCardWidth;
     let placedCardHeight;

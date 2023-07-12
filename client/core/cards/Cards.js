@@ -87,6 +87,7 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
   //we dont user defaultProps as we want to pass through userId too
   const stacksData = data && data.length !== 0 ? data : [initStack(user?._id)];
   const activeStack = stacksData.find(s => s.id === customActiveStack) || stacksData[0];
+  const notSavedYet = !data?.find(s => s.id === activeStack.id);
   //console.log("Cards", activeStack)
   //console.log("screen", screen)
 
@@ -158,7 +159,7 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
     //console.log("updateStack", updatedStack)
     //const updatedStackData = stacksData.map(s => s.id !== updatedStack.id ? s : updatedStack);
     //save(user._id, updatedStackData);
-    save(updatedStack);
+    save(updatedStack, notSavedYet);
   }, [stringifiedData]);
 
   const updateCard = useCallback((updatedCard) => {

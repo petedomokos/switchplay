@@ -5,9 +5,8 @@ import { createStack, updateStack } from '../../actions/UserActions'
 const mapStateToProps = (state, ownProps) => {
 	//console.log("JourneyContainer..........state.async", state.asyncProcesses)
 	const { asyncProcesses, user, system } = state;
-	const stacks = user?.stacks;
-	console.log("CardsContainer stacks", user.stacks);
-	console.log("active", system.activeStack)
+	//console.log("CardsContainer stacks", user.stacks);
+	//console.log("active", system.activeStack)
 
 	return{
 		user,
@@ -26,8 +25,10 @@ const mapStateToProps = (state, ownProps) => {
 }
 
 const mapDispatchToProps = dispatch => ({
-	save(stack, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
-		if(stack.id === "temp"){
+	save(stack, shouldCreate, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
+		//console.log("save", stack, shouldCreate)
+		//only create new stack if a signed in user has saved the stack (ie made a change)
+		if(shouldCreate){
 			dispatch(createStack(stack, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter))
 		}else{
 			dispatch(updateStack(stack, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter))
