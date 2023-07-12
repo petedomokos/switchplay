@@ -178,10 +178,7 @@ export const updateStack = stack => dispatch => {
 			url: `/api/users/${jwt.user._id}/stacks`,
 			method: 'PUT',
 			body:JSON.stringify(serverStack),
-			requireAuth:true,
-			nextAction: data => {
-				return { type:C.UPDATE_STACK, stack:transformStackForClient(data)};
-			}
+			requireAuth:true
 		}
 	)
 }
