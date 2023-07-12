@@ -145,9 +145,10 @@ export default function cardItemsComponent() {
                 .append("g")
                     .attr("class", "item")
                     .each(function(){
-                        const itemG = d3.select(this);
+                        const itemG = d3.select(this)
+                            .attr("opacity", withLabels ? 1 : 0);
+
                         itemG.append("text")
-                            .attr("opacity", withLabels ? 1 : 0)
                             .attr("text-anchor", "middle")
                             .attr("dominant-baseline", "central")
                             .attr("font-size", "9")
@@ -164,7 +165,6 @@ export default function cardItemsComponent() {
                     .merge(itemG)
                     .each(function(d, i){
                         const itemG = d3.select(this);
-
                         itemG
                             .transition()
                             .delay(300)
