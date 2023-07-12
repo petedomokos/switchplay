@@ -1,7 +1,9 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10, OVERLAY } from "./constants";
+import { DIMNS, grey10, OVERLAY, COLOURS } from "./constants";
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
 import { toRadians } from '../journey/screenGeometryHelpers';
+
+const { GOLD } = COLOURS;
 
 function pentagonVertices(options={}){
     const { r=1, centre=[0,0], theta, n=5 } = options;
@@ -44,6 +46,8 @@ export default function pentagonComponent() {
     }
 
     let styles = {
+        _lineStrokeWidth:() => 5,
+        _lineStroke:() => "grey"
     }
 
     //API CALLBACKS
@@ -71,6 +75,7 @@ export default function pentagonComponent() {
                 .append("g")
                     .attr("class", "section")
                     .each(function(d,i){
+                        console.log("sectionD", d)
                         const sectionG = d3.select(this);
                         sectionG.append("line").attr("class", "start show-with-section visible");
                         sectionG.append("line").attr("class", "inner show-with-section visible");

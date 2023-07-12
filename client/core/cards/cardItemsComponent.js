@@ -58,7 +58,6 @@ export default function cardItemsComponent() {
     */
 
     function cardItems(selection, options={}) {
-        //console.log("profileinfo", height)
         const { transitionEnter=true, transitionUpdate=true } = options;
 
         updateDimns();
@@ -81,7 +80,6 @@ export default function cardItemsComponent() {
 
         function update(data){
             const { } = data;
-            console.log("cardItems", data)
 
             const contentsG = d3.select(this).select("g.card-items-contents")
                 .attr("transform", `translate(${margin.left + extraHorizMargin/2},${margin.top + extraVertMargin/2})`);

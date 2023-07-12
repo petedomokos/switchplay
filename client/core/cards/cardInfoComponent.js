@@ -1,6 +1,9 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10, OVERLAY } from "./constants";
+import { DIMNS, grey10, OVERLAY, COLOURS } from "./constants";
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
+import pentagonComponent from './pentagonComponent';
+
+const { GOLD } = COLOURS;
 
 /*
 
@@ -77,6 +80,7 @@ export default function profileInfoComponent() {
     let onMouseover = function(){};
     let onMouseout = function(){};
 
+    const pentagon = pentagonComponent();
     //let enhancedDrag = dragEnhancements();
     let dateIntervalTimer;
     let showDateCount = false;
@@ -156,11 +160,15 @@ export default function profileInfoComponent() {
                             .append("g")
                                 .attr("class", "progress-summary")
                                 .each(function(d){
-                                    const contentsG = d3.select(this).append("g").attr("class", "summary-contents")
+                                    const contentsG = d3.select(this).append("g").attr("class", "summary-contents");
+
+                                    contentsG.append("g").attr("class", "pentagon")
+                                    /*
+                                    //@todo - change to trophy when completed all 5
                                     contentsG.append("path")
                                         .attr("d", trophy.pathD)
                                         .attr("transform", styles.trophyTranslate)
-                                        .attr("fill", styles.statusFill);
+                                        .attr("fill", styles.statusFill);*/
 
                                     d3.select(this)
                                         .append("rect")
@@ -171,9 +179,36 @@ export default function profileInfoComponent() {
                                 .merge(progressSummaryG)
                                 .attr("transform", `translate(${dateWidth + titleWidth},${0})`)
                                 .each(function(d,i){
+                                    const { isFront, isNext, isSecondNext, isSelected, isHeld } = d;
                                     const contentsG = d3.select(this).select("g.summary-contents")
                                         .attr("transform", `translate(${progressSummaryMargin.left},${progressSummaryMargin.top})`);
 
+                                    contentsG.select("g.pentagon")
+                                        .attr("transform", `translate(${progressSummaryContentsWidth/2},${progressSummaryContentsHeight/2})`)
+                                        .datum(d.itemsData)
+                                        .call(pentagon
+                                            .r2(d3.min([progressSummaryContentsWidth * 0.5, progressSummaryContentsHeight * 0.5]))
+                                            .withSections(false)
+                                            .styles({
+                                                _lineStrokeWidth:(itemD) => {
+                                                    const { status } = itemD;
+                                                    return status === 2 ? 4 : (status === 1 ? 2 : 1)
+                                                },
+                                                _lineStroke:(itemD) => {
+                                                    const { status } = itemD;
+                                                    if(status === 2){
+                                                        return isFront || isSelected ? GOLD : (isNext ? GOLD : GOLD);
+                                                    }
+                                                    if(status === 1){
+                                                        return isFront || isSelected ? grey10(1) : (isNext ? grey10(2) : grey10(3));
+                                                    }
+                                                    return isFront || isSelected ? grey10(5) : (isNext ? grey10(6) : grey10(7))
+
+                                                }
+                                            }))
+
+                                    /*
+                                    //@todo - change to trophy when completed all 5
                                     contentsG.select("path") 
                                         .transition("transA")
                                         .delay(300)
@@ -184,7 +219,7 @@ export default function profileInfoComponent() {
                                         .transition("transB")
                                             .delay(300)
                                             .duration(200)
-                                                .attr("fill", styles.statusFill)
+                                                .attr("fill", styles.statusFill)*/
 
                                     //hitbox
                                     d3.select(this).select("rect.hitbox")

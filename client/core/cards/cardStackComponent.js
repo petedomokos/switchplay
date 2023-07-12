@@ -183,11 +183,10 @@ export default function cardStackComponent() {
                         transition:transformTransition.update 
                     })
                     .each(function(d,i){
-                        const { isHeld, isFront, isSelected, info, status, items } = d;
-                        //console.log("infoH", infoHeight);
+                        const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, items } = d;
                         //const infoHeight;
                         //components
-                        const cardInfo = cardInfoComponents[d.cardNr]
+                        const cardInfo = cardInfoComponents[cardNr]
                             .width(contentsWidth)
                             .height(infoHeight)
                             .styles({
@@ -243,17 +242,30 @@ export default function cardStackComponent() {
                             .attr("fill","none")
                         
 
-                        const infoDatum = { ...info, status };
+                        const infoDatum = { ...info, status, itemsData:d.items, isSelected, isFront, isNext, isSecondNext };
                         contentsG.selectAll("g.info")
                             .datum(infoDatum)
                             .call(cardInfo);
 
-                        if(i === 4){
-                            contentsG.select("g.items-area")
-                                .attr("transform", `translate(0, ${infoHeight})`)
-                                .datum(d.items)
-                                .call(cardItems)
-                        }
+                        //hide if placed
+                        contentsG.select("g.info")
+                            .transition()
+                                .delay(200)
+                                .duration(200)
+                                    .attr("opacity", isHeld || isSelected ? 1 : 0)
+
+                        contentsG.select("g.items-area")
+                            .attr("transform", `translate(0, ${infoHeight})`)
+                            .datum(d.items)
+                            .call(cardItems)
+
+                        //remove items for cards behind
+                        const shouldHideItems = isHeld && !isFront && !isSelected;
+                        contentsG.select("g.items-area")
+                            .attr("pointer-events", shouldHideItems ? "none" : null)
+                            .transition("items-trans")
+                                .duration(100)
+                                .attr("opacity", shouldHideItems ? 0 : 1)
                         
                         contentsG.select("rect.items-area-bg")
                             .attr("width", contentsWidth)
