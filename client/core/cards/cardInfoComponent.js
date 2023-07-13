@@ -395,6 +395,7 @@ export default function profileInfoComponent() {
 
                         */
                     })
+                    .on("click", function(e,d){ onClick.call(this, e, d)})
 
         }
 

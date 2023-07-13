@@ -199,7 +199,9 @@ export default function cardStackComponent() {
                                     "translate(-3,3) scale(0.25)" : "translate(-45,3) scale(0.6)"
                             })
                             .fontSizes(fontSizes.info)
-                            .onClick(onClickInfo)
+                            .onClick((e) => {
+                                console.log("info click") 
+                                onClick(e,d); })
 
                         const cardItems = cardItemsComponents[d.cardNr]
                             .styles({ 
