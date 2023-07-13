@@ -82,8 +82,6 @@ export default function cardItemsComponent() {
             contentsG.append("g").attr("class", "centre");
         }
 
-        //console.log("mod.................", 3 % 3)
-
         function update(data){
             //console.log("data", data)
             const { } = data;
@@ -104,6 +102,7 @@ export default function cardItemsComponent() {
                     .r1(innerRadius)
                     .r2(outerRadius)
                     .withSections(withSections)
+                    .editable(editable)
                     .styles(styles)
                     .onClick(function(e,d){
                         if(!editable){ return; }

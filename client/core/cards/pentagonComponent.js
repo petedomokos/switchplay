@@ -98,6 +98,7 @@ export default function pentagonComponent() {
                         sectionG.append("line").attr("class", "outer visible");
                         sectionG.append("line").attr("class", "outer-line-hitbox")
                             .style("stroke", "transparent");
+                            
                         sectionG.append("path").attr("class", "section-hitbox")
                             .attr("fill", "transparent")
                             //.style("fill", i % 2 === 0 ? "blue" : "yellow");
@@ -114,6 +115,7 @@ export default function pentagonComponent() {
 
                     })
                     .merge(sectionG)
+                    .attr("pointer-events", editable ? null : "none")
                     .each(function(d,i){
                         //segement points start from centre (a) clockwise around the quadrilateral
                         const ax = innerVertices[i][0];

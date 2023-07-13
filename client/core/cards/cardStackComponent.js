@@ -202,6 +202,8 @@ export default function cardStackComponent() {
                                 onSelectCard(e, cardD); 
                             })
 
+                        const cardIsEditable = (isHeld && isFront) || isSelected;
+
                         const cardItems = cardItemsComponents[cardNr]
                             .styles({ 
                                 _lineStrokeWidth:lineD => {
@@ -219,8 +221,8 @@ export default function cardStackComponent() {
                             })
                             .width(width)
                             .height(itemsAreaHeight)
-                            .withSections((isHeld && isFront) || isSelected)
-                            .editable((isHeld && isFront) || isSelected)
+                            .withSections(cardIsEditable)
+                            .editable(cardIsEditable)
                             .onSelectItem(onSelectItem)
                             .onUpdateItemStatus(function(itemNr, newStatus){
                                 onUpdateItemStatus(cardNr, itemNr, newStatus);
