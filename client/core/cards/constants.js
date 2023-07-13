@@ -1,5 +1,7 @@
 import * as d3 from 'd3';
 
+export const INFO_HEIGHT_PROPORTION_OF_CARDS_AREA = 0.06;
+
 export const grey10 = (i) => ["#FFFFFF", "#E8E8E8","#D3D3D3", "#BEBEBE", "#A8A8A8", "#888888", "#696969", "#505050", "#303030", "#000000"][i-1];
 
 //@todo - whats time for in book??? '/api/user/photo/' +user._id +'?'+new Date().getTime()

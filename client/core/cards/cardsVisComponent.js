@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { grey10, COLOURS } from "./constants";
+import { grey10, COLOURS, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA } from "./constants";
 import cardStackComponent from './cardStackComponent';
 import { updateRectDimns } from '../journey/transitionHelpers';
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
@@ -42,6 +42,7 @@ export default function cardsVisComponent() {
 
     let heldCardsAreaHeight;
     let placedCardsAreaHeight;
+    let heldCardInfoHeight;
 
     let vertSpaceForIncs;
 
@@ -70,7 +71,8 @@ export default function cardsVisComponent() {
         //this aspectRatio is only needed to aid with selecting a card to takeover entire area
         cardsAreaAspectRatio = cardsAreaWidth/cardsAreaHeight;
 
-        const minInc = 30;
+        heldCardInfoHeight = cardsAreaHeight * INFO_HEIGHT_PROPORTION_OF_CARDS_AREA;
+        const minInc = heldCardInfoHeight;
         vertCardInc = i => {
             const incA = 16;
             const incB = 10;
@@ -275,6 +277,7 @@ export default function cardsVisComponent() {
                     .call(stack
                         .width(heldCardWidth)
                         .height(heldCardHeight)
+                        .infoHeight(heldCardInfoHeight)
                         .placedCardWidth(placedCardWidth)
                         .placedCardHeight(placedCardHeight)
                         .selectedCardWidth(selectedCardWidth)

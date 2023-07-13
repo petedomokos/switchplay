@@ -13,9 +13,6 @@ export default function cardStackComponent() {
     // dimensions
     let width = 300;
     let height = 600;
-    let margin = { top:0, bottom: 0, left:0, right:0 }
-    let contentsWidth;
-    let contentsHeight;
 
     let placedCardWidth = 0;
     let placedCardHeight = 0;
@@ -23,16 +20,15 @@ export default function cardStackComponent() {
     let selectedCardWidth = width;
     let selectedCardHeight = height;
 
-    let infoHeight;
+    let infoHeight = 30;
+    let spaceHeight;
     let bottomBarHeight = 40
     let itemsAreaHeight;
 
     function updateDimns(){
-        contentsWidth = width - margin.left - margin.right;
-        contentsHeight = height - margin.top - margin.bottom;
-        infoHeight = d3.max([20, contentsHeight * 0.15]);
-        bottomBarHeight = 40;
-        itemsAreaHeight = contentsHeight - infoHeight - bottomBarHeight;
+        spaceHeight = 20;
+        bottomBarHeight = 0;
+        itemsAreaHeight = height - infoHeight - spaceHeight - bottomBarHeight;
     }
 
     let fontSizes = {
@@ -149,6 +145,7 @@ export default function cardStackComponent() {
                     .each(function(d,i){
                         cardInfoComponents[d.cardNr] = cardInfoComponent();
                         cardItemsComponents[d.cardNr] = cardItemsComponent();
+
                         //ENTER
                         const contentsG = d3.select(this).append("g").attr("class", "contents card-contents")
 
@@ -190,11 +187,11 @@ export default function cardStackComponent() {
                         transition:transformTransition.update 
                     })
                     .each(function(d,i){
-                        const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, items } = d;
+                        const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, items } = d;            
                         //const infoHeight;
                         //components
                         const cardInfo = cardInfoComponents[cardNr]
-                            .width(contentsWidth)
+                            .width(width)
                             .height(infoHeight)
                             .styles({
                                 statusFill:() => getProgressStatusFill(d),
@@ -219,7 +216,7 @@ export default function cardStackComponent() {
                                     return lineD.status === 2 ? GOLD : (lineD.status === 1 ? grey10(2) : grey10(6))
                                 }
                             })
-                            .width(contentsWidth)
+                            .width(width)
                             .height(itemsAreaHeight)
                             .withSections((isHeld && isFront) || isSelected)
                             .onClickItem(function(e,clickedD){
@@ -235,8 +232,8 @@ export default function cardStackComponent() {
                     
                         const contentsG = d3.select(this).select("g.card-contents")
                         contentsG.select("rect.card-bg")
-                            .attr("width", contentsWidth)
-                            .attr("height", contentsHeight)
+                            .attr("width", width)
+                            .attr("height", height)
                             .transition()
                             .delay(200)
                             .duration(400)
@@ -244,7 +241,7 @@ export default function cardStackComponent() {
                                 .attr("stroke", getCardStroke(d))
 
                         contentsG.select("rect.info-bg")
-                            .attr("width", contentsWidth)
+                            .attr("width", width)
                             .attr("height", infoHeight)
                             .attr("fill","none")
                         
@@ -262,7 +259,7 @@ export default function cardStackComponent() {
                                     .attr("opacity", isHeld || isSelected ? 1 : 0)
 
                         contentsG.select("g.items-area")
-                            .attr("transform", `translate(0, ${infoHeight})`)
+                            .attr("transform", `translate(0, ${infoHeight + spaceHeight})`)
                             .datum(d.items)
                             .call(cardItems)
 
@@ -275,11 +272,12 @@ export default function cardStackComponent() {
                                 .attr("opacity", shouldHideItems ? 0 : 1)
                         
                         contentsG.select("rect.items-area-bg")
-                            .attr("width", contentsWidth)
-                            .attr("height", infoHeight)
+                            .attr("width", width)
+                            .attr("height", itemsAreaHeight)
                             .attr("fill", "none")
 
                         //btns
+                        /*
                         const bottomBarBtnsData = [
                             { 
                                 key:"flip", pos:"central", shouldDisplay:() => false,
@@ -294,8 +292,8 @@ export default function cardStackComponent() {
                                 onClick:e => { onClick.call(this, e, d); }
                             }
                         ]
-                        const centralBtnWidth = d3.min([contentsWidth * 0.3, 70])
-                        const cornerBtnWidth = d3.min([contentsWidth * 0.3, 40])
+                        const centralBtnWidth = d3.min([width * 0.3, 70])
+                        const cornerBtnWidth = d3.min([width * 0.3, 40])
                         const _btnWidth = d => d.pos === "central" ? centralBtnWidth : cornerBtnWidth;
                         const btnMargin = { 
                             left: 5, right: 5, top:5, bottom:5
@@ -325,8 +323,8 @@ export default function cardStackComponent() {
                                 .attr("transform", d => {
                                     const { pos } = d;
                                     const x = pos === "left" ? 0 : 
-                                        (pos === "central" ? contentsWidth/2 - _btnWidth(d)/2 : 
-                                        contentsWidth - _btnWidth(d));
+                                        (pos === "central" ? width/2 - _btnWidth(d)/2 : 
+                                        width - _btnWidth(d));
                                     return `translate(${x},${0})`;
                                 })
                                 .each(function(d,i){
@@ -342,8 +340,9 @@ export default function cardStackComponent() {
                         bottomBarBtnG.exit().remove();
 
                         bottomBarG.select("rect.bottom-bar-bg")
-                            .attr("width", contentsWidth)
+                            .attr("width", width)
                             .attr("height", bottomBarHeight)
+                        */
 
                     })
                     /*.on("click", function(e,d){
@@ -416,6 +415,11 @@ export default function cardStackComponent() {
     cardStack.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
+        return cardStack;
+    };
+    cardStack.infoHeight = function (value) {
+        if (!arguments.length) { return infoHeight; }
+        infoHeight = value;
         return cardStack;
     };
     cardStack.placedCardWidth = function (value) {

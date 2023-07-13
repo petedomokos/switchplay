@@ -36,27 +36,35 @@ export default function profileInfoComponent() {
     let progressSummaryContentsHeight;
 
     function updateDimns(){
-        margin = { left:3, right:3, top:3, bottom: 3 }
+        margin = { left:width * 0.05, right:width * 0.05, top:height * 0.05, bottom: height * 0.05 }
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
-        dateWidth = 30;
+        /*dateWidth = 30;
         dateHeight = height;
         //use margin to make it a square for exact diagonal, so build up the other way 
         const dateMarginHoriz = 3;
         dateContentsWidth = dateWidth - dateMarginHoriz * 2;
         dateContentsHeight = dateContentsWidth;
         const dateMarginVert = (dateHeight - dateContentsHeight) / 2;
-        dateMargin = { left: dateMarginHoriz, top:dateMarginVert }
+        dateMargin = { left: dateMarginHoriz, top:dateMarginVert }*/
+        dateHeight = contentsHeight;
+        dateWidth = dateHeight;
+        const dateMarginValue = dateHeight * 0.05;
+        //use margin to make it a square for exact diagonal, so build up the other way 
+        dateMargin = { left: dateMarginValue, top:dateMarginValue }
+        dateContentsWidth = dateWidth - dateMarginValue * 2;
+        dateContentsHeight = dateContentsWidth;
 
-        progressSummaryWidth = 30;
-        progressSummaryHeight = height;
+        progressSummaryHeight = contentsHeight;
+        progressSummaryWidth = progressSummaryHeight;
+        progressSummaryHeight = contentsHeight;
         progressSummaryMargin = { left: 3, right:3, top:height * 0.1, bottom:height * 0.1 };
         progressSummaryContentsWidth = progressSummaryWidth - progressSummaryMargin.left - progressSummaryMargin.right;
         progressSummaryContentsHeight = progressSummaryHeight - progressSummaryMargin.top - progressSummaryMargin.bottom;
 
+        titleHeight = contentsHeight;
         titleWidth = contentsWidth - dateWidth - progressSummaryWidth;
-        titleHeight = height;
         titleMargin = { left: 10, right:10, top:height * 0.1, bottom:height * 0.1 }
         titleContentsWidth = titleWidth - titleMargin.left - titleMargin.right;
         titleContentsHeight = titleHeight - titleMargin.top - titleMargin.bottom;
@@ -103,14 +111,36 @@ export default function profileInfoComponent() {
         function update(data){
             const { id, firstname, surname, age, position, isCurrent, isFuture, settings, personType } = data;
 
+            const outerBgRect = containerG.selectAll("g.outerBgRect").data([1])
+            outerBgRect.enter()
+                .append("rect")
+                    .attr("class", "outer-bg-rect")
+                    .merge(outerBgRect)
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr("fill", "none")
+                    .attr("stroke", "blue")
+            
+            d3.select(this).select("rect.outer-bg")
+            .attr("width", width)
+            .attr("height", height)
+
             const contentsG = containerG.selectAll("g.info-contents").data([data])
             contentsG.enter()
                 .append("g")
                     .attr("class", "info-contents")
+                    .each(function(data,i){
+                        const contentsG = d3.select(this);
+                        contentsG.append("rect").attr("class", "contents-bg")
+                            .attr("fill", "yellow")
+                    })
                     .merge(contentsG)
                     .attr("transform", `translate(${margin.left},${margin.top})`)
                     .each(function(data,i){
                         const contentsG = d3.select(this);
+                        contentsG.select("rect.contents-bg")
+                            .attr("width", contentsWidth)
+                            .attr("height", contentsHeight)
 
                         //TITLE
                         const titleG = contentsG.selectAll("g.card-title").data([data])
@@ -130,7 +160,8 @@ export default function profileInfoComponent() {
 
                                     d3.select(this).append("rect")
                                         .attr("class", "hitbox")
-                                        .attr("fill", "transparent");
+                                        .attr("fill", "transparent")
+                                        .attr("stroke", "black");
                                     
                                 })
                                 .merge(titleG)
@@ -142,7 +173,7 @@ export default function profileInfoComponent() {
                                     contentsG.select("text.primary")
                                         .attr("x", titleContentsWidth/2)
                                         .attr("y", titleContentsHeight/2)
-                                        .attr("font-size", titleHeight * 0.35)
+                                        .attr("font-size", titleContentsHeight * 0.4)
                                         //.attr("fill", d.isFuture ? "grey" : "white")
                                         //.text(d.title || d.id)
                                         .text(d.title || `Card ${cardNr + 1}`)
