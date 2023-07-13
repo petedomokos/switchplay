@@ -111,20 +111,6 @@ export default function profileInfoComponent() {
         function update(data){
             const { id, firstname, surname, age, position, isCurrent, isFuture, settings, personType } = data;
 
-            const outerBgRect = containerG.selectAll("g.outerBgRect").data([1])
-            outerBgRect.enter()
-                .append("rect")
-                    .attr("class", "outer-bg-rect")
-                    .merge(outerBgRect)
-                    .attr("width", width)
-                    .attr("height", height)
-                    .attr("fill", "none")
-                    .attr("stroke", "blue")
-            
-            d3.select(this).select("rect.outer-bg")
-            .attr("width", width)
-            .attr("height", height)
-
             const contentsG = containerG.selectAll("g.info-contents").data([data])
             contentsG.enter()
                 .append("g")
@@ -161,7 +147,7 @@ export default function profileInfoComponent() {
                                     d3.select(this).append("rect")
                                         .attr("class", "hitbox")
                                         .attr("fill", "transparent")
-                                        .attr("stroke", "black");
+                                        .attr("stroke", "none");
                                     
                                 })
                                 .merge(titleG)
