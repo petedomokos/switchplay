@@ -118,7 +118,7 @@ export default function profileInfoComponent() {
                     .each(function(data,i){
                         const contentsG = d3.select(this);
                         contentsG.append("rect").attr("class", "contents-bg")
-                            .attr("fill", "yellow")
+                            .attr("fill", "transparent")
                     })
                     .merge(contentsG)
                     .attr("transform", `translate(${margin.left},${margin.top})`)

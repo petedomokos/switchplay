@@ -87,7 +87,7 @@ export default function cardItemsComponent() {
             contentsG.select("rect.card-items-contents-bg")
                 .attr("width", contentsWidth)
                 .attr("height", contentsHeight)
-                .attr("fill","yellow")// "none")
+                .attr("fill", "none")
 
             contentsG.select("g.centre")
                 .attr("transform", `translate(${contentsWidth/2},${contentsHeight/2})`)
