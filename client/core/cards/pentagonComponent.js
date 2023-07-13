@@ -150,7 +150,6 @@ export default function pentagonComponent() {
                             .attr("width", outerVertices[i + 1] ? outerVertices[i+1][0] : outerVertices[0][0])
                             .attr("y2", outerVertices[i + 1] ? outerVertices[i+1][1] : outerVertices[0][1])*/
 
-                        console.log("r2", r2)
                         sectionG.select("line.outer-line-hitbox")
                             .attr("x1", outerHitboxVertices[i][0])
                             .attr("y1", outerHitboxVertices[i][1])
