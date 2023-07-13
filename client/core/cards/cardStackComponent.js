@@ -86,7 +86,7 @@ export default function cardStackComponent() {
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
         updateDimns();
         selection.each(function (data) {
-            //console.log("data", data)
+            //console.log("stack data", data)
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
@@ -200,7 +200,6 @@ export default function cardStackComponent() {
                             })
                             .fontSizes(fontSizes.info)
                             .onClick((e) => {
-                                console.log("info click") 
                                 onClick(e,d); })
 
                         const cardItems = cardItemsComponents[d.cardNr]
@@ -248,7 +247,8 @@ export default function cardStackComponent() {
                             .attr("fill","none")
                         
 
-                        const infoDatum = { ...info, status, itemsData:d.items, isSelected, isFront, isNext, isSecondNext };
+                        const infoDatum = { ...info, itemsData:d.items, isSelected, isFront, isNext, isSecondNext };
+                        
                         contentsG.selectAll("g.info")
                             .datum(infoDatum)
                             .call(cardInfo);

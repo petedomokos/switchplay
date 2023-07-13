@@ -36,36 +36,35 @@ export default function profileInfoComponent() {
     let progressSummaryContentsHeight;
 
     function updateDimns(){
-        margin = { left:width * 0.05, right:width * 0.05, top:height * 0.05, bottom: height * 0.05 }
+        const infoMarginValue = height * 0.2;
+        margin = { left:infoMarginValue, right:infoMarginValue, top:infoMarginValue, bottom: infoMarginValue }
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
-        /*dateWidth = 30;
-        dateHeight = height;
-        //use margin to make it a square for exact diagonal, so build up the other way 
-        const dateMarginHoriz = 3;
-        dateContentsWidth = dateWidth - dateMarginHoriz * 2;
-        dateContentsHeight = dateContentsWidth;
-        const dateMarginVert = (dateHeight - dateContentsHeight) / 2;
-        dateMargin = { left: dateMarginHoriz, top:dateMarginVert }*/
         dateHeight = contentsHeight;
         dateWidth = dateHeight;
-        const dateMarginValue = dateHeight * 0.05;
+        const infoItemsMarginValue = contentsHeight * 0.1;
         //use margin to make it a square for exact diagonal, so build up the other way 
-        dateMargin = { left: dateMarginValue, top:dateMarginValue }
-        dateContentsWidth = dateWidth - dateMarginValue * 2;
+        dateMargin = { left: infoItemsMarginValue, top:infoItemsMarginValue }
+        dateContentsWidth = dateWidth - infoItemsMarginValue * 2;
         dateContentsHeight = dateContentsWidth;
 
         progressSummaryHeight = contentsHeight;
         progressSummaryWidth = progressSummaryHeight;
         progressSummaryHeight = contentsHeight;
-        progressSummaryMargin = { left: 3, right:3, top:height * 0.1, bottom:height * 0.1 };
+        progressSummaryMargin = { 
+            left: infoItemsMarginValue, right:infoItemsMarginValue, 
+            top:infoItemsMarginValue, bottom:infoItemsMarginValue 
+        };
         progressSummaryContentsWidth = progressSummaryWidth - progressSummaryMargin.left - progressSummaryMargin.right;
         progressSummaryContentsHeight = progressSummaryHeight - progressSummaryMargin.top - progressSummaryMargin.bottom;
 
         titleHeight = contentsHeight;
         titleWidth = contentsWidth - dateWidth - progressSummaryWidth;
-        titleMargin = { left: 10, right:10, top:height * 0.1, bottom:height * 0.1 }
+        titleMargin = { 
+            left: infoItemsMarginValue, right:infoItemsMarginValue, 
+            top:infoItemsMarginValue, bottom:infoItemsMarginValue 
+        };
         titleContentsWidth = titleWidth - titleMargin.left - titleMargin.right;
         titleContentsHeight = titleHeight - titleMargin.top - titleMargin.bottom;
     }
@@ -89,7 +88,6 @@ export default function profileInfoComponent() {
     let onMouseout = function(){};
 
     const pentagon = pentagonComponent();
-    //let enhancedDrag = dragEnhancements();
     let dateIntervalTimer;
     let showDateCount = false;
 
@@ -159,7 +157,7 @@ export default function profileInfoComponent() {
                                     contentsG.select("text.primary")
                                         .attr("x", titleContentsWidth/2)
                                         .attr("y", titleContentsHeight/2)
-                                        .attr("font-size", titleContentsHeight * 0.4)
+                                        .attr("font-size", titleContentsHeight * 0.5)
                                         //.attr("fill", d.isFuture ? "grey" : "white")
                                         //.text(d.title || d.id)
                                         .text(d.title || `Card ${cardNr + 1}`)
@@ -181,7 +179,11 @@ export default function profileInfoComponent() {
 
                                     contentsG.append("g").attr("class", "pentagon")
                                     /*
-                                    //@todo - change to trophy when completed all 5
+                                    //@todo - info change to trophy when completed all 5
+                                     - pros - it creates a sense of reward
+                                     - cons - it may interfere with pattern-finding potential eg user can 
+                                     quickly look up teh path and see which bits of teh pentagon are ocnsistently
+                                     underachiecved. a trophy breaks the pattern
                                     contentsG.append("path")
                                         .attr("d", trophy.pathD)
                                         .attr("transform", styles.trophyTranslate)
@@ -247,24 +249,7 @@ export default function profileInfoComponent() {
 
 
                         //DATE
-
                         const format = d3.timeFormat("%_d %b, %y");
-                        //const nrChars = formattedDate => formattedDate[0] === " " ? formattedDate.length - 1 : formattedDate.length;
-                        //todo- make a pseudo text element and use getComputerTxtlngth, instead of this bodge to make TODAY work
-                        //const calcLength = (text, fontSize, isUpperCase=false) =>  nrChars(text) * fontSize * (isUpperCase ? 0.7 : 0.47);
-                        /*const length = d => {
-                            const text = d.isCurrent ? currentValueDataMethod.selectedLabel() : format(d.date);
-                            return calcLength(text, fontSizes.date, d.isCurrent);
-                        }*/
-                        //date dimns
-                        //const horizandVertLength = d => length(d) * Math.sin(Math.PI/4);
-                        //const x = d => dateMargin + horizandVertLength(d)/2;
-                        //const y = d => dateMargin + horizandVertLength(d)/2;
-                        //datCount dimns
-                        //const horizandVertLengthOfDateCount = d => calcLength(d.label, fontSizes.date, false) * Math.sin(Math.PI/4);
-                        
-                        //settings are only defined for current card
-                        //const currentValueDataMethod = settings?.find(s => s.key === "currentValueDataMethod");
                         
                         const dateG = contentsG.selectAll("g.date").data([data])
                         dateG.enter()
@@ -298,7 +283,7 @@ export default function profileInfoComponent() {
 
                                     contentsG.select("text.primary")
                                         .attr("transform", d => `translate(${dateContentsWidth/2},${dateContentsHeight/2}) rotate(-45)`)
-                                        .attr("font-size", dateHeight * 0.15)
+                                        .attr("font-size", dateHeight * 0.25)
                                         .text(format(d.date))
 
                                     d3.select(this).select("rect.hitbox")
@@ -309,7 +294,6 @@ export default function profileInfoComponent() {
 
                         dateG.exit().remove();
 
-                        /*
                         const dateCountG = contentsG.selectAll("g.date-count").data(data.dateCount ? [data.dateCount] : [])
                         dateCountG.enter()
                             .append("g")
@@ -347,23 +331,24 @@ export default function profileInfoComponent() {
                                     
                                     d3.select(this).append("rect").attr("class", "hitbox")
                                         .attr("fill", "transparent")
-                                        .on("click", (e,d) => { onClick.call(this, e, d, data, "date") })
+                                        .attr("stroke", "none")
+                                        //.on("click", (e,d) => { onClick.call(this, e, d, data, "date") })
                                 })
                                 .merge(dateCountG)
-                                .attr("transform", d => `translate(${dateMargin},${dateMargin})`) //rotates from start
+                                .attr("transform", d => `translate(${dateMargin.left},${dateMargin.top})`) //rotates from start
                                 .attr("pointer-events", showDateCount ? "all" : "none")
                                 .each(function(d){
-                                    const width = horizandVertLengthOfDateCount(d) * 1.25;
+                                    const width = dateWidth;
                                     const height = width;
-                                    const margin = { top: height * 0.1, bottom: height * 0.3 }
+                                    const margin = { top: 0, bottom: height * 0.5 }
                                     const contentsHeight = height - margin.top - margin.bottom;
                                     const numberHeight = contentsHeight * 0.75;
                                     const wordsHeight = contentsHeight - numberHeight;
 
-                                    const numberFontSize = d3.min([20, fontSizes.date * 1.5]);
+                                    const numberFontSize = d3.min([8, height * 0.8]);
                                     const wordsFontSize = numberFontSize * 0.75;
 
-                                    const extraGap = 8;
+                                    const extraGap = height < 30 ? 5 : 0;
 
                                     d3.select(this).select("text.number")
                                         .attr("x", width/2)
@@ -392,8 +377,6 @@ export default function profileInfoComponent() {
                                 dateIntervalTimer = null;
                             })
                             .remove();
-
-                        */
                     })
                     .on("click", function(e,d){ onClick.call(this, e, d)})
 

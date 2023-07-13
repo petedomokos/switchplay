@@ -72,7 +72,7 @@ export default function cardsVisComponent() {
         cardsAreaAspectRatio = cardsAreaWidth/cardsAreaHeight;
 
         heldCardInfoHeight = cardsAreaHeight * INFO_HEIGHT_PROPORTION_OF_CARDS_AREA;
-        const minInc = heldCardInfoHeight;
+        const minInc = heldCardInfoHeight * 0.9;
         vertCardInc = i => {
             const incA = 16;
             const incB = 10;

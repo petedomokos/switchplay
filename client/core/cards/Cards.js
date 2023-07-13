@@ -15,8 +15,8 @@ import { grey10 } from './constants';
 const instructions = [
   { keyPhrase:"Swipe a card down", rest:" to put it down" },
   { keyPhrase:"Swipe a card up", rest:" to pick it up" },
-  { keyPhrase:"Tap a card", rest:" to bring it closer/put it back" },
-  { keyPhrase:"Tap a line", rest:" to change an items status" }
+  { keyPhrase:"Tap the top of a card", rest:" to bring it closer/put it back" },
+  { keyPhrase:"Tap outside an item", rest:" to change an items status" }
 ]
 
 const useStyles = makeStyles((theme) => ({

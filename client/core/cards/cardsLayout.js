@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import { calcDateCount } from '../../util/TimeHelpers';
 
 const calcCardStatus = items => {
     if(items.filter(it => it.status !== 2).length === 0){ return 2; }
@@ -12,6 +13,8 @@ export default function cardsLayout(){
     let format = "profiles";
 
     function update(cardsData){
+        const now = new Date();
+
         const _data = cardsData.map((c,i) => {
             const { cardNr, title="", date, items } = c;
             return {
@@ -20,6 +23,7 @@ export default function cardsLayout(){
                 info:{ 
                     ...info,
                     date,
+                    dateCount:calcDateCount(now, date),
                     title,
                     status:calcCardStatus(items)
                 },
