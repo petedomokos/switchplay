@@ -280,7 +280,7 @@ export default function profileInfoComponent() {
 
                                     contentsG.select("text.primary")
                                         .attr("transform", d => `translate(${dateContentsWidth/2},${dateContentsHeight/2}) rotate(-45)`)
-                                        .attr("font-size", dateHeight * 0.25)
+                                        .attr("font-size", dateHeight * 0.15)
                                         .text(format(d.date))
 
                                     d3.select(this).select("rect.hitbox")

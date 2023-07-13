@@ -83,7 +83,7 @@ export default function pentagonComponent() {
                             .attr("fill", "pink")
                             .attr("opacity", 0.3);*/
                         sectionG.append("line").attr("class", "outer-line-hitbox")
-                            .attr("stroke", "transparent")
+                            .attr("stroke","aqua")// "transparent")
                             .attr("opacity", 0.3);
 
                         const sectionContentsG = sectionG.append("g").attr("class", "section-contents show-with-section");

@@ -24,16 +24,15 @@ export default function cardStackComponent() {
     let selectedCardHeight = height;
 
     let infoHeight;
+    let bottomBarHeight = 40
     let itemsAreaHeight;
 
     function updateDimns(){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
         infoHeight = d3.max([20, contentsHeight * 0.15]);
-        itemsAreaHeight = contentsHeight - infoHeight;
-        console.log("ch infoH", contentsHeight, infoHeight)
-
-
+        bottomBarHeight = 40;
+        itemsAreaHeight = contentsHeight - infoHeight - bottomBarHeight;
     }
 
     let fontSizes = {
@@ -168,8 +167,14 @@ export default function cardStackComponent() {
                             .append("g")
                                 .attr("class", "items-area")
                                     .append("rect")
-                                        .attr("class", "items-area-bg")
-    
+                                        .attr("class", "items-area-bg");
+
+                        contentsG
+                            .append("g")
+                                .attr("class", "bottom-bar")
+                                    .append("rect")
+                                        .attr("class", "bottom-bar-bg")
+                                        .attr("fill", "white");
                     })
                     .call(updateTransform, { 
                         x, 
@@ -241,7 +246,7 @@ export default function cardStackComponent() {
                         contentsG.select("rect.info-bg")
                             .attr("width", contentsWidth)
                             .attr("height", infoHeight)
-                            .attr("fill","aqua")
+                            .attr("fill","none")
                         
 
                         const infoDatum = { ...info, status, itemsData:d.items, isSelected, isFront, isNext, isSecondNext };
@@ -273,14 +278,79 @@ export default function cardStackComponent() {
                             .attr("width", contentsWidth)
                             .attr("height", infoHeight)
                             .attr("fill", "none")
+
+                        //btns
+                        const bottomBarBtnsData = [
+                            { 
+                                key:"flip", pos:"central", shouldDisplay:() => false,
+                                onClick:() => { alert("card flip not available yet"); }
+                            },
+                            { 
+                                key:"expand", pos:"right", shouldDisplay: card => card.isFront && !card.isSelected,
+                                onClick:e => { onClick.call(this, e, d) } 
+                            },
+                            { 
+                                key:"collapse", pos:"right", shouldDisplay: card => card.isSelected,
+                                onClick:e => { onClick.call(this, e, d); }
+                            }
+                        ]
+                        const _btnWidth = d => d.pos === "central" ? 70 : 40;
+                        const btnMargin = { 
+                            left: 5, right: 5, top:5, bottom:5
+                            //top: (bottomBarHeight - btnHeight)/2, bottom: (bottomBarHeight - btnHeight)/2 
+                        };
+                        const btnHeight = bottomBarHeight - btnMargin.top - btnMargin.bottom;
+
+
+                        const bottomBarG = contentsG.select("g.bottom-bar")
+                            .attr("transform", `translate(0,${infoHeight + itemsAreaHeight})`)
+;
+
+                        const bottomBarBtnG = bottomBarG.selectAll("g.btn").data(bottomBarBtnsData);
+                        bottomBarBtnG.enter()
+                            .append("g")
+                                .attr("class", "btn")
+                                .each(function(btnD,i){
+                                    const btnG = d3.select(this);
+                                    btnG.append("rect")
+                                        .attr("class", "hitbox")
+                                        .attr("rx", 3)
+                                        .attr("ry", 3)
+                                        .attr("stroke", "none")
+                                        .attr("fill", grey10(4))
+                                })
+                                .merge(bottomBarBtnG)
+                                .attr("transform", d => {
+                                    const { pos } = d;
+                                    const x = pos === "left" ? 0 : 
+                                        (pos === "central" ? contentsWidth/2 - _btnWidth(d)/2 : 
+                                        contentsWidth - _btnWidth(d));
+                                    return `translate(${x},${0})`;
+                                })
+                                .each(function(d,i){
+                                    const btnG = d3.select(this);
+                                    btnG.select("rect")
+                                        .attr("width", _btnWidth(d))
+                                        .attr("height", bottomBarHeight)
+                                })
+                                .on("click", (e, d) => {
+                                    if(d.onClick){ d.onClick.call(this, e, d) }
+                                })
+
+                        bottomBarBtnG.exit().remove();
+
+                        bottomBarG.select("rect.bottom-bar-bg")
+                            .attr("width", contentsWidth)
+                            .attr("height", bottomBarHeight)
+
                     })
-                    .on("click", function(e,d){
+                    /*.on("click", function(e,d){
                         if(itemClicked){
                             itemClicked = false;
                             return;
                         }
                         onClick.call(this, e, d)
-                    })
+                    })*/
                     .call(drag)
   
             //EXIT
