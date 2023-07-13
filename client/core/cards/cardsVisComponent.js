@@ -127,12 +127,12 @@ export default function cardsVisComponent() {
     }
     let _styles = () => DEFAULT_STYLES;
 
-    let frontCardNr = 0; //0 is the first card of 5
     let selectedCardNr;
     let format;
 
     let setForm = function(){};
     let updateItemStatus = function(){};
+    let updateFrontCardNr = function(){};
 
     let containerG;
     let contentsG;
@@ -195,7 +195,8 @@ export default function cardsVisComponent() {
 
             function update(stackData, options={}){
                 const { } = options;
-                //console.log("update stackData", stackData)
+                const { frontCardNr } = stackData;
+
                 //dimns for specific chart
                 const cardsData = stackData.cards
                     .map((card,i) => { 
@@ -321,20 +322,21 @@ export default function cardsVisComponent() {
                             update(stackData);
                         })
                         .onPickUp(function(d){
-                            const prevActiveCardNr = frontCardNr;
-                            frontCardNr = d.cardNr;
-                            update(stackData);
+                            updateFrontCardNr(d.cardNr)
+                            //frontCardNr = d.cardNr;
+                            //update(stackData);
                         })
                         .onPutDown(function(d){
                             if(d.isSelected){
+                                selectedCardNr = null;
                                 //show other cards as we need to deselect the card too
                                 containerG.selectAll("g.card").filter(dat => dat.cardNr !== d.cardNr)
                                     .attr("pointer-events", null)
-                                    .attr("opacity", 1)
+                                    .attr("opacity", 1);
                             }
-                            frontCardNr = d.cardNr + 1;
-                            selectedCardNr = null;
-                            update(stackData);
+                            updateFrontCardNr(d.cardNr + 1);
+                            //frontCardNr = d.cardNr + 1;
+                            //update(stackData);
                         })) 
 
             }
@@ -373,6 +375,11 @@ export default function cardsVisComponent() {
     cardsVis.updateItemStatus = function (value) {
         if (!arguments.length) { return updateItemStatus; }
         updateItemStatus = value;
+        return cardsVis;
+    };
+    cardsVis.updateFrontCardNr = function (value) {
+        if (!arguments.length) { return updateFrontCardNr; }
+        updateFrontCardNr = value;
         return cardsVis;
     };
     cardsVis.setForm = function (value) {

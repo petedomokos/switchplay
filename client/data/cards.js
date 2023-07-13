@@ -9,6 +9,7 @@ export const initStack = (userId) => {
         owner:userId,
         id:"temp",
         title:"",
+        frontCardNr:0,
         cards:[
             {
                 cardNr:0,

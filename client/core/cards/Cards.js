@@ -130,6 +130,7 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
       .width(screen.width || 300)
       .height(screen.height || 600)
       .updateItemStatus(updateItemStatus)
+      .updateFrontCardNr(updateFrontCardNr)
       .setForm(setForm)
 
   }, [stringifiedData, screen])
@@ -156,11 +157,12 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
   }
 
   const updateStack = useCallback(updatedStack => {
-    //console.log("updateStack", updatedStack)
-    //const updatedStackData = stacksData.map(s => s.id !== updatedStack.id ? s : updatedStack);
-    //save(user._id, updatedStackData);
     save(updatedStack, notSavedYet);
   }, [stringifiedData]);
+
+  const updateFrontCardNr = useCallback(cardNr => {
+    updateStack({ ...activeStack, frontCardNr:cardNr })
+  }, [stringifiedData, form]);
 
   const updateCard = useCallback((updatedCard) => {
     //console.log("updateCard", updatedCard)
