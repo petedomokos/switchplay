@@ -303,14 +303,11 @@ export default function cardsVisComponent() {
                             }
                             return heldCardsAreaHeight + placedCardMarginVert;;
                         })
-                        .onClickItem(function(e,d){ setForm({ formType: "item", value:d }) })  
-                        .onClickLine(function(e,d){
-                            const { cardNr, itemNr, status } = d;
-                            //new status - todo - use mod 2
-                            const newStatus = status === 0 ? 1 : (status === 1 ?  2 : 0)
-                            updateItemStatus(cardNr, itemNr, newStatus)
-                        })
-                        .onClick(function(e,d){
+                        .onSelectItem(function(item){ 
+                            setForm({ formType: "item", value:item }) 
+                        })  
+                        .onUpdateItemStatus(updateItemStatus)
+                        .onSelectCard(function(e, d){
                             //hide/show others
                             containerG.selectAll("g.card").filter(dat => dat.cardNr !== d.cardNr)
                                 .attr("pointer-events", d.isSelected ? null : "none")

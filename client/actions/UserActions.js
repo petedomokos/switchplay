@@ -16,6 +16,7 @@ export const transformStackForClient = serverStack => {
 		cards:JSON.parse(cards).map(c => ({
 			...c,
 			date:new Date(c.date),
+			items:c.items.map(it => ({ ...it, status:it.status || 0 }))
 		}))
 	}
 }

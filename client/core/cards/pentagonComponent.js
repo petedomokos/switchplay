@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { DIMNS, grey10, OVERLAY, COLOURS } from "./constants";
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
 import { toRadians } from '../journey/screenGeometryHelpers';
+import dragEnhancements from '../journey/enhancedDragHandler';
 
 const { GOLD } = COLOURS;
 
@@ -55,13 +56,12 @@ export default function pentagonComponent() {
 
     //API CALLBACKS
     let onClick = function(){};
-    let onClickSectionLine = function(){};
-    let onClickSectionContent = function(){};
-    let onMouseover = function(){};
-    let onMouseout = function(){};
+    let onLongpressStart = function(){};
+    let onLongpressEnd = function(){};
+    //let onMouseover = function(){};
+    //let onMouseout = function(){};
 
-    //next - put expand btn in bottom right -> when it is expanded, we can allow flipping the card, but not when not expanded? or flip is a two finger
-    //gesture
+    let enhancedDrag = dragEnhancements();
 
     function pentagon(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true } = options;
@@ -71,6 +71,19 @@ export default function pentagonComponent() {
         })
 
         function update(sectionsData){
+
+            //drag
+            enhancedDrag
+                .dragThreshold(100)
+                .onLongpressStart(onLongpressStart)
+                .onLongpressEnd(onLongpressEnd)
+                .onClick(onClick);
+
+            const drag = d3.drag()
+                .on("start", enhancedDrag())
+                .on("drag", enhancedDrag())
+                .on("end", enhancedDrag())
+
             //console.log("pentagon", sectionsData)
             const containerG = d3.select(this);
             const sectionG = containerG.selectAll("g.section").data(sectionsData);
@@ -80,14 +93,14 @@ export default function pentagonComponent() {
                     .each(function(d,i){
                         const sectionG = d3.select(this);
                         sectionG.append("line").attr("class", "start show-with-section visible");
+                        sectionG.append("line").attr("class", "finish show-with-section visible");
                         sectionG.append("line").attr("class", "inner show-with-section visible");
                         sectionG.append("line").attr("class", "outer visible");
-                        /*sectionG.append("rect").attr("class", "outer-line-hitbox")
-                            .attr("fill", "pink")
-                            .attr("opacity", 0.3);*/
                         sectionG.append("line").attr("class", "outer-line-hitbox")
-                            .attr("stroke", "transparent")
-                            .attr("opacity", 0.3);
+                            .style("stroke", "transparent");
+                        sectionG.append("path").attr("class", "section-hitbox")
+                            .attr("fill", "transparent")
+                            //.style("fill", i % 2 === 0 ? "blue" : "yellow");
 
                         const sectionContentsG = sectionG.append("g").attr("class", "section-contents show-with-section");
                         sectionContentsG
@@ -99,24 +112,42 @@ export default function pentagonComponent() {
                                 .attr("stroke", grey10(7))
                                 .attr("fill", grey10(7));
 
-                        sectionContentsG
-                            .append("rect") //@todo 0 use a path to do it accurately
-                                .attr("class", "contents-hitbox")
-                                .attr("fill", "transparent")
-                                .attr("opacity", 0.3)
                     })
                     .merge(sectionG)
                     .each(function(d,i){
+                        //segement points start from centre (a) clockwise around the quadrilateral
+                        const ax = innerVertices[i][0];
+                        const ay = innerVertices[i][1];
+                        const bx = outerVertices[i][0];
+                        const by = outerVertices[i][1];
+                        const cx = outerVertices[i + 1] ? outerVertices[i+1][0] : outerVertices[0][0];
+                        const cy = outerVertices[i + 1] ? outerVertices[i+1][1] : outerVertices[0][1];
+                        const dx = innerVertices[i + 1] ? innerVertices[i+1][0] : innerVertices[0][0];
+                        const dy = innerVertices[i + 1] ? innerVertices[i+1][1] : innerVertices[0][1];
+
                         const sectionG = d3.select(this);
                         //startLine
                         sectionG.select("line.start")
                             .transition("start-trans")
                             .delay(300)
                             .duration(200)
-                                .attr("x1", innerVertices[i][0])
-                                .attr("y1", innerVertices[i][1])
-                                .attr("x2", outerVertices[i][0])
-                                .attr("y2", outerVertices[i][1])
+                                .attr("x1", ax)
+                                .attr("y1", ay)
+                                .attr("x2", bx)
+                                .attr("y2", by)
+
+                        //finishLine
+                        //@todo - include this when a section is clicked, or longpressed
+                        sectionG.select("line.finish")
+                            .attr("display", "none")
+                            .transition("finish-trans")
+                            .delay(300)
+                            .duration(200)
+                                .attr("x1", cx)
+                                .attr("y1", cy)
+                                .attr("x2", dx)
+                                .attr("y2", dy)
+                        
 
                         //inner line
                         //delay needed so when card swiped the lines dont transition too soon
@@ -125,10 +156,10 @@ export default function pentagonComponent() {
                             .transition("inner-trans")
                             .delay(300)
                             .duration(200)
-                                .attr("x1", innerVertices[i][0])
-                                .attr("y1", innerVertices[i][1])
-                                .attr("x2", innerVertices[i + 1] ? innerVertices[i+1][0] : innerVertices[0][0])
-                                .attr("y2", innerVertices[i + 1] ? innerVertices[i+1][1] : innerVertices[0][1])
+                                .attr("x1", ax)
+                                .attr("y1", ay)
+                                .attr("x2", dx)
+                                .attr("y2", dy)
 
                         //outer line
                         const outerLine = sectionG.select("line.outer");
@@ -136,28 +167,24 @@ export default function pentagonComponent() {
                             .transition("outer-trans")
                             .delay(300)
                             .duration(200)
-                                .attr("x1", outerVertices[i][0])
-                                .attr("y1", outerVertices[i][1])
-                                .attr("x2", outerVertices[i + 1] ? outerVertices[i+1][0] : outerVertices[0][0])
-                                .attr("y2", outerVertices[i + 1] ? outerVertices[i+1][1] : outerVertices[0][1])
+                                .attr("x1", bx)
+                                .attr("y1", by)
+                                .attr("x2", cx)
+                                .attr("y2", cy)
+
+                        
 
                         //outerLine hitbox
-                        /*
-                        @todo - use a rect
-                        sectionG.select("rect.outer-line-hitbox")
-                            .attr("x", outerVertices[i][0])
-                            .attr("y", outerVertices[i][1])
-                            .attr("width", outerVertices[i + 1] ? outerVertices[i+1][0] : outerVertices[0][0])
-                            .attr("y2", outerVertices[i + 1] ? outerVertices[i+1][1] : outerVertices[0][1])*/
-
                         sectionG.select("line.outer-line-hitbox")
-                            .attr("x1", outerHitboxVertices[i][0])
-                            .attr("y1", outerHitboxVertices[i][1])
-                            .attr("x2", outerHitboxVertices[i + 1] ? outerHitboxVertices[i+1][0] : outerHitboxVertices[0][0])
-                            .attr("y2", outerHitboxVertices[i + 1] ? outerHitboxVertices[i+1][1] : outerHitboxVertices[0][1])
+                            .attr("x1", bx)
+                            .attr("y1", by)
+                            .attr("x2", cx)
+                            .attr("y2", cy)
                             .attr("stroke-width", hitlineStrokeWidth)
                             .attr("display", editable ? null : "none")
-                            .on("click", onClickSectionLine)
+
+                        sectionG.select("path.section-hitbox")
+                            .attr("d", `M${ax},${ay} L${bx},${by} L${cx},${cy} L${dx},${dy}`)
 
                         //all lines
                         sectionG.selectAll("line.visible")
@@ -183,18 +210,7 @@ export default function pentagonComponent() {
                         }
 
                         //contents
-                        const hitboxWidth = (r2-r1) * 0.4;
-                        const hitboxHeight = d3.min([40, (r2-r1) * 0.3]);
                         const sectionContentsG = sectionG.select("g.section-contents")
-
-                        sectionContentsG.select("rect.contents-hitbox")
-                            .attr("x", -hitboxWidth/2)
-                            .attr("y", -hitboxHeight/2)
-                            .attr("width", hitboxWidth)
-                            .attr("height", hitboxHeight)
-                            .on("click", onClickSectionContent)
-
-
                         sectionContentsG
                             .transition()
                             .delay(300)
@@ -207,6 +223,7 @@ export default function pentagonComponent() {
                             .text(text)
 
                     })
+                    .call(drag)
 
             sectionG.exit().remove();
 
@@ -250,6 +267,17 @@ export default function pentagonComponent() {
         onClick = value;
         return pentagon;
     };
+    pentagon.onLongpressStart = function (value) {
+        if (!arguments.length) { return onLongpressStart; }
+        onLongpressStart = value;
+        return pentagon;
+    };
+    pentagon.onLongpressEnd = function (value) {
+        if (!arguments.length) { return onLongpressEnd; }
+        onLongpressEnd = value;
+        return pentagon;
+    };
+    /*
     pentagon.onClickSectionLine = function (value) {
         if (!arguments.length) { return onClickSectionLine; }
         onClickSectionLine = value;
@@ -274,5 +302,6 @@ export default function pentagonComponent() {
         }
         return pentagon;
     };
+    */
     return pentagon;
 }

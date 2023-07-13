@@ -45,9 +45,13 @@ export default function cardItemsComponent() {
     }
 
     let withSections = true;
+    let editable = true;
+    let proposedNewStatus;
+    let statusTimer;
+
 ;    //API CALLBACKS
-    let onClickItem = function(){};
-    let onClickLine = function(){};
+    let onSelectItem = function(){};
+    let onUpdateItemStatus = function(){};
     let onDblClick = function(){};
     let onMouseover = function(){};
     let onMouseout = function(){};
@@ -78,7 +82,10 @@ export default function cardItemsComponent() {
             contentsG.append("g").attr("class", "centre");
         }
 
+        //console.log("mod.................", 3 % 3)
+
         function update(data){
+            //console.log("data", data)
             const { } = data;
 
             const contentsG = d3.select(this).select("g.card-items-contents")
@@ -89,6 +96,7 @@ export default function cardItemsComponent() {
                 .attr("height", contentsHeight)
                 .attr("fill", "none")
 
+            let newStatus;
             contentsG.select("g.centre")
                 .attr("transform", `translate(${contentsWidth/2},${contentsHeight/2})`)
                 .datum(data)
@@ -97,8 +105,38 @@ export default function cardItemsComponent() {
                     .r2(outerRadius)
                     .withSections(withSections)
                     .styles(styles)
-                    .onClickSectionLine(onClickLine)
-                    .onClickSectionContent(onClickItem));
+                    .onClick(function(e,d){
+                        if(!editable){ return; }
+                        onSelectItem(d);
+                    })
+                    .onLongpressStart(function(e,d){
+                        if(!editable){ return; }
+                        const changeStatus = (prevStatus) => {
+                            newStatus = (prevStatus + 1) % 3;
+                            const newD = { ...d, status: newStatus }
+                            //update stroke
+                            //first, show the 4th line (finish line)
+                            d3.select(this).select("line.finish")
+                                .attr("display", null)
+
+                            d3.select(this).selectAll("line.visible")
+                                .attr("stroke-width", styles._lineStrokeWidth(newD))
+                                .attr("stroke", styles._lineStroke(newD))
+                        }
+                        changeStatus(d.status);
+                        statusTimer = d3.interval(() => {
+                            changeStatus(newStatus);
+                        }, 750)
+                    })
+                    .onLongpressEnd(function(e,d){
+                        if(!editable){ return; }
+                        statusTimer.stop();
+                        onUpdateItemStatus(d.itemNr, newStatus);
+                        //hide the 4th line (finish line)
+                        d3.select(this).select("line.finish")
+                        .attr("display", "none")
+
+                    }));
         }
 
         return selection;
@@ -128,14 +166,19 @@ export default function cardItemsComponent() {
         withSections = value;
         return cardItems;
     };
-    cardItems.onClickItem = function (value) {
-        if (!arguments.length) { return onClickItem; }
-        onClickItem = value;
+    cardItems.editable = function (value) {
+        if (!arguments.length) { return editable; }
+        editable = value;
         return cardItems;
     };
-    cardItems.onClickLine = function (value) {
-        if (!arguments.length) { return onClickLine; }
-        onClickLine = value;
+    cardItems.onSelectItem = function (value) {
+        if (!arguments.length) { return onSelectItem; }
+        onSelectItem = value;
+        return cardItems;
+    };
+    cardItems.onUpdateItemStatus = function (value) {
+        if (!arguments.length) { return onUpdateItemStatus; }
+        onUpdateItemStatus = value;
         return cardItems;
     };
     cardItems.onDblClick = function (value) {

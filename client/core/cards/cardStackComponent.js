@@ -55,13 +55,14 @@ export default function cardStackComponent() {
     };
 
     //API CALLBACKS
-    let onClick = function(){};
-    let onClickItem = function(){};
-    let onClickLine = function(){};
+    let onSelectCard = function(){};
+    let onSelectItem = function(){};
+    let onUpdateItemStatus = function(){};
     let onPickUp = function(){};
     let onPutDown = function(){};
     let onClickInfo = function(){};
 
+    let onClick = function(){};
     let onDragStart = function() {};
     let onDrag = function() {};
     let onDragEnd = function() {};
@@ -78,8 +79,6 @@ export default function cardStackComponent() {
     //components
     let cardInfoComponents = {};
     let cardItemsComponents = {};
-
-    let itemClicked = false;
 
     function cardStack(selection, options={}) {
         //check the height of info, make smaller if necc and create a bottom bar, so the pentagon is in centre
@@ -186,23 +185,24 @@ export default function cardStackComponent() {
                         k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),
                         transition:transformTransition.update 
                     })
-                    .each(function(d,i){
-                        const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, items } = d;            
+                    .each(function(cardD,i){
+                        const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, items } = cardD;            
                         //const infoHeight;
                         //components
                         const cardInfo = cardInfoComponents[cardNr]
                             .width(width)
                             .height(infoHeight)
                             .styles({
-                                statusFill:() => getProgressStatusFill(d),
+                                statusFill:() => getProgressStatusFill(cardD),
                                 trophyTranslate:isHeld || isSelected ? 
                                     "translate(-3,3) scale(0.25)" : "translate(-45,3) scale(0.6)"
                             })
                             .fontSizes(fontSizes.info)
-                            .onClick((e) => {
-                                onClick(e,d); })
+                            .onClick(function(e){
+                                onSelectCard(e, cardD); 
+                            })
 
-                        const cardItems = cardItemsComponents[d.cardNr]
+                        const cardItems = cardItemsComponents[cardNr]
                             .styles({ 
                                 _lineStrokeWidth:lineD => {
                                     if(isHeld || isSelected){
@@ -220,15 +220,10 @@ export default function cardStackComponent() {
                             .width(width)
                             .height(itemsAreaHeight)
                             .withSections((isHeld && isFront) || isSelected)
-                            .onClickItem(function(e,clickedD){
-                                if(!isHeld && !isSelected) { return; }
-                                itemClicked = true;
-                                onClickItem.call(this, e, clickedD);
-                            })
-                            .onClickLine(function(e,clickedD){
-                                if(!isHeld && !isSelected) { return; }
-                                itemClicked = true;
-                                onClickLine.call(this, e, clickedD);
+                            .editable((isHeld && isFront) || isSelected)
+                            .onSelectItem(onSelectItem)
+                            .onUpdateItemStatus(function(itemNr, newStatus){
+                                onUpdateItemStatus(cardNr, itemNr, newStatus);
                             })
                     
                         const contentsG = d3.select(this).select("g.card-contents")
@@ -238,8 +233,8 @@ export default function cardStackComponent() {
                             .transition()
                             .delay(200)
                             .duration(400)
-                                .attr("fill", getCardFill(d))
-                                .attr("stroke", getCardStroke(d))
+                                .attr("fill", getCardFill(cardD))
+                                .attr("stroke", getCardStroke(cardD))
 
                         contentsG.select("rect.info-bg")
                             .attr("width", width)
@@ -247,7 +242,7 @@ export default function cardStackComponent() {
                             .attr("fill","none")
                         
 
-                        const infoDatum = { ...info, itemsData:d.items, isSelected, isFront, isNext, isSecondNext };
+                        const infoDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext };
                         
                         contentsG.selectAll("g.info")
                             .datum(infoDatum)
@@ -262,7 +257,7 @@ export default function cardStackComponent() {
 
                         contentsG.select("g.items-area")
                             .attr("transform", `translate(0, ${infoHeight + spaceHeight})`)
-                            .datum(d.items)
+                            .datum(cardD.items)
                             .call(cardItems)
 
                         //remove items for cards behind
@@ -278,83 +273,7 @@ export default function cardStackComponent() {
                             .attr("height", itemsAreaHeight)
                             .attr("fill", "none")
 
-                        //btns
-                        /*
-                        const bottomBarBtnsData = [
-                            { 
-                                key:"flip", pos:"central", shouldDisplay:() => false,
-                                onClick:() => { alert("card flip not available yet"); }
-                            },
-                            { 
-                                key:"expand", pos:"right", shouldDisplay: card => card.isFront && !card.isSelected,
-                                onClick:e => { onClick.call(this, e, d) } 
-                            },
-                            { 
-                                key:"collapse", pos:"right", shouldDisplay: card => card.isSelected,
-                                onClick:e => { onClick.call(this, e, d); }
-                            }
-                        ]
-                        const centralBtnWidth = d3.min([width * 0.3, 70])
-                        const cornerBtnWidth = d3.min([width * 0.3, 40])
-                        const _btnWidth = d => d.pos === "central" ? centralBtnWidth : cornerBtnWidth;
-                        const btnMargin = { 
-                            left: 5, right: 5, top:5, bottom:5
-                            //top: (bottomBarHeight - btnHeight)/2, bottom: (bottomBarHeight - btnHeight)/2 
-                        };
-                        const btnHeight = bottomBarHeight - btnMargin.top - btnMargin.bottom;
-
-
-                        const bottomBarG = contentsG.select("g.bottom-bar")
-                            .attr("transform", `translate(0,${infoHeight + itemsAreaHeight})`)
-;
-
-                        const bottomBarBtnG = bottomBarG.selectAll("g.btn").data(bottomBarBtnsData);
-                        bottomBarBtnG.enter()
-                            .append("g")
-                                .attr("class", "btn")
-                                .each(function(btnD,i){
-                                    const btnG = d3.select(this);
-                                    btnG.append("rect")
-                                        .attr("class", "hitbox")
-                                        .attr("rx", 3)
-                                        .attr("ry", 3)
-                                        .attr("stroke", "none")
-                                        .attr("fill", grey10(4))
-                                })
-                                .merge(bottomBarBtnG)
-                                .attr("transform", d => {
-                                    const { pos } = d;
-                                    const x = pos === "left" ? 0 : 
-                                        (pos === "central" ? width/2 - _btnWidth(d)/2 : 
-                                        width - _btnWidth(d));
-                                    return `translate(${x},${0})`;
-                                })
-                                .each(function(d,i){
-                                    const btnG = d3.select(this);
-                                    btnG.select("rect")
-                                        .attr("width", _btnWidth(d))
-                                        .attr("height", bottomBarHeight)
-                                })
-                                .on("click", (e, d) => {
-                                    if(d.onClick){ d.onClick.call(this, e, d) }
-                                })
-
-                        bottomBarBtnG.exit().remove();
-
-                        bottomBarG.select("rect.bottom-bar-bg")
-                            .attr("width", width)
-                            .attr("height", bottomBarHeight)
-                        */
-
-                    })
-                    /*.on("click", function(e,d){
-                        if(itemClicked){
-                            itemClicked = false;
-                            return;
-                        }
-                        onClick.call(this, e, d)
-                    })*/
-                    .call(drag)
+                    }).call(drag)
   
             //EXIT
             cardG.exit().call(remove);
@@ -503,14 +422,19 @@ export default function cardStackComponent() {
         onClick = value;
         return cardStack;
     };
-    cardStack.onClickItem = function (value) {
-        if (!arguments.length) { return onClickItem; }
-        onClickItem = value;
+    cardStack.onSelectCard = function (value) {
+        if (!arguments.length) { return onSelectCard; }
+        onSelectCard = value;
         return cardStack;
     };
-    cardStack.onClickLine = function (value) {
-        if (!arguments.length) { return onClickLine; }
-        onClickLine = value;
+    cardStack.onSelectItem = function (value) {
+        if (!arguments.length) { return onSelectItem; }
+        onSelectItem = value;
+        return cardStack;
+    };
+    cardStack.onUpdateItemStatus = function (value) {
+        if (!arguments.length) { return onUpdateItemStatus; }
+        onUpdateItemStatus = value;
         return cardStack;
     };
     cardStack.onPickUp = function (value) {
