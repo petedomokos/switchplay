@@ -75,7 +75,6 @@ export default function pentagonComponent() {
                 .append("g")
                     .attr("class", "section")
                     .each(function(d,i){
-                        console.log("sectionD", d)
                         const sectionG = d3.select(this);
                         sectionG.append("line").attr("class", "start show-with-section visible");
                         sectionG.append("line").attr("class", "inner show-with-section visible");

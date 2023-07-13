@@ -23,13 +23,15 @@ export default function cardStackComponent() {
     let selectedCardWidth = width;
     let selectedCardHeight = height;
 
-    const infoHeight = d3.max([30, contentsHeight * 0.2]);
+    let infoHeight;
     let itemsAreaHeight;
 
     function updateDimns(){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
+        infoHeight = d3.max([20, contentsHeight * 0.15]);
         itemsAreaHeight = contentsHeight - infoHeight;
+        console.log("ch infoH", contentsHeight, infoHeight)
 
 
     }
@@ -239,7 +241,7 @@ export default function cardStackComponent() {
                         contentsG.select("rect.info-bg")
                             .attr("width", contentsWidth)
                             .attr("height", infoHeight)
-                            .attr("fill","none")
+                            .attr("fill","aqua")
                         
 
                         const infoDatum = { ...info, status, itemsData:d.items, isSelected, isFront, isNext, isSecondNext };
