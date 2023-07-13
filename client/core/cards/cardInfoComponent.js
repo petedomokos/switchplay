@@ -189,6 +189,7 @@ export default function profileInfoComponent() {
                                         .call(pentagon
                                             .r2(d3.min([progressSummaryContentsWidth * 0.5, progressSummaryContentsHeight * 0.5]))
                                             .withSections(false)
+                                            .editable(false)
                                             .styles({
                                                 _lineStrokeWidth:(itemD) => {
                                                     const { status } = itemD;

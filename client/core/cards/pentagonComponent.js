@@ -26,6 +26,7 @@ export default function pentagonComponent() {
     let r1 = 0;
     let r2 = 100;
     let withSections = true;
+    let editable = true;
 
     let innerVertices;
     let outerVertices;
@@ -152,6 +153,7 @@ export default function pentagonComponent() {
                             .attr("x2", outerHitboxVertices[i + 1] ? outerHitboxVertices[i+1][0] : outerHitboxVertices[0][0])
                             .attr("y2", outerHitboxVertices[i + 1] ? outerHitboxVertices[i+1][1] : outerHitboxVertices[0][1])
                             .attr("stroke-width", 30)
+                            .attr("display", editable ? null : "none")
                             .on("click", onClickSectionLine)
 
                         //all lines
@@ -224,6 +226,11 @@ export default function pentagonComponent() {
     pentagon.withSections = function (value) {
         if (!arguments.length) { return withSections; }
         withSections = value;
+        return pentagon;
+    };
+    pentagon.editable = function (value) {
+        if (!arguments.length) { return editable; }
+        editable = value;
         return pentagon;
     };
     
