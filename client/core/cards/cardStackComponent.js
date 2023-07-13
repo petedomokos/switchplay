@@ -294,10 +294,8 @@ export default function cardStackComponent() {
                                 onClick:e => { onClick.call(this, e, d); }
                             }
                         ]
-                        console.log("cw", contentsWidth)
                         const centralBtnWidth = d3.min([contentsWidth * 0.3, 70])
                         const cornerBtnWidth = d3.min([contentsWidth * 0.3, 40])
-                        console.log("centralBW", centralBtnWidth)
                         const _btnWidth = d => d.pos === "central" ? centralBtnWidth : cornerBtnWidth;
                         const btnMargin = { 
                             left: 5, right: 5, top:5, bottom:5

@@ -32,14 +32,16 @@ export default function pentagonComponent() {
     let outerVertices;
     let outerHitboxVertices;
     let segmentVertices;
+    let hitlineStrokeWidth;
 
     let shouldTruncate;
     
     
     function updateDimns(){
+        hitlineStrokeWidth = r2 * 0.45;
         innerVertices = pentagonVertices({ r:r1, theta:i => i * 72 });
         outerVertices = pentagonVertices({ r:r2, theta:i => i * 72 });
-        outerHitboxVertices = pentagonVertices({ r:r2+15, theta:i => i * 72 });
+        outerHitboxVertices = pentagonVertices({ r:r2+hitlineStrokeWidth/2, theta:i => i * 72 });
         segmentVertices = pentagonVertices({ r:r1 + (r2 - r1)/2, theta:i => (i + 0.5) * 72 });
 
         //console.log("r2 - r1", r2 - r1)
@@ -147,12 +149,14 @@ export default function pentagonComponent() {
                             .attr("y", outerVertices[i][1])
                             .attr("width", outerVertices[i + 1] ? outerVertices[i+1][0] : outerVertices[0][0])
                             .attr("y2", outerVertices[i + 1] ? outerVertices[i+1][1] : outerVertices[0][1])*/
+
+                        console.log("r2", r2)
                         sectionG.select("line.outer-line-hitbox")
                             .attr("x1", outerHitboxVertices[i][0])
                             .attr("y1", outerHitboxVertices[i][1])
                             .attr("x2", outerHitboxVertices[i + 1] ? outerHitboxVertices[i+1][0] : outerHitboxVertices[0][0])
                             .attr("y2", outerHitboxVertices[i + 1] ? outerHitboxVertices[i+1][1] : outerHitboxVertices[0][1])
-                            .attr("stroke-width", 30)
+                            .attr("stroke-width", hitlineStrokeWidth)
                             .attr("display", editable ? null : "none")
                             .on("click", onClickSectionLine)
 
