@@ -52,9 +52,12 @@ export default function cardItemsComponent() {
 ;    //API CALLBACKS
     let onSelectItem = function(){};
     let onUpdateItemStatus = function(){};
-    let onDblClick = function(){};
-    let onMouseover = function(){};
-    let onMouseout = function(){};
+    let onDragStart = function(){};
+    let onDrag = function(){};
+    let onDragEnd = function(){};
+
+    //let onMouseover = function(){};
+    //let onMouseout = function(){};
 
     const pentagon = pentagonComponent();
     /*
@@ -135,7 +138,8 @@ export default function cardItemsComponent() {
                         d3.select(this).select("line.finish")
                         .attr("display", "none")
 
-                    }));
+                    })
+                    .onDrag(onDrag));
         }
 
         return selection;
@@ -180,11 +184,22 @@ export default function cardItemsComponent() {
         onUpdateItemStatus = value;
         return cardItems;
     };
-    cardItems.onDblClick = function (value) {
-        if (!arguments.length) { return onDblClick; }
-        onDblClick = value;
+    cardItems.onDragStart = function (value) {
+        if (!arguments.length) { return onDragStart; }
+        onDragStart = value;
         return cardItems;
     };
+    cardItems.onDrag = function (value) {
+        if (!arguments.length) { return onDrag; }
+        onDrag = value;
+        return cardItems;
+    };
+    cardItems.onDragEnd = function (value) {
+        if (!arguments.length) { return onDragEnd; }
+        onDragEnd = value;
+        return cardItems;
+    };
+    /*
     cardItems.onMouseover = function (value) {
         if (!arguments.length) { return onMouseover; }
         if(typeof value === "function"){
@@ -199,5 +214,6 @@ export default function cardItemsComponent() {
         }
         return cardItems;
     };
+    */
     return cardItems;
 }

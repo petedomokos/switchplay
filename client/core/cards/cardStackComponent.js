@@ -95,7 +95,7 @@ export default function cardStackComponent() {
                 .onLongpressEnd(longpressEnd);
 
             const drag = d3.drag()
-                .on("start", enhancedDrag(dragStart))
+                .on("start", enhancedDrag())
                 .on("drag", enhancedDrag(dragged))
                 .on("end", enhancedDrag(dragEnd))
 
@@ -227,6 +227,8 @@ export default function cardStackComponent() {
                             .onUpdateItemStatus(function(itemNr, newStatus){
                                 onUpdateItemStatus(cardNr, itemNr, newStatus);
                             })
+                            .onDrag(e => dragged(e, cardD))
+                            .onDragEnd(e => dragEnd(e, cardD))
                     
                         const contentsG = d3.select(this).select("g.card-contents")
                         contentsG.select("rect.card-bg")
@@ -280,9 +282,6 @@ export default function cardStackComponent() {
             //EXIT
             cardG.exit().call(remove);
 
-            function dragStart(e , d){
-                //onDragStart.call(this, e, d)
-            }
             let swipeTriggered = false;
             function dragged(e , d){
                 if(swipeTriggered){ return; }

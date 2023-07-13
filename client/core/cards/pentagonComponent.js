@@ -45,7 +45,6 @@ export default function pentagonComponent() {
         outerHitboxVertices = pentagonVertices({ r:r2+hitlineStrokeWidth/2, theta:i => i * 72 });
         segmentVertices = pentagonVertices({ r:r1 + (r2 - r1)/2, theta:i => (i + 0.5) * 72 });
 
-        //console.log("r2 - r1", r2 - r1)
         shouldTruncate = r2 - r1 < 100;
     }
 
@@ -58,6 +57,9 @@ export default function pentagonComponent() {
     let onClick = function(){};
     let onLongpressStart = function(){};
     let onLongpressEnd = function(){};
+    let onDragStart = function(){};
+    let onDrag = function(){};
+    let onDragEnd = function(){};
     //let onMouseover = function(){};
     //let onMouseout = function(){};
 
@@ -80,11 +82,10 @@ export default function pentagonComponent() {
                 .onClick(onClick);
 
             const drag = d3.drag()
-                .on("start", enhancedDrag())
-                .on("drag", enhancedDrag())
-                .on("end", enhancedDrag())
+                .on("start", enhancedDrag(onDragStart))
+                .on("drag", enhancedDrag(onDrag))
+                .on("end", enhancedDrag(onDragEnd))
 
-            //console.log("pentagon", sectionsData)
             const containerG = d3.select(this);
             const sectionG = containerG.selectAll("g.section").data(sectionsData);
             sectionG.enter()
@@ -277,6 +278,21 @@ export default function pentagonComponent() {
     pentagon.onLongpressEnd = function (value) {
         if (!arguments.length) { return onLongpressEnd; }
         onLongpressEnd = value;
+        return pentagon;
+    };
+    pentagon.onDragStart = function (value) {
+        if (!arguments.length) { return onDragStart; }
+        onDragStart = value;
+        return pentagon;
+    };
+    pentagon.onDrag = function (value) {
+        if (!arguments.length) { return onDrag; }
+        onDrag = value;
+        return pentagon;
+    };
+    pentagon.onDragEnd = function (value) {
+        if (!arguments.length) { return onDragEnd; }
+        onDragEnd = value;
         return pentagon;
     };
     /*
