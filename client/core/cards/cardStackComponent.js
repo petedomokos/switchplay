@@ -304,7 +304,7 @@ export default function cardStackComponent() {
                     //the crad itself has been dragged
                     cardD =d;
                 }
-                console.log("dragged cardD", cardD?.cardNr)
+                //console.log("dragged cardD", cardD?.cardNr)
                 if(swipeDirection === "up" && !cardD.isHeld){ 
                     onPickUp(cardD);
                     swipeTriggered = true;
