@@ -307,7 +307,7 @@ export default function cardsVisComponent() {
                             setForm({ formType: "item", value:item }) 
                         })  
                         .onUpdateItemStatus(updateItemStatus)
-                        .onSelectCard(function(e, d){
+                        .onClickCard(function(e, d){
                             //hide/show others
                             containerG.selectAll("g.card").filter(dat => dat.cardNr !== d.cardNr)
                                 .attr("pointer-events", d.isSelected ? null : "none")

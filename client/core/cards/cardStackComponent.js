@@ -5,6 +5,7 @@ import cardInfoComponent from './cardInfoComponent';
 import cardItemsComponent from './cardItemsComponent';
 import { remove } from '../journey/domHelpers';
 import { updateTransform } from '../journey/transitionHelpers';
+import { icons } from '../../util/icons';
 
 const { GOLD } = COLOURS;
 
@@ -55,7 +56,7 @@ export default function cardStackComponent() {
     };
 
     //API CALLBACKS
-    let onSelectCard = function(){};
+    let onClickCard = function(){};
     let onSelectItem = function(){};
     let onUpdateItemStatus = function(){};
     let onPickUp = function(){};
@@ -202,7 +203,7 @@ export default function cardStackComponent() {
                             })
                             .fontSizes(fontSizes.info)
                             .onClick(function(e){
-                                onSelectCard(e, cardD); 
+                                onClickCard(e, cardD); 
                             })
 
                         const cardIsEditable = (isHeld && isFront) || isSelected;
@@ -279,6 +280,59 @@ export default function cardStackComponent() {
                             .attr("width", width)
                             .attr("height", itemsAreaHeight)
                             .attr("fill", "none")
+
+                        //btm right btn
+                        const expandBtnDatum = { 
+                            key:"expand", 
+                            onClick:e => { onClickCard(e, cardD);  },
+                            icon:icons.expand,
+                        }
+                        const collapseBtnDatum = { 
+                            key:"expand", 
+                            onClick:e => { onClickCard(e, cardD) },
+                            icon:icons.collapse,
+                        }
+                        const botRightBtnData = isSelected ? [collapseBtnDatum] : (isFront ? [expandBtnDatum] : []);
+                        const btnHeight = d3.max([35, d3.min([50, 0.15 * height])]);
+                        const btnWidth = btnHeight;
+                        //assumme all are square
+                        //note: 0.8 is a bodge coz iconsseems to be bigger than they state
+                        const scale = d => (0.8 * btnHeight)/d.icon.height;
+                        const btnMargin = 3;
+                        const btnContentsWidth = btnWidth - 2 * btnMargin;
+                        const btnContentsHeight = btnHeight - 2 * btnMargin;
+                        const botRightBtnG = contentsG.selectAll("g.bottom-right-btn").data(botRightBtnData);
+                        botRightBtnG.enter()
+                            .append("g")
+                                .attr("class", "bottom-right-btn")
+                                .each(function(d){
+                                    const btnG = d3.select(this);
+                                    btnG.append("path")
+                                        .attr("fill", grey10(5));
+
+                                    btnG.append("rect").attr("class", "btn-hitbox")
+                                        .attr("fill", "transparent")
+                                        .attr("stroke", "none")
+
+                                })
+                                .merge(botRightBtnG)
+                                .attr("transform", `translate(${width - btnWidth + btnMargin},${height - btnHeight + btnMargin})`)
+                                .each(function(d){
+                                    const btnG = d3.select(this);
+                                    btnG.select("path")
+                                        .attr("transform", `scale(${scale(d)})`)
+                                        .attr("d", d.icon.d)
+                            
+                                    btnG.select("rect.btn-hitbox")
+                                        .attr("width", btnContentsWidth)
+                                        .attr("height", btnContentsHeight)
+
+                                })
+                                .on("click", (e,d) => d.onClick(e, d));
+
+                        botRightBtnG.exit().remove();
+
+
 
                     }).call(drag)
   
@@ -453,9 +507,9 @@ export default function cardStackComponent() {
         onClick = value;
         return cardStack;
     };
-    cardStack.onSelectCard = function (value) {
-        if (!arguments.length) { return onSelectCard; }
-        onSelectCard = value;
+    cardStack.onClickCard = function (value) {
+        if (!arguments.length) { return onClickCard; }
+        onClickCard = value;
         return cardStack;
     };
     cardStack.onSelectItem = function (value) {

@@ -31,7 +31,7 @@ export default function pentagonComponent() {
 
     let innerVertices;
     let outerVertices;
-    let outerHitboxVertices;
+    //let outerHitboxVertices;
     let segmentVertices;
     let hitlineStrokeWidth;
 
@@ -42,7 +42,7 @@ export default function pentagonComponent() {
         hitlineStrokeWidth = r2 * 0.45;
         innerVertices = pentagonVertices({ r:r1, theta:i => i * 72 });
         outerVertices = pentagonVertices({ r:r2, theta:i => i * 72 });
-        outerHitboxVertices = pentagonVertices({ r:r2+hitlineStrokeWidth/2, theta:i => i * 72 });
+        //outerHitboxVertices = pentagonVertices({ r:r2+hitlineStrokeWidth/2, theta:i => i * 72 });
         segmentVertices = pentagonVertices({ r:r1 + (r2 - r1)/2, theta:i => (i + 0.5) * 72 });
 
         shouldTruncate = r2 - r1 < 100;
@@ -97,8 +97,8 @@ export default function pentagonComponent() {
                         sectionG.append("line").attr("class", "finish show-with-section visible");
                         sectionG.append("line").attr("class", "inner show-with-section visible");
                         sectionG.append("line").attr("class", "outer visible");
-                        sectionG.append("line").attr("class", "outer-line-hitbox")
-                            .style("stroke", "transparent");
+                        //sectionG.append("line").attr("class", "outer-line-hitbox")
+                            //.style("stroke", "transparent");
                             
                         sectionG.append("path").attr("class", "section-hitbox")
                             .attr("fill", "transparent")
@@ -178,13 +178,14 @@ export default function pentagonComponent() {
                         
 
                         //outerLine hitbox
+                        /*
                         sectionG.select("line.outer-line-hitbox")
                             .attr("x1", bx)
                             .attr("y1", by)
                             .attr("x2", cx)
                             .attr("y2", cy)
                             .attr("stroke-width", hitlineStrokeWidth)
-                            .attr("display", editable ? null : "none")
+                            .attr("display", editable ? null : "none")*/
 
                         sectionG.select("path.section-hitbox")
                             .attr("d", `M${ax},${ay} L${bx},${by} L${cx},${cy} L${dx},${dy}`)
