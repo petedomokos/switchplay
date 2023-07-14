@@ -135,6 +135,9 @@ export default function cardStackComponent() {
                 return (d.isSelected || d.isHeld ? grey10(5) : grey10(8))
             }
 
+            //bgdrag
+            containerG.call(drag);
+
             const cardG = containerG.selectAll("g.card").data(data, d => d.cardNr);
             cardG.enter()
                 //.insert("g", ":first-child")
@@ -285,12 +288,28 @@ export default function cardStackComponent() {
             let swipeTriggered = false;
             function dragged(e , d){
                 if(swipeTriggered){ return; }
-                if(e.dy <= 0 && !d.isHeld){ 
-                    onPickUp(d);
+                const swipeDirection = e.dy <= 0 ? "up" : "down";
+                let cardD;
+                if(Array.isArray(d)){
+                    //the bg has been dragged, so apply it to the correct card
+                    const frontCard = data.find(c => c.isFront);
+                    if(swipeDirection === "down"){
+                        cardD = frontCard;
+                    }else{
+                        const nr = d3.max([0, frontCard.cardNr - 1]);
+                        cardD = data.find(c => c.cardNr === nr);
+                    } 
+                }else{
+                    //the crad itself has been dragged
+                    cardD =d;
+                }
+                console.log("dragged cardD", cardD?.cardNr)
+                if(swipeDirection === "up" && !cardD.isHeld){ 
+                    onPickUp(cardD);
                     swipeTriggered = true;
                 }
-                if(e.dy >= 0 && d.isHeld){
-                    onPutDown(d);
+                if(swipeDirection === "down" && cardD.isHeld){
+                    onPutDown(cardD);
                     swipeTriggered = true;
                 }
                 //onDrag.call(this, e, d)
