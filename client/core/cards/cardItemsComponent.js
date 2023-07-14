@@ -113,31 +113,33 @@ export default function cardItemsComponent() {
                     })
                     .onLongpressStart(function(e,d){
                         if(!editable){ return; }
+                        //console.log("this", this)
+                        //d3.select(this).raise();
                         const changeStatus = (prevStatus) => {
                             newStatus = (prevStatus + 1) % 3;
                             const newD = { ...d, status: newStatus }
                             //update stroke
-                            //first, show the 4th line (finish line)
-                            d3.select(this).select("line.finish")
-                                .attr("display", null)
 
                             d3.select(this).selectAll("line.visible")
                                 .attr("stroke-width", styles._lineStrokeWidth(newD))
                                 .attr("stroke", styles._lineStroke(newD))
+
+                            /*const finishLineStroke = newStatus === 0 ? 0 : (newStatus === 1 ? 4.5 : 5.5)
+                            //first, show the 4th line (finish line)
+                            d3.select(this).select("line.finish")
+                                .attr("display", null)
+                                .attr("opacity", 1)
+                                .attr("stroke-width", finishLineStroke)*/
                         }
                         changeStatus(d.status);
                         statusTimer = d3.interval(() => {
                             changeStatus(newStatus);
-                        }, 750)
+                        }, 600)
                     })
                     .onLongpressEnd(function(e,d){
                         if(!editable){ return; }
                         statusTimer.stop();
                         onUpdateItemStatus(d.itemNr, newStatus);
-                        //hide the 4th line (finish line)
-                        d3.select(this).select("line.finish")
-                        .attr("display", "none")
-
                     })
                     .onDrag(onDrag));
         }

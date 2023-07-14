@@ -94,7 +94,10 @@ export default function pentagonComponent() {
                     .each(function(d,i){
                         const sectionG = d3.select(this);
                         sectionG.append("line").attr("class", "start show-with-section visible");
-                        sectionG.append("line").attr("class", "finish show-with-section visible");
+                        sectionG.append("line").attr("class", "finish show-with-section visible")
+                            //.attr("opacity", 1)
+                            //.attr("display", "none");
+
                         sectionG.append("line").attr("class", "inner show-with-section visible");
                         sectionG.append("line").attr("class", "outer visible");
                         //sectionG.append("line").attr("class", "outer-line-hitbox")
@@ -142,7 +145,6 @@ export default function pentagonComponent() {
                         //finishLine
                         //@todo - include this when a section is clicked, or longpressed
                         sectionG.select("line.finish")
-                            .attr("display", "none")
                             .transition("finish-trans")
                             .delay(300)
                             .duration(200)
@@ -150,6 +152,15 @@ export default function pentagonComponent() {
                                 .attr("y1", cy)
                                 .attr("x2", dx)
                                 .attr("y2", dy)
+                        
+                        /*sectionG.select("line.finish")
+                            .transition("finish-trans")
+                            .delay(500)
+                            .duration(500)
+                                .attr("opacity", 0)
+                                .on("end", function(){
+                                    d3.select(this).attr("display", "none")
+                                })*/
                         
 
                         //inner line

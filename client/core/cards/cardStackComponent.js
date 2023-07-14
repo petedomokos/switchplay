@@ -308,7 +308,7 @@ export default function cardStackComponent() {
                                 .each(function(d){
                                     const btnG = d3.select(this);
                                     btnG.append("path")
-                                        .attr("fill", grey10(5));
+                                        .attr("fill", grey10(4));
 
                                     btnG.append("rect").attr("class", "btn-hitbox")
                                         .attr("fill", "transparent")
