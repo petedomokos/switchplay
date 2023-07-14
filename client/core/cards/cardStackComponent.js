@@ -289,10 +289,11 @@ export default function cardStackComponent() {
             function dragged(e , d){
                 if(swipeTriggered){ return; }
                 const swipeDirection = e.dy <= 0 ? "up" : "down";
+                const frontCard = data.find(c => c.isFront);
+
                 let cardD;
                 if(Array.isArray(d)){
                     //the bg has been dragged, so apply it to the correct card
-                    const frontCard = data.find(c => c.isFront);
                     if(swipeDirection === "down"){
                         cardD = frontCard;
                     }else{
@@ -308,8 +309,18 @@ export default function cardStackComponent() {
                     onPickUp(cardD);
                     swipeTriggered = true;
                 }
+                if(swipeDirection === "up" && cardD.isHeld){
+                    const nr = d3.max([0, frontCard.cardNr - 1]);
+                    const cardD = data.find(c => c.cardNr === nr);
+                    onPickUp(cardD);
+                    swipeTriggered = true;
+                }
                 if(swipeDirection === "down" && cardD.isHeld){
                     onPutDown(cardD);
+                    swipeTriggered = true;
+                }
+                if(swipeDirection === "down" && !cardD.isHeld){
+                    onPutDown(frontCard);
                     swipeTriggered = true;
                 }
                 //onDrag.call(this, e, d)
