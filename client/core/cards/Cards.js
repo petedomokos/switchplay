@@ -92,7 +92,7 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
   //console.log("Cards", activeStack)
   //console.log("screen", screen)
 
-  const [showInstructions, setShowInstructions] = useState(false)// useState(activeStack.id === "temp");
+  const [showInstructions, setShowInstructions] = useState(activeStack.id === "temp");
   const [layout, setLayout] = useState(() => cardStacksLayout());
   const [cards, setCards] = useState(() => cardsVisComponent());
   const [form, setForm] = useState(null);
@@ -113,7 +113,7 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
   const stringifiedData = JSON.stringify(data);
 
   useEffect(() => {
-    //setShowInstructions(activeStack.id === "temp");
+    setShowInstructions(activeStack.id === "temp");
   }, [activeStack._id])
 
   useEffect(() => {
