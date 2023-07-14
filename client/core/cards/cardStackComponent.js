@@ -212,9 +212,9 @@ export default function cardStackComponent() {
                             .styles({ 
                                 _lineStrokeWidth:lineD => {
                                     if(isHeld || isSelected){
-                                        return lineD.status === 2 ? 5 : (lineD.status === 1 ? 2.5 : 0.8);
+                                        return lineD.status === 2 ? 5 : (lineD.status === 1 ? 2.5 : 0.2);
                                     }
-                                    return lineD.status === 2 ? 10 : (lineD.status === 1 ? 5 : 2.5)
+                                    return lineD.status === 2 ? 10 : (lineD.status === 1 ? 5 : 0.8)
                                 },
                                 _lineStroke:(lineD,i) => {
                                     if(isHeld || isSelected){
