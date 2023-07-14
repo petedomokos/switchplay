@@ -13,11 +13,9 @@ import { initStack } from '../../data/cards';
 import { grey10 } from './constants';
 
 const instructions = [
-  { keyPhrase:"Swipe a card down", rest:" to put it down" },
-  { keyPhrase:"Swipe a card up", rest:" to pick it up" },
-  { keyPhrase:"Tap the top of a card", rest:" to bring it closer/put it back" },
-  { keyPhrase:"Tap a section", rest:" to edit" },
-  { keyPhrase:"Longpress a section", rest:" to change status" }
+  { keyPhrase:"Swipe up/down", rest:" to pick up or put down cards" },
+  { keyPhrase:"Tap a section", rest:" to view or edit" },
+  { keyPhrase:"Press & hold a section", rest:" to change status" }
 ]
 
 const useStyles = makeStyles((theme) => ({
