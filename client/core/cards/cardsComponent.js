@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import { grey10, COLOURS, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA } from "./constants";
-import cardStackComponent from './cardStackComponent';
+import deckComponent from './deckComponent';
 import { updateRectDimns } from '../journey/transitionHelpers';
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
 
@@ -20,7 +20,7 @@ function maxDimns(maxWidth, maxHeight, aspectRatio){
 
 */
 
-export default function cardsVisComponent() {
+export default function cardsComponent() {
     //API SETTINGS
     // dimensions
     let width = 300;
@@ -123,7 +123,7 @@ export default function cardsVisComponent() {
         placedCardMarginVert = (placedCardsAreaHeight - placedCardHeight)/2;
     }
     let DEFAULT_STYLES = {
-        stack:{ info:{ date:{ fontSize:9 } } },
+        deck:{ info:{ date:{ fontSize:9 } } },
     }
     let _styles = () => DEFAULT_STYLES;
 
@@ -140,14 +140,14 @@ export default function cardsVisComponent() {
     let cardsG;
 
     //components
-    const stack = cardStackComponent();
+    const deck = deckComponent();
 
-    function cardsVis(selection, options={}) {
+    function cards(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true } = options;
 
         updateDimns();
         // expression elements
-        selection.each(function (stackData) {
+        selection.each(function (deckData) {
             containerG = d3.select(this)
                 .attr("width", width)
                 .attr("height", height);
@@ -156,12 +156,12 @@ export default function cardsVisComponent() {
                 init();
             }
 
-            update(stackData);
+            update(deckData);
 
             function init(){
-                containerG.append("rect").attr("class", "cards-vis-bg")
+                containerG.append("rect").attr("class", "cards-bg")
                     .attr("fill", "transparent");
-                contentsG = containerG.append("g").attr("class", "cards-vis-contents");
+                contentsG = containerG.append("g").attr("class", "cards-contents");
 
                 topSpaceG = contentsG
                     .append("g")
@@ -193,12 +193,12 @@ export default function cardsVisComponent() {
                     .attr("fill", "none")
             }
 
-            function update(stackData, options={}){
+            function update(deckData, options={}){
                 const { } = options;
-                const { frontCardNr } = stackData;
+                const { frontCardNr } = deckData;
 
                 //dimns for specific chart
-                const cardsData = stackData.cards
+                const cardsData = deckData.cards
                     .map((card,i) => { 
                         const { cardNr } = card;
                         return {
@@ -217,7 +217,7 @@ export default function cardsVisComponent() {
                 contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
                 cardsG.attr("transform", `translate(0, ${topSpaceHeight})`)
 
-                containerG.select("rect.cards-vis-bg")
+                containerG.select("rect.cards-bg")
                     .call(updateRectDimns, { 
                         width: () => width, 
                         height:() => height,
@@ -249,7 +249,7 @@ export default function cardsVisComponent() {
                     .attr("stroke", "none");
 
                 progressSummaryG.select("path")
-                    .attr("fill", stackData.status === 2 ? GOLD : (stackData.status === 1 ? grey10(2) : grey10(6)))
+                    .attr("fill", deckData.status === 2 ? GOLD : (deckData.status === 1 ? grey10(2) : grey10(6)))
 
                 cardsG
                     .select("rect.cards-bg")
@@ -275,7 +275,7 @@ export default function cardsVisComponent() {
 
                 cardsG
                     .datum(cardsData)
-                    .call(stack
+                    .call(deck
                         .width(heldCardWidth)
                         .height(heldCardHeight)
                         .infoHeight(heldCardInfoHeight)
@@ -316,12 +316,12 @@ export default function cardsVisComponent() {
                                     .attr("opacity", d.isSelected ? 1 : 0)
 
                             selectedCardNr = d.isSelected ? null : d.cardNr
-                            update(stackData);
+                            update(deckData);
                         })
                         .onPickUp(function(d){
                             updateFrontCardNr(d.cardNr)
                             //frontCardNr = d.cardNr;
-                            //update(stackData);
+                            //update(deckData);
                         })
                         .onPutDown(function(d){
                             if(d.isSelected){
@@ -333,7 +333,7 @@ export default function cardsVisComponent() {
                             }
                             updateFrontCardNr(d.cardNr + 1);
                             //frontCardNr = d.cardNr + 1;
-                            //update(stackData);
+                            //update(deckData);
                         })) 
 
             }
@@ -344,17 +344,17 @@ export default function cardsVisComponent() {
     }
     
     //api
-    cardsVis.width = function (value) {
+    cards.width = function (value) {
         if (!arguments.length) { return width; }
         width = value;
-        return cardsVis;
+        return cards;
     };
-    cardsVis.height = function (value) {
+    cards.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
-        return cardsVis;
+        return cards;
     };
-    cardsVis.styles = function (value) {
+    cards.styles = function (value) {
         if (!arguments.length) { return _styles; }
         if(typeof value === "function"){
             _styles = (d,i) => ({ ...DEFAULT_STYLES, ...value(d,i) });
@@ -362,27 +362,27 @@ export default function cardsVisComponent() {
             _styles = (d,i) => ({ ...DEFAULT_STYLES, ...value });
         }
         
-        return cardsVis;
+        return cards;
     };
-    cardsVis.format = function (value) {
+    cards.format = function (value) {
         if (!arguments.length) { return format; }
         format = value;
-        return cardsVis;
+        return cards;
     };
-    cardsVis.updateItemStatus = function (value) {
+    cards.updateItemStatus = function (value) {
         if (!arguments.length) { return updateItemStatus; }
         updateItemStatus = value;
-        return cardsVis;
+        return cards;
     };
-    cardsVis.updateFrontCardNr = function (value) {
+    cards.updateFrontCardNr = function (value) {
         if (!arguments.length) { return updateFrontCardNr; }
         updateFrontCardNr = value;
-        return cardsVis;
+        return cards;
     };
-    cardsVis.setForm = function (value) {
+    cards.setForm = function (value) {
         if (!arguments.length) { return setForm; }
         setForm = value;
-        return cardsVis;
+        return cards;
     };
-    return cardsVis;
+    return cards;
 }

@@ -23,7 +23,7 @@ function getPersonType(id){
 export const hydrateUser = user => {
     return {
         ...user,
-        stacks:user.stacks || [],
+        decks:user.decks || [],
         photo: user.photo ? { ...user.photo, added:new Date(user.photo.added)} : null,
         photos:user.photos ? user.photos.map(p => ({ ...p, added:new Date(p.added) })) : null,
         goals:getGoals(user._id), //legacy - can probably remove

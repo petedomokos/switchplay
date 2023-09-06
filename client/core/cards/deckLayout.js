@@ -7,15 +7,15 @@ const calcStackStatus = cards => {
     return 0;
 }
 
-export default function cardStacksLayout(){
+export default function decksLayout(){
     let datasets = [];
     let info = {};
     let format = "profiles";
 
     const _cardsLayout = cardsLayout();
 
-    function update(stacksData){
-        const _data = stacksData.map((s,i) => {
+    function update(decksData){
+        const _data = decksData.map((s,i) => {
             const { cards } = s;
             const processedCards = _cardsLayout(cards);
                 return {

@@ -9,7 +9,7 @@ import { icons } from '../../util/icons';
 
 const { GOLD } = COLOURS;
 
-export default function cardStackComponent() {
+export default function deckComponent() {
     //API SETTINGS
     // dimensions
     let width = 300;
@@ -81,12 +81,12 @@ export default function cardStackComponent() {
     let cardInfoComponents = {};
     let cardItemsComponents = {};
 
-    function cardStack(selection, options={}) {
+    function deck(selection, options={}) {
         //check the height of info, make smaller if necc and create a bottom bar, so the pentagon is in centre
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
         updateDimns();
         selection.each(function (data) {
-            //console.log("stack data", data)
+            //console.log("deck data", data)
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
@@ -413,185 +413,185 @@ export default function cardStackComponent() {
     }
     
     //api
-    cardStack.width = function (value) {
+    deck.width = function (value) {
         if (!arguments.length) { return width; }
         width = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.height = function (value) {
+    deck.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.infoHeight = function (value) {
+    deck.infoHeight = function (value) {
         if (!arguments.length) { return infoHeight; }
         infoHeight = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.placedCardWidth = function (value) {
+    deck.placedCardWidth = function (value) {
         if (!arguments.length) { return placedCardWidth; }
         placedCardWidth = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.placedCardHeight = function (value) {
+    deck.placedCardHeight = function (value) {
         if (!arguments.length) { return placedCardHeight; }
         placedCardHeight = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.selectedCardWidth = function (value) {
+    deck.selectedCardWidth = function (value) {
         if (!arguments.length) { return selectedCardWidth; }
         selectedCardWidth = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.selectedCardHeight = function (value) {
+    deck.selectedCardHeight = function (value) {
         if (!arguments.length) { return selectedCardHeight; }
         selectedCardHeight = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.margin = function (value) {
+    deck.margin = function (value) {
         if (!arguments.length) { return margin; }
         margin = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.x = function (func) {
+    deck.x = function (func) {
         if (!arguments.length) { return x; }
         x = func;
-        return cardStack;
+        return deck;
     };
-    cardStack.y = function (func) {
+    deck.y = function (func) {
         if (!arguments.length) { return y; }
         y = func;
-        return cardStack;
+        return deck;
     };
-    cardStack.kpiHeight = function (value) {
+    deck.kpiHeight = function (value) {
         if (!arguments.length) { return fixedKpiHeight; }
         kpiHeight = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.fontSizes = function (values) {
+    deck.fontSizes = function (values) {
         if (!arguments.length) { return fontSizes; }
         fontSizes = { ...fontSizes, ...values };
-        return cardStack;
+        return deck;
     };
-    cardStack.format = function (value) {
+    deck.format = function (value) {
         if (!arguments.length) { return format; }
         format = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.transformTransition = function (value) {
+    deck.transformTransition = function (value) {
         if (!arguments.length) { return transformTransition; }
         transformTransition = { 
             enter:value.enter,// || transformTransition.enter,
             update:value.update// || transformTransition.update
         }
-        return cardStack;
+        return deck;
     };
-    cardStack.yScale = function (value, key) {
+    deck.yScale = function (value, key) {
         if (!arguments.length) { return yScale; }
         yScale = value;
         if(key) { yKey = key; }
         calcY = y => typeof d.y === "number" ? d.y : yScale(d[yKey]);
 
-        return cardStack;
+        return deck;
     };
-    cardStack.xScale = function (value, key) {
+    deck.xScale = function (value, key) {
         if (!arguments.length) { return xScale; }
         xScale = value;
         if(key) { xKey = key; }
         calcX = x => typeof d.x === "number" ? d.x : xScale(d[xKey]);
 
-        return cardStack;
+        return deck;
     };
-    cardStack.onClick = function (value) {
+    deck.onClick = function (value) {
         if (!arguments.length) { return onClick; }
         onClick = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.onClickCard = function (value) {
+    deck.onClickCard = function (value) {
         if (!arguments.length) { return onClickCard; }
         onClickCard = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.onSelectItem = function (value) {
+    deck.onSelectItem = function (value) {
         if (!arguments.length) { return onSelectItem; }
         onSelectItem = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.onUpdateItemStatus = function (value) {
+    deck.onUpdateItemStatus = function (value) {
         if (!arguments.length) { return onUpdateItemStatus; }
         onUpdateItemStatus = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.onPickUp = function (value) {
+    deck.onPickUp = function (value) {
         if (!arguments.length) { return onPickUp; }
         onPickUp = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.onPutDown = function (value) {
+    deck.onPutDown = function (value) {
         if (!arguments.length) { return onPutDown; }
         onPutDown = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.onClickInfo = function (value) {
+    deck.onClickInfo = function (value) {
         if (!arguments.length) { return onClickInfo; }
         onClickInfo = value;
-        return cardStack;
+        return deck;
     };
-    cardStack.onDragStart = function (value) {
+    deck.onDragStart = function (value) {
         if (!arguments.length) { return onDragStart; }
         if(typeof value === "function"){
             onDragStart = value;
         }
-        return cardStack;
+        return deck;
     };
-    cardStack.onDrag = function (value) {
+    deck.onDrag = function (value) {
         if (!arguments.length) { return onDrag; }
         if(typeof value === "function"){
             onDrag = value;
         }
-        return cardStack;
+        return deck;
     };
-    cardStack.onDragEnd = function (value) {
+    deck.onDragEnd = function (value) {
         if (!arguments.length) { return onDragEnd; }
         if(typeof value === "function"){
             onDragEnd = value;
         }
-        return cardStack;
+        return deck;
     };
-    cardStack.onLongpressStart = function (value) {
+    deck.onLongpressStart = function (value) {
         if (!arguments.length) { return onLongpressStart; }
         if(typeof value === "function"){
             onLongpressStart = value;
         }
-        return cardStack;
+        return deck;
     };
-    cardStack.onLongpressDragged = function (value) {
+    deck.onLongpressDragged = function (value) {
         if (!arguments.length) { return onLongpressDragged; }
         if(typeof value === "function"){
             onLongpressDragged = value;
         }
-        return cardStack;
+        return deck;
     };
-    cardStack.onLongpressEnd = function (value) {
+    deck.onLongpressEnd = function (value) {
         if (!arguments.length) { return onLongpressEnd; }
         if(typeof value === "function"){
             onLongpressEnd = value;
         }
-        return cardStack;
+        return deck;
     };
-    cardStack.onMouseover = function (value) {
+    deck.onMouseover = function (value) {
         if (!arguments.length) { return onMouseover; }
         if(typeof value === "function"){
             onMouseover = value;
         }
-        return cardStack;
+        return deck;
     };
-    cardStack.onMouseout = function (value) {
+    deck.onMouseout = function (value) {
         if (!arguments.length) { return onMouseout; }
         if(typeof value === "function"){
             onMouseout = value;
         }
-        return cardStack;
+        return deck;
     };
-    return cardStack;
+    return deck;
 }

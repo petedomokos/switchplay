@@ -1,5 +1,5 @@
 import User from '../models/user.model'
-import Stack from '../models/cards/stack.model'
+import Stack from '../models/cards/deck.model'
 import Journey from '../models/journey/journey.model'
 import extend from 'lodash/extend'
 import errorHandler from './../helpers/dbErrorHandler'
@@ -143,21 +143,21 @@ const list = async (req, res) => {
 
 const createStack = async (req, res) => {
   const { user, body } = req;
-  const stack = body;
-  if(!user.stacks){
-    console.log("stacks not defined - creating")
-    user.stacks = [stack]
+  const deck = body;
+  if(!user.decks){
+    console.log("decks not defined - creating")
+    user.decks = [deck]
   }else{
-    console.log("pushing stack to stacks")
-    user.stacks = [stack, ...user.stacks]
+    console.log("pushing deck to decks")
+    user.decks = [deck, ...user.decks]
   }
-  console.log("user stacks", user.stacks)
-  //save it and return the new stack id to replace "temp"
+  console.log("user decks", user.decks)
+  //save it and return the new deck id to replace "temp"
   try {
     const result = await user.save()
-    //res.json(stack._id) - tdo - replace with this line
+    //res.json(deck._id) - tdo - replace with this line
     //the one that is added will always be the first one - need the saved version which will have _id
-    res.json(result.stacks[0])
+    res.json(result.decks[0])
   } catch (err) {
     return res.status(400).json({
       error: errorHandler.getErrorMessage(err)
@@ -166,17 +166,17 @@ const createStack = async (req, res) => {
 }
 
 const updateStack = async (req, res) => {
-  console.log('updating stack for.....', req.user._id)
+  console.log('updating deck for.....', req.user._id)
   const { user, body } = req;
   const updatedStack = body;
   updatedStack.updated = Date.now()
-  console.log("updatedstack", updatedStack)
-  console.log("stack id", updatedStack._id)
-  console.log("staskso id", user.stacks[0]._id)
-  console.log("equals??????", user.stacks[0]._id.equals(updatedStack._id))
-  user.stacks = user.stacks.map(s => !s._id.equals(updatedStack._id) ? s : updatedStack);
+  console.log("updateddeck", updatedStack)
+  console.log("deck id", updatedStack._id)
+  console.log("staskso id", user.decks[0]._id)
+  console.log("equals??????", user.decks[0]._id.equals(updatedStack._id))
+  user.decks = user.decks.map(s => !s._id.equals(updatedStack._id) ? s : updatedStack);
   user.updated = Date.now()
-  console.log("user stacks", user.stacks)
+  console.log("user decks", user.decks)
   try {
     await user.save()
     res.json(updatedStack)

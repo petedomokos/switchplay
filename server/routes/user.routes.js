@@ -18,7 +18,7 @@ router.route('/api/users')
   .get(userCtrl.list)
   .post(userCtrl.create)
 
-router.route('/api/users/:userId/stacks')
+router.route('/api/users/:userId/decks')
   .post(userCtrl.createStack)
   .put(authCtrl.requireSignin, authCtrl.hasAuthorization, userCtrl.updateStack)
 

@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 import crypto from 'crypto'
 import StatValueSchema from './journey/stat-value.model'
-import StackSchema from './cards/stack.model'
+import StackSchema from './cards/deck.model'
 
 const UserSchema = new mongoose.Schema({
   username: {
@@ -51,7 +51,7 @@ const UserSchema = new mongoose.Schema({
   //roles are player, coach, player-coach
   isPlayer:{type:Boolean, default:true},
   isCoach: {type:Boolean, default:true},
-  stacks:[StackSchema],
+  decks:[StackSchema],
   //other users who have admin rights over this user
   admin:[{type:mongoose.Schema.ObjectId, ref:'User'}],
   administeredUsers:[{type:mongoose.Schema.ObjectId, ref:'User'}],

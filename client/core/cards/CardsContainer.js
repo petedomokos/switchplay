@@ -5,14 +5,14 @@ import { createStack, updateStack } from '../../actions/UserActions'
 const mapStateToProps = (state, ownProps) => {
 	//console.log("JourneyContainer..........state.async", state.asyncProcesses)
 	const { asyncProcesses, user, system } = state;
-	//console.log("CardsContainer stacks", user.stacks);
+	//console.log("CardsContainer decks", user.decks);
 	//console.log("active", system.activeStack)
 
 	return{
 		user,
 		//data:user.milestonesData,
 		customActiveStack: system.activeStack,
-		data: user?.stacks,
+		data: user?.decks,
 		datasets:[],
 		//screen:state.system.screen,
         //width:state.system.screen.width,
@@ -25,13 +25,13 @@ const mapStateToProps = (state, ownProps) => {
 }
 
 const mapDispatchToProps = dispatch => ({
-	save(stack, shouldCreate, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
-		//console.log("save", stack, shouldCreate)
-		//only create new stack if a signed in user has saved the stack (ie made a change)
+	save(deck, shouldCreate, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
+		//console.log("save", deck, shouldCreate)
+		//only create new deck if a signed in user has saved the deck (ie made a change)
 		if(shouldCreate){
-			dispatch(createStack(stack, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter))
+			dispatch(createStack(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter))
 		}else{
-			dispatch(updateStack(stack, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter))
+			dispatch(updateStack(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter))
 		}
 	},
 })

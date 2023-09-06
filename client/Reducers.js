@@ -51,31 +51,31 @@ export const user = (state=InitialState.user, act) =>{
 			//aswell as photos and journeys
 			return { ...state, ...act.user, photos:mergedPhotos, journeys:mergedJourneys };
 		}
-		//this is generally called before new stack is persisted to server
+		//this is generally called before new deck is persisted to server
 		case C.CREATE_STACK:{
 			return {
 				...state,
-				stacks:[act.stack, ...state.stacks]
+				decks:[act.deck, ...state.decks]
 			};
 		}
-		//this is called after new stack is saved to server
+		//this is called after new deck is saved to server
 		case C.UPDATE_NEW_STACK_ID:{
 			return {
 				...state,
 				//replace the temp id (note, other changes could have been made eg more letters typed into title)
-				stacks:state.stacks.map(s => s.id !== "temp" ? s : ({ ...s, id:act.newStackId }))
+				decks:state.decks.map(s => s.id !== "temp" ? s : ({ ...s, id:act.newStackId }))
 			};
 		}
 		case C.UPDATE_STACK:{
 			return {
 				...state,
-				stacks:state.stacks.map(s => s.id !== act.stack.id ? s : ({ ...s, ...act.stack }))
+				decks:state.decks.map(s => s.id !== act.deck.id ? s : ({ ...s, ...act.deck }))
 			};
 		}
 		case C.DELETE_STACK:{
 			return {
 				...state,
-				stacks:state.stacks.filter(s => s.id !== act.stackId)
+				decks:state.decks.filter(s => s.id !== act.deckId)
 			};
 		}
 		case C.SAVE_JOURNEY:{
@@ -644,10 +644,10 @@ export const system = (state={}, act) => {
 			}
 		}
 		case C.CREATE_STACK:{
-			return { ...state, activeStack:act.stack.id };
+			return { ...state, activeStack:act.deck.id };
 		}
 		case C.UPDATE_NEW_STACK_ID:{
-			//set the created stack as the actice stack so it will still show
+			//set the created deck as the actice deck so it will still show
 			return { ...state, activeStack:act.newStackId };
 		}
 		default:

@@ -3,8 +3,8 @@ import * as d3 from 'd3';
 import { makeStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
 //import {  } from './constants';
-import cardStacksLayout from './cardStacksLayout';
-import cardsVisComponent from "./cardsVisComponent";
+import deckLayout from './deckLayout';
+import cardsComponent from "./cardsComponent";
 import ItemForm from "./forms/ItemForm";
 import { sortAscending } from '../../util/ArrayHelpers';
 import { initStack } from '../../data/cards';
@@ -85,15 +85,15 @@ const useStyles = makeStyles((theme) => ({
 
 const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen, save }) => {
   //we dont user defaultProps as we want to pass through userId too
-  const stacksData = data && data.length !== 0 ? data : [initStack(user?._id)];
-  const activeStack = stacksData.find(s => s.id === customActiveStack) || stacksData[0];
+  const decksData = data && data.length !== 0 ? data : [initStack(user?._id)];
+  const activeStack = decksData.find(s => s.id === customActiveStack) || decksData[0];
   const notSavedYet = !data?.find(s => s.id === activeStack.id);
   //console.log("Cards", activeStack)
   //console.log("screen", screen)
 
   const [showInstructions, setShowInstructions] = useState(activeStack.id === "temp");
-  const [layout, setLayout] = useState(() => cardStacksLayout());
-  const [cards, setCards] = useState(() => cardsVisComponent());
+  const [layout, setLayout] = useState(() => deckLayout());
+  const [cards, setCards] = useState(() => cardsComponent());
   const [form, setForm] = useState(null);
   //console.log("Form", form)
 
@@ -116,11 +116,11 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
   }, [activeStack._id])
 
   useEffect(() => {
-    //for now, just use active stack
+    //for now, just use active deck
     //const orderedCardsData = sortAscending(activeStack.cards, d => d.date);
 
-    const processedStacksData = layout(stacksData);
-    //just use first stack for now
+    const processedStacksData = layout(decksData);
+    //just use first deck for now
     d3.select(containerRef.current).datum(processedStacksData[0])
 
   }, [stringifiedData])
