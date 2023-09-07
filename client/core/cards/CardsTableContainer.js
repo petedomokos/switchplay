@@ -1,17 +1,17 @@
 import { connect } from 'react-redux'
-import Cards  from './Cards'
+import CardsTable  from './CardsTable'
 import { createStack, updateStack } from '../../actions/UserActions'
 
 const mapStateToProps = (state, ownProps) => {
 	//console.log("JourneyContainer..........state.async", state.asyncProcesses)
 	const { asyncProcesses, user, system } = state;
-	//console.log("CardsContainer decks", user.decks);
+	//console.log("CardsTableContainer decks", user.decks);
 	//console.log("active", system.activeStack)
 
 	return{
 		user,
 		//data:user.milestonesData,
-		customActiveStack: system.activeStack,
+		customActiveDeck: system.activeDeck,
 		data: user?.decks,
 		datasets:[],
 		//screen:state.system.screen,
@@ -37,10 +37,10 @@ const mapDispatchToProps = dispatch => ({
 })
 
 //wrap all 4 sections in the same container for now.
-const CardsContainer = connect(
+const CardsTableContainer = connect(
 	mapStateToProps,
 	mapDispatchToProps
-	)(Cards)
+	)(CardsTable)
 
-export default CardsContainer
+export default CardsTableContainer
 

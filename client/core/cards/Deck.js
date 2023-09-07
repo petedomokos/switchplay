@@ -4,20 +4,13 @@ import { makeStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
 //import {  } from './constants';
 import deckLayout from './deckLayout';
-import cardsComponent from "./cardsComponent";
+import deckComponent from "./deckComponent";
 import ItemForm from "./forms/ItemForm";
 import { sortAscending } from '../../util/ArrayHelpers';
 import { initStack } from '../../data/cards';
 //import { createId } from './helpers';
 
 import { grey10 } from './constants';
-
-const instructions = [
-  { keyPhrase:"Swipe up", rest:" to pick up a card" },
-  { keyPhrase:"Swipe down", rest:" to put down a card" },
-  { keyPhrase:"Tap a section", rest:" to view or edit" },
-  { keyPhrase:"Longpress a section", rest:" to change status" }
-]
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
     height:props => props.screen.height,
     display:"flex",
     flexDirection:"column",
-    background:grey10(9)
+    background:"yellow", //grey10(9)
   },
   instructionsSection:{
     position:"absolute",
@@ -50,17 +43,6 @@ const useStyles = makeStyles((theme) => ({
   keyPhrase:{
     color:grey10(1)
   },
-  hideInstructions:{
-    margin:"25px 5px",
-    width:"125px",
-    height:"30px",
-    fontSize:"12px",
-    color:grey10(2)
-
-  },
-  showInstructions:{
-
-  },
   svg:{
   },
   formContainer:{
@@ -74,26 +56,13 @@ const useStyles = makeStyles((theme) => ({
 
 }))
 
-// next - position the form properly, need the topSpaceheight and margins so we can get to top left of selected card.
-// may change margins for selected so it expands even more to take entire screen
-// also then decide how to close the form and deselect if it wasnt selected before item was clicked
-// then impl the very basic form properly (just title), and how it saves, inc keyPress
-//also
-//Make a note somewhere for later to consider making it go to a list of all 5 items, as long as keyboard causes it to scroll up 
-//like trello so the one being edited is in screen
-//this way, we can enter 5 items as a list. but we lose the positional meaning of the 5 items eg 4 corner model for FA for example
-
-const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen, save }) => {
+const Deck = ({ user, data, datasets, asyncProcesses, screen, save }) => {
   //we dont user defaultProps as we want to pass through userId too
-  const decksData = data && data.length !== 0 ? data : [initStack(user?._id)];
-  const activeStack = decksData.find(s => s.id === customActiveStack) || decksData[0];
-  const notSavedYet = !data?.find(s => s.id === activeStack.id);
-  //console.log("Cards", activeStack)
-  //console.log("screen", screen)
+  const deckData = data || initStack(user?._id);
+  console.log("Deck", data)
 
-  const [showInstructions, setShowInstructions] = useState(activeStack.id === "temp");
   const [layout, setLayout] = useState(() => deckLayout());
-  const [cards, setCards] = useState(() => cardsComponent());
+  const [deck, setDeck] = useState(() => deckComponent());
   const [form, setForm] = useState(null);
   //console.log("Form", form)
 
@@ -107,80 +76,55 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
   };
   const classes = useStyles(styleProps) 
   const containerRef = useRef(null);
-  const instructionsRef = useRef(null);
 
   const stringifiedData = JSON.stringify(data);
 
   useEffect(() => {
-    setShowInstructions(activeStack.id === "temp");
-  }, [activeStack._id])
-
-  useEffect(() => {
-    //for now, just use active deck
-    //const orderedCardsData = sortAscending(activeStack.cards, d => d.date);
-
-    const processedStacksData = layout(decksData);
+    //const processedDeckData = layout(deckData);
     //just use first deck for now
-    d3.select(containerRef.current).datum(processedStacksData[0])
+    //d3.select(containerRef.current).datum(processedDeckData)
 
   }, [stringifiedData])
 
   useEffect(() => {
-    cards
+    /*deck
       .width(screen.width || 300)
       .height(screen.height || 600)
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
-      .setForm(setForm)
+      .setForm(setForm)*/
 
   }, [stringifiedData, screen])
 
   useEffect(() => {
-    d3.select(containerRef.current).call(cards);
+    //d3.select(containerRef.current).call(deck);
   }, [stringifiedData, screen])
-
-  const handleHideInstructions = () => {
-    d3.select(instructionsRef.current)
-      .style("opacity", 1)
-      .transition()
-        .duration(200)
-        .style("opacity", 0);
-
-    d3.select(containerRef.current)
-      .style("display", null)
-      .style("opacity", 0)
-      .transition()
-        .delay(300)
-        .duration(200)
-        .style("opacity", 1)
-          .on("end", () => { setShowInstructions(false); });
-  }
 
   const updateStack = useCallback(updatedStack => {
     save(updatedStack, notSavedYet);
   }, [stringifiedData]);
 
   const updateFrontCardNr = useCallback(cardNr => {
-    updateStack({ ...activeStack, frontCardNr:cardNr })
+    updateStack({ ...deckData, frontCardNr:cardNr })
   }, [stringifiedData, form]);
 
   const updateCard = useCallback((updatedCard) => {
     //console.log("updateCard", updatedCard)
-    const updatedCards = activeStack.cards.map(c => c.cardNr !== updatedCard.cardNr ? c : updatedCard);
-    updateStack({ ...activeStack, cards:updatedCards })
+    const updatedCards = deckData.cards.map(c => c.cardNr !== updatedCard.cardNr ? c : updatedCard);
+    updateStack({ ...deckData, cards:updatedCards })
   }, [stringifiedData]);
 
   const updateItemTitle = useCallback(updatedTitle => {
     //console.log("updateTitle", updatedTitle, form)
     const { cardNr, itemNr } = form.value;
-    const cardToUpdate = activeStack.cards.find(c => c.cardNr === cardNr);
+    const cardToUpdate = deckData.cards.find(c => c.cardNr === cardNr);
     const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title: updatedTitle }));
     updateCard({ ...cardToUpdate, items:updatedItems })
   }, [stringifiedData, form]);
 
   const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
     //console.log("updateItemStatus", cardNr, itemNr, updatedStatus)
-    const cardToUpdate = activeStack.cards.find(c => c.cardNr === cardNr);
+    const cardToUpdate = deckData.cards.find(c => c.cardNr === cardNr);
     const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, status: updatedStatus }));
     updateCard({ ...cardToUpdate, items:updatedItems })
   }, [stringifiedData, form]);
@@ -199,21 +143,7 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
 
   return (
     <div className={`cards-root ${classes.root}`}>
-      <div className={classes.instructionsSection} ref={instructionsRef}
-        style={{display:showInstructions ? null : "none"}}>
-        <div className={classes.instructionsTitle}>How To Play</div>
-        <div className={classes.instructions}>
-          {instructions.map((ins,i) => 
-              <p className={classes.instruction} key={`ins-${i}`}>
-                <span className={classes.keyPhrase}>{ins.keyPhrase}</span>
-                {ins.rest}
-              </p>
-          )}
-          <Button color="primary" variant="contained" onClick={() => handleHideInstructions()} className={classes.hideInstructions}>Go To Cards</Button>
-        </div>
-      </div>
-      <svg className={classes.svg} ref={containerRef} id={`cards-svg`} 
-        style={{display:showInstructions ? "none" : null}}>
+      <svg className={classes.svg} ref={containerRef} id={`cards-svg`} >
         <defs>
           <filter id="shine">
             <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
@@ -230,10 +160,10 @@ const Cards = ({ user, customActiveStack, data, datasets, asyncProcesses, screen
   )
 }
 
-Cards.defaultProps = {
+Deck.defaultProps = {
   asyncProcesses:{},
   datasets: [], 
   screen: {}
 }
 
-export default Cards;
+export default Deck;
