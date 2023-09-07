@@ -15,11 +15,13 @@ import { grey10 } from './constants';
 const useStyles = makeStyles((theme) => ({
   root: {
     position:"relative",
-    width:props => props.screen.width,
-    height:props => props.screen.height,
+    width:props => props.screen.width * 0.9,
+    height:props => props.screen.height * 0.98,
     display:"flex",
     flexDirection:"column",
-    background:"yellow", //grey10(9)
+    border:"solid",
+    borderWidth:"thin",
+    borderColor:grey10(7)
   },
   instructionsSection:{
     position:"absolute",
@@ -64,7 +66,6 @@ const Deck = ({ user, data, datasets, asyncProcesses, screen, save }) => {
   const [layout, setLayout] = useState(() => deckLayout());
   const [deck, setDeck] = useState(() => deckComponent());
   const [form, setForm] = useState(null);
-  //console.log("Form", form)
 
   let styleProps = {
     screen,
@@ -80,24 +81,24 @@ const Deck = ({ user, data, datasets, asyncProcesses, screen, save }) => {
   const stringifiedData = JSON.stringify(data);
 
   useEffect(() => {
-    //const processedDeckData = layout(deckData);
+    const processedDeckData = layout(deckData);
     //just use first deck for now
-    //d3.select(containerRef.current).datum(processedDeckData)
+    d3.select(containerRef.current).datum(processedDeckData)
 
   }, [stringifiedData])
 
   useEffect(() => {
-    /*deck
+    deck
       .width(screen.width || 300)
       .height(screen.height || 600)
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
-      .setForm(setForm)*/
+      .setForm(setForm)
 
   }, [stringifiedData, screen])
 
   useEffect(() => {
-    //d3.select(containerRef.current).call(deck);
+    d3.select(containerRef.current).call(deck);
   }, [stringifiedData, screen])
 
   const updateStack = useCallback(updatedStack => {
@@ -151,11 +152,11 @@ const Deck = ({ user, data, datasets, asyncProcesses, screen, save }) => {
         </defs>
       </svg>
       {/**form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>*/}
-      <div className={classes.formContainer}>
+      {/**<div className={classes.formContainer}>
           {form?.formType === "item" && 
             <ItemForm item={form.value} fontSize={form.height * 0.5} save={updateItemTitle} close={() => setForm(null)} />
           }
-      </div>
+        </div>*/}
     </div>
   )
 }

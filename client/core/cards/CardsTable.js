@@ -127,7 +127,7 @@ const CardsTable = ({ user, customActiveDeck, data, datasets, asyncProcesses, sc
     })
   }, [form, stringifiedData])
 
-  next: Deck still displaying even when showInstrucitons is true
+  //next: Deck still displaying even when showInstrucitons is true
 
   return (
     <div className={`cards-root ${classes.root}`}>
@@ -144,7 +144,9 @@ const CardsTable = ({ user, customActiveDeck, data, datasets, asyncProcesses, sc
           <Button color="primary" variant="contained" onClick={() => handleHideInstructions()} className={classes.hideInstructions}>Go To Cards</Button>
         </div>
       </div>
-      <Deck data={activeDeck} style={{display:showInstructions ? "none" : null}}/>
+      <div ref={containerRef} style={{display:showInstructions ? "none" : null}}>
+        <Deck data={activeDeck} screen={screen} user={user} />
+      </div>
       {/**form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>*/}
       <div className={classes.formContainer}>
           {form?.formType === "item" && 

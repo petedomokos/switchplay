@@ -14,22 +14,14 @@ export default function decksLayout(){
 
     const _cardsLayout = cardsLayout();
 
-    function update(decksData){
-        const _data = decksData.map((s,i) => {
-            const { cards } = s;
-            const processedCards = _cardsLayout(cards);
-                return {
-                    ...s,
-                    cards:processedCards,
-                    status:calcStackStatus(processedCards)
-                }
-        })
-
-        if(_data[0] && _data[0].cardNr !== _data.length){
-            //hasnt been reversed yet
-            return _data.reverse();
+    function update(deckData){
+        const { cards } = deckData;
+        const processedCards = _cardsLayout(cards);
+        return {
+            ...deckData,
+            cards:processedCards,
+            status:calcStackStatus(processedCards)
         }
-        return _data;
     }
 
     update.format = function (value) {

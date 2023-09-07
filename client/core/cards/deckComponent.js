@@ -195,7 +195,7 @@ export default function deckComponent() {
 
             function update(_deckData, options={}){
                 const { } = options;
-                const { frontCardNr } = deckData;
+                const { frontCardNr } = _deckData;
 
                 //dimns for specific chart
                 const deckData = _deckData.cards
@@ -211,7 +211,7 @@ export default function deckComponent() {
                             isSelected:selectedCardNr === card.cardNr
                         }
                     });
-                //console.log("deckData", deckData)
+                console.log("deckData", deckData)
 
                 //gs
                 contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
