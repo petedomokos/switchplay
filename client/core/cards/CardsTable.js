@@ -9,6 +9,7 @@ import { initStack } from '../../data/cards';
 //import { createId } from './helpers';
 
 import { grey10 } from './constants';
+import { HeightRounded } from '@material-ui/icons';
 
 const instructions = [
   { keyPhrase:"Swipe up", rest:" to pick up a card" },
@@ -20,8 +21,8 @@ const instructions = [
 const useStyles = makeStyles((theme) => ({
   root: {
     position:"relative",
-    width:props => props.screen.width,
-    height:props => props.screen.height,
+    width:props => props.width,
+    height:props => props.height,
     display:"flex",
     flexDirection:"column",
     background:grey10(9)
@@ -59,33 +60,73 @@ const useStyles = makeStyles((theme) => ({
   showInstructions:{
 
   },
+  decks:{
+    display:props => props.decks.display,
+    width:props => `${props.width}px`,
+    //height:props => `${props.height}px`,
+    flexWrap:"wrap",
+    justifyContent:"flex-start",
+    alignItems:"flex-start",
+    border:"solid",
+    borderWidth:"thin", 
+    borderColor:"yellow"
+  },
+  nonSelectedDeckContainer:{
+    width:props => `${props.nonSelectedDeckContainer.width}px`,
+    height:props => `${props.nonSelectedDeckContainer.height}px`,
+  },
+  selectedDeckContainer:{
+    width:props => `${props.selectedDeckContainer.width}px`,
+    height:props => `${props.selectedDeckContainer.height}px`,
+  },
   formContainer:{
     position:"absolute",
     left:"0px",
     top:"0px",
-    width:props => `${props.form.width}px`,
-    height:props => `${props.form.height}px`,
+    width:props => `${props.width}px`,
+    height:props => `${props.height}px`,
     display:props => props.form.display
   }
 
 }))
 
 const CardsTable = ({ user, customActiveDeck, data, datasets, asyncProcesses, screen, save }) => {
+  const width = screen.width || 300;
+  const height = screen.height * 0.98 || 600;
   //we dont user defaultProps as we want to pass through userId too
-  const decksData = data && data.length !== 0 ? data : [initStack(user?._id)];
+  const mockDecks = [1,2,3,4,5].map(nr => 
+    ({ ...initStack(user?._id), id:nr === 1 ? "temp" : `temp${nr}` }))
+  
+  const decksData = mockDecks;
+  //const decksData = data && data.length !== 0 ? data : [initStack(user?._id)];
   const activeDeck = decksData.find(s => s.id === customActiveDeck) || decksData[0];
   const notSavedYet = !data?.find(s => s.id === activeDeck.id);
 
+  const [selectedDeck, setSelectedDeck] = useState("");
   const [showInstructions, setShowInstructions] = useState(activeDeck.id === "temp");
   const [form, setForm] = useState(null);
-  //console.log("Form", form)
+
+  const nonSelectedDeckWidth = d3.min([width/3, 200]);
+  const nonSelectedDeckHeight = nonSelectedDeckWidth * 1.5;
+  const selectedDeckWidth = width * 0.98;
+  const selectedDeckHeight = height * 0.9;
 
   let styleProps = {
-    screen,
+    width,
+    height,
     form:{ 
       display: form ? null : "none",
-      width:screen.width || 300,
-      height:screen.height || 600 
+    },
+    decks:{
+      display:showInstructions ? "none" : "flex",
+    },
+    nonSelectedDeckContainer:{
+      width:nonSelectedDeckWidth,
+      height:nonSelectedDeckHeight
+    },
+    selectedDeckContainer:{
+      width:selectedDeckWidth,
+      height:selectedDeckHeight
     }
   };
   const classes = useStyles(styleProps) 
@@ -130,7 +171,8 @@ const CardsTable = ({ user, customActiveDeck, data, datasets, asyncProcesses, sc
   //next: Deck still displaying even when showInstrucitons is true
 
   return (
-    <div className={`cards-root ${classes.root}`}>
+    <div className={`cards-root ${classes.root}`} 
+      onClick={() => { setSelectedDeck("") }}>
       <div className={classes.instructionsSection} ref={instructionsRef}
         style={{display:showInstructions ? null : "none"}}>
         <div className={classes.instructionsTitle}>How To Play</div>
@@ -144,8 +186,22 @@ const CardsTable = ({ user, customActiveDeck, data, datasets, asyncProcesses, sc
           <Button color="primary" variant="contained" onClick={() => handleHideInstructions()} className={classes.hideInstructions}>Go To Cards</Button>
         </div>
       </div>
-      <div ref={containerRef} style={{display:showInstructions ? "none" : null}}>
-        <Deck data={activeDeck} screen={screen} user={user} />
+      <div ref={containerRef} className={classes.decks} >
+        {decksData.map(deckData =>
+          <div 
+            key={`deckContainer-${deckData.id}`}
+            className={selectedDeck ? classes.selectedDeckContainer : classes.nonSelectedDeckContainer}
+            style={{display:!selectedDeck || selectedDeck === deckData.id ? null : "none" }}
+          >
+            <Deck data={activeDeck} user={user} 
+              width={selectedDeck ? selectedDeckWidth : nonSelectedDeckWidth} 
+              height={selectedDeck ? selectedDeckHeight : nonSelectedDeckHeight}
+              onClick={(e) => { 
+                setSelectedDeck(deckData.id);
+                e.stopPropagation();
+              }} />
+          </div>
+        )}
       </div>
       {/**form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>*/}
       <div className={classes.formContainer}>

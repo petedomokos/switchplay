@@ -211,7 +211,6 @@ export default function deckComponent() {
                             isSelected:selectedCardNr === card.cardNr
                         }
                     });
-                console.log("deckData", deckData)
 
                 //gs
                 contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)

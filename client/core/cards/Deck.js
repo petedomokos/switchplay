@@ -15,8 +15,8 @@ import { grey10 } from './constants';
 const useStyles = makeStyles((theme) => ({
   root: {
     position:"relative",
-    width:props => props.screen.width * 0.9,
-    height:props => props.screen.height * 0.98,
+    width:props => props.width,
+    height:props => props.height,
     display:"flex",
     flexDirection:"column",
     border:"solid",
@@ -46,33 +46,33 @@ const useStyles = makeStyles((theme) => ({
     color:grey10(1)
   },
   svg:{
+    pointerEvents:"none"
   },
   formContainer:{
     position:"absolute",
     left:"0px",
     top:"0px",
-    width:props => `${props.form.width}px`,
-    height:props => `${props.form.height}px`,
+    width:props => `${props.width}px`,
+    height:props => `${props.height}px`,
     display:props => props.form.display
   }
 
 }))
 
-const Deck = ({ user, data, datasets, asyncProcesses, screen, save }) => {
+const Deck = ({ user, data, datasets, asyncProcesses, width, height, save, onClick }) => {
   //we dont user defaultProps as we want to pass through userId too
   const deckData = data || initStack(user?._id);
-  console.log("Deck", data)
+  //console.log("Deck", width)
 
   const [layout, setLayout] = useState(() => deckLayout());
   const [deck, setDeck] = useState(() => deckComponent());
   const [form, setForm] = useState(null);
 
   let styleProps = {
-    screen,
+    width,
+    height,
     form:{ 
       display: form ? null : "none",
-      width:screen.width || 300,
-      height:screen.height || 600 
     }
   };
   const classes = useStyles(styleProps) 
@@ -89,17 +89,17 @@ const Deck = ({ user, data, datasets, asyncProcesses, screen, save }) => {
 
   useEffect(() => {
     deck
-      .width(screen.width || 300)
-      .height(screen.height || 600)
+      .width(width)
+      .height(height)
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
       .setForm(setForm)
 
-  }, [stringifiedData, screen])
+  }, [stringifiedData, width, height])
 
   useEffect(() => {
     d3.select(containerRef.current).call(deck);
-  }, [stringifiedData, screen])
+  }, [stringifiedData, width, height])
 
   const updateStack = useCallback(updatedStack => {
     save(updatedStack, notSavedYet);
@@ -143,7 +143,7 @@ const Deck = ({ user, data, datasets, asyncProcesses, screen, save }) => {
   }, [form, stringifiedData])
 
   return (
-    <div className={`cards-root ${classes.root}`}>
+    <div className={`cards-root ${classes.root}`} onClick={onClick}>
       <svg className={classes.svg} ref={containerRef} id={`cards-svg`} >
         <defs>
           <filter id="shine">
@@ -164,7 +164,8 @@ const Deck = ({ user, data, datasets, asyncProcesses, screen, save }) => {
 Deck.defaultProps = {
   asyncProcesses:{},
   datasets: [], 
-  screen: {}
+  width:300,
+  height:600
 }
 
 export default Deck;
