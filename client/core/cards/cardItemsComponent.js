@@ -35,7 +35,7 @@ export default function cardItemsComponent() {
         itemWidth = contentsWidth/4.5;
         itemHeight = itemWidth;
         const longestItemLength = d3.max([itemWidth, itemHeight]);
-        innerRadius = 30;// 0;// (actualContentsLength/2 - longestItemLength/2) * (withSections ? 0.5 : 1);
+        innerRadius = 0;// (actualContentsLength/2 - longestItemLength/2) * (withSections ? 0.5 : 1);
         outerRadius = contentsWidth/2;
     }
 
