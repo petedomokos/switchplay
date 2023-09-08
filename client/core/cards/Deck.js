@@ -17,6 +17,7 @@ const useStyles = makeStyles((theme) => ({
     position:"relative",
     width:props => props.width,
     height:props => props.height,
+    transition: "all 2000ms",
     display:"flex",
     flexDirection:"column",
     border:"solid",
@@ -98,7 +99,7 @@ const Deck = ({ user, data, datasets, asyncProcesses, width, height, save, onCli
   }, [stringifiedData, width, height])
 
   useEffect(() => {
-    d3.select(containerRef.current).call(deck);
+    //d3.select(containerRef.current).call(deck);
   }, [stringifiedData, width, height])
 
   const updateStack = useCallback(updatedStack => {
@@ -144,13 +145,14 @@ const Deck = ({ user, data, datasets, asyncProcesses, width, height, save, onCli
 
   return (
     <div className={`cards-root ${classes.root}`} onClick={onClick}>
-      <svg className={classes.svg} ref={containerRef} id={`cards-svg`} >
+      Deck {deckData.id}
+      {/**<svg className={classes.svg} ref={containerRef} id={`cards-svg`} >
         <defs>
           <filter id="shine">
             <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
           </filter>
         </defs>
-      </svg>
+      </svg>*/}
       {/**form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>*/}
       {/**<div className={classes.formContainer}>
           {form?.formType === "item" && 

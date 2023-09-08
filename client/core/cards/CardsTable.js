@@ -9,7 +9,6 @@ import { initStack } from '../../data/cards';
 //import { createId } from './helpers';
 
 import { grey10 } from './constants';
-import { HeightRounded } from '@material-ui/icons';
 
 const instructions = [
   { keyPhrase:"Swipe up", rest:" to pick up a card" },
@@ -20,11 +19,14 @@ const instructions = [
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    position:"relative",
+    position:"absolute",
+    left:props => props.left,
+    top:props => props.top,
     width:props => props.width,
     height:props => props.height,
-    display:"flex",
-    flexDirection:"column",
+    transition: "all 2000ms",
+    //display:"flex",
+    //flexDirection:"column",
     background:grey10(9)
   },
   instructionsSection:{
@@ -63,6 +65,7 @@ const useStyles = makeStyles((theme) => ({
   decks:{
     display:props => props.decks.display,
     width:props => `${props.width}px`,
+    transition: "all 2000ms",
     //height:props => `${props.height}px`,
     flexWrap:"wrap",
     justifyContent:"flex-start",
@@ -71,13 +74,11 @@ const useStyles = makeStyles((theme) => ({
     borderWidth:"thin", 
     borderColor:"yellow"
   },
-  nonSelectedDeckContainer:{
-    width:props => `${props.nonSelectedDeckContainer.width}px`,
-    height:props => `${props.nonSelectedDeckContainer.height}px`,
-  },
-  selectedDeckContainer:{
-    width:props => `${props.selectedDeckContainer.width}px`,
-    height:props => `${props.selectedDeckContainer.height}px`,
+  deckContainer:{
+    position:"absolute",
+    width:props => `${props.deckContainer.width}px`,
+    height:props => `${props.deckContainer.height}px`,
+    transition: "all 2000ms",
   },
   formContainer:{
     position:"absolute",
@@ -87,46 +88,89 @@ const useStyles = makeStyles((theme) => ({
     height:props => `${props.height}px`,
     display:props => props.form.display
   }
+}))
 
+//helpers
+const createMockDecks = userId => [1,2,3,4,5].map((nr,i) =>  
+  ({ 
+      ...initStack(userId), 
+      id:nr === 1 ? "temp" : `temp${nr}`,
+      pos:i
+  })
+)
+const colour = deck => (deck.colNr + deck.rowNr) % 2 === 0 ? "red" : "blue";
+const embellishedDecks = decksState => decksState.map((d,i) => ({
+  ...d, 
+  colNr:d.pos % 3,
+  rowNr:Math.floor(d.pos/3),
 }))
 
 const CardsTable = ({ user, customActiveDeck, data, datasets, asyncProcesses, screen, save }) => {
   const width = screen.width || 300;
   const height = screen.height * 0.98 || 600;
   //we dont user defaultProps as we want to pass through userId too
-  const mockDecks = [1,2,3,4,5].map(nr => 
-    ({ ...initStack(user?._id), id:nr === 1 ? "temp" : `temp${nr}` }))
-  
-  const decksData = mockDecks;
+  const [decksState, setDecksState] = useState(createMockDecks(user?.id));
+  console.log("decksState", decksState)
+  const decksData = embellishedDecks(decksState);
+  console.log("decksData", decksData)
   //const decksData = data && data.length !== 0 ? data : [initStack(user?._id)];
   const activeDeck = decksData.find(s => s.id === customActiveDeck) || decksData[0];
   const notSavedYet = !data?.find(s => s.id === activeDeck.id);
 
-  const [selectedDeck, setSelectedDeck] = useState("");
+  const [selectedDeckId, setSelectedDeckId] = useState("");
   const [showInstructions, setShowInstructions] = useState(activeDeck.id === "temp");
   const [form, setForm] = useState(null);
 
-  const nonSelectedDeckWidth = d3.min([width/3, 200]);
-  const nonSelectedDeckHeight = nonSelectedDeckWidth * 1.5;
+  const selectedDeck = decksData.find(d => d.id === selectedDeckId);
+
+  const moveDeck = (origArrPos, newArrPos) => {
+    setDecksState(prevState => {
+      if(newArrPos < origArrPos){
+        //moving it back
+        return prevState.map(d => {
+          if(d.pos === origArrPos) { return { ...d, pos:newArrPos } }
+          //decks before the new pos arent changed
+          if(d.pos < newArrPos) { return d; }
+          //decks after the old pos arent changed
+          if(d.pos > origArrPos) { return d; }
+          //decks between will increase by 1
+          return { ...d, pos:d.pos + 1 }
+        })
+      }
+      //moving it forward
+      return prevState.map(d => {
+        if(d.pos === origArrPos) { return { ...d, pos:newArrPos } }
+        //decks before the orig pos arent changed
+        if(d.pos < origArrPos) { return d; }
+        //decks after the new pos arent changed
+        if(d.pos > newArrPos) { return d; }
+        //decks between will reduce by 1
+        return { ...d, pos:d.pos - 1 }
+      })
+    })
+  } 
+
+  const nonSelectedDeckWidth = /*selectedDeck ? 0 :*/ d3.min([width/3, 200]);
+  const nonSelectedDeckHeight = /*selectedDeck ? 0 :*/ nonSelectedDeckWidth * 1.5;
   const selectedDeckWidth = width * 0.98;
   const selectedDeckHeight = height * 0.9;
+  const deckWidth = selectedDeck ? selectedDeckWidth : nonSelectedDeckWidth;
+  const deckHeight = selectedDeck ? selectedDeckHeight : nonSelectedDeckHeight;
 
   let styleProps = {
-    width,
-    height,
+    left:selectedDeck ? -selectedDeckWidth * selectedDeck.colNr : 0,
+    top:selectedDeck ? -selectedDeckHeight * selectedDeck.rowNr : 0,
+    width:width * 10, //selectedDeck ? width * 3 : width,
+    height: height * 10,
     form:{ 
       display: form ? null : "none",
     },
     decks:{
       display:showInstructions ? "none" : "flex",
     },
-    nonSelectedDeckContainer:{
-      width:nonSelectedDeckWidth,
-      height:nonSelectedDeckHeight
-    },
-    selectedDeckContainer:{
-      width:selectedDeckWidth,
-      height:selectedDeckHeight
+    deckContainer:{
+      width:deckWidth,
+      height:deckHeight
     }
   };
   const classes = useStyles(styleProps) 
@@ -172,7 +216,7 @@ const CardsTable = ({ user, customActiveDeck, data, datasets, asyncProcesses, sc
 
   return (
     <div className={`cards-root ${classes.root}`} 
-      onClick={() => { setSelectedDeck("") }}>
+      onClick={() => { setSelectedDeckId("") }}>
       <div className={classes.instructionsSection} ref={instructionsRef}
         style={{display:showInstructions ? null : "none"}}>
         <div className={classes.instructionsTitle}>How To Play</div>
@@ -187,21 +231,33 @@ const CardsTable = ({ user, customActiveDeck, data, datasets, asyncProcesses, sc
         </div>
       </div>
       <div ref={containerRef} className={classes.decks} >
-        {decksData.map(deckData =>
-          <div 
-            key={`deckContainer-${deckData.id}`}
-            className={selectedDeck ? classes.selectedDeckContainer : classes.nonSelectedDeckContainer}
-            style={{display:!selectedDeck || selectedDeck === deckData.id ? null : "none" }}
-          >
-            <Deck data={activeDeck} user={user} 
-              width={selectedDeck ? selectedDeckWidth : nonSelectedDeckWidth} 
-              height={selectedDeck ? selectedDeckHeight : nonSelectedDeckHeight}
-              onClick={(e) => { 
-                setSelectedDeck(deckData.id);
+        {decksData.map(deckData => {
+          const { colNr, rowNr } = deckData;
+          return <div 
+              key={`deckContainer-${deckData.id}`}
+              className={classes.deckContainer}
+              style={{
+                left:colNr * deckWidth,
+                top: rowNr * deckHeight,
+                background:colour(deckData)
+                /*display:!selectedDeckId || selectedDeckId === deckData.id ? null : "none"*/ 
+              }}
+            >
+            <Deck data={deckData} user={user} 
+              width={deckWidth} 
+              height={deckHeight}
+              onClick={(e) => {
+                /*if(deckData.pos === 4){
+                  moveDeck(deckData.pos, 1);
+                  e.stopPropagation();
+                  return;
+                }*/
+                setSelectedDeckId(prevState => prevState ? "" : deckData.id);
                 e.stopPropagation();
               }} />
           </div>
-        )}
+    })}
+        })}
       </div>
       {/**form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>*/}
       <div className={classes.formContainer}>
