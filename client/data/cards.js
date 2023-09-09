@@ -3,11 +3,11 @@ import { addDays, addWeeks } from "../util/TimeHelpers"
 const items = [
     { itemNr:0, status:0 }, { itemNr:1, status:0 }, { itemNr:2, status:0 }, { itemNr:3, status:0 }, { itemNr:4, status:0 },
 ]
-export const initStack = (userId) => {    
+export const initDeck = (userId) => {    
     const now = new Date();
     return {
         owner:userId,
-        id:"temp",
+        id:`temp-${Date.now()}`,
         title:"",
         frontCardNr:0,
         cards:[

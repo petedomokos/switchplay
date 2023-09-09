@@ -1,5 +1,13 @@
 import * as d3 from 'd3';
 
+export const TRANSITIONS = {
+    SLOW:800,
+    //med:400,
+    MED:2000,
+    FAST:200,
+    VERY_FAST:50
+}
+
 export const INFO_HEIGHT_PROPORTION_OF_CARDS_AREA = 0.07;
 
 export const grey10 = (i) => ["#FFFFFF", "#E8E8E8","#D3D3D3", "#BEBEBE", "#A8A8A8", "#888888", "#696969", "#505050", "#303030", "#000000"][i-1];
@@ -23,23 +31,6 @@ export const TIME_SETTINGS = {
     YEAR_END : { MONTH:4, DAY_OF_MONTH:31 },
     WEEK_END_DAY:0, //0 = sunday,
     DAY_END_HRS:22
-}
-
-export const TRANSITIONS = {
-    DEFAULT_DURATIONS:{
-        SLIDE:{ FAST:200, MED:400, SLOW:600 },
-        FADE:{ FAST:50, MED:200, SLOW:400 }
-    },
-    KPI:{
-        FADE:{
-            DURATION:400
-        }
-    },
-    KPIS:{
-        AUTO_SCROLL:{
-            DURATION:300
-        }
-    }
 }
 
 export const FONTSIZES = { 

@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10, OVERLAY, COLOURS } from "./constants";
+import { DIMNS, grey10, OVERLAY, COLOURS, TRANSITIONS } from "./constants";
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
 import pentagonComponent from './pentagonComponent';
 
@@ -378,7 +378,9 @@ export default function profileInfoComponent() {
                             })
                             .remove();
                     })
-                    .on("click", function(e,d){ onClick.call(this, e, d)})
+                    .on("click", function(e,d){ 
+                        onClick.call(this, e, d)
+                    })
 
         }
 

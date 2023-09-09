@@ -1,9 +1,9 @@
 import { connect } from 'react-redux'
 import CardsTable  from './CardsTable'
-import { createStack, updateStack } from '../../actions/UserActions'
+import { createDeck, updateDecks } from '../../actions/UserActions'
 
 const mapStateToProps = (state, ownProps) => {
-	//console.log("JourneyContainer..........state.async", state.asyncProcesses)
+	console.log("CardsTableContainer...user", state.user)
 	const { asyncProcesses, user, system } = state;
 	//console.log("CardsTableContainer decks", user.decks);
 
@@ -11,7 +11,6 @@ const mapStateToProps = (state, ownProps) => {
 		user,
 		//data:user.milestonesData,
 		customActiveDeck: system.activeDeck,
-		data: user?.decks,
 		datasets:[],
 		//screen:state.system.screen,
         //width:state.system.screen.width,
@@ -24,15 +23,12 @@ const mapStateToProps = (state, ownProps) => {
 }
 
 const mapDispatchToProps = dispatch => ({
-	save(deck, shouldCreate, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
-		//console.log("save", deck, shouldCreate)
-		//only create new deck if a signed in user has saved the deck (ie made a change)
-		if(shouldCreate){
-			dispatch(createStack(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter))
-		}else{
-			dispatch(updateStack(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter))
-		}
+	save(decks, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
+		dispatch(updateDecks(decks, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter));
 	},
+	createDeck(settings){
+		dispatch(createDeck(settings))
+	}
 })
 
 //wrap all 4 sections in the same container for now.

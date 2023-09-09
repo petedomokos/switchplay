@@ -19,8 +19,8 @@ router.route('/api/users')
   .post(userCtrl.create)
 
 router.route('/api/users/:userId/decks')
-  .post(userCtrl.createStack)
-  .put(authCtrl.requireSignin, authCtrl.hasAuthorization, userCtrl.updateStack)
+  .post(userCtrl.createDeck)
+  .put(authCtrl.requireSignin, authCtrl.hasAuthorization, userCtrl.updateDecks)
 
 router.route('/api/users/:userId')
   .get(authCtrl.requireSignin, userCtrl.read)

@@ -5,10 +5,10 @@ import Button from '@material-ui/core/Button'
 import ItemForm from "./forms/ItemForm";
 import Deck from "./Deck";
 import { sortAscending } from '../../util/ArrayHelpers';
-import { initStack } from '../../data/cards';
+//import { initDeck } from '../../data/cards';
 //import { createId } from './helpers';
 
-import { grey10 } from './constants';
+import { grey10, TRANSITIONS } from './constants';
 
 const instructions = [
   { keyPhrase:"Swipe up", rest:" to pick up a card" },
@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
     top:props => props.top,
     width:props => props.width,
     height:props => props.height,
-    transition: "all 2000ms",
+    transition: `all ${TRANSITIONS.MED}ms`,
     //display:"flex",
     //flexDirection:"column",
     background:grey10(9)
@@ -65,20 +65,41 @@ const useStyles = makeStyles((theme) => ({
   decks:{
     display:props => props.decks.display,
     width:props => `${props.width}px`,
-    transition: "all 2000ms",
+    transition: `all ${TRANSITIONS.MED}ms`,
     //height:props => `${props.height}px`,
     flexWrap:"wrap",
     justifyContent:"flex-start",
     alignItems:"flex-start",
-    border:"solid",
-    borderWidth:"thin", 
-    borderColor:"yellow"
+    //border:"solid",
+    //borderWidth:"thin", 
+    //borderColor:"yellow"
   },
   deckContainer:{
     position:"absolute",
     width:props => `${props.deckContainer.width}px`,
     height:props => `${props.deckContainer.height}px`,
-    transition: "all 2000ms",
+    transition: `all ${TRANSITIONS.MED}ms`,
+  },
+  addDeckIconContainer:{
+    position:"absolute",
+    left:props => props.addDeckIcon.left,
+    top:props => props.addDeckIcon.top,
+    width:props => `${props.deckContainer.width}px`,
+    height:props => `${props.deckContainer.height}px`,
+    transition: `all ${TRANSITIONS.MED}ms`,
+    display:"flex",
+    justifyContent:"center",
+    alignItems:"center",
+    color:grey10(2)
+  },
+  newDeckPlaceholder:{
+    width:props => `${props.deckContainer.width}px`,
+    height:props => `${props.deckContainer.height}px`,
+    display:"flex",
+    justifyContent:"center",
+    alignItems:"center",
+    fontSize:"12px",
+    background:grey10(5)
   },
   formContainer:{
     position:"absolute",
@@ -91,37 +112,87 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 //helpers
-const createMockDecks = userId => [1,2,3,4,5].map((nr,i) =>  
+const createMockDecks = (userId, nrDecks=1) => d3.range(nrDecks).map((nr,i) =>  
   ({ 
-      ...initStack(userId), 
-      id:nr === 1 ? "temp" : `temp${nr}`,
-      pos:i
+      ...initDeck(userId), 
+      id:`temp-${nr}`,
   })
 )
-const colour = deck => (deck.colNr + deck.rowNr) % 2 === 0 ? "red" : "blue";
-const embellishedDecks = decksState => decksState.map((d,i) => ({
+
+const calcColNr = pos => pos % 3;
+const calcRowNr = pos => Math.floor(pos/3);
+
+const embellishedDecks = decks => decks
+  .map((d,i) => ({ ...d, pos:typeof d.pos === "number" ? d.pos : i })) //pos may or may nt be persisted
+  .map(d => ({
   ...d, 
-  colNr:d.pos % 3,
-  rowNr:Math.floor(d.pos/3),
+  colNr:calcColNr(d.pos),
+  rowNr:calcRowNr(d.pos),
 }))
 
-const CardsTable = ({ user, customActiveDeck, data, datasets, asyncProcesses, screen, save }) => {
+const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, screen, save, createDeck }) => {
+  const { decks=[] } = user;
   const width = screen.width || 300;
   const height = screen.height * 0.98 || 600;
-  //we dont user defaultProps as we want to pass through userId too
-  const [decksState, setDecksState] = useState(createMockDecks(user?.id));
-  console.log("decksState", decksState)
-  const decksData = embellishedDecks(decksState);
-  console.log("decksData", decksData)
-  //const decksData = data && data.length !== 0 ? data : [initStack(user?._id)];
-  const activeDeck = decksData.find(s => s.id === customActiveDeck) || decksData[0];
-  const notSavedYet = !data?.find(s => s.id === activeDeck.id);
+  console.log("CardsTable", decks)
 
-  const [selectedDeckId, setSelectedDeckId] = useState("");
-  const [showInstructions, setShowInstructions] = useState(activeDeck.id === "temp");
+  const decksData = embellishedDecks(decks);
+  console.log("decksData", decksData)
+  const stringifiedData = JSON.stringify(decksData);
+
+  const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
+  const [showInstructions, setShowInstructions] = useState(false);
   const [form, setForm] = useState(null);
 
   const selectedDeck = decksData.find(d => d.id === selectedDeckId);
+
+  const nonSelectedDeckWidth = /*selectedDeck ? 0 :*/ d3.min([width/3, 200]);
+  const nonSelectedDeckHeight = /*selectedDeck ? 0 :*/ nonSelectedDeckWidth * 1.5;
+  const selectedDeckWidth = width * 0.98;
+  const selectedDeckHeight = height * 0.9;
+  const deckWidth = selectedDeck ? selectedDeckWidth : nonSelectedDeckWidth;
+  const deckHeight = selectedDeck ? selectedDeckHeight : nonSelectedDeckHeight;
+  //pos of new icon - in next avail slot
+  const addDeckIconLeft = calcColNr(decksData.length) * nonSelectedDeckWidth;
+  const addDeckIconTop = calcRowNr(decksData.length) * nonSelectedDeckHeight;
+
+  let styleProps = {
+    left:selectedDeck ? -selectedDeckWidth * selectedDeck.colNr : 0,
+    top:selectedDeck ? -selectedDeckHeight * selectedDeck.rowNr : 0,
+    width:width * 10, //selectedDeck ? width * 3 : width,
+    height: height * 10,
+    form:{ 
+      display: form ? null : "none",
+    },
+    decks:{
+      display:showInstructions ? "none" : "flex",
+    },
+    deckContainer:{
+      width:deckWidth,
+      height:deckHeight
+    },
+    addDeckIcon:{
+      left:addDeckIconLeft,
+      top:addDeckIconTop
+    }
+
+  };
+  const classes = useStyles(styleProps) 
+  const containerRef = useRef(null);
+  const instructionsRef = useRef(null);
+
+  const updateDeck = useCallback(updatedDeck => {
+    // console.log("updateDeck", updatedDeck)
+    const updatedDecks = decks.map(d => d.id === updatedDeck.id ? updatedDeck : d)
+    save(updatedDecks, false); //dont persist yet
+  }, [stringifiedData]);
+
+
+  //@todo - add a settings form with a useState toggle to show it when user clicks to create
+  const createNewDeck = useCallback((settings={}) => {
+    //do animation to show its being created
+    createDeck(settings)
+  }, []);
 
   const moveDeck = (origArrPos, newArrPos) => {
     setDecksState(prevState => {
@@ -150,38 +221,13 @@ const CardsTable = ({ user, customActiveDeck, data, datasets, asyncProcesses, sc
     })
   } 
 
-  const nonSelectedDeckWidth = /*selectedDeck ? 0 :*/ d3.min([width/3, 200]);
-  const nonSelectedDeckHeight = /*selectedDeck ? 0 :*/ nonSelectedDeckWidth * 1.5;
-  const selectedDeckWidth = width * 0.98;
-  const selectedDeckHeight = height * 0.9;
-  const deckWidth = selectedDeck ? selectedDeckWidth : nonSelectedDeckWidth;
-  const deckHeight = selectedDeck ? selectedDeckHeight : nonSelectedDeckHeight;
-
-  let styleProps = {
-    left:selectedDeck ? -selectedDeckWidth * selectedDeck.colNr : 0,
-    top:selectedDeck ? -selectedDeckHeight * selectedDeck.rowNr : 0,
-    width:width * 10, //selectedDeck ? width * 3 : width,
-    height: height * 10,
-    form:{ 
-      display: form ? null : "none",
-    },
-    decks:{
-      display:showInstructions ? "none" : "flex",
-    },
-    deckContainer:{
-      width:deckWidth,
-      height:deckHeight
-    }
-  };
-  const classes = useStyles(styleProps) 
-  const containerRef = useRef(null);
-  const instructionsRef = useRef(null);
-
-  const stringifiedData = JSON.stringify(data);
+  useEffect(() => {
+    //setShowInstructions(???);
+  }, [selectedDeckId])
 
   useEffect(() => {
-    setShowInstructions(activeDeck.id === "temp");
-  }, [activeDeck._id])
+    setSelectedDeckId(customSelectedDeckId);
+  }, [customSelectedDeckId])
 
   const handleHideInstructions = () => {
     d3.select(instructionsRef.current)
@@ -212,7 +258,7 @@ const CardsTable = ({ user, customActiveDeck, data, datasets, asyncProcesses, sc
     })
   }, [form, stringifiedData])
 
-  //next: Deck still displaying even when showInstrucitons is true
+  //next: Deck still displaying even when showInstructions is true
 
   return (
     <div className={`cards-root ${classes.root}`} 
@@ -238,26 +284,29 @@ const CardsTable = ({ user, customActiveDeck, data, datasets, asyncProcesses, sc
               className={classes.deckContainer}
               style={{
                 left:colNr * deckWidth,
-                top: rowNr * deckHeight,
-                background:colour(deckData)
-                /*display:!selectedDeckId || selectedDeckId === deckData.id ? null : "none"*/ 
+                top: rowNr * deckHeight, 
               }}
             >
-            <Deck data={deckData} user={user} 
-              width={deckWidth} 
-              height={deckHeight}
-              onClick={(e) => {
-                /*if(deckData.pos === 4){
-                  moveDeck(deckData.pos, 1);
-                  e.stopPropagation();
-                  return;
-                }*/
-                setSelectedDeckId(prevState => prevState ? "" : deckData.id);
-                e.stopPropagation();
-              }} />
+              {deckData.id.includes("temp") ? 
+                <div className={classes.newDeckPlaceholder}>Saving Deck...</div>
+                :
+                <Deck data={deckData} user={user} 
+                  width={deckWidth} 
+                  height={deckHeight}
+                  update={updateDeck}
+                  onClick={(e) => {
+                    setSelectedDeckId(prevState => prevState ? "" : deckData.id);
+                    e.stopPropagation();
+                  }} 
+                />
+              }
           </div>
-    })}
         })}
+        {user && !selectedDeckId &&
+          <div className={classes.addDeckIconContainer}
+            onClick={createNewDeck}>New
+          </div>
+        }
       </div>
       {/**form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>*/}
       <div className={classes.formContainer}>
@@ -270,6 +319,7 @@ const CardsTable = ({ user, customActiveDeck, data, datasets, asyncProcesses, sc
 }
 
 CardsTable.defaultProps = {
+  customSelectedDeckId:"",
   asyncProcesses:{},
   datasets: [], 
   screen: {}

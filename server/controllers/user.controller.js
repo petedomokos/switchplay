@@ -1,5 +1,5 @@
 import User from '../models/user.model'
-import Stack from '../models/cards/deck.model'
+import Deck from '../models/cards/deck.model'
 import Journey from '../models/journey/journey.model'
 import extend from 'lodash/extend'
 import errorHandler from './../helpers/dbErrorHandler'
@@ -141,7 +141,8 @@ const list = async (req, res) => {
   }
 }
 
-const createStack = async (req, res) => {
+const createDeck = async (req, res) => {
+  console.log("createDeck---------------")
   const { user, body } = req;
   const deck = body;
   if(!user.decks){
@@ -165,21 +166,32 @@ const createStack = async (req, res) => {
   }
 }
 
-const updateStack = async (req, res) => {
-  console.log('updating deck for.....', req.user._id)
+const updateDecks = async (req, res) => {
+  console.log('updateDecks for.....', req.user._id)
   const { user, body } = req;
-  const updatedStack = body;
-  updatedStack.updated = Date.now()
-  console.log("updateddeck", updatedStack)
-  console.log("deck id", updatedStack._id)
+  console.log("body", body)
+  const updatedDecks = body.map(deck => ({ ...deck, updated: Date.now() }));
+  console.log("updatedDecks", updatedDecks)
+  user.decks = user.decks.map(d => {
+    const updates = updatedDecks.find(deck => deck._id.equals(d._id))
+    console.log("check ", d._id)
+    console.log("shouldUpdate?", !!updates)
+    return updates ? { ...d, ...updates } : d
+  });
+  console.log("updatecomplete...user.decks", user.decks)
+  /*const updatedDeck = body;
+  updatedDeck.updated = Date.now()
+  console.log("updateddeck", updatedDeck)
+  console.log("deck id", updatedDeck._id)
   console.log("staskso id", user.decks[0]._id)
-  console.log("equals??????", user.decks[0]._id.equals(updatedStack._id))
-  user.decks = user.decks.map(s => !s._id.equals(updatedStack._id) ? s : updatedStack);
+  console.log("equals??????", user.decks[0]._id.equals(updatedDeck._id))
+  user.decks = user.decks.map(s => !s._id.equals(updatedDeck._id) ? s : updatedDeck);
   user.updated = Date.now()
   console.log("user decks", user.decks)
+  */
   try {
     await user.save()
-    res.json(updatedStack)
+    res.json(updatedDecks)
   } catch (err) {
     return res.status(400).json({
       error: errorHandler.getErrorMessage(err)
@@ -325,8 +337,8 @@ export default {
   list,
   remove,
   update,
-  createStack,
-  updateStack,
+  createDeck,
+  updateDecks,
   photos,
   photo,
   defaultPhoto

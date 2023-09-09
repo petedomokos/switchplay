@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10, COLOURS } from "./constants";
+import { DIMNS, grey10, COLOURS, TRANSITIONS } from "./constants";
 import dragEnhancements from '../journey/enhancedDragHandler';
 import cardInfoComponent from './cardInfoComponent';
 import cardItemsComponent from './cardItemsComponent';
@@ -145,6 +145,7 @@ export default function cardsComponent() {
                 .append("g")
                     .attr("class", d => `card card-${d.cardNr}`)
                     .attr("opacity", 1)
+
                     .each(function(d,i){
                         cardInfoComponents[d.cardNr] = cardInfoComponent();
                         cardItemsComponents[d.cardNr] = cardItemsComponent();
@@ -334,7 +335,9 @@ export default function cardsComponent() {
 
 
 
-                    }).call(drag)
+                    })
+                    .call(drag)
+                    .on("click", e => { e.stopPropagation(); })
   
             //EXIT
             cardG.exit().call(remove);

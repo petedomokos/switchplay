@@ -7,8 +7,9 @@ import deckLayout from './deckLayout';
 import deckComponent from "./deckComponent";
 import ItemForm from "./forms/ItemForm";
 import { sortAscending } from '../../util/ArrayHelpers';
-import { initStack } from '../../data/cards';
+import { initDeck } from '../../data/cards';
 //import { createId } from './helpers';
+import { TRANSITIONS } from "./constants"
 
 import { grey10 } from './constants';
 
@@ -17,12 +18,19 @@ const useStyles = makeStyles((theme) => ({
     position:"relative",
     width:props => props.width,
     height:props => props.height,
-    transition: "all 2000ms",
+    transition: `all ${TRANSITIONS.MED}ms`,
     display:"flex",
     flexDirection:"column",
-    border:"solid",
-    borderWidth:"thin",
-    borderColor:grey10(7)
+    //border:"solid",
+    //borderWidth:"thin",
+    //borderColor:grey10(7)
+  },
+  overlay:{
+    width:props => props.width,
+    height:props => props.height,
+    position:"absolute",
+    display:props => props.overlayDisplay,
+    transition: `all ${TRANSITIONS.MED}ms`,
   },
   instructionsSection:{
     position:"absolute",
@@ -47,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
     color:grey10(1)
   },
   svg:{
-    pointerEvents:"none"
+    //pointerEvents:"none"
   },
   formContainer:{
     position:"absolute",
@@ -57,12 +65,11 @@ const useStyles = makeStyles((theme) => ({
     height:props => `${props.height}px`,
     display:props => props.form.display
   }
-
 }))
 
-const Deck = ({ user, data, datasets, asyncProcesses, width, height, save, onClick }) => {
+const Deck = ({ user, data, datasets, asyncProcesses, width, height, onClick, update }) => {
   //we dont user defaultProps as we want to pass through userId too
-  const deckData = data || initStack(user?._id);
+  const deckData = data || initDeck(user?._id);
   //console.log("Deck", width)
 
   const [layout, setLayout] = useState(() => deckLayout());
@@ -74,7 +81,8 @@ const Deck = ({ user, data, datasets, asyncProcesses, width, height, save, onCli
     height,
     form:{ 
       display: form ? null : "none",
-    }
+    },
+    overlayDisplay:width <= 200 ? null : "none"
   };
   const classes = useStyles(styleProps) 
   const containerRef = useRef(null);
@@ -95,25 +103,20 @@ const Deck = ({ user, data, datasets, asyncProcesses, width, height, save, onCli
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
       .setForm(setForm)
-
   }, [stringifiedData, width, height])
 
   useEffect(() => {
-    //d3.select(containerRef.current).call(deck);
+    d3.select(containerRef.current).call(deck);
   }, [stringifiedData, width, height])
 
-  const updateStack = useCallback(updatedStack => {
-    save(updatedStack, notSavedYet);
-  }, [stringifiedData]);
-
   const updateFrontCardNr = useCallback(cardNr => {
-    updateStack({ ...deckData, frontCardNr:cardNr })
+    update({ ...deckData, frontCardNr:cardNr })
   }, [stringifiedData, form]);
 
   const updateCard = useCallback((updatedCard) => {
     //console.log("updateCard", updatedCard)
     const updatedCards = deckData.cards.map(c => c.cardNr !== updatedCard.cardNr ? c : updatedCard);
-    updateStack({ ...deckData, cards:updatedCards })
+    update({ ...deckData, cards:updatedCards })
   }, [stringifiedData]);
 
   const updateItemTitle = useCallback(updatedTitle => {
@@ -144,21 +147,21 @@ const Deck = ({ user, data, datasets, asyncProcesses, width, height, save, onCli
   }, [form, stringifiedData])
 
   return (
-    <div className={`cards-root ${classes.root}`} onClick={onClick}>
-      Deck {deckData.id}
-      {/**<svg className={classes.svg} ref={containerRef} id={`cards-svg`} >
+    <div className={`cards-root ${classes.root}`} >
+      <svg className={classes.svg} ref={containerRef} id={`cards-svg`} >
         <defs>
           <filter id="shine">
             <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
           </filter>
         </defs>
-      </svg>*/}
+      </svg>
       {/**form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>*/}
       {/**<div className={classes.formContainer}>
           {form?.formType === "item" && 
             <ItemForm item={form.value} fontSize={form.height * 0.5} save={updateItemTitle} close={() => setForm(null)} />
           }
         </div>*/}
+      <div className={classes.overlay} onClick={onClick}></div>
     </div>
   )
 }

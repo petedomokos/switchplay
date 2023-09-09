@@ -1,12 +1,13 @@
 import * as d3 from 'd3';
-import { grey10, COLOURS, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA } from "./constants";
+import { grey10, COLOURS, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIONS } from "./constants";
 import cardsComponent from './cardsComponent';
 import { updateRectDimns } from '../journey/transitionHelpers';
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
 
 const { GOLD } = COLOURS;
 
-const transformTransition = { update: { duration: 1000 } };
+//const transformTransition = { update: { duration: 1000 } };
+const transformTransition = { update: { duration: TRANSITIONS.MED } };
 
 function maxDimns(maxWidth, maxHeight, aspectRatio){
     const potentialHeight = maxWidth * aspectRatio;
@@ -17,6 +18,12 @@ function maxDimns(maxWidth, maxHeight, aspectRatio){
 }
 
 /*
+
+next - get cards working again properly, eg saving
+then - get transitions working perfectly, so selecting/deselecting a deck is smooth
+then - we want the cards to all slide together into one pile so we only see the top one
+       when its not selected, and then slide out into position when selected/held,
+       with some on the table depening on teh fronNr
 
 */
 

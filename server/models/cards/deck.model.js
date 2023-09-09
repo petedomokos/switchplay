@@ -18,5 +18,5 @@ export default new mongoose.Schema({
   created: {type: Date,default: Date.now}
 })
 
-//export default mongoose.model('Stack', StackSchema)
+//export default mongoose.model('Deck', DeckSchema)
 

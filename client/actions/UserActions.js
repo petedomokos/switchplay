@@ -4,15 +4,16 @@ import { status, parseResponse, logError,
 import auth from '../auth/auth-helper'
 import { signout } from './AuthActions.js';
 import { transformJourneyForClient } from "./JourneyActions"
+import { initDeck } from '../data/cards';
 
-export const transformStackForClient = serverStack => {
-	console.log("transformStackForClient", serverStack)
-	const { created, updated, cards, ...clientStack } = serverStack;
+export const transformDeckForClient = serverDeck => {
+	console.log("transformDeckForClient", serverDeck)
+	const { created, updated, cards, ...clientDeck } = serverDeck;
 	return {
-		...clientStack,
+		...clientDeck,
 		created:new Date(created),
 		updated:updated ? new Date(updated) : null,
-		id:serverStack._id,
+		id:serverDeck._id,
 		cards:JSON.parse(cards).map(c => ({
 			...c,
 			date:new Date(c.date),
@@ -21,10 +22,10 @@ export const transformStackForClient = serverStack => {
 	}
 }
 
-export const transformStackForServer = clientStack => {
-	const { id, cards, ...serverStack } = clientStack;
+export const transformDeckForServer = clientDeck => {
+	const { id, cards, ...serverDeck } = clientDeck;
 	return {
-		...serverStack,
+		...serverDeck,
 		cards:JSON.stringify(cards)
 	}
 }
@@ -40,7 +41,7 @@ export const transformUserForClient = serverUser => {
 		...serverUser,
 		photos:hydratedPhotos,
 		journeys:hydratedJourneys,
-		decks:decks.map(s => transformStackForClient(s))
+		decks:decks.map(s => transformDeckForClient(s))
 	}
 }
 
@@ -131,40 +132,37 @@ export const updateUser = (id, formData, history) => dispatch => {
 	//}, 2000)
 }
 
-
-export const createStack = deck => dispatch => {
+export const createDeck = settings => dispatch => {
 	const jwt = auth.isAuthenticated();
-	//console.log("createStack", deck)
-	if(!jwt.user) {
-		console.log("no user signed in")
-		//save to store anyway - deck id will be "temp" and it wont have owner userId
-		dispatch({ type:C.CREATE_STACK, deck });
-		return;
-	}
-	const deckWithUserId = { ...deck, owner: jwt.user._id };
-	//save to store
-	dispatch({ type:C.CREATE_STACK, deck:deckWithUserId });
-	//persist
-	const serverStack = transformStackForServer(deckWithUserId);
+	const deck = initDeck(jwt.user._id);
+	console.log("createDeck", deck)
+	//save to store with temp id so an icon is displayed to show its saving
+	dispatch({ type:C.CREATE_DECK, deck:deck });
+	//now try it with persistance too
+	//also need to add a pos property to each deck in model
+
+	const serverDeck = transformDeckForServer(deck);
 	fetchThenDispatch(dispatch, 
 		'updating.user',
 		{
 			url: `/api/users/${jwt.user._id}/decks`,
 			method: 'POST',
-			body:JSON.stringify(serverStack),
+			body:JSON.stringify(serverDeck),
 			requireAuth:true,
 			nextAction: data => {
 				console.log("response data", data)
-				return { type:C.UPDATE_NEW_STACK_ID, newStackId: data._id }
+				return { type:C.UPDATE_NEW_DECK_ID, newDeckId: data._id }
 			}
 		}
 	)
 }
 
-export const updateStack = deck => dispatch => {
-	//console.log("updateStack", deck)
+export const updateDecks = (decks, shouldPersist) => dispatch => {
+	console.log("updateDecks", decks)
 	//update in store
-	dispatch({ type:C.UPDATE_STACK, deck })
+	dispatch({ type:C.UPDATE_DECKS, decks });
+
+	if(!shouldPersist){ return; }
 
 	const jwt = auth.isAuthenticated();
 	if(!jwt.user) {
@@ -172,13 +170,13 @@ export const updateStack = deck => dispatch => {
 		return;
 	}
 
-	const serverStack = transformStackForServer(deck);
+	const serverDecks = decks.map(d => transformDeckForServer(d));
 	fetchThenDispatch(dispatch, 
 		'updating.user',
 		{
 			url: `/api/users/${jwt.user._id}/decks`,
 			method: 'PUT',
-			body:JSON.stringify(serverStack),
+			body:JSON.stringify(serverDecks),
 			requireAuth:true
 		}
 	)

@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import cardsLayout from "./cardsLayout";
 
-const calcStackStatus = cards => {
+const calcDeckStatus = cards => {
     if(cards.filter(c => c.info.status !== 2).length === 0){ return 2; }
     if(cards.filter(c => c.info.status !== 2).length <= 2) { return 1; }
     return 0;
@@ -20,7 +20,7 @@ export default function decksLayout(){
         return {
             ...deckData,
             cards:processedCards,
-            status:calcStackStatus(processedCards)
+            status:calcDeckStatus(processedCards)
         }
     }
 

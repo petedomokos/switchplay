@@ -33,8 +33,8 @@ const expectedIsAchieved = (values, options) => requiredValueIsAchieved(values.c
 
 export function hydrateJourneyData(data, user, datasets){
     const now = new Date();
-    console.log("hydrateJourneyData", data)
-    console.log("datasets", datasets)
+    //console.log("hydrateJourneyData", data)
+    //console.log("datasets", datasets)
     const player = user.player;
     const nonCurrentProfiles = data.profiles.filter(p => p.id !== "current");
 
@@ -79,7 +79,7 @@ export function hydrateJourneyData(data, user, datasets){
     //STEP 1: HYDRATE PROFILES
     const options = { now, rangeFormat };
     const hydratedProfiles = hydrateProfiles(profiles, datasets, kpis, defaultTargets, settings, options);
-    console.log("hydratedProfiles", hydratedProfiles)
+    //console.log("hydratedProfiles", hydratedProfiles)
 
     //STEP 2: CREATE CURRENT PROFILE, including expected values
     const currentProfile = { 
@@ -222,9 +222,9 @@ function getValueForSession(stat, datapoints, sessionDate, start, target){
 }
 
 function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target, log){
-    console.log("calcCurrent......", stat.key)
-    console.log("datapoints", datapoints)
-    console.log("dateRange", dateRange)
+    //console.log("calcCurrent......", stat.key)
+    //console.log("datapoints", datapoints)
+    //console.log("dateRange", dateRange)
     if(log){
         //console.log("calcCurrent stat", stat)
     }
@@ -241,7 +241,7 @@ function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target, log
             console.log("d", d)
             return typeof d[1] === "number"
         })
-    console.log("nrpairs", dateValuePairs.length)
+    //console.log("nrpairs", dateValuePairs.length)
 
     const values = dateValuePairs.map(d => d[1]);
     
@@ -285,8 +285,8 @@ const goBackByExpiryDurationFromDate = (duration, units) => date => {
 }
 
 function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, defaultTargets, settings, options={}){
-    console.log("hydrateProfile------------", profile.id, profile.date, profile)
-    console.log("datasets", datasets)
+    //console.log("hydrateProfile------------", profile.id, profile.date, profile)
+    //console.log("datasets", datasets)
     const { now, rangeFormat } = options;
     const { id, customTargets=[], isCurrent, profileKpis=[] } = profile;
     const date = typeof profile.date === "string" ? new Date(profile.date) : profile.date;
@@ -387,19 +387,19 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
             //KEYS/ID
             const { datasetKey, statKey, min, max, accuracy, standards, orientationFocus } = kpi;
             const key = kpi.key || `${datasetKey}-${statKey}`;
-            console.log("kpi key--------------------------", key)
-            console.log("kpi--------------------------", kpi)
+            //console.log("kpi key--------------------------", key)
+            //console.log("kpi--------------------------", kpi)
 
 
             const profileKpi = profileKpis.find(pKpi => pKpi.key === key) || {};
             const { customMinStandard, customStartValue, steps=[] } = profileKpi;
 
-            console.log("datasets", datasets)
-            console.log("datasetKey", datasetKey)
+            //console.log("datasets", datasets)
+            //console.log("datasetKey", datasetKey)
             const dataset = datasets.find(dset => dset.key === datasetKey);
-            console.log("dataset", dataset)
+            //console.log("dataset", dataset)
             const datapoints = dataset?.datapoints || [];
-            console.log("datapoints", datapoints)
+            //console.log("datapoints", datapoints)
 
             //add accuracy to teh stat - note that the stat has only stable metadata, whereas the kpi
             //is dependent on context, so level of accuracy to display is defined in kpi not stat
@@ -534,7 +534,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 min, max, start, current, expected, achieved, target, //proposedTarget,
             }
             if(shouldLog){
-                console.log("order", order)
+                //console.log("order", order)
                 //console.log("values", values)
             }
 
@@ -625,7 +625,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
 //current profile is dynamically created, so it doesnt need hydrating
 //note - this is nely created each time, so nothing must be stored on it
 function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
-    console.log("createcurrentprofile----------------------------------")
+    //console.log("createcurrentprofile----------------------------------")
     const { now, rangeFormat } = options;
     const activeProfile = d3.least(orderedProfiles.filter(p => p.isFuture), p => p.date);
     const { kpis } = activeProfile;
@@ -657,13 +657,13 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
         date:now, dateRange, datePhase,
         id:"current", isCurrent:true, dataType:"profile",
         kpis:kpis.map((kpi,i) => {
-            console.log("kpi...", kpi)
+            //console.log("kpi...", kpi)
             const { datasetKey, statKey, name, min, max, accuracy, key } = kpi;
             const milestoneId = "current";
             
             const dataset = datasets.find(dset => dset.key === datasetKey);
             const datapoints = dataset?.datapoints || [];
-            console.log("datapoints", datapoints)
+            //console.log("datapoints", datapoints)
             const stat = { ...dataset?.stats.find(s => s.key === statKey), accuracy };
             const getValue = getValueForStat(stat.key, stat.accuracy);
             //@todo - pass these dateValue pairs into calCurrent so not repeating work
@@ -676,7 +676,7 @@ function createCurrentProfile(orderedProfiles, datasets, settings, options={}){
             let current;
             if(currentValueDataMethod !== "specificSession"){
                 current = calcCurrent(stat, datapoints, dateRange, currentValueDataMethod, undefined, undefined);
-                console.log("calced current", current)
+                //console.log("calced current", current)
             }else{
                 //it must be a future card and current value is based purely on a specificSession
                 current = getValueForSession(stat, datapoints, specificDate)

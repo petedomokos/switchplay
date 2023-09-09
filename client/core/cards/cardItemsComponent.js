@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10 } from "./constants";
+import { DIMNS, grey10, TRANSITIONS } from "./constants";
 import pentagonComponent from './pentagonComponent';
 
 /*
