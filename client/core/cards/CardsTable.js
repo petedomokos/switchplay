@@ -85,7 +85,7 @@ const useStyles = makeStyles((theme) => ({
     left:props => props.addDeckIcon.left,
     top:props => props.addDeckIcon.top,
     width:props => `${props.deckContainer.width}px`,
-    height:props => `${props.deckContainer.height}px`,
+    height:props => `${props.deckContainer.height/2}px`,
     transition: `all ${TRANSITIONS.MED}ms`,
     display:"flex",
     justifyContent:"center",
@@ -295,8 +295,8 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
                   width={deckWidth} 
                   height={deckHeight}
                   update={updateDeck}
+                  isSelected={selectedDeckId === deckData.id}
                   onClick={(e) => {
-
                     setSelectedDeckId(prevState => prevState ? "" : deckData.id);
                     e.stopPropagation();
                   }} 

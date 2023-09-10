@@ -238,7 +238,7 @@ function calcCurrent(stat, datapoints, dateRange, dataMethod, start, target, log
         .filter(d => !d.isTarget)
         .map(d => [d.date, getValue(d)])
         .filter(d => {
-            console.log("d", d)
+            //console.log("d", d)
             return typeof d[1] === "number"
         })
     //console.log("nrpairs", dateValuePairs.length)
@@ -519,7 +519,7 @@ function hydrateProfile(profile, lastPastProfile, prevProfile, datasets, kpis, d
                 current = getValueForSession(stat, datapoints, specificDate, start, target)
             }
             //if(shouldLog){
-                console.log("current", current)
+                //console.log("current", current)
             //}
 
             const achieved = isPast ? current : null;

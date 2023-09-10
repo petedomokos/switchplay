@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     height:props => props.height,
     position:"absolute",
     display:props => props.overlayDisplay,
-    transition: `all ${TRANSITIONS.MED}ms`,
+    transition: `all ${TRANSITIONS.MED}ms`
   },
   instructionsSection:{
     position:"absolute",
@@ -54,8 +54,22 @@ const useStyles = makeStyles((theme) => ({
   keyPhrase:{
     color:grey10(1)
   },
+  header:{
+    height:props => props.header.height,
+    padding:"2.5% 12.5%",
+    border:"solid",
+    borderWidth:"thin",
+    borderColor:"blue",
+    display:"flex",
+    justifyContent:"space-between",
+    alignItems:"center",
+    fontSize:props => props.header.fontSize,
+    transition: `all ${TRANSITIONS.MED}ms`
+  },
   svg:{
-    //pointerEvents:"none"
+    pointerEvents:props => props.svg.pointerEvents,
+    position:"absolute",
+    top:props => `${props.header.height}px`,
   },
   formContainer:{
     position:"absolute",
@@ -67,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Deck = ({ user, data, datasets, asyncProcesses, width, height, onClick, update }) => {
+const Deck = ({ user, data, isSelected, datasets, asyncProcesses, width, height, onClick, update }) => {
   //we dont user defaultProps as we want to pass through userId too
   const deckData = data || initDeck(user?._id);
   //console.log("Deck", width)
@@ -76,9 +90,20 @@ const Deck = ({ user, data, datasets, asyncProcesses, width, height, onClick, up
   const [deck, setDeck] = useState(() => deckComponent());
   const [form, setForm] = useState(null);
 
+  const headerHeight = d3.min([45, d3.max([11, height * 0.15])]);
+  const svgWidth = width;
+  const svgHeight = height - headerHeight;
+
   let styleProps = {
     width,
     height,
+    header:{
+      height:headerHeight,
+      fontSize:d3.min([24, d3.max([headerHeight * 0.4, 10])]),
+    },
+    svg:{
+      pointerEvents:isSelected ? "all" : "none"
+    },
     form:{ 
       display: form ? null : "none",
     },
@@ -98,15 +123,17 @@ const Deck = ({ user, data, datasets, asyncProcesses, width, height, onClick, up
 
   useEffect(() => {
     deck
-      .width(width)
-      .height(height)
+      .width(svgWidth)
+      .height(svgHeight)
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
       .setForm(setForm)
   }, [stringifiedData, width, height])
 
   useEffect(() => {
+    //why when we comment out this line, only the 1st deck opens!?
     //d3.select(containerRef.current).call(deck);
+    d3.select(containerRef.current).style("display", "none")
   }, [stringifiedData, width, height])
 
   const updateFrontCardNr = useCallback(cardNr => {
@@ -148,6 +175,10 @@ const Deck = ({ user, data, datasets, asyncProcesses, width, height, onClick, up
 
   return (
     <div className={`cards-root ${classes.root}`} >
+      <div className={classes.header} onClick={() => { console.log("title clicked")}}>
+        <div>Enter Title...</div>
+        <div>PR</div>
+      </div>
       <svg className={classes.svg} ref={containerRef} id={`cards-svg`} >
         <defs>
           <filter id="shine">
