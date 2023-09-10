@@ -191,8 +191,9 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   //@todo - add a settings form with a useState toggle to show it when user clicks to create
   const createNewDeck = useCallback((settings={}) => {
     //do animation to show its being created
-    createDeck(settings)
-  }, []);
+    const pos = decks.length;
+    createDeck({ ...settings, pos })
+  }, [decks]);
 
   const moveDeck = (origArrPos, newArrPos) => {
     setDecksState(prevState => {
@@ -304,7 +305,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
         })}
         {user && !selectedDeckId &&
           <div className={classes.addDeckIconContainer}
-            onClick={createNewDeck}>New
+            onClick={() => createNewDeck()}>New
           </div>
         }
       </div>

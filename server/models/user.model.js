@@ -65,8 +65,8 @@ const UserSchema = new mongoose.Schema({
 
   manualValues:[StatValueSchema],
 
-  isSystemAdmin:{type:Boolean,default:false},
-  hashed_password: {type: String,required: "Password is required"},
+  isSystemAdmin:{type:Boolean, default:false},
+  hashed_password: {type: String, required: "Password is required"},
   salt: String,
   updated: Date,
   created: {type: Date,default: Date.now}

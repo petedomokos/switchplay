@@ -134,8 +134,7 @@ export const updateUser = (id, formData, history) => dispatch => {
 
 export const createDeck = settings => dispatch => {
 	const jwt = auth.isAuthenticated();
-	const deck = initDeck(jwt.user._id);
-	console.log("createDeck", deck)
+	const deck = initDeck(jwt.user._id, settings);
 	//save to store with temp id so an icon is displayed to show its saving
 	dispatch({ type:C.CREATE_DECK, deck:deck });
 	//now try it with persistance too
