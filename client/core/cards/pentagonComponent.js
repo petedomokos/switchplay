@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10, OVERLAY, COLOURS } from "./constants";
+import { DIMNS, grey10, OVERLAY, COLOURS, TRANSITIONS } from "./constants";
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
 import { toRadians } from '../journey/screenGeometryHelpers';
 import dragEnhancements from '../journey/enhancedDragHandler';
@@ -36,6 +36,8 @@ export default function pentagonComponent() {
     let hitlineStrokeWidth;
 
     let shouldTruncate;
+
+    let prevR2 = 0; //can say it starts at 0 as it doesnt exist at that point
     
     
     function updateDimns(){
@@ -131,12 +133,14 @@ export default function pentagonComponent() {
                         const dx = innerVertices[i + 1] ? innerVertices[i+1][0] : innerVertices[0][0];
                         const dy = innerVertices[i + 1] ? innerVertices[i+1][1] : innerVertices[0][1];
 
+                        const sizeIsIncreasing = r2 - prevR2 > 0;
+                        const sizeIsDecreasing = r2 - prevR2 < 0;
                         const sectionG = d3.select(this);
                         //startLine
                         sectionG.select("line.start")
                             .transition("start-trans")
-                            .delay(300)
-                            .duration(200)
+                            .delay(sizeIsIncreasing ? 300 : 0)
+                            .duration(TRANSITIONS.MED)
                                 .attr("x1", ax)
                                 .attr("y1", ay)
                                 .attr("x2", bx)
@@ -146,8 +150,8 @@ export default function pentagonComponent() {
                         //@todo - include this when a section is clicked, or longpressed
                         sectionG.select("line.finish")
                             .transition("finish-trans")
-                            .delay(300)
-                            .duration(200)
+                            .delay(sizeIsIncreasing ? 300 : 0)
+                            .duration(TRANSITIONS.MED)
                                 .attr("x1", cx)
                                 .attr("y1", cy)
                                 .attr("x2", dx)
@@ -168,8 +172,8 @@ export default function pentagonComponent() {
                         const innerLine = sectionG.select("line.inner");
                         innerLine
                             .transition("inner-trans")
-                            .delay(300)
-                            .duration(200)
+                            .delay(sizeIsIncreasing ? 300 : 0)
+                            .duration(TRANSITIONS.MED)
                                 .attr("x1", ax)
                                 .attr("y1", ay)
                                 .attr("x2", dx)
@@ -179,8 +183,8 @@ export default function pentagonComponent() {
                         const outerLine = sectionG.select("line.outer");
                         outerLine
                             .transition("outer-trans")
-                            .delay(300)
-                            .duration(200)
+                            .delay(0)//sizeIsIncreasing ? 300 : 0)
+                            .duration(TRANSITIONS.MED)
                                 .attr("x1", bx)
                                 .attr("y1", by)
                                 .attr("x2", cx)
@@ -204,15 +208,16 @@ export default function pentagonComponent() {
                         //all lines
                         sectionG.selectAll("line.visible")
                             .transition("trans-stroke")
-                            .duration(200)
+                            .delay(sizeIsIncreasing ? 300 : 0)
+                            .duration(TRANSITIONS.MED)
                                 .attr("stroke", styles._lineStroke(d,i))
                                 .attr("stroke-width", styles._lineStrokeWidth(d,i))
 
                         sectionG.selectAll(".show-with-section")
                             .attr("pointer-events", withSections ? null : "none")
                             .transition("outer-trans")
-                            .delay(300)
-                            .duration(200)
+                            .delay(sizeIsIncreasing ? 300 : 0)
+                            .duration(TRANSITIONS.MED)
                                 .attr("opacity", withSections ? 1 : 0)
 
                         //text
@@ -228,13 +233,13 @@ export default function pentagonComponent() {
                         const sectionContentsG = sectionG.select("g.section-contents")
                         sectionContentsG
                             .transition()
-                            .delay(300)
-                            .duration(200)
+                            //.delay(sizeIsIncreasing ? 300 : 0)
+                            .duration(TRANSITIONS.MED)
                                 .attr("transform", `translate(${segmentVertices[i][0]}, ${segmentVertices[i][1]})`)
 
                         //text
                         sectionContentsG.select("text")
-                            .attr("font-size", 10)
+                            .attr("font-size", r2/10)
                             .text(text)
 
                     })
@@ -255,6 +260,7 @@ export default function pentagonComponent() {
     };
     pentagon.r2 = function (value) {
         if (!arguments.length) { return r2; }
+        prevR2 = r2;
         r2 = value;
         return pentagon;
     };

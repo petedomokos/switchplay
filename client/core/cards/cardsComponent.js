@@ -294,7 +294,7 @@ export default function cardsComponent() {
                             icon:icons.collapse,
                         }
                         const botRightBtnData = isSelected ? [collapseBtnDatum] : (isFront ? [expandBtnDatum] : []);
-                        const btnHeight = d3.max([35, d3.min([50, 0.15 * height])]);
+                        const btnHeight = d3.max([/*35*/1, d3.min([50, 0.15 * height])]);
                         const btnWidth = btnHeight;
                         //assumme all are square
                         //note: 0.8 is a bodge coz iconsseems to be bigger than they state
