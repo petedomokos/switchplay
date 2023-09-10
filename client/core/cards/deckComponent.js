@@ -18,9 +18,7 @@ function maxDimns(maxWidth, maxHeight, aspectRatio){
 }
 
 /*
-
-next - get cards working again properly, eg saving
-then - get transitions working perfectly, so selecting/deselecting a deck is smooth
+next - get transitions working perfectly, so selecting/deselecting a deck is smooth
 then - we want the cards to all slide together into one pile so we only see the top one
        when its not selected, and then slide out into position when selected/held,
        with some on the table depening on teh fronNr
@@ -41,11 +39,7 @@ export default function deckComponent() {
     let deckAreaHeight;
     let deckAreaMargin;
     let deckAreaAspectRatio;
-    let topSpaceHeight;
     let botSpaceHeight;
-
-    let progressSummaryWidth = 30;
-    let progressSummaryHeight = 30;
 
     let heldCardsAreaHeight;
     let placedCardsAreaHeight;
@@ -72,8 +66,7 @@ export default function deckComponent() {
         contentsHeight = height - margin.top - margin.bottom;
 
         deckAreaWidth = contentsWidth;
-        topSpaceHeight = contentsHeight * 0.1;
-        deckAreaHeight = contentsHeight * 0.9;
+        deckAreaHeight = contentsHeight;
         botSpaceHeight = 0;// contentsHeight * 0.1;
         //this aspectRatio is only needed to aid with selecting a card to takeover entire area
         deckAreaAspectRatio = deckAreaWidth/deckAreaHeight;
@@ -143,7 +136,6 @@ export default function deckComponent() {
 
     let containerG;
     let contentsG;
-    let topSpaceG;
     let cardsG;
 
     //components
@@ -169,22 +161,6 @@ export default function deckComponent() {
                 containerG.append("rect").attr("class", "deck-bg")
                     .attr("fill", "transparent");
                 contentsG = containerG.append("g").attr("class", "deck-contents");
-
-                topSpaceG = contentsG
-                    .append("g")
-                    .attr("class", "top-space");
-
-                topSpaceG.append("rect").attr("class", "top-space-bg")
-                const progressSummaryG = topSpaceG.append("g").attr("class", "deck-progress-summary");
-                progressSummaryG.append("rect").attr("class", "deck-progress-summary-hitbox");
-                progressSummaryG.append("path")
-                    .attr("d", trophy.pathD)
-                    .attr("transform", "translate(-2.5,-5) scale(0.4)");
-                    
-                topSpaceG.append("text")
-                    .attr("class", "deck-title")
-                    .attr("dominant-baseline", "central")
-                    .attr("text-anchor", "middle")
 
                 cardsG = contentsG
                     .append("g")
@@ -221,7 +197,6 @@ export default function deckComponent() {
 
                 //gs
                 contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
-                cardsG.attr("transform", `translate(0, ${topSpaceHeight})`)
 
                 containerG.select("rect.deck-bg")
                     .call(updateRectDimns, { 
@@ -230,33 +205,6 @@ export default function deckComponent() {
                         transition:transformTransition
                     })
                 
-                topSpaceG.select("rect.top-space-bg")
-                    .attr("width", contentsWidth)
-                    .attr("height", topSpaceHeight)
-                    .attr("stroke", "none")
-                    .attr("fill", "none")
-
-                topSpaceG.select("text.deck-title")
-                    .attr("x", deckAreaWidth/2)
-                    .attr("y", progressSummaryHeight/2)
-                    .attr("stroke-width", 0.3)
-                    .attr("stroke", grey10(7))
-                    .attr("fill", grey10(7))
-                    .attr("font-family", "Arial, Helvetica, sans-serif")
-                    .text("ENTER TITLE ...");
-
-                const progressSummaryG = topSpaceG.select("g.deck-progress-summary")
-                    .attr("transform", `translate(${deckAreaWidth - progressSummaryWidth}, 0)`)
-                
-                progressSummaryG.select("rect.deck-progress-summary-hitbox")
-                    .attr("width", progressSummaryWidth)
-                    .attr("height", progressSummaryHeight)
-                    .attr("fill", "transparent")
-                    .attr("stroke", "none");
-
-                progressSummaryG.select("path")
-                    .attr("fill", deckData.status === 2 ? GOLD : (deckData.status === 1 ? grey10(2) : grey10(6)))
-
                 cardsG
                     .select("rect.cards-bg")
                     .call(updateRectDimns, { 

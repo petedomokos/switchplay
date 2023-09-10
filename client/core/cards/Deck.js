@@ -10,8 +10,8 @@ import { sortAscending } from '../../util/ArrayHelpers';
 import { initDeck } from '../../data/cards';
 //import { createId } from './helpers';
 import { TRANSITIONS } from "./constants"
-
 import { grey10 } from './constants';
+import { trophy } from "../../../assets/icons/milestoneIcons.js"
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
   },
   header:{
     height:props => props.header.height,
-    padding:"2.5% 12.5%",
+    padding:"2.5% 10%",
     border:"solid",
     borderWidth:"thin",
     borderColor:"blue",
@@ -64,6 +64,14 @@ const useStyles = makeStyles((theme) => ({
     justifyContent:"space-between",
     alignItems:"center",
     fontSize:props => props.header.fontSize,
+    transition: `all ${TRANSITIONS.MED}ms`
+  },
+  title:{
+
+  },
+  progressIcon:{
+    width:props => props.progressIcon.width,
+    height:props => props.progressIcon.height,
     transition: `all ${TRANSITIONS.MED}ms`
   },
   svg:{
@@ -93,13 +101,18 @@ const Deck = ({ user, data, isSelected, datasets, asyncProcesses, width, height,
   const headerHeight = d3.min([45, d3.max([11, height * 0.15])]);
   const svgWidth = width;
   const svgHeight = height - headerHeight;
-
+  const progressIconWidth = headerHeight;
+  const progressIconHeight = headerHeight;
   let styleProps = {
     width,
     height,
     header:{
       height:headerHeight,
       fontSize:d3.min([24, d3.max([headerHeight * 0.4, 10])]),
+    },
+    progressIcon:{
+      width:progressIconWidth,
+      height:progressIconHeight
     },
     svg:{
       pointerEvents:isSelected ? "all" : "none"
@@ -111,8 +124,56 @@ const Deck = ({ user, data, isSelected, datasets, asyncProcesses, width, height,
   };
   const classes = useStyles(styleProps) 
   const containerRef = useRef(null);
+  const progressIconRef = useRef(null);
 
   const stringifiedData = JSON.stringify(data);
+
+  const onClickProgress = (e) => {
+    //console.log("click progress");
+    e.stopPropagation();
+
+  }
+  const onClickTitle = (e) => {
+    //console.log("click title");
+    e.stopPropagation();
+  }
+
+  useEffect(() => {
+    //dimns
+    const progressIconMargin = { 
+      left:progressIconWidth * 0.1, right:progressIconWidth * 0.1,
+      top:progressIconHeight * 0.1, bottom:progressIconHeight * 0.1
+    }
+    const progressIconContentsWidth = progressIconWidth - progressIconMargin.left - progressIconMargin.right;
+    const progressIconContentsHeight = progressIconHeight - progressIconMargin.top - progressIconMargin.bottom;
+    
+    const actualIconWidth = 80; //???
+    const iconScale = progressIconContentsWidth/actualIconWidth;
+    const hozIconShift = -progressIconContentsWidth * 0.2;
+    const vertIconShift = hozIconShift;
+
+    //enter-update
+    const iconSvg = d3.select(progressIconRef.current).selectAll("svg.deck-progress").data([1]);
+    iconSvg.enter()
+      .append("svg")
+        .attr("class", "deck-progress")
+        .attr("pointer-events", "none")
+        .each(function(){
+          d3.select(this).append("path")
+            .attr("transform", `translate(${0},${0}) scale(${iconScale})`)
+        })
+        .merge(iconSvg)
+        .attr("transform", `translate(${progressIconMargin.left},${progressIconMargin.top})`)
+        .each(function(){
+          d3.select(this).select("path")
+            .attr("d", trophy.pathD)
+            .attr("fill", deckData.status === 2 ? GOLD : (deckData.status === 1 ? grey10(2) : grey10(6)))
+            .transition()
+              .duration(TRANSITIONS.MED)
+              .attr("transform", `translate(${hozIconShift},${vertIconShift}) scale(${iconScale})`)
+            
+        });
+  }, [stringifiedData, width, height])
 
   useEffect(() => {
     const processedDeckData = layout(deckData);
@@ -132,8 +193,7 @@ const Deck = ({ user, data, isSelected, datasets, asyncProcesses, width, height,
 
   useEffect(() => {
     //why when we comment out this line, only the 1st deck opens!?
-    //d3.select(containerRef.current).call(deck);
-    d3.select(containerRef.current).style("display", "none")
+    d3.select(containerRef.current).call(deck);
   }, [stringifiedData, width, height])
 
   const updateFrontCardNr = useCallback(cardNr => {
@@ -175,9 +235,11 @@ const Deck = ({ user, data, isSelected, datasets, asyncProcesses, width, height,
 
   return (
     <div className={`cards-root ${classes.root}`} >
-      <div className={classes.header} onClick={() => { console.log("title clicked")}}>
-        <div>Enter Title...</div>
-        <div>PR</div>
+      <div className={classes.header} onClick={onClickTitle}>
+        <div className={classes.title}>Enter Title...</div>
+        <div className={classes.progressIcon} ref={progressIconRef}
+          onClick={onClickProgress}>
+        </div>
       </div>
       <svg className={classes.svg} ref={containerRef} id={`cards-svg`} >
         <defs>
