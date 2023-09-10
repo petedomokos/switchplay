@@ -7,7 +7,7 @@ import { transformJourneyForClient } from "./JourneyActions"
 import { initDeck } from '../data/cards';
 
 export const transformDeckForClient = serverDeck => {
-	console.log("transformDeckForClient", serverDeck)
+	//console.log("transformDeckForClient", serverDeck)
 	const { created, updated, cards, ...clientDeck } = serverDeck;
 	return {
 		...clientDeck,
@@ -149,7 +149,7 @@ export const createDeck = settings => dispatch => {
 			body:JSON.stringify(serverDeck),
 			requireAuth:true,
 			nextAction: data => {
-				console.log("response data", data)
+				//console.log("response data", data)
 				return { type:C.UPDATE_NEW_DECK_ID, newDeckId: data._id }
 			}
 		}
@@ -157,7 +157,7 @@ export const createDeck = settings => dispatch => {
 }
 
 export const updateDecks = (decks, shouldPersist) => dispatch => {
-	console.log("updateDecks", decks)
+	//console.log("updateDecks", decks)
 	//update in store
 	dispatch({ type:C.UPDATE_DECKS, decks });
 
@@ -165,7 +165,7 @@ export const updateDecks = (decks, shouldPersist) => dispatch => {
 
 	const jwt = auth.isAuthenticated();
 	if(!jwt.user) {
-		console.log("no user signed in");
+		//console.log("no user signed in");
 		return;
 	}
 

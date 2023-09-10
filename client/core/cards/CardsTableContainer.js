@@ -3,9 +3,8 @@ import CardsTable  from './CardsTable'
 import { createDeck, updateDecks } from '../../actions/UserActions'
 
 const mapStateToProps = (state, ownProps) => {
-	console.log("CardsTableContainer...user", state.user)
+	//console.log("CardsTableContainer...user", state.user)
 	const { asyncProcesses, user, system } = state;
-	//console.log("CardsTableContainer decks", user.decks);
 
 	return{
 		user,
@@ -27,7 +26,6 @@ const mapDispatchToProps = dispatch => ({
 		dispatch(updateDecks(decks, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter));
 	},
 	createDeck(settings){
-		console.log("settings....", settings)
 		dispatch(createDeck(settings))
 	}
 })

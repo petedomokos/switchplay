@@ -7,7 +7,7 @@ import Deck from "./Deck";
 import { sortAscending } from '../../util/ArrayHelpers';
 //import { initDeck } from '../../data/cards';
 //import { createId } from './helpers';
-
+import IconComponent from './IconComponent';
 import { grey10, TRANSITIONS } from './constants';
 
 const instructions = [
@@ -90,7 +90,7 @@ const useStyles = makeStyles((theme) => ({
     display:"flex",
     justifyContent:"center",
     alignItems:"center",
-    color:grey10(2)
+    color:grey10(4)
   },
   newDeckPlaceholder:{
     width:props => `${props.deckContainer.width}px`,
@@ -134,10 +134,10 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const { decks=[] } = user;
   const width = screen.width || 300;
   const height = screen.height * 0.98 || 600;
-  console.log("CardsTable", decks)
+  //console.log("CardsTable", decks)
 
   const decksData = embellishedDecks(decks);
-  console.log("decksData", decksData)
+  //console.log("decksData", decksData)
   const stringifiedData = JSON.stringify(decksData);
 
   const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
@@ -296,6 +296,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
                   height={deckHeight}
                   update={updateDeck}
                   onClick={(e) => {
+
                     setSelectedDeckId(prevState => prevState ? "" : deckData.id);
                     e.stopPropagation();
                   }} 
@@ -303,9 +304,10 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
               }
           </div>
         })}
-        {user && !selectedDeckId &&
-          <div className={classes.addDeckIconContainer}
-            onClick={() => createNewDeck()}>New
+        {user && !selectedDeckId && 
+          <div className={classes.addDeckIconContainer}>
+            <IconComponent 
+              text="New" onClick={() => createNewDeck()} />
           </div>
         }
       </div>

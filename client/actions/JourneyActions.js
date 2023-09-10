@@ -8,7 +8,7 @@ function dateIsValid(date) {
 }
 
 const transformJourneyForServer = journey => {
-	console.log("transformJourneyForServer", journey)
+	//console.log("transformJourneyForServer", journey)
 	const { playerId, coachId, media, name="", desc="" } = journey;
 	//dont think we need to store anything on channels, or could just be the setting "monthly"
 	//if we want to persist the users last zoom level. Or maybe just preserve the zoom level then?
@@ -109,7 +109,7 @@ const transformJourneyForServer = journey => {
 }
 
 export const transformJourneyForClient = journey => {
-	console.log("transformJForClient", journey)
+	//console.log("transformJForClient", journey)
 	//for legacy we put in [] defaults
 	const { contracts, profiles, aims, goals, settings=[], updated, created } = journey;
 	return {
@@ -173,10 +173,10 @@ export const saveAdhocJourneyToStore = journey => (
 )
 
 export const saveJourney = (journey, shouldPersist=true, shouldUpdateStoreBefore=false, shouldUpdateStoreAfter=false)  => dispatch => {
-	console.log("saveJourney.............", journey)
+	//console.log("saveJourney.............", journey)
 	//note - currently, the client store simply stores the server journey too
 	const serverJourney = transformJourneyForServer(journey);
-	console.log("save to server...serverJourney", serverJourney)
+	//console.log("save to server...serverJourney", serverJourney)
 	/*
 	//atm, if no user logged in, we still have  auser object so just store journey in there as normal, but dont persist to server
 	const jwt = auth.isAuthenticated();

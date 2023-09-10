@@ -21,9 +21,9 @@ const useStyles = makeStyles((theme) => ({
     transition: `all ${TRANSITIONS.MED}ms`,
     display:"flex",
     flexDirection:"column",
-    //border:"solid",
-    //borderWidth:"thin",
-    //borderColor:grey10(7)
+    border:"solid",
+    borderWidth:"thin",
+    borderColor:grey10(7)
   },
   overlay:{
     width:props => props.width,
@@ -106,7 +106,7 @@ const Deck = ({ user, data, datasets, asyncProcesses, width, height, onClick, up
   }, [stringifiedData, width, height])
 
   useEffect(() => {
-    d3.select(containerRef.current).call(deck);
+    //d3.select(containerRef.current).call(deck);
   }, [stringifiedData, width, height])
 
   const updateFrontCardNr = useCallback(cardNr => {
