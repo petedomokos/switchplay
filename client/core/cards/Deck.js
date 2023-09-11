@@ -18,6 +18,8 @@ const useStyles = makeStyles((theme) => ({
     position:"relative",
     width:props => props.width,
     height:props => props.height,
+    //transform:"scale(2)",
+    //transformOrigin:"top left",
     transition: `all ${TRANSITIONS.MED}ms`,
     display:"flex",
     flexDirection:"column",
@@ -72,7 +74,9 @@ const useStyles = makeStyles((theme) => ({
   progressIcon:{
     width:props => props.progressIcon.width,
     height:props => props.progressIcon.height,
-    transition: `all ${TRANSITIONS.MED}ms`
+    transform:props => `scale(${props.progressIcon.scale})`,
+    transformOrigin:"center left",
+    transition: `all ${TRANSITIONS.MED}ms`,
   },
   svg:{
     pointerEvents:props => props.svg.pointerEvents,
@@ -89,38 +93,45 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Deck = ({ user, data, isSelected, datasets, asyncProcesses, width, height, onClick, update }) => {
+const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, width, height, onClick, update }) => {
   //we dont user defaultProps as we want to pass through userId too
   const deckData = data || initDeck(user?._id);
   //console.log("Deck", width)
+  const isSelected = selectedDeckId === deckData.id;
 
   const [layout, setLayout] = useState(() => deckLayout());
   const [deck, setDeck] = useState(() => deckComponent());
   const [form, setForm] = useState(null);
 
-  const headerHeight = d3.min([45, d3.max([11, height * 0.15])]);
+  const headerHeight = 45;// d3.min([45, d3.max([11, height * 0.15])]);
+  const titleFontSize = headerHeight * 0.5;
+  const minTitleFontSize = 12;
+  const scaledMinTitleFontSize = minTitleFontSize / scale;
   const svgWidth = width;
   const svgHeight = height - headerHeight;
-  const progressIconWidth = headerHeight;
+  const progressIconWidth = headerHeight * 0.8;// d3.min([width * 0.2, headerHeight]);
   const progressIconHeight = headerHeight;
   let styleProps = {
     width,
     height,
     header:{
       height:headerHeight,
-      fontSize:d3.min([24, d3.max([headerHeight * 0.4, 10])]),
+      //fontSize:d3.min([24, d3.max([headerHeight * 0.4, 10])]),
+      //fontSize:d3.min([24, d3.max([width * 0.1, 10])]),
+      fontSize:d3.max([scaledMinTitleFontSize, titleFontSize])
     },
     progressIcon:{
       width:progressIconWidth,
-      height:progressIconHeight
+      height:progressIconHeight,
+      scale:selectedDeckId ? 1 : 1.7
     },
     svg:{
-      pointerEvents:isSelected ? "all" : "none"
+      pointerEvents:isSelected ? "all" : "none",
     },
     form:{ 
       display: form ? null : "none",
     },
-    overlayDisplay:width <= 200 ? null : "none"
+    overlayDisplay:selectedDeckId ? "none" : null
   };
   const classes = useStyles(styleProps) 
   const containerRef = useRef(null);
@@ -140,9 +151,12 @@ const Deck = ({ user, data, isSelected, datasets, asyncProcesses, width, height,
 
   useEffect(() => {
     //dimns
+    const extraVertSpace = headerHeight - progressIconHeight;
     const progressIconMargin = { 
-      left:progressIconWidth * 0.1, right:progressIconWidth * 0.1,
-      top:progressIconHeight * 0.1, bottom:progressIconHeight * 0.1
+      left:progressIconWidth * 0.1, 
+      right:progressIconWidth * 0.1,
+      top:progressIconHeight * 0.1 + extraVertSpace/2, 
+      bottom:progressIconHeight * 0.1 + extraVertSpace/2
     }
     const progressIconContentsWidth = progressIconWidth - progressIconMargin.left - progressIconMargin.right;
     const progressIconContentsHeight = progressIconHeight - progressIconMargin.top - progressIconMargin.bottom;
@@ -189,7 +203,7 @@ const Deck = ({ user, data, isSelected, datasets, asyncProcesses, width, height,
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
       .setForm(setForm)
-  }, [stringifiedData, width, height])
+  }, [stringifiedData,/* width, height*/])
 
   useEffect(() => {
     //why when we comment out this line, only the 1st deck opens!?
@@ -263,7 +277,8 @@ Deck.defaultProps = {
   asyncProcesses:{},
   datasets: [], 
   width:300,
-  height:600
+  height:600,
+  scale:1
 }
 
 export default Deck;

@@ -148,8 +148,6 @@ export default function deckComponent() {
         // expression elements
         selection.each(function (deckData) {
             containerG = d3.select(this)
-                .attr("width", width)
-                .attr("height", height);
 
             if(containerG.select("g").empty()){
                 init();
@@ -158,6 +156,10 @@ export default function deckComponent() {
             update(deckData);
 
             function init(){
+                containerG
+                    .attr("width", width)
+                    .attr("height", height);
+
                 containerG.append("rect").attr("class", "deck-bg")
                     .attr("fill", "transparent");
                 contentsG = containerG.append("g").attr("class", "deck-contents");
@@ -196,31 +198,41 @@ export default function deckComponent() {
                     });
 
                 //gs
+                //we can transition even on enter as it will just have no effect
+                containerG
+                    .transition("svg-dimns")
+                    .duration(TRANSITIONS.MED)
+                        .attr("width", width)
+                        .attr("height", height)
+
                 contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
 
                 containerG.select("rect.deck-bg")
-                    .call(updateRectDimns, { 
+                    /*.call(updateRectDimns, { 
                         width: () => width, 
                         height:() => height,
-                        transition:transformTransition
-                    })
+                        transition:transformTransition,
+                        name:d => `deck-dimns-${d.id}`
+                    })*/
                 
                 cardsG
                     .select("rect.cards-bg")
-                    .call(updateRectDimns, { 
+                    /*.call(updateRectDimns, { 
                         width: () => deckAreaWidth, 
                         height:() => deckAreaHeight,
-                        transition:transformTransition
-                    })
+                        transition:transformTransition,
+                        name:d => `cards-dimns-${d.id}`
+                    })*/
 
                 cardsG
                     .select("rect.placed-cards-bg")
                     .attr("transform", `translate(0,${vertSpaceForIncs + heldCardHeight})`)
-                    .call(updateRectDimns, { 
+                    /*.call(updateRectDimns, { 
                         width: () => deckAreaWidth, 
                         height:() => placedCardsAreaHeight,
-                        transition:transformTransition
-                    })
+                        transition:transformTransition,
+                        name:d => `placed-cards-dimns-${d.id}`
+                    })*/
 
                 //selected card dimns
                 const selectedCardDimns = maxDimns(deckAreaWidth, deckAreaHeight, cardAspectRatio)
@@ -237,6 +249,7 @@ export default function deckComponent() {
                         .placedCardHeight(placedCardHeight)
                         .selectedCardWidth(selectedCardWidth)
                         .selectedCardHeight(selectedCardHeight)
+                        .transformTransition(transformTransition)
                         .x((d,i) => {
                             if(d.isSelected){
                                 //keep it centred

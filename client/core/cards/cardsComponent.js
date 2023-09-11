@@ -49,9 +49,9 @@ export default function cardsComponent() {
 
     let transformTransition = { 
         enter: null, 
-        update: { duration:d => 200,// d.statusChanging ? 200 : 500,
+        update: { duration:d => TRANSITIONS.MED,// d.statusChanging ? 200 : 500,
             delay:d => 0,//d => d.statusChanging ? 0 : 100,
-            ease:d3.easeQuadInOut
+            //ease:d3.easeQuadInOut
         } 
     };
 
@@ -128,7 +128,6 @@ export default function cardsComponent() {
                 return status === 2 ? GOLD : (status === 1 ? grey10(2) : grey10(5))
             };
 
-
             const getCardStroke = d => {
                 if(d.isFront){ return grey10(1); }
                 if(d.isNext){ return grey10(2); }
@@ -145,7 +144,6 @@ export default function cardsComponent() {
                 .append("g")
                     .attr("class", d => `card card-${d.cardNr}`)
                     .attr("opacity", 1)
-
                     .each(function(d,i){
                         cardInfoComponents[d.cardNr] = cardInfoComponent();
                         cardItemsComponents[d.cardNr] = cardItemsComponent();
@@ -156,6 +154,8 @@ export default function cardsComponent() {
                         contentsG.append("rect").attr("class", "card-bg")
                                 .attr("rx", 3)
                                 .attr("ry", 3)
+                                .attr("width", width)
+                                .attr("height", height)
                                 .attr("stroke", getCardStroke(d))
                                 .attr("fill", getCardFill(d))
 
@@ -164,6 +164,9 @@ export default function cardsComponent() {
                                 .attr("class", "info")
                                     .append("rect")
                                         .attr("class", "info-bg")
+                                            .attr("width", width)
+                                            .attr("height", infoHeight)
+                        
                         contentsG
                             .append("g")
                                 .attr("class", "items-area")
@@ -181,7 +184,8 @@ export default function cardsComponent() {
                         x, 
                         y,
                         k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),  
-                        transition:transformTransition.enter
+                        transition:transformTransition.enter,
+                        name:d => `card-pos-${d.id}`
                     })
                     .merge(cardG)
                     .call(updateTransform, { 
@@ -192,6 +196,7 @@ export default function cardsComponent() {
                     })
                     .each(function(cardD,i){
                         const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, items } = cardD;            
+                        
                         //const infoHeight;
                         //components
                         const cardInfo = cardInfoComponents[cardNr]
@@ -236,23 +241,32 @@ export default function cardsComponent() {
                             .onDragEnd(e => dragEnd(e, cardD))
                     
                         const contentsG = d3.select(this).select("g.card-contents")
-                        contentsG.select("rect.card-bg")
-                            .attr("width", width)
-                            .attr("height", height)
-                            .transition()
+                        const cardRect = contentsG.select("rect.card-bg");
+
+                        cardRect
+                            .transition("card-bg-appearance")
                             .delay(200)
                             .duration(400)
                                 .attr("fill", getCardFill(cardD))
                                 .attr("stroke", getCardStroke(cardD))
 
-                        contentsG.select("rect.info-bg")
-                            .attr("width", width)
-                            .attr("height", infoHeight)
-                            .attr("fill","none")
-                        
+                        cardRect
+                            .transition("card-bg-dimns")
+                            //.delay(0)
+                            .duration(TRANSITIONS.MED)
+                            .ease(d3.easeLinear)
+                                .attr("width", width)
+                                .attr("height", height)
 
-                        const infoDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext };
+                        contentsG.select("rect.info-bg")
+                            .transition("info-bg")
+                            //.delay(0)
+                            .duration(TRANSITIONS.MED)
+                                .attr("width", width)
+                                .attr("height", infoHeight)
+                                .attr("fill","none")
                         
+                        const infoDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext };
                         contentsG.selectAll("g.info")
                             .datum(infoDatum)
                             .call(cardInfo);
@@ -294,7 +308,7 @@ export default function cardsComponent() {
                             icon:icons.collapse,
                         }
                         const botRightBtnData = isSelected ? [collapseBtnDatum] : (isFront ? [expandBtnDatum] : []);
-                        const btnHeight = d3.max([/*35*/1, d3.min([50, 0.15 * height])]);
+                        const btnHeight = d3.max([1, d3.min([50, 0.15 * height])]);
                         const btnWidth = btnHeight;
                         //assumme all are square
                         //note: 0.8 is a bodge coz iconsseems to be bigger than they state
@@ -332,8 +346,6 @@ export default function cardsComponent() {
                                 .on("click", (e,d) => d.onClick(e, d));
 
                         botRightBtnG.exit().remove();
-
-
 
                     })
                     .call(drag)

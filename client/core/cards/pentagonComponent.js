@@ -134,7 +134,6 @@ export default function pentagonComponent() {
                         const dy = innerVertices[i + 1] ? innerVertices[i+1][1] : innerVertices[0][1];
 
                         const sizeIsIncreasing = r2 - prevR2 > 0;
-                        const sizeIsDecreasing = r2 - prevR2 < 0;
                         const sectionG = d3.select(this);
                         //startLine
                         sectionG.select("line.start")
@@ -183,14 +182,12 @@ export default function pentagonComponent() {
                         const outerLine = sectionG.select("line.outer");
                         outerLine
                             .transition("outer-trans")
-                            .delay(0)//sizeIsIncreasing ? 300 : 0)
+                            .delay(sizeIsIncreasing ? 300 : 0)
                             .duration(TRANSITIONS.MED)
                                 .attr("x1", bx)
                                 .attr("y1", by)
                                 .attr("x2", cx)
                                 .attr("y2", cy)
-
-                        
 
                         //outerLine hitbox
                         /*

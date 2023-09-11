@@ -78,19 +78,21 @@ const useStyles = makeStyles((theme) => ({
     position:"absolute",
     width:props => `${props.deckContainer.width}px`,
     height:props => `${props.deckContainer.height}px`,
+    transform:props => `scale(${props.deckContainer.scale})`,
+    transformOrigin:"top left",
     transition: `all ${TRANSITIONS.MED}ms`,
   },
   addDeckIconContainer:{
     position:"absolute",
     left:props => props.addDeckIcon.left,
     top:props => props.addDeckIcon.top,
-    width:props => `${props.deckContainer.width}px`,
-    height:props => `${props.deckContainer.height/2}px`,
+    width:props => `${props.addDeckIcon.width}px`,
+    height:props => `${props.addDeckIcon.height}px`,
     transition: `all ${TRANSITIONS.MED}ms`,
     display:"flex",
     justifyContent:"center",
     alignItems:"center",
-    color:grey10(4)
+    color:grey10(4),
   },
   newDeckPlaceholder:{
     width:props => `${props.deckContainer.width}px`,
@@ -156,6 +158,8 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const addDeckIconLeft = calcColNr(decksData.length) * nonSelectedDeckWidth;
   const addDeckIconTop = calcRowNr(decksData.length) * nonSelectedDeckHeight;
 
+  const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
+
   let styleProps = {
     left:selectedDeck ? -selectedDeckWidth * selectedDeck.colNr : 0,
     top:selectedDeck ? -selectedDeckHeight * selectedDeck.rowNr : 0,
@@ -168,12 +172,17 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
       display:showInstructions ? "none" : "flex",
     },
     deckContainer:{
-      width:deckWidth,
-      height:deckHeight
+      //width:deckWidth,
+      //height:deckHeight
+      width:selectedDeckWidth,
+      height:selectedDeckHeight,
+      scale:selectedDeckId ? 1 : deckScale,
     },
     addDeckIcon:{
       left:addDeckIconLeft,
-      top:addDeckIconTop
+      top:addDeckIconTop,
+      width:nonSelectedDeckWidth,
+      height:nonSelectedDeckHeight
     }
 
   };
@@ -285,17 +294,18 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
               className={classes.deckContainer}
               style={{
                 left:colNr * deckWidth,
-                top: rowNr * deckHeight, 
+                top: rowNr * deckHeight
               }}
             >
               {deckData.id.includes("temp") ? 
                 <div className={classes.newDeckPlaceholder}>Saving Deck...</div>
                 :
                 <Deck data={deckData} user={user} 
-                  width={deckWidth} 
-                  height={deckHeight}
+                  width={selectedDeckWidth} 
+                  height={selectedDeckHeight}
+                  scale={deckScale}
                   update={updateDeck}
-                  isSelected={selectedDeckId === deckData.id}
+                  selectedDeckId={selectedDeckId}
                   onClick={(e) => {
                     setSelectedDeckId(prevState => prevState ? "" : deckData.id);
                     e.stopPropagation();
@@ -304,6 +314,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
               }
           </div>
         })}
+
         {user && !selectedDeckId && 
           <div className={classes.addDeckIconContainer}>
             <IconComponent 
