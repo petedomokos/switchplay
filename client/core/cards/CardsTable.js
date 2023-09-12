@@ -177,6 +177,9 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const nonSelectedDeckWidth = /*selectedDeck ? 0 :*/ d3.min([tableContentsWidth/3, 200]);
   const nonSelectedDeckHeight = nonSelectedDeckWidth / aspectRatio;
 
+  //extra margin at bottom of each deck to give a nice gap between them
+  const deckMarginBottom = selectedDeck ? 20 : 30;
+
   const deckWidth = selectedDeck ? selectedDeckWidth : nonSelectedDeckWidth;
   const deckHeight = selectedDeck ? selectedDeckHeight : nonSelectedDeckHeight;
   //new icon goes in next avail slot
@@ -184,11 +187,6 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const addDeckIconTop = margin.top + calcRowNr(decksData.length) * nonSelectedDeckHeight;
 
   const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
-
-  /*console.log("deckScale", deckScale)
-  console.log("nonSelDH * 1/scale", deckHeight * (1/deckScale))
-  console.log("selDH", selectedDeckHeight)*/
-
 
   let styleProps = {
     left:selectedDeck ? -selectedDeckWidth * selectedDeck.colNr : 0,
@@ -323,7 +321,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
               style={{
                 //left and top not affect by scale coz origin is top-left
                 left:margin.left + colNr * deckWidth, //so we use deckWidth which is dynamic
-                top:margin.top + rowNr * deckHeight, //and deckHeight
+                top:margin.top + rowNr * (deckHeight + deckMarginBottom), //and deckHeight
               }}
             >
               {deckData.id.includes("temp") ? 
