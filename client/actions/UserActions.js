@@ -156,10 +156,10 @@ export const createDeck = settings => dispatch => {
 	)
 }
 
-export const updateDecks = (decks, shouldPersist) => dispatch => {
-	//console.log("updateDecks", decks)
+export const updateDeck = (deck, shouldPersist=true) => dispatch => {
+	console.log("updateDeck", shouldPersist, deck)
 	//update in store
-	dispatch({ type:C.UPDATE_DECKS, decks });
+	dispatch({ type:C.UPDATE_DECK, deck });
 
 	if(!shouldPersist){ return; }
 
@@ -169,13 +169,13 @@ export const updateDecks = (decks, shouldPersist) => dispatch => {
 		return;
 	}
 
-	const serverDecks = decks.map(d => transformDeckForServer(d));
+	const serverDeck = transformDeckForServer(deck);
 	fetchThenDispatch(dispatch, 
 		'updating.user',
 		{
 			url: `/api/users/${jwt.user._id}/decks`,
 			method: 'PUT',
-			body:JSON.stringify(serverDecks),
+			body:JSON.stringify(serverDeck),
 			requireAuth:true
 		}
 	)

@@ -66,10 +66,10 @@ export const user = (state=InitialState.user, act) =>{
 				decks:state.decks.map(s => !s.id.includes("temp") ? s : ({ ...s, id:act.newDeckId }))
 			};
 		}
-		case C.UPDATE_DECKS:{
+		case C.UPDATE_DECK:{
 			return {
 				...state,
-				decks:state.decks.map(s => s.id !== act.deck.id ? s : ({ ...s, ...act.deck }))
+				decks:state.decks.map(d => d.id === act.deck.id ? { ...d, ...act.deck } : d)
 			};
 		}
 		case C.DELETE_STACK:{

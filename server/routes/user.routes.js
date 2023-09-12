@@ -20,7 +20,7 @@ router.route('/api/users')
 
 router.route('/api/users/:userId/decks')
   .post(userCtrl.createDeck)
-  .put(authCtrl.requireSignin, authCtrl.hasAuthorization, userCtrl.updateDecks)
+  .put(authCtrl.requireSignin, authCtrl.hasAuthorization, userCtrl.updateDeck)
 
 router.route('/api/users/:userId')
   .get(authCtrl.requireSignin, userCtrl.read)

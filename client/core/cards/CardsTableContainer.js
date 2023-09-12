@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import CardsTable  from './CardsTable'
-import { createDeck, updateDecks } from '../../actions/UserActions'
+import { createDeck, updateDeck } from '../../actions/UserActions'
 
 const mapStateToProps = (state, ownProps) => {
 	//console.log("CardsTableContainer...user", state.user)
@@ -22,12 +22,12 @@ const mapStateToProps = (state, ownProps) => {
 }
 
 const mapDispatchToProps = dispatch => ({
-	save(decks, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
-		dispatch(updateDecks(decks, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter));
-	},
 	createDeck(settings){
 		dispatch(createDeck(settings))
-	}
+	},
+	updateDeck(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
+		dispatch(updateDeck(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter));
+	},
 })
 
 //wrap all 4 sections in the same container for now.

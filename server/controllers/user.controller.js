@@ -166,32 +166,20 @@ const createDeck = async (req, res) => {
   }
 }
 
-const updateDecks = async (req, res) => {
-  console.log('updateDecks for.....', req.user._id)
+const updateDeck = async (req, res) => {
+  //console.log('updateDeck for.................', req.user._id)
   const { user, body } = req;
-  console.log("body", body)
-  const updatedDecks = body.map(deck => ({ ...deck, updated: Date.now() }));
-  console.log("updatedDecks", updatedDecks)
-  user.decks = user.decks.map(d => {
-    const updates = updatedDecks.find(deck => deck._id.equals(d._id))
-    console.log("check ", d._id)
-    console.log("shouldUpdate?", !!updates)
-    return updates ? { ...d, ...updates } : d
-  });
-  console.log("updatecomplete...user.decks", user.decks)
-  /*const updatedDeck = body;
-  updatedDeck.updated = Date.now()
-  console.log("updateddeck", updatedDeck)
-  console.log("deck id", updatedDeck._id)
-  console.log("staskso id", user.decks[0]._id)
-  console.log("equals??????", user.decks[0]._id.equals(updatedDeck._id))
-  user.decks = user.decks.map(s => !s._id.equals(updatedDeck._id) ? s : updatedDeck);
+
+  const updatedDeck = body;
+  const now = Date.now();
+  updatedDeck.updated = now;
+  
+  //@todo - change so that it just adds updates to the stored deck
+  user.decks = user.decks.map(deck => deck._id.equals(updatedDeck._id) ? updatedDeck : deck);
   user.updated = Date.now()
-  console.log("user decks", user.decks)
-  */
   try {
     await user.save()
-    res.json(updatedDecks)
+    res.json(updatedDeck)
   } catch (err) {
     return res.status(400).json({
       error: errorHandler.getErrorMessage(err)
@@ -338,7 +326,7 @@ export default {
   remove,
   update,
   createDeck,
-  updateDecks,
+  updateDeck,
   photos,
   photo,
   defaultPhoto

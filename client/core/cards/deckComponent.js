@@ -181,14 +181,6 @@ export default function deckComponent() {
                     .attr("fill", "none");
             }
 
-            //next - pass in selectedDeckId to this comp,
-            //and if this comp is not selected, then the cards slide under
-            //each other, leaving a much smaller top gap,
-            //just enough to show that there are more cards,
-            // and the top card takes up all of the heldCards space.
-            //note - placedCards stay placed, so user can view all
-            //of the front cards at once from the table view
-
             function update(_deckData, options={}){
                 //console.log("update", _deckData)
                 const { } = options;
@@ -289,7 +281,6 @@ export default function deckComponent() {
                         })  
                         .onUpdateItemStatus(updateItemStatus)
                         .onClickCard(function(e, d){
-                            console.log("click card")
                             //hide/show others
                             containerG.selectAll("g.card").filter(dat => dat.cardNr !== d.cardNr)
                                 .attr("pointer-events", d.isSelected ? null : "none")

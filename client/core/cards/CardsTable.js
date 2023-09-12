@@ -142,7 +142,7 @@ const embellishedDecks = decks => decks
   rowNr:calcRowNr(i),
 }))
 
-const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, screen, save, createDeck }) => {
+const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, screen, createDeck, updateDeck }) => {
   const { decks=[] } = user;
   //const decks = [user.decks[0]]
   const width = screen.width || 300;
@@ -224,13 +224,6 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const setSelectedDeck = useCallback((newSelectedDeckId) => {
       setSelectedDeckId(prevState => prevState ? "" : newSelectedDeckId);
   }, [stringifiedData]);
-
-  const updateDeck = useCallback(updatedDeck => {
-    // console.log("updateDeck", updatedDeck)
-    const updatedDecks = decks.map(d => d.id === updatedDeck.id ? updatedDeck : d)
-    save(updatedDecks, false); //dont persist yet
-  }, [stringifiedData]);
-
 
   //@todo - add a settings form with a useState toggle to show it when user clicks to create
   const createNewDeck = useCallback((settings={}) => {
