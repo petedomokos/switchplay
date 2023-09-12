@@ -87,15 +87,23 @@ const useStyles = makeStyles((theme) => ({
     borderColor:"blue"*/
 
   },
+  //add deck
+  addTextWrapper:{
+  },
+  addDeckText:{
+
+  },
   addDeckIconContainer:{
     position:"absolute",
     left:props => props.addDeckIcon.left,
     top:props => props.addDeckIcon.top,
     width:props => `${props.addDeckIcon.width}px`,
-    height:props => `${props.addDeckIcon.height}px`,
+    height:props => `${props.addDeckIcon.height * 0.4}px`,
+    padding:props => `${props.addDeckIcon.height * 0.3}px 0px`,
     //transition: `${TRANSITIONS.MED}ms`,
     display:"flex",
-    justifyContent:"center",
+    flexDirection:"column",
+    justifyContent:"space-around",
     alignItems:"center",
     color:grey10(4),
     /*border:"solid",
@@ -344,6 +352,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
 
         {user && !selectedDeckId && 
           <div className={classes.addDeckIconContainer}>
+            {decks.length === 0 && <div className={classes.addDeckText}>Add a deck</div>}
             <IconComponent text="New" onClick={() => createNewDeck()} />
           </div>
         }
