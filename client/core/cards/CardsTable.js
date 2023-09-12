@@ -114,22 +114,24 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 //helpers
+/*
 const createMockDecks = (userId, nrDecks=1) => d3.range(nrDecks).map((nr,i) =>  
   ({ 
       ...initDeck(userId), 
       id:`temp-${nr}`,
   })
 )
+*/
 
-const calcColNr = pos => pos % 3;
-const calcRowNr = pos => Math.floor(pos/3);
+const calcColNr = i => i % 3;
+const calcRowNr = i => Math.floor(i/3);
 
 const embellishedDecks = decks => decks
-  .map((d,i) => ({ ...d, pos:typeof d.pos === "number" ? d.pos : i })) //pos may or may nt be persisted
-  .map(d => ({
+  .map((d,i) => ({ ...d, i }))
+  .map((d,i) => ({
   ...d, 
-  colNr:calcColNr(d.pos),
-  rowNr:calcRowNr(d.pos),
+  colNr:calcColNr(i),
+  rowNr:calcRowNr(i),
 }))
 
 const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, screen, save, createDeck }) => {
@@ -154,7 +156,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const selectedDeckHeight = height * 0.9;
   const deckWidth = selectedDeck ? selectedDeckWidth : nonSelectedDeckWidth;
   const deckHeight = selectedDeck ? selectedDeckHeight : nonSelectedDeckHeight;
-  //pos of new icon - in next avail slot
+  //new icon goes in next avail slot
   const addDeckIconLeft = calcColNr(decksData.length) * nonSelectedDeckWidth;
   const addDeckIconTop = calcRowNr(decksData.length) * nonSelectedDeckHeight;
 
@@ -200,10 +202,9 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   //@todo - add a settings form with a useState toggle to show it when user clicks to create
   const createNewDeck = useCallback((settings={}) => {
     //do animation to show its being created
-    const pos = decks.length;
-    createDeck({ ...settings, pos })
+    createDeck(settings)
   }, [decks]);
-
+  /*
   const moveDeck = (origArrPos, newArrPos) => {
     setDecksState(prevState => {
       if(newArrPos < origArrPos){
@@ -230,6 +231,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
       })
     })
   } 
+  */
 
   useEffect(() => {
     //setShowInstructions(???);

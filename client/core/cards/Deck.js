@@ -94,7 +94,7 @@ const useStyles = makeStyles((theme) => ({
 const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, width, height, onClick, update }) => {
   //we dont user defaultProps as we want to pass through userId too
   const deckData = data || initDeck(user?._id);
-  //console.log("Deck", width)
+  //console.log("Deck", selectedDeckId)
   const isSelected = selectedDeckId === deckData.id;
 
   const [layout, setLayout] = useState(() => deckLayout());

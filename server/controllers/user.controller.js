@@ -150,7 +150,7 @@ const createDeck = async (req, res) => {
     user.decks = [deck]
   }else{
     console.log("pushing deck to decks")
-    user.decks = [deck, ...user.decks]
+    user.decks = [...user.decks, deck]
   }
   console.log("user decks", user.decks)
   //save it and return the new deck id to replace "temp"

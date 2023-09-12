@@ -6,7 +6,7 @@ export default new mongoose.Schema({
   owner:{type:mongoose.Schema.ObjectId, ref:'User'},
   cards:String,
   frontCardNr:{ type: Number, default: 0 },
-  pos:{type: Number, required: "pos is required"},
+  isArchived:{type: Boolean, default: false},
   colour:String,
   tags:[String],
   updated: Date,

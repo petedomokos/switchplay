@@ -55,7 +55,7 @@ export const user = (state=InitialState.user, act) =>{
 		case C.CREATE_DECK:{
 			return {
 				...state,
-				decks:[act.deck, ...state.decks]
+				decks:[...state.decks, act.deck]
 			};
 		}
 		//this is called after new deck is saved to server
