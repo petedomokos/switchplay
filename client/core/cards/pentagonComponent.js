@@ -81,7 +81,9 @@ export default function pentagonComponent() {
                 .dragThreshold(100)
                 .onLongpressStart(onLongpressStart)
                 .onLongpressEnd(onLongpressEnd)
-                .onClick(onClick);
+                .onClick(function(e,d){
+                    onClick.call(this, e, d)
+                });
 
             const drag = d3.drag()
                 .on("start", enhancedDrag(onDragStart))
@@ -120,6 +122,13 @@ export default function pentagonComponent() {
                                 .attr("fill", grey10(7));
 
                     })
+                    //WARNING: drag is before merge so it doesnt get broken when a longpress causes an update
+                    //if it breaks, the enhancedDH will trigger onClick because isLongpress is reset to false
+                    //it still seems to be reset here, but is not reappended - this may cause a problem
+                    //with the d that is sent through notbeing the latest)
+                    //if so, could put it back bekow merge so it updates, but find another way to prevent 
+                    //click if its been longpressed. eg store an isLongpress here in outer scope
+                    .call(drag)
                     .merge(sectionG)
                     .attr("pointer-events", editable ? null : "none")
                     .each(function(d,i){
@@ -240,7 +249,6 @@ export default function pentagonComponent() {
                             .text(text)
 
                     })
-                    .call(drag)
 
             sectionG.exit().remove();
 

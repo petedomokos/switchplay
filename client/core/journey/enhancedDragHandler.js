@@ -75,6 +75,9 @@ export default function dragEnhancements() {
                 }
                 case "drag":
                 case "zoom": {
+                    //note - this is showing as false sometimes even when it is a lp, if drag is broken by update
+                    //this may cause onClick to fire etc, if drag is reappended on the update
+                    //console.log("drg isLP?", isLongpress)
                     if (isMultitouch) {
                         break;
                     }
@@ -121,12 +124,16 @@ export default function dragEnhancements() {
                     break;
                 }
                 case "end": {
+                    //note - this is showing as false sometimes even when it is a lp, if drag is broken by update
+                    //this may cause onClick to fire etc, if drag is reappended on the update
+                    //console.log("end...isLP?", isLongpress)
                     const reset = () => {
                         // internal clean up
                         if (longpressTimer) { clearLongpressTimer(); }
                         resetFlags();
                     }
                     // click flag
+                    
                     isClick = withClick && !wasMoved && !isLongpress && !isMultitouch;
 
                     if (isLongpress) {
@@ -176,6 +183,7 @@ export default function dragEnhancements() {
         longpressSettings = { ...longpressSettings, ...settings };
     }
 
+    //issue - if held for a shorteer period, it doesnt set isLP to true, but still triggers longpress! (and click)
     function setLongpressTimer(e, d) {
         longpressTimer = d3.timeout(() => {
             if (isMultitouch) { return; }
