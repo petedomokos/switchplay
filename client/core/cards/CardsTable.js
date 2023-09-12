@@ -352,7 +352,11 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
 
         {user && !selectedDeckId && 
           <div className={classes.addDeckIconContainer}>
-            {decks.length === 0 && <div className={classes.addDeckText}>Add a deck</div>}
+            {decks.length === 0 && 
+              <div className={classes.addDeckText} onClick={() => createNewDeck()}>
+                Add a deck
+              </div>
+            }
             <IconComponent text="New" onClick={() => createNewDeck()} />
           </div>
         }
