@@ -2,9 +2,6 @@ import * as d3 from 'd3';
 import { grey10, COLOURS, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIONS } from "./constants";
 import cardsComponent from './cardsComponent';
 import { updateRectDimns } from '../journey/transitionHelpers';
-import { trophy } from "../../../assets/icons/milestoneIcons.js"
-
-const { GOLD } = COLOURS;
 
 //const transformTransition = { update: { duration: 1000 } };
 const transformTransition = { update: { duration: TRANSITIONS.MED } };
@@ -193,11 +190,12 @@ export default function deckComponent() {
             //of the front cards at once from the table view
 
             function update(_deckData, options={}){
+                //console.log("update", _deckData)
                 const { } = options;
                 const { frontCardNr } = _deckData;
 
                 //dimns for specific chart
-                const deckData = _deckData.cards
+                const cardsData = _deckData.cards
                     .map((card,i) => { 
                         const { cardNr } = card;
                         return {
@@ -254,7 +252,7 @@ export default function deckComponent() {
                 const selectedCardHeight = selectedCardDimns.height;
 
                 cardsG
-                    .datum(deckData)
+                    .datum(cardsData)
                     .call(cards
                         .width(heldCardWidth)
                         .height(heldCardHeight)
@@ -291,6 +289,7 @@ export default function deckComponent() {
                         })  
                         .onUpdateItemStatus(updateItemStatus)
                         .onClickCard(function(e, d){
+                            console.log("click card")
                             //hide/show others
                             containerG.selectAll("g.card").filter(dat => dat.cardNr !== d.cardNr)
                                 .attr("pointer-events", d.isSelected ? null : "none")

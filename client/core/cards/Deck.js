@@ -10,8 +10,11 @@ import { sortAscending } from '../../util/ArrayHelpers';
 import { initDeck } from '../../data/cards';
 //import { createId } from './helpers';
 import { TRANSITIONS } from "./constants"
-import { grey10 } from './constants';
+import { grey10, COLOURS } from './constants';
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
+const { GOLD } = COLOURS;
+
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
