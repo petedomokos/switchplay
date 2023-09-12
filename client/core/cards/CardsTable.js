@@ -212,7 +212,8 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
       left:addDeckIconLeft,
       top:addDeckIconTop,
       width:nonSelectedDeckWidth,
-      height:nonSelectedDeckHeight
+      //height:45
+      height:/*decks.length === 0 ?*/ nonSelectedDeckHeight// : nonSelectedDeckHeight/2
     }
 
   };
