@@ -149,7 +149,7 @@ export const createDeck = settings => dispatch => {
 			body:JSON.stringify(serverDeck),
 			requireAuth:true,
 			nextAction: data => {
-				//console.log("response data", data)
+				console.log("response data", data)
 				return { type:C.UPDATE_NEW_DECK_ID, newDeckId: data._id }
 			}
 		}

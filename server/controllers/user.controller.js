@@ -146,19 +146,18 @@ const createDeck = async (req, res) => {
   const { user, body } = req;
   const deck = body;
   if(!user.decks){
-    console.log("decks not defined - creating")
+    //console.log("decks not defined - creating")
     user.decks = [deck]
   }else{
-    console.log("pushing deck to decks")
+    //console.log("pushing deck to decks")
     user.decks = [...user.decks, deck]
   }
-  console.log("user decks", user.decks)
+  //console.log("user decks", user.decks)
   //save it and return the new deck id to replace "temp"
   try {
     const result = await user.save()
-    //res.json(deck._id) - tdo - replace with this line
-    //the one that is added will always be the first one - need the saved version which will have _id
-    res.json(result.decks[0])
+    //the one that is added will always be the last one 
+    res.json(result.decks[result.decks.length - 1])
   } catch (err) {
     return res.status(400).json({
       error: errorHandler.getErrorMessage(err)
