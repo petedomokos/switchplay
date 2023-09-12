@@ -58,10 +58,7 @@ const useStyles = makeStyles((theme) => ({
   },
   header:{
     height:props => props.header.height,
-    padding:"2.5% 10%",
-    border:"solid",
-    borderWidth:"thin",
-    borderColor:"blue",
+    padding:props => `2.5% 10% 2.5% ${10 + props.header.extraPadLeft}%`,
     display:"flex",
     justifyContent:"space-between",
     alignItems:"center",
@@ -69,6 +66,7 @@ const useStyles = makeStyles((theme) => ({
     transition: `all ${TRANSITIONS.MED}ms`
   },
   title:{
+    color:grey10(6)
 
   },
   progressIcon:{
@@ -118,7 +116,8 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
       height:headerHeight,
       //fontSize:d3.min([24, d3.max([headerHeight * 0.4, 10])]),
       //fontSize:d3.min([24, d3.max([width * 0.1, 10])]),
-      fontSize:d3.max([scaledMinTitleFontSize, titleFontSize])
+      fontSize:d3.max([scaledMinTitleFontSize, titleFontSize]),
+      extraPadLeft:selectedDeckId ? 5 : 0, // make sure burger bar doesnt go over name
     },
     progressIcon:{
       width:progressIconWidth,
@@ -200,15 +199,16 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
     deck
       .width(svgWidth)
       .height(svgHeight)
+      .selectedDeckId(selectedDeckId)
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
       .setForm(setForm)
-  }, [stringifiedData,/* width, height*/])
+  }, [stringifiedData, width, height, selectedDeckId])
 
   useEffect(() => {
     //why when we comment out this line, only the 1st deck opens!?
     d3.select(containerRef.current).call(deck);
-  }, [stringifiedData, width, height])
+  }, [stringifiedData, width, height, selectedDeckId])
 
   const updateFrontCardNr = useCallback(cardNr => {
     update({ ...deckData, frontCardNr:cardNr })

@@ -45,6 +45,7 @@ export default function cardsComponent() {
     let y = (d,i) => 0;
 
     //state
+    let selectedDeckId;
     let format = "actual";
 
     let transformTransition = { 
@@ -192,7 +193,8 @@ export default function cardsComponent() {
                         x, 
                         y, 
                         k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),
-                        transition:transformTransition.update 
+                        transition:transformTransition.update,
+                        name:(d,i) => `card-pos-${i}-${d.id}`
                     })
                     .each(function(cardD,i){
                         const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, items } = cardD;            
@@ -259,6 +261,7 @@ export default function cardsComponent() {
                                 .attr("height", height)
 
                         contentsG.select("rect.info-bg")
+                            .attr("display", selectedDeckId ? null : "none") //hide when small
                             .transition("info-bg")
                             //.delay(0)
                             .duration(TRANSITIONS.MED)
@@ -268,6 +271,7 @@ export default function cardsComponent() {
                         
                         const infoDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext };
                         contentsG.selectAll("g.info")
+                            .attr("display", selectedDeckId ? null : "none") //hide when small
                             .datum(infoDatum)
                             .call(cardInfo);
 
@@ -486,6 +490,11 @@ export default function cardsComponent() {
     cards.fontSizes = function (values) {
         if (!arguments.length) { return fontSizes; }
         fontSizes = { ...fontSizes, ...values };
+        return cards;
+    };
+    cards.selectedDeckId = function (value) {
+        if (!arguments.length) { return selectedDeckId; }
+        selectedDeckId = value;
         return cards;
     };
     cards.format = function (value) {
