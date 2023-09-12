@@ -95,7 +95,7 @@ const useStyles = makeStyles((theme) => ({
     top:"0px",
     width:props => `${props.width}px`,
     height:props => `${props.height}px`,
-    display:props => props.form.display
+    display:props => props.form.display,
   }
 }))
 
@@ -272,11 +272,11 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
         </defs>
       </svg>
       {/**form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>*/}
-      {/**<div className={classes.formContainer}>
-          {form?.formType === "item" && 
-            <ItemForm item={form.value} fontSize={form.height * 0.5} save={updateItemTitle} close={() => setForm(null)} />
-          }
-        </div>*/}
+      <div className={classes.formContainer}>
+        {form?.formType === "item" && 
+          <ItemForm item={form.value} fontSize={form.height * 0.5} save={updateItemTitle} close={() => setForm(null)} />
+        }
+      </div>
       <div className={classes.overlay} onClick={onClick}></div>
     </div>
   )

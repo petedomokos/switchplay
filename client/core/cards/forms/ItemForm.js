@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
     display:"flex",
     flexDirection:"column",
     alignItems:"center",
-    background:grey10(9)
+    background:grey10(8)
   },
   formTitle:{
     margin:"10px",
@@ -75,7 +75,7 @@ export default function ItemForm({ item, fontSize, save, close }) {
   useEffect(() => { d3.timeout(() => { setEditing(true) }, 1) }, [])
 
   return (
-    <div className={classes.root}>
+    <div className={classes.root} onClick={e => { e.stopPropagation() }}>
       <p className={classes.formTitle}>Card {value.cardNr+1} Item {value.itemNr+1}</p>
       <form>
         {editing && 

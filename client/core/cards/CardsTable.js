@@ -351,11 +351,11 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
         }
       </div>
       {/**form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>*/}
-      <div className={classes.formContainer}>
+      {/**<div className={classes.formContainer}>
           {form?.formType === "item" && 
             <ItemForm item={form.value} fontSize={form.height * 0.5} save={updateItemTitle} close={() => setForm(null)} />
           }
-      </div>
+      </div>*/}
     </div>
   )
 }

@@ -157,7 +157,7 @@ export const createDeck = settings => dispatch => {
 }
 
 export const updateDeck = (deck, shouldPersist=true) => dispatch => {
-	console.log("updateDeck", shouldPersist, deck)
+	//console.log("updateDeck", shouldPersist, deck)
 	//update in store
 	dispatch({ type:C.UPDATE_DECK, deck });
 
