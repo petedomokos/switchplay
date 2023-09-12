@@ -23,9 +23,9 @@ const useStyles = makeStyles((theme) => ({
     transition: `all ${TRANSITIONS.MED}ms`,
     display:"flex",
     flexDirection:"column",
-    border:"solid",
+    /*border:"solid",
     borderWidth:"thin",
-    borderColor:grey10(7)
+    borderColor:grey10(7)*/
   },
   overlay:{
     width:props => props.width,
@@ -58,16 +58,20 @@ const useStyles = makeStyles((theme) => ({
   },
   header:{
     height:props => props.header.height,
-    padding:props => `2.5% 10% 2.5% ${10 + props.header.extraPadLeft}%`,
+    padding:props => props.header.padding,
     display:"flex",
     justifyContent:"space-between",
     alignItems:"center",
     fontSize:props => props.header.fontSize,
-    transition: `all ${TRANSITIONS.MED}ms`
+    transition: `all ${TRANSITIONS.MED}ms`,
+    /*border:"solid",
+    borderColor:"white",
+    borderWidth:"thin"*/
   },
   title:{
-    color:grey10(6)
-
+    color:grey10(6),
+    //@todo - sort positions of header contents properly, thi sis just a workaround
+    marginBottom:20, 
   },
   progressIcon:{
     width:props => props.progressIcon.width,
@@ -75,6 +79,7 @@ const useStyles = makeStyles((theme) => ({
     transform:props => `scale(${props.progressIcon.scale})`,
     transformOrigin:"center left",
     transition: `all ${TRANSITIONS.MED}ms`,
+    //background:"aqua"
   },
   svg:{
     pointerEvents:props => props.svg.pointerEvents,
@@ -103,11 +108,11 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
 
   const headerHeight = 45;// d3.min([45, d3.max([11, height * 0.15])]);
   const titleFontSize = headerHeight * 0.5;
-  const minTitleFontSize = 12;
+  const minTitleFontSize = 10;
   const scaledMinTitleFontSize = minTitleFontSize / scale;
   const svgWidth = width;
   const svgHeight = height - headerHeight;
-  const progressIconWidth = headerHeight * 0.8;// d3.min([width * 0.2, headerHeight]);
+  const progressIconWidth = headerHeight * 0.6;// d3.min([width * 0.2, headerHeight]);
   const progressIconHeight = headerHeight;
   let styleProps = {
     width,
@@ -117,12 +122,13 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
       //fontSize:d3.min([24, d3.max([headerHeight * 0.4, 10])]),
       //fontSize:d3.min([24, d3.max([width * 0.1, 10])]),
       fontSize:d3.max([scaledMinTitleFontSize, titleFontSize]),
-      extraPadLeft:selectedDeckId ? 5 : 0, // make sure burger bar doesnt go over name
+      //padding:`5% 10% 2.5% ${10 + props.header.extraPadLeft}%`
+      padding:selectedDeckId ? "5% 15%" : "10% 15%", // make sure burger bar doesnt go over name
     },
     progressIcon:{
       width:progressIconWidth,
       height:progressIconHeight,
-      scale:selectedDeckId ? 1 : 1.7
+      scale:selectedDeckId ? 1 : 1.7,
     },
     svg:{
       pointerEvents:isSelected ? "all" : "none",
@@ -173,7 +179,7 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
         .attr("pointer-events", "none")
         .each(function(){
           d3.select(this).append("path")
-            .attr("transform", `translate(${0},${0}) scale(${iconScale})`)
+            .attr("transform", `translate(${hozIconShift},${vertIconShift}) scale(${iconScale})`)
         })
         .merge(iconSvg)
         .attr("transform", `translate(${progressIconMargin.left},${progressIconMargin.top})`)
