@@ -26,9 +26,9 @@ const useStyles = makeStyles((theme) => ({
     transition: `all ${TRANSITIONS.MED}ms`,
     display:"flex",
     flexDirection:"column",
-    /*border:"solid",
+    border:"solid",
     borderWidth:"thin",
-    borderColor:grey10(7)*/
+    borderColor:grey10(7)
   },
   overlay:{
     width:props => props.width,
@@ -208,7 +208,14 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
     deck
       .width(svgWidth)
       .height(svgHeight)
-      .selectedDeckId(selectedDeckId)
+      
+  }, [])
+
+  useEffect(() => {
+    deck
+      //.width(svgWidth)
+      //.height(svgHeight)
+      //.selectedDeckId(selectedDeckId)
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
       .setForm(setForm)

@@ -4,7 +4,7 @@ import cardsComponent from './cardsComponent';
 import { updateRectDimns } from '../journey/transitionHelpers';
 
 //const transformTransition = { update: { duration: 1000 } };
-const transformTransition = { update: { duration: TRANSITIONS.MED } };
+const transformTransition = { update: { duration: TRANSITIONS.MED, delay:500 } };
 
 function maxDimns(maxWidth, maxHeight, aspectRatio){
     const potentialHeight = maxWidth * aspectRatio;
@@ -55,6 +55,10 @@ export default function deckComponent() {
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
+        
+        console.log("w h", width, height)
+        //console.log("margin", margin)
+        //console.log("cw ch", contentsWidth, contentsHeight)
         deckAreaWidth = contentsWidth;
         deckAreaHeight = contentsHeight;
         //this aspectRatio is only needed to aid with selecting a card to takeover entire area
@@ -253,7 +257,7 @@ export default function deckComponent() {
                         .placedCardHeight(placedCardHeight)
                         .selectedCardWidth(selectedCardWidth)
                         .selectedCardHeight(selectedCardHeight)
-                        .selectedDeckId(selectedDeckId)
+                        //.selectedDeckId(selectedDeckId)
                         .transformTransition(transformTransition)
                         .x((d,i) => {
                             if(d.isSelected){

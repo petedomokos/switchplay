@@ -3,7 +3,8 @@ import * as d3 from 'd3';
 export const TRANSITIONS = {
     SLOW:800,
     //med:400,
-    MED:500,
+    //MED:500,
+    MED:1000,
     FAST:200,
     VERY_FAST:50
 }
