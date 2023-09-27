@@ -70,9 +70,9 @@ const useStyles = makeStyles((theme) => ({
     flexWrap:"wrap",
     justifyContent:"flex-start",
     alignItems:"flex-start",
-    border:"solid",
+    /*border:"solid",
     borderWidth:"thin", 
-    borderColor:"yellow"
+    borderColor:"yellow"*/
   },
   deckContainer:{
     position:"absolute",
@@ -82,9 +82,9 @@ const useStyles = makeStyles((theme) => ({
     transform:props => `scale(${props.deckContainer.scale})`, 
     transformOrigin:"top left",
     transition: `all ${TRANSITIONS.MED}ms`,
-    border:"solid",
+    /*border:"solid",
     borderWidth:"thin", 
-    borderColor:"blue"
+    borderColor:"blue"*/
 
   },
   //add deck
@@ -186,7 +186,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const nonSelectedDeckHeight = nonSelectedDeckWidth / aspectRatio;
 
   //extra margin at bottom of each deck to give a nice gap between them
-  const deckMarginBottom = 20// selectedDeck ? 20 : 30;
+  const deckMarginBottom = 0// 20// selectedDeck ? 20 : 30;
 
   const deckWidth = selectedDeck ? selectedDeckWidth : nonSelectedDeckWidth;
   const deckHeight = selectedDeck ? selectedDeckHeight : nonSelectedDeckHeight;

@@ -56,7 +56,7 @@ export default function deckComponent() {
         contentsHeight = height - margin.top - margin.bottom;
 
         
-        console.log("w h", width, height)
+        //console.log("w h", width, height)
         //console.log("margin", margin)
         //console.log("cw ch", contentsWidth, contentsHeight)
         deckAreaWidth = contentsWidth;
@@ -167,9 +167,14 @@ export default function deckComponent() {
                     .attr("width", width)
                     .attr("height", height);
 
-                containerG.append("rect").attr("class", "deck-bg")
-                    .attr("fill", "transparent");
-                contentsG = containerG.append("g").attr("class", "deck-contents");
+                containerG
+                    .append("rect")
+                        .attr("class", "deck-bg")
+                        .attr("fill", "transparent")
+                        //.attr("fill", "red")
+                        .attr("stroke", "yellow");
+
+                /*contentsG = containerG.append("g").attr("class", "deck-contents");
 
                 cardsG = contentsG
                     .append("g")
@@ -182,7 +187,7 @@ export default function deckComponent() {
 
                 cardsG.append("rect").attr("class", "placed-cards-bg")
                     .attr("stroke", "none")
-                    .attr("fill", "none");
+                    .attr("fill", "none");*/
             }
 
             function update(_deckData, options={}){
@@ -208,22 +213,24 @@ export default function deckComponent() {
                 //gs
                 //we can transition even on enter as it will just have no effect
                 containerG
-                    .transition("svg-dimns")
-                    .duration(TRANSITIONS.MED)
+                    //.transition("svg-dimns")
+                    //.duration(TRANSITIONS.MED)
                         .attr("width", width)
                         .attr("height", height)
 
-                contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
+                //contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
 
                 containerG.select("rect.deck-bg")
-                    .call(updateRectDimns, { 
+                    .attr("width", width)
+                    .attr("height", height)
+                    /*.call(updateRectDimns, { 
                         width: () => width, 
                         height:() => height,
                         transition:transformTransition,
                         name:d => `deck-dimns-${d.id}`
-                    })
+                    })*/
                 
-                cardsG
+                /*cardsG
                     .select("rect.cards-bg")
                     .call(updateRectDimns, { 
                         width: () => deckAreaWidth, 
@@ -240,14 +247,14 @@ export default function deckComponent() {
                         height:() => placedCardsAreaHeight,
                         transition:transformTransition,
                         name:d => `placed-cards-dimns-${d.id}`
-                    })
+                    })*/
 
                 //selected card dimns
                 const selectedCardDimns = maxDimns(deckAreaWidth, deckAreaHeight, cardAspectRatio)
                 const selectedCardWidth = selectedCardDimns.width;
                 const selectedCardHeight = selectedCardDimns.height;
 
-                cardsG
+                /*cardsG
                     .datum(cardsData)
                     .call(cards
                         .width(heldCardWidth)
@@ -311,7 +318,7 @@ export default function deckComponent() {
                             updateFrontCardNr(d.cardNr + 1);
                             //frontCardNr = d.cardNr + 1;
                             //update(deckData);
-                        }))
+                        }))*/
 
             }
 

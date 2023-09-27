@@ -26,9 +26,9 @@ const useStyles = makeStyles((theme) => ({
     transition: `all ${TRANSITIONS.MED}ms`,
     display:"flex",
     flexDirection:"column",
-    border:"solid",
+   /*border:"solid",
     borderWidth:"thin",
-    borderColor:grey10(7)
+    borderColor:grey10(7)*/
   },
   overlay:{
     width:props => props.width,
@@ -60,16 +60,16 @@ const useStyles = makeStyles((theme) => ({
     color:grey10(1)
   },
   header:{
-    height:props => props.header.height,
+    height:props => props.header.contentsHeight,
     padding:props => props.header.padding,
     display:"flex",
     justifyContent:"space-between",
     alignItems:"center",
     fontSize:props => props.header.fontSize,
     transition: `all ${TRANSITIONS.MED}ms`,
-    /*border:"solid",
+    border:"solid",
     borderColor:"white",
-    borderWidth:"thin"*/
+    borderWidth:"thin"
   },
   title:{
     color:grey10(6),
@@ -79,7 +79,8 @@ const useStyles = makeStyles((theme) => ({
   progressIcon:{
     width:props => props.progressIcon.width,
     height:props => props.progressIcon.height,
-    transform:props => `scale(${props.progressIcon.scale})`,
+    transform:"translate(20px, -35px)",
+    //transform:props => `scale(${props.progressIcon.scale})`,
     transformOrigin:"center left",
     transition: `all ${TRANSITIONS.MED}ms`,
     //background:"aqua"
@@ -109,29 +110,38 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
   const [deck, setDeck] = useState(() => deckComponent());
   const [form, setForm] = useState(null);
 
-  const headerHeight = 45;// d3.min([45, d3.max([11, height * 0.15])]);
-  const titleFontSize = headerHeight * 0.5;
+  const headerWidth = width;
+  const headerHeight = 100;// d3.min([45, d3.max([11, height * 0.15])]);
+  const headerMargin = {
+    hoz:headerWidth * 0.15,
+    vert:headerHeight * 0.1//selectedDeckId ? headerHeight * 0.05 : headerHeight * 0.1
+  }
+  const headerContentsWidth = headerWidth - 2 * headerMargin.hoz;
+  const headerContentsHeight = headerHeight - 2 * headerMargin.vert;
+  
+  const titleFontSize = headerContentsHeight * 0.5;
   const minTitleFontSize = 10;
   const scaledMinTitleFontSize = minTitleFontSize / scale;
   const svgWidth = width;
   const svgHeight = height - headerHeight;
-  const progressIconWidth = headerHeight * 0.6;// d3.min([width * 0.2, headerHeight]);
-  const progressIconHeight = headerHeight;
+  const progressIconHeight = headerContentsHeight * 0.6;// d3.min([width * 0.2, headerHeight]);
+  const progressIconWidth = progressIconHeight;
   let styleProps = {
     width,
     height,
     header:{
       height:headerHeight,
+      contentsHeight:headerContentsHeight,
       //fontSize:d3.min([24, d3.max([headerHeight * 0.4, 10])]),
       //fontSize:d3.min([24, d3.max([width * 0.1, 10])]),
       fontSize:d3.max([scaledMinTitleFontSize, titleFontSize]),
       //padding:`5% 10% 2.5% ${10 + props.header.extraPadLeft}%`
-      padding:selectedDeckId ? "5% 15%" : "10% 15%", // make sure burger bar doesnt go over name
+      padding:`${headerMargin.vert}px ${headerMargin.hoz}px`
     },
     progressIcon:{
       width:progressIconWidth,
       height:progressIconHeight,
-      scale:selectedDeckId ? 1 : 1.7,
+      //scale:selectedDeckId ? 1 : 1.7,
     },
     svg:{
       pointerEvents:isSelected ? "all" : "none",
