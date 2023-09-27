@@ -285,7 +285,7 @@ export default function cardsComponent() {
                         contentsG.select("g.items-area")
                             .attr("transform", `translate(0, ${infoHeight + spaceHeight})`)
                             .datum(cardD.items)
-                            .call(cardItems)
+                            //.call(cardItems)
 
                         //remove items for cards behind
                         const shouldHideItems = isHeld && !isFront && !isSelected;
