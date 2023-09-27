@@ -67,7 +67,6 @@ const useStyles = makeStyles((theme) => ({
     alignItems:"center",
     fontSize:props => props.header.fontSize,
     transition: `all ${TRANSITIONS.MED}ms`,
-    background:"blue"
     /*border:"solid",
     borderColor:"white",
     borderWidth:"thin"*/

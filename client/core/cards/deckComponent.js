@@ -183,7 +183,7 @@ export default function deckComponent() {
                 cardsG.append("rect")
                     .attr("class", "cards-bg")
                     .attr("fill", "transparent")
-                    .attr("fill", "red")
+                    //.attr("fill", "red")
                     .attr("stroke", "red");
 
                 /*cardsG.append("rect").attr("class", "placed-cards-bg")
@@ -258,7 +258,7 @@ export default function deckComponent() {
                 const selectedCardWidth = selectedCardDimns.width;
                 const selectedCardHeight = selectedCardDimns.height;
 
-                /*cardsG
+                cardsG
                     .datum(cardsData)
                     .call(cards
                         .width(heldCardWidth)
@@ -322,7 +322,7 @@ export default function deckComponent() {
                             updateFrontCardNr(d.cardNr + 1);
                             //frontCardNr = d.cardNr + 1;
                             //update(deckData);
-                        }))*/
+                        }))
 
             }
 
