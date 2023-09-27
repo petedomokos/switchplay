@@ -64,9 +64,9 @@ const useStyles = makeStyles((theme) => ({
   },
   decks:{
     display:props => props.decks.display,
-    width:props => `${props.width}px`,
+    width:1000, //props => `${props.width}px`,
     transition: `all ${TRANSITIONS.MED}ms`,
-    height:props => `${props.height}px`,
+    height:1000, //props => `${props.height}px`,
     flexWrap:"wrap",
     justifyContent:"flex-start",
     alignItems:"flex-start",
@@ -81,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
     //scales down when no deck selected
     transform:props => `scale(${props.deckContainer.scale})`, 
     transformOrigin:"top left",
-    transition: `all ${TRANSITIONS.MED}ms`,
+    transition: `transform ${TRANSITIONS.MED}ms, top ${TRANSITIONS.MED}ms, left ${TRANSITIONS.MED}ms`,
     /*border:"solid",
     borderWidth:"thin", 
     borderColor:"blue"*/

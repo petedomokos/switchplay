@@ -9,6 +9,10 @@ body{
   -webkit-user-select: none;
   user-select: none;
   /*-webkit-text-size-adjust: none;*/
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0) scale(1.0, 1.0);
+  -webkit-transform: translateZ(0) scale(1.0, 1.0);
 }
 /*MAIN-BURGER-MENU------------------------------*/
 /* Position and sizing of burger button */

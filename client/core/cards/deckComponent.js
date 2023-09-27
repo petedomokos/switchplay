@@ -172,9 +172,9 @@ export default function deckComponent() {
                         .attr("class", "deck-bg")
                         .attr("fill", "transparent")
                         //.attr("fill", "red")
-                        .attr("stroke", "yellow");
+                        //.attr("stroke", "yellow");
 
-                /*contentsG = containerG.append("g").attr("class", "deck-contents");
+                contentsG = containerG.append("g").attr("class", "deck-contents");
 
                 cardsG = contentsG
                     .append("g")
@@ -183,9 +183,10 @@ export default function deckComponent() {
                 cardsG.append("rect")
                     .attr("class", "cards-bg")
                     .attr("fill", "transparent")
-                    .attr("stroke", "none");
+                    .attr("fill", "red")
+                    .attr("stroke", "red");
 
-                cardsG.append("rect").attr("class", "placed-cards-bg")
+                /*cardsG.append("rect").attr("class", "placed-cards-bg")
                     .attr("stroke", "none")
                     .attr("fill", "none");*/
             }
@@ -218,7 +219,7 @@ export default function deckComponent() {
                         .attr("width", width)
                         .attr("height", height)
 
-                //contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
+                contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
 
                 containerG.select("rect.deck-bg")
                     .attr("width", width)
@@ -230,9 +231,12 @@ export default function deckComponent() {
                         name:d => `deck-dimns-${d.id}`
                     })*/
                 
-                /*cardsG
+                cardsG
                     .select("rect.cards-bg")
-                    .call(updateRectDimns, { 
+                        .attr("width", contentsWidth)
+                        .attr("height", contentsHeight)
+
+                    /*.call(updateRectDimns, { 
                         width: () => deckAreaWidth, 
                         height:() => deckAreaHeight,
                         transition:transformTransition,

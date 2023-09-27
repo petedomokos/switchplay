@@ -67,9 +67,10 @@ const useStyles = makeStyles((theme) => ({
     alignItems:"center",
     fontSize:props => props.header.fontSize,
     transition: `all ${TRANSITIONS.MED}ms`,
-    border:"solid",
+    background:"blue"
+    /*border:"solid",
     borderColor:"white",
-    borderWidth:"thin"
+    borderWidth:"thin"*/
   },
   title:{
     color:grey10(6),
