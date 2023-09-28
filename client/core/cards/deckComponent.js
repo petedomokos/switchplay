@@ -271,6 +271,8 @@ export default function deckComponent() {
                         //.selectedDeckId(selectedDeckId)
                         .transformTransition(transformTransition)
                         .x((d,i) => {
+                            //setting pos to same place solves jaggedness, so the issue is in 
+                            //the changes to x and y below
                             return 0;
                             if(d.isSelected){
                                 //keep it centred

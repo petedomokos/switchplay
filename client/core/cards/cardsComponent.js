@@ -321,7 +321,7 @@ export default function cardsComponent() {
                         const btnContentsWidth = btnWidth - 2 * btnMargin;
                         const btnContentsHeight = btnHeight - 2 * btnMargin;
                         const botRightBtnG = contentsG.selectAll("g.bottom-right-btn").data(botRightBtnData);
-                        botRightBtnG.enter()
+                        /*botRightBtnG.enter()
                             .append("g")
                                 .attr("class", "bottom-right-btn")
                                 .each(function(d){
@@ -349,7 +349,7 @@ export default function cardsComponent() {
                                 })
                                 .on("click", (e,d) => d.onClick(e, d));
 
-                        botRightBtnG.exit().remove();
+                        botRightBtnG.exit().remove();*/
 
                     })
                     .call(drag)

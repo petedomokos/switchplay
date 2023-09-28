@@ -227,7 +227,7 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
   useEffect(() => {
     //why when we comment out this line, only the 1st deck opens!?
     d3.select(containerRef.current).call(deck);
-  }, [stringifiedData, width, height, selectedDeckId])
+  }, [/*stringifiedData, width, height, selectedDeckId*/])
 
   const updateFrontCardNr = useCallback(cardNr => {
     update({ ...deckData, frontCardNr:cardNr })
