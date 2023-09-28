@@ -296,7 +296,7 @@ export default function deckComponent() {
                             }
                             if(d.isHeld){
                                 //in multideck view, not all the incr space is taken up
-                                const totalVertIncs = vertSpaceForIncs;// selectedDeckId ? vertSpaceForIncs : vertCardInc(4);
+                                const totalVertIncs = selectedDeckId ? vertSpaceForIncs : vertCardInc(4);
                                 const extraMarginTop = (heldCardsAreaHeight - heldCardHeight - totalVertIncs)/2;
                                 return extraMarginTop + totalVertIncs - vertCardInc(d.handPos)
                             }
