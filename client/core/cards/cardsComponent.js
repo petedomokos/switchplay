@@ -285,7 +285,7 @@ export default function cardsComponent() {
                         contentsG.select("g.items-area")
                             .attr("transform", `translate(0, ${infoHeight + spaceHeight})`)
                             .datum(cardD.items)
-                            .call(cardItems)
+                            //.call(cardItems)
 
                         //remove items for cards behind
                         const shouldHideItems = isHeld && !isFront && !isSelected;
@@ -312,7 +312,6 @@ export default function cardsComponent() {
                             icon:icons.collapse,
                         }
                         const botRightBtnData = isSelected ? [collapseBtnDatum] : (isFront ? [expandBtnDatum] : []);
-                        console.log("h", height)
                         const btnHeight = d3.max([1, d3.min([50, 0.15 * height])]);
                         const btnWidth = btnHeight;
                         //assumme all are square
