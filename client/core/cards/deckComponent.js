@@ -109,7 +109,6 @@ export default function deckComponent() {
         vertSpaceForIncs = visibleVertCardInc(4);
         //vertSpaceForIncs = vertCardInc(4);
         placedCardsAreaHeight = d3.min([80, deckAreaHeight/7]);
-        //console.log("placedCardsAH", placedCardsAreaHeight)
         heldCardsAreaHeight = deckAreaHeight - placedCardsAreaHeight;
 
         //need to use visibleVertCardInc to calc the dimns...
@@ -117,7 +116,6 @@ export default function deckComponent() {
         const heldCardDimns = maxDimns(maxHeldCardWidth, maxHeldCardHeight, cardAspectRatio);
         heldCardWidth = heldCardDimns.width;
         heldCardHeight = heldCardDimns.height;
-        //console.log("heldCardHeight", heldCardHeight)
     
         //make margin 0 and see if it sorts out horiz overlap
         const deckAreaMarginVert = (deckAreaHeight - vertSpaceForIncs - heldCardHeight - placedCardsAreaHeight)/2;
@@ -298,13 +296,20 @@ export default function deckComponent() {
                             if(d.isSelected){
                                 return (deckAreaHeight - selectedCardHeight)/2;
                             }
+                            
                             if(d.isHeld){
+                                //extra shift up in multiview to create a pseudo margin between decks
+                                const vertShiftUpForMultiview = heldCardsAreaHeight * 0.15; 
                                 //in multideck view, not all the incr space is taken up
                                 const totalVertIncs = selectedDeckId ? vertSpaceForIncs : vertCardInc(4);
                                 const extraMarginTop = (heldCardsAreaHeight - heldCardHeight - totalVertIncs)/2;
-                                return extraMarginTop + totalVertIncs - vertCardInc(d.handPos)
+                                return extraMarginTop + totalVertIncs - vertCardInc(d.handPos) 
+                                    - (selectedDeckId ? 0 : vertShiftUpForMultiview)
                             }
-                            return heldCardsAreaHeight + placedCardMarginVert;
+
+                            //extra shift up in multiview to create a pseudo margin between decks
+                            const vertShiftUpForMultiview = heldCardsAreaHeight * 0.25; 
+                            return heldCardsAreaHeight + placedCardMarginVert - (selectedDeckId ? 0 : vertShiftUpForMultiview);
                         })
                         .onSelectItem(function(item){ 
                             setForm({ formType: "item", value:item }) 

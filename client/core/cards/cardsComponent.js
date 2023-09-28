@@ -146,7 +146,6 @@ export default function cardsComponent() {
                     .attr("class", d => `card card-${d.cardNr}`)
                     .attr("opacity", 1)
                     .each(function(d,i){
-                        //console.log("height placedCardH", height, placedCardHeight)
                         cardInfoComponents[d.cardNr] = cardInfoComponent();
                         cardItemsComponents[d.cardNr] = cardItemsComponent();
 
