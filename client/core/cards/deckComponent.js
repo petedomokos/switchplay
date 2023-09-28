@@ -4,7 +4,7 @@ import cardsComponent from './cardsComponent';
 import { updateRectDimns } from '../journey/transitionHelpers';
 
 //const transformTransition = { update: { duration: 1000 } };
-const transformTransition = { update: { duration: TRANSITIONS.MED, delay:2000 } };
+const transformTransition = { update: { duration: TRANSITIONS.MED, delay:0 } };
 
 function maxDimns(maxWidth, maxHeight, aspectRatio){
     const potentialHeight = maxWidth * aspectRatio;
@@ -258,14 +258,16 @@ export default function deckComponent() {
                 const selectedCardWidth = selectedCardDimns.width;
                 const selectedCardHeight = selectedCardDimns.height;
 
-                console.log("heldCardW", heldCardHeight)
+                console.log("heldCardW H", heldCardWidth, heldCardHeight)
                 cardsG
                     .datum(cardsData)
                     .call(cards
-                        .width(heldCardWidth)
-                        .height(heldCardHeight)
-                        .width(247.5)
-                        .height(324.94)
+                        //.width(heldCardWidth)
+                        //.height(heldCardHeight)
+                        //.width(247.5)
+                        //.height(324.94)
+                        .width(187.5)
+                        .height(246.17)
                         .infoHeight(heldCardInfoHeight)
                         .placedCardWidth(placedCardWidth)
                         .placedCardHeight(placedCardHeight)
