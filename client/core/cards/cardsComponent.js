@@ -273,7 +273,7 @@ export default function cardsComponent() {
                         contentsG.selectAll("g.info")
                             .attr("display", selectedDeckId ? null : "none") //hide when small
                             .datum(infoDatum)
-                            .call(cardInfo);
+                            //.call(cardInfo);
 
                         //hide if placed
                         contentsG.select("g.info")
@@ -322,7 +322,7 @@ export default function cardsComponent() {
                         const btnContentsHeight = btnHeight - 2 * btnMargin;
                         //next - put expand btn back and sort its transition
                         const botRightBtnG = contentsG.selectAll("g.bottom-right-btn").data(botRightBtnData);
-                        botRightBtnG.enter()
+                        /*botRightBtnG.enter()
                             .append("g")
                                 .attr("class", "bottom-right-btn")
                                 .each(function(d){
@@ -350,7 +350,7 @@ export default function cardsComponent() {
                                 })
                                 .on("click", (e,d) => d.onClick(e, d));
 
-                        botRightBtnG.exit().remove();
+                        botRightBtnG.exit().remove();*/
 
                     })
                     .call(drag)
