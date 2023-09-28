@@ -267,11 +267,13 @@ export default function deckComponent() {
                             }
                             if(d.isHeld){
                                 const extraMarginLeft = (contentsWidth - heldCardWidth)/2;
+                                console.log("held x", extraMarginLeft + horizCardInc(d.handPos))
                                 return extraMarginLeft + horizCardInc(d.handPos);
                             }
                             return d.cardNr * (placedCardWidth + placedCardHorizGap);
                         })
                         .y((d,i) => {
+                            return 0;
                             if(d.isSelected){
                                 return (contentsHeight - selectedCardHeight)/2;
                             }
