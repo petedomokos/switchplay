@@ -218,7 +218,7 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
     deck
       .width(svgWidth)
       .height(svgHeight)
-      .selectedDeckId(selectedDeckId)
+      //.selectedDeckId(selectedDeckId)
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
       .setForm(setForm)
