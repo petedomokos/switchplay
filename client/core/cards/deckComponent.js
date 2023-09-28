@@ -284,12 +284,12 @@ export default function deckComponent() {
                                 const totalVertIncs = vertSpaceForIncs;// selectedDeckId ? vertSpaceForIncs : vertCardInc(4);
                                 const extraMarginTop = (heldCardsAreaHeight - heldCardHeight - totalVertIncs)/2;
                                 return extraMarginTop + totalVertIncs - vertCardInc(d.handPos) 
-                                    - (selectedDeckId ? 0 : vertShiftUpForMultiview)
+                                   // - (selectedDeckId ? 0 : vertShiftUpForMultiview)
                             }
 
                             //extra shift up in multiview to create a pseudo margin between decks
                             const vertShiftUpForMultiview = heldCardsAreaHeight * 0.15; 
-                            return heldCardsAreaHeight + placedCardMarginVert - (selectedDeckId ? 0 : vertShiftUpForMultiview);
+                            return heldCardsAreaHeight + placedCardMarginVert //- (selectedDeckId ? 0 : vertShiftUpForMultiview);
                         })
                         .onSelectItem(function(item){ 
                             setForm({ formType: "item", value:item }) 
