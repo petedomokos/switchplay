@@ -58,7 +58,10 @@ export default function deckComponent() {
         
         //console.log("w h", width, height)
         //console.log("margin", margin)
-        console.log("cw ch", contentsWidth, contentsHeight)
+        //console.log("cw ch", contentsWidth, contentsHeight)
+        //next issue - placedCardHeight is shoter for cards that are placed when page loads 
+        //than for newly placed cards ie when cards are placed in multideck mode, they are shorter
+        //also - todo - remove deckAreaWidth and Height
         deckAreaWidth = contentsWidth;
         deckAreaHeight = contentsHeight;
         //this aspectRatio is only needed to aid with selecting a card to takeover entire area
@@ -83,7 +86,6 @@ export default function deckComponent() {
         const maxHorizSpaceForIncs = 50;
         const horizSpaceForVisibleIncs = d3.min([deckAreaWidth * 0.25, maxHorizSpaceForIncs]); 
         const horizSpaceForNonVisibleIncs = horizSpaceForVisibleIncs * 0.4;
-        const horizSpaceForIncs = selectedDeckId ? horizSpaceForVisibleIncs : horizSpaceForNonVisibleIncs;
         const visibleHorizCardInc = i => {
             if(i === 0) { return 0; }
             if(i === 1) { return horizSpaceForVisibleIncs * 0.07; }
@@ -100,12 +102,14 @@ export default function deckComponent() {
         vertCardInc = selectedDeckId ? visibleVertCardInc : nonVisibleVertInc;
         horizCardInc = selectedDeckId ? visibleHorizCardInc : nonVisibleHorizInc;
 
-        const maxHeldCardWidth = deckAreaWidth - (horizSpaceForIncs * 2); //need it to be symmetrical
+        //NOTE: this max must also be same regardless of multideck view or single deck view
+        const maxHeldCardWidth = deckAreaWidth - (horizSpaceForVisibleIncs * 2); //need it to be symmetrical
         //NOTE: vertSpaceForIncs is the same regardless of whether the deck is selected 
         //(ie all card info sections visible) or not
         vertSpaceForIncs = visibleVertCardInc(4);
         //vertSpaceForIncs = vertCardInc(4);
         placedCardsAreaHeight = d3.min([80, deckAreaHeight/7]);
+        //console.log("placedCardsAH", placedCardsAreaHeight)
         heldCardsAreaHeight = deckAreaHeight - placedCardsAreaHeight;
 
         //need to use visibleVertCardInc to calc the dimns...
@@ -113,6 +117,7 @@ export default function deckComponent() {
         const heldCardDimns = maxDimns(maxHeldCardWidth, maxHeldCardHeight, cardAspectRatio);
         heldCardWidth = heldCardDimns.width;
         heldCardHeight = heldCardDimns.height;
+        //console.log("heldCardHeight", heldCardHeight)
     
         //make margin 0 and see if it sorts out horiz overlap
         const deckAreaMarginVert = (deckAreaHeight - vertSpaceForIncs - heldCardHeight - placedCardsAreaHeight)/2;
@@ -262,7 +267,6 @@ export default function deckComponent() {
                 const selectedCardWidth = selectedCardDimns.width;
                 const selectedCardHeight = selectedCardDimns.height;
 
-                console.log("heldCardW H", heldCardWidth, heldCardHeight)
                 cardsG
                     .datum(cardsData)
                     .call(cards

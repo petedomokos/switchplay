@@ -87,7 +87,7 @@ export default function cardsComponent() {
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
         updateDimns();
         selection.each(function (data) {
-            //console.log("cards data", data)
+            //console.log("cards height", height)
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
@@ -146,6 +146,7 @@ export default function cardsComponent() {
                     .attr("class", d => `card card-${d.cardNr}`)
                     .attr("opacity", 1)
                     .each(function(d,i){
+                        //console.log("height placedCardH", height, placedCardHeight)
                         cardInfoComponents[d.cardNr] = cardInfoComponent();
                         cardItemsComponents[d.cardNr] = cardItemsComponent();
 
