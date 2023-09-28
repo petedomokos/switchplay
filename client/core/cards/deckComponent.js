@@ -24,9 +24,6 @@ export default function deckComponent() {
     let contentsWidth;
     let contentsHeight;
 
-    let deckAreaWidth;
-    let deckAreaHeight;
-    let deckAreaMargin;
     let deckAreaAspectRatio;
     let botSpaceHeight;
 
@@ -54,20 +51,10 @@ export default function deckComponent() {
     function updateDimns(){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
-
-        
-        //console.log("w h", width, height)
-        //console.log("margin", margin)
-        //console.log("cw ch", contentsWidth, contentsHeight)
-        //next issue - placedCardHeight is shoter for cards that are placed when page loads 
-        //than for newly placed cards ie when cards are placed in multideck mode, they are shorter
-        //also - todo - remove deckAreaWidth and Height
-        deckAreaWidth = contentsWidth;
-        deckAreaHeight = contentsHeight;
         //this aspectRatio is only needed to aid with selecting a card to takeover entire area
-        deckAreaAspectRatio = deckAreaWidth/deckAreaHeight;
+        deckAreaAspectRatio = contentsWidth/contentsHeight;
 
-        heldCardInfoHeight = deckAreaHeight * INFO_HEIGHT_PROPORTION_OF_CARDS_AREA;
+        heldCardInfoHeight = contentsHeight * INFO_HEIGHT_PROPORTION_OF_CARDS_AREA;
         const minInc = heldCardInfoHeight * 0.9;
         const visibleVertCardInc = i => {
             const incA = 16;
@@ -84,7 +71,7 @@ export default function deckComponent() {
         //@todo - change the way horiz is done so its the other way round like vert
         //so horizSpaceForIncs can be calculated after in same way as vertSpaceForIncs
         const maxHorizSpaceForIncs = 50;
-        const horizSpaceForVisibleIncs = d3.min([deckAreaWidth * 0.25, maxHorizSpaceForIncs]); 
+        const horizSpaceForVisibleIncs = d3.min([contentsWidth * 0.25, maxHorizSpaceForIncs]); 
         const horizSpaceForNonVisibleIncs = horizSpaceForVisibleIncs * 0.4;
         const visibleHorizCardInc = i => {
             if(i === 0) { return 0; }
@@ -103,36 +90,28 @@ export default function deckComponent() {
         horizCardInc = selectedDeckId ? visibleHorizCardInc : nonVisibleHorizInc;
 
         //NOTE: this max must also be same regardless of multideck view or single deck view
-        const maxHeldCardWidth = deckAreaWidth - (horizSpaceForVisibleIncs * 2); //need it to be symmetrical
+        const maxHeldCardWidth = contentsWidth - (horizSpaceForVisibleIncs * 2); //need it to be symmetrical
         //NOTE: vertSpaceForIncs is the same regardless of whether the deck is selected 
         //(ie all card info sections visible) or not
         vertSpaceForIncs = visibleVertCardInc(4);
         //vertSpaceForIncs = vertCardInc(4);
-        placedCardsAreaHeight = d3.min([80, deckAreaHeight/7]);
-        heldCardsAreaHeight = deckAreaHeight - placedCardsAreaHeight;
+        placedCardsAreaHeight = d3.min([80, contentsHeight/7]);
+        heldCardsAreaHeight = contentsHeight - placedCardsAreaHeight;
 
         //need to use visibleVertCardInc to calc the dimns...
-        const maxHeldCardHeight = deckAreaHeight - vertSpaceForIncs - placedCardsAreaHeight;
+        const maxHeldCardHeight = contentsHeight - vertSpaceForIncs - placedCardsAreaHeight;
         const heldCardDimns = maxDimns(maxHeldCardWidth, maxHeldCardHeight, cardAspectRatio);
         heldCardWidth = heldCardDimns.width;
         heldCardHeight = heldCardDimns.height;
-    
-        //make margin 0 and see if it sorts out horiz overlap
-        const deckAreaMarginVert = (deckAreaHeight - vertSpaceForIncs - heldCardHeight - placedCardsAreaHeight)/2;
-        const deckAreaMarginHoriz = (deckAreaWidth - heldCardWidth)/2;
-        deckAreaMargin = { 
-            top:deckAreaMarginVert/2, bottom:deckAreaMarginVert/2,
-            left:deckAreaMarginHoriz/2, right:deckAreaMarginHoriz/2
-        }
 
         //placed deck
         const maxPlacedCardHeight = placedCardsAreaHeight * 0.8;
-        const maxPlacedCardWidth = d3.min([60, (deckAreaWidth/5) * 0.8]); //ensure some gap
+        const maxPlacedCardWidth = d3.min([60, (contentsWidth/5) * 0.8]); //ensure some gap
         const placedCardDimns = maxDimns(maxPlacedCardWidth, maxPlacedCardHeight, cardAspectRatio)
         placedCardWidth = placedCardDimns.width;
         placedCardHeight = placedCardDimns.height;
 
-        placedCardHorizGap = (deckAreaWidth - 5 * placedCardWidth) / 4;
+        placedCardHorizGap = (contentsWidth - 5 * placedCardWidth) / 4;
         placedCardMarginVert = (placedCardsAreaHeight - placedCardHeight)/2;
     }
     let DEFAULT_STYLES = {
@@ -191,7 +170,7 @@ export default function deckComponent() {
                     .attr("class", "cards-bg")
                     .attr("fill", "transparent")
                     //.attr("fill", "red")
-                    .attr("stroke", "red");
+                    //.attr("stroke", "red");
 
                 /*cardsG.append("rect").attr("class", "placed-cards-bg")
                     .attr("stroke", "none")
@@ -244,8 +223,8 @@ export default function deckComponent() {
                         .attr("height", contentsHeight)
 
                     /*.call(updateRectDimns, { 
-                        width: () => deckAreaWidth, 
-                        height:() => deckAreaHeight,
+                        width: () => contentsWidth, 
+                        height:() => contentsHeight,
                         transition:transformTransition,
                         name:d => `cards-dimns-${d.id}`
                     })
@@ -254,14 +233,14 @@ export default function deckComponent() {
                     .select("rect.placed-cards-bg")
                     .attr("transform", `translate(0,${heldCardsAreaHeight})`)
                     .call(updateRectDimns, { 
-                        width: () => deckAreaWidth, 
+                        width: () => contentsWidth, 
                         height:() => placedCardsAreaHeight,
                         transition:transformTransition,
                         name:d => `placed-cards-dimns-${d.id}`
                     })*/
 
                 //selected card dimns
-                const selectedCardDimns = maxDimns(deckAreaWidth, deckAreaHeight, cardAspectRatio)
+                const selectedCardDimns = maxDimns(contentsWidth, contentsHeight, cardAspectRatio)
                 const selectedCardWidth = selectedCardDimns.width;
                 const selectedCardHeight = selectedCardDimns.height;
 
@@ -284,17 +263,17 @@ export default function deckComponent() {
                         .x((d,i) => {
                             if(d.isSelected){
                                 //keep it centred
-                                return (deckAreaWidth - selectedCardWidth)/2;
+                                return (contentsWidth - selectedCardWidth)/2;
                             }
                             if(d.isHeld){
-                                const extraMarginLeft = (deckAreaWidth - heldCardWidth)/2;
+                                const extraMarginLeft = (contentsWidth - heldCardWidth)/2;
                                 return extraMarginLeft + horizCardInc(d.handPos);
                             }
                             return d.cardNr * (placedCardWidth + placedCardHorizGap);
                         })
                         .y((d,i) => {
                             if(d.isSelected){
-                                return (deckAreaHeight - selectedCardHeight)/2;
+                                return (contentsHeight - selectedCardHeight)/2;
                             }
                             
                             if(d.isHeld){

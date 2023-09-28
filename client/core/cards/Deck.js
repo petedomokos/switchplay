@@ -119,7 +119,7 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
   const headerContentsWidth = headerWidth - 2 * headerMargin.hoz;
   const headerContentsHeight = headerHeight - 2 * headerMargin.vert;
   
-  const titleFontSize = headerContentsHeight * 0.5;
+  const titleFontSize = headerContentsHeight * 0.35;
   const minTitleFontSize = 10;
   const scaledMinTitleFontSize = minTitleFontSize / scale;
   const svgWidth = width;
