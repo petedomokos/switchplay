@@ -19,14 +19,14 @@ const { GOLD } = COLOURS;
 const useStyles = makeStyles((theme) => ({
   root: {
     position:"relative",
-    width:props => props.width,
-    height:props => props.height,
+    //width:props => props.width,
+    //height:props => props.height,
     //transform:"scale(2)",
     //transformOrigin:"top left",
     transition: `all ${TRANSITIONS.MED}ms`,
     display:"flex",
     flexDirection:"column",
-   /*border:"solid",
+    /*border:"solid",
     borderWidth:"thin",
     borderColor:grey10(7)*/
   },
@@ -226,7 +226,7 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
 
   useEffect(() => {
     //why when we comment out this line, only the 1st deck opens!?
-    d3.select(containerRef.current).call(deck);
+    //d3.select(containerRef.current).call(deck);
   }, [stringifiedData, width, height, selectedDeckId])
 
   const updateFrontCardNr = useCallback(cardNr => {
@@ -274,7 +274,9 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
           onClick={onClickProgress}>
         </div>
       </div>
-      <svg className={classes.svg} ref={containerRef} id={`cards-svg`} >
+      <svg className={classes.svg} ref={containerRef} id={`cards-svg`} 
+        width={svgWidth} height={svgHeight} >
+          <rect width={svgWidth} height={svgHeight} stroke="red" fill="none"  />
         <defs>
           <filter id="shine">
             <feGaussianBlur in="SourceGraphic" stdDeviation="4" />

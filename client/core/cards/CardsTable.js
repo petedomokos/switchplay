@@ -64,9 +64,9 @@ const useStyles = makeStyles((theme) => ({
   },
   decks:{
     display:props => props.decks.display,
-    width:1000, //props => `${props.width}px`,
+    //width:1000, //props => `${props.width}px`,
     transition: `all ${TRANSITIONS.MED}ms`,
-    height:1000, //props => `${props.height}px`,
+    //height:1000, //props => `${props.height}px`,
     flexWrap:"wrap",
     justifyContent:"flex-start",
     alignItems:"flex-start",
@@ -76,15 +76,15 @@ const useStyles = makeStyles((theme) => ({
   },
   deckContainer:{
     position:"absolute",
-    width:props => `${props.deckContainer.width}px`, //always selectedWidth
-    height:props => `${props.deckContainer.height}px`, //always selectedHeight
+    //width:1000, //props => `${props.deckContainer.width}px`, //always selectedWidth
+    //height:1000,//props => `${props.deckContainer.height}px`, //always selectedHeight
     //scales down when no deck selected
     transform:props => `scale(${props.deckContainer.scale})`, 
     transformOrigin:"top left",
     transition: `transform ${TRANSITIONS.MED}ms, top ${TRANSITIONS.MED}ms, left ${TRANSITIONS.MED}ms`,
     /*border:"solid",
     borderWidth:"thin", 
-    borderColor:"blue"*/
+    borderColor:"blue",*/
 
   },
   //add deck
@@ -151,8 +151,8 @@ const embellishedDecks = decks => decks
 }))
 
 const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, screen, createDeck, updateDeck }) => {
-  const { decks=[] } = user;
-  //const decks = [user.decks[0]]
+  //const { decks=[] } = user;
+  const decks = user?.decks[0] ? [user.decks[0]] : []
   const width = screen.width || 300;
   const height = screen.height || 600;
   //console.log("CardsTable", decks)

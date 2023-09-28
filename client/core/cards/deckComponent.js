@@ -86,7 +86,7 @@ export default function deckComponent() {
         const nonVisibleHorizInc = i => (i/5) * horizSpaceForNonVisibleIncs; //5 cards
 
         //if no deck is selected, then we are in Table view mode so only front card info is seen
-        vertCardInc = selectedDeckId ? visibleVertCardInc : nonVisibleVertInc;
+        vertCardInc = nonVisibleVertInc;// selectedDeckId ? visibleVertCardInc : nonVisibleVertInc;
         horizCardInc = selectedDeckId ? visibleHorizCardInc : nonVisibleHorizInc;
 
         //NOTE: this max must also be same regardless of multideck view or single deck view
@@ -170,7 +170,7 @@ export default function deckComponent() {
                     .attr("class", "cards-bg")
                     .attr("fill", "transparent")
                     //.attr("fill", "red")
-                    //.attr("stroke", "red");
+                    .attr("stroke", "red");
 
                 /*cardsG.append("rect").attr("class", "placed-cards-bg")
                     .attr("stroke", "none")
@@ -244,15 +244,11 @@ export default function deckComponent() {
                 const selectedCardWidth = selectedCardDimns.width;
                 const selectedCardHeight = selectedCardDimns.height;
 
-                cardsG
+                /*cardsG
                     .datum(cardsData)
                     .call(cards
                         .width(heldCardWidth)
                         .height(heldCardHeight)
-                        //.width(247.5)
-                        //.height(324.94)
-                        //.width(187.5)
-                        //.height(246.17)
                         .infoHeight(heldCardInfoHeight)
                         .placedCardWidth(placedCardWidth)
                         .placedCardHeight(placedCardHeight)
@@ -283,6 +279,7 @@ export default function deckComponent() {
                                 //in multideck view, not all the incr space is taken up
                                 const totalVertIncs = vertSpaceForIncs;// selectedDeckId ? vertSpaceForIncs : vertCardInc(4);
                                 const extraMarginTop = (heldCardsAreaHeight - heldCardHeight - totalVertIncs)/2;
+                                //return extraMarginTop + totalVertIncs - vertCardInc(d.handPos) 
                                 return extraMarginTop + totalVertIncs - vertCardInc(d.handPos) 
                                    // - (selectedDeckId ? 0 : vertShiftUpForMultiview)
                             }
@@ -322,7 +319,7 @@ export default function deckComponent() {
                             updateFrontCardNr(d.cardNr + 1);
                             //frontCardNr = d.cardNr + 1;
                             //update(deckData);
-                        }))
+                        }))*/
 
             }
 

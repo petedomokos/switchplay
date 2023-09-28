@@ -184,7 +184,7 @@ export default function cardsComponent() {
                     .call(updateTransform, { 
                         x, 
                         y,
-                        k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),  
+                        //k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),  
                         transition:transformTransition.enter,
                         name:d => `card-pos-${d.id}`
                     })
@@ -192,7 +192,7 @@ export default function cardsComponent() {
                     .call(updateTransform, { 
                         x, 
                         y, 
-                        k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),
+                        //k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),
                         transition:transformTransition.update,
                         name:(d,i) => `card-pos-${i}-${d.id}`
                     })
