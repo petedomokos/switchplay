@@ -261,6 +261,7 @@ export default function deckComponent() {
                         //.selectedDeckId(selectedDeckId)
                         .transformTransition(transformTransition)
                         .x((d,i) => {
+                            return 0;
                             if(d.isSelected){
                                 //keep it centred
                                 return (contentsWidth - selectedCardWidth)/2;
@@ -272,6 +273,7 @@ export default function deckComponent() {
                             return d.cardNr * (placedCardWidth + placedCardHorizGap);
                         })
                         .y((d,i) => {
+                            return 0;
                             if(d.isSelected){
                                 return (contentsHeight - selectedCardHeight)/2;
                             }
