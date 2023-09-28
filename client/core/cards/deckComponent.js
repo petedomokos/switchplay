@@ -273,7 +273,6 @@ export default function deckComponent() {
                             return d.cardNr * (placedCardWidth + placedCardHorizGap);
                         })
                         .y((d,i) => {
-                            return 0;
                             if(d.isSelected){
                                 return (contentsHeight - selectedCardHeight)/2;
                             }
@@ -282,7 +281,7 @@ export default function deckComponent() {
                                 //extra shift up in multiview to create a pseudo margin between decks
                                 const vertShiftUpForMultiview = heldCardsAreaHeight * 0.25; 
                                 //in multideck view, not all the incr space is taken up
-                                const totalVertIncs = vertSpaceForIncs;// selectedDeckId ? vertSpaceForIncs : vertCardInc(4);
+                                const totalVertIncs = selectedDeckId ? vertSpaceForIncs : vertCardInc(4);
                                 const extraMarginTop = (heldCardsAreaHeight - heldCardHeight - totalVertIncs)/2;
                                 return extraMarginTop + totalVertIncs - vertCardInc(d.handPos) 
                                    // - (selectedDeckId ? 0 : vertShiftUpForMultiview)
