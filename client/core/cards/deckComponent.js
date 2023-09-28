@@ -279,21 +279,17 @@ export default function deckComponent() {
                             
                             if(d.isHeld){
                                 //extra shift up in multiview to create a pseudo margin between decks
-                                const vertShiftUpForMultiview = heldCardsAreaHeight * 0.15; 
+                                const vertShiftUpForMultiview = heldCardsAreaHeight * 0.25; 
                                 //in multideck view, not all the incr space is taken up
                                 const totalVertIncs = vertSpaceForIncs;// selectedDeckId ? vertSpaceForIncs : vertCardInc(4);
                                 const extraMarginTop = (heldCardsAreaHeight - heldCardHeight - totalVertIncs)/2;
-                                if(d.cardNr === 0){
-                                    //console.log("y", extraMarginTop + totalVertIncs - vertCardInc(d.handPos))
-                                }
                                 return extraMarginTop + totalVertIncs - vertCardInc(d.handPos) 
-                                    //- (selectedDeckId ? 0 : vertShiftUpForMultiview)
+                                    - (selectedDeckId ? 0 : vertShiftUpForMultiview)
                             }
 
                             //extra shift up in multiview to create a pseudo margin between decks
-                            const vertShiftUpForMultiview = heldCardsAreaHeight * 0.25; 
-                            //console.log("placed y", heldCardsAreaHeight)
-                            return heldCardsAreaHeight + placedCardMarginVert// - (selectedDeckId ? 0 : vertShiftUpForMultiview);
+                            const vertShiftUpForMultiview = heldCardsAreaHeight * 0.15; 
+                            return heldCardsAreaHeight + placedCardMarginVert - (selectedDeckId ? 0 : vertShiftUpForMultiview);
                         })
                         .onSelectItem(function(item){ 
                             setForm({ formType: "item", value:item }) 

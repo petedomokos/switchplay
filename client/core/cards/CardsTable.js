@@ -172,7 +172,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const margin = { 
     left:0,// selectedDeckId ? 0 : width * 0.05, 
     right:0,// selectedDeckId ? 0 : width * 0.05, 
-    top: 20,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
+    top: 30,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
     bottom:0,// selectedDeckId ? 0 :  height * 0.05
   }
   const tableContentsWidth = width - margin.left - margin.right;
