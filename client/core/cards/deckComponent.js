@@ -101,10 +101,14 @@ export default function deckComponent() {
         horizCardInc = selectedDeckId ? visibleHorizCardInc : nonVisibleHorizInc;
 
         const maxHeldCardWidth = deckAreaWidth - (horizSpaceForIncs * 2); //need it to be symmetrical
-        vertSpaceForIncs = vertCardInc(4);
+        //NOTE: vertSpaceForIncs is the same regardless of whether the deck is selected 
+        //(ie all card info sections visible) or not
+        vertSpaceForIncs = visibleVertCardInc(4);
+        //vertSpaceForIncs = vertCardInc(4);
         placedCardsAreaHeight = d3.min([80, deckAreaHeight/7]);
         heldCardsAreaHeight = deckAreaHeight - placedCardsAreaHeight;
 
+        //need to use visibleVertCardInc to calc the dimns...
         const maxHeldCardHeight = deckAreaHeight - vertSpaceForIncs - placedCardsAreaHeight;
         const heldCardDimns = maxDimns(maxHeldCardWidth, maxHeldCardHeight, cardAspectRatio);
         heldCardWidth = heldCardDimns.width;
@@ -262,12 +266,12 @@ export default function deckComponent() {
                 cardsG
                     .datum(cardsData)
                     .call(cards
-                        //.width(heldCardWidth)
-                        //.height(heldCardHeight)
+                        .width(heldCardWidth)
+                        .height(heldCardHeight)
                         //.width(247.5)
                         //.height(324.94)
-                        .width(187.5)
-                        .height(246.17)
+                        //.width(187.5)
+                        //.height(246.17)
                         .infoHeight(heldCardInfoHeight)
                         .placedCardWidth(placedCardWidth)
                         .placedCardHeight(placedCardHeight)
@@ -291,8 +295,10 @@ export default function deckComponent() {
                                 return (deckAreaHeight - selectedCardHeight)/2;
                             }
                             if(d.isHeld){
-                                const extraMarginTop = (heldCardsAreaHeight - heldCardHeight - vertSpaceForIncs)/2;
-                                return extraMarginTop + vertSpaceForIncs - vertCardInc(d.handPos)
+                                //in multideck view, not all the incr space is taken up
+                                const totalVertIncs = vertSpaceForIncs;// selectedDeckId ? vertSpaceForIncs : vertCardInc(4);
+                                const extraMarginTop = (heldCardsAreaHeight - heldCardHeight - totalVertIncs)/2;
+                                return extraMarginTop + totalVertIncs - vertCardInc(d.handPos)
                             }
                             return heldCardsAreaHeight + placedCardMarginVert;
                         })
