@@ -4,7 +4,7 @@ import cardsComponent from './cardsComponent';
 import { updateRectDimns } from '../journey/transitionHelpers';
 
 //const transformTransition = { update: { duration: 1000 } };
-const transformTransition = { update: { duration: TRANSITIONS.MED, delay:0 } };
+const transformTransition = { update: { duration: TRANSITIONS.MED, delay:1000 } };
 
 function maxDimns(maxWidth, maxHeight, aspectRatio){
     const potentialHeight = maxWidth * aspectRatio;
@@ -279,9 +279,9 @@ export default function deckComponent() {
                             
                             if(d.isHeld){
                                 //extra shift up in multiview to create a pseudo margin between decks
-                                const vertShiftUpForMultiview = heldCardsAreaHeight * 0.25; 
+                                //const vertShiftUpForMultiview = heldCardsAreaHeight * 0.25; 
                                 //in multideck view, not all the incr space is taken up
-                                const totalVertIncs = selectedDeckId ? vertSpaceForIncs : vertCardInc(4);
+                                const totalVertIncs = vertSpaceForIncs;// selectedDeckId ? vertSpaceForIncs : vertCardInc(4);
                                 const extraMarginTop = (heldCardsAreaHeight - heldCardHeight - totalVertIncs)/2;
                                 return extraMarginTop + totalVertIncs - vertCardInc(d.handPos) 
                                    // - (selectedDeckId ? 0 : vertShiftUpForMultiview)
