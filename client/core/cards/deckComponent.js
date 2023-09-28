@@ -4,7 +4,7 @@ import cardsComponent from './cardsComponent';
 import { updateRectDimns } from '../journey/transitionHelpers';
 
 //const transformTransition = { update: { duration: 1000 } };
-const transformTransition = { update: { duration: TRANSITIONS.MED, delay:500 } };
+const transformTransition = { update: { duration: TRANSITIONS.MED, delay:2000 } };
 
 function maxDimns(maxWidth, maxHeight, aspectRatio){
     const potentialHeight = maxWidth * aspectRatio;
@@ -58,7 +58,7 @@ export default function deckComponent() {
         
         //console.log("w h", width, height)
         //console.log("margin", margin)
-        //console.log("cw ch", contentsWidth, contentsHeight)
+        console.log("cw ch", contentsWidth, contentsHeight)
         deckAreaWidth = contentsWidth;
         deckAreaHeight = contentsHeight;
         //this aspectRatio is only needed to aid with selecting a card to takeover entire area
@@ -258,11 +258,14 @@ export default function deckComponent() {
                 const selectedCardWidth = selectedCardDimns.width;
                 const selectedCardHeight = selectedCardDimns.height;
 
+                console.log("heldCardW", heldCardHeight)
                 cardsG
                     .datum(cardsData)
                     .call(cards
                         .width(heldCardWidth)
                         .height(heldCardHeight)
+                        .width(247.5)
+                        .height(324.94)
                         .infoHeight(heldCardInfoHeight)
                         .placedCardWidth(placedCardWidth)
                         .placedCardHeight(placedCardHeight)
@@ -271,9 +274,6 @@ export default function deckComponent() {
                         //.selectedDeckId(selectedDeckId)
                         .transformTransition(transformTransition)
                         .x((d,i) => {
-                            //setting pos to same place solves jaggedness, so the issue is in 
-                            //the changes to x and y below
-                            return 0;
                             if(d.isSelected){
                                 //keep it centred
                                 return (deckAreaWidth - selectedCardWidth)/2;
@@ -285,7 +285,6 @@ export default function deckComponent() {
                             return d.cardNr * (placedCardWidth + placedCardHorizGap);
                         })
                         .y((d,i) => {
-                            return 0;
                             if(d.isSelected){
                                 return (deckAreaHeight - selectedCardHeight)/2;
                             }
