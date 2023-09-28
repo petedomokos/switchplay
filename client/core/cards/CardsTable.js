@@ -172,7 +172,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const margin = { 
     left:0,// selectedDeckId ? 0 : width * 0.05, 
     right:0,// selectedDeckId ? 0 : width * 0.05, 
-    top:0,// selectedDeckId ? 0 : d3.max([vertSpaceForHeader + 10, height * 0.05]), 
+    top: selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
     bottom:0,// selectedDeckId ? 0 :  height * 0.05
   }
   const tableContentsWidth = width - margin.left - margin.right;
@@ -186,7 +186,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const nonSelectedDeckHeight = nonSelectedDeckWidth / aspectRatio;
 
   //extra margin at bottom of each deck to give a nice gap between them
-  const deckMarginBottom = 0// 20// selectedDeck ? 20 : 30;
+  const deckMarginBottom = 20// selectedDeck ? 20 : 30;
 
   const deckWidth = selectedDeck ? selectedDeckWidth : nonSelectedDeckWidth;
   const deckHeight = selectedDeck ? selectedDeckHeight : nonSelectedDeckHeight;
