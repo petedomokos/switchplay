@@ -273,6 +273,7 @@ export default function deckComponent() {
                             return d.cardNr * (placedCardWidth + placedCardHorizGap);
                         })
                         .y((d,i) => {
+                            return 0;
                             if(d.isSelected){
                                 return (contentsHeight - selectedCardHeight)/2;
                             }
