@@ -124,6 +124,7 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
   const scaledMinTitleFontSize = minTitleFontSize / scale;
   const svgWidth = width;
   const svgHeight = height - headerHeight;
+  console.log("svgH", svgHeight)
   const progressIconHeight = headerContentsHeight * 0.6;// d3.min([width * 0.2, headerHeight]);
   const progressIconWidth = progressIconHeight;
   let styleProps = {
