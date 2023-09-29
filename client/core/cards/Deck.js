@@ -12,92 +12,14 @@ import { initDeck } from '../../data/cards';
 import { TRANSITIONS } from "./constants"
 import { grey10, COLOURS } from './constants';
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
+import { get } from 'lodash';
 const { GOLD } = COLOURS;
 
 
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    position:"relative",
-    //width:props => props.width,
-    //height:props => props.height,
-    //transform:"scale(2)",
-    //transformOrigin:"top left",
-    transition: `all ${TRANSITIONS.MED}ms`,
-    display:"flex",
-    flexDirection:"column",
-    /*border:"solid",
-    borderWidth:"thin",
-    borderColor:grey10(7)*/
   },
-  overlay:{
-    width:props => props.width,
-    height:props => props.height,
-    position:"absolute",
-    display:props => props.overlayDisplay,
-    transition: `all ${TRANSITIONS.MED}ms`
-  },
-  instructionsSection:{
-    position:"absolute",
-    margin:"50px",
-  },
-  instructionsTitle:{
-    margin:"5px 5px 20px 5px",
-    color:grey10(10),
-    fontSize:"16px",
-  },
-  instructions:{
-    display:"flex",
-    flexDirection:"column",
-    margin:"5px 0px 0px 0px",
-  },
-  instruction:{
-    margin:"15px 5px",
-    color:grey10(5),
-    fontSize:"14px"
-  },
-  keyPhrase:{
-    color:grey10(1)
-  },
-  header:{
-    height:props => props.header.contentsHeight,
-    padding:props => props.header.padding,
-    display:"flex",
-    justifyContent:"space-between",
-    alignItems:"center",
-    fontSize:props => props.header.fontSize,
-    transition: `all ${TRANSITIONS.MED}ms`,
-    /*border:"solid",
-    borderColor:"white",
-    borderWidth:"thin"*/
-  },
-  title:{
-    color:grey10(6),
-    //@todo - sort positions of header contents properly, thi sis just a workaround
-    marginBottom:20, 
-  },
-  progressIcon:{
-    width:props => props.progressIcon.width,
-    height:props => props.progressIcon.height,
-    transform:"translate(20px, -35px)",
-    //transform:props => `scale(${props.progressIcon.scale})`,
-    transformOrigin:"center left",
-    transition: `all ${TRANSITIONS.MED}ms`,
-    //background:"aqua"
-  },
-  svg:{
-    pointerEvents:props => props.svg.pointerEvents,
-    position:"absolute",
-    top:props => `${props.header.height}px`,
-  },
-  formContainer:{
-    position:"absolute",
-    left:"0px",
-    top:"0px",
-    width:props => `${props.width}px`,
-    height:props => `${props.height}px`,
-    display:props => props.form.display,
-  }
 }))
 
 const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, width, height, onClick, update }) => {
@@ -110,103 +32,14 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
   const [deck, setDeck] = useState(() => deckComponent());
   const [form, setForm] = useState(null);
 
-  const headerWidth = width;
-  const headerHeight = 100;// d3.min([45, d3.max([11, height * 0.15])]);
-  const headerMargin = {
-    hoz:headerWidth * 0.15,
-    vert:headerHeight * 0.1//selectedDeckId ? headerHeight * 0.05 : headerHeight * 0.1
-  }
-  const headerContentsWidth = headerWidth - 2 * headerMargin.hoz;
-  const headerContentsHeight = headerHeight - 2 * headerMargin.vert;
-  
-  const titleFontSize = headerContentsHeight * 0.35;
-  const minTitleFontSize = 10;
-  const scaledMinTitleFontSize = minTitleFontSize / scale;
-  const svgWidth = width;
-  const svgHeight = height - headerHeight;
-  const progressIconHeight = headerContentsHeight * 0.6;// d3.min([width * 0.2, headerHeight]);
-  const progressIconWidth = progressIconHeight;
   let styleProps = {
-    width,
-    height,
-    header:{
-      height:headerHeight,
-      contentsHeight:headerContentsHeight,
-      //fontSize:d3.min([24, d3.max([headerHeight * 0.4, 10])]),
-      //fontSize:d3.min([24, d3.max([width * 0.1, 10])]),
-      fontSize:d3.max([scaledMinTitleFontSize, titleFontSize]),
-      //padding:`5% 10% 2.5% ${10 + props.header.extraPadLeft}%`
-      padding:`${headerMargin.vert}px ${headerMargin.hoz}px`
-    },
-    progressIcon:{
-      width:progressIconWidth,
-      height:progressIconHeight,
-      //scale:selectedDeckId ? 1 : 1.7,
-    },
-    svg:{
-      pointerEvents:isSelected ? "all" : "none",
-    },
-    form:{ 
-      display: form ? null : "none",
-    },
-    overlayDisplay:selectedDeckId ? "none" : null
   };
   const classes = useStyles(styleProps) 
   const containerRef = useRef(null);
-  const progressIconRef = useRef(null);
 
   const stringifiedData = JSON.stringify(data);
 
-  const onClickProgress = (e) => {
-    //console.log("click progress");
-    e.stopPropagation();
-
-  }
-  const onClickTitle = (e) => {
-    //console.log("click title");
-    e.stopPropagation();
-  }
-
-  useEffect(() => {
-    //dimns
-    const extraVertSpace = headerHeight - progressIconHeight;
-    const progressIconMargin = { 
-      left:progressIconWidth * 0.1, 
-      right:progressIconWidth * 0.1,
-      top:progressIconHeight * 0.1 + extraVertSpace/2, 
-      bottom:progressIconHeight * 0.1 + extraVertSpace/2
-    }
-    const progressIconContentsWidth = progressIconWidth - progressIconMargin.left - progressIconMargin.right;
-    const progressIconContentsHeight = progressIconHeight - progressIconMargin.top - progressIconMargin.bottom;
-    
-    const actualIconWidth = 80; //???
-    const iconScale = progressIconContentsWidth/actualIconWidth;
-    const hozIconShift = -progressIconContentsWidth * 0.2;
-    const vertIconShift = hozIconShift;
-
-    //enter-update
-    const iconSvg = d3.select(progressIconRef.current).selectAll("svg.deck-progress").data([1]);
-    iconSvg.enter()
-      .append("svg")
-        .attr("class", "deck-progress")
-        .attr("pointer-events", "none")
-        .each(function(){
-          d3.select(this).append("path")
-            .attr("transform", `translate(${hozIconShift},${vertIconShift}) scale(${iconScale})`)
-        })
-        .merge(iconSvg)
-        .attr("transform", `translate(${progressIconMargin.left},${progressIconMargin.top})`)
-        .each(function(){
-          d3.select(this).select("path")
-            .attr("d", trophy.pathD)
-            .attr("fill", deckData.status === 2 ? GOLD : (deckData.status === 1 ? grey10(2) : grey10(6)))
-            .transition()
-              .duration(TRANSITIONS.MED)
-              .attr("transform", `translate(${hozIconShift},${vertIconShift}) scale(${iconScale})`)
-            
-        });
-  }, [stringifiedData, width, height])
-
+  /*
   useEffect(() => {
     const processedDeckData = layout(deckData);
     //just use first deck for now
@@ -216,8 +49,8 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
 
   useEffect(() => {
     deck
-      .width(svgWidth)
-      .height(svgHeight)
+      .width(width)
+      .height(height)
       .selectedDeckId(selectedDeckId)
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
@@ -228,6 +61,7 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
     //why when we comment out this line, only the 1st deck opens!?
     //d3.select(containerRef.current).call(deck);
   }, [stringifiedData, width, height, selectedDeckId])
+  */
 
   const updateFrontCardNr = useCallback(cardNr => {
     update({ ...deckData, frontCardNr:cardNr })
@@ -267,30 +101,9 @@ const Deck = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wid
   }, [form, stringifiedData])
 
   return (
-    <div className={`cards-root ${classes.root}`} >
-      <div className={classes.header} onClick={onClickTitle}>
-        <div className={classes.title}>Enter Title...</div>
-        <div className={classes.progressIcon} ref={progressIconRef}
-          onClick={onClickProgress}>
-        </div>
-      </div>
-      <svg className={classes.svg} ref={containerRef} id={`cards-svg`} 
-        width={svgWidth} height={svgHeight} >
-          <rect width={svgWidth} height={svgHeight} stroke="red" fill="none"  />
-        <defs>
-          <filter id="shine">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
-          </filter>
-        </defs>
-      </svg>
-      {/**form && <div className={classes.formOverlay} onClick={handleSaveForm}></div>*/}
-      <div className={classes.formContainer}>
-        {form?.formType === "item" && 
-          <ItemForm item={form.value} fontSize={form.height * 0.5} save={updateItemTitle} close={() => setForm(null)} />
-        }
-      </div>
-      <div className={classes.overlay} onClick={onClick}></div>
-    </div>
+    <g className={`deck-cont-${data.id}`} ref={containerRef} >
+      <rect width={width} height={height} stroke="blue" fill="none" />
+    </g>
   )
 }
 
