@@ -86,7 +86,7 @@ export default function cardItemsComponent() {
         }
 
         function update(data){
-            //console.log("data", data)
+            //console.log("cardItems", data)
             const { } = data;
 
             const contentsG = d3.select(this).select("g.card-items-contents")

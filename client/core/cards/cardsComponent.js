@@ -160,7 +160,7 @@ export default function cardsComponent() {
                                 .attr("stroke", getCardStroke(d))
                                 .attr("fill", getCardFill(d))
 
-                        /*contentsG
+                        contentsG
                             .append("g")
                                 .attr("class", "info")
                                     .append("rect")
@@ -174,8 +174,6 @@ export default function cardsComponent() {
                                     .append("rect")
                                         .attr("class", "items-area-bg");
 
-                        */
-
                         contentsG.append("rect").attr("class", "card-overlay")
                             .attr("rx", 3)
                             .attr("ry", 3)
@@ -183,7 +181,6 @@ export default function cardsComponent() {
                             .attr("fill", "transparent")
                             .on("click", onClickCard)
                     })
-                    //.attr("transform", (d,i) => `translate(${i * 5}, ${50 - i * 5})`)
                     .call(updateTransform, { 
                         x, 
                         y,
@@ -232,53 +229,9 @@ export default function cardsComponent() {
                             .onClick(function(e){
                                 onClickCard(e, cardD); 
                             })
+                        */
 
-                        const cardIsEditable = (isHeld && isFront) || isSelected;
-
-                        const cardItems = cardItemsComponents[cardNr]
-                            .styles({ 
-                                _lineStrokeWidth:lineD => {
-                                    if(isHeld || isSelected){
-                                        return lineD.status === 2 ? 5 : (lineD.status === 1 ? 2.5 : 0.2);
-                                    }
-                                    return lineD.status === 2 ? 10 : (lineD.status === 1 ? 5 : 0.8)
-                                },
-                                _lineStroke:(lineD,i) => {
-                                    if(isHeld || isSelected){
-                                        return lineD.status === 2 ? GOLD : (lineD.status === 1 ? grey10(2) : "#989898")
-                                    }
-                                    return lineD.status === 2 ? GOLD : (lineD.status === 1 ? grey10(2) : grey10(6))
-                                }
-                            })
-                            .width(width)
-                            .height(itemsAreaHeight)
-                            .withSections(cardIsEditable)
-                            .editable(cardIsEditable)
-                            .onSelectItem(onSelectItem)
-                            .onUpdateItemStatus(function(itemNr, newStatus){
-                                onUpdateItemStatus(cardNr, itemNr, newStatus);
-                            })
-                            .onDrag(e => dragged(e, cardD))
-                            .onDragEnd(e => dragEnd(e, cardD))
-                    
-                        const contentsG = d3.select(this).select("g.card-contents")
-                        const cardRect = contentsG.select("rect.card-bg");
-
-                        cardRect
-                            .transition("card-bg-appearance")
-                            .delay(200)
-                            .duration(400)
-                                .attr("fill", getCardFill(cardD))
-                                .attr("stroke", getCardStroke(cardD))
-
-                        cardRect
-                            .transition("card-bg-dimns")
-                            //.delay(0)
-                            .duration(TRANSITIONS.MED)
-                            .ease(d3.easeLinear)
-                                .attr("width", width)
-                                .attr("height", height)
-
+                             /*
                         contentsG.select("rect.info-bg")
                             .attr("display", deckIsSelected ? null : "none") //hide when small
                             .transition("info-bg")
@@ -301,10 +254,49 @@ export default function cardsComponent() {
                                 .duration(200)
                                     .attr("opacity", isHeld || isSelected ? 1 : 0)
 
+                        */
+
+                        //ITEMS
+                        const cardIsEditable = (isHeld && isFront) || isSelected;
+
+                        const cardItems = cardItemsComponents[cardNr]
+                            .styles({ 
+                                _lineStrokeWidth:lineD => {
+                                    if(deckIsSelected){
+                                        if(isHeld || isSelected){
+                                            return lineD.status === 2 ? 1 : (lineD.status === 1 ? 0.8 : 0.2);
+                                        }
+                                        return lineD.status === 2 ? 3 : (lineD.status === 1 ? 2 : 0.2)
+                                    }
+                                    //multiple deck view
+                                    if(isHeld || isSelected){
+                                        return lineD.status === 2 ? 3 : (lineD.status === 1 ? 3 : 0.2);
+                                    }
+                                    return lineD.status === 2 ? 3 : (lineD.status === 1 ? 2 : 0.2);
+                                    
+                                },
+                                _lineStroke:(lineD,i) => {
+                                    if(isHeld || isSelected){
+                                        return lineD.status === 2 ? GOLD : (lineD.status === 1 ? grey10(2) : "#989898")
+                                    }
+                                    return lineD.status === 2 ? GOLD : (lineD.status === 1 ? grey10(2) : grey10(6))
+                                }
+                            })
+                            .width(width)
+                            .height(itemsAreaHeight)
+                            .withSections(cardIsEditable)
+                            .editable(cardIsEditable)
+                            .onSelectItem(onSelectItem)
+                            .onUpdateItemStatus(function(itemNr, newStatus){
+                                onUpdateItemStatus(cardNr, itemNr, newStatus);
+                            })
+                            .onDrag(e => dragged(e, cardD))
+                            .onDragEnd(e => dragEnd(e, cardD))
+
                         contentsG.select("g.items-area")
                             .attr("transform", `translate(0, ${infoHeight + spaceHeight})`)
                             .datum(cardD.items)
-                            //.call(cardItems)
+                            .call(cardItems)
 
                         //remove items for cards behind
                         const shouldHideItems = isHeld && !isFront && !isSelected;
@@ -318,8 +310,6 @@ export default function cardsComponent() {
                             .attr("width", width)
                             .attr("height", itemsAreaHeight)
                             .attr("fill", "none")
-
-                        */
 
                         //btm right btn
                         const expandBtnDatum = { 
@@ -398,7 +388,7 @@ export default function cardsComponent() {
                     //the crad itself has been dragged
                     cardD =d;
                 }
-                //console.log("dragged cardD", cardD?.cardNr)
+
                 if(swipeDirection === "up" && !cardD.isHeld){ 
                     onPickUp(cardD);
                     swipeTriggered = true;
