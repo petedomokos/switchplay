@@ -111,20 +111,24 @@ const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcess
     const newScale = deck ? zoomScale : 1;
     const newTransformState = d3.zoomIdentity.translate(newX * newScale, newY * newScale).scale(newScale);
 
+    console.log("zoom...")
     d3.select(zoomRef.current).call(zoom.transform, newTransformState)
     d3.select(deckHeadersRef.current)
       .style("left", `${newX * newScale}px`)
       .style("top", `${newY * newScale}px`)
-      .style("transform",`scale(${newScale})`) 
+      .style("transform",`scale(${newScale})`)
 
     //if req, update state in react, may need it with delay so it happens at end of zoom
-    setSelectedDeckId(id);
+    //setSelectedDeckId(id);
 }, [stringifiedData]);
 
 const onClickDeck = useCallback((e, d) => {
+  console.log("click deck")
   setSelectedDeck(d.id); 
   e.stopPropagation();
 }, [stringifiedData]);
+
+console.log("Rerender")
 
   //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
