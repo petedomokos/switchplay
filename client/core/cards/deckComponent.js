@@ -103,6 +103,8 @@ export default function deckComponent() {
         const heldCardDimns = maxDimns(maxHeldCardWidth, maxHeldCardHeight, cardAspectRatio);
         heldCardWidth = heldCardDimns.width;
         heldCardHeight = heldCardDimns.height;
+        console.log("maxWidth width", maxHeldCardWidth, heldCardWidth)
+        console.log("maxWidth", maxHeldCardHeight, heldCardHeight)
 
         //placed deck
         const maxPlacedCardHeight = placedCardsAreaHeight * 0.8;

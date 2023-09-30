@@ -20,14 +20,15 @@ const { GOLD } = COLOURS;
 const useStyles = makeStyles((theme) => ({
   root: {
     position:"relative",
-    transition: `all ${TRANSITIONS.MED}ms`,
-    display:"flex",
-    flexDirection:"column",
+    //transition: `all ${TRANSITIONS.MED}ms`,
+    //display:"flex",
+    //flexDirection:"column",
     /*border:"solid",
     borderWidth:"thin",
     borderColor:grey10(7)*/
   },
   overlay:{
+    display:"none",
     width:props => props.width,
     height:props => props.height,
     position:"absolute",
