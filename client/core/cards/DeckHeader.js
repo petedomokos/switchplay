@@ -42,9 +42,9 @@ const useStyles = makeStyles((theme) => ({
     //transform:props => `scale(${props.progressIcon.scale})`,
     transformOrigin:"center left",
     transition: `all ${TRANSITIONS.MED}ms`,
-    border:"solid",
+    /*border:"solid",
     borderWidth:"thin",
-    borderColor:"aqua"
+    borderColor:"aqua"*/
   },
 }))
 
@@ -129,7 +129,7 @@ const DeckHeader = ({ user, data, selectedDeckId, scale, datasets, asyncProcesse
         .each(function(){
           d3.select(this).select("path")
             .attr("d", trophy.pathD)
-            .attr("fill", GOLD)// deckData.status === 2 ? GOLD : (deckData.status === 1 ? grey10(2) : grey10(6)))
+            .attr("fill", data.status === 2 ? GOLD : (data.status === 1 ? grey10(2) : grey10(6)))
             .transition()
               .duration(TRANSITIONS.MED)
               .attr("transform", `translate(${hozIconShift},${vertIconShift}) scale(${iconScale})`)
