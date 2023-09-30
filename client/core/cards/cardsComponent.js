@@ -175,6 +175,13 @@ export default function cardsComponent() {
                                         .attr("class", "items-area-bg");
 
                         */
+
+                        contentsG.append("rect").attr("class", "card-overlay")
+                            .attr("rx", 3)
+                            .attr("ry", 3)
+                            .attr("stroke", "none")
+                            .attr("fill", "transparent")
+                            .on("click", onClickCard)
                     })
                     //.attr("transform", (d,i) => `translate(${i * 5}, ${50 - i * 5})`)
                     .call(updateTransform, { 
@@ -193,7 +200,13 @@ export default function cardsComponent() {
                         name:(d,i) => `card-pos-${i}-${d.id}`
                     })
                     .each(function(cardD,i){
-                        const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, items } = cardD;            
+                        const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, items } = cardD; 
+                        const contentsG = d3.select(this).select("g.card-contents");
+                        
+                        contentsG.select("rect.card-overlay")
+                            .attr("width", width)
+                            .attr("height", height)
+                            .attr("display", selectedDeckId ? "none" : null)
                         
                         //const infoHeight;
                         //components

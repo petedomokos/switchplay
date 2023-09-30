@@ -112,7 +112,7 @@ const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcess
     const newScale = deck ? zoomScale : 1;
     const newTransformState = d3.zoomIdentity.translate(newX * newScale, newY * newScale).scale(newScale);
 
-    //d3.select(zoomRef.current).call(zoom.transform, newTransformState)
+    d3.select(zoomRef.current).call(zoom.transform, newTransformState)
     d3.select(deckHeadersRef.current)
       .style("left", `${newX * newScale}px`)
       .style("top", `${newY * newScale}px`)
@@ -140,7 +140,6 @@ const onClickDeck = useCallback((e, d) => {
   }, [stringifiedData])
 
   useEffect(() => {
-    console.log("update decks")
     decks
       .width(width)
       .height(height)
@@ -157,7 +156,7 @@ const onClickDeck = useCallback((e, d) => {
   }, [stringifiedData, width, height, selectedDeckId])
 
   useEffect(() => {
-    //d3.select(containerRef.current).call(decks);
+    d3.select(containerRef.current).call(decks);
   }, [stringifiedData, width, height, selectedDeckId])
 
   //zoom
@@ -211,9 +210,8 @@ const onClickDeck = useCallback((e, d) => {
         {data.map((deckData,i) =>
           <div  onClick={e => { onClickDeck(e, deckData) }}
               key={`deck-header-${deckData.id}`} style={{ position:"absolute", left:deckX(deckData), top:deckY(deckData),
-              border:"solid", borderWidth:"thin", borderColor:"grey", width:deckWrapperWidth, height:deckHeaderHeight }}>
-                Enter Title
-            {/**<DeckHeader data={deckData} width={deckWrapperWidth} height={deckHeaderHeight} onClick={onClickDeck} />*/}
+              /*border:"solid", borderWidth:"thin", borderColor:"grey", width:deckWrapperWidth, height:deckHeaderHeight*/ }}>
+            <DeckHeader data={deckData} width={deckWrapperWidth} height={deckHeaderHeight} onClick={onClickDeck} />
           </div>
         )}
       </div>

@@ -123,6 +123,7 @@ export default function deckComponent() {
     let selectedCardNr;
     let format;
 
+    let onClickDeck = function(){};
     let setForm = function(){};
     let updateItemStatus = function(){};
     let updateFrontCardNr = function(){};
@@ -268,6 +269,10 @@ export default function deckComponent() {
                         })  
                         .onUpdateItemStatus(updateItemStatus)
                         .onClickCard(function(e, d){
+                            if(!selectedDeckId){
+                                onClickDeck(e, _deckData)
+                                return;
+                            }
                             //hide/show others
                             containerG.selectAll("g.card").filter(dat => dat.cardNr !== d.cardNr)
                                 .attr("pointer-events", d.isSelected ? null : "none")
@@ -332,6 +337,11 @@ export default function deckComponent() {
     deck.format = function (value) {
         if (!arguments.length) { return format; }
         format = value;
+        return deck;
+    };
+    deck.onClickDeck = function (value) {
+        if (!arguments.length) { return onClickDeck; }
+        onClickDeck = value;
         return deck;
     };
     deck.updateItemStatus = function (value) {

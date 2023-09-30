@@ -72,10 +72,10 @@ export default function decksComponent() {
                         .each(function(d,i){
                             deckComponents[d.id] = deckComponent();
 
-                            d3.select(this).append("rect")
+                            /*d3.select(this).append("rect")
                                 .attr("pointer-events", "none")
                                 .attr("fill", "none")
-                                .attr("stroke", "aqua")
+                                .attr("stroke", "aqua")*/
                         })
                         .merge(deckG)
                         .attr("transform", (d,i) => `translate(${x(d,i)}, ${y(d,i)})`)
@@ -83,22 +83,22 @@ export default function decksComponent() {
                             const deckWidth = _deckWidth(d,i);
                             const deckHeight = _deckHeight(d,i);
 
-                            d3.select(this).select("rect")
+                            /*d3.select(this).select("rect")
                                 .attr("width", width)
-                                .attr("height", height)
+                                .attr("height", height)*/
 
                             const deck = deckComponents[d.id];
                             deck
-                            .width(deckWidth)
-                            .height(deckHeight)
-                            .selectedDeckId(selectedDeckId)
-                            //.updateItemStatus(updateItemStatus)
-                            //.updateFrontCardNr(updateFrontCardNr)
-                            //.setForm(setForm)
+                                .width(deckWidth)
+                                .height(deckHeight)
+                                .selectedDeckId(selectedDeckId)
+                                .onClickDeck(onClickDeck)
+                                //.updateItemStatus(updateItemStatus)
+                                //.updateFrontCardNr(updateFrontCardNr)
+                                //.setForm(setForm)
 
                             d3.select(this).call(deck)
                         })
-                        .on("click", onClickDeck)
 
                 deckG.exit().remove();
 
