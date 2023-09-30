@@ -21,14 +21,14 @@ const useStyles = makeStyles((theme) => ({
     width:props => props.contentsWidth,
     height:props => props.contentsHeight,
     padding:props => props.padding,
-    display:"flex",
+    //display:"flex",
     justifyContent:"space-between",
     alignItems:"center",
     fontSize:props => props.fontSize,
     transition: `all ${TRANSITIONS.MED}ms`,
-    /*border:"solid",
+    border:"solid",
     borderColor:"white",
-    borderWidth:"thin"*/
+    borderWidth:"thin"
   },
   title:{
     color:grey10(6),

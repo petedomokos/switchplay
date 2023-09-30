@@ -130,8 +130,7 @@ const onClickDeck = useCallback((e, d) => {
 
 console.log("Rerender")
 //next - somethin gi s causing header to jump to the right (zoom in) and left (xoom out)
-// a tiny bit for a moment during zooming - see on android more than here, but a similar thing happens
-
+// a tiny bit for a moment during zooming - see on android more than here, but a similar
 
   //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
@@ -214,7 +213,9 @@ console.log("Rerender")
       </svg>
       <div className={classes.deckHeaders} ref={deckHeadersRef}>
         {data.map((deckData,i) =>
-          <div key={`deck-header-${deckData.id}`} style={{ position:"absolute", left:deckX(deckData), top:deckY(deckData) }}>
+          <div  onClick={e => { onClickDeck(e, deckData) }}
+              key={`deck-header-${deckData.id}`} style={{ position:"absolute", left:deckX(deckData), top:deckY(deckData),
+              /*border:"solid",*/ borderWidth:"thin", borderColor:"grey", width:deckWrapperWidth, height:deckHeaderHeight }}>
             <DeckHeader data={deckData} width={deckWrapperWidth} height={deckHeaderHeight} onClick={onClickDeck} />
           </div>
         )}

@@ -75,7 +75,7 @@ export default function decksComponent() {
                             d3.select(this).append("rect")
                                 .attr("pointer-events", "none")
                                 .attr("fill", "none")
-                                //.attr("stroke", "aqua")
+                                .attr("stroke", "aqua")
                         })
                         .merge(deckG)
                         .attr("transform", (d,i) => `translate(${x(d,i)}, ${y(d,i)})`)
