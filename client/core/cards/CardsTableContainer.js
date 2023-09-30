@@ -26,6 +26,7 @@ const mapDispatchToProps = dispatch => ({
 		dispatch(createDeck(settings))
 	},
 	updateDeck(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
+		console.log("update deck", deck)
 		dispatch(updateDeck(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter));
 	},
 })

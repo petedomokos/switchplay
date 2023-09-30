@@ -33,6 +33,8 @@ export default function decksComponent() {
     let format;
 
     let onClickDeck = function(){}
+    let updateItemStatus = function(){};
+    let updateFrontCardNr = function(){};
 
     let x = (d,i) => d.x;
     let y = (d,i) => d.y;
@@ -93,8 +95,8 @@ export default function decksComponent() {
                                 .height(deckHeight)
                                 .selectedDeckId(selectedDeckId)
                                 .onClickDeck(onClickDeck)
-                                //.updateItemStatus(updateItemStatus)
-                                //.updateFrontCardNr(updateFrontCardNr)
+                                .updateItemStatus(updateItemStatus)
+                                .updateFrontCardNr(updateFrontCardNr)
                                 //.setForm(setForm)
 
                             d3.select(this).call(deck)

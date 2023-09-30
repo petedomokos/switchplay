@@ -127,12 +127,13 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
     })
   }, [form, stringifiedData])
 
-  //next: Deck still displaying even when shouldDisplayInstructions is true
-
   return (
     <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
-      {/**shouldDisplayInstructions && <Instructions /> */}
-      <Decks data={decksData} width={tableContentsWidth} height={tableContentsHeight} />
+      {shouldDisplayInstructions ?  
+        <Instructions />
+        :
+        <Decks data={decksData} width={tableContentsWidth} height={tableContentsHeight} updateDeck={updateDeck} />
+      }
     </div>
   )
 }

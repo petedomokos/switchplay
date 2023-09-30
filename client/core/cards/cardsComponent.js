@@ -207,6 +207,15 @@ export default function cardsComponent() {
                             .attr("width", width)
                             .attr("height", height)
                             .attr("display", selectedDeckId ? "none" : null)
+
+                        
+                        //bg colour
+                        contentsG.select("rect.card-bg")
+                            .transition("card-bg-appearance")
+                            .delay(200)
+                            .duration(400)
+                                .attr("fill", getCardFill(cardD))
+                                .attr("stroke", getCardStroke(cardD))
                         
                         //const infoHeight;
                         //components

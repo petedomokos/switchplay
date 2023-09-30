@@ -289,6 +289,7 @@ export default function deckComponent() {
                             //update(deckData);
                         })
                         .onPutDown(function(d){
+                            console.log("put down")
                             if(d.isSelected){
                                 selectedCardNr = null;
                                 //show other deck as we need to deselect the card too

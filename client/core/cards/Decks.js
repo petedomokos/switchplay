@@ -63,13 +63,15 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcesses, width, height, onClick, update }) => {
+const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcesses, width, height, onClick, updateDeck }) => {
   //console.log("Decks", height)
   const [layout, setLayout] = useState(() => deckLayout());
   const [decks, setDecks] = useState(() => decksComponent());
   const [zoom, setZoom] = useState(() => d3.zoom());
   const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
   const [form, setForm] = useState(null);
+
+  const selectedDeck = data.find(deck => deck.id === selectedDeckId);
 
   const deckAspectRatio = width / height;
   const deckWrapperWidth = d3.min([width/3, 200]);
@@ -112,7 +114,7 @@ const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcess
     const newScale = deck ? zoomScale : 1;
     const newTransformState = d3.zoomIdentity.translate(newX * newScale, newY * newScale).scale(newScale);
 
-    //d3.select(zoomRef.current).call(zoom.transform, newTransformState)
+    d3.select(zoomRef.current).call(zoom.transform, newTransformState)
     d3.select(deckHeadersRef.current)
       .style("left", `${newX * newScale}px`)
       .style("top", `${newY * newScale}px`)
@@ -127,9 +129,31 @@ const onClickDeck = useCallback((e, d) => {
   e.stopPropagation();
 }, [stringifiedData]);
 
-//next - somethin gi s causing header to jump to the right (zoom in) and left (xoom out)
-// a tiny bit for a moment during zooming - see on android more than here, but a similar
-//its the whole deckheaders div that seems to move, but could be all theincdividual header divs instead
+const updateFrontCardNr = useCallback(cardNr => {
+  console.log("update front cardnumber", selectedDeck)
+  updateDeck({ ...selectedDeck, frontCardNr:cardNr })
+}, [stringifiedData, form, selectedDeckId]);
+
+const updateCard = useCallback((updatedCard) => {
+  //console.log("updateCard", updatedCard)
+  const updatedCards = selectedDeck.cards.map(c => c.cardNr !== updatedCard.cardNr ? c : updatedCard);
+  updateDeck({ ...selectedDeck, cards:updatedCards })
+}, [stringifiedData, selectedDeckId]);
+
+const updateItemTitle = useCallback(updatedTitle => {
+  //console.log("updateTitle", updatedTitle, form)
+  const { cardNr, itemNr } = form.value;
+  const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
+  const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title: updatedTitle }));
+  updateCard({ ...cardToUpdate, items:updatedItems })
+}, [stringifiedData, form, selectedDeckId]);
+
+const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
+  //console.log("updateItemStatus", cardNr, itemNr, updatedStatus)
+  const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
+  const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, status: updatedStatus }));
+  updateCard({ ...cardToUpdate, items:updatedItems })
+}, [stringifiedData, form, selectedDeckId]);
 
   //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
@@ -137,7 +161,7 @@ const onClickDeck = useCallback((e, d) => {
     //just use first deck for now
     d3.select(containerRef.current).datum(processedDeckData)
 
-  }, [stringifiedData])
+  }, [stringifiedData, selectedDeckId])
 
   useEffect(() => {
     decks
@@ -150,13 +174,14 @@ const onClickDeck = useCallback((e, d) => {
       ._deckHeight((d,i) => deckHeight)
       .onClickDeck(onClickDeck)
       //.zoom(zoom)
-      //.updateItemStatus(updateItemStatus)
-      //.updateFrontCardNr(updateFrontCardNr)
+      .updateItemStatus(updateItemStatus)
+      .updateFrontCardNr(updateFrontCardNr)
       //.setForm(setForm)
   }, [stringifiedData, width, height, selectedDeckId])
 
   useEffect(() => {
-    //d3.select(containerRef.current).call(decks);
+    console.log("d3 render", selectedDeck)
+    d3.select(containerRef.current).call(decks);
   }, [stringifiedData, width, height, selectedDeckId])
 
   //zoom
