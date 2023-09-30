@@ -59,7 +59,6 @@ export default function decksComponent() {
             update(decksData);
 
             function init(){
-
             }
 
             function update(decksData, options={}){

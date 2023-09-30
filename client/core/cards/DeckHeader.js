@@ -33,16 +33,18 @@ const useStyles = makeStyles((theme) => ({
   title:{
     color:grey10(6),
     //@todo - sort positions of header contents properly, thi sis just a workaround
-    marginBottom:20, 
+    //marginBottom:20, 
   },
   progressIcon:{
     width:props => props.progressIcon.width,
     height:props => props.progressIcon.height,
-    transform:"translate(20px, -35px)",
+    //transform:"translate(20px, -35px)",
     //transform:props => `scale(${props.progressIcon.scale})`,
     transformOrigin:"center left",
     transition: `all ${TRANSITIONS.MED}ms`,
-    //background:"aqua"
+    border:"solid",
+    borderWidth:"thin",
+    borderColor:"aqua"
   },
 }))
 
@@ -95,7 +97,6 @@ const DeckHeader = ({ user, data, selectedDeckId, scale, datasets, asyncProcesse
     e.stopPropagation();
   }
 
-  /*
   useEffect(() => {
     //dimns
     const extraVertSpace = height - progressIconHeight;
@@ -110,8 +111,8 @@ const DeckHeader = ({ user, data, selectedDeckId, scale, datasets, asyncProcesse
     
     const actualIconWidth = 80; //???
     const iconScale = progressIconContentsWidth/actualIconWidth;
-    const hozIconShift = -progressIconContentsWidth * 0.2;
-    const vertIconShift = hozIconShift;
+    const hozIconShift = 0;// -progressIconContentsWidth * 0.2;
+    const vertIconShift = 0;// hozIconShift;
 
     //enter-update
     const iconSvg = d3.select(progressIconRef.current).selectAll("svg.deck-progress").data([1]);
@@ -124,7 +125,7 @@ const DeckHeader = ({ user, data, selectedDeckId, scale, datasets, asyncProcesse
             .attr("transform", `translate(${hozIconShift},${vertIconShift}) scale(${iconScale})`)
         })
         .merge(iconSvg)
-        .attr("transform", `translate(${progressIconMargin.left},${progressIconMargin.top})`)
+        .attr("transform", `translate(${progressIconMargin.left - 3},${progressIconMargin.top - 11})`)
         .each(function(){
           d3.select(this).select("path")
             .attr("d", trophy.pathD)
@@ -135,17 +136,13 @@ const DeckHeader = ({ user, data, selectedDeckId, scale, datasets, asyncProcesse
             
         });
   }, [stringifiedData, width, height])
-  */
-
 
   return (
     <div className={classes.root} onClick={e => { onClick(e, data) }} >
-      {/**<div className={classes.header} onClick={onClickTitle}>
-        <div className={classes.title}>Enter Title...</div>
-        <div className={classes.progressIcon} ref={progressIconRef}
-          onClick={onClickProgress}>
-        </div>
-      </div>*/}
+      <div className={classes.title}>Enter Title...</div>
+      <div className={classes.progressIcon} ref={progressIconRef}
+        onClick={onClickProgress}>
+      </div>
     </div>
   )
 }
