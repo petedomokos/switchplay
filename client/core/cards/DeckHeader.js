@@ -36,6 +36,7 @@ const useStyles = makeStyles((theme) => ({
     //marginBottom:20, 
   },
   progressIcon:{
+    display:"none",
     width:props => props.progressIcon.width,
     height:props => props.progressIcon.height,
     //transform:"translate(20px, -35px)",

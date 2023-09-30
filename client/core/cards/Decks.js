@@ -129,6 +129,9 @@ const onClickDeck = useCallback((e, d) => {
 }, [stringifiedData]);
 
 console.log("Rerender")
+//next - somethin gi s causing header to jump to the right (zoom in) and left (xoom out)
+// a tiny bit for a moment during zooming - see on android more than here, but a similar thing happens
+
 
   //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
