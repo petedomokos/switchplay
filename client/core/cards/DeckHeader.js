@@ -52,15 +52,18 @@ const DeckHeader = ({ user, data, selectedDeckId, scale, datasets, asyncProcesse
   const [form, setForm] = useState(null);
 
   const margin = {
-    hoz:width * 0.15,
+    left:width * 0.15,
+    //@todo - make right same as remaining space to the right of last card when all 5 are held
+    right:width * 0.05,
     vert:height * 0.1//selectedDeckId ? headerHeight * 0.05 : headerHeight * 0.1
   }
-  const contentsWidth = width - 2 * margin.hoz;
+  const contentsWidth = width - margin.left - margin.right;
   const contentsHeight = height - 2 * margin.vert;
   
-  const titleFontSize = contentsHeight * 0.35;
-  const minTitleFontSize = 10;
+  const titleFontSize = contentsHeight * 0.25;
+  const minTitleFontSize = 11;
   const scaledMinTitleFontSize = minTitleFontSize / scale;
+  
 
   const progressIconHeight = contentsHeight * 0.6;// d3.min([width * 0.2, headerHeight]);
   const progressIconWidth = progressIconHeight;
@@ -72,7 +75,7 @@ const DeckHeader = ({ user, data, selectedDeckId, scale, datasets, asyncProcesse
     contentsWidth,
     contentsHeight,
     fontSize:d3.max([scaledMinTitleFontSize, titleFontSize]),
-    padding:`${margin.vert}px ${margin.hoz}px`,
+    padding:`${margin.vert}px ${margin.right}px ${margin.vert}px ${margin.left}px`,
     progressIcon:{
       width:progressIconWidth,
       height:progressIconHeight,

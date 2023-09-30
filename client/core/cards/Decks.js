@@ -74,7 +74,14 @@ const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcess
   const selectedDeck = data.find(deck => deck.id === selectedDeckId);
 
   const deckAspectRatio = width / height;
-  const deckWrapperWidth = d3.min([width/3, 200]);
+  const deckOuterMargin = {
+    left:10, //width * 0.05,
+    right:10,//width * 0.05,
+    top:15,//height * 0.05,
+    bottom:15//height * 0.05
+  }
+  const deckWrapperWidthWithMargins = d3.min([width/3, 220]);
+  const deckWrapperWidth = deckWrapperWidthWithMargins - deckOuterMargin.left - deckOuterMargin.right;
   const deckWrapperHeight = deckWrapperWidth / deckAspectRatio;
 
   const deckHeaderWidth = deckWrapperWidth;
@@ -84,11 +91,16 @@ const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcess
   const deckHeight = deckWrapperHeight - deckHeaderHeight;
 
   const zoomScale = width / deckWidth;
+  const currentScale = selectedDeckId ? zoomScale : 1;
 
-  const deckMarginBottom = 20;
-
-  const deckX = (d,i) => d.colNr * deckWidth;
-  const deckY = (d,i) => d.rowNr * (deckWrapperHeight + deckMarginBottom);
+  const deckX = (d,i) => {
+    const widthPerDeck = deckOuterMargin.left + deckWrapperWidth + deckOuterMargin.right;
+    return deckOuterMargin.left + d.colNr * widthPerDeck;
+  }
+  const deckY = (d,i) => {
+    const heightPerDeck = deckOuterMargin.top + deckWrapperHeight + deckOuterMargin.bottom
+    return deckOuterMargin.top + d.rowNr * heightPerDeck;
+  }
 
   let styleProps = {
     width,
@@ -235,7 +247,7 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
           <div  onClick={e => { onClickDeck(e, deckData) }}
               key={`deck-header-${deckData.id}`} style={{ position:"absolute", left:deckX(deckData), top:deckY(deckData),
               /*border:"solid", borderWidth:"thin", borderColor:"grey", width:deckWrapperWidth, height:deckHeaderHeight*/ }}>
-            <DeckHeader data={deckData} width={deckWrapperWidth} height={deckHeaderHeight} onClick={onClickDeck} />
+            <DeckHeader data={deckData} scale={currentScale} width={deckWrapperWidth} height={deckHeaderHeight} onClick={onClickDeck} />
           </div>
         )}
       </div>
