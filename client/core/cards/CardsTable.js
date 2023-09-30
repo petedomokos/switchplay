@@ -16,8 +16,8 @@ const useStyles = makeStyles((theme) => ({
     position:"absolute",
     left:props => props.left,
     top:props => props.top,
-    width:props => props.width,
-    height:props => props.height,
+    width:props => props.width * 10,
+    height:props => props.height * 10,
     transition: `all ${TRANSITIONS.MED}ms`,
     //display:"flex",
     //flexDirection:"column",
@@ -130,8 +130,8 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   //next: Deck still displaying even when shouldDisplayInstructions is true
 
   return (
-    <div className={`cards-root ${classes.root}`} onClick={() => { setSelectedDeckId("") }}>
-      {shouldDisplayInstructions && <Instructions /> }
+    <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
+      {/**shouldDisplayInstructions && <Instructions /> */}
       <Decks data={decksData} width={tableContentsWidth} height={tableContentsHeight} />
     </div>
   )

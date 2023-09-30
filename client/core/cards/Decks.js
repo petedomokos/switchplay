@@ -112,7 +112,7 @@ const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcess
     const newScale = deck ? zoomScale : 1;
     const newTransformState = d3.zoomIdentity.translate(newX * newScale, newY * newScale).scale(newScale);
 
-    d3.select(zoomRef.current).call(zoom.transform, newTransformState)
+    //d3.select(zoomRef.current).call(zoom.transform, newTransformState)
     d3.select(deckHeadersRef.current)
       .style("left", `${newX * newScale}px`)
       .style("top", `${newY * newScale}px`)
@@ -157,11 +157,7 @@ const onClickDeck = useCallback((e, d) => {
   }, [stringifiedData, width, height, selectedDeckId])
 
   useEffect(() => {
-    //why when we comment out this line, only the 1st deck opens!?
-    d3.select(containerRef.current).call(decks);
-    //@todo - try to simplify by putting zoomRef in a separate svg altogether
-    //put teh decks svg inside a div, that also contains all the header divs.
-    //all are absolutely positioned, but this way, we only need to apply zoom transform to one containing div
+    //d3.select(containerRef.current).call(decks);
   }, [stringifiedData, width, height, selectedDeckId])
 
   //zoom
@@ -205,11 +201,11 @@ const onClickDeck = useCallback((e, d) => {
       <svg className={classes.svg} id={`cards-svg`} width={width} height={height} >
         <g ref={zoomRef}><rect width={width} height={height} fill="transparent" /></g>
         <g ref={containerRef} />
-        {/**<defs>
+        <defs>
           <filter id="shine">
             <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
           </filter>
-        </defs>*/}
+        </defs>
       </svg>
       <div className={classes.deckHeaders} ref={deckHeadersRef}>
         {data.map((deckData,i) =>
