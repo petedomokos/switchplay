@@ -93,7 +93,8 @@ export default function decksComponent() {
                             deck
                                 .width(deckWidth)
                                 .height(deckHeight)
-                                .selectedDeckId(selectedDeckId)
+                                //.selectedDeckId(selectedDeckId)
+                                .deckIsSelected(selectedDeckId === d.id)
                                 .onClickDeck(onClickDeck)
                                 .updateItemStatus(updateItemStatus)
                                 .updateFrontCardNr(updateFrontCardNr)

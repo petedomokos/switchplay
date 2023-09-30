@@ -88,8 +88,8 @@ export default function deckComponent() {
         const nonVisibleVertInc = i => i * heldCardInfoHeight * 0.2;
         const nonVisibleHorizInc = i => (i/5) * horizSpaceForNonVisibleIncs; //5 cards
 
-        vertCardInc = selectedDeckId ? visibleVertCardInc : nonVisibleVertInc;
-        horizCardInc = selectedDeckId ? visibleHorizCardInc : nonVisibleHorizInc;
+        vertCardInc = deckIsSelected ? visibleVertCardInc : nonVisibleVertInc;
+        horizCardInc = deckIsSelected ? visibleHorizCardInc : nonVisibleHorizInc;
 
         //NOTE: this max must also be same regardless of multideck view or single deck view
         const maxHeldCardWidth = contentsWidth - (horizSpaceForVisibleIncs * 2); //need it to be symmetrical
@@ -124,7 +124,7 @@ export default function deckComponent() {
     }
     let _styles = () => DEFAULT_STYLES;
 
-    let selectedDeckId;
+    let deckIsSelected;
     let selectedCardNr;
     let format;
 
@@ -235,7 +235,7 @@ export default function deckComponent() {
                         .placedCardHeight(placedCardHeight)
                         .selectedCardWidth(selectedCardWidth)
                         .selectedCardHeight(selectedCardHeight)
-                        .selectedDeckId(selectedDeckId)
+                        .deckIsSelected(deckIsSelected)
                         .transformTransition(transformTransition)
                         .x((d,i) => {
                             if(d.isSelected){
@@ -256,23 +256,23 @@ export default function deckComponent() {
                                 //extra shift up in multiview to create a pseudo margin between decks
                                 //const vertShiftUpForMultiview = heldCardsAreaHeight * 0.25; 
                                 //in multideck view, not all the incr space is taken up
-                                const totalVertIncs = vertSpaceForIncs;// selectedDeckId ? vertSpaceForIncs : vertCardInc(4);
+                                const totalVertIncs = vertSpaceForIncs;// deckIsSelected ? vertSpaceForIncs : vertCardInc(4);
                                 const extraMarginTop = (heldCardsAreaHeight - heldCardHeight - totalVertIncs)/2;
                                 //return extraMarginTop + totalVertIncs - vertCardInc(d.handPos) 
                                 return extraMarginTop + totalVertIncs - vertCardInc(d.handPos) 
-                                   // - (selectedDeckId ? 0 : vertShiftUpForMultiview)
+                                   // - (deckIsSelected ? 0 : vertShiftUpForMultiview)
                             }
 
                             //extra shift up in multiview to create a pseudo margin between decks
                             const vertShiftUpForMultiview = heldCardsAreaHeight * 0.15; 
-                            return heldCardsAreaHeight + placedCardMarginVert //- (selectedDeckId ? 0 : vertShiftUpForMultiview);
+                            return heldCardsAreaHeight + placedCardMarginVert //- (deckIsSelected ? 0 : vertShiftUpForMultiview);
                         })
                         .onSelectItem(function(item){ 
                             setForm({ formType: "item", value:item }) 
                         })  
                         .onUpdateItemStatus(updateItemStatus)
                         .onClickCard(function(e, d){
-                            if(!selectedDeckId){
+                            if(!deckIsSelected){
                                 onClickDeck(e, _deckData)
                                 return;
                             }
@@ -332,9 +332,9 @@ export default function deckComponent() {
         
         return deck;
     };
-    deck.selectedDeckId = function (value) {
-        if (!arguments.length) { return selectedDeckId; }
-        selectedDeckId = value;
+    deck.deckIsSelected = function (value) {
+        if (!arguments.length) { return deckIsSelected; }
+        deckIsSelected = value; 
         return deck;
     };
     deck.format = function (value) {

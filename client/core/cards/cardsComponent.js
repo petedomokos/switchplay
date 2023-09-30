@@ -45,7 +45,7 @@ export default function cardsComponent() {
     let y = (d,i) => 0;
 
     //state
-    let selectedDeckId;
+    let deckIsSelected;
     let format = "actual";
 
     let transformTransition = { 
@@ -206,7 +206,7 @@ export default function cardsComponent() {
                         contentsG.select("rect.card-overlay")
                             .attr("width", width)
                             .attr("height", height)
-                            .attr("display", selectedDeckId ? "none" : null)
+                            .attr("display", deckIsSelected ? "none" : null)
 
                         
                         //bg colour
@@ -280,7 +280,7 @@ export default function cardsComponent() {
                                 .attr("height", height)
 
                         contentsG.select("rect.info-bg")
-                            .attr("display", selectedDeckId ? null : "none") //hide when small
+                            .attr("display", deckIsSelected ? null : "none") //hide when small
                             .transition("info-bg")
                             //.delay(0)
                             .duration(TRANSITIONS.MED)
@@ -290,7 +290,7 @@ export default function cardsComponent() {
                         
                         const infoDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext };
                         contentsG.selectAll("g.info")
-                            .attr("display", selectedDeckId ? null : "none") //hide when small
+                            .attr("display", deckIsSelected ? null : "none") //hide when small
                             .datum(infoDatum)
                             //.call(cardInfo);
 
@@ -341,8 +341,7 @@ export default function cardsComponent() {
                         const btnMargin = 3;
                         const btnContentsWidth = btnWidth - 2 * btnMargin;
                         const btnContentsHeight = btnHeight - 2 * btnMargin;
-                        //next - put expand btn back and sort its transition
-                        /*const botRightBtnG = contentsG.selectAll("g.bottom-right-btn").data(botRightBtnData);
+                        const botRightBtnG = contentsG.selectAll("g.bottom-right-btn").data(botRightBtnData);
                         botRightBtnG.enter()
                             .append("g")
                                 .attr("class", "bottom-right-btn")
@@ -371,7 +370,7 @@ export default function cardsComponent() {
                                 })
                                 .on("click", (e,d) => d.onClick(e, d));
 
-                        botRightBtnG.exit().remove();*/
+                        botRightBtnG.exit().remove();
 
                     })
                     .call(drag)
@@ -514,9 +513,9 @@ export default function cardsComponent() {
         fontSizes = { ...fontSizes, ...values };
         return cards;
     };
-    cards.selectedDeckId = function (value) {
-        if (!arguments.length) { return selectedDeckId; }
-        selectedDeckId = value;
+    cards.deckIsSelected = function (value) {
+        if (!arguments.length) { return deckIsSelected; }
+        deckIsSelected = value;
         return cards;
     };
     cards.format = function (value) {

@@ -26,9 +26,9 @@ const useStyles = makeStyles((theme) => ({
     alignItems:"center",
     fontSize:props => props.fontSize,
     transition: `all ${TRANSITIONS.MED}ms`,
-    border:"solid",
+    /*border:"solid",
     borderColor:"white",
-    borderWidth:"thin"
+    borderWidth:"thin"*/
   },
   title:{
     color:grey10(6),
