@@ -137,8 +137,9 @@ const DeckHeader = ({ user, data, selectedDeckId, scale, datasets, asyncProcesse
   }, [stringifiedData, width, height])
   */
 
+
   return (
-    <div className={`cards-root ${classes.root}`} >
+    <div className={classes.root} onClick={e => { onClick(e, data) }} >
       {/**<div className={classes.header} onClick={onClickTitle}>
         <div className={classes.title}>Enter Title...</div>
         <div className={classes.progressIcon} ref={progressIconRef}

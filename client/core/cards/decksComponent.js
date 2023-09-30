@@ -3,7 +3,7 @@ import { grey10, COLOURS, TRANSITIONS } from "./constants";
 import { updateRectDimns } from '../journey/transitionHelpers';
 
 //const transformTransition = { update: { duration: 1000 } };
-const transformTransition = { update: { duration: TRANSITIONS.MED, delay:1000 } };
+const transformTransition = { update: { duration: TRANSITIONS.MED } };
 
 function maxDimns(maxWidth, maxHeight, aspectRatio){
     const potentialHeight = maxWidth * aspectRatio;
@@ -72,7 +72,8 @@ export default function decksComponent() {
                         .each(function(d,i){
                             const deckG = d3.select(this);
                             deckG.append("rect")
-                                .attr("fill", "red")
+                                .attr("pointer-events", "none")
+                                .attr("fill", "none")
                                 .attr("stroke", "aqua")
                         })
                         .merge(deckG)

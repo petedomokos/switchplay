@@ -4,7 +4,7 @@ export const TRANSITIONS = {
     SLOW:800,
     //med:400,
     //MED:500,
-    MED:3000,
+    MED:1000,
     FAST:200,
     VERY_FAST:50
 }

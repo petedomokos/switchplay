@@ -42,6 +42,16 @@ const useStyles = makeStyles((theme) => ({
     //pointerEvents:props => props.svg.pointerEvents,
     position:"absolute",
   },
+  deckHeaders:{
+    position:"absolute",
+    left:0,
+    top:0,
+    transitionTimingFunction: "linear",
+    //transitionTimingFunction: "ease",
+    //transitionTimingFunction: "cubic-bezier(0.1, 0.7, 1.0, 0.1)",
+    transformOrigin:"top left",
+    transition: `all ${TRANSITIONS.MED}ms`
+  },
   formContainer:{
     position:"absolute",
     left:"0px",
@@ -91,17 +101,21 @@ const Decks = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wi
   const classes = useStyles(styleProps);
   const zoomRef = useRef(null);
   const containerRef = useRef(null);
+  const deckHeadersRef = useRef(null);
   const stringifiedData = JSON.stringify(data);
 
   const setSelectedDeck = useCallback((id) => {
     const deck = data.find(d => d.id === id);
-    const newX = deck ? -deckX(deck) * zoomScale : 0;
-    const newY = deck ? -deckY(deck) * zoomScale : 0;
+    const newX = deck ? -deckX(deck) : 0;
+    const newY = deck ? -deckY(deck): 0;
     const newScale = deck ? zoomScale : 1;
-    const newTransformState = d3.zoomIdentity.translate(newX, newY).scale(newScale);
+    const newTransformState = d3.zoomIdentity.translate(newX * newScale, newY * newScale).scale(newScale);
 
-    //console.log("zoom to ....", newTransformState)
     d3.select(zoomRef.current).call(zoom.transform, newTransformState)
+    d3.select(deckHeadersRef.current)
+      .style("left", `${newX * newScale}px`)
+      .style("top", `${newY * newScale}px`)
+      .style("transform",`scale(${newScale})`) 
 
     //if req, update state in react with delay so it happens at end of zoom
     //setSelectedDeckId(prevState => prevState ? "" : newSelectedDeckId);
@@ -111,7 +125,6 @@ const onClickDeck = useCallback((e, d) => {
   setSelectedDeck(d.id); 
   e.stopPropagation();
 }, [stringifiedData]);
-
 
   //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
@@ -140,6 +153,9 @@ const onClickDeck = useCallback((e, d) => {
   useEffect(() => {
     //why when we comment out this line, only the 1st deck opens!?
     d3.select(containerRef.current).call(decks);
+    //@todo - try to simplify by putting zoomRef in a separate svg altogether
+    //put teh decks svg inside a div, that also contains all the header divs.
+    //all are absolutely positioned, but this way, we only need to apply zoom transform to one containing div
   }, [stringifiedData, width, height, selectedDeckId])
 
   //zoom
@@ -158,6 +174,7 @@ const onClickDeck = useCallback((e, d) => {
       //console.log("zoomed", e.transform)
       d3.select(containerRef.current)
         .transition()
+        .ease(d3.easeLinear)
         .duration(TRANSITIONS.MED)
           .attr("transform", e.transform)
     })
@@ -188,12 +205,13 @@ const onClickDeck = useCallback((e, d) => {
           </filter>
         </defs>*/}
       </svg>
-      {data.map((deckData,i) =>
-        <div onClick={e => { onClickDeck(e, deckData)} }
-             style={{ position:"absolute", left:deckX(deckData), top:deckY(deckData), background:grey10(3) }}>
-          <DeckHeader width={deckWrapperWidth} height={deckHeaderHeight} />
-        </div>
-      )}
+      <div className={classes.deckHeaders} ref={deckHeadersRef}>
+        {data.map((deckData,i) =>
+          <div key={`deck-header-${deckData.id}`} style={{ position:"absolute", left:deckX(deckData), top:deckY(deckData) }}>
+            <DeckHeader data={deckData} width={deckWrapperWidth} height={deckHeaderHeight} onClick={onClickDeck} />
+          </div>
+        )}
+      </div>
       {/**<div className={classes.overlay} onClick={onClick}></div>*/}
     </div>
   )
