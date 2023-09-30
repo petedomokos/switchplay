@@ -112,7 +112,7 @@ const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcess
     const newScale = deck ? zoomScale : 1;
     const newTransformState = d3.zoomIdentity.translate(newX * newScale, newY * newScale).scale(newScale);
 
-    d3.select(zoomRef.current).call(zoom.transform, newTransformState)
+    //d3.select(zoomRef.current).call(zoom.transform, newTransformState)
     d3.select(deckHeadersRef.current)
       .style("left", `${newX * newScale}px`)
       .style("top", `${newY * newScale}px`)
@@ -156,7 +156,7 @@ const onClickDeck = useCallback((e, d) => {
   }, [stringifiedData, width, height, selectedDeckId])
 
   useEffect(() => {
-    d3.select(containerRef.current).call(decks);
+    //d3.select(containerRef.current).call(decks);
   }, [stringifiedData, width, height, selectedDeckId])
 
   //zoom
