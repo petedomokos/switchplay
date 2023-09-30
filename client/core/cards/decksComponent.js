@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { grey10, COLOURS, TRANSITIONS } from "./constants";
 import { updateRectDimns } from '../journey/transitionHelpers';
+import deckComponent from './deckComponent';
 
 //const transformTransition = { update: { duration: 1000 } };
 const transformTransition = { update: { duration: TRANSITIONS.MED } };
@@ -35,8 +36,8 @@ export default function decksComponent() {
 
     let x = (d,i) => d.x;
     let y = (d,i) => d.y;
-    let deckWidth = (d,i) => 50;
-    let deckHeight = (d,i) => 75;
+    let _deckWidth = (d,i) => 50;
+    let _deckHeight = (d,i) => 75;
 
     let containerG;
 
@@ -50,7 +51,7 @@ export default function decksComponent() {
         // expression elements
         selection.each(function (decksData) {
             containerG = d3.select(this)
-            //console.log("containerG", this)
+            //console.log("decks....")
 
             if(containerG.select("rect").empty()){
                 init();
@@ -62,15 +63,16 @@ export default function decksComponent() {
             }
 
             function update(decksData, options={}){
-                //console.log("update", decksData)
+                //console.log("update", selectedDeckId)
 
                 const deckG = containerG.selectAll("g.deck").data(decksData);
                 deckG.enter()
                     .append("g")
                         .attr("class", "deck")
                         .each(function(d,i){
-                            const deckG = d3.select(this);
-                            deckG.append("rect")
+                            deckComponents[d.id] = deckComponent();
+
+                            d3.select(this).append("rect")
                                 .attr("pointer-events", "none")
                                 .attr("fill", "none")
                                 .attr("stroke", "aqua")
@@ -78,9 +80,23 @@ export default function decksComponent() {
                         .merge(deckG)
                         .attr("transform", (d,i) => `translate(${x(d,i)}, ${y(d,i)})`)
                         .each(function(d,i){
+                            const deckWidth = _deckWidth(d,i);
+                            const deckHeight = _deckHeight(d,i);
+
                             d3.select(this).select("rect")
-                                .attr("width", deckWidth(d,i))
-                                .attr("height", deckHeight(d,i))
+                                .attr("width", width)
+                                .attr("height", height)
+
+                            const deck = deckComponents[d.id];
+                            deck
+                            .width(deckWidth)
+                            .height(deckHeight)
+                            .selectedDeckId(selectedDeckId)
+                            //.updateItemStatus(updateItemStatus)
+                            //.updateFrontCardNr(updateFrontCardNr)
+                            //.setForm(setForm)
+
+                            d3.select(this).call(deck)
                         })
                         .on("click", onClickDeck)
 
@@ -105,14 +121,14 @@ export default function decksComponent() {
         return decks;
     };
     //each deck
-    decks.deckWidth = function (func) {
-        if (!arguments.length) { return deckWidth; }
-        deckWidth = func;
+    decks._deckWidth = function (func) {
+        if (!arguments.length) { return _deckWidth; }
+        _deckWidth = func;
         return decks;
     };
-    decks.deckHeight = function (func) {
-        if (!arguments.length) { return deckHeight; }
-        deckHeight = func;
+    decks._deckHeight = function (func) {
+        if (!arguments.length) { return _deckHeight; }
+        _deckHeight = func;
         return decks;
     };
     decks.x = function (func) {

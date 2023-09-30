@@ -3,7 +3,7 @@ import { getTransformationFromTrans } from './helpers';
 import { TRANSITIONS } from "../cards/constants"
 
 export function updateTransform(selection, options={}){
-    //console.log("updateTransform-----------------------", selection.nodes())
+    //console.log("updateTransform-----------------------", selection.node())
     const { x = d => d.x, y = d => d.y, k= () => 1, transition, cb = () => {}, name="" } = options;
     selection.each(function(d, i){
         const _name = typeof name === "function" ? name(d,i) : name;

@@ -4,7 +4,7 @@ import cardsComponent from './cardsComponent';
 import { updateRectDimns } from '../journey/transitionHelpers';
 
 //const transformTransition = { update: { duration: 1000 } };
-const transformTransition = { update: { duration: TRANSITIONS.MED, delay:1000 } };
+const transformTransition = { update: { duration: TRANSITIONS.MED, delay: TRANSITIONS.MED * 0.15 } };
 
 function maxDimns(maxWidth, maxHeight, aspectRatio){
     const potentialHeight = maxWidth * aspectRatio;
@@ -19,7 +19,8 @@ export default function deckComponent() {
     // dimensions
     let width = 300;
     let height = 600
-    let margin = { left: 40, right: 40, top: 20, bottom: 20 };
+    let margin = { left: 0, right: 0, top: 0, bottom: 0 };
+    //let margin = { left: 40, right: 40, top: 20, bottom: 20 };
     let extraMargin; //if deck dont take up full space
     let contentsWidth;
     let contentsHeight;
@@ -85,8 +86,7 @@ export default function deckComponent() {
         const nonVisibleVertInc = i => i * heldCardInfoHeight * 0.2;
         const nonVisibleHorizInc = i => (i/5) * horizSpaceForNonVisibleIncs; //5 cards
 
-        //if no deck is selected, then we are in Table view mode so only front card info is seen
-        vertCardInc = nonVisibleVertInc;// selectedDeckId ? visibleVertCardInc : nonVisibleVertInc;
+        vertCardInc = selectedDeckId ? visibleVertCardInc : nonVisibleVertInc;
         horizCardInc = selectedDeckId ? visibleHorizCardInc : nonVisibleHorizInc;
 
         //NOTE: this max must also be same regardless of multideck view or single deck view
@@ -95,7 +95,7 @@ export default function deckComponent() {
         //(ie all card info sections visible) or not
         vertSpaceForIncs = visibleVertCardInc(4);
         //vertSpaceForIncs = vertCardInc(4);
-        placedCardsAreaHeight = d3.min([80, contentsHeight/7]);
+        placedCardsAreaHeight = d3.min([80, contentsHeight/7]); 
         heldCardsAreaHeight = contentsHeight - placedCardsAreaHeight;
 
         //need to use visibleVertCardInc to calc the dimns...
@@ -149,28 +149,19 @@ export default function deckComponent() {
             update(deckData);
 
             function init(){
-                containerG
-                    .attr("width", width)
-                    .attr("height", height);
-
-                containerG
-                    .append("rect")
-                        .attr("class", "deck-bg")
-                        .attr("fill", "transparent")
-                        //.attr("fill", "red")
-                        //.attr("stroke", "yellow");
 
                 contentsG = containerG.append("g").attr("class", "deck-contents");
+
+                contentsG.append("rect")
+                    .attr("class", "contents-bg")
+                    .attr("pointer-events", "none")
+                    .attr("fill", "none")
+                    //.attr("fill", "red")
+                    //.attr("stroke", "red");
 
                 cardsG = contentsG
                     .append("g")
                     .attr("class", "cards");
-
-                cardsG.append("rect")
-                    .attr("class", "cards-bg")
-                    .attr("fill", "transparent")
-                    //.attr("fill", "red")
-                    .attr("stroke", "red");
 
                 /*cardsG.append("rect").attr("class", "placed-cards-bg")
                     .attr("stroke", "none")
@@ -198,27 +189,11 @@ export default function deckComponent() {
                     });
 
                 //gs
-                //we can transition even on enter as it will just have no effect
-                containerG
-                    //.transition("svg-dimns")
-                    //.duration(TRANSITIONS.MED)
-                        .attr("width", width)
-                        .attr("height", height)
 
                 contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
-
-                containerG.select("rect.deck-bg")
-                    .attr("width", width)
-                    .attr("height", height)
-                    /*.call(updateRectDimns, { 
-                        width: () => width, 
-                        height:() => height,
-                        transition:transformTransition,
-                        name:d => `deck-dimns-${d.id}`
-                    })*/
                 
-                cardsG
-                    .select("rect.cards-bg")
+                contentsG
+                    .select("rect.contents-bg")
                         .attr("width", contentsWidth)
                         .attr("height", contentsHeight)
 
@@ -244,7 +219,7 @@ export default function deckComponent() {
                 const selectedCardWidth = selectedCardDimns.width;
                 const selectedCardHeight = selectedCardDimns.height;
 
-                /*cardsG
+                cardsG
                     .datum(cardsData)
                     .call(cards
                         .width(heldCardWidth)
@@ -319,7 +294,7 @@ export default function deckComponent() {
                             updateFrontCardNr(d.cardNr + 1);
                             //frontCardNr = d.cardNr + 1;
                             //update(deckData);
-                        }))*/
+                        }))
 
             }
 

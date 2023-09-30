@@ -62,12 +62,12 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Decks = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, width, height, onClick, update }) => {
+const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcesses, width, height, onClick, update }) => {
   //console.log("Decks", height)
   const [layout, setLayout] = useState(() => deckLayout());
   const [decks, setDecks] = useState(() => decksComponent());
   const [zoom, setZoom] = useState(() => d3.zoom());
-  //const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
+  const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
   const [form, setForm] = useState(null);
 
   const deckAspectRatio = width / height;
@@ -82,7 +82,7 @@ const Decks = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wi
 
   const zoomScale = width / deckWidth;
 
-  const deckMarginBottom = 0;
+  const deckMarginBottom = 20;
 
   const deckX = (d,i) => d.colNr * deckWidth;
   const deckY = (d,i) => d.rowNr * (deckWrapperHeight + deckMarginBottom);
@@ -117,8 +117,8 @@ const Decks = ({ user, data, selectedDeckId, scale, datasets, asyncProcesses, wi
       .style("top", `${newY * newScale}px`)
       .style("transform",`scale(${newScale})`) 
 
-    //if req, update state in react with delay so it happens at end of zoom
-    //setSelectedDeckId(prevState => prevState ? "" : newSelectedDeckId);
+    //if req, update state in react, may need it with delay so it happens at end of zoom
+    setSelectedDeckId(id);
 }, [stringifiedData]);
 
 const onClickDeck = useCallback((e, d) => {
@@ -128,7 +128,7 @@ const onClickDeck = useCallback((e, d) => {
 
   //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
-    const processedDeckData = data//.map(deckData => layout(deckData));
+    const processedDeckData = data.map(deckData => layout(deckData));
     //just use first deck for now
     d3.select(containerRef.current).datum(processedDeckData)
 
@@ -141,8 +141,8 @@ const onClickDeck = useCallback((e, d) => {
       .selectedDeckId(selectedDeckId)
       .x(deckX)
       .y((d,i) => deckY(d,i) + deckHeaderHeight)
-      .deckWidth((d,i) => deckWidth)
-      .deckHeight((d,i) => deckHeight)
+      ._deckWidth((d,i) => deckWidth)
+      ._deckHeight((d,i) => deckHeight)
       .onClickDeck(onClickDeck)
       //.zoom(zoom)
       //.updateItemStatus(updateItemStatus)

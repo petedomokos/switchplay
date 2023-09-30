@@ -160,7 +160,7 @@ export default function cardsComponent() {
                                 .attr("stroke", getCardStroke(d))
                                 .attr("fill", getCardFill(d))
 
-                        contentsG
+                        /*contentsG
                             .append("g")
                                 .attr("class", "info")
                                     .append("rect")
@@ -174,17 +174,13 @@ export default function cardsComponent() {
                                     .append("rect")
                                         .attr("class", "items-area-bg");
 
-                        contentsG
-                            .append("g")
-                                .attr("class", "bottom-bar")
-                                    .append("rect")
-                                        .attr("class", "bottom-bar-bg")
-                                        .attr("fill", "white");
+                        */
                     })
+                    //.attr("transform", (d,i) => `translate(${i * 5}, ${50 - i * 5})`)
                     .call(updateTransform, { 
                         x, 
                         y,
-                        //k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),  
+                        k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),  
                         transition:transformTransition.enter,
                         name:d => `card-pos-${d.id}`
                     })
@@ -192,7 +188,7 @@ export default function cardsComponent() {
                     .call(updateTransform, { 
                         x, 
                         y, 
-                        //k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),
+                        k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),
                         transition:transformTransition.update,
                         name:(d,i) => `card-pos-${i}-${d.id}`
                     })
@@ -201,6 +197,7 @@ export default function cardsComponent() {
                         
                         //const infoHeight;
                         //components
+                        /*
                         const cardInfo = cardInfoComponents[cardNr]
                             .width(width)
                             .height(infoHeight)
@@ -300,6 +297,8 @@ export default function cardsComponent() {
                             .attr("height", itemsAreaHeight)
                             .attr("fill", "none")
 
+                        */
+
                         //btm right btn
                         const expandBtnDatum = { 
                             key:"expand", 
@@ -321,8 +320,8 @@ export default function cardsComponent() {
                         const btnContentsWidth = btnWidth - 2 * btnMargin;
                         const btnContentsHeight = btnHeight - 2 * btnMargin;
                         //next - put expand btn back and sort its transition
-                        const botRightBtnG = contentsG.selectAll("g.bottom-right-btn").data(botRightBtnData);
-                        /*botRightBtnG.enter()
+                        /*const botRightBtnG = contentsG.selectAll("g.bottom-right-btn").data(botRightBtnData);
+                        botRightBtnG.enter()
                             .append("g")
                                 .attr("class", "bottom-right-btn")
                                 .each(function(d){
