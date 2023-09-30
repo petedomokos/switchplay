@@ -45,6 +45,8 @@ export default function deckComponent() {
     let placedCardMarginVert;
     let placedCardHorizGap;
 
+    let extraMarginLeftForCards;
+
     //increments
     let vertCardInc;
     let horizCardInc;
@@ -106,12 +108,15 @@ export default function deckComponent() {
 
         //placed deck
         const maxPlacedCardHeight = placedCardsAreaHeight * 0.8;
-        const maxPlacedCardWidth = d3.min([60, (contentsWidth/5) * 0.8]); //ensure some gap
+        //ensure at least 0.1 for gaps
+        const maxPlacedCardWidth = (heldCardWidth * 0.9)/5;
         const placedCardDimns = maxDimns(maxPlacedCardWidth, maxPlacedCardHeight, cardAspectRatio)
         placedCardWidth = placedCardDimns.width;
         placedCardHeight = placedCardDimns.height;
 
-        placedCardHorizGap = (contentsWidth - 5 * placedCardWidth) / 4;
+        placedCardHorizGap = (heldCardWidth - 5 * placedCardWidth) / 4;
+
+        extraMarginLeftForCards = (contentsWidth - heldCardWidth)/2;
         placedCardMarginVert = (placedCardsAreaHeight - placedCardHeight)/2;
     }
     let DEFAULT_STYLES = {
@@ -238,11 +243,9 @@ export default function deckComponent() {
                                 return (contentsWidth - selectedCardWidth)/2;
                             }
                             if(d.isHeld){
-                                const extraMarginLeft = (contentsWidth - heldCardWidth)/2;
-                                //console.log("held x", extraMarginLeft + horizCardInc(d.handPos))
-                                return extraMarginLeft + horizCardInc(d.handPos);
+                                return extraMarginLeftForCards + horizCardInc(d.handPos);
                             }
-                            return d.cardNr * (placedCardWidth + placedCardHorizGap);
+                            return extraMarginLeftForCards + d.cardNr * (placedCardWidth + placedCardHorizGap);
                         })
                         .y((d,i) => {
                             if(d.isSelected){
@@ -289,7 +292,6 @@ export default function deckComponent() {
                             //update(deckData);
                         })
                         .onPutDown(function(d){
-                            console.log("put down")
                             if(d.isSelected){
                                 selectedCardNr = null;
                                 //show other deck as we need to deselect the card too

@@ -180,7 +180,6 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
   }, [stringifiedData, width, height, selectedDeckId])
 
   useEffect(() => {
-    console.log("d3 render", selectedDeck)
     d3.select(containerRef.current).call(decks);
   }, [stringifiedData, width, height, selectedDeckId])
 
