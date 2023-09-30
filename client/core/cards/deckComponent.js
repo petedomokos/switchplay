@@ -58,9 +58,9 @@ export default function deckComponent() {
         heldCardInfoHeight = contentsHeight * INFO_HEIGHT_PROPORTION_OF_CARDS_AREA;
         const minInc = heldCardInfoHeight * 0.9;
         const visibleVertCardInc = i => {
-            const incA = 16;
-            const incB = 10;
-            const incC = 4;
+            const incA = minInc * 0.6;// 16;
+            const incB = minInc * 0.4;// 10;
+            const incC = minInc * 0.1;// 4;
             const incD = 0;
             if(i === 0) { return 0; }
             if(i === 1) { return minInc + incA }
@@ -71,15 +71,15 @@ export default function deckComponent() {
 
         //@todo - change the way horiz is done so its the other way round like vert
         //so horizSpaceForIncs can be calculated after in same way as vertSpaceForIncs
-        const maxHorizSpaceForIncs = 50;
+        const maxHorizSpaceForIncs = 20;
         const horizSpaceForVisibleIncs = d3.min([contentsWidth * 0.25, maxHorizSpaceForIncs]); 
         const horizSpaceForNonVisibleIncs = horizSpaceForVisibleIncs * 0.4;
         const visibleHorizCardInc = i => {
             if(i === 0) { return 0; }
-            if(i === 1) { return horizSpaceForVisibleIncs * 0.07; }
-            if(i === 2) { return horizSpaceForVisibleIncs * (0.07 + 0.13); }
-            if(i === 3) { return horizSpaceForVisibleIncs * (0.07 + 0.13 + 0.27); }
-            if(i === 4) { return horizSpaceForVisibleIncs * (0.07 + 0.13 + 0.27 + 0.53); }
+            if(i === 1) { return horizSpaceForVisibleIncs * 0.1; }
+            if(i === 2) { return horizSpaceForVisibleIncs * (0.1 + 0.13); }
+            if(i === 3) { return horizSpaceForVisibleIncs * (0.1 + 0.13 + 0.3); }
+            if(i === 4) { return horizSpaceForVisibleIncs * (0.1 + 0.13 + 0.3 + 0.47); }
         };
 
         //when deck is reduced in size, the cards behind are not visible exceot a tiny bit
@@ -103,8 +103,6 @@ export default function deckComponent() {
         const heldCardDimns = maxDimns(maxHeldCardWidth, maxHeldCardHeight, cardAspectRatio);
         heldCardWidth = heldCardDimns.width;
         heldCardHeight = heldCardDimns.height;
-        console.log("maxWidth width", maxHeldCardWidth, heldCardWidth)
-        console.log("maxWidth", maxHeldCardHeight, heldCardHeight)
 
         //placed deck
         const maxPlacedCardHeight = placedCardsAreaHeight * 0.8;
@@ -231,7 +229,7 @@ export default function deckComponent() {
                         .placedCardHeight(placedCardHeight)
                         .selectedCardWidth(selectedCardWidth)
                         .selectedCardHeight(selectedCardHeight)
-                        //.selectedDeckId(selectedDeckId)
+                        .selectedDeckId(selectedDeckId)
                         .transformTransition(transformTransition)
                         .x((d,i) => {
                             if(d.isSelected){

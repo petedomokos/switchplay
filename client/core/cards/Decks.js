@@ -119,7 +119,7 @@ const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcess
       .style("transform",`scale(${newScale})`)
 
     //if req, update state in react, may need it with delay so it happens at end of zoom
-    //setSelectedDeckId(id);
+    setSelectedDeckId(id);
 }, [stringifiedData]);
 
 const onClickDeck = useCallback((e, d) => {
@@ -140,6 +140,7 @@ const onClickDeck = useCallback((e, d) => {
   }, [stringifiedData])
 
   useEffect(() => {
+    console.log("update decks")
     decks
       .width(width)
       .height(height)
