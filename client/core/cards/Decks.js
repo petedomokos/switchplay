@@ -111,7 +111,6 @@ const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcess
     const newScale = deck ? zoomScale : 1;
     const newTransformState = d3.zoomIdentity.translate(newX * newScale, newY * newScale).scale(newScale);
 
-    console.log("zoom...")
     d3.select(zoomRef.current).call(zoom.transform, newTransformState)
     d3.select(deckHeadersRef.current)
       .style("left", `${newX * newScale}px`)
@@ -123,14 +122,13 @@ const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcess
 }, [stringifiedData]);
 
 const onClickDeck = useCallback((e, d) => {
-  console.log("click deck")
   setSelectedDeck(d.id); 
   e.stopPropagation();
 }, [stringifiedData]);
 
-console.log("Rerender")
 //next - somethin gi s causing header to jump to the right (zoom in) and left (xoom out)
 // a tiny bit for a moment during zooming - see on android more than here, but a similar
+//its the whole deckheaders div that seems to move, but could be all theincdividual header divs instead
 
   //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
@@ -215,8 +213,9 @@ console.log("Rerender")
         {data.map((deckData,i) =>
           <div  onClick={e => { onClickDeck(e, deckData) }}
               key={`deck-header-${deckData.id}`} style={{ position:"absolute", left:deckX(deckData), top:deckY(deckData),
-              /*border:"solid",*/ borderWidth:"thin", borderColor:"grey", width:deckWrapperWidth, height:deckHeaderHeight }}>
-            <DeckHeader data={deckData} width={deckWrapperWidth} height={deckHeaderHeight} onClick={onClickDeck} />
+              border:"solid", borderWidth:"thin", borderColor:"grey", width:deckWrapperWidth, height:deckHeaderHeight }}>
+                Enter Title
+            {/**<DeckHeader data={deckData} width={deckWrapperWidth} height={deckHeaderHeight} onClick={onClickDeck} />*/}
           </div>
         )}
       </div>
