@@ -69,7 +69,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   /*const decks = [
     { id:"d1" }, { id:"d2" }, { id:"d3" }, { id:"d4" }
   ]*/
-  //console.log("user", user)
+  //console.log("screen", screen)
   //const decks = user?.decks[0] ? [user.decks[0]] : []
   const width = screen.width || 300;
   const height = screen.height || 600;

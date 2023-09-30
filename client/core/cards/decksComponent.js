@@ -31,6 +31,8 @@ export default function decksComponent() {
     let selectedCardNr;
     let format;
 
+    let onClickDeck = function(){}
+
     let x = (d,i) => d.x;
     let y = (d,i) => d.y;
     let deckWidth = (d,i) => 50;
@@ -48,27 +50,20 @@ export default function decksComponent() {
         // expression elements
         selection.each(function (decksData) {
             containerG = d3.select(this)
+            //console.log("containerG", this)
 
-            if(containerG.select("g").empty()){
+            if(containerG.select("rect").empty()){
                 init();
             }
 
             update(decksData);
 
             function init(){
-                containerG
-                    .append("rect")
-                        .attr("class", "decks-container-bg")
-                        .attr("fill", "transparent")
-                        .attr("stroke", "red");
 
             }
 
             function update(decksData, options={}){
                 //console.log("update", decksData)
-                containerG.select("rect.decks-container-bg")
-                    .attr("width", width)
-                    .attr("height", height)
 
                 const deckG = containerG.selectAll("g.deck").data(decksData);
                 deckG.enter()
@@ -77,7 +72,7 @@ export default function decksComponent() {
                         .each(function(d,i){
                             const deckG = d3.select(this);
                             deckG.append("rect")
-                                .attr("fill", "none")
+                                .attr("fill", "red")
                                 .attr("stroke", "aqua")
                         })
                         .merge(deckG)
@@ -87,6 +82,7 @@ export default function decksComponent() {
                                 .attr("width", deckWidth(d,i))
                                 .attr("height", deckHeight(d,i))
                         })
+                        .on("click", onClickDeck)
 
                 deckG.exit().remove();
 
@@ -162,6 +158,11 @@ export default function decksComponent() {
     decks.setForm = function (value) {
         if (!arguments.length) { return setForm; }
         setForm = value;
+        return decks;
+    };
+    decks.onClickDeck = function (value) {
+        if (!arguments.length) { return onClickDeck; }
+        onClickDeck = value;
         return decks;
     };
     return decks;
