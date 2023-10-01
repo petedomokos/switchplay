@@ -142,10 +142,6 @@ const Decks = ({ user, data, customSelectedDeckId, datasets, asyncProcesses, wid
   };
   const classes = useStyles(styleProps);
 
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   const setSelectedDeck = useCallback((id) => {
     const deck = data.find(d => d.id === id);
     const newX = deck ? -deckX(deck) : 0;
@@ -270,20 +266,26 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
           </filter>
         </defs>
       </svg>
-      <div className={classes.deckHeaders} ref={deckHeadersRef}>
-        {data.map((deckData,i) =>
+      <div className={classes.deckHeaders} ref={deckHeadersRef}
+         onClick={e => { onClickDeck(e, data[0]) }}>
+        <div style={{ position:"absolute", left:50, top:50, background:"white"}}>
+          Test
+        </div>
+        {/**data.map((deckData,i) =>
           <div  onClick={e => { onClickDeck(e, deckData) }}
               key={`deck-header-${deckData.id}`} style={{ position:"absolute", left:deckX(deckData), top:deckY(deckData),
               border:"solid", borderWidth:"thin", borderColor:"grey", width:deckWrapperWidth, height:deckHeaderHeight }}>
                 Title
-            {/**<DeckHeader data={deckData} scale={currentScale} width={deckWrapperWidth} height={deckHeaderHeight} onClick={onClickDeck} />*/}
+           
           </div>
-        )}
+        )*/}
       </div>
       {/**<div className={classes.overlay} onClick={onClick}></div>*/}
     </div>
   )
 }
+
+// {/**<DeckHeader data={deckData} scale={currentScale} width={deckWrapperWidth} height={deckHeaderHeight} onClick={onClickDeck} />*/}
 
 Decks.defaultProps = {
   asyncProcesses:{},
