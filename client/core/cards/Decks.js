@@ -251,8 +251,8 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
     //need to add a zoomlayerG inside the svg which gets zoomed when svg is acted on
   }, [])
 
-  //next - the onclick here should be uncommented, but need to stopPropagation for the click on a deck. also
-  //the deck click should be put on teh deck div as it was befire, not the g
+  //next - gradualy put header stylingbelow into the div, keep checking its smooth
+  //then, put zoom back gradualy, remove margin etc
   return (
     <div className={`cards-root ${classes.root}`} onClick={() => { setSelectedDeck("")}} >
       <svg className={classes.svg} id={`cards-svg`} width={width * 100} height={height * 100} display="none" >
@@ -270,7 +270,8 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
           Test
         </div>*/}
         {data.map((deckData,i) =>
-          <div onClick={e => { onClickDeck(e, deckData) }}
+          <div key={`deck-header-${deckData.id}`}
+              onClick={e => { onClickDeck(e, deckData) }}
               style={{ position:"absolute", left:deckX(deckData), top:deckY(deckData), background:"white", 
               width:deckWrapperWidth, height:deckHeaderHeight, fontSize:"7px" }}>
             Test
