@@ -3,9 +3,6 @@ import { grey10, COLOURS, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIONS } fr
 import cardsComponent from './cardsComponent';
 import { updateRectDimns } from '../journey/transitionHelpers';
 
-//const transformTransition = { update: { duration: 1000 } };
-const transformTransition = { update: { duration: TRANSITIONS.MED, delay: TRANSITIONS.MED * 0.15 } };
-
 function maxDimns(maxWidth, maxHeight, aspectRatio){
     const potentialHeight = maxWidth * aspectRatio;
     if(potentialHeight <= maxHeight){
@@ -127,6 +124,7 @@ export default function deckComponent() {
     let deckIsSelected;
     let selectedCardNr;
     let format;
+    let transformTransition;
 
     let onClickDeck = function(){};
     let setForm = function(){};
@@ -340,6 +338,11 @@ export default function deckComponent() {
     deck.format = function (value) {
         if (!arguments.length) { return format; }
         format = value;
+        return deck;
+    };
+    deck.transformTransition = function (value) {
+        if (!arguments.length) { return transformTransition; }
+        transformTransition = value; 
         return deck;
     };
     deck.onClickDeck = function (value) {

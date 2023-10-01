@@ -3,8 +3,7 @@ import { grey10, COLOURS, TRANSITIONS } from "./constants";
 import { updateRectDimns } from '../journey/transitionHelpers';
 import deckComponent from './deckComponent';
 
-//const transformTransition = { update: { duration: 1000 } };
-const transformTransition = { update: { duration: TRANSITIONS.MED } };
+const transformTransition = { update: { duration: TRANSITIONS.MED, delay:1000/* TRANSITIONS.MED * 0.15*/ } };
 
 function maxDimns(maxWidth, maxHeight, aspectRatio){
     const potentialHeight = maxWidth * aspectRatio;
@@ -98,6 +97,7 @@ export default function decksComponent() {
                                 .onClickDeck(onClickDeck)
                                 .updateItemStatus(updateItemStatus)
                                 .updateFrontCardNr(updateFrontCardNr)
+                                .transformTransition(transformTransition)
                                 //.setForm(setForm)
 
                             d3.select(this).call(deck)

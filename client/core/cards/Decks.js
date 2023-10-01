@@ -143,7 +143,6 @@ const onClickDeck = useCallback((e, d) => {
 }, [stringifiedData]);
 
 const updateFrontCardNr = useCallback(cardNr => {
-  console.log("update front cardnumber", selectedDeck)
   updateDeck({ ...selectedDeck, frontCardNr:cardNr })
 }, [stringifiedData, form, selectedDeckId]);
 
