@@ -229,7 +229,6 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
       //console.log("zoomed", e.transform)
       d3.select(containerRef.current)
         .transition()
-        .ease(d3.easeLinear)
         .duration(TRANSITIONS.MED)
           .attr("transform", e.transform)
     })

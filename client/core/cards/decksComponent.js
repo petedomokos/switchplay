@@ -3,7 +3,7 @@ import { grey10, COLOURS, TRANSITIONS } from "./constants";
 import { updateRectDimns } from '../journey/transitionHelpers';
 import deckComponent from './deckComponent';
 
-const transformTransition = { update: { duration: TRANSITIONS.MED * 0.7, delay: TRANSITIONS.MED /** 0.15*/ } };
+const transformTransition = { update: { duration: TRANSITIONS.MED } };
 
 function maxDimns(maxWidth, maxHeight, aspectRatio){
     const potentialHeight = maxWidth * aspectRatio;
