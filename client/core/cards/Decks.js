@@ -110,7 +110,7 @@ const Decks = ({ user, data, customSelectedDeckId, datasets, asyncProcesses, wid
   const deckWidth = deckWrapperWidth;
   const deckHeight = deckWrapperHeight - deckHeaderHeight;
 
-  const zoomScale = 1.3;//width / deckWidth;
+  const zoomScale = width / deckWidth;
   const currentScale = selectedDeckId ? zoomScale : 1;
 
   const deckX = (d,i) => {
