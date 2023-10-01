@@ -58,10 +58,10 @@ const useStyles = makeStyles((theme) => ({
     //transitionTimingFunction: "cubic-bezier(0.1, 0.7, 1.0, 0.1)",
     transformOrigin:"top left",
     transition: `all ${TRANSITIONS.MED}ms`,
-    border:"solid",
+    /*border:"solid",
     borderWidth:"thin",
-    borderColor:"blue",
-    background:"blue"
+    borderColor:"blue",*/
+    //background:"blue"
 
   },
   formContainer:{
@@ -270,11 +270,10 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
           Test
         </div>*/}
         {data.map((deckData,i) =>
-          <div key={`deck-header-${deckData.id}`}
-              onClick={e => { onClickDeck(e, deckData) }}
+          <div key={`deck-header-${deckData.id}`} onClick={e => { onClickDeck(e, deckData) }}
               style={{ position:"absolute", left:deckX(deckData), top:deckY(deckData), background:"white", 
               width:deckWrapperWidth, height:deckHeaderHeight, fontSize:"7px" }}>
-            Test
+              <DeckHeader data={deckData} scale={currentScale} width={deckWrapperWidth} height={deckHeaderHeight} onClick={onClickDeck} />
           </div>
         )}
         {/**data.map((deckData,i) =>

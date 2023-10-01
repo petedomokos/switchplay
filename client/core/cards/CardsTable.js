@@ -83,8 +83,8 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   ]*/
   //console.log("screen", screen)
   //const decks = user?.decks[0] ? [user.decks[0]] : []
-  const width = screen.width * 0.7 || 300;
-  const height = screen.height * 0.7 || 600;
+  const width = screen.width || 300;
+  const height = screen.height || 600;
   //console.log("CardsTable", decks)
 
   const containerWidth = 100000;
@@ -101,10 +101,10 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   //we follow d3 margin convention here (eg html padding)
   const vertSpaceForHeader = 40;
   const margin = { 
-    left:width * 0.3,// selectedDeckId ? 0 : width * 0.05, 
-    right:width * 0.3,// selectedDeckId ? 0 : width * 0.05, 
-    top: height * 0.25,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
-    bottom:height * 0.25// selectedDeckId ? 0 :  height * 0.05
+    left:width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
+    right:width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
+    top: height * 0.1,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
+    bottom:height * 0.1// selectedDeckId ? 0 :  height * 0.05
   }
   const contentsWidth = width - margin.left - margin.right;
   const contentsHeight = height - margin.top - margin.bottom;
