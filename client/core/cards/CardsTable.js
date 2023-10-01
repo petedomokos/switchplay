@@ -18,14 +18,22 @@ const useStyles = makeStyles((theme) => ({
     top:props => props.top,
     width:props => props.width,
     height:props => props.height,
-    margin:"30px",
-    padding:props => props.padding,
+    //margin:"30px",
+    //padding:props => props.padding,
     transition: `all ${TRANSITIONS.MED}ms`,
     //display:"flex",
     //flexDirection:"column",
     background:grey10(3),//grey10(9)
     border:"solid",
     borderWidth:"thin",
+  },
+  contents:{
+    position:"absolute",
+    left:props => props.contents.left,
+    top:props => props.contents.top,
+    width:props => props.contents.width,
+    height:props => props.contents.height,
+    background:"red"
   },
   hideInstructions:{
     margin:"25px 5px",
@@ -75,9 +83,12 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   ]*/
   //console.log("screen", screen)
   //const decks = user?.decks[0] ? [user.decks[0]] : []
-  const width = screen.width * 0.8 || 300;
-  const height = screen.height * 0.8 || 600;
+  const width = screen.width * 0.95 || 300;
+  const height = screen.height * 0.95 || 600;
   //console.log("CardsTable", decks)
+
+  const contWidth = 10000;
+  const contHeight = 10000;
 
   const decksData = embellishedDecks(decks);
   //console.log("decksData", decksData)
@@ -92,7 +103,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const margin = { 
     left:width * 0,// selectedDeckId ? 0 : width * 0.05, 
     right:width * 0,// selectedDeckId ? 0 : width * 0.05, 
-    top: height * 0.1,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
+    top: height * 0,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
     bottom:height * 0// selectedDeckId ? 0 :  height * 0.05
   }
   const tableContentsWidth = width - margin.left - margin.right;
@@ -101,9 +112,17 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   //const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
 
   let styleProps = {
-    width:tableContentsWidth, //selectedDeck ? width * 3 : width,
-    height: tableContentsHeight,
-    padding:`${margin.top}px ${margin.right}px  ${margin.bottom}px  ${margin.left}px`,
+    left:-contWidth/2,
+    top:-contHeight/2,
+    width:contWidth,
+    height: contHeight,
+    //padding:`${margin.top}px ${margin.right}px  ${margin.bottom}px  ${margin.left}px`,
+    contents:{
+      left:contWidth/2,
+      top:contHeight/2,
+      width:width,
+      height:height,
+    },
     form:{ 
       display: form ? null : "none",
     },
@@ -134,11 +153,13 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
 
   return (
     <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
-      {shouldDisplayInstructions ?  
-        <Instructions />
-        :
-        <Decks data={decksData} width={tableContentsWidth} height={tableContentsHeight} updateDeck={updateDeck} />
-      }
+      <div className={classes.contents}>
+        {shouldDisplayInstructions ?  
+          <Instructions />
+          :
+          <Decks data={decksData} width={tableContentsWidth} height={tableContentsHeight} updateDeck={updateDeck} />
+        }
+      </div>
     </div>
   )
 }
