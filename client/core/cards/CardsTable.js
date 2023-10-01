@@ -151,18 +151,16 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
     })
   }, [form, stringifiedData])
 
-  //the contents is maybe causing the jaggedness as the deckheaders div is expaning, but contents stays teh same
-  //maybe get rid of contents div now -> or remove its dimns so dimns are dynamic
-
   return (
     <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
-      <div className={classes.contents}>
         {shouldDisplayInstructions ?  
           <Instructions />
           :
-          <Decks data={decksData} width={contentsWidth} height={contentsHeight} updateDeck={updateDeck} />
+          <Decks 
+            initLeft={containerWidth/2 + margin.left + (screen.width - width)/2}
+            initTop={containerHeight/2 + margin.top}
+            data={decksData} width={contentsWidth} height={contentsHeight} updateDeck={updateDeck} />
         }
-      </div>
     </div>
   )
 }
@@ -175,3 +173,21 @@ CardsTable.defaultProps = {
 }
 
 export default CardsTable;
+
+/*
+return (
+    <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
+      <div className={classes.contents}>
+        {shouldDisplayInstructions ?  
+          <Instructions />
+          :
+          <Decks 
+            initLeft={containerWidth/2 + margin.left + (screen.width - width)/2}
+            initTop={containerHeight/2 + margin.top}
+            data={decksData} width={contentsWidth} height={contentsHeight} updateDeck={updateDeck} />
+        }
+      </div>
+    </div>
+  )
+}
+*/

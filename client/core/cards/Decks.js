@@ -74,7 +74,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Decks = ({ user, data, customSelectedDeckId, datasets, asyncProcesses, width, height, onClick, updateDeck }) => {
+const Decks = ({ user, data, customSelectedDeckId, initLeft, initTop, datasets, asyncProcesses, width, height, onClick, updateDeck }) => {
   //console.log("Decks", data)
   if(data.length === 0){ return null}
   //processed props
@@ -128,8 +128,8 @@ const Decks = ({ user, data, customSelectedDeckId, datasets, asyncProcesses, wid
     width,
     height,
     deckHeaders:{
-      left: `${x}px`,
-      top: `${y}px`,
+      left: `${initLeft + x}px`,
+      top: `${initTop + y}px`,
       transform: `scale(${k})`
     },
     svg:{
@@ -277,7 +277,7 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
                   position:"absolute", left:deckX(deckData), top:deckY(deckData),
                   border:"solid", borderWidth:"thin", borderColor:"grey", 
                   width:deckWrapperWidth, height:deckHeaderHeight,
-                  fontSize:"10px" 
+                  fontSize:"7px" 
               }}>
                 Title
            
@@ -296,6 +296,8 @@ Decks.defaultProps = {
   datasets: [], 
   width:300,
   height:600,
+  initLeft:0,
+  initTop:0,
 }
 
 export default Decks;
