@@ -45,8 +45,9 @@ const useStyles = makeStyles((theme) => ({
   },
   deckHeaders:{
     position:"absolute",
-    left:0,
-    top:0,
+    left:props => props.deckHeaders.left,
+    top:props => props.deckHeaders.top,
+    transform:props => props.deckHeaders.transform,
     transitionTimingFunction: "linear",
     //transitionTimingFunction: "ease",
     //transitionTimingFunction: "cubic-bezier(0.1, 0.7, 1.0, 0.1)",
@@ -63,16 +64,24 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcesses, width, height, onClick, updateDeck }) => {
+const Decks = ({ user, data, customSelectedDeckId, datasets, asyncProcesses, width, height, onClick, updateDeck }) => {
   //console.log("Decks", height)
+  //processed props
+  const stringifiedData = JSON.stringify(data);
+  //state
   const [layout, setLayout] = useState(() => deckLayout());
   const [decks, setDecks] = useState(() => decksComponent());
   const [zoom, setZoom] = useState(() => d3.zoom());
   const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
   const [form, setForm] = useState(null);
-
+  //processed state
   const selectedDeck = data.find(deck => deck.id === selectedDeckId);
-
+  //refs
+  const zoomRef = useRef(null);
+  const containerRef = useRef(null);
+  const deckHeadersRef = useRef(null);
+  const zoomStateRef = useRef(d3.zoomIdentity);
+  //dimns
   const deckAspectRatio = width / height;
   const deckOuterMargin = {
     left:10, //width * 0.05,
@@ -102,9 +111,16 @@ const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcess
     return deckOuterMargin.top + d.rowNr * heightPerDeck;
   }
 
+  //deckHeaders zoom
+  const { x, y, k } = zoomStateRef.current;
   let styleProps = {
     width,
     height,
+    deckHeaders:{
+      left: `${x}px`,
+      top: `${y}px`,
+      transform: `scale(${k})`
+    },
     svg:{
       pointerEvents:selectedDeckId ? "all" : "none",
     },
@@ -114,32 +130,34 @@ const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcess
     overlayDisplay:selectedDeckId ? "none" : null
   };
   const classes = useStyles(styleProps);
-  const zoomRef = useRef(null);
-  const containerRef = useRef(null);
-  const deckHeadersRef = useRef(null);
-  const stringifiedData = JSON.stringify(data);
 
+  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   const setSelectedDeck = useCallback((id) => {
     const deck = data.find(d => d.id === id);
     const newX = deck ? -deckX(deck) : 0;
     const newY = deck ? -deckY(deck): 0;
     const newScale = deck ? zoomScale : 1;
     const newTransformState = d3.zoomIdentity.translate(newX * newScale, newY * newScale).scale(newScale);
+    zoomStateRef.current = newTransformState;
 
-    d3.select(zoomRef.current).call(zoom.transform, newTransformState)
-    d3.select(deckHeadersRef.current)
+    //d3.select(zoomRef.current).call(zoom.transform, newTransformState)
+    /*d3.select(deckHeadersRef.current)
       .style("left", `${newX * newScale}px`)
       .style("top", `${newY * newScale}px`)
-      .style("transform",`scale(${newScale})`)
+      .style("transform",`scale(${newScale})`)*/
 
     //if req, update state in react, may need it with delay so it happens at end of zoom
     setSelectedDeckId(id);
 }, [stringifiedData]);
 
 const onClickDeck = useCallback((e, d) => {
-  setSelectedDeck(d.id); 
+  setSelectedDeck(selectedDeck ? "" : d.id)
+  //setSelectedDeck(d.id); 
   e.stopPropagation();
-}, [stringifiedData]);
+}, [stringifiedData, selectedDeckId]);
 
 const updateFrontCardNr = useCallback(cardNr => {
   updateDeck({ ...selectedDeck, frontCardNr:cardNr })
@@ -232,7 +250,7 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
   //the deck click should be put on teh deck div as it was befire, not the g
   return (
     <div className={`cards-root ${classes.root}`} onClick={() => { setSelectedDeck("")}} >
-      <svg className={classes.svg} id={`cards-svg`} width={width * 100} height={height * 100} >
+      <svg className={classes.svg} id={`cards-svg`} width={width * 100} height={height * 100} display="none" >
         <g ref={zoomRef}><rect width={width} height={height} fill="transparent" /></g>
         <g ref={containerRef} />
         <defs>
@@ -261,7 +279,6 @@ Decks.defaultProps = {
   datasets: [], 
   width:300,
   height:600,
-  scale:1
 }
 
 export default Decks;
