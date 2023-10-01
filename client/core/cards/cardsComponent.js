@@ -159,14 +159,6 @@ export default function cardsComponent() {
                                 .attr("height", height)
                                 .attr("stroke", getCardStroke(d))
                                 .attr("fill", getCardFill(d))
-
-                        contentsG
-                            .append("g")
-                                .attr("class", "info")
-                                    .append("rect")
-                                        .attr("class", "info-bg")
-                                            .attr("width", width)
-                                            .attr("height", infoHeight)
                         
                         contentsG
                             .append("g")

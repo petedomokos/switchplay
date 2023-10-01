@@ -51,7 +51,8 @@ const useStyles = makeStyles((theme) => ({
     //transitionTimingFunction: "ease",
     //transitionTimingFunction: "cubic-bezier(0.1, 0.7, 1.0, 0.1)",
     transformOrigin:"top left",
-    transition: `all ${TRANSITIONS.MED}ms`
+    transition: `all ${TRANSITIONS.MED}ms`,
+    display:"none"
   },
   formContainer:{
     position:"absolute",
@@ -127,10 +128,10 @@ const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcess
     const newTransformState = d3.zoomIdentity.translate(newX * newScale, newY * newScale).scale(newScale);
 
     d3.select(zoomRef.current).call(zoom.transform, newTransformState)
-    d3.select(deckHeadersRef.current)
+    /*d3.select(deckHeadersRef.current)
       .style("left", `${newX * newScale}px`)
       .style("top", `${newY * newScale}px`)
-      .style("transform",`scale(${newScale})`)
+      .style("transform",`scale(${newScale})`)*/
 
     //if req, update state in react, may need it with delay so it happens at end of zoom
     setSelectedDeckId(id);
