@@ -83,8 +83,8 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   ]*/
   //console.log("screen", screen)
   //const decks = user?.decks[0] ? [user.decks[0]] : []
-  const width = screen.width || 300;
-  const height = screen.height || 600;
+  const width = screen.width * 0.7 || 300;
+  const height = screen.height * 0.7 || 600;
   //console.log("CardsTable", decks)
 
   const containerWidth = 10000;
@@ -118,7 +118,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
     height: containerHeight,
     //padding:`${margin.top}px ${margin.right}px  ${margin.bottom}px  ${margin.left}px`,
     contents:{
-      left:containerWidth/2 + margin.left,
+      left:containerWidth/2 + margin.left + (screen.width - width)/2,
       top:containerHeight/2 + margin.top,
       //width:contentsWidth,
       //height:contentsHeight,
