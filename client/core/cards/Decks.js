@@ -52,7 +52,6 @@ const useStyles = makeStyles((theme) => ({
     //transitionTimingFunction: "cubic-bezier(0.1, 0.7, 1.0, 0.1)",
     transformOrigin:"top left",
     transition: `all ${TRANSITIONS.MED}ms`,
-    display:"none"
   },
   formContainer:{
     position:"absolute",
@@ -128,10 +127,10 @@ const Decks = ({ user, data, customSelectedDeckId, scale, datasets, asyncProcess
     const newTransformState = d3.zoomIdentity.translate(newX * newScale, newY * newScale).scale(newScale);
 
     d3.select(zoomRef.current).call(zoom.transform, newTransformState)
-    /*d3.select(deckHeadersRef.current)
+    d3.select(deckHeadersRef.current)
       .style("left", `${newX * newScale}px`)
       .style("top", `${newY * newScale}px`)
-      .style("transform",`scale(${newScale})`)*/
+      .style("transform",`scale(${newScale})`)
 
     //if req, update state in react, may need it with delay so it happens at end of zoom
     setSelectedDeckId(id);
@@ -233,7 +232,7 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
   //the deck click should be put on teh deck div as it was befire, not the g
   return (
     <div className={`cards-root ${classes.root}`} onClick={() => { setSelectedDeck("")}} >
-      <svg className={classes.svg} id={`cards-svg`} width={width} height={height} >
+      <svg className={classes.svg} id={`cards-svg`} width={width * 100} height={height * 100} >
         <g ref={zoomRef}><rect width={width} height={height} fill="transparent" /></g>
         <g ref={containerRef} />
         <defs>
@@ -246,8 +245,9 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
         {data.map((deckData,i) =>
           <div  onClick={e => { onClickDeck(e, deckData) }}
               key={`deck-header-${deckData.id}`} style={{ position:"absolute", left:deckX(deckData), top:deckY(deckData),
-              /*border:"solid", borderWidth:"thin", borderColor:"grey", width:deckWrapperWidth, height:deckHeaderHeight*/ }}>
-            <DeckHeader data={deckData} scale={currentScale} width={deckWrapperWidth} height={deckHeaderHeight} onClick={onClickDeck} />
+              border:"solid", borderWidth:"thin", borderColor:"grey", width:deckWrapperWidth, height:deckHeaderHeight }}>
+                Title
+            {/**<DeckHeader data={deckData} scale={currentScale} width={deckWrapperWidth} height={deckHeaderHeight} onClick={onClickDeck} />*/}
           </div>
         )}
       </div>
