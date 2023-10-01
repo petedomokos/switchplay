@@ -87,8 +87,8 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const height = screen.height || 600;
   //console.log("CardsTable", decks)
 
-  const contWidth = 10000;
-  const contHeight = 10000;
+  const containerWidth = 10000;
+  const containerHeight = 10000;
 
   const decksData = embellishedDecks(decks);
   //console.log("decksData", decksData)
@@ -101,27 +101,27 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   //we follow d3 margin convention here (eg html padding)
   const vertSpaceForHeader = 40;
   const margin = { 
-    left:width * 0,// selectedDeckId ? 0 : width * 0.05, 
-    right:width * 0,// selectedDeckId ? 0 : width * 0.05, 
-    top: height * 0,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
-    bottom:height * 0// selectedDeckId ? 0 :  height * 0.05
+    left:width * 0.2,// selectedDeckId ? 0 : width * 0.05, 
+    right:width * 0.2,// selectedDeckId ? 0 : width * 0.05, 
+    top: height * 0.2,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
+    bottom:height * 0.2// selectedDeckId ? 0 :  height * 0.05
   }
-  const tableContentsWidth = width - margin.left - margin.right;
-  const tableContentsHeight = height - margin.top - margin.bottom;
+  const contentsWidth = width - margin.left - margin.right;
+  const contentsHeight = height - margin.top - margin.bottom;
 
   //const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
 
   let styleProps = {
-    left:-contWidth/2,
-    top:-contHeight/2,
-    width:contWidth,
-    height: contHeight,
+    left:-containerWidth/2,
+    top:-containerHeight/2,
+    width:containerWidth,
+    height: containerHeight,
     //padding:`${margin.top}px ${margin.right}px  ${margin.bottom}px  ${margin.left}px`,
     contents:{
-      left:contWidth/2,
-      top:contHeight/2,
-      width:width,
-      height:height,
+      left:containerWidth/2 + margin.left,
+      top:containerHeight/2 + margin.top,
+      width:contentsWidth,
+      height:contentsHeight,
     },
     form:{ 
       display: form ? null : "none",
@@ -157,7 +157,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
         {shouldDisplayInstructions ?  
           <Instructions />
           :
-          <Decks data={decksData} width={tableContentsWidth} height={tableContentsHeight} updateDeck={updateDeck} />
+          <Decks data={decksData} width={contentsWidth} height={contentsHeight} updateDeck={updateDeck} />
         }
       </div>
     </div>

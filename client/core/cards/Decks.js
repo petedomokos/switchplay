@@ -265,19 +265,19 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
         </defs>
       </svg>
       <div className={classes.deckHeaders} ref={deckHeadersRef}
-         onClick={e => { onClickDeck(e, data[0]) }}>
-        {/**<div style={{ position:"absolute", left:deckX(data[0]), top:deckY(data[0]), background:"white", 
+         onClick={e => { onClickDeck(e, data[1]) }}>
+        <div style={{ position:"absolute", left:deckX(data[1]), top:deckY(data[1]), background:"white", 
             width:deckWrapperWidth, height:deckHeaderHeight}}>
           Test
-        </div>**/}
-        {data.map((deckData,i) =>
+        </div>
+        {/**data.map((deckData,i) =>
           <div  onClick={e => { onClickDeck(e, deckData) }}
               key={`deck-header-${deckData.id}`} style={{ position:"absolute", left:deckX(deckData), top:deckY(deckData),
               border:"solid", borderWidth:"thin", borderColor:"grey", width:deckWrapperWidth, height:deckHeaderHeight }}>
                 Title
            
           </div>
-        )}
+        )*/}
       </div>
       {/**<div className={classes.overlay} onClick={onClick}></div>*/}
     </div>
