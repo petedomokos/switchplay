@@ -16,12 +16,16 @@ const useStyles = makeStyles((theme) => ({
     position:"absolute",
     left:props => props.left,
     top:props => props.top,
-    width:props => props.width * 100,
-    height:props => props.height * 100,
+    width:props => props.width,
+    height:props => props.height,
+    margin:"30px",
+    padding:props => props.padding,
     transition: `all ${TRANSITIONS.MED}ms`,
     //display:"flex",
     //flexDirection:"column",
-    background:grey10(9)
+    background:grey10(3),//grey10(9)
+    border:"solid",
+    borderWidth:"thin",
   },
   hideInstructions:{
     margin:"25px 5px",
@@ -71,8 +75,8 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   ]*/
   //console.log("screen", screen)
   //const decks = user?.decks[0] ? [user.decks[0]] : []
-  const width = screen.width || 300;
-  const height = screen.height || 600;
+  const width = screen.width * 0.8 || 300;
+  const height = screen.height * 0.8 || 600;
   //console.log("CardsTable", decks)
 
   const decksData = embellishedDecks(decks);
@@ -86,10 +90,10 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   //we follow d3 margin convention here (eg html padding)
   const vertSpaceForHeader = 40;
   const margin = { 
-    left:0,// selectedDeckId ? 0 : width * 0.05, 
-    right:0,// selectedDeckId ? 0 : width * 0.05, 
-    top: 30,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
-    bottom:0,// selectedDeckId ? 0 :  height * 0.05
+    left:20,// selectedDeckId ? 0 : width * 0.05, 
+    right:20,// selectedDeckId ? 0 : width * 0.05, 
+    top: 20,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
+    bottom:20,// selectedDeckId ? 0 :  height * 0.05
   }
   const tableContentsWidth = width - margin.left - margin.right;
   const tableContentsHeight = height - margin.top - margin.bottom;
@@ -97,8 +101,9 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   //const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
 
   let styleProps = {
-    width:tableContentsWidth * 10, //selectedDeck ? width * 3 : width,
-    height: tableContentsHeight * 10,
+    width:tableContentsWidth, //selectedDeck ? width * 3 : width,
+    height: tableContentsHeight,
+    padding:`${margin.top}px ${margin.right}px  ${margin.bottom}px  ${margin.left}px`,
     form:{ 
       display: form ? null : "none",
     },

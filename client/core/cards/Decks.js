@@ -23,9 +23,11 @@ const useStyles = makeStyles((theme) => ({
     //transition: `all ${TRANSITIONS.MED}ms`,
     //display:"flex",
     //flexDirection:"column",
-    /*border:"solid",
+    width:props => props.width,
+    height:props => props.height,
+    border:"solid",
     borderWidth:"thin",
-    borderColor:grey10(7)*/
+    borderColor:"red"
   },
   overlay:{
     display:"none",
@@ -39,12 +41,15 @@ const useStyles = makeStyles((theme) => ({
     color:grey10(1)
   },
   svg:{
+    display:"none",
     pointerEvents:"all",
     //pointerEvents:props => props.svg.pointerEvents,
     position:"absolute",
   },
   deckHeaders:{
     position:"absolute",
+    width:props => props.width,
+    height:props => props.height,
     left:props => props.deckHeaders.left,
     top:props => props.deckHeaders.top,
     transform:props => props.deckHeaders.transform,
@@ -53,6 +58,11 @@ const useStyles = makeStyles((theme) => ({
     //transitionTimingFunction: "cubic-bezier(0.1, 0.7, 1.0, 0.1)",
     transformOrigin:"top left",
     transition: `all ${TRANSITIONS.MED}ms`,
+    border:"solid",
+    borderWidth:"thin",
+    borderColor:"blue",
+    background:"blue"
+
   },
   formContainer:{
     position:"absolute",
@@ -113,6 +123,7 @@ const Decks = ({ user, data, customSelectedDeckId, datasets, asyncProcesses, wid
 
   //deckHeaders zoom
   const { x, y, k } = zoomStateRef.current;
+  console.log("zoomState", zoomStateRef.current)
   let styleProps = {
     width,
     height,
