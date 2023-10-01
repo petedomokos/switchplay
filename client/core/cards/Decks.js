@@ -72,7 +72,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Decks = ({ user, data, customSelectedDeckId, initLeft, initTop, datasets, asyncProcesses, width, height, onClick, updateDeck }) => {
+const Decks = ({ user, data, customSelectedDeckId, setSel, initLeft, initTop, datasets, asyncProcesses, width, height, onClick, updateDeck }) => {
   //console.log("Decks", data)
   if(data.length === 0){ return null}
   //processed props
@@ -151,6 +151,7 @@ const Decks = ({ user, data, customSelectedDeckId, initLeft, initTop, datasets, 
 
     //if req, update state in react, may need it with delay so it happens at end of zoom
     setSelectedDeckId(id);
+    setSel(id)
 }, [stringifiedData]);
 
 const onClickDeck = useCallback((e, d) => {

@@ -101,10 +101,10 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   //we follow d3 margin convention here (eg html padding)
   const vertSpaceForHeader = 40;
   const margin = { 
-    left:width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
-    right:width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
-    top: height * 0.1,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
-    bottom:height * 0.1// selectedDeckId ? 0 :  height * 0.05
+    left:0,//width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
+    right:0,//width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
+    top:0,// height * 0.1,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
+    bottom:0,//height * 0.1// selectedDeckId ? 0 :  height * 0.05
   }
   const contentsWidth = width - margin.left - margin.right;
   const contentsHeight = height - margin.top - margin.bottom;
@@ -112,16 +112,14 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   //const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
 
   let styleProps = {
-    left:-containerWidth/2,
-    top:-containerHeight/2,
-    width:containerWidth,
+    left: -containerWidth/2,
+    top: -containerHeight/2,
+    width: containerWidth,
     height: containerHeight,
     //padding:`${margin.top}px ${margin.right}px  ${margin.bottom}px  ${margin.left}px`,
     contents:{
-      left:containerWidth/2 + margin.left + (screen.width - width)/2,
-      top:containerHeight/2 + margin.top,
-      //width:contentsWidth,
-      //height:contentsHeight,
+      left: containerWidth/2 + margin.left + (screen.width - width)/2,
+      top: containerHeight/2 + margin.top,
     },
     form:{ 
       display: form ? null : "none",
@@ -158,6 +156,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
           <Instructions />
           :
           <Decks 
+            setSel={setSelectedDeckId}
             initLeft={containerWidth/2 + margin.left + (screen.width - width)/2}
             initTop={containerHeight/2 + margin.top}
             data={decksData} width={contentsWidth} height={contentsHeight} updateDeck={updateDeck} />
