@@ -75,7 +75,8 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const Decks = ({ user, data, customSelectedDeckId, datasets, asyncProcesses, width, height, onClick, updateDeck }) => {
-  //console.log("Decks", height)
+  console.log("Decks", data)
+  if(data.length === 0){ return null}
   //processed props
   const stringifiedData = JSON.stringify(data);
   //state
@@ -216,7 +217,7 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
   }, [stringifiedData, width, height, selectedDeckId])
 
   useEffect(() => {
-    d3.select(containerRef.current).call(decks);
+    //d3.select(containerRef.current).call(decks);
   }, [stringifiedData, width, height, selectedDeckId])
 
   //zoom
@@ -252,6 +253,7 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
   }, [])
 
 
+  console.log("data", data)
 
   //next - the onclick here should be uncommented, but need to stopPropagation for the click on a deck. also
   //the deck click should be put on teh deck div as it was befire, not the g
@@ -268,7 +270,8 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
       </svg>
       <div className={classes.deckHeaders} ref={deckHeadersRef}
          onClick={e => { onClickDeck(e, data[0]) }}>
-        <div style={{ position:"absolute", left:50, top:50, background:"white"}}>
+        <div style={{ position:"absolute", left:deckX(data[0]), top:deckY(data[0]), background:"white", 
+            width:deckWrapperWidth, height:deckHeaderHeight}}>
           Test
         </div>
         {/**data.map((deckData,i) =>
