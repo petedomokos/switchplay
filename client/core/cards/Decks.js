@@ -264,14 +264,14 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
           </filter>
         </defs>
       </svg>
-      <div className={classes.deckHeaders} ref={deckHeadersRef}
-         onClick={e => { onClickDeck(e, data[1]) }}>
+      <div className={classes.deckHeaders} ref={deckHeadersRef}>
         {/**<div style={{ position:"absolute", left:deckX(data[1]), top:deckY(data[1]), background:"white", 
             width:deckWrapperWidth, height:deckHeaderHeight}}>
           Test
         </div>*/}
         {data.map((deckData,i) =>
-          <div style={{ position:"absolute", left:deckX(deckData), top:deckY(deckData), background:"white", 
+          <div onClick={e => { onClickDeck(e, deckData) }}
+              style={{ position:"absolute", left:deckX(deckData), top:deckY(deckData), background:"white", 
               width:deckWrapperWidth, height:deckHeaderHeight, fontSize:"7px" }}>
             Test
           </div>
