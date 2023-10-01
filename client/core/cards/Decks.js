@@ -20,14 +20,16 @@ const { GOLD } = COLOURS;
 const useStyles = makeStyles((theme) => ({
   root: {
     position:"relative",
-    //transition: `all ${TRANSITIONS.MED}ms`,
+    paddingTop:props => props.paddingTop,
+    transition: `all ${TRANSITIONS.MED}ms`,
+    transitionTimingFunction: "ease-in-out",
     //display:"flex",
     //flexDirection:"column",
     width:props => props.width,
     height:props => props.height,
-    border:"solid",
+    /*border:"solid",
     borderWidth:"thin",
-    borderColor:"red"
+    borderColor:"red"*/
   },
   overlay:{
     display:"none",
@@ -104,6 +106,7 @@ const Decks = ({ user, data, customSelectedDeckId, setSel, initLeft, initTop, da
 
   const zoomScale = width / deckWidth;
   const currentScale = selectedDeckId ? zoomScale : 1;
+  const extraMarginTop = selectedDeckId ? 0 : 35;
 
   const deckX = (d,i) => {
     const widthPerDeck = deckOuterMargin.left + deckWidth + deckOuterMargin.right;
@@ -119,12 +122,7 @@ const Decks = ({ user, data, customSelectedDeckId, setSel, initLeft, initTop, da
   let styleProps = {
     width,
     height,
-    /*
-    deckHeaders:{
-      left: `${initLeft + x}px`,
-      top: `${initTop + y}px`,
-      transform: `scale(${k})`
-    },*/
+    paddingTop:selectedDeck ? 0 : 35,
     svg:{
       pointerEvents:selectedDeckId ? "all" : "none",
     },
@@ -138,7 +136,7 @@ const Decks = ({ user, data, customSelectedDeckId, setSel, initLeft, initTop, da
   const setSelectedDeck = useCallback((id) => {
     const deck = data.find(d => d.id === id);
     const newX = deck ? -deckX(deck) : 0;
-    const newY = deck ? -deckY(deck): 0;
+    const newY = deck ? -deckY(deck) : 0;
     const newScale = deck ? zoomScale : 1;
     const newTransformState = d3.zoomIdentity.translate(newX * newScale, newY * newScale).scale(newScale);
     zoomStateRef.current = newTransformState;

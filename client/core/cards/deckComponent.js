@@ -26,7 +26,7 @@ export default function deckComponent() {
 
     let headerWidth;
     let headerHeight;
-    let headerMargin = { left: 15, right: 0, top: 0, bottom: 0 };
+    let headerMargin = { left: 0, right: 0, top: 0, bottom: 0 };
     let headerContentsWidth;
     let headerContentsHeight;
     let progressIconWidth;
@@ -65,6 +65,7 @@ export default function deckComponent() {
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
+        headerMargin = { left:deckIsSelected ? 15 : 7.5, right: 0, top: 0, bottom: 0 }
         headerWidth = contentsWidth;
         headerHeight = 20;
         headerContentsWidth = headerWidth - headerMargin.left - headerMargin.right;
@@ -187,14 +188,18 @@ export default function deckComponent() {
                     .attr("pointer-events", "none")
                     .attr("fill", "none")
                     //.attr("fill", "red")
-                    .attr("stroke", grey10(8));
+                    .attr("stroke", grey10(8))
+                    .attr("rx", 3)
+                    .attr("ry", 3);
                 
                 headerG = contentsG.append("g")
                     .attr("class", "header");
 
                 headerG.append("rect")
                     .attr("class", "header-bg")
-                    .attr("fill", grey10(7));
+                    .attr("fill", grey10(8))
+                    .attr("rx", 3)
+                    .attr("ry", 3);
 
                 cardsAreaG = contentsG
                     .append("g")
@@ -209,7 +214,9 @@ export default function deckComponent() {
                     .attr("fill", "none");*/
 
                 //header children
-                const headerContentsG = headerG.append("g").attr("class", "header-contents");
+                const headerContentsG = headerG.append("g")
+                    .attr("class", "header-contents")
+                    .attr("transform", `translate(${headerMargin.left},${headerMargin.top})`);
 
                 const titleG = headerContentsG.append("g")
                     .attr("class", "title")
@@ -220,14 +227,20 @@ export default function deckComponent() {
                     
                 titleG.append("rect")
                     .attr("class", "title-hitbox")
+                    .attr("width", headerContentsWidth - progressIconWidth)
+                    .attr("height", headerContentsHeight)
                     .attr("fill", "transparent")
+                    
 
                 const progressIconG = headerContentsG.append("g")
-                    .attr("class", "progress-icon");
+                    .attr("class", "progress-icon")
+                    .attr("transform", `translate(${headerContentsWidth - progressIconWidth}, 0)`);
                 
                 progressIconG.append("rect")
                     .attr("class", "progress-icon-hitbox")
-                    .attr("fill", grey10(4))
+                    .attr("fill", grey10(7))
+                    .attr("rx", 3)
+                    .attr("ry", 3)
 
             }
 
@@ -268,15 +281,22 @@ export default function deckComponent() {
                         .attr("width", cardsAreaWidth)
                         .attr("height", cardsAreaHeight)
 
-                const headerContentsG = headerG.select("g.header-contents")
-                    .attr("transform", `translate(${headerMargin.left},${headerMargin.top})`)
+                const headerContentsG = headerG.select("g.header-contents");
+
+                headerContentsG
+                    .transition("icon")
+                    .duration(TRANSITIONS.MED)
+                        .attr("transform", `translate(${headerMargin.left},${headerMargin.top})`)
 
                 const titleG = headerContentsG.select("g.title");
 
                 titleG.select("rect.title-hitbox")
-                    .attr("width", headerContentsWidth - progressIconWidth)
-                    .attr("height", headerContentsHeight)
                     .on("click", function(e){ onClickDeck(e, _deckData); })
+                    .transition("icon")
+                    .duration(TRANSITIONS.MED)
+                        .attr("width", headerContentsWidth - progressIconWidth)
+                        .attr("height", headerContentsHeight)
+                        
 
                 //header contents
                 titleG.select("text")
@@ -288,7 +308,9 @@ export default function deckComponent() {
                     .text(_deckData.title || "Enter Title...")
 
                 headerContentsG.select("g.progress-icon")
-                    .attr("transform", `translate(${headerContentsWidth - progressIconWidth}, 0)`)
+                    .transition("icon")
+                    .duration(TRANSITIONS.MED)
+                        .attr("transform", `translate(${headerContentsWidth - progressIconWidth}, 0)`)
                 
                 headerContentsG.select("rect.progress-icon-hitbox")
                     .attr("width", progressIconWidth)
