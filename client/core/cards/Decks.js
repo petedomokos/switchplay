@@ -75,7 +75,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const Decks = ({ user, data, customSelectedDeckId, datasets, asyncProcesses, width, height, onClick, updateDeck }) => {
-  console.log("Decks", data)
+  //console.log("Decks", data)
   if(data.length === 0){ return null}
   //processed props
   const stringifiedData = JSON.stringify(data);
@@ -110,7 +110,7 @@ const Decks = ({ user, data, customSelectedDeckId, datasets, asyncProcesses, wid
   const deckWidth = deckWrapperWidth;
   const deckHeight = deckWrapperHeight - deckHeaderHeight;
 
-  const zoomScale = width / deckWidth;
+  const zoomScale = 1.3;//width / deckWidth;
   const currentScale = selectedDeckId ? zoomScale : 1;
 
   const deckX = (d,i) => {

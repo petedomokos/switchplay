@@ -31,8 +31,8 @@ const useStyles = makeStyles((theme) => ({
     position:"absolute",
     left:props => props.contents.left,
     top:props => props.contents.top,
-    width:props => props.contents.width,
-    height:props => props.contents.height,
+    //width:props => props.contents.width,
+    //height:props => props.contents.height,
     background:"red"
   },
   hideInstructions:{
@@ -101,10 +101,10 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   //we follow d3 margin convention here (eg html padding)
   const vertSpaceForHeader = 40;
   const margin = { 
-    left:width * 0.2,// selectedDeckId ? 0 : width * 0.05, 
-    right:width * 0.2,// selectedDeckId ? 0 : width * 0.05, 
-    top: height * 0.2,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
-    bottom:height * 0.2// selectedDeckId ? 0 :  height * 0.05
+    left:width * 0.3,// selectedDeckId ? 0 : width * 0.05, 
+    right:width * 0.3,// selectedDeckId ? 0 : width * 0.05, 
+    top: height * 0.25,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
+    bottom:height * 0.25// selectedDeckId ? 0 :  height * 0.05
   }
   const contentsWidth = width - margin.left - margin.right;
   const contentsHeight = height - margin.top - margin.bottom;
@@ -120,8 +120,8 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
     contents:{
       left:containerWidth/2 + margin.left,
       top:containerHeight/2 + margin.top,
-      width:contentsWidth,
-      height:contentsHeight,
+      //width:contentsWidth,
+      //height:contentsHeight,
     },
     form:{ 
       display: form ? null : "none",
@@ -150,6 +150,9 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
       }
     })
   }, [form, stringifiedData])
+
+  //the contents is maybe causing the jaggedness as the deckheaders div is expaning, but contents stays teh same
+  //maybe get rid of contents div now -> or remove its dimns so dimns are dynamic
 
   return (
     <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
