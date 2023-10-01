@@ -87,8 +87,8 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const height = screen.height * 0.7 || 600;
   //console.log("CardsTable", decks)
 
-  const containerWidth = 10000;
-  const containerHeight = 10000;
+  const containerWidth = 100000;
+  const containerHeight = 100000;
 
   const decksData = embellishedDecks(decks);
   //console.log("decksData", decksData)
