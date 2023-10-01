@@ -41,11 +41,11 @@ const useStyles = makeStyles((theme) => ({
     color:grey10(1)
   },
   svg:{
-    display:"none",
     pointerEvents:"all",
     //pointerEvents:props => props.svg.pointerEvents,
     position:"absolute",
   },
+  /*
   deckHeaders:{
     position:"absolute",
     width:props => props.width,
@@ -58,12 +58,10 @@ const useStyles = makeStyles((theme) => ({
     //transitionTimingFunction: "cubic-bezier(0.1, 0.7, 1.0, 0.1)",
     transformOrigin:"top left",
     transition: `all ${TRANSITIONS.MED}ms`,
-    /*border:"solid",
-    borderWidth:"thin",
-    borderColor:"blue",*/
     //background:"blue"
 
   },
+  */
   formContainer:{
     position:"absolute",
     left:"0px",
@@ -90,7 +88,7 @@ const Decks = ({ user, data, customSelectedDeckId, initLeft, initTop, datasets, 
   //refs
   const zoomRef = useRef(null);
   const containerRef = useRef(null);
-  const deckHeadersRef = useRef(null);
+  //const deckHeadersRef = useRef(null);
   const zoomStateRef = useRef(d3.zoomIdentity);
   //dimns
   const deckAspectRatio = width / height;
@@ -100,25 +98,19 @@ const Decks = ({ user, data, customSelectedDeckId, initLeft, initTop, datasets, 
     top:15,//height * 0.05,
     bottom:15//height * 0.05
   }
-  const deckWrapperWidthWithMargins = d3.min([width/3, 220]);
-  const deckWrapperWidth = deckWrapperWidthWithMargins - deckOuterMargin.left - deckOuterMargin.right;
-  const deckWrapperHeight = deckWrapperWidth / deckAspectRatio;
-
-  const deckHeaderWidth = deckWrapperWidth;
-  const deckHeaderHeight = 30;// d3.min([45, d3.max([11, height * 0.15])]);
-
-  const deckWidth = deckWrapperWidth;
-  const deckHeight = deckWrapperHeight - deckHeaderHeight;
+  const deckWidthWithMargins = d3.min([width/3, 220]);
+  const deckWidth = deckWidthWithMargins - deckOuterMargin.left - deckOuterMargin.right;
+  const deckHeight = deckWidth / deckAspectRatio;
 
   const zoomScale = width / deckWidth;
   const currentScale = selectedDeckId ? zoomScale : 1;
 
   const deckX = (d,i) => {
-    const widthPerDeck = deckOuterMargin.left + deckWrapperWidth + deckOuterMargin.right;
+    const widthPerDeck = deckOuterMargin.left + deckWidth + deckOuterMargin.right;
     return deckOuterMargin.left + d.colNr * widthPerDeck;
   }
   const deckY = (d,i) => {
-    const heightPerDeck = deckOuterMargin.top + deckWrapperHeight + deckOuterMargin.bottom
+    const heightPerDeck = deckOuterMargin.top + deckHeight + deckOuterMargin.bottom
     return deckOuterMargin.top + d.rowNr * heightPerDeck;
   }
 
@@ -127,11 +119,12 @@ const Decks = ({ user, data, customSelectedDeckId, initLeft, initTop, datasets, 
   let styleProps = {
     width,
     height,
+    /*
     deckHeaders:{
       left: `${initLeft + x}px`,
       top: `${initTop + y}px`,
       transform: `scale(${k})`
-    },
+    },*/
     svg:{
       pointerEvents:selectedDeckId ? "all" : "none",
     },
@@ -150,7 +143,7 @@ const Decks = ({ user, data, customSelectedDeckId, initLeft, initTop, datasets, 
     const newTransformState = d3.zoomIdentity.translate(newX * newScale, newY * newScale).scale(newScale);
     zoomStateRef.current = newTransformState;
 
-    //d3.select(zoomRef.current).call(zoom.transform, newTransformState)
+    d3.select(zoomRef.current).call(zoom.transform, newTransformState)
     /*d3.select(deckHeadersRef.current)
       .style("left", `${newX * newScale}px`)
       .style("top", `${newY * newScale}px`)
@@ -205,7 +198,7 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
       .height(height)
       .selectedDeckId(selectedDeckId)
       .x(deckX)
-      .y((d,i) => deckY(d,i) + deckHeaderHeight)
+      .y((d,i) => deckY(d,i))
       ._deckWidth((d,i) => deckWidth)
       ._deckHeight((d,i) => deckHeight)
       .onClickDeck(onClickDeck)
@@ -216,7 +209,7 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
   }, [stringifiedData, width, height, selectedDeckId])
 
   useEffect(() => {
-    //d3.select(containerRef.current).call(decks);
+    d3.select(containerRef.current).call(decks);
   }, [stringifiedData, width, height, selectedDeckId])
 
   //zoom
@@ -255,8 +248,8 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
   //then, put zoom back gradualy, remove margin etc
   return (
     <div className={`cards-root ${classes.root}`} onClick={() => { setSelectedDeck("")}} >
-      <svg className={classes.svg} id={`cards-svg`} width={width * 100} height={height * 100} display="none" >
-        <g ref={zoomRef}><rect width={width} height={height} fill="transparent" /></g>
+      <svg className={classes.svg} id={`cards-svg`} width={width} height={height} >
+        <g ref={zoomRef} display="none"><rect width={width} height={height} fill="transparent" /></g>
         <g ref={containerRef} />
         <defs>
           <filter id="shine">
@@ -264,32 +257,15 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
           </filter>
         </defs>
       </svg>
-      <div className={classes.deckHeaders} ref={deckHeadersRef}>
-        {/**<div style={{ position:"absolute", left:deckX(data[1]), top:deckY(data[1]), background:"white", 
-            width:deckWrapperWidth, height:deckHeaderHeight}}>
-          Test
-        </div>*/}
-        {data.map((deckData,i) =>
+      {/**<div className={classes.deckHeaders} ref={deckHeadersRef}>
+        data.map((deckData,i) =>
           <div key={`deck-header-${deckData.id}`} onClick={e => { onClickDeck(e, deckData) }}
               style={{ position:"absolute", left:deckX(deckData), top:deckY(deckData), background:"white", 
               width:deckWrapperWidth, height:deckHeaderHeight, fontSize:"7px" }}>
               <DeckHeader data={deckData} scale={currentScale} width={deckWrapperWidth} height={deckHeaderHeight} onClick={onClickDeck} />
           </div>
-        )}
-        {/**data.map((deckData,i) =>
-          <div  onClick={e => { onClickDeck(e, deckData) }}
-              key={`deck-header-${deckData.id}`} 
-              style={{ 
-                  position:"absolute", left:deckX(deckData), top:deckY(deckData),
-                  border:"solid", borderWidth:"thin", borderColor:"grey", 
-                  width:deckWrapperWidth, height:deckHeaderHeight,
-                  fontSize:"7px" 
-              }}>
-                Title
-           
-          </div>
-            )*/}
-      </div>
+        )
+      </div>*/}
       {/**<div className={classes.overlay} onClick={onClick}></div>*/}
     </div>
   )

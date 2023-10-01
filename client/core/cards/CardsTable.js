@@ -23,9 +23,9 @@ const useStyles = makeStyles((theme) => ({
     transition: `all ${TRANSITIONS.MED}ms`,
     //display:"flex",
     //flexDirection:"column",
-    background:grey10(3),//grey10(9)
-    border:"solid",
-    borderWidth:"thin",
+    background:grey10(9)
+    //border:"solid",
+    //borderWidth:"thin",
   },
   contents:{
     position:"absolute",
@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
     top:props => props.contents.top,
     //width:props => props.contents.width,
     //height:props => props.contents.height,
-    background:"red"
+    //background:"red"
   },
   hideInstructions:{
     margin:"25px 5px",
@@ -153,30 +153,6 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
 
   return (
     <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
-        {shouldDisplayInstructions ?  
-          <Instructions />
-          :
-          <Decks 
-            initLeft={containerWidth/2 + margin.left + (screen.width - width)/2}
-            initTop={containerHeight/2 + margin.top}
-            data={decksData} width={contentsWidth} height={contentsHeight} updateDeck={updateDeck} />
-        }
-    </div>
-  )
-}
-
-CardsTable.defaultProps = {
-  customSelectedDeckId:"",
-  asyncProcesses:{},
-  datasets: [], 
-  screen: {}
-}
-
-export default CardsTable;
-
-/*
-return (
-    <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
       <div className={classes.contents}>
         {shouldDisplayInstructions ?  
           <Instructions />
@@ -190,4 +166,12 @@ return (
     </div>
   )
 }
-*/
+
+CardsTable.defaultProps = {
+  customSelectedDeckId:"",
+  asyncProcesses:{},
+  datasets: [], 
+  screen: {}
+}
+
+export default CardsTable;

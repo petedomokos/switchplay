@@ -19,10 +19,23 @@ export default function deckComponent() {
     let margin = { left: 0, right: 0, top: 0, bottom: 0 };
     //let margin = { left: 40, right: 40, top: 20, bottom: 20 };
     let extraMargin; //if deck dont take up full space
+
+    //next - add header, and put cardsAreaWifdth and height back in
     let contentsWidth;
     let contentsHeight;
 
-    let deckAreaAspectRatio;
+    let headerWidth;
+    let headerHeight;
+    let headerMargin = { left: 0, right: 0, top: 0, bottom: 0 };
+    let headerContentsWidth;
+    let headerContentsHeight;
+    let progressIconWidth;
+    let progressIconHeight;
+
+    let cardsAreaWidth;
+    let cardsAreaHeight;
+
+    let cardsAreaAspectRatio;
     let botSpaceHeight;
 
     let heldCardsAreaHeight;
@@ -51,8 +64,20 @@ export default function deckComponent() {
     function updateDimns(){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
+
+        headerWidth = contentsWidth;
+        headerHeight = 20;
+        headerContentsWidth = headerWidth - headerMargin.left - headerMargin.right;
+        headerContentsHeight = headerHeight - headerMargin.top - headerMargin.bottom;
+
+        progressIconWidth = d3.min([20, headerContentsWidth * 0.3])
+        progressIconHeight = headerContentsHeight;
+
+        cardsAreaWidth = contentsWidth;
+        cardsAreaHeight = contentsHeight - headerHeight;
+
         //this aspectRatio is only needed to aid with selecting a card to takeover entire area
-        deckAreaAspectRatio = contentsWidth/contentsHeight;
+        cardsAreaAspectRatio = cardsAreaWidth/cardsAreaHeight;
 
         heldCardInfoHeight = contentsHeight * INFO_HEIGHT_PROPORTION_OF_CARDS_AREA;
         const minInc = heldCardInfoHeight * 0.9;
@@ -71,7 +96,7 @@ export default function deckComponent() {
         //@todo - change the way horiz is done so its the other way round like vert
         //so horizSpaceForIncs can be calculated after in same way as vertSpaceForIncs
         const maxHorizSpaceForIncs = 20;
-        const horizSpaceForVisibleIncs = d3.min([contentsWidth * 0.25, maxHorizSpaceForIncs]); 
+        const horizSpaceForVisibleIncs = d3.min([cardsAreaWidth * 0.25, maxHorizSpaceForIncs]); 
         const horizSpaceForNonVisibleIncs = horizSpaceForVisibleIncs * 0.4;
         const visibleHorizCardInc = i => {
             if(i === 0) { return 0; }
@@ -89,16 +114,16 @@ export default function deckComponent() {
         horizCardInc = deckIsSelected ? visibleHorizCardInc : nonVisibleHorizInc;
 
         //NOTE: this max must also be same regardless of multideck view or single deck view
-        const maxHeldCardWidth = contentsWidth - (horizSpaceForVisibleIncs * 2); //need it to be symmetrical
+        const maxHeldCardWidth = cardsAreaWidth - (horizSpaceForVisibleIncs * 2); //need it to be symmetrical
         //NOTE: vertSpaceForIncs is the same regardless of whether the deck is selected 
         //(ie all card info sections visible) or not
         vertSpaceForIncs = visibleVertCardInc(4);
         //vertSpaceForIncs = vertCardInc(4);
-        placedCardsAreaHeight = d3.min([80, contentsHeight/7]); 
-        heldCardsAreaHeight = contentsHeight - placedCardsAreaHeight;
+        placedCardsAreaHeight = d3.min([80, cardsAreaHeight/7]); 
+        heldCardsAreaHeight = cardsAreaHeight - placedCardsAreaHeight;
 
         //need to use visibleVertCardInc to calc the dimns...
-        const maxHeldCardHeight = contentsHeight - vertSpaceForIncs - placedCardsAreaHeight;
+        const maxHeldCardHeight = cardsAreaHeight - vertSpaceForIncs - placedCardsAreaHeight;
         const heldCardDimns = maxDimns(maxHeldCardWidth, maxHeldCardHeight, cardAspectRatio);
         heldCardWidth = heldCardDimns.width;
         heldCardHeight = heldCardDimns.height;
@@ -113,7 +138,7 @@ export default function deckComponent() {
 
         placedCardHorizGap = (heldCardWidth - 5 * placedCardWidth) / 4;
 
-        extraMarginLeftForCards = (contentsWidth - heldCardWidth)/2;
+        extraMarginLeftForCards = (cardsAreaWidth - heldCardWidth)/2;
         placedCardMarginVert = (placedCardsAreaHeight - placedCardHeight)/2;
     }
     let DEFAULT_STYLES = {
@@ -133,7 +158,8 @@ export default function deckComponent() {
 
     let containerG;
     let contentsG;
-    let cardsG;
+    let headerG;
+    let cardsAreaG;
 
     //components
     const cards = cardsComponent();
@@ -161,15 +187,39 @@ export default function deckComponent() {
                     .attr("pointer-events", "none")
                     .attr("fill", "none")
                     //.attr("fill", "red")
-                    //.attr("stroke", "red");
+                    .attr("stroke", "red");
+                
+                headerG = contentsG.append("g")
+                    .attr("class", "header");
 
-                cardsG = contentsG
+                headerG.append("rect")
+                    .attr("class", "header-bg")
+                    .attr("fill", grey10(7));
+
+                cardsAreaG = contentsG
                     .append("g")
-                    .attr("class", "cards");
+                    .attr("class", "cards-area");
 
-                /*cardsG.append("rect").attr("class", "placed-cards-bg")
+                cardsAreaG.append("rect")
+                    .attr("class", "cards-area-bg")
+                    .attr("fill", "none");
+
+                /*cardsAreaG.append("rect").attr("class", "placed-cards-bg")
                     .attr("stroke", "none")
                     .attr("fill", "none");*/
+
+                //header children
+                const headerContentsG = headerG.append("g").attr("class", "header-contents");
+                headerContentsG.append("text")
+                    .attr("class", "title")
+                    .attr("dominant-baseline", "central");
+
+                const progressIconG = headerContentsG.append("g")
+                    .attr("class", "progress-icon");
+                
+                progressIconG.append("rect")
+                    .attr("class", "progress-icon-hitbox")
+                    .attr("fill", grey10(4))
             }
 
             function update(_deckData, options={}){
@@ -195,35 +245,46 @@ export default function deckComponent() {
                 //gs
 
                 contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
-                
+                //main bgs
                 contentsG
                     .select("rect.contents-bg")
                         .attr("width", contentsWidth)
                         .attr("height", contentsHeight)
+                headerG
+                    .select("rect.header-bg")
+                        .attr("width", headerWidth)
+                        .attr("height", headerHeight)
+                cardsAreaG
+                    .select("rect.cards-area-bg")
+                        .attr("width", cardsAreaWidth)
+                        .attr("height", cardsAreaHeight)
 
-                    /*.call(updateRectDimns, { 
-                        width: () => contentsWidth, 
-                        height:() => contentsHeight,
-                        transition:transformTransition,
-                        name:d => `cards-dimns-${d.id}`
-                    })
+                const headerContentsG = headerG.select("g.header-contents")
+                    .attr("transform", `translate(${headerMargin.left},)${headerMargin.top}`)
 
-                cardsG
-                    .select("rect.placed-cards-bg")
-                    .attr("transform", `translate(0,${heldCardsAreaHeight})`)
-                    .call(updateRectDimns, { 
-                        width: () => contentsWidth, 
-                        height:() => placedCardsAreaHeight,
-                        transition:transformTransition,
-                        name:d => `placed-cards-dimns-${d.id}`
-                    })*/
+                //header contents
+                headerContentsG.select("text")
+                    .attr("y", headerContentsHeight/2)
+                    .attr("stroke", grey10(2))
+                    .attr("fill", grey10(2))
+                    .attr("stroke-width", 0.1)
+                    .attr("font-size", headerHeight * 0.3)
+                    .text(_deckData.title || "Enter Title...")
+
+                headerContentsG.select("g.progress-icon")
+                    .attr("transform", `translate(${headerContentsWidth - progressIconWidth}, 0)`)
+                
+                .select("rect.progress-icon-hitbox")
+                    .attr("width", progressIconWidth)
+                    .attr("height", progressIconHeight)
 
                 //selected card dimns
-                const selectedCardDimns = maxDimns(contentsWidth, contentsHeight, cardAspectRatio)
+                const selectedCardDimns = maxDimns(cardsAreaWidth, cardsAreaHeight, cardAspectRatio)
                 const selectedCardWidth = selectedCardDimns.width;
                 const selectedCardHeight = selectedCardDimns.height;
 
-                cardsG
+                cardsAreaG
+                    .attr("transform", `translate(0, ${headerHeight})`)
                     .datum(cardsData)
                     .call(cards
                         .width(heldCardWidth)
@@ -238,7 +299,7 @@ export default function deckComponent() {
                         .x((d,i) => {
                             if(d.isSelected){
                                 //keep it centred
-                                return (contentsWidth - selectedCardWidth)/2;
+                                return (cardsAreaWidth - selectedCardWidth)/2;
                             }
                             if(d.isHeld){
                                 return extraMarginLeftForCards + horizCardInc(d.handPos);
@@ -247,7 +308,7 @@ export default function deckComponent() {
                         })
                         .y((d,i) => {
                             if(d.isSelected){
-                                return (contentsHeight - selectedCardHeight)/2;
+                                return (cardsAreaHeight - selectedCardHeight)/2;
                             }
                             
                             if(d.isHeld){
