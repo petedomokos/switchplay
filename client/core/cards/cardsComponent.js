@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { DIMNS, grey10, COLOURS, TRANSITIONS } from "./constants";
 import dragEnhancements from '../journey/enhancedDragHandler';
-import cardInfoComponent from './cardInfoComponent';
+import cardHeaderComponent from './cardHeaderComponent';
 import cardItemsComponent from './cardItemsComponent';
 import { remove } from '../journey/domHelpers';
 import { updateTransform } from '../journey/transitionHelpers';
@@ -79,8 +79,8 @@ export default function cardsComponent() {
     //dom
     let containerG;
     //components
-    let cardInfoComponents = {};
-    let cardItemsComponents = {};
+    let headerComponents = {};
+    let itemsComponents = {};
 
     function cards(selection, options={}) {
         //check the height of info, make smaller if necc and create a bottom bar, so the pentagon is in centre
@@ -146,13 +146,17 @@ export default function cardsComponent() {
                     .attr("class", d => `card card-${d.cardNr}`)
                     .attr("opacity", 1)
                     .each(function(d,i){
-                        cardInfoComponents[d.cardNr] = cardInfoComponent();
-                        cardItemsComponents[d.cardNr] = cardItemsComponent();
+                        const { cardNr, isHeld, isSelected } = d;
+
+                        headerComponents[cardNr] = cardHeaderComponent();
+                        itemsComponents[cardNr] = cardItemsComponent();
 
                         //ENTER
                         const contentsG = d3.select(this).append("g").attr("class", "contents card-contents")
 
-                        contentsG.append("rect").attr("class", "card-bg")
+                        contentsG
+                            .append("rect")
+                                .attr("class", "card-bg")
                                 .attr("rx", 3)
                                 .attr("ry", 3)
                                 .attr("width", width)
@@ -162,16 +166,24 @@ export default function cardsComponent() {
                         
                         contentsG
                             .append("g")
+                                .attr("class", "card-header")
+                                .attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
+                                .attr("opacity", deckIsSelected & (isHeld || isSelected) ? 1 : 0)
+                        
+                        contentsG
+                            .append("g")
                                 .attr("class", "items-area")
                                     .append("rect")
                                         .attr("class", "items-area-bg");
 
-                        contentsG.append("rect").attr("class", "card-overlay")
-                            .attr("rx", 3)
-                            .attr("ry", 3)
-                            .attr("stroke", "none")
-                            .attr("fill", "transparent")
-                            .on("click", onClickCard)
+                        contentsG
+                            .append("rect")
+                                .attr("class", "card-overlay")
+                                .attr("rx", 3)
+                                .attr("ry", 3)
+                                .attr("stroke", "none")
+                                .attr("fill", "transparent")
+                                .on("click", onClickCard)
                     })
                     .call(updateTransform, { 
                         x, 
@@ -189,7 +201,7 @@ export default function cardsComponent() {
                         name:(d,i) => `card-pos-${i}-${d.id}`
                     })
                     .each(function(cardD,i){
-                        const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, items } = cardD; 
+                        const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status } = cardD; 
                         const contentsG = d3.select(this).select("g.card-contents");
                         
                         contentsG.select("rect.card-overlay")
@@ -208,7 +220,7 @@ export default function cardsComponent() {
                         
                         //const infoHeight;
                         //components
-                        const cardInfo = cardInfoComponents[cardNr]
+                        const header = headerComponents[cardNr]
                             .width(width)
                             .height(infoHeight)
                             .styles({
@@ -220,36 +232,21 @@ export default function cardsComponent() {
                             .onClick(function(e){
                                 onClickCard(e, cardD); 
                             })
-
-                             /*
-                        contentsG.select("rect.info-bg")
-                            .attr("display", deckIsSelected ? null : "none") //hide when small
-                            .transition("info-bg")
-                            //.delay(0)
-                            .duration(TRANSITIONS.MED)
-                                .attr("width", width)
-                                .attr("height", infoHeight)
-                                .attr("fill","none")
                         
-                        const infoDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext };
-                        contentsG.selectAll("g.info")
-                            .attr("display", deckIsSelected ? null : "none") //hide when small
-                            .datum(infoDatum)
-                            //.call(cardInfo);
-
-                        //hide if placed
-                        contentsG.select("g.info")
-                            .transition()
+                        const headerDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext };
+                        contentsG.selectAll("g.card-header")
+                            .attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
+                            .datum(headerDatum)
+                            .call(header)
+                                .transition() //hide if small
                                 .delay(200)
                                 .duration(200)
-                                    .attr("opacity", isHeld || isSelected ? 1 : 0)
-
-                        */
+                                    .attr("opacity", deckIsSelected & (isHeld || isSelected) ? 1 : 0);
 
                         //ITEMS
                         const cardIsEditable = (isHeld && isFront) || isSelected;
 
-                        const cardItems = cardItemsComponents[cardNr]
+                        const items = itemsComponents[cardNr]
                             .styles({ 
                                 _lineStrokeWidth:lineD => {
                                     if(deckIsSelected){
@@ -286,7 +283,7 @@ export default function cardsComponent() {
                         contentsG.select("g.items-area")
                             .attr("transform", `translate(0, ${infoHeight + spaceHeight})`)
                             .datum(cardD.items)
-                            .call(cardItems)
+                            .call(items)
 
                         //remove items for cards behind
                         const shouldHideItems = isHeld && !isFront && !isSelected;

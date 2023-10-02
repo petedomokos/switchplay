@@ -8,7 +8,7 @@ const { GOLD } = COLOURS;
 /*
 
 */
-export default function profileInfoComponent() {
+export default function cardHeaderComponent() {
     //API SETTINGS
     // dimensions
     let width = 250;
@@ -94,7 +94,7 @@ export default function profileInfoComponent() {
     //dom
     let containerG;
 
-    function profileInfo(selection, options={}) {
+    function header(selection, options={}) {
         //console.log("profileinfo", height)
         const { transitionEnter=true, transitionUpdate=true } = options;
 
@@ -116,7 +116,7 @@ export default function profileInfoComponent() {
                     .each(function(data,i){
                         const contentsG = d3.select(this);
                         contentsG.append("rect").attr("class", "contents-bg")
-                            .attr("fill", "transparent")
+                            .attr("fill", "transparent");
                     })
                     .merge(contentsG)
                     .attr("transform", `translate(${margin.left},${margin.top})`)
@@ -138,9 +138,9 @@ export default function profileInfoComponent() {
                                             .attr("dominant-baseline", "central")
                                             .attr("text-anchor", "middle")
                                             .style("font-family", "helvetica, sans-serifa")
-                                            .attr("stroke", grey10(7))
+                                            .attr("stroke", grey10(8))
                                             .attr("stroke-width", 0.5)
-                                            .attr("fill", grey10(7));
+                                            .attr("fill", grey10(8));
 
                                     d3.select(this).append("rect")
                                         .attr("class", "hitbox")
@@ -158,6 +158,8 @@ export default function profileInfoComponent() {
                                         .attr("x", titleContentsWidth/2)
                                         .attr("y", titleContentsHeight/2)
                                         .attr("font-size", titleContentsHeight * 0.5)
+                                        .attr("stroke", grey10(7))
+                                        .attr("stroke-width", 0.1)
                                         //.attr("fill", d.isFuture ? "grey" : "white")
                                         //.text(d.title || d.id)
                                         .text(d.title || `Card ${cardNr + 1}`)
@@ -212,7 +214,7 @@ export default function profileInfoComponent() {
                                             .styles({
                                                 _lineStrokeWidth:(itemD) => {
                                                     const { status } = itemD;
-                                                    return status === 2 ? 4 : (status === 1 ? 2 : 1)
+                                                    return status === 2 ? 2 : (status === 1 ? 1 : 0.5)
                                                 },
                                                 _lineStroke:(itemD) => {
                                                     const { status } = itemD;
@@ -265,7 +267,7 @@ export default function profileInfoComponent() {
                                             .attr("text-anchor", "middle")
                                             .style("font-family", "helvetica, sans-serifa")
                                             .attr("stroke", grey10(7))
-                                            .attr("stroke-width", 0.5)
+                                            .attr("stroke-width", 0.1)
                                             .attr("fill", grey10(7))
                                     
                                     d3.select(this)
@@ -283,7 +285,7 @@ export default function profileInfoComponent() {
 
                                     contentsG.select("text.primary")
                                         .attr("transform", d => `translate(${dateContentsWidth/2},${dateContentsHeight/2}) rotate(-45)`)
-                                        .attr("font-size", dateHeight * 0.25)
+                                        .attr("font-size", dateHeight * 0.3)
                                         .text(format(d.date))
 
                                     d3.select(this).select("rect.hitbox")
@@ -339,28 +341,33 @@ export default function profileInfoComponent() {
                                 .attr("pointer-events", showDateCount ? "all" : "none")
                                 .each(function(d){
                                     const width = dateWidth;
-                                    const height = width;
-                                    const margin = { top: 0, bottom: height * 0.5 }
-                                    const contentsHeight = height - margin.top - margin.bottom;
-                                    const numberHeight = contentsHeight * 0.75;
+                                    const numberHeight = contentsHeight * 0.65;
                                     const wordsHeight = contentsHeight - numberHeight;
 
-                                    const numberFontSize = d3.min([8, height * 0.8]);
-                                    const wordsFontSize = numberFontSize * 0.75;
+                                    const numberFontSize = numberHeight * 0.9;
+                                    const wordsFontSize = wordsHeight * 0.9;
 
-                                    const extraGap = height < 30 ? 5 : 0;
+                                    const extraShiftUp = 1.5;
+                                    const extraGapBetween = 0;// height < 30 ? 5 : 0;
 
                                     d3.select(this).select("text.number")
                                         .attr("x", width/2)
-                                        .attr("y", margin.top + numberHeight / 2)
+                                        .attr("y", numberHeight * 0.8 - extraGapBetween/2 - extraShiftUp)
+                                        .attr("dominant-baseline", "auto") //line at bottom of text
+                                        //.attr("font-size", numberFontSize)
                                         .attr("font-size", numberFontSize)
+                                        .attr("stroke", grey10(7))
+                                        .attr("stroke-width", 0.1)
                                         //.attr("fill", isFuture ? "grey" : "white")
                                         .text(d => Math.abs(d.value))
 
                                     d3.select(this).select("text.words")
                                         .attr("x", width/2)
-                                        .attr("y", margin.top + numberHeight + wordsHeight / 2 + extraGap)
+                                        .attr("y", numberHeight + extraGapBetween/2 - extraShiftUp)
+                                        .attr("dominant-baseline", "hanging")
                                         .attr("font-size", wordsFontSize)
+                                        .attr("stroke", grey10(7))
+                                        .attr("stroke-width", 0.1)
                                         //.attr("fill", isFuture ? "grey" : "white")
                                         .text(d => `${d.label} ${d.value < 0 ? "ago" : ""}`)
 
@@ -379,6 +386,7 @@ export default function profileInfoComponent() {
                             .remove();
                     })
                     .on("click", function(e,d){ 
+                        console.log("clk")
                         onClick.call(this, e, d)
                     })
 
@@ -388,53 +396,53 @@ export default function profileInfoComponent() {
     }
     
     //api
-    profileInfo.width = function (value) {
+    header.width = function (value) {
         if (!arguments.length) { return width; }
         width = value;
-        return profileInfo;
+        return header;
     };
-    profileInfo.height = function (value) {
+    header.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
-        return profileInfo;
+        return header;
     };
-    profileInfo.styles = function (obj) {
+    header.styles = function (obj) {
         if (!arguments.length) { return styles; }
         styles = {
             ...styles,
             ...obj,
         };
-        return profileInfo;
+        return header;
     };
-    profileInfo.fontSizes = function (values) {
+    header.fontSizes = function (values) {
         if (!arguments.length) { return fontSizes; }
         fontSizes = { ...fontSizes, ...values };
-        return profileInfo;
+        return header;
     };
-    profileInfo.editable = function (value) {
+    header.editable = function (value) {
         if (!arguments.length) { return editable; }
         editable = value;
-        return profileInfo;
+        return header;
     };
    
-    profileInfo.onClick = function (value) {
+    header.onClick = function (value) {
         if (!arguments.length) { return onClick; }
         onClick = value;
-        return profileInfo;
+        return header;
     };
-    profileInfo.onMouseover = function (value) {
+    header.onMouseover = function (value) {
         if (!arguments.length) { return onMouseover; }
         if(typeof value === "function"){
             onMouseover = value;
         }
-        return profileInfo;
+        return header;
     };
-    profileInfo.onMouseout = function (value) {
+    header.onMouseout = function (value) {
         if (!arguments.length) { return onMouseout; }
         if(typeof value === "function"){
             onMouseout = value;
         }
-        return profileInfo;
+        return header;
     };
-    return profileInfo;
+    return header;
 }
