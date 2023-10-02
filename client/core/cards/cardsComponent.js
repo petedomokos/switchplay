@@ -208,7 +208,6 @@ export default function cardsComponent() {
                         
                         //const infoHeight;
                         //components
-                        /*
                         const cardInfo = cardInfoComponents[cardNr]
                             .width(width)
                             .height(infoHeight)
@@ -221,7 +220,6 @@ export default function cardsComponent() {
                             .onClick(function(e){
                                 onClickCard(e, cardD); 
                             })
-                        */
 
                              /*
                         contentsG.select("rect.info-bg")
@@ -308,32 +306,38 @@ export default function cardsComponent() {
                             key:"expand", 
                             onClick:e => { onClickCard(e, cardD);  },
                             icon:icons.expand,
+                            shouldDisplay:!isSelected
                         }
                         const collapseBtnDatum = { 
                             key:"expand", 
                             onClick:e => { onClickCard(e, cardD) },
                             icon:icons.collapse,
+                            shouldDisplay:isSelected
                         }
-                        const botRightBtnData = isSelected ? [collapseBtnDatum] : (isFront ? [expandBtnDatum] : []);
-                        const btnHeight = d3.max([1, d3.min([50, 0.15 * height])]);
+                        const botRightBtnData = [collapseBtnDatum, expandBtnDatum];
+                        const btnHeight = d3.max([1, d3.min([15, 0.12 * height])]);
                         const btnWidth = btnHeight;
                         //assumme all are square
                         //note: 0.8 is a bodge coz iconsseems to be bigger than they state
                         const scale = d => (0.8 * btnHeight)/d.icon.height;
-                        const btnMargin = 3;
+                        const btnMargin = btnHeight * 0.1;
                         const btnContentsWidth = btnWidth - 2 * btnMargin;
                         const btnContentsHeight = btnHeight - 2 * btnMargin;
                         const botRightBtnG = contentsG.selectAll("g.bottom-right-btn").data(botRightBtnData);
                         botRightBtnG.enter()
                             .append("g")
                                 .attr("class", "bottom-right-btn")
+                                .attr("opacity", d => d.shouldDisplay ? 1 : 0)
+                                .attr("pointer-events",d => d.shouldDisplay ? "all" : "none")
                                 .each(function(d){
                                     const btnG = d3.select(this);
                                     btnG.append("path")
-                                        .attr("fill", grey10(4));
+                                        .attr("fill", grey10(5));
 
                                     btnG.append("rect").attr("class", "btn-hitbox")
                                         .attr("fill", "transparent")
+                                        //.attr("fill", "red")
+                                        .attr("opacity", 0.3)
                                         .attr("stroke", "none")
 
                                 })
@@ -341,6 +345,12 @@ export default function cardsComponent() {
                                 .attr("transform", `translate(${width - btnWidth + btnMargin},${height - btnHeight + btnMargin})`)
                                 .each(function(d){
                                     const btnG = d3.select(this);
+                                    //visibility
+                                    btnG
+                                        .transition()
+                                        .duration(TRANSITIONS.MED)
+                                            .attr("opacity", d.shouldDisplay ? 1 : 0);
+
                                     btnG.select("path")
                                         .attr("transform", `scale(${scale(d)})`)
                                         .attr("d", d.icon.d)
