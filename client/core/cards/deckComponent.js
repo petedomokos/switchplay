@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { grey10, COLOURS, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIONS } from "./constants";
 import cardsComponent from './cardsComponent';
+import headerComponent from './headerComponent';
 import { updateRectDimns } from '../journey/transitionHelpers';
 
 function maxDimns(maxWidth, maxHeight, aspectRatio){
@@ -20,17 +21,11 @@ export default function deckComponent() {
     //let margin = { left: 40, right: 40, top: 20, bottom: 20 };
     let extraMargin; //if deck dont take up full space
 
-    //next - add header, and put cardsAreaWifdth and height back in
     let contentsWidth;
     let contentsHeight;
 
     let headerWidth;
     let headerHeight;
-    let headerMargin = { left: 0, right: 0, top: 0, bottom: 0 };
-    let headerContentsWidth;
-    let headerContentsHeight;
-    let progressIconWidth;
-    let progressIconHeight;
 
     let cardsAreaWidth;
     let cardsAreaHeight;
@@ -65,14 +60,8 @@ export default function deckComponent() {
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
-        headerMargin = { left:deckIsSelected ? 15 : 7.5, right: 0, top: 0, bottom: 0 }
         headerWidth = contentsWidth;
         headerHeight = 20;
-        headerContentsWidth = headerWidth - headerMargin.left - headerMargin.right;
-        headerContentsHeight = headerHeight - headerMargin.top - headerMargin.bottom;
-
-        progressIconWidth = d3.min([20, headerContentsWidth * 0.3])
-        progressIconHeight = headerContentsHeight;
 
         cardsAreaWidth = contentsWidth;
         cardsAreaHeight = contentsHeight - headerHeight;
@@ -163,6 +152,7 @@ export default function deckComponent() {
     let cardsAreaG;
 
     //components
+    const header = headerComponent();
     const cards = cardsComponent();
 
     function deck(selection, options={}) {
@@ -195,12 +185,6 @@ export default function deckComponent() {
                 headerG = contentsG.append("g")
                     .attr("class", "header");
 
-                headerG.append("rect")
-                    .attr("class", "header-bg")
-                    .attr("fill", grey10(8))
-                    .attr("rx", 3)
-                    .attr("ry", 3);
-
                 cardsAreaG = contentsG
                     .append("g")
                     .attr("class", "cards-area");
@@ -208,40 +192,6 @@ export default function deckComponent() {
                 cardsAreaG.append("rect")
                     .attr("class", "cards-area-bg")
                     .attr("fill", "none");
-
-                /*cardsAreaG.append("rect").attr("class", "placed-cards-bg")
-                    .attr("stroke", "none")
-                    .attr("fill", "none");*/
-
-                //header children
-                const headerContentsG = headerG.append("g")
-                    .attr("class", "header-contents")
-                    .attr("transform", `translate(${headerMargin.left},${headerMargin.top})`);
-
-                const titleG = headerContentsG.append("g")
-                    .attr("class", "title")
-
-                titleG.append("text")
-                    .attr("class", "title")
-                    .attr("dominant-baseline", "central");
-                    
-                titleG.append("rect")
-                    .attr("class", "title-hitbox")
-                    .attr("width", headerContentsWidth - progressIconWidth)
-                    .attr("height", headerContentsHeight)
-                    .attr("fill", "transparent")
-                    
-
-                const progressIconG = headerContentsG.append("g")
-                    .attr("class", "progress-icon")
-                    .attr("transform", `translate(${headerContentsWidth - progressIconWidth}, 0)`);
-                
-                progressIconG.append("rect")
-                    .attr("class", "progress-icon-hitbox")
-                    .attr("fill", grey10(7))
-                    .attr("rx", 3)
-                    .attr("ry", 3)
-
             }
 
             function update(_deckData, options={}){
@@ -264,58 +214,30 @@ export default function deckComponent() {
                         }
                     });
 
-                //gs
-
+                //contents
                 contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
-                //main bgs
+
                 contentsG
                     .select("rect.contents-bg")
                         .attr("width", contentsWidth)
                         .attr("height", contentsHeight)
-                headerG
-                    .select("rect.header-bg")
-                        .attr("width", headerWidth)
-                        .attr("height", headerHeight)
+                
+                //header
+                headerG.datum(_deckData)
+                    .call(header
+                        .width(headerWidth)
+                        .height(headerHeight)
+                        .margin({ left:deckIsSelected ? 15 : 7.5, right: 0, top: 0, bottom: 0 } )
+                        .onClickTitle(onClickDeck)
+                        .onClickProgressIcon(onClickDeck))
+                
+
+                //Cards area
                 cardsAreaG
                     .select("rect.cards-area-bg")
                         .attr("width", cardsAreaWidth)
                         .attr("height", cardsAreaHeight)
 
-                const headerContentsG = headerG.select("g.header-contents");
-
-                headerContentsG
-                    .transition("icon")
-                    .duration(TRANSITIONS.MED)
-                        .attr("transform", `translate(${headerMargin.left},${headerMargin.top})`)
-
-                const titleG = headerContentsG.select("g.title");
-
-                titleG.select("rect.title-hitbox")
-                    .on("click", function(e){ onClickDeck(e, _deckData); })
-                    .transition("icon")
-                    .duration(TRANSITIONS.MED)
-                        .attr("width", headerContentsWidth - progressIconWidth)
-                        .attr("height", headerContentsHeight)
-                        
-
-                //header contents
-                titleG.select("text")
-                    .attr("y", headerContentsHeight/2)
-                    .attr("stroke", grey10(2))
-                    .attr("fill", grey10(2))
-                    .attr("stroke-width", 0.1)
-                    .attr("font-size", headerHeight * 0.3)
-                    .text(_deckData.title || "Enter Title...")
-
-                headerContentsG.select("g.progress-icon")
-                    .transition("icon")
-                    .duration(TRANSITIONS.MED)
-                        .attr("transform", `translate(${headerContentsWidth - progressIconWidth}, 0)`)
-                
-                headerContentsG.select("rect.progress-icon-hitbox")
-                    .attr("width", progressIconWidth)
-                    .attr("height", progressIconHeight)
-                    .on("click", function(e){ onClickDeck(e, _deckData); })
 
                 //selected card dimns
                 const selectedCardDimns = maxDimns(cardsAreaWidth, cardsAreaHeight, cardAspectRatio)
@@ -341,6 +263,7 @@ export default function deckComponent() {
                                 return (cardsAreaWidth - selectedCardWidth)/2;
                             }
                             if(d.isHeld){
+                                //console.log("ret", extraMarginLeftForCards + horizCardInc(d.handPos))
                                 return extraMarginLeftForCards + horizCardInc(d.handPos);
                             }
                             return extraMarginLeftForCards + d.cardNr * (placedCardWidth + placedCardHorizGap);
