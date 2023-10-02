@@ -385,10 +385,7 @@ export default function cardHeaderComponent() {
                             })
                             .remove();
                     })
-                    .on("click", function(e,d){ 
-                        console.log("clk")
-                        onClick.call(this, e, d)
-                    })
+                    .on("click", onClick)
 
         }
 

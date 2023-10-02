@@ -170,6 +170,14 @@ export default function deckComponent() {
             update(deckData);
 
             function init(){
+                //bg
+                containerG
+                    .append("rect")
+                        .attr("class", "deck-bg")
+                        .attr("width", width)
+                        .attr("height", height)
+                        //.attr("fill", "transparent")
+                        .attr("fill", grey10(9))
 
                 contentsG = containerG.append("g").attr("class", "deck-contents");
 
@@ -177,21 +185,21 @@ export default function deckComponent() {
                     .attr("class", "contents-bg")
                     .attr("pointer-events", "none")
                     .attr("fill", "none")
-                    //.attr("fill", "red")
                     .attr("stroke", grey10(8))
                     .attr("rx", 3)
                     .attr("ry", 3);
                 
                 headerG = contentsG.append("g")
-                    .attr("class", "header");
+                    .attr("class", "header")
+                    .attr("opacity", selectedCardNr ? 0 : 1);
 
                 cardsAreaG = contentsG
                     .append("g")
                     .attr("class", "cards-area");
 
-                cardsAreaG.append("rect")
+                /*cardsAreaG.append("rect")
                     .attr("class", "cards-area-bg")
-                    .attr("fill", "none");
+                    .attr("fill", "none");*/
             }
 
             function update(_deckData, options={}){
@@ -214,6 +222,22 @@ export default function deckComponent() {
                         }
                     });
 
+                //bg
+                containerG.select("rect.deck-bg")
+                    .attr("display", selectedCardNr ? null : "none")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .on("click", e => {
+                        deselectCard();
+                        e.stopPropagation();
+                    })
+                    /*.call(updateRectDimns, { 
+                        width: () => width, 
+                        height:() => height,
+                        transition:transformTransition,
+                        name:d => `deck-dimns-${d.id}`
+                    })*/
+
                 //contents
                 contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
 
@@ -223,7 +247,8 @@ export default function deckComponent() {
                         .attr("height", contentsHeight)
                 
                 //header
-                headerG.datum(_deckData)
+                headerG
+                    .datum(_deckData)
                     .call(header
                         .width(headerWidth)
                         .height(headerHeight)
@@ -233,16 +258,57 @@ export default function deckComponent() {
                 
 
                 //Cards area
-                cardsAreaG
+                /*cardsAreaG
                     .select("rect.cards-area-bg")
                         .attr("width", cardsAreaWidth)
-                        .attr("height", cardsAreaHeight)
+                        .attr("height", cardsAreaHeight)*/
 
 
                 //selected card dimns
                 const selectedCardDimns = maxDimns(cardsAreaWidth, cardsAreaHeight, cardAspectRatio)
                 const selectedCardWidth = selectedCardDimns.width;
                 const selectedCardHeight = selectedCardDimns.height;
+
+                function selectCard(d){
+                    //hide/show others
+                    //@todo - this can be part of update process instead
+                    containerG.selectAll("g.card").filter(cardD => cardD.cardNr !== d.cardNr)
+                        .attr("pointer-events", "none")
+                        .transition("cards")
+                        .duration(400)
+                            .attr("opacity", 0)
+                                .on("end", function(){ d3.select(this).attr("display", "none"); })
+                
+                    headerG
+                        .transition("header")
+                        .duration(400)
+                           .attr("opacity", 0)
+                           .on("end", function(){ d3.select(this).attr("display", "none"); })
+
+                    selectedCardNr = d.cardNr;
+                    update(deckData);
+                }
+
+                function deselectCard(){
+                    //hide/show others
+                    //@todo - this can be part of update process instead
+                    containerG.selectAll("g.card")//.filter(d => d.cardNr !== cardD.cardNr)
+                        .attr("display", null)
+                            .transition("cards")
+                            .delay(400)
+                            .duration(600)
+                                .attr("opacity", 1)
+                
+                    headerG
+                        .attr("display", null)
+                            .transition("header")
+                            .delay(400)
+                            .duration(600)
+                            .attr("opacity", 1)
+
+                    selectedCardNr = null
+                    update(deckData);
+                }
 
                 cardsAreaG
                     .attr("transform", `translate(0, ${headerHeight})`)
@@ -294,18 +360,12 @@ export default function deckComponent() {
                         .onUpdateItemStatus(updateItemStatus)
                         .onClickCard(function(e, d){
                             if(!deckIsSelected){
-                                onClickDeck(e, _deckData)
-                                return;
+                                onClickDeck(e, _deckData);
+                            } else if(d.isSelected){
+                                deselectCard(d);
+                            } else{
+                                selectCard(d);
                             }
-                            //hide/show others
-                            containerG.selectAll("g.card").filter(dat => dat.cardNr !== d.cardNr)
-                                .attr("pointer-events", d.isSelected ? null : "none")
-                                .transition()
-                                .duration(200)
-                                    .attr("opacity", d.isSelected ? 1 : 0)
-
-                            selectedCardNr = d.isSelected ? null : d.cardNr
-                            update(deckData);
                         })
                         .onPickUp(function(d){
                             updateFrontCardNr(d.cardNr)

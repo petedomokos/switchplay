@@ -233,7 +233,7 @@ export default function cardsComponent() {
                                 onClickCard(e, cardD); 
                             })
                         
-                        const headerDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext };
+                        const headerDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr };
                         contentsG.selectAll("g.card-header")
                             .attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
                             .datum(headerDatum)
@@ -297,6 +297,7 @@ export default function cardsComponent() {
                             .attr("width", width)
                             .attr("height", itemsAreaHeight)
                             .attr("fill", "none")
+                            .on("click", () => { console.log("items area click ")})
 
                         //btm right btn
                         const expandBtnDatum = { 
