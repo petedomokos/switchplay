@@ -87,7 +87,6 @@ export default function cardsComponent() {
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
         updateDimns();
         selection.each(function (data) {
-            //console.log("cards height", height)
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
@@ -296,8 +295,7 @@ export default function cardsComponent() {
                         contentsG.select("rect.items-area-bg")
                             .attr("width", width)
                             .attr("height", itemsAreaHeight)
-                            .attr("fill", "none")
-                            .on("click", () => { console.log("items area click ")})
+                            .attr("fill", "none");
 
                         //btm right btn
                         const expandBtnDatum = { 

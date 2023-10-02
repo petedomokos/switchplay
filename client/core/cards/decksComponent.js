@@ -34,6 +34,7 @@ export default function decksComponent() {
     let onClickDeck = function(){}
     let updateItemStatus = function(){};
     let updateFrontCardNr = function(){};
+    let setForm = function(){};
 
     let x = (d,i) => d.x;
     let y = (d,i) => d.y;
@@ -51,8 +52,7 @@ export default function decksComponent() {
         updateDimns();
         // expression elements
         selection.each(function (decksData) {
-            containerG = d3.select(this)
-            //console.log("decks....")
+            containerG = d3.select(this);
 
             if(containerG.select("rect").empty()){
                 init();
@@ -64,19 +64,12 @@ export default function decksComponent() {
             }
 
             function update(decksData, options={}){
-                //console.log("update", selectedDeckId)
-
                 const deckG = containerG.selectAll("g.deck").data(decksData);
                 deckG.enter()
                     .append("g")
                         .attr("class", "deck")
                         .each(function(d,i){
                             deckComponents[d.id] = deckComponent();
-
-                            /*d3.select(this).append("rect")
-                                .attr("pointer-events", "none")
-                                .attr("fill", "none")
-                                .attr("stroke", "aqua")*/
                         })
                         .merge(deckG)
                         .attr("transform", (d,i) => `translate(${x(d,i)}, ${y(d,i)})`)
@@ -84,21 +77,16 @@ export default function decksComponent() {
                             const deckWidth = _deckWidth(d,i);
                             const deckHeight = _deckHeight(d,i);
 
-                            /*d3.select(this).select("rect")
-                                .attr("width", width)
-                                .attr("height", height)*/
-
                             const deck = deckComponents[d.id];
                             deck
                                 .width(deckWidth)
                                 .height(deckHeight)
-                                //.selectedDeckId(selectedDeckId)
                                 .deckIsSelected(selectedDeckId === d.id)
                                 .onClickDeck(onClickDeck)
                                 .updateItemStatus(updateItemStatus)
                                 .updateFrontCardNr(updateFrontCardNr)
                                 .transformTransition(transformTransition)
-                                //.setForm(setForm)
+                                .setForm(setForm)
 
                             d3.select(this).call(deck)
                         })

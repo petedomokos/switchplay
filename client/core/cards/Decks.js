@@ -163,13 +163,11 @@ const updateFrontCardNr = useCallback(cardNr => {
 }, [stringifiedData, form, selectedDeckId]);
 
 const updateCard = useCallback((updatedCard) => {
-  //console.log("updateCard", updatedCard)
   const updatedCards = selectedDeck.cards.map(c => c.cardNr !== updatedCard.cardNr ? c : updatedCard);
   updateDeck({ ...selectedDeck, cards:updatedCards })
 }, [stringifiedData, selectedDeckId]);
 
 const updateItemTitle = useCallback(updatedTitle => {
-  //console.log("updateTitle", updatedTitle, form)
   const { cardNr, itemNr } = form.value;
   const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
   const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title: updatedTitle }));
@@ -204,7 +202,7 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
       //.zoom(zoom)
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
-      //.setForm(setForm)
+      .setForm(setForm)
   }, [stringifiedData, width, height, selectedDeckId])
 
   useEffect(() => {
@@ -242,8 +240,6 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
     //need to add a zoomlayerG inside the svg which gets zoomed when svg is acted on
   }, [])
 
-  //next - gradualy put header stylingbelow into the div, keep checking its smooth
-  //then, put zoom back gradualy, remove margin etc
   return (
     <div className={`cards-root ${classes.root}`} onClick={() => { setSelectedDeck("")}} >
       <svg className={classes.svg} id={`cards-svg`} width={width} height={height} >
@@ -255,21 +251,15 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
           </filter>
         </defs>
       </svg>
-      {/**<div className={classes.deckHeaders} ref={deckHeadersRef}>
-        data.map((deckData,i) =>
-          <div key={`deck-header-${deckData.id}`} onClick={e => { onClickDeck(e, deckData) }}
-              style={{ position:"absolute", left:deckX(deckData), top:deckY(deckData), background:"white", 
-              width:deckWrapperWidth, height:deckHeaderHeight, fontSize:"7px" }}>
-              <DeckHeader data={deckData} scale={currentScale} width={deckWrapperWidth} height={deckHeaderHeight} onClick={onClickDeck} />
-          </div>
-        )
-      </div>*/}
+      <div className={classes.formContainer}>
+        {form?.formType === "item" && 
+          <ItemForm item={form.value} fontSize={form.height * 0.5} save={updateItemTitle} close={() => setForm(null)} />
+        }
+      </div>
       {/**<div className={classes.overlay} onClick={onClick}></div>*/}
     </div>
   )
 }
-
-// {/**<DeckHeader data={deckData} scale={currentScale} width={deckWrapperWidth} height={deckHeaderHeight} onClick={onClickDeck} />*/}
 
 Decks.defaultProps = {
   asyncProcesses:{},

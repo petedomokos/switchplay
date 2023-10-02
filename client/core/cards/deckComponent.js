@@ -290,6 +290,7 @@ export default function deckComponent() {
                 }
 
                 function deselectCard(){
+                    console.log("deselecting card")
                     //hide/show others
                     //@todo - this can be part of update process instead
                     containerG.selectAll("g.card")//.filter(d => d.cardNr !== cardD.cardNr)
@@ -329,7 +330,6 @@ export default function deckComponent() {
                                 return (cardsAreaWidth - selectedCardWidth)/2;
                             }
                             if(d.isHeld){
-                                //console.log("ret", extraMarginLeftForCards + horizCardInc(d.handPos))
                                 return extraMarginLeftForCards + horizCardInc(d.handPos);
                             }
                             return extraMarginLeftForCards + d.cardNr * (placedCardWidth + placedCardHorizGap);
