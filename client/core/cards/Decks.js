@@ -84,6 +84,8 @@ const Decks = ({ user, data, customSelectedDeckId, setSel, initLeft, initTop, da
   const [decks, setDecks] = useState(() => decksComponent());
   const [zoom, setZoom] = useState(() => d3.zoom());
   const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
+  const [longpressedDeckId, setLongpressedDeckId] = useState("");
+  //console.log("Decks longpressedDeckId", longpressedDeckId)
   const [form, setForm] = useState(null);
   //processed state
   const selectedDeck = data.find(deck => deck.id === selectedDeckId);
@@ -153,35 +155,49 @@ const Decks = ({ user, data, customSelectedDeckId, setSel, initLeft, initTop, da
     //if req, update state in react, may need it with delay so it happens at end of zoom
     setSelectedDeckId(id);
     setSel(id)
-}, [stringifiedData]);
+  }, [stringifiedData]);
 
-const onClickDeck = useCallback((e, d) => {
-  setSelectedDeck(selectedDeck ? "" : d.id)
-  //setSelectedDeck(d.id); 
-  e.stopPropagation();
-}, [stringifiedData, selectedDeckId]);
+  const onClickBg = useCallback((e, d) => {
+    if(longpressedDeckId){
+      setLongpressedDeckId("");
+      return;
+    }
+    setSelectedDeck("")
+    e.stopPropagation();
+  }, [stringifiedData, selectedDeckId, longpressedDeckId]);
 
-const updateFrontCardNr = useCallback(cardNr => {
-  updateDeck({ ...selectedDeck, frontCardNr:cardNr })
-}, [stringifiedData, form, selectedDeckId]);
+  const onClickDeck = useCallback((e, d) => {
+    setSelectedDeck(selectedDeck ? "" : d.id)
+    //setSelectedDeck(d.id); 
+    e.stopPropagation();
+  }, [stringifiedData, selectedDeckId]);
 
-const updateCard = useCallback((updatedCard) => {
-  const updatedCards = selectedDeck.cards.map(c => c.cardNr !== updatedCard.cardNr ? c : updatedCard);
-  updateDeck({ ...selectedDeck, cards:updatedCards })
-}, [stringifiedData, selectedDeckId]);
+  const updateFrontCardNr = useCallback(cardNr => {
+    updateDeck({ ...selectedDeck, frontCardNr:cardNr })
+  }, [stringifiedData, form, selectedDeckId]);
 
-const updateItemTitle = useCallback(updatedTitle => {
-  const { cardNr, itemNr } = form.value;
-  const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
-  const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title: updatedTitle }));
-  updateCard({ ...cardToUpdate, items:updatedItems })
-}, [stringifiedData, form, selectedDeckId]);
+  const updateCard = useCallback((updatedCard) => {
+    const updatedCards = selectedDeck.cards.map(c => c.cardNr !== updatedCard.cardNr ? c : updatedCard);
+    updateDeck({ ...selectedDeck, cards:updatedCards })
+  }, [stringifiedData, selectedDeckId]);
 
-const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
-  const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
-  const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, status: updatedStatus }));
-  updateCard({ ...cardToUpdate, items:updatedItems })
-}, [stringifiedData, form, selectedDeckId]);
+  const updateItemTitle = useCallback(updatedTitle => {
+    const { cardNr, itemNr } = form.value;
+    const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
+    const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title: updatedTitle }));
+    updateCard({ ...cardToUpdate, items:updatedItems })
+  }, [stringifiedData, form, selectedDeckId]);
+
+  const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
+    const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
+    const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, status: updatedStatus }));
+    updateCard({ ...cardToUpdate, items:updatedItems })
+  }, [stringifiedData, form, selectedDeckId]);
+
+  //overlay and pointer events none was stopiing zoom working!!
+  useEffect(() => {
+    decks.longpressedDeckId(longpressedDeckId)
+  }, [longpressedDeckId])
 
   //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
@@ -201,6 +217,7 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
       ._deckWidth((d,i) => deckWidth)
       ._deckHeight((d,i) => deckHeight)
       .onClickDeck(onClickDeck)
+      .onSetLongpressedDeckId(setLongpressedDeckId)
       //.zoom(zoom)
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
@@ -243,7 +260,7 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
   }, [])
 
   return (
-    <div className={`cards-root ${classes.root}`} onClick={() => { setSelectedDeck("")}} >
+    <div className={`cards-root ${classes.root}`} onClick={onClickBg} >
       <svg className={classes.svg} id={`cards-svg`} overflow="visible" >
         <g ref={zoomRef} display="none"><rect width={width} height={height} fill="transparent" /></g>
         <g ref={containerRef} />
@@ -258,7 +275,6 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
           <ItemForm item={form.value} fontSize={form.height * 0.5} save={updateItemTitle} close={() => setForm(null)} />
         }
       </div>
-      {/**<div className={classes.overlay} onClick={onClick}></div>*/}
     </div>
   )
 }

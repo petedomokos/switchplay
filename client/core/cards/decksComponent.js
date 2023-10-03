@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { grey10, COLOURS, TRANSITIONS } from "./constants";
 import { updateRectDimns } from '../journey/transitionHelpers';
 import deckComponent from './deckComponent';
+import decksLayout from './deckLayout';
 
 const transformTransition = { update: { duration: TRANSITIONS.MED } };
 
@@ -27,11 +28,13 @@ export default function decksComponent() {
     }
     let _styles = () => DEFAULT_STYLES;
 
-    let selectedDeckId;
+    let selectedDeckId = "";
+    let longpressedDeckId = "";
     let selectedCardNr;
     let format;
 
     let onClickDeck = function(){}
+    let onSetLongpressedDeckId = function(){}
     let updateItemStatus = function(){};
     let updateFrontCardNr = function(){};
     let setForm = function(){};
@@ -83,6 +86,9 @@ export default function decksComponent() {
                                 .height(deckHeight)
                                 .deckIsSelected(selectedDeckId === d.id)
                                 .onClickDeck(onClickDeck)
+                                .onSetLongpressed(isLongpressed => { 
+                                    onSetLongpressedDeckId( isLongpressed ? d.id : "") 
+                                }) 
                                 .updateItemStatus(updateItemStatus)
                                 .updateFrontCardNr(updateFrontCardNr)
                                 .transformTransition(transformTransition)
@@ -147,6 +153,13 @@ export default function decksComponent() {
         selectedDeckId = value;
         return decks;
     };
+    decks.longpressedDeckId = function (value) {
+        if (!arguments.length) { return longpressedDeckId; }
+        longpressedDeckId = value;
+        //pass on to each deck
+        Object.values(deckComponents).forEach(deck => deck.longpressedDeckId(value))
+        return decks;
+    };
     decks.format = function (value) {
         if (!arguments.length) { return format; }
         format = value;
@@ -170,6 +183,11 @@ export default function decksComponent() {
     decks.onClickDeck = function (value) {
         if (!arguments.length) { return onClickDeck; }
         onClickDeck = value;
+        return decks;
+    };
+    decks.onSetLongpressedDeckId = function (value) {
+        if (!arguments.length) { return onSetLongpressedDeckId; }
+        onSetLongpressedDeckId = value;
         return decks;
     };
     return decks;

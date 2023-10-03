@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { grey10, COLOURS, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIONS } from "./constants";
 import cardsComponent from './cardsComponent';
 import headerComponent from './headerComponent';
+import dragEnhancements from '../journey/enhancedDragHandler';
 import { updateRectDimns } from '../journey/transitionHelpers';
 
 function maxDimns(maxWidth, maxHeight, aspectRatio){
@@ -140,11 +141,21 @@ export default function deckComponent() {
     let selectedCardNr;
     let format;
     let transformTransition;
+    let longpressedDeckId;
+
+    let id;
 
     let onClickDeck = function(){};
+    let onSetLongpressed = function(){};
     let setForm = function(){};
     let updateItemStatus = function(){};
     let updateFrontCardNr = function(){};
+
+    let deckIsLongpressed = false;
+    let wasLongpressDragged = false;
+
+    let longpressStart;
+    let longpressEnd;
 
     let containerG;
     let contentsG;
@@ -154,6 +165,7 @@ export default function deckComponent() {
     //components
     const header = headerComponent();
     const cards = cardsComponent();
+    let enhancedDrag = dragEnhancements();
 
     function deck(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true } = options;
@@ -161,6 +173,7 @@ export default function deckComponent() {
         updateDimns();
         // expression elements
         selection.each(function (deckData) {
+            id = deckData.id;
             containerG = d3.select(this)
 
             if(containerG.select("g").empty()){
@@ -197,15 +210,19 @@ export default function deckComponent() {
                     .append("g")
                     .attr("class", "cards-area");
 
-                /*cardsAreaG.append("rect")
-                    .attr("class", "cards-area-bg")
-                    .attr("fill", "none");*/
+                containerG
+                    .append("rect")
+                        .attr("class", "deck-overlay")
+                        .attr("width", width)
+                        .attr("height", height)
+                        .attr("fill", "transparent")// grey10(9))
+                        .attr("opacity", 0.3)
             }
 
             function update(_deckData, options={}){
                 //console.log("update", _deckData)
                 const { } = options;
-                const { frontCardNr } = _deckData;
+                const { id, frontCardNr } = _deckData;
 
                 //dimns for specific chart
                 const cardsData = _deckData.cards
@@ -230,6 +247,76 @@ export default function deckComponent() {
                     .on("click", e => {
                         deselectCard();
                         e.stopPropagation();
+                    })
+                    /*.call(updateRectDimns, { 
+                        width: () => width, 
+                        height:() => height,
+                        transition:transformTransition,
+                        name:d => `deck-dimns-${d.id}`
+                    })*/
+
+                //drag overlay
+            enhancedDrag
+                .dragThreshold(100)
+                .onLongpressStart(function(){ onSetLongpressed(true); })
+                .onLongpressDragged(longpressDragged)
+                .onLongpressEnd(function(){
+                    if(wasLongpressDragged){
+                        onSetLongpressed(false);
+                    }
+                });
+
+            const drag = d3.drag()
+                .on("start", deckIsSelected ? null : enhancedDrag(dragStart))
+                .on("drag", deckIsSelected ? null : enhancedDrag(dragged))
+                .on("end", deckIsSelected ? null : enhancedDrag(dragEnd))
+
+                function dragStart(e,d){
+                }
+                function dragged(e,d){
+                    if(longpressedDeckId === id){
+                        wasLongpressDragged = true;
+                    }
+                }
+                function dragEnd(e,d){
+                    if(longpressedDeckId === id){
+                        onSetLongpressed(false);
+                    }
+                }
+
+                longpressStart = function(e,d){
+                    containerG.select("rect.deck-overlay").attr("fill", "green")
+                    d3.selectAll("g.deck").filter(d => d.id !== id)
+                        .attr("pointer-events", "none")
+
+                    onSetLongpressed(true);
+                }
+                function longpressDragged(e,d){
+                    wasLongpressDragged = true;
+                }
+                longpressEnd = function(e,d){
+                    if(wasLongpressDragged){
+                        console.log("was dragged...")
+                        //todo - process dragged deck
+                        wasLongpressDragged = false;
+                    }
+                    containerG.select("rect.deck-overlay").attr("fill", "transparent")
+                    d3.selectAll("g.deck").filter(d => d.id !== id)
+                        .attr("pointer-events", "all")
+                }
+
+                containerG.call(drag)
+                    
+                containerG.select("rect.deck-overlay")
+                    .attr("display", deckIsSelected ? "none" : null)
+                    .attr("width", width)
+                    .attr("height", height)
+                    .on("click", e => {
+                        if(longpressedDeckId === id){ 
+                            e.stopPropagation();
+                            return;
+                        }
+                        onClickDeck(e, _deckData)
                     })
                     /*.call(updateRectDimns, { 
                         width: () => width, 
@@ -288,6 +375,12 @@ export default function deckComponent() {
                     selectedCardNr = d.cardNr;
                     update(deckData);
                 }
+
+                //2 issues - clicking card backgrounddoes nothing, but it should still prevent 
+                //propagation to the div bg to deslect deck.
+
+                //2nd - swiping the placed cards is not being picked up - perhaps start with clicking
+                //all cards, check that is picked up, it should just prevetn ptopagtion thats all
 
                 function deselectCard(){
                     //hide/show others
@@ -369,8 +462,6 @@ export default function deckComponent() {
                         })
                         .onPickUp(function(d){
                             updateFrontCardNr(d.cardNr)
-                            //frontCardNr = d.cardNr;
-                            //update(deckData);
                         })
                         .onPutDown(function(d){
                             if(d.isSelected){
@@ -381,8 +472,6 @@ export default function deckComponent() {
                                     .attr("opacity", 1);
                             }
                             updateFrontCardNr(d.cardNr + 1);
-                            //frontCardNr = d.cardNr + 1;
-                            //update(deckData);
                         }))
 
             }
@@ -428,9 +517,25 @@ export default function deckComponent() {
         transformTransition = value; 
         return deck;
     };
+    deck.longpressedDeckId = function (value) {
+        if (!arguments.length) { return longpressedDeckId; }
+        if(longpressedDeckId === id && value !== id){
+            longpressEnd();
+        }else if(longpressedDeckId !== id && value === id){
+            longpressStart();
+        }
+        longpressedDeckId = value;
+        return deck;
+    };
+    //functions
     deck.onClickDeck = function (value) {
         if (!arguments.length) { return onClickDeck; }
         onClickDeck = value;
+        return deck;
+    };
+    deck.onSetLongpressed = function (value) {
+        if (!arguments.length) { return onSetLongpressed; }
+        onSetLongpressed = value;
         return deck;
     };
     deck.updateItemStatus = function (value) {

@@ -162,6 +162,10 @@ export default function cardsComponent() {
                                 .attr("height", height)
                                 .attr("stroke", getCardStroke(d))
                                 .attr("fill", getCardFill(d))
+                                .on("click", e => {
+                                    console.log("card bg click...do nothing")
+                                    e.stopPropagation();
+                                })
                         
                         contentsG
                             .append("g")
@@ -175,14 +179,14 @@ export default function cardsComponent() {
                                     .append("rect")
                                         .attr("class", "items-area-bg");
 
-                        contentsG
+                        /*contentsG
                             .append("rect")
                                 .attr("class", "card-overlay")
                                 .attr("rx", 3)
                                 .attr("ry", 3)
                                 .attr("stroke", "none")
                                 .attr("fill", "transparent")
-                                .on("click", onClickCard)
+                                .on("click", onClickCard)*/
                     })
                     .call(updateTransform, { 
                         x, 
@@ -205,10 +209,10 @@ export default function cardsComponent() {
                         const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status } = cardD; 
                         const contentsG = d3.select(this).select("g.card-contents");
                         
-                        contentsG.select("rect.card-overlay")
+                        /*contentsG.select("rect.card-overlay")
                             .attr("width", width)
                             .attr("height", height)
-                            .attr("display", deckIsSelected ? "none" : null)
+                            .attr("display", deckIsSelected ? "none" : null)*/
 
                         
                         //bg colour
@@ -371,6 +375,7 @@ export default function cardsComponent() {
 
             let swipeTriggered = false;
             function dragged(e , d){
+                console.log("card dragged")
                 if(swipeTriggered){ return; }
                 const swipeDirection = e.dy <= 0 ? "up" : "down";
                 const frontCard = data.find(c => c.isFront);
