@@ -4,7 +4,7 @@ import { TRANSITIONS } from "../cards/constants"
 
 export function updateTransform(selection, options={}){
     //console.log("updateTransform-----------------------", selection.node())
-    const { x = d => d.x, y = d => d.y, k= () => 1, transition, cb = () => {}, name="" } = options;
+    const { x = d => d.x, y = d => d.y, k= () => 1, transition, cb = () => {}, name="", force } = options;
     selection.each(function(d, i){
         const _name = typeof name === "function" ? name(d,i) : name;
         const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
@@ -12,7 +12,7 @@ export function updateTransform(selection, options={}){
             //already where it needs to be
             return;
         }
-        if(d3.select(this).attr("class").includes("transitioning")){
+        if(d3.select(this).attr("class").includes("transitioning") && !force){
             //already in transition - so we ignore the new request
             return;
         }

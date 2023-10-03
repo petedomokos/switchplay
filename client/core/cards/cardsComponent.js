@@ -189,7 +189,8 @@ export default function cardsComponent() {
                         y,
                         k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),  
                         transition:transformTransition.enter,
-                        name:d => `card-pos-${d.id}`
+                        name:d => `card-pos-${d.id}`,
+                        force:true
                     })
                     .merge(cardG)
                     .call(updateTransform, { 
@@ -197,7 +198,8 @@ export default function cardsComponent() {
                         y, 
                         k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),
                         transition:transformTransition.update,
-                        name:(d,i) => `card-pos-${i}-${d.id}`
+                        name:(d,i) => `card-pos-${i}-${d.id}`,
+                        force:true
                     })
                     .each(function(cardD,i){
                         const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status } = cardD; 

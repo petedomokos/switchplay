@@ -78,20 +78,13 @@ const embellishedDecks = decks => decks
 
 const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, screen, createDeck, updateDeck }) => {
   const { decks=[] } = user;
-  /*const decks = [
-    { id:"d1" }, { id:"d2" }, { id:"d3" }, { id:"d4" }
-  ]*/
-  //console.log("screen", screen)
-  //const decks = user?.decks[0] ? [user.decks[0]] : []
   const width = screen.width || 300;
   const height = screen.height || 600;
-  //console.log("CardsTable", decks)
 
   const containerWidth = 100000;
   const containerHeight = 100000;
 
   const decksData = embellishedDecks(decks);
-  //console.log("decksData", decksData)
   const stringifiedData = JSON.stringify(decksData);
 
   const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);

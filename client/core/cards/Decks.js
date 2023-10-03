@@ -178,7 +178,6 @@ const updateItemTitle = useCallback(updatedTitle => {
 }, [stringifiedData, form, selectedDeckId]);
 
 const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
-  //console.log("updateItemStatus", cardNr, itemNr, updatedStatus)
   const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
   const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, status: updatedStatus }));
   updateCard({ ...cardToUpdate, items:updatedItems })

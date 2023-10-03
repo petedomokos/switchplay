@@ -290,7 +290,6 @@ export default function deckComponent() {
                 }
 
                 function deselectCard(){
-                    console.log("deselecting card")
                     //hide/show others
                     //@todo - this can be part of update process instead
                     containerG.selectAll("g.card")//.filter(d => d.cardNr !== cardD.cardNr)
@@ -310,6 +309,7 @@ export default function deckComponent() {
                     selectedCardNr = null
                     update(deckData);
                 }
+
 
                 cardsAreaG
                     .attr("transform", `translate(0, ${headerHeight})`)
