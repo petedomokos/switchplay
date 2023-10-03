@@ -93,6 +93,9 @@ const Decks = ({ user, data, customSelectedDeckId, setSel, initLeft, initTop, da
   //const deckHeadersRef = useRef(null);
   const zoomStateRef = useRef(d3.zoomIdentity);
   //dimns
+  const containerWidth = 100000;
+  const containerHeight = 100000;
+
   const deckAspectRatio = width / height;
   const deckOuterMargin = {
     left:10, //width * 0.05,
@@ -242,7 +245,7 @@ const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
 
   return (
     <div className={`cards-root ${classes.root}`} onClick={() => { setSelectedDeck("")}} >
-      <svg className={classes.svg} id={`cards-svg`} width={width} height={height} >
+      <svg className={classes.svg} id={`cards-svg`} overflow="visible" >
         <g ref={zoomRef} display="none"><rect width={width} height={height} fill="transparent" /></g>
         <g ref={containerRef} />
         <defs>
