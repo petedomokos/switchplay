@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import CardsTable  from './CardsTable'
-import { createDeck, updateDeck } from '../../actions/UserActions'
+import { createTable, updateTable,  createDeck, updateDeck } from '../../actions/UserActions'
 
 const mapStateToProps = (state, ownProps) => {
 	//console.log("CardsTableContainer...user", state.user)
@@ -22,12 +22,18 @@ const mapStateToProps = (state, ownProps) => {
 }
 
 const mapDispatchToProps = dispatch => ({
-	createDeck(settings){
-		dispatch(createDeck(settings))
+	createDeck(settings, tableId){
+		console.log("create deck............", tableId)
+		dispatch(createDeck(settings, tableId))
 	},
 	updateDeck(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
-		console.log("update deck", deck)
 		dispatch(updateDeck(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter));
+	},
+	createTable(settings){
+		dispatch(createTable(settings))
+	},
+	updateTable(table, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
+		dispatch(updateTable(table, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter));
 	},
 })
 

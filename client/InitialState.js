@@ -4,6 +4,7 @@ export const InitialState = {
 	//but when creating a new user or group, they dont need to go into other.
 	user:{
 		settings:{},
+		tables:[],
 		decks:[],
 		administeredUsers:[],
 		administeredGroups:[],

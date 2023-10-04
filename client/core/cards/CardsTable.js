@@ -5,6 +5,7 @@ import Button from '@material-ui/core/Button'
 import ItemForm from "./forms/ItemForm";
 import { sortAscending } from '../../util/ArrayHelpers';
 //import { initDeck } from '../../data/cards';
+import { isNumber } from '../../data/dataHelpers';
 //import { createId } from './helpers';
 import IconComponent from './IconComponent';
 import Instructions from "./Instructions"
@@ -31,6 +32,7 @@ const useStyles = makeStyles((theme) => ({
     position:"absolute",
     left:props => props.contents.left,
     top:props => props.contents.top,
+    transition: `top ${TRANSITIONS.MED}ms`,
     //width:props => props.contents.width,
     //height:props => props.contents.height,
     //background:"red"
@@ -64,39 +66,75 @@ const createMockDecks = (userId, nrDecks=1) => d3.range(nrDecks).map((nr,i) =>
   })
 )
 */
+const DEFAULT_NR_COLS = 3;
+const calcColNr = (i, nrCols) => i % nrCols;
+const calcRowNr = (i, nrCols) => Math.floor(i/nrCols);
 
-const calcColNr = i => i % 3;
-const calcRowNr = i => Math.floor(i/3);
-
-const embellishedDecks = decks => decks
+const embellishedDecks = (decks, nrCols=DEFAULT_NR_COLS) => decks
   .map((d,i) => ({ ...d, i }))
   .map((d,i) => ({
   ...d, 
-  colNr:calcColNr(i),
-  rowNr:calcRowNr(i),
+  colNr: isNumber(d.colNr) ? d.colNr : calcColNr(i, nrCols),
+  rowNr: isNumber(d.rowNr) ? d.rowNr : calcRowNr(i, nrCols),
+  listPos: isNumber(d.colNr) ? null : i
 }))
 
-const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, screen, createDeck, updateDeck }) => {
-  const { decks=[] } = user;
+/*
+todo
+   - work out why 2 tables are being created - wy is cerate`table being called on each reload
+   - put teh new deck icon back on screen
+   - create a new deck by clicking icon -> add the deckid into the table.decks array too, so need to also updateTable
+   (this will be a separate Reacr rerender, but the order they happen in shouldnt matter, it will only show the deck when both are returned)
+
+
+*/
+const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, screen, createTable, updateTable, createDeck, updateDeck, updateDecks }) => {
+  const { tables=[], decks=[] } = user;
+  console.log("tables", tables)
+
+  //@todo - move creating flag to asyncProcesses
+  const [creatingTable, setCreatingTable] = useState(false);
+  //for now, we just assume its the first table
+  //console.log("CardsTable", user._id, creatingTable, user.tables)
+  useEffect(() => {
+    if(user._id && tables.length === 0 && !creatingTable){
+      setCreatingTable(true);
+      //console.log("call createTable..................")
+      createTable();
+      return;
+    }
+    //reset flag if it has been created
+    if(tables.length !== 0 && creatingTable){
+      setCreatingTable(false)
+    }
+  },[user._id, tables.length])
+
+  const table = tables[0];
+  const tableDecks = table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
+  console.log("tableDecks", tableDecks)
+
+
   const width = screen.width || 300;
   const height = screen.height || 600;
 
   const containerWidth = 100000;
   const containerHeight = 100000;
 
-  const decksData = embellishedDecks(decks);
-  const stringifiedData = JSON.stringify(decksData);
+  const nrCols = DEFAULT_NR_COLS;
+
+  const decksData = embellishedDecks(tableDecks, nrCols);
+  const stringifiedData = JSON.stringify(tableDecks);
 
   const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
   const [shouldDisplayInstructions, setShouldDisplayInstructions] = useState(false);
   const [form, setForm] = useState(null);
 
   //we follow d3 margin convention here (eg html padding)
-  const vertSpaceForHeader = 40;
+  //const vertSpaceForHeader = 40;
   const margin = { 
     left:0,//width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
     right:0,//width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
-    top:0,// height * 0.1,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
+    top: selectedDeckId ? 0 : 35,// height * 0.1,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
     bottom:0,//height * 0.1// selectedDeckId ? 0 :  height * 0.05
   }
   const contentsWidth = width - margin.left - margin.right;
@@ -126,6 +164,10 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const containerRef = useRef(null);
   const instructionsRef = useRef(null);
 
+  const onCreateDeck = useCallback((settings={}) => {
+    createDeck(settings, table.id)
+  }, [table]);
+
   useEffect(() => {
     //setShouldDisplayInstructions(???);
   }, [selectedDeckId])
@@ -149,10 +191,10 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
           <Instructions />
           :
           <Decks 
-            setSel={setSelectedDeckId}
-            initLeft={containerWidth/2 + margin.left + (screen.width - width)/2}
-            initTop={containerHeight/2 + margin.top}
-            data={decksData} width={contentsWidth} height={contentsHeight} updateDeck={updateDeck} />
+            setSel={setSelectedDeckId} nrCols={nrCols} 
+            data={decksData} width={contentsWidth} height={contentsHeight} 
+            onCreateDeck={onCreateDeck} 
+            updateDeck={updateDeck} />
         }
       </div>
     </div>

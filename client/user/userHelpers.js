@@ -23,6 +23,7 @@ function getPersonType(id){
 export const hydrateUser = user => {
     return {
         ...user,
+        tables:user.tables || [],
         decks:user.decks || [],
         photo: user.photo ? { ...user.photo, added:new Date(user.photo.added)} : null,
         photos:user.photos ? user.photos.map(p => ({ ...p, added:new Date(p.added) })) : null,

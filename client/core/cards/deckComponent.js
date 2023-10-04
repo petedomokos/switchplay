@@ -2,8 +2,11 @@ import * as d3 from 'd3';
 import { grey10, COLOURS, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIONS } from "./constants";
 import cardsComponent from './cardsComponent';
 import headerComponent from './headerComponent';
+import contextMenuComponent from "./contextMenuComponent";
 import dragEnhancements from '../journey/enhancedDragHandler';
 import { updateRectDimns } from '../journey/transitionHelpers';
+import { getTransformationFromTrans } from '../journey/helpers';
+import { isNumber } from '../../data/dataHelpers';
 
 function maxDimns(maxWidth, maxHeight, aspectRatio){
     const potentialHeight = maxWidth * aspectRatio;
@@ -12,6 +15,10 @@ function maxDimns(maxWidth, maxHeight, aspectRatio){
     }
     return { width: maxHeight/aspectRatio, height: maxHeight }
 }
+
+const CONTEXT_MENU_ITEM_HEIGHT = 50;
+const CONTEXT_MENU_GAP = 10;
+const contextMenuData = [ { key:"delete", icon:"" }, { key:"archive", icon:""} ]
 
 export default function deckComponent() {
     //API SETTINGS
@@ -24,6 +31,8 @@ export default function deckComponent() {
 
     let contentsWidth;
     let contentsHeight;
+
+    let contextMenuWidth;
 
     let headerWidth;
     let headerHeight;
@@ -60,6 +69,8 @@ export default function deckComponent() {
     function updateDimns(){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
+
+        contextMenuWidth = contentsWidth;
 
         headerWidth = contentsWidth;
         headerHeight = 20;
@@ -137,16 +148,22 @@ export default function deckComponent() {
     }
     let _styles = () => DEFAULT_STYLES;
 
+    //settings
     let deckIsSelected;
     let selectedCardNr;
     let format;
     let transformTransition;
     let longpressedDeckId;
+    let getCell = position => [0,0];
 
+    //data 
     let id;
 
     let onClickDeck = function(){};
     let onSetLongpressed = function(){};
+    let onMoveDeck = function(){};
+    let onDeleteDeck = function(){};
+    let onArchiveDeck = function(){};
     let setForm = function(){};
     let updateItemStatus = function(){};
     let updateFrontCardNr = function(){};
@@ -161,11 +178,13 @@ export default function deckComponent() {
     let contentsG;
     let headerG;
     let cardsAreaG;
+    let contextMenuG;
 
     //components
     const header = headerComponent();
     const cards = cardsComponent();
-    let enhancedDrag = dragEnhancements();
+    const contextMenu = contextMenuComponent();
+    const enhancedDrag = dragEnhancements();
 
     function deck(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true } = options;
@@ -215,14 +234,17 @@ export default function deckComponent() {
                         .attr("class", "deck-overlay")
                         .attr("width", width)
                         .attr("height", height)
-                        .attr("fill", "transparent")// grey10(9))
-                        .attr("opacity", 0.3)
+                        .attr("fill", "transparent")
+                        .attr("opacity", 0.3);
+
+                contextMenuG = containerG.append("g")
+                    .attr("class", "context-menu")
             }
 
             function update(_deckData, options={}){
                 //console.log("update", _deckData)
                 const { } = options;
-                const { id, frontCardNr } = _deckData;
+                const { id, frontCardNr, listPos, colNr, rowNr } = _deckData;
 
                 //dimns for specific chart
                 const cardsData = _deckData.cards
@@ -255,54 +277,168 @@ export default function deckComponent() {
                         name:d => `deck-dimns-${d.id}`
                     })*/
 
-                //drag overlay
-            enhancedDrag
-                .dragThreshold(100)
-                .onLongpressStart(function(){ onSetLongpressed(true); })
-                .onLongpressDragged(longpressDragged)
-                .onLongpressEnd(function(){
-                    if(wasLongpressDragged){
-                        onSetLongpressed(false);
-                    }
-                });
+                //contextMenu
+                //note - hoz and vert margins are not the same proportion of total
+                const menuMargin = {
+                    left: contextMenuWidth * 0.1, right:contextMenuWidth * 0.1,
+                    top:CONTEXT_MENU_ITEM_HEIGHT * 0.1, bottom: CONTEXT_MENU_ITEM_HEIGHT * 0.1
+                }
+                const nrItems = contextMenuData.length;
+                const menuItemWidth = (contextMenuWidth - menuMargin.left - menuMargin.right)/nrItems;
+                const contextMenuHeight = CONTEXT_MENU_ITEM_HEIGHT + menuMargin.top + menuMargin.bottom;
+                contextMenuG
+                    .attr("transform", `translate(${(width - contextMenuWidth)/2},${-contextMenuHeight - CONTEXT_MENU_GAP})`)
+                
+                contextMenu
+                    .itemWidth(menuItemWidth)
+                    .itemHeight(CONTEXT_MENU_ITEM_HEIGHT)
+                    .margin(menuMargin)
+                    .onClick((e,d) => {
+                        if(d.key === "delete"){
+                            console.log("delete")
+                            //todo - impl
+                        }
+                        if(d.key === "archive"){
+                            console.log("archive")
+                            //todo - impl
+                        }
+                        e.stopPropagation();
+                    })
 
-            const drag = d3.drag()
-                .on("start", deckIsSelected ? null : enhancedDrag(dragStart))
-                .on("drag", deckIsSelected ? null : enhancedDrag(dragged))
-                .on("end", deckIsSelected ? null : enhancedDrag(dragEnd))
+                //drag overlay
+                enhancedDrag
+                    .dragThreshold(100)
+                    .onLongpressStart(function(){ onSetLongpressed(true); })
+                    .onLongpressDragged(longpressDragged)
+                    .onLongpressEnd(function(){
+                        if(wasLongpressDragged){
+                            onSetLongpressed(false);
+                        }
+                    });
+
+                /*
+                    todo
+                    - Y create a selection.copy() of the longpressed deck
+                    - Y move the copy based on e.dx and dy
+                    - Y create functions to calculate which cell the drag is in
+                    - Y transition the clone to fit in the slot, at saem time as a general update will transitoin the others to move, then on end, reoklace clone with original
+                    - Y highlight the newcell during drag - fill and/or stroke of its overlay or of its background
+                    - update the pos in array on longpress end (note: we are not doing grids for now, just a single list)
+                    - Y make copy() disappear on end, 
+                    - check - normal react update should place the actual deck in correct place
+                    - check the updateTransform handles changes smoothly for each deck
+
+                    - Y add context menu above/below deck (with shaded background opacity around 0.5)
+                    - add svg icons for delete and archive
+                    - process the delete and archive here and also on back end
+                */
+
+                const drag = d3.drag()
+                    .on("start", deckIsSelected ? null : enhancedDrag(dragStart))
+                    .on("drag", deckIsSelected ? null : enhancedDrag(dragged))
+                    .on("end", deckIsSelected ? null : enhancedDrag(dragEnd))
+
+                let cloneG;
+                let newCell;
 
                 function dragStart(e,d){
                 }
+
                 function dragged(e,d){
-                    if(longpressedDeckId === id){
-                        wasLongpressDragged = true;
-                    }
-                }
-                function dragEnd(e,d){
-                    if(longpressedDeckId === id){
-                        onSetLongpressed(false);
-                    }
+                    if(longpressedDeckId === id){ wasLongpressDragged = true; }
+                    handleDrag(e);
                 }
 
+                function dragEnd(e,d){ if(longpressedDeckId === id){ onSetLongpressed(false); } }
+
                 longpressStart = function(e,d){
-                    containerG.select("rect.deck-overlay").attr("fill", "green")
-                    d3.selectAll("g.deck").filter(d => d.id !== id)
-                        .attr("pointer-events", "none")
+                    d3.selectAll("g.deck").filter(d => d.id !== id).attr("pointer-events", "none")
+                        
+                    //create a clone 
+                    cloneG = containerG
+                        .clone(true)
+                        .attr("pointer-events", "none") //this allows orig deck to be dragged
+                        .attr("opacity", 1)
+                        .raise();
+                    
+                    cloneG.select("rect.deck-overlay").attr("fill", "green")
+                    cloneG.select("g.context-menu")
+                        .attr("pointer-events", "all")
+                        .datum(contextMenuData)
+                        .call(contextMenu)
+
+                    //now we have cloned it, we hide the original
+                    containerG.attr("opacity", 0)
+
+                    const { translateX, translateY } = getTransformationFromTrans(cloneG.attr("transform"));
 
                     onSetLongpressed(true);
                 }
                 function longpressDragged(e,d){
                     wasLongpressDragged = true;
+                    handleDrag(e);
                 }
+
+                function handleDrag(e,d){
+                    cloneG.select("g.context-menu").remove();
+
+                    const { translateX, translateY } = getTransformationFromTrans(cloneG.attr("transform"));
+                    const newX = translateX + e.dx;
+                    const newY = translateY + e.dy;
+                    const latestNewCell = getCell([newX, newY]);
+                    const currentNewCell = newCell;
+                    if(!newCell || latestNewCell.key !== currentNewCell.key){
+                        newCell = latestNewCell;
+                        // add newCell stroke
+                        d3.select(`g.deck-${newCell.deckId}`).select("rect.deck-overlay")
+                            .attr("opacity", 0.8)
+                            .attr("stroke", "green")
+                            .attr("stroke-width", 3)
+                    
+                        //remove prev 
+                        d3.select(`g.deck-${currentNewCell?.deckId}`).select("rect.deck-overlay")
+                            .attr("opacity", 0.3)
+                            .attr("stroke", null)
+                            .attr("stroke-width", null)
+                    }
+                       
+                    //console.log("newcell", newCell)
+                    //drag the clone
+                    cloneG.attr("transform", `translate(${newX},${newY})`);
+                }
+
                 longpressEnd = function(e,d){
                     if(wasLongpressDragged){
-                        console.log("was dragged...")
-                        //todo - process dragged deck
+                        //console.log("was dragged...")
+                        console.log("newCell", newCell)
+                        //@todo - if no listPos, it is grid format so handle changes of rowNr and colNr
+                        if(isNumber(listPos)){
+                            //decks are in displayed list format
+                            onMoveDeck(listPos, newCell.listPos);
+                        }
+                        cloneG
+                            .transition("clone")
+                            .duration(TRANSITIONS.MED)
+                            .attr("transform", `translate(${newCell.deckX},${newCell.deckY})`)
+                            .on("end", function(){
+                                //replace clone with original
+                                cloneG.remove();
+                                containerG.attr("opacity", 1)
+                                //remove newCell stroke
+                                d3.select(`g.deck-${newCell?.deckId}`).select("rect.deck-overlay")
+                                    .attr("opacity", 0.3)
+                                    .attr("stroke", null)
+                                    .attr("stroke-width", null)
+
+                            })
                         wasLongpressDragged = false;
+                    }else{
+                        //replace clone with original
+                        cloneG.remove();
+                        containerG.attr("opacity", 1)
                     }
-                    containerG.select("rect.deck-overlay").attr("fill", "transparent")
-                    d3.selectAll("g.deck").filter(d => d.id !== id)
-                        .attr("pointer-events", "all")
+                
+                    d3.selectAll("g.deck").filter(d => d.id !== id).attr("pointer-events", "all");
                 }
 
                 containerG.call(drag)
@@ -527,10 +663,30 @@ export default function deckComponent() {
         longpressedDeckId = value;
         return deck;
     };
+    deck.getCell = function (func) {
+        if (!arguments.length) { return getCell; }
+        getCell = func;
+        return deck;
+    };
     //functions
     deck.onClickDeck = function (value) {
         if (!arguments.length) { return onClickDeck; }
         onClickDeck = value;
+        return deck;
+    };
+    deck.onMoveDeck = function (value) {
+        if (!arguments.length) { return onMoveDeck; }
+        onMoveDeck = value;
+        return deck;
+    };
+    deck.onDeleteDeck = function (value) {
+        if (!arguments.length) { return onDeleteDeck; }
+        onDeleteDeck = value;
+        return deck;
+    };
+    deck.onArchiveDeck = function (value) {
+        if (!arguments.length) { return onArchiveDeck; }
+        onArchiveDeck = value;
         return deck;
     };
     deck.onSetLongpressed = function (value) {

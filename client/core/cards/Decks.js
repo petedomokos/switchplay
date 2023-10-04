@@ -7,20 +7,18 @@ import DeckHeader from './DeckHeader';
 import deckLayout from './deckLayout';
 import decksComponent from "./decksComponent";
 import ItemForm from "./forms/ItemForm";
-import { sortAscending } from '../../util/ArrayHelpers';
+import { sortAscending, reorder } from '../../util/ArrayHelpers';
 import { initDeck } from '../../data/cards';
 //import { createId } from './helpers';
 import { TRANSITIONS } from "./constants"
 import { grey10, COLOURS } from './constants';
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
+import IconComponent from './IconComponent';
 const { GOLD } = COLOURS;
-
-
 
 const useStyles = makeStyles((theme) => ({
   root: {
     position:"relative",
-    paddingTop:props => props.paddingTop,
     transition: `all ${TRANSITIONS.MED}ms`,
     transitionTimingFunction: "ease-in-out",
     //display:"flex",
@@ -31,39 +29,42 @@ const useStyles = makeStyles((theme) => ({
     borderWidth:"thin",
     borderColor:"red"*/
   },
-  overlay:{
-    display:"none",
-    width:props => props.width,
-    height:props => props.height,
-    position:"absolute",
-    display:props => props.overlayDisplay,
-    transition: `all ${TRANSITIONS.MED}ms`
-  },
   keyPhrase:{
     color:grey10(1)
+  },
+  addDeckIconContainer:{
+    position:"absolute",
+    left:props => props.addDeckIconContainer.left,
+    top:props => props.addDeckIconContainer.top,
+    width:props => `${props.addDeckIconContainer.width}px`,
+    height:props => `${props.addDeckIconContainer.height}px`,
+    display:"flex",
+    flexDirection:"column",
+    justifyContent:"center",
+    alignItems:"center",
+    /*border:"solid",
+    borderColor:"white",*/
+  },
+  addDeckText:{
+    color:"white",
+    height:"40px",
+    display:"flex",
+    alignItems:"center"
+  },
+  cell:{
+    position:"absolute",
+    display:props => props.cell.display,
+    border:"solid",
+    borderWidth:"thin",
+    borderColor:"white",
+    width:props => props.cell.width,
+    height:props => props.cell.height
   },
   svg:{
     pointerEvents:"all",
     //pointerEvents:props => props.svg.pointerEvents,
     position:"absolute",
   },
-  /*
-  deckHeaders:{
-    position:"absolute",
-    width:props => props.width,
-    height:props => props.height,
-    left:props => props.deckHeaders.left,
-    top:props => props.deckHeaders.top,
-    transform:props => props.deckHeaders.transform,
-    transitionTimingFunction: "linear",
-    //transitionTimingFunction: "ease",
-    //transitionTimingFunction: "cubic-bezier(0.1, 0.7, 1.0, 0.1)",
-    transformOrigin:"top left",
-    transition: `all ${TRANSITIONS.MED}ms`,
-    //background:"blue"
-
-  },
-  */
   formContainer:{
     position:"absolute",
     left:"0px",
@@ -74,9 +75,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Decks = ({ user, data, customSelectedDeckId, setSel, initLeft, initTop, datasets, asyncProcesses, width, height, onClick, updateDeck }) => {
-  //console.log("Decks", data)
-  if(data.length === 0){ return null}
+const Decks = ({ data, customSelectedDeckId, setSel, nrCols, datasets, asyncProcesses, width, height, onClick, onCreateDeck, updateDeck, updateDecks }) => {
   //processed props
   const stringifiedData = JSON.stringify(data);
   //state
@@ -95,8 +94,6 @@ const Decks = ({ user, data, customSelectedDeckId, setSel, initLeft, initTop, da
   //const deckHeadersRef = useRef(null);
   const zoomStateRef = useRef(d3.zoomIdentity);
   //dimns
-  const containerWidth = 100000;
-  const containerHeight = 100000;
 
   const deckAspectRatio = width / height;
   const deckOuterMargin = {
@@ -105,38 +102,89 @@ const Decks = ({ user, data, customSelectedDeckId, setSel, initLeft, initTop, da
     top:15,//height * 0.05,
     bottom:15//height * 0.05
   }
-  const deckWidthWithMargins = d3.min([width/3, 220]);
+  const deckWidthWithMargins = width/nrCols;// d3.min([width/3, 220]);
   const deckWidth = deckWidthWithMargins - deckOuterMargin.left - deckOuterMargin.right;
+  //the inner height is calcuated first as the aspect ration must be maintained
   const deckHeight = deckWidth / deckAspectRatio;
+  const deckHeightWithMargins = deckHeight + deckOuterMargin.top + deckOuterMargin.bottom;
 
   const zoomScale = width / deckWidth;
-  const currentScale = selectedDeckId ? zoomScale : 1;
-  const extraMarginTop = selectedDeckId ? 0 : 35;
 
-  const deckX = (d,i) => {
-    const widthPerDeck = deckOuterMargin.left + deckWidth + deckOuterMargin.right;
-    return deckOuterMargin.left + d.colNr * widthPerDeck;
-  }
-  const deckY = (d,i) => {
-    const heightPerDeck = deckOuterMargin.top + deckHeight + deckOuterMargin.bottom
-    return deckOuterMargin.top + d.rowNr * heightPerDeck;
-  }
+  const cellX = d => d.colNr * deckWidthWithMargins;
+  const cellY = d => d.rowNr * deckHeightWithMargins;
+  const deckX = d => cellX(d) + deckOuterMargin.left;
+  const deckY = d => cellY(d) + deckOuterMargin.top;
 
-  //deckHeaders zoom
-  const { x, y, k } = zoomStateRef.current;
+  const getColNr = x => Math.round(x / deckWidthWithMargins);
+  const getRowNr = y => Math.round(y / deckHeightWithMargins)
+  const getCell = pos => {
+    const colNr = getColNr(pos[0]);
+    const rowNr = getRowNr(pos[1]);
+    const deck = data.find(deck => deck.colNr === colNr && deck.rowNr === rowNr);
+    return {
+      key:`cell-${colNr}-${rowNr}`,
+      pos:[colNr, rowNr],
+      listPos:deck.listPos,
+      x:cellX({ colNr }),
+      y:cellY({ rowNr }),
+      deckX:deckX({ colNr }),
+      deckY:deckY({ rowNr }),
+      deckId:deck?.id
+    }
+  };
+
+  //new icon goes in next avail slot
+  const nextAvailableCol = data.length % nrCols;
+  //console.log("nextCol", nextAvailableCol);
+  const nextAvailableRow = Math.floor(data.length / nrCols)
+  //console.log("nextRow", nextAvailableRow);
+  const addDeckIconLeft = deckX({ colNr: nextAvailableCol });
+  const addDeckIconTop = deckY({ rowNr:nextAvailableRow });
+  //console.log("l r", addDeckIconLeft, addDeckIconTop)
+
   let styleProps = {
     width,
     height,
-    paddingTop:selectedDeck ? 0 : 35,
+    cell:{
+      display:selectedDeckId ? "none" : null,
+      width:deckWidthWithMargins,
+      height:deckHeightWithMargins,
+    },
     svg:{
       pointerEvents:selectedDeckId ? "all" : "none",
     },
+    addDeckIconContainer:{
+      left:addDeckIconLeft,
+      top:addDeckIconTop,
+      width:deckWidth,
+      //height:45
+      height:deckHeight,
+    },
     form:{ 
       display: form ? null : "none",
-    },
-    overlayDisplay:selectedDeckId ? "none" : null
+    }
   };
   const classes = useStyles(styleProps);
+
+  //@todo - add a settings form with a useState toggle to show it when user clicks to create
+  const createNewDeck = e => {
+    //do animation to show its being created
+    onCreateDeck({})
+    e.stopPropagation();
+  };
+
+  const moveDeck = useCallback((origListPos, newListPos) => {
+    console.log("move from", origListPos)
+    console.log("to", newListPos)
+    const reorderedData = reorder(data, origListPos, newListPos) ;
+    updateDecks(reorderedData.map(d => ({ id:d.id, listPos: d.listPos })));
+  }, [stringifiedData]);
+
+  const deleteDeck = useCallback(() => {
+  }, [stringifiedData]);
+
+  const archiveDeck = useCallback(() => {
+  }, [stringifiedData]); 
 
   const setSelectedDeck = useCallback((id) => {
     const deck = data.find(d => d.id === id);
@@ -147,11 +195,6 @@ const Decks = ({ user, data, customSelectedDeckId, setSel, initLeft, initTop, da
     zoomStateRef.current = newTransformState;
 
     d3.select(zoomRef.current).call(zoom.transform, newTransformState)
-    /*d3.select(deckHeadersRef.current)
-      .style("left", `${newX * newScale}px`)
-      .style("top", `${newY * newScale}px`)
-      .style("transform",`scale(${newScale})`)*/
-
     //if req, update state in react, may need it with delay so it happens at end of zoom
     setSelectedDeckId(id);
     setSel(id)
@@ -213,11 +256,15 @@ const Decks = ({ user, data, customSelectedDeckId, setSel, initLeft, initTop, da
       .height(height)
       .selectedDeckId(selectedDeckId)
       .x(deckX)
-      .y((d,i) => deckY(d,i))
+      .y(deckY)
       ._deckWidth((d,i) => deckWidth)
       ._deckHeight((d,i) => deckHeight)
+      .getCell(getCell)
       .onClickDeck(onClickDeck)
       .onSetLongpressedDeckId(setLongpressedDeckId)
+      .onMoveDeck(moveDeck)
+      .onDeleteDeck(deleteDeck)
+      .onArchiveDeck(archiveDeck)
       //.zoom(zoom)
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
@@ -261,7 +308,10 @@ const Decks = ({ user, data, customSelectedDeckId, setSel, initLeft, initTop, da
 
   return (
     <div className={`cards-root ${classes.root}`} onClick={onClickBg} >
-      <svg className={classes.svg} id={`cards-svg`} overflow="visible" >
+      {data.map(deckData => 
+        <div key={`cell-${deckData.id}`} className={classes.cell} style={{ left: cellX(deckData), top: cellY(deckData) }}></div>
+      )}
+      <svg className={classes.svg} id={`cards-svg`} overflow="visible">
         <g ref={zoomRef} display="none"><rect width={width} height={height} fill="transparent" /></g>
         <g ref={containerRef} />
         <defs>
@@ -270,6 +320,16 @@ const Decks = ({ user, data, customSelectedDeckId, setSel, initLeft, initTop, da
           </filter>
         </defs>
       </svg>
+      {!selectedDeckId &&
+          <div className={classes.addDeckIconContainer}>
+            {data.length === 0 && 
+              <div className={classes.addDeckText} onClick={createNewDeck} >
+                Add a deck
+              </div>
+            }
+            <IconComponent text="New" onClick={createNewDeck} />
+          </div>
+      }
       <div className={classes.formContainer}>
         {form?.formType === "item" && 
           <ItemForm item={form.value} fontSize={form.height * 0.5} save={updateItemTitle} close={() => setForm(null)} />
@@ -284,8 +344,7 @@ Decks.defaultProps = {
   datasets: [], 
   width:300,
   height:600,
-  initLeft:0,
-  initTop:0,
+  nrCols:3
 }
 
 export default Decks;

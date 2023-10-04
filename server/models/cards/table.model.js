@@ -1,12 +1,13 @@
 import mongoose from 'mongoose'
 
-//const DeckSchema = new mongoose.Schema({
+//const TableSchema = new mongoose.Schema({
 export default new mongoose.Schema({
   title:String,
   owner:{type:mongoose.Schema.ObjectId, ref:'User'},
   admin:[{type:mongoose.Schema.ObjectId, ref:'User'}],
-  cards:String,
-  frontCardNr:{ type: Number, default: 0 },
+  decks:[String],
+  layoutFormat:{type: String, default: "list"}, //list or grid
+  //gridFormat:...need a new Schema for this. Also, this can still exist even if format is set to list
   isArchived:{type: Boolean, default: false},
   colour:String,
   tags:[String],
@@ -14,5 +15,5 @@ export default new mongoose.Schema({
   created: {type: Date, default: Date.now}
 })
 
-//export default mongoose.model('Deck', DeckSchema)
+//export default mongoose.model('Table', TableSchema)
 

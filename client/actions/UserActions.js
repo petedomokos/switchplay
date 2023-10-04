@@ -6,6 +6,17 @@ import { signout } from './AuthActions.js';
 import { transformJourneyForClient } from "./JourneyActions"
 import { initDeck } from '../data/cards';
 
+export const transformTableForClient = serverTable => {
+	//console.log("transformTableForClient", serverTable)
+	const { created, updated, ...clientTable } = serverTable;
+	return {
+		...clientTable,
+		created:new Date(created),
+		updated:updated ? new Date(updated) : null,
+		id:serverTable._id,
+	}
+}
+
 export const transformDeckForClient = serverDeck => {
 	//console.log("transformDeckForClient", serverDeck)
 	const { created, updated, cards, ...clientDeck } = serverDeck;
@@ -33,7 +44,7 @@ export const transformDeckForServer = clientDeck => {
 
 export const transformUserForClient = serverUser => {
 	//console.log("transformUserForClient", serverUser)
-	const { journeys=[], photos=[], decks=[] } = serverUser;
+	const { journeys=[], photos=[], decks=[], tables=[] } = serverUser;
 	const hydratedPhotos = photos.map(p => ({ ...p, added: new Date(p.added) }))
 	//@todo - check will we ever use this for updating journeys? I dont think we need it 
 	const hydratedJourneys = journeys.map(j => transformJourneyForClient(j))
@@ -41,7 +52,8 @@ export const transformUserForClient = serverUser => {
 		...serverUser,
 		photos:hydratedPhotos,
 		journeys:hydratedJourneys,
-		decks:decks.map(s => transformDeckForClient(s))
+		tables:tables.map(t => transformTableForClient(t)),
+		decks:decks.map(s => transformDeckForClient(s)),
 	}
 }
 
@@ -75,17 +87,24 @@ export const fetchUser = id => dispatch => {
 			url: '/api/users/'+id,
 			requireAuth:true,
 			nextAction: data => {
-				//console.log("load user returned", data)
+				//console.log("load user returned", data._id)
 				const jwt = auth.isAuthenticated();
+				//console.log("jwt user", jwt.user?._id)
 				//may be reloading the signed in user
 				if(jwt.user._id === data._id){
 					//need to replicate this logic on the signin page too somehow, or point it to here
 					//first - 
-					//console.log('siging in to store again', data.username)
-					return { type:C.SIGN_IN, user:transformUserForClient(data) };
+					//console.log('signin...transforming user........', data)
+					const _user = transformUserForClient(data)
+					//console.log('DONE: transformed user........', _user)
+					return { type:C.SIGN_IN, user:_user };
 				}
-				//console.log('loading another user into user', data.username)
-				return { type:C.LOAD_USER, user:transformUserForClient(data) };
+				//console.log('transforming user........', data)
+				const _user = transformUserForClient(data)
+				//console.log('DONE: transformed user........', _user)
+				return { type:C.LOAD_USER, user:_user };
+
+				//return { type:C.LOAD_USER, user:transformUserForClient(data) };
 			}
 		}) 
 }
@@ -132,25 +151,68 @@ export const updateUser = (id, formData, history) => dispatch => {
 	//}, 2000)
 }
 
-export const createDeck = settings => dispatch => {
+export const createTable = (settings={}) => dispatch => {
 	const jwt = auth.isAuthenticated();
-	const deck = initDeck(jwt.user._id, settings);
-	//save to store with temp id so an icon is displayed to show its saving
-	dispatch({ type:C.CREATE_DECK, deck:deck });
-	//now try it with persistance too
-	//also need to add a pos property to each deck in model
+	const table = { owner: jwt.user._id, ...settings };
+
+	fetchThenDispatch(dispatch, 
+		'updating.user',
+		{
+			url: `/api/users/${jwt.user._id}/tables`,
+			method: 'POST',
+			body:JSON.stringify(table),
+			requireAuth:true,
+			nextAction: data => {
+				console.log("response data", data)
+				return { type:C.CREATE_TABLE, table:data }
+			}
+		}
+	)
+}
+
+export const updateTable = (table, shouldPersist=true) => dispatch => {
+	console.log("updateTable", shouldPersist, table)
+	//update in store
+	/*
+	dispatch({ type:C.UPDATE_DECK, deck });
+
+	if(!shouldPersist){ return; }
+
+	const jwt = auth.isAuthenticated();
+	if(!jwt.user) {
+		//console.log("no user signed in");
+		return;
+	}
 
 	const serverDeck = transformDeckForServer(deck);
 	fetchThenDispatch(dispatch, 
 		'updating.user',
 		{
 			url: `/api/users/${jwt.user._id}/decks`,
-			method: 'POST',
+			method: 'PUT',
 			body:JSON.stringify(serverDeck),
+			requireAuth:true
+		}
+	)
+	*/
+}
+
+export const createDeck = (settings, tableId) => dispatch => {
+	const jwt = auth.isAuthenticated();
+	//@todo - move this to server
+	const deck = initDeck(jwt.user._id, settings);
+	const serverDeck = transformDeckForServer(deck);
+	const requestBody = { deck:serverDeck, tableId }
+	fetchThenDispatch(dispatch, 
+		'updating.user',
+		{
+			url: `/api/users/${jwt.user._id}/decks`,
+			method: 'POST',
+			body:JSON.stringify(requestBody),
 			requireAuth:true,
 			nextAction: data => {
 				console.log("response data", data)
-				return { type:C.UPDATE_NEW_DECK_ID, newDeckId: data._id }
+				return { type:C.CREATE_DECK, deck: transformDeckForClient(data), tableId }
 			}
 		}
 	)
@@ -176,6 +238,36 @@ export const updateDeck = (deck, shouldPersist=true) => dispatch => {
 			url: `/api/users/${jwt.user._id}/decks`,
 			method: 'PUT',
 			body:JSON.stringify(serverDeck),
+			requireAuth:true
+		}
+	)
+}
+
+export const updateDecks = (decks=[], shouldPersist=true) => dispatch => {
+	console.log("updateDeck", shouldPersist, decks)
+	//update in store
+	dispatch({ type:C.UPDATE_DECKS, decks });
+	return;
+
+	//todo - first check it works on client
+	//then persist - check updateDeck still works for a simple single update eg item status
+	//then impl updateDecks in controller to update the properties that have been sent in the body items
+
+	if(!shouldPersist){ return; }
+
+	const jwt = auth.isAuthenticated();
+	if(!jwt.user) {
+		//console.log("no user signed in");
+		return;
+	}
+
+	const serverDecks = decks.map(deck => transformDeckForServer(deck));
+	fetchThenDispatch(dispatch, 
+		'updating.user',
+		{
+			url: `/api/users/${jwt.user._id}/decks`,
+			method: 'PUT',
+			body:JSON.stringify(serverDecks),
 			requireAuth:true
 		}
 	)

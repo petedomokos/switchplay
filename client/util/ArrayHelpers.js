@@ -1,4 +1,28 @@
 import * as d3 from 'd3';
+export function reorder(data, origListPos, newListPos){
+	if(newListPos < origListPos){
+		//moving it back
+		return data.map(d => {
+		  if(d.listPos === origListPos) { return { ...d, listPos:newListPos } }
+		  //decks before the new pos arent changed
+		  if(d.listPos < newListPos) { return d; }
+		  //decks after the old pos arent changed
+		  if(d.listPos > origListPos) { return d; }
+		  //decks between will increase by 1
+		  return { ...d, listPos:d.listPos + 1 }
+		})
+	  }
+	  //moving it forward
+	  return data.map(d => {
+		if(d.listPos === origListPos) { return { ...d, listPos:newListPos } }
+		//decks before the orig pos arent changed
+		if(d.listPos < origListPos) { return d; }
+		//decks after the new pos arent changed
+		if(d.listPos > newListPos) { return d; }
+		//decks between will reduce by 1
+		return { ...d, listPos:d.listPos - 1 }
+	  })
+}
 
 export function compareAlpha(obj1, obj2){
 	const getName = obj => obj.name || obj.surname || obj.username || ""

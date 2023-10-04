@@ -2,17 +2,8 @@ import * as d3 from 'd3';
 import { grey10, COLOURS, TRANSITIONS } from "./constants";
 import { updateRectDimns } from '../journey/transitionHelpers';
 import deckComponent from './deckComponent';
-import decksLayout from './deckLayout';
 
 const transformTransition = { update: { duration: TRANSITIONS.MED } };
-
-function maxDimns(maxWidth, maxHeight, aspectRatio){
-    const potentialHeight = maxWidth * aspectRatio;
-    if(potentialHeight <= maxHeight){
-        return { width: maxWidth, height: potentialHeight }
-    }
-    return { width: maxHeight/aspectRatio, height: maxHeight }
-}
 
 export default function decksComponent() {
     //API SETTINGS
@@ -35,6 +26,9 @@ export default function decksComponent() {
 
     let onClickDeck = function(){}
     let onSetLongpressedDeckId = function(){}
+    let onMoveDeck = function(){};
+    let onDeleteDeck = function(){};
+    let onArchiveDeck = function(){};
     let updateItemStatus = function(){};
     let updateFrontCardNr = function(){};
     let setForm = function(){};
@@ -43,6 +37,7 @@ export default function decksComponent() {
     let y = (d,i) => d.y;
     let _deckWidth = (d,i) => 50;
     let _deckHeight = (d,i) => 75;
+    let getCell = position => [0,0];
 
     let containerG;
 
@@ -70,7 +65,7 @@ export default function decksComponent() {
                 const deckG = containerG.selectAll("g.deck").data(decksData);
                 deckG.enter()
                     .append("g")
-                        .attr("class", "deck")
+                        .attr("class", d => `deck deck-${d.id}`)
                         .each(function(d,i){
                             deckComponents[d.id] = deckComponent();
                         })
@@ -85,10 +80,14 @@ export default function decksComponent() {
                                 .width(deckWidth)
                                 .height(deckHeight)
                                 .deckIsSelected(selectedDeckId === d.id)
+                                .getCell(getCell)
                                 .onClickDeck(onClickDeck)
                                 .onSetLongpressed(isLongpressed => { 
                                     onSetLongpressedDeckId( isLongpressed ? d.id : "") 
-                                }) 
+                                })
+                                .onMoveDeck(onMoveDeck)
+                                .onDeleteDeck(onDeleteDeck)
+                                .onArchiveDeck(onArchiveDeck)
                                 .updateItemStatus(updateItemStatus)
                                 .updateFrontCardNr(updateFrontCardNr)
                                 .transformTransition(transformTransition)
@@ -136,6 +135,11 @@ export default function decksComponent() {
     decks.y = function (func) {
         if (!arguments.length) { return y; }
         y = func;
+        return decks;
+    };
+    decks.getCell = function (func) {
+        if (!arguments.length) { return getCell; }
+        getCell = func;
         return decks;
     };
     decks.styles = function (value) {
@@ -188,6 +192,21 @@ export default function decksComponent() {
     decks.onSetLongpressedDeckId = function (value) {
         if (!arguments.length) { return onSetLongpressedDeckId; }
         onSetLongpressedDeckId = value;
+        return decks;
+    };
+    decks.onMoveDeck = function (value) {
+        if (!arguments.length) { return onMoveDeck; }
+        onMoveDeck = value;
+        return decks;
+    };
+    decks.onDeleteDeck = function (value) {
+        if (!arguments.length) { return onDeleteDeck; }
+        onDeleteDeck = value;
+        return decks;
+    };
+    decks.onArchiveDeck = function (value) {
+        if (!arguments.length) { return onArchiveDeck; }
+        onArchiveDeck = value;
         return decks;
     };
     return decks;

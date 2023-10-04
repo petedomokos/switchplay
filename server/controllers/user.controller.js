@@ -141,10 +141,39 @@ const list = async (req, res) => {
   }
 }
 
+const createTable = async (req, res) => {
+  console.log("createTable---------------")
+  const { user, body } = req;
+
+  const table = {
+    owner:user._id,
+    decks:[]
+  }
+  if(!user.tables){
+    //console.log("decks not defined - creating")
+    user.tables = [table]
+  }else{
+    //console.log("pushing deck to decks")
+    user.tables = [...user.tables, table]
+  }
+  //console.log("user decks", user.decks)
+  //save it and return the new deck id to replace "temp"
+  try {
+    const result = await user.save()
+    console.log("saved")
+    //the one that is added will always be the last one 
+    res.json(result.tables[result.tables.length - 1])
+  } catch (err) {
+    return res.status(400).json({
+      error: errorHandler.getErrorMessage(err)
+    })
+  }
+}
+
 const createDeck = async (req, res) => {
   console.log("createDeck---------------")
-  const { user, body } = req;
-  const deck = body;
+  const { user, body:{ deck, tableId } } = req;
+  console.log("tableId", tableId)
   if(!user.decks){
     //console.log("decks not defined - creating")
     user.decks = [deck]
@@ -153,9 +182,22 @@ const createDeck = async (req, res) => {
     user.decks = [...user.decks, deck]
   }
   //console.log("user decks", user.decks)
-  //save it and return the new deck id to replace "temp"
   try {
     const result = await user.save()
+    console.log("saved1")
+    const newDeckId = result.decks[result.decks.length - 1]._id;
+    console.log("newDeckId", newDeckId)
+
+    //note - mapping doesnt change table.decks to the new version
+    user.tables.forEach(t => {
+      if(t._id.equals(tableId)){
+        //add body.tableId
+        const newDecks = [...t.decks, newDeckId];
+        t.decks = newDecks;
+      }
+    });
+    const result2 = await user.save();
+    console.log("saved2")
     //the one that is added will always be the last one 
     res.json(result.decks[result.decks.length - 1])
   } catch (err) {
@@ -165,8 +207,20 @@ const createDeck = async (req, res) => {
   }
 }
 
+const updateTable = async (req, res) => {
+  console.log('updateTable for.................', req.user._id)
+  const { user, body } = req;
+  //try {
+    //await user.save()
+    //res.json(updatedDeck)
+  //} catch (err) {
+    return res.status(400).json({
+      error: errorHandler.getErrorMessage(err)
+    })
+  //}
+}
 const updateDeck = async (req, res) => {
-  //console.log('updateDeck for.................', req.user._id)
+  console.log('updateDeck for.................', req.user._id)
   const { user, body } = req;
 
   const updatedDeck = body;
@@ -324,6 +378,8 @@ export default {
   list,
   remove,
   update,
+  createTable,
+  updateTable,
   createDeck,
   updateDeck,
   photos,
