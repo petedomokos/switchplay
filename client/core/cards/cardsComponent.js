@@ -177,7 +177,8 @@ export default function cardsComponent() {
                             .append("g")
                                 .attr("class", "items-area")
                                     .append("rect")
-                                        .attr("class", "items-area-bg");
+                                        .attr("class", "items-area-bg")
+                                        .attr("fill", "blue");
 
                         /*contentsG
                             .append("rect")
@@ -222,6 +223,13 @@ export default function cardsComponent() {
                             .duration(400)
                                 .attr("fill", getCardFill(cardD))
                                 .attr("stroke", getCardStroke(cardD))
+
+                        contentsG.select("rect.card-bg")
+                            .transition("card-bg-dimns")
+                            //.delay(200)
+                            .duration(TRANSITIONS.MED)
+                                .attr("width", width)
+                                .attr("height", height)
                         
                         //const infoHeight;
                         //components

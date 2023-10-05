@@ -116,7 +116,8 @@ export default function cardHeaderComponent() {
                     .each(function(data,i){
                         const contentsG = d3.select(this);
                         contentsG.append("rect").attr("class", "contents-bg")
-                            .attr("fill", "transparent");
+                            .attr("fill", "transparent")
+                            .attr("opacity", 0.5);
                     })
                     .merge(contentsG)
                     .attr("transform", `translate(${margin.left},${margin.top})`)
