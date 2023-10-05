@@ -7,13 +7,14 @@ import DeckHeader from './DeckHeader';
 import deckLayout from './deckLayout';
 import decksComponent from "./decksComponent";
 import ItemForm from "./forms/ItemForm";
-import { sortAscending, reorder } from '../../util/ArrayHelpers';
+import { sortAscending, moveElementPosition } from '../../util/ArrayHelpers';
 import { initDeck } from '../../data/cards';
 //import { createId } from './helpers';
 import { TRANSITIONS } from "./constants"
 import { grey10, COLOURS } from './constants';
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
 import IconComponent from './IconComponent';
+import { Table } from '@material-ui/core';
 const { GOLD } = COLOURS;
 
 const useStyles = makeStyles((theme) => ({
@@ -75,9 +76,9 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Decks = ({ data, customSelectedDeckId, setSel, nrCols, datasets, asyncProcesses, width, height, onClick, onCreateDeck, updateDeck, updateDecks }) => {
+const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, asyncProcesses, width, height, onClick, onCreateDeck, updateTable, updateDeck, updateDecks }) => {
   //processed props
-  const stringifiedData = JSON.stringify(data);
+  const stringifiedData = JSON.stringify({ data, table });
   //state
   const [layout, setLayout] = useState(() => deckLayout());
   const [decks, setDecks] = useState(() => decksComponent());
@@ -124,9 +125,9 @@ const Decks = ({ data, customSelectedDeckId, setSel, nrCols, datasets, asyncProc
     return {
       key:`cell-${colNr}-${rowNr}`,
       pos:[colNr, rowNr],
-      listPos:deck.listPos,
       x:cellX({ colNr }),
       y:cellY({ rowNr }),
+      listPos:deck.listPos,
       deckX:deckX({ colNr }),
       deckY:deckY({ rowNr }),
       deckId:deck?.id
@@ -135,12 +136,9 @@ const Decks = ({ data, customSelectedDeckId, setSel, nrCols, datasets, asyncProc
 
   //new icon goes in next avail slot
   const nextAvailableCol = data.length % nrCols;
-  //console.log("nextCol", nextAvailableCol);
   const nextAvailableRow = Math.floor(data.length / nrCols)
-  //console.log("nextRow", nextAvailableRow);
   const addDeckIconLeft = deckX({ colNr: nextAvailableCol });
   const addDeckIconTop = deckY({ rowNr:nextAvailableRow });
-  //console.log("l r", addDeckIconLeft, addDeckIconTop)
 
   let styleProps = {
     width,
@@ -168,16 +166,14 @@ const Decks = ({ data, customSelectedDeckId, setSel, nrCols, datasets, asyncProc
 
   //@todo - add a settings form with a useState toggle to show it when user clicks to create
   const createNewDeck = e => {
-    //do animation to show its being created
+    //@todo - do animation to show its being created
     onCreateDeck({})
     e.stopPropagation();
   };
 
   const moveDeck = useCallback((origListPos, newListPos) => {
-    console.log("move from", origListPos)
-    console.log("to", newListPos)
-    const reorderedData = reorder(data, origListPos, newListPos) ;
-    updateDecks(reorderedData.map(d => ({ id:d.id, listPos: d.listPos })));
+    const reorderedIds = moveElementPosition(data.map(d => d.id), origListPos, newListPos);
+    updateTable({ ...table, decks:reorderedIds })
   }, [stringifiedData]);
 
   const deleteDeck = useCallback(() => {
@@ -251,6 +247,7 @@ const Decks = ({ data, customSelectedDeckId, setSel, nrCols, datasets, asyncProc
   }, [stringifiedData, selectedDeckId])
 
   useEffect(() => {
+    console.log("update decks")
     decks
       .width(width)
       .height(height)

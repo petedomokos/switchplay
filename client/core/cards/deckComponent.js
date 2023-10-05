@@ -323,14 +323,14 @@ export default function deckComponent() {
                     - Y create functions to calculate which cell the drag is in
                     - Y transition the clone to fit in the slot, at saem time as a general update will transitoin the others to move, then on end, reoklace clone with original
                     - Y highlight the newcell during drag - fill and/or stroke of its overlay or of its background
-                    - update the pos in array on longpress end (note: we are not doing grids for now, just a single list)
+                    - Y update the pos in array on longpress end (note: we are not doing grids for now, just a single list)
                     - Y make copy() disappear on end, 
-                    - check - normal react update should place the actual deck in correct place
-                    - check the updateTransform handles changes smoothly for each deck
+                    - Y check - normal react update should place the actual deck in correct place
+                    - 1ST: check the updateTransform handles changes smoothly for each deck and all transforms work well together
 
                     - Y add context menu above/below deck (with shaded background opacity around 0.5)
-                    - add svg icons for delete and archive
-                    - process the delete and archive here and also on back end
+                    - 3RD: add svg icons for delete and archive
+                    - 2ND: process the delete and archive here and also on back end
                 */
 
                 const drag = d3.drag()
@@ -410,12 +410,10 @@ export default function deckComponent() {
                 longpressEnd = function(e,d){
                     if(wasLongpressDragged){
                         //console.log("was dragged...")
-                        console.log("newCell", newCell)
-                        //@todo - if no listPos, it is grid format so handle changes of rowNr and colNr
-                        if(isNumber(listPos)){
-                            //decks are in displayed list format
-                            onMoveDeck(listPos, newCell.listPos);
-                        }
+                        //console.log("newCell", newCell)
+                        //@todo - handle grid format if layoutFormat is grid
+                        onMoveDeck(listPos, newCell.listPos);
+
                         cloneG
                             .transition("clone")
                             .duration(TRANSITIONS.MED)
@@ -471,7 +469,7 @@ export default function deckComponent() {
                 
                 //header
                 headerG
-                    .datum(_deckData)
+                    .datum({ ..._deckData, title:_deckData.title || id })
                     .call(header
                         .width(headerWidth)
                         .height(headerHeight)

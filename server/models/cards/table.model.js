@@ -6,6 +6,7 @@ export default new mongoose.Schema({
   owner:{type:mongoose.Schema.ObjectId, ref:'User'},
   admin:[{type:mongoose.Schema.ObjectId, ref:'User'}],
   decks:[String],
+  archivedDecks:[String],
   layoutFormat:{type: String, default: "list"}, //list or grid
   //gridFormat:...need a new Schema for this. Also, this can still exist even if format is set to list
   isArchived:{type: Boolean, default: false},

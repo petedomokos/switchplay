@@ -16,10 +16,16 @@ export default function cardsLayout(){
         const now = new Date();
 
         const _data = cardsData.map((c,i) => {
-            const { cardNr, title="", date, items } = c;
+            const { deckId, cardNr, title="", date, items } = c;
             return {
                 ...c,
-                items:c.items.map(it => ({ ...it, cardNr, title:it.title || "" })),
+                items:c.items.map(it => ({ 
+                    ...it, 
+                    deckId,
+                    cardNr, 
+                    title:it.title || "" ,
+                    key:`deck-${deckId}-card-${cardNr}-item-${it.itemNr}`
+                })),
                 info:{ 
                     ...info,
                     date,

@@ -173,7 +173,7 @@ const createTable = async (req, res) => {
 const createDeck = async (req, res) => {
   console.log("createDeck---------------")
   const { user, body:{ deck, tableId } } = req;
-  console.log("tableId", tableId)
+  //console.log("tableId", tableId)
   if(!user.decks){
     //console.log("decks not defined - creating")
     user.decks = [deck]
@@ -184,9 +184,9 @@ const createDeck = async (req, res) => {
   //console.log("user decks", user.decks)
   try {
     const result = await user.save()
-    console.log("saved1")
+    //console.log("saved1")
     const newDeckId = result.decks[result.decks.length - 1]._id;
-    console.log("newDeckId", newDeckId)
+    //console.log("newDeckId", newDeckId)
 
     //note - mapping doesnt change table.decks to the new version
     user.tables.forEach(t => {
@@ -197,7 +197,7 @@ const createDeck = async (req, res) => {
       }
     });
     const result2 = await user.save();
-    console.log("saved2")
+    //console.log("saved2")
     //the one that is added will always be the last one 
     res.json(result.decks[result.decks.length - 1])
   } catch (err) {
@@ -210,17 +210,24 @@ const createDeck = async (req, res) => {
 const updateTable = async (req, res) => {
   console.log('updateTable for.................', req.user._id)
   const { user, body } = req;
-  //try {
-    //await user.save()
-    //res.json(updatedDeck)
-  //} catch (err) {
+
+  const updatedTable = body;
+  const now = Date.now();
+  updatedTable.updated = now;
+  
+  user.tables = user.tables.map(table => table._id.equals(updatedTable._id) ? updatedTable : table);
+  user.updated = now;
+  try {
+    await user.save()
+    res.json(updatedTable)
+  } catch (err) {
     return res.status(400).json({
       error: errorHandler.getErrorMessage(err)
     })
-  //}
+  }
 }
 const updateDeck = async (req, res) => {
-  console.log('updateDeck for.................', req.user._id)
+  //console.log('updateDeck for.................', req.user._id)
   const { user, body } = req;
 
   const updatedDeck = body;
@@ -229,7 +236,7 @@ const updateDeck = async (req, res) => {
   
   //@todo - change so that it just adds updates to the stored deck
   user.decks = user.decks.map(deck => deck._id.equals(updatedDeck._id) ? updatedDeck : deck);
-  user.updated = Date.now()
+  user.updated = now;
   try {
     await user.save()
     res.json(updatedDeck)

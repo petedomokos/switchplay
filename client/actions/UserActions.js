@@ -171,30 +171,24 @@ export const createTable = (settings={}) => dispatch => {
 }
 
 export const updateTable = (table, shouldPersist=true) => dispatch => {
-	console.log("updateTable", shouldPersist, table)
+	//next - impl this, then check it works and also teh updateDeck still works
 	//update in store
-	/*
-	dispatch({ type:C.UPDATE_DECK, deck });
+	dispatch({ type:C.UPDATE_TABLE, table });
 
 	if(!shouldPersist){ return; }
 
 	const jwt = auth.isAuthenticated();
-	if(!jwt.user) {
-		//console.log("no user signed in");
-		return;
-	}
+	if(!jwt.user) { return; }
 
-	const serverDeck = transformDeckForServer(deck);
 	fetchThenDispatch(dispatch, 
 		'updating.user',
 		{
-			url: `/api/users/${jwt.user._id}/decks`,
+			url: `/api/users/${jwt.user._id}/tables`,
 			method: 'PUT',
-			body:JSON.stringify(serverDeck),
+			body:JSON.stringify(table),
 			requireAuth:true
 		}
 	)
-	*/
 }
 
 export const createDeck = (settings, tableId) => dispatch => {
@@ -244,14 +238,9 @@ export const updateDeck = (deck, shouldPersist=true) => dispatch => {
 }
 
 export const updateDecks = (decks=[], shouldPersist=true) => dispatch => {
-	console.log("updateDeck", shouldPersist, decks)
+	//console.log("updateDeck", shouldPersist, decks)
 	//update in store
 	dispatch({ type:C.UPDATE_DECKS, decks });
-	return;
-
-	//todo - first check it works on client
-	//then persist - check updateDeck still works for a simple single update eg item status
-	//then impl updateDecks in controller to update the properties that have been sent in the body items
 
 	if(!shouldPersist){ return; }
 

@@ -1,27 +1,20 @@
 import * as d3 from 'd3';
-export function reorder(data, origListPos, newListPos){
-	if(newListPos < origListPos){
-		//moving it back
-		return data.map(d => {
-		  if(d.listPos === origListPos) { return { ...d, listPos:newListPos } }
-		  //decks before the new pos arent changed
-		  if(d.listPos < newListPos) { return d; }
-		  //decks after the old pos arent changed
-		  if(d.listPos > origListPos) { return d; }
-		  //decks between will increase by 1
-		  return { ...d, listPos:d.listPos + 1 }
-		})
-	  }
-	  //moving it forward
-	  return data.map(d => {
-		if(d.listPos === origListPos) { return { ...d, listPos:newListPos } }
-		//decks before the orig pos arent changed
-		if(d.listPos < origListPos) { return d; }
-		//decks after the new pos arent changed
-		if(d.listPos > newListPos) { return d; }
-		//decks between will reduce by 1
-		return { ...d, listPos:d.listPos - 1 }
-	  })
+export function moveElementPosition(data, origPos, newPos){
+	//console.log("orig new", origPos, newPos)
+	if(origPos === newPos) { return data; }
+	const elementToMove = data[origPos];
+	if(origPos > newPos){
+		//move it back
+		const beforeNewPos = data.slice(0, newPos);
+		const fromNewPosUpToButNotIncludingOrig = data.slice(newPos, origPos);
+		const afterOrigPos = data.slice(origPos+1, data.length);
+		return [...beforeNewPos, elementToMove, ...fromNewPosUpToButNotIncludingOrig, ...afterOrigPos];
+	}
+	//move it forward
+	const beforeOrigPos = data.slice(0, origPos);
+	const afterOrigUpToAndIncludingNew = data.slice(origPos+1, newPos+1);
+	const afterNewPos = data.slice(newPos+1, data.length);
+	return [...beforeOrigPos, ...afterOrigUpToAndIncludingNew, elementToMove, ...afterNewPos];
 }
 
 export function compareAlpha(obj1, obj2){
@@ -121,12 +114,12 @@ export const findById = (id, items) =>{
 }
 
 //helpers
-export const sortAscending = (data, accessor =  d => d) => {
+export function sortAscending(data, accessor =  d => d){
   const dataCopy = data.map(d => d);
   return dataCopy.sort((a, b) => d3.ascending(accessor(a), accessor(b)))
 };
 
-export const sortDescending = (data, accessor =  d => d) => {
+export function sortDescending(data, accessor =  d => d){
 	const dataCopy = data.map(d => d);
 	return dataCopy.sort((a, b) => d3.descending(accessor(a), accessor(b)))
   };

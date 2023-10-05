@@ -62,7 +62,7 @@ export default function decksComponent() {
             }
 
             function update(decksData, options={}){
-                const deckG = containerG.selectAll("g.deck").data(decksData);
+                const deckG = containerG.selectAll("g.deck").data(decksData, d => d.id);
                 deckG.enter()
                     .append("g")
                         .attr("class", d => `deck deck-${d.id}`)

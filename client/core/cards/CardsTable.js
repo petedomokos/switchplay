@@ -71,12 +71,11 @@ const calcColNr = (i, nrCols) => i % nrCols;
 const calcRowNr = (i, nrCols) => Math.floor(i/nrCols);
 
 const embellishedDecks = (decks, nrCols=DEFAULT_NR_COLS) => decks
-  .map((d,i) => ({ ...d, i }))
   .map((d,i) => ({
   ...d, 
   colNr: isNumber(d.colNr) ? d.colNr : calcColNr(i, nrCols),
   rowNr: isNumber(d.rowNr) ? d.rowNr : calcRowNr(i, nrCols),
-  listPos: isNumber(d.colNr) ? null : i
+  listPos:i
 }))
 
 /*
@@ -111,7 +110,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
 
   const table = tables[0];
   const tableDecks = table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
-  console.log("tableDecks", tableDecks)
+  console.log("tableDecks", tableDecks.map(d => d.id))
 
 
   const width = screen.width || 300;
@@ -191,10 +190,10 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
           <Instructions />
           :
           <Decks 
-            setSel={setSelectedDeckId} nrCols={nrCols} 
+            table={table} setSel={setSelectedDeckId} nrCols={nrCols} 
             data={decksData} width={contentsWidth} height={contentsHeight} 
             onCreateDeck={onCreateDeck} 
-            updateDeck={updateDeck} />
+            updateTable={updateTable} updateDeck={updateDeck} />
         }
       </div>
     </div>
