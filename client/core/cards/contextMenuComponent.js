@@ -97,10 +97,17 @@ export default function contextMenuComponent() {
                                 .attr("class", "item-contents")
 
                             itemContentsG.append("rect")
-                                .attr("stroke", "white")
+                                //.attr("stroke", "white")
                                 .attr("fill", "transparent")
 
+                            //append img
+                            itemContentsG.append("image")
+                                .attr("transform", `translate(-8,0) scale(0.5)`); //imgs are 80 x 80
+
                         })
+                        //next - move the 2 saved icon ng files into same place as default photo
+                        //and get them into the url and into the image, then positoin them
+                        //then put in a folder for icons 
                         .merge(itemG)
                         .attr("transform", (d,i) => `translate(${i * itemWidth}, 0)`)
                         .each(function(d,i){
@@ -109,6 +116,9 @@ export default function contextMenuComponent() {
                             itemContentsG.select("rect")
                                 .attr("width", itemContentsWidth)
                                 .attr("height", itemContentsHeight);
+
+                            itemContentsG.select("image")
+                                .attr("xlink:href", d.url)
 
                         })
                         .on("click", onClick)

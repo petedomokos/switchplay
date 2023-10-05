@@ -56,9 +56,9 @@ const useStyles = makeStyles((theme) => ({
   cell:{
     position:"absolute",
     display:props => props.cell.display,
-    border:"solid",
+    /*border:"solid",
     borderWidth:"thin",
-    borderColor:"white",
+    borderColor:"white",*/
     width:props => props.cell.width,
     height:props => props.cell.height
   },

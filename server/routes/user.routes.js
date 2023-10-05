@@ -11,6 +11,7 @@ router.route('/api/users/photo/:userId/:photoId')
 router.route('/api/users/photo/:userId')
   .get(userCtrl.photo, userCtrl.defaultPhoto)
 
+//need to work out why not accessing other photos except default
 router.route('/api/users/defaultphoto')
   .get(userCtrl.defaultPhoto)
 

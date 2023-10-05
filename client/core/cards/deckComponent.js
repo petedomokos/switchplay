@@ -18,7 +18,10 @@ function maxDimns(maxWidth, maxHeight, aspectRatio){
 
 const CONTEXT_MENU_ITEM_HEIGHT = 50;
 const CONTEXT_MENU_GAP = 10;
-const contextMenuData = [ { key:"delete", icon:"" }, { key:"archive", icon:""} ]
+const contextMenuData = [ 
+    { key:"delete", url:"/delete.png" }, 
+    { key:"archive", url:"/archive.png" } 
+]
 
 export default function deckComponent() {
     //API SETTINGS
@@ -320,23 +323,6 @@ export default function deckComponent() {
                             onSetLongpressed(false);
                         }
                     });
-
-                /*
-                    todo
-                    - Y create a selection.copy() of the longpressed deck
-                    - Y move the copy based on e.dx and dy
-                    - Y create functions to calculate which cell the drag is in
-                    - Y transition the clone to fit in the slot, at saem time as a general update will transitoin the others to move, then on end, reoklace clone with original
-                    - Y highlight the newcell during drag - fill and/or stroke of its overlay or of its background
-                    - Y update the pos in array on longpress end (note: we are not doing grids for now, just a single list)
-                    - Y make copy() disappear on end, 
-                    - Y check - normal react update should place the actual deck in correct place
-                    - 3RD: check the updateTransform handles changes smoothly for each deck and all transforms work well together
-
-                    - Y add context menu above/below deck (with shaded background opacity around 0.5)
-                    - 2ND: add svg icons for delete and archive
-                    - 1ST: process the delete and archive here and also on back end
-                */
 
                 const drag = d3.drag()
                     .on("start", deckIsSelected ? null : enhancedDrag(dragStart))
