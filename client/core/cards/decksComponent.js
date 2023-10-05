@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import { grey10, COLOURS, TRANSITIONS } from "./constants";
-import { updateRectDimns } from '../journey/transitionHelpers';
+import { updateTransform } from '../journey/transitionHelpers';
 import deckComponent from './deckComponent';
 
 const transformTransition = { update: { duration: TRANSITIONS.MED } };
@@ -69,8 +69,15 @@ export default function decksComponent() {
                         .each(function(d,i){
                             deckComponents[d.id] = deckComponent();
                         })
-                        .merge(deckG)
                         .attr("transform", (d,i) => `translate(${x(d,i)}, ${y(d,i)})`)
+                        .merge(deckG)
+                        .call(updateTransform, { 
+                            x, 
+                            y, 
+                            transition:transformTransition.update,
+                            name:(d,i) => `deck-${d.id}`,
+                            force:true
+                        })
                         .each(function(d,i){
                             const deckWidth = _deckWidth(d,i);
                             const deckHeight = _deckHeight(d,i);

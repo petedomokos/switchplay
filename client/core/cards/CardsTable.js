@@ -87,9 +87,9 @@ todo
 
 
 */
-const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, screen, createTable, updateTable, createDeck, updateDeck, updateDecks }) => {
+const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, screen, createTable, updateTable, createDeck, updateDeck, deleteDeck }) => {
   const { tables=[], decks=[] } = user;
-  console.log("tables", tables)
+  //console.log("tables", tables)
 
   //@todo - move creating flag to asyncProcesses
   const [creatingTable, setCreatingTable] = useState(false);
@@ -110,8 +110,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
 
   const table = tables[0];
   const tableDecks = table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
-  console.log("tableDecks", tableDecks.map(d => d.id))
-
+  //console.log("tableDecks", tableDecks.map(d => d.id))
 
   const width = screen.width || 300;
   const height = screen.height || 600;
@@ -192,7 +191,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
           <Decks 
             table={table} setSel={setSelectedDeckId} nrCols={nrCols} 
             data={decksData} width={contentsWidth} height={contentsHeight} 
-            onCreateDeck={onCreateDeck} 
+            onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} 
             updateTable={updateTable} updateDeck={updateDeck} />
         }
       </div>

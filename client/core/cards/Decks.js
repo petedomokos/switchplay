@@ -15,6 +15,7 @@ import { grey10, COLOURS } from './constants';
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
 import IconComponent from './IconComponent';
 import { Table } from '@material-ui/core';
+import { isNumber } from 'lodash';
 const { GOLD } = COLOURS;
 
 const useStyles = makeStyles((theme) => ({
@@ -76,7 +77,8 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, asyncProcesses, width, height, onClick, onCreateDeck, updateTable, updateDeck, updateDecks }) => {
+const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, asyncProcesses, width, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
+  //console.log("data", data)
   //processed props
   const stringifiedData = JSON.stringify({ data, table });
   //state
@@ -122,12 +124,14 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, as
     const colNr = getColNr(pos[0]);
     const rowNr = getRowNr(pos[1]);
     const deck = data.find(deck => deck.colNr === colNr && deck.rowNr === rowNr);
+    //handle case of dragging deck into the next available slot or any cell that is empty ie in a list that means 
+    //a cell after teh last filled one
     return {
       key:`cell-${colNr}-${rowNr}`,
       pos:[colNr, rowNr],
       x:cellX({ colNr }),
       y:cellY({ rowNr }),
-      listPos:deck.listPos,
+      listPos:deck ? deck.listPos : data.length - 1, //default to the end of the list
       deckX:deckX({ colNr }),
       deckY:deckY({ rowNr }),
       deckId:deck?.id
@@ -172,14 +176,27 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, as
   };
 
   const moveDeck = useCallback((origListPos, newListPos) => {
+    if(!isNumber(origListPos) || !isNumber(newListPos)){ return; }
     const reorderedIds = moveElementPosition(data.map(d => d.id), origListPos, newListPos);
     updateTable({ ...table, decks:reorderedIds })
   }, [stringifiedData]);
 
-  const deleteDeck = useCallback(() => {
+  const onDeleteDeck = useCallback(id => {
+    const updatedTable = { 
+      ...table, 
+      decks:table.decks.filter(deckId => deckId !== id),
+      archivedDecks:table.archivedDecks.filter(deckId => deckId !== id) 
+    };
+    deleteDeck(id, updatedTable);
   }, [stringifiedData]);
 
-  const archiveDeck = useCallback(() => {
+  const archiveDeck = useCallback(id => {
+    console.log("arc", id)
+    updateTable({ 
+      ...table, 
+      decks:table.decks.filter(deckId => deckId !== id),
+      archivedDecks:[ ...table.archivedDecks, id]
+    })
   }, [stringifiedData]); 
 
   const setSelectedDeck = useCallback((id) => {
@@ -247,7 +264,6 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, as
   }, [stringifiedData, selectedDeckId])
 
   useEffect(() => {
-    console.log("update decks")
     decks
       .width(width)
       .height(height)
@@ -260,7 +276,7 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, as
       .onClickDeck(onClickDeck)
       .onSetLongpressedDeckId(setLongpressedDeckId)
       .onMoveDeck(moveDeck)
-      .onDeleteDeck(deleteDeck)
+      .onDeleteDeck(onDeleteDeck)
       .onArchiveDeck(archiveDeck)
       //.zoom(zoom)
       .updateItemStatus(updateItemStatus)

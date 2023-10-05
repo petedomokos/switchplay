@@ -77,10 +77,11 @@ export const user = (state=InitialState.user, act) =>{
 				decks:state.decks.map(d => d.id === act.deck.id ? { ...d, ...act.deck } : d)
 			};
 		}
-		case C.DELETE_STACK:{
+		case C.DELETE_DECK:{
 			return {
 				...state,
-				decks:state.decks.filter(s => s.id !== act.deckId)
+				decks:state.decks.filter(d => d.id !== act.deckId),
+				tables:state.tables.map(t => t.id !== act.table.id ? t : ({ ...t, ...act.table }))
 			};
 		}
 		case C.SAVE_JOURNEY:{

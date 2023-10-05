@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import CardsTable  from './CardsTable'
-import { createTable, updateTable,  createDeck, updateDeck } from '../../actions/UserActions'
+import { createTable, updateTable,  createDeck, updateDeck, deleteDeck } from '../../actions/UserActions'
 
 const mapStateToProps = (state, ownProps) => {
 	//console.log("CardsTableContainer...user", state.user)
@@ -23,11 +23,17 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => ({
 	createDeck(settings, tableId){
-		console.log("create deck............", tableId)
 		dispatch(createDeck(settings, tableId))
 	},
 	updateDeck(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
 		dispatch(updateDeck(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter));
+	},
+	deleteDeck(deckId, updatedTable, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
+		dispatch(deleteDeck(deckId, updatedTable, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter));
+		//@todo - find a proper soln to having to send two requests instead of use of timeout
+		//find out why it is causing an error to send both at same time
+		//this second one doesnt update the store (ie 2ndflag is false)
+		setTimeout(() => { dispatch(updateTable(updatedTable, true, false)); }, 3000)
 	},
 	createTable(settings){
 		dispatch(createTable(settings))

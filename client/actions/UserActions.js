@@ -170,8 +170,8 @@ export const createTable = (settings={}) => dispatch => {
 	)
 }
 
-export const updateTable = (table, shouldPersist=true) => dispatch => {
-	//next - impl this, then check it works and also teh updateDeck still works
+export const updateTable = (table, shouldPersist=true, shouldUpdateStore=true) => dispatch => {
+	console.log("updateTable", table)
 	//update in store
 	dispatch({ type:C.UPDATE_TABLE, table });
 
@@ -237,31 +237,28 @@ export const updateDeck = (deck, shouldPersist=true) => dispatch => {
 	)
 }
 
-export const updateDecks = (decks=[], shouldPersist=true) => dispatch => {
-	//console.log("updateDeck", shouldPersist, decks)
+export const deleteDeck = (deckId, updatedTable, shouldPersist=true) => dispatch => {
+	console.log("deleteDeck", shouldPersist, deckId)
 	//update in store
-	dispatch({ type:C.UPDATE_DECKS, decks });
+	dispatch({ type:C.DELETE_DECK, deckId, table:updatedTable });
 
 	if(!shouldPersist){ return; }
 
 	const jwt = auth.isAuthenticated();
-	if(!jwt.user) {
-		//console.log("no user signed in");
-		return;
-	}
+	if(!jwt.user) { return; }
 
-	const serverDecks = decks.map(deck => transformDeckForServer(deck));
+	//work out why thus isnt callintg remove
+	//then put updateTble back in too, and see if they both work
 	fetchThenDispatch(dispatch, 
 		'updating.user',
 		{
 			url: `/api/users/${jwt.user._id}/decks`,
-			method: 'PUT',
-			body:JSON.stringify(serverDecks),
-			requireAuth:true
+			method: 'DELETE',
+			body:JSON.stringify({ deckId }),
+			requireAuth:true,
 		}
 	)
 }
-
 
 export const deleteUserAccount = (id, history) => dispatch => {
 	fetchThenDispatch(dispatch, 

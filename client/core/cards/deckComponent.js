@@ -154,7 +154,11 @@ export default function deckComponent() {
     let format;
     let transformTransition;
     let longpressedDeckId;
+
+    //for dragging decks
     let getCell = position => [0,0];
+    let cloneG;
+    let newCell;
 
     //data 
     let id;
@@ -242,7 +246,6 @@ export default function deckComponent() {
             }
 
             function update(_deckData, options={}){
-                //console.log("update", _deckData)
                 const { } = options;
                 const { id, frontCardNr, listPos, colNr, rowNr } = _deckData;
 
@@ -296,11 +299,13 @@ export default function deckComponent() {
                     .onClick((e,d) => {
                         if(d.key === "delete"){
                             console.log("delete")
-                            //todo - impl
+                            onDeleteDeck(id);
+                            cleanupLongpress();
                         }
                         if(d.key === "archive"){
                             console.log("archive")
-                            //todo - impl
+                            onArchiveDeck(id);
+                            cleanupLongpress();
                         }
                         e.stopPropagation();
                     })
@@ -326,20 +331,17 @@ export default function deckComponent() {
                     - Y update the pos in array on longpress end (note: we are not doing grids for now, just a single list)
                     - Y make copy() disappear on end, 
                     - Y check - normal react update should place the actual deck in correct place
-                    - 1ST: check the updateTransform handles changes smoothly for each deck and all transforms work well together
+                    - 3RD: check the updateTransform handles changes smoothly for each deck and all transforms work well together
 
                     - Y add context menu above/below deck (with shaded background opacity around 0.5)
-                    - 3RD: add svg icons for delete and archive
-                    - 2ND: process the delete and archive here and also on back end
+                    - 2ND: add svg icons for delete and archive
+                    - 1ST: process the delete and archive here and also on back end
                 */
 
                 const drag = d3.drag()
                     .on("start", deckIsSelected ? null : enhancedDrag(dragStart))
                     .on("drag", deckIsSelected ? null : enhancedDrag(dragged))
                     .on("end", deckIsSelected ? null : enhancedDrag(dragEnd))
-
-                let cloneG;
-                let newCell;
 
                 function dragStart(e,d){
                 }
@@ -351,12 +353,13 @@ export default function deckComponent() {
 
                 function dragEnd(e,d){ if(longpressedDeckId === id){ onSetLongpressed(false); } }
 
+                //issue - cloneG is a child of container, which moves, making the clone move too????
                 longpressStart = function(e,d){
                     d3.selectAll("g.deck").filter(d => d.id !== id).attr("pointer-events", "none")
-                        
                     //create a clone 
                     cloneG = containerG
                         .clone(true)
+                        .attr("class", "cloned-deck")
                         .attr("pointer-events", "none") //this allows orig deck to be dragged
                         .attr("opacity", 1)
                         .raise();
@@ -409,7 +412,6 @@ export default function deckComponent() {
 
                 longpressEnd = function(e,d){
                     if(wasLongpressDragged){
-                        //console.log("was dragged...")
                         //console.log("newCell", newCell)
                         //@todo - handle grid format if layoutFormat is grid
                         onMoveDeck(listPos, newCell.listPos);
@@ -419,24 +421,26 @@ export default function deckComponent() {
                             .duration(TRANSITIONS.MED)
                             .attr("transform", `translate(${newCell.deckX},${newCell.deckY})`)
                             .on("end", function(){
-                                //replace clone with original
-                                cloneG.remove();
-                                containerG.attr("opacity", 1)
-                                //remove newCell stroke
-                                d3.select(`g.deck-${newCell?.deckId}`).select("rect.deck-overlay")
-                                    .attr("opacity", 0.3)
-                                    .attr("stroke", null)
-                                    .attr("stroke-width", null)
-
+                                cleanupLongpress();
                             })
                         wasLongpressDragged = false;
                     }else{
-                        //replace clone with original
-                        cloneG.remove();
-                        containerG.attr("opacity", 1)
+                        cleanupLongpress();
                     }
                 
                     d3.selectAll("g.deck").filter(d => d.id !== id).attr("pointer-events", "all");
+                }
+
+                function cleanupLongpress(){
+                    cloneG.remove();
+                    containerG.attr("opacity", 1);
+
+                    //remove newCell stroke if it exists
+                    d3.select(`g.deck-${newCell?.deckId}`).select("rect.deck-overlay")
+                        .attr("opacity", 0.3)
+                        .attr("stroke", null)
+                        .attr("stroke-width", null)
+
                 }
 
                 containerG.call(drag)

@@ -25,6 +25,7 @@ router.route('/api/users/:userId/tables')
 router.route('/api/users/:userId/decks')
   .post(userCtrl.createDeck)
   .put(authCtrl.requireSignin, authCtrl.hasAuthorization, userCtrl.updateDeck)
+  .delete(authCtrl.requireSignin, authCtrl.hasAuthorization, userCtrl.removeDeck)
 
 router.route('/api/users/:userId')
   .get(authCtrl.requireSignin, userCtrl.read)

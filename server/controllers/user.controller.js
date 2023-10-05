@@ -217,8 +217,10 @@ const updateTable = async (req, res) => {
   
   user.tables = user.tables.map(table => table._id.equals(updatedTable._id) ? updatedTable : table);
   user.updated = now;
+  console.log("updatedTable")
   try {
     await user.save()
+    console.log("saved updated table")
     res.json(updatedTable)
   } catch (err) {
     return res.status(400).json({
@@ -241,6 +243,26 @@ const updateDeck = async (req, res) => {
     await user.save()
     res.json(updatedDeck)
   } catch (err) {
+    return res.status(400).json({
+      error: errorHandler.getErrorMessage(err)
+    })
+  }
+}
+
+const removeDeck = async (req, res) => {
+  console.log('removeDeck... user deckId', req.user._id, req.body.deckId)
+  const { user, body:{ deckId } } = req;
+  
+  console.log("init nrdecks", user.decks.length)
+  user.decks = user.decks.filter(deck => !deck._id.equals(deckId));
+  user.updated = Date.now();
+  console.log("deleted deck")
+  try {
+    const result = await user.save();
+    console.log("saved...nrdecks", result.decks.length)
+    res.json(deckId)
+  } catch (err) {
+    console.log("err!!!!", err)
     return res.status(400).json({
       error: errorHandler.getErrorMessage(err)
     })
@@ -389,6 +411,7 @@ export default {
   updateTable,
   createDeck,
   updateDeck,
+  removeDeck,
   photos,
   photo,
   defaultPhoto
