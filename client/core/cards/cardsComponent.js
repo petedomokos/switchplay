@@ -14,7 +14,7 @@ export default function cardsComponent() {
     // dimensions
     let width = 300;
     let height = 600;
-    let margin = { left:0, right: 0, top:10, bottom:0 }
+    let margin = { left:3, right: 3, top:10, bottom:0 }
     let contentsWidth;
     let contentsHeight;
 
