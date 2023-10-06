@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { grey10, COLOURS, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIONS } from "./constants";
+import { grey10, COLOURS, DIMNS, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIONS } from "./constants";
 import cardsComponent from './cardsComponent';
 import headerComponent from './headerComponent';
 import contextMenuComponent from "./contextMenuComponent";
@@ -77,7 +77,7 @@ export default function deckComponent() {
         contextMenuWidth = contentsWidth;
 
         headerWidth = contentsWidth;
-        headerHeight = 20;
+        headerHeight = DIMNS.DECK.HEADER_HEIGHT;
 
         cardsAreaWidth = contentsWidth;
         cardsAreaHeight = contentsHeight - headerHeight;
@@ -275,6 +275,7 @@ export default function deckComponent() {
                     .on("click", e => {
                         deselectCard();
                         e.stopPropagation();
+                        setForm(null);
                     })
                     /*.call(updateRectDimns, { 
                         width: () => width, 
@@ -361,7 +362,7 @@ export default function deckComponent() {
 
                     const { translateX, translateY } = getTransformationFromTrans(cloneG.attr("transform"));
 
-                    onSetLongpressed(true);
+                    onSetLongpressed(true)
                 }
                 function longpressDragged(e,d){
                     wasLongpressDragged = true;
@@ -464,9 +465,9 @@ export default function deckComponent() {
                         .width(headerWidth)
                         .height(headerHeight)
                         .margin({ left:deckIsSelected ? 15 : 7.5, right: 0, top: 0, bottom: 0 } )
-                        .onClickTitle(e => {
+                        .onClickTitle(function(e){
                             e.stopPropagation();
-                            //setForm({ formType: "deck-title" }) 
+                            setForm({ formType: "deck-title" }) 
                         })
                         .onClickProgressIcon(onClickDeck))
                 

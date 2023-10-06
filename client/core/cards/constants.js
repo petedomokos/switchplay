@@ -42,8 +42,15 @@ export const STYLES = {
 
 export const DIMNS = {
     burgerBarWidth:45,
+    DECK:{
+        HEADER_HEIGHT:20,
+        PROGRESS_ICON_WIDTH:20
+    }
 }
 
 export const COLOURS = {
-    GOLD:"#FFE10A"// brighter #ffd700,   darker #ccad00
+    GOLD:"#FFE10A",// brighter #ffd700,   darker #ccad00
+    HEADER:{
+        BG:grey10(8)
+    }
 }

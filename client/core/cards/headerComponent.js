@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { grey10, COLOURS, TRANSITIONS } from "./constants";
+import { grey10, COLOURS, TRANSITIONS, DIMNS } from "./constants";
 import { updateRectDimns } from '../journey/transitionHelpers';
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
 
@@ -22,7 +22,8 @@ export default function headerComponent() {
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
-        progressIconWidth = d3.min([20, contentsWidth * 0.3])
+        //@todo - put teh 20 in constants as its also used in Decks for form
+        progressIconWidth = DIMNS.DECK.PROGRESS_ICON_WIDTH;
         progressIconHeight = contentsHeight;
         progressIconMargin = {
             left: progressIconWidth * 0.1, right: progressIconWidth * 0.1,
@@ -67,7 +68,7 @@ export default function headerComponent() {
                     .attr("width", width)
                     .attr("height", height)
                     .attr("pointer-events", "none")
-                    .attr("fill", grey10(8))
+                    .attr("fill", COLOURS.HEADER.BG)
                     .attr("rx", 3)
                     .attr("ry", 3);
 
@@ -138,14 +139,16 @@ export default function headerComponent() {
                     
                 
                 titleG.select("rect.title-hitbox")
-                    .on("click", function(e){ 
-                        onClickTitle(e, data);
-                        e.stopPropagation(); 
-                    })
                     .transition("title-hitbox")
                     .duration(TRANSITIONS.MED)
                         .attr("width", contentsWidth - progressIconWidth)
                         .attr("height", contentsHeight)
+
+                titleG
+                    .on("click", function(e){ 
+                        onClickTitle.call(this, e, data);
+                        e.stopPropagation(); 
+                    })
 
                 //progress-icon
                 contentsG.select("g.progress-icon")

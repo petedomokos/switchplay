@@ -11,7 +11,7 @@ import DeckTitleForm from './forms/DeckTitleForm';
 import { sortAscending, moveElementPosition } from '../../util/ArrayHelpers';
 import { initDeck } from '../../data/cards';
 //import { createId } from './helpers';
-import { TRANSITIONS } from "./constants"
+import { TRANSITIONS, DIMNS } from "./constants"
 import { grey10, COLOURS } from './constants';
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
 import IconComponent from './IconComponent';
@@ -145,6 +145,15 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, as
   const addDeckIconLeft = deckX({ colNr: nextAvailableCol });
   const addDeckIconTop = deckY({ rowNr:nextAvailableRow });
 
+  const deckFormMarginLeft = DIMNS.burgerBarWidth + 8; //not sure why this 8 is needed
+  const deckFormMarginTop = 2; //not sure why this is needed
+  const deckFormDimns = {
+    width:width - (DIMNS.DECK.PROGRESS_ICON_WIDTH * zoomScale) - deckFormMarginLeft,
+    height:DIMNS.DECK.HEADER_HEIGHT * zoomScale - deckFormMarginTop,
+    marginLeft:deckFormMarginLeft,
+    marginTop:deckFormMarginTop
+  }
+
   let styleProps = {
     width,
     height,
@@ -213,31 +222,36 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, as
     setSel(id)
   }, [stringifiedData]);
 
+  //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
-    console.log("click bg")
+    e.stopPropagation();
     if(longpressedDeckId){
       setLongpressedDeckId("");
       return;
     }
-    setSelectedDeck("")
-    e.stopPropagation();
-  }, [stringifiedData, selectedDeckId, longpressedDeckId]);
+    //bg click shouldnt change anything else if its just clicking to comeo out a form
+    if(form){  
+      setForm(null);
+      return; 
+    }
+    setSelectedDeck("");
+  }, [stringifiedData, selectedDeckId, longpressedDeckId, form]);
 
   const onClickDeck = useCallback((e, d) => {
     setSelectedDeck(selectedDeck ? "" : d.id)
     //setSelectedDeck(d.id); 
     e.stopPropagation();
+    setForm(null);
   }, [stringifiedData, selectedDeckId]);
 
   const updateFrontCardNr = useCallback(cardNr => {
-    updateDeck({ ...selectedDeck, frontCardNr:cardNr })
+    updateDeck({ ...selectedDeck, frontCardNr:cardNr });
+    setForm(null);
   }, [stringifiedData, form, selectedDeckId]);
 
-  const updateDeckTitle = useCallback(updatedTitle => {
-    console.log("updateDeckTitle", updatedTitle)
-    //const {  } = form.value;
-
-  
+  const updateDeckTitle = useCallback(title => {
+    //console.log("updateDeckTitle", title)
+    updateDeck({ ...selectedDeck, title })
   }, [stringifiedData, form, selectedDeckId]);
 
   const updateCard = useCallback((updatedCard) => {
@@ -253,6 +267,7 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, as
   }, [stringifiedData, form, selectedDeckId]);
 
   const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
+    setForm(null);
     const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
     const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, status: updatedStatus }));
     updateCard({ ...cardToUpdate, items:updatedItems })
@@ -260,7 +275,8 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, as
 
   //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
-    decks.longpressedDeckId(longpressedDeckId)
+    decks.longpressedDeckId(longpressedDeckId);
+    setForm(null);
   }, [longpressedDeckId])
 
   //overlay and pointer events none was stopiing zoom working!!
@@ -355,9 +371,11 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, as
         {form?.formType === "item" && 
           <ItemForm item={form.value} fontSize={form.height * 0.5} save={updateItemTitle} close={() => setForm(null)} />
         }
-        {/**form?.formType === "deck-title" && 
-          <DeckTitleForm deck={selectedDeck} fontSize={form.height * 0.5} save={updateDeckTitle} close={() => setForm(null)} />
-      */}
+        {form?.formType === "deck-title" && 
+          <DeckTitleForm deck={selectedDeck} save={updateDeckTitle} close={() => setForm(null)}
+            dimns={deckFormDimns} 
+          />
+        }
       </div>
     </div>
   )

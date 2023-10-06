@@ -32,7 +32,7 @@ export default function cardsComponent() {
     function updateDimns(){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom; 
-        gapBetweenInfoAndItems = 20;
+        gapBetweenInfoAndItems = 0;
         bottomBarHeight = 0;
         itemsAreaHeight = contentsHeight - infoHeight - gapBetweenInfoAndItems - bottomBarHeight;
     }
