@@ -17,13 +17,15 @@ export default function cardItemsComponent() {
     let contentsWidth;
     let contentsHeight;
 
+    let extraShiftDownForAngleDiscrepancy;
+
     let itemWidth;
     let itemHeight;
     let innerRadius;
     let outerRadius;
 
     function updateDimns(){
-        margin = { left: width * 0.05, right:width * 0.05, top:height * 0.1, bottom:height * 0.1 }
+        margin = { left: width * 0.05, right:width * 0.05, top:height * 0.05, bottom:height * 0.05 }
         const availContentsWidth = width - margin.left - margin.right;
         const availContentsHeight = height - margin.top - margin.bottom;
         const actualContentsLength = d3.min([availContentsWidth, availContentsHeight]);
@@ -36,7 +38,11 @@ export default function cardItemsComponent() {
         itemHeight = itemWidth;
         const longestItemLength = d3.max([itemWidth, itemHeight]);
         innerRadius = 0;// (actualContentsLength/2 - longestItemLength/2) * (withSections ? 0.5 : 1);
-        outerRadius = contentsWidth/2;
+        //radius is slightly linger than half contentsWidt, because the total length is nerve quite 2 * radius
+        //due to angles
+        outerRadius = contentsWidth * 0.53;
+        //we need to shift down by theis extra 0.03 of contentsWidth to centre it. 
+        extraShiftDownForAngleDiscrepancy = contentsWidth * 0.03;
     }
 
     let styles = {
@@ -90,7 +96,9 @@ export default function cardItemsComponent() {
             const { } = data;
 
             const contentsG = d3.select(this).select("g.card-items-contents")
-                .attr("transform", `translate(${margin.left + extraHorizMargin/2},${margin.top + extraVertMargin/2})`);
+                .attr("transform", `translate(
+                    ${margin.left + extraHorizMargin/2},
+                    ${margin.top + extraVertMargin/2})`);
 
             contentsG.select("rect.card-items-contents-bg")
                 .attr("width", contentsWidth)
@@ -99,7 +107,7 @@ export default function cardItemsComponent() {
 
             let newStatus;
             contentsG.select("g.centre")
-                .attr("transform", `translate(${contentsWidth/2},${contentsHeight/2})`)
+                .attr("transform", `translate(${contentsWidth/2},${contentsHeight/2 + extraShiftDownForAngleDiscrepancy})`)
                 .datum(data)
                 .call(pentagon
                     .r1(innerRadius)

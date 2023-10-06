@@ -26,7 +26,7 @@ export default function cardsComponent() {
 
     let infoHeight = 30;
     let gapBetweenInfoAndItems;
-    let bottomBarHeight = 40
+    let bottomBarHeight = 0
     let itemsAreaHeight;
 
     function updateDimns(){
@@ -260,7 +260,7 @@ export default function cardsComponent() {
                                 .transition() //hide if small
                                 .delay(200)
                                 .duration(200)
-                                    .attr("opacity", deckIsSelected & (isHeld || isSelected) ? 1 : 0);
+                                    .attr("opacity", /*deckIsSelected &*/ (isHeld || isSelected) ? 1 : 0);
 
                         //ITEMS
                         const cardIsEditable = (isHeld && isFront) || isSelected;

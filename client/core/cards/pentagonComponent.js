@@ -82,6 +82,7 @@ export default function pentagonComponent() {
                 .onLongpressStart(onLongpressStart)
                 .onLongpressEnd(onLongpressEnd)
                 .onClick(function(e,d){
+                    console.log("section click")
                     onClick.call(this, e, d)
                 });
 
