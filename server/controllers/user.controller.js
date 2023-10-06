@@ -210,19 +210,18 @@ const createDeck = async (req, res) => {
 
 const updateTable = async (req, res) => {
   console.log('updateTable for.................', req.user._id)
-  const { user, body } = req;
+  const { user, body:{ table }} = req;
 
-  const updatedTable = body;
   const now = Date.now();
-  updatedTable.updated = now;
+  table.updated = now;
   
-  user.tables = user.tables.map(table => table._id.equals(updatedTable._id) ? updatedTable : table);
+  user.tables = user.tables.map(t => t._id.equals(table._id) ? table : t);
   user.updated = now;
-  console.log("updatedTable")
+  console.log("updatedTable", table.id)
   try {
     await user.save()
     console.log("saved updated table")
-    res.json(updatedTable)
+    res.json(table)
   } catch (err) {
     return res.status(400).json({
       error: errorHandler.getErrorMessage(err)
@@ -252,11 +251,14 @@ const updateDeck = async (req, res) => {
 
 const removeDeck = async (req, res) => {
   console.log('removeDeck... user deckId', req.user._id, req.body.deckId)
-  const { user, body:{ deckId } } = req;
+  const { user, body:{ deckId, table } } = req;
+  const now = Date.now();
+  table.updated = now;
   
   console.log("init nrdecks", user.decks.length)
   user.decks = user.decks.filter(deck => !deck._id.equals(deckId));
-  user.updated = Date.now();
+  user.tables = user.tables.map(t => t._id.equals(table._id) ? table : t);
+  user.updated = now;
   console.log("deleted deck")
   try {
     const result = await user.save();

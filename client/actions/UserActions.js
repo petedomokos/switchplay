@@ -185,7 +185,7 @@ export const updateTable = (table, shouldPersist=true, shouldUpdateStore=true) =
 		{
 			url: `/api/users/${jwt.user._id}/tables`,
 			method: 'PUT',
-			body:JSON.stringify(table),
+			body:JSON.stringify({ table }),
 			requireAuth:true
 		}
 	)
@@ -237,10 +237,10 @@ export const updateDeck = (deck, shouldPersist=true) => dispatch => {
 	)
 }
 
-export const deleteDeck = (deckId, updatedTable, shouldPersist=true) => dispatch => {
+export const deleteDeck = (deckId, table, shouldPersist=true) => dispatch => {
 	console.log("deleteDeck", shouldPersist, deckId)
 	//update in store
-	dispatch({ type:C.DELETE_DECK, deckId, table:updatedTable });
+	dispatch({ type:C.DELETE_DECK, deckId, table });
 
 	if(!shouldPersist){ return; }
 
@@ -254,7 +254,7 @@ export const deleteDeck = (deckId, updatedTable, shouldPersist=true) => dispatch
 		{
 			url: `/api/users/${jwt.user._id}/decks`,
 			method: 'DELETE',
-			body:JSON.stringify({ deckId }),
+			body:JSON.stringify({ deckId, table }),
 			requireAuth:true,
 		}
 	)

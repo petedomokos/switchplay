@@ -191,7 +191,6 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, as
   }, [stringifiedData]);
 
   const archiveDeck = useCallback(id => {
-    console.log("arc", id)
     updateTable({ 
       ...table, 
       decks:table.decks.filter(deckId => deckId !== id),
