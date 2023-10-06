@@ -7,6 +7,7 @@ import dragEnhancements from '../journey/enhancedDragHandler';
 import { updateRectDimns } from '../journey/transitionHelpers';
 import { getTransformationFromTrans } from '../journey/helpers';
 import { isNumber } from '../../data/dataHelpers';
+import { ContactSupportOutlined } from '@material-ui/icons';
 
 function maxDimns(maxWidth, maxHeight, aspectRatio){
     const potentialHeight = maxWidth * aspectRatio;
@@ -215,7 +216,6 @@ export default function deckComponent() {
                         .attr("class", "deck-bg")
                         .attr("width", width)
                         .attr("height", height)
-                        //.attr("fill", "transparent")
                         .attr("fill", grey10(9))
 
                 contentsG = containerG.append("g").attr("class", "deck-contents");
@@ -230,7 +230,7 @@ export default function deckComponent() {
                 
                 headerG = contentsG.append("g")
                     .attr("class", "header")
-                    .attr("opacity", selectedCardNr ? 0 : 1);
+                    .attr("opacity", isNumber(selectedCardNr) ? 0 : 1);
 
                 cardsAreaG = contentsG
                     .append("g")
@@ -269,7 +269,7 @@ export default function deckComponent() {
 
                 //bg
                 containerG.select("rect.deck-bg")
-                    .attr("display", selectedCardNr ? null : "none")
+                    .attr("display", isNumber(selectedCardNr) ? null : "none")
                     .attr("width", width)
                     .attr("height", height)
                     .on("click", e => {
@@ -464,7 +464,10 @@ export default function deckComponent() {
                         .width(headerWidth)
                         .height(headerHeight)
                         .margin({ left:deckIsSelected ? 15 : 7.5, right: 0, top: 0, bottom: 0 } )
-                        .onClickTitle(onClickDeck)
+                        .onClickTitle(e => {
+                            e.stopPropagation();
+                            //setForm({ formType: "deck-title" }) 
+                        })
                         .onClickProgressIcon(onClickDeck))
                 
 
@@ -573,7 +576,7 @@ export default function deckComponent() {
                         })
                         .onSelectItem(function(item){ 
                             setForm({ formType: "item", value:item }) 
-                        })  
+                        })
                         .onUpdateItemStatus(updateItemStatus)
                         .onClickCard(function(e, d){
                             if(!deckIsSelected){

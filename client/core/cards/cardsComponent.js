@@ -14,22 +14,27 @@ export default function cardsComponent() {
     // dimensions
     let width = 300;
     let height = 600;
+    let margin = { left:0, right: 0, top:10, bottom:0 }
+    let contentsWidth;
+    let contentsHeight;
 
     let placedCardWidth = 0;
     let placedCardHeight = 0;
 
-    let selectedCardWidth = width;
-    let selectedCardHeight = height;
+    let selectedCardWidth = contentsWidth;
+    let selectedCardHeight = contentsHeight;
 
     let infoHeight = 30;
-    let spaceHeight;
+    let gapBetweenInfoAndItems;
     let bottomBarHeight = 40
     let itemsAreaHeight;
 
     function updateDimns(){
-        spaceHeight = 20;
+        contentsWidth = width - margin.left - margin.right;
+        contentsHeight = height - margin.top - margin.bottom; 
+        gapBetweenInfoAndItems = 20;
         bottomBarHeight = 0;
-        itemsAreaHeight = height - infoHeight - spaceHeight - bottomBarHeight;
+        itemsAreaHeight = contentsHeight - infoHeight - gapBetweenInfoAndItems - bottomBarHeight;
     }
 
     let fontSizes = {
@@ -158,8 +163,8 @@ export default function cardsComponent() {
                                 .attr("class", "card-bg")
                                 .attr("rx", 3)
                                 .attr("ry", 3)
-                                .attr("width", width)
-                                .attr("height", height)
+                                .attr("width", contentsWidth)
+                                .attr("height", contentsHeight)
                                 .attr("stroke", getCardStroke(d))
                                 .attr("fill", getCardFill(d))
                                 .on("click", e => {
@@ -208,11 +213,12 @@ export default function cardsComponent() {
                     })
                     .each(function(cardD,i){
                         const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status } = cardD; 
-                        const contentsG = d3.select(this).select("g.card-contents");
+                        const contentsG = d3.select(this).select("g.card-contents")
+                            .attr("transform", `translate(${margin.left},${margin.top})`);
                         
                         /*contentsG.select("rect.card-overlay")
-                            .attr("width", width)
-                            .attr("height", height)
+                            .attr("width", contentsWidth)
+                            .attr("height", contentsHeight)
                             .attr("display", deckIsSelected ? "none" : null)*/
 
                         
@@ -228,13 +234,13 @@ export default function cardsComponent() {
                             .transition("card-bg-dimns")
                             //.delay(200)
                             .duration(TRANSITIONS.MED)
-                                .attr("width", width)
-                                .attr("height", height)
+                                .attr("width", contentsWidth)
+                                .attr("height", contentsHeight)
                         
                         //const infoHeight;
                         //components
                         const header = headerComponents[cardNr]
-                            .width(width)
+                            .width(contentsWidth)
                             .height(infoHeight)
                             .styles({
                                 statusFill:() => getProgressStatusFill(cardD),
@@ -282,7 +288,7 @@ export default function cardsComponent() {
                                     return lineD.status === 2 ? GOLD : (lineD.status === 1 ? grey10(2) : grey10(6))
                                 }
                             })
-                            .width(width)
+                            .width(contentsWidth)
                             .height(itemsAreaHeight)
                             .withSections(cardIsEditable)
                             .editable(cardIsEditable)
@@ -294,7 +300,7 @@ export default function cardsComponent() {
                             .onDragEnd(e => dragEnd(e, cardD))
 
                         contentsG.select("g.items-area")
-                            .attr("transform", `translate(0, ${infoHeight + spaceHeight})`)
+                            .attr("transform", `translate(0, ${infoHeight + gapBetweenInfoAndItems})`)
                             .datum(cardD.items)
                             .call(items)
 
@@ -307,7 +313,7 @@ export default function cardsComponent() {
                                 .attr("opacity", shouldHideItems ? 0 : 1)
                         
                         contentsG.select("rect.items-area-bg")
-                            .attr("width", width)
+                            .attr("width", contentsWidth)
                             .attr("height", itemsAreaHeight)
                             .attr("fill", "none");
 
@@ -325,7 +331,7 @@ export default function cardsComponent() {
                             shouldDisplay:isSelected
                         }
                         const botRightBtnData = [collapseBtnDatum, expandBtnDatum];
-                        const btnHeight = d3.max([1, d3.min([15, 0.12 * height])]);
+                        const btnHeight = d3.max([1, d3.min([15, 0.12 * contentsHeight])]);
                         const btnWidth = btnHeight;
                         //assumme all are square
                         //note: 0.8 is a bodge coz iconsseems to be bigger than they state
@@ -352,7 +358,7 @@ export default function cardsComponent() {
 
                                 })
                                 .merge(botRightBtnG)
-                                .attr("transform", `translate(${width - btnWidth + btnMargin},${height - btnHeight + btnMargin})`)
+                                .attr("transform", `translate(${contentsWidth - btnWidth + btnMargin},${contentsHeight - btnHeight + btnMargin})`)
                                 .each(function(d){
                                     const btnG = d3.select(this);
                                     //visibility

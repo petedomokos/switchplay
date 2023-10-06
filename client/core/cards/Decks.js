@@ -7,6 +7,7 @@ import DeckHeader from './DeckHeader';
 import deckLayout from './deckLayout';
 import decksComponent from "./decksComponent";
 import ItemForm from "./forms/ItemForm";
+import DeckTitleForm from './forms/DeckTitleForm';
 import { sortAscending, moveElementPosition } from '../../util/ArrayHelpers';
 import { initDeck } from '../../data/cards';
 //import { createId } from './helpers';
@@ -213,6 +214,7 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, as
   }, [stringifiedData]);
 
   const onClickBg = useCallback((e, d) => {
+    console.log("click bg")
     if(longpressedDeckId){
       setLongpressedDeckId("");
       return;
@@ -229,6 +231,13 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, as
 
   const updateFrontCardNr = useCallback(cardNr => {
     updateDeck({ ...selectedDeck, frontCardNr:cardNr })
+  }, [stringifiedData, form, selectedDeckId]);
+
+  const updateDeckTitle = useCallback(updatedTitle => {
+    console.log("updateDeckTitle", updatedTitle)
+    //const {  } = form.value;
+
+  
   }, [stringifiedData, form, selectedDeckId]);
 
   const updateCard = useCallback((updatedCard) => {
@@ -346,6 +355,9 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, as
         {form?.formType === "item" && 
           <ItemForm item={form.value} fontSize={form.height * 0.5} save={updateItemTitle} close={() => setForm(null)} />
         }
+        {/**form?.formType === "deck-title" && 
+          <DeckTitleForm deck={selectedDeck} fontSize={form.height * 0.5} save={updateDeckTitle} close={() => setForm(null)} />
+      */}
       </div>
     </div>
   )

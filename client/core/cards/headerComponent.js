@@ -138,7 +138,10 @@ export default function headerComponent() {
                     
                 
                 titleG.select("rect.title-hitbox")
-                    .on("click", function(e){ onClickTitle(e, data); })
+                    .on("click", function(e){ 
+                        onClickTitle(e, data);
+                        e.stopPropagation(); 
+                    })
                     .transition("title-hitbox")
                     .duration(TRANSITIONS.MED)
                         .attr("width", contentsWidth - progressIconWidth)
