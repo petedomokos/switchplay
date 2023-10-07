@@ -81,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
 //note: heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
 const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, datasets, asyncProcesses, width, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
-  //console.log("Decks", height)
+  //console.log("Decks", data.map(d => d.title || d.id ))
   //processed props
   const stringifiedData = JSON.stringify({ data, table });
   //state

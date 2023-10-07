@@ -72,14 +72,15 @@ const calcRowNr = (i, nrCols) => Math.floor(i/nrCols);
 const embellishedDecks = (decks, nrCols=DEFAULT_NR_COLS) => decks
   .map((d,i) => ({
   ...d, 
-  colNr: isNumber(d.colNr) ? d.colNr : calcColNr(i, nrCols),
-  rowNr: isNumber(d.rowNr) ? d.rowNr : calcRowNr(i, nrCols),
+  //@todo - impl layoutFormat grid
+  colNr: /*layoutFormat === "grid" ? d.fixedColNr :*/ calcColNr(i, nrCols),
+  rowNr: /*layoutFormat === "grid" ? d.fixedRowNr :*/ calcRowNr(i, nrCols),
   listPos:i
 }))
 
 const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, screen, createTable, updateTable, createDeck, updateDeck, deleteDeck }) => {
   const { tables=[], decks=[] } = user;
-  //console.log("tables", tables)
+  //console.log("CardsTable...tables", tables)
 
   //@todo - move creating flag to asyncProcesses
   const [creatingTable, setCreatingTable] = useState(false);

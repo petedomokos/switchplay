@@ -342,6 +342,7 @@ export default function deckComponent() {
 
                 //issue - cloneG is a child of container, which moves, making the clone move too????
                 longpressStart = function(e,d){
+                    console.log("lp start")
                     d3.selectAll("g.deck").filter(d => d.id !== id).attr("pointer-events", "none")
                     //create a clone 
                     cloneG = containerG
@@ -370,6 +371,7 @@ export default function deckComponent() {
                 }
 
                 function handleDrag(e,d){
+                    if(!cloneG) { return; }
                     cloneG.select("g.context-menu").remove();
 
                     const { translateX, translateY } = getTransformationFromTrans(cloneG.attr("transform"));
@@ -399,7 +401,7 @@ export default function deckComponent() {
 
                 longpressEnd = function(e,d){
                     if(wasLongpressDragged){
-                        //console.log("newCell", newCell)
+                        console.log("newCell", newCell)
                         //@todo - handle grid format if layoutFormat is grid
                         onMoveDeck(listPos, newCell.listPos);
 

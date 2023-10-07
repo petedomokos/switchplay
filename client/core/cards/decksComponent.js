@@ -79,6 +79,9 @@ export default function decksComponent() {
                             force:true
                         })
                         .each(function(d,i){
+                            if(d.title.includes("Steve")){
+                                console.log("update Steve x", x(d))
+                            }
                             const deckWidth = _deckWidth(d,i);
                             const deckHeight = _deckHeight(d,i);
 

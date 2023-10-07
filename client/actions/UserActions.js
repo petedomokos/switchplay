@@ -238,7 +238,6 @@ export const updateDeck = (deck, shouldPersist=true) => dispatch => {
 }
 
 export const deleteDeck = (deckId, table, shouldPersist=true) => dispatch => {
-	console.log("deleteDeck", shouldPersist, deckId)
 	//update in store
 	dispatch({ type:C.DELETE_DECK, deckId, table });
 
