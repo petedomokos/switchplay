@@ -228,6 +228,7 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, dat
 
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
+    console.log("bg click")
     e.stopPropagation();
     if(longpressedDeckId){
       setLongpressedDeckId("");

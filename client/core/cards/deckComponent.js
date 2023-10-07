@@ -317,7 +317,10 @@ export default function deckComponent() {
                 //drag overlay
                 enhancedDrag
                     .dragThreshold(100)
-                    .onLongpressStart(function(){ onSetLongpressed(true); })
+                    .onLongpressStart(function(){
+                        console.log("lp start") //this not being triggered after delete
+                        onSetLongpressed(true); 
+                    })
                     .onLongpressDragged(longpressDragged)
                     .onLongpressEnd(function(){
                         if(wasLongpressDragged){
@@ -342,7 +345,6 @@ export default function deckComponent() {
 
                 //issue - cloneG is a child of container, which moves, making the clone move too????
                 longpressStart = function(e,d){
-                    console.log("lp start")
                     d3.selectAll("g.deck").filter(d => d.id !== id).attr("pointer-events", "none")
                     //create a clone 
                     cloneG = containerG
@@ -360,8 +362,6 @@ export default function deckComponent() {
 
                     //now we have cloned it, we hide the original
                     containerG.attr("opacity", 0)
-
-                    const { translateX, translateY } = getTransformationFromTrans(cloneG.attr("transform"));
 
                     onSetLongpressed(true)
                 }
@@ -429,6 +429,8 @@ export default function deckComponent() {
                         .attr("opacity", 0.3)
                         .attr("stroke", null)
                         .attr("stroke-width", null)
+
+                    onSetLongpressed(false)
 
                 }
 

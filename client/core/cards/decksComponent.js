@@ -71,6 +71,9 @@ export default function decksComponent() {
                         })
                         .attr("transform", (d,i) => `translate(${x(d,i)}, ${y(d,i)})`)
                         .merge(deckG)
+                        //the first click after a delete, this does nothing, there is no pointer events at all on deck
+                        //bg click is enabled, so either pointer-events is off for svg, or something like that
+                        .on("click", console.log("deck clicked"))
                         .call(updateTransform, { 
                             x, 
                             y, 
@@ -79,9 +82,6 @@ export default function decksComponent() {
                             force:true
                         })
                         .each(function(d,i){
-                            if(d.title.includes("Steve")){
-                                console.log("update Steve x", x(d))
-                            }
                             const deckWidth = _deckWidth(d,i);
                             const deckHeight = _deckHeight(d,i);
 
