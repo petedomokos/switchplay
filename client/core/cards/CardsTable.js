@@ -35,7 +35,6 @@ const useStyles = makeStyles((theme) => ({
     transition: `top ${TRANSITIONS.MED}ms`,
     //width:props => props.contents.width,
     //height:props => props.contents.height,
-    //background:"red"
   },
   hideInstructions:{
     margin:"25px 5px",
@@ -78,15 +77,6 @@ const embellishedDecks = (decks, nrCols=DEFAULT_NR_COLS) => decks
   listPos:i
 }))
 
-/*
-todo
-   - work out why 2 tables are being created - wy is cerate`table being called on each reload
-   - put teh new deck icon back on screen
-   - create a new deck by clicking icon -> add the deckid into the table.decks array too, so need to also updateTable
-   (this will be a separate Reacr rerender, but the order they happen in shouldnt matter, it will only show the deck when both are returned)
-
-
-*/
 const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, screen, createTable, updateTable, createDeck, updateDeck, deleteDeck }) => {
   const { tables=[], decks=[] } = user;
   //console.log("tables", tables)
@@ -128,7 +118,6 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const [form, setForm] = useState(null);
 
   //we follow d3 margin convention here (eg html padding)
-  //const vertSpaceForHeader = 40;
   const margin = { 
     left:0,//width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
     right:0,//width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
@@ -190,7 +179,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
           :
           <Decks 
             table={table} setSel={setSelectedDeckId} nrCols={nrCols} 
-            data={decksData} width={contentsWidth} height={contentsHeight} 
+            data={decksData} width={contentsWidth} height={contentsHeight} heightK={height/contentsHeight}
             onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} 
             updateTable={updateTable} updateDeck={updateDeck} />
         }

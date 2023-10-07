@@ -78,8 +78,10 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, asyncProcesses, width, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
-  //console.log("data", data)
+//note: heightK is a special value to accomodate fact that height changes when deck is selected
+//without it, each deckHeight is slighlty wrong
+const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, datasets, asyncProcesses, width, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
+  //console.log("Decks", height)
   //processed props
   const stringifiedData = JSON.stringify({ data, table });
   //state
@@ -110,7 +112,9 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, as
   const deckWidth = deckWidthWithMargins - deckOuterMargin.left - deckOuterMargin.right;
   //the inner height is calcuated first as the aspect ration must be maintained
   const deckHeight = deckWidth / deckAspectRatio;
-  const deckHeightWithMargins = deckHeight + deckOuterMargin.top + deckOuterMargin.bottom;
+  //note: heightK is a special value to accomodate fact that height changes when deck is selected
+  //without it, each deckHeight is slightly wrong when deck is selected
+  const deckHeightWithMargins = (deckHeight * heightK) + deckOuterMargin.top + deckOuterMargin.bottom;
 
   const zoomScale = width / deckWidth;
 
@@ -220,7 +224,7 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, as
     //if req, update state in react, may need it with delay so it happens at end of zoom
     setSelectedDeckId(id);
     setSel(id)
-  }, [stringifiedData]);
+  }, [stringifiedData, width, height]);
 
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
@@ -341,7 +345,7 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, nrCols, datasets, as
     //console.log("attach zoom to ", zoomRef.current)
     d3.select(zoomRef.current).call(zoom);
     //need to add a zoomlayerG inside the svg which gets zoomed when svg is acted on
-  }, [])
+  }, [width, height])
 
   return (
     <div className={`cards-root ${classes.root}`} onClick={onClickBg} >
