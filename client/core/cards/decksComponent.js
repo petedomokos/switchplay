@@ -21,17 +21,23 @@ export default function decksComponent() {
 
     let selectedDeckId = "";
     let longpressedDeckId = "";
-    let selectedCardNr;
+    let selectedCardNr = () => "";
     let format;
 
     let onClickDeck = function(){}
     let onSetLongpressedDeckId = function(){}
+    let onSetSelectedCardNr = function(){}
     let onMoveDeck = function(){};
     let onDeleteDeck = function(){};
     let onArchiveDeck = function(){};
     let updateItemStatus = function(){};
     let updateFrontCardNr = function(){};
     let setForm = function(){};
+
+    let zoom;
+    let startLongpress;
+    let endLongpress;
+    let handleDrag;
 
     let x = (d,i) => d.x;
     let y = (d,i) => d.y;
@@ -59,9 +65,19 @@ export default function decksComponent() {
             update(decksData);
 
             function init(){
+                containerG
+                    .append("rect")
+                        .attr("class", "decks-bg")
+                        .attr("fill", "blue")
+                        .attr("stroke", "white");
             }
 
             function update(decksData, options={}){
+                containerG.select("rect.decks-bg")
+                    .attr("width", width)
+                    .attr("height", height)
+
+
                 const deckG = containerG.selectAll("g.deck").data(decksData, d => d.id);
                 deckG.enter()
                     .append("g")
@@ -71,9 +87,6 @@ export default function decksComponent() {
                         })
                         .attr("transform", (d,i) => `translate(${x(d,i)}, ${y(d,i)})`)
                         .merge(deckG)
-                        //the first click after a delete, this does nothing, there is no pointer events at all on deck
-                        //bg click is enabled, so either pointer-events is off for svg, or something like that
-                        .on("click", console.log("deck clicked"))
                         .call(updateTransform, { 
                             x, 
                             y, 
@@ -95,18 +108,35 @@ export default function decksComponent() {
                                 .onSetLongpressed(isLongpressed => { 
                                     onSetLongpressedDeckId( isLongpressed ? d.id : "") 
                                 })
+                                .onSetSelectedCardNr(onSetSelectedCardNr)
                                 .onMoveDeck(onMoveDeck)
                                 .onDeleteDeck(onDeleteDeck)
                                 .onArchiveDeck(onArchiveDeck)
                                 .updateItemStatus(updateItemStatus)
                                 .updateFrontCardNr(updateFrontCardNr)
                                 .transformTransition(transformTransition)
-                                .setForm(setForm)
+                                .setForm(setForm);
 
                             d3.select(this).call(deck)
                         })
 
                 deckG.exit().remove();
+
+                d3.select("g.zoom")
+                    .on("click", (e) => { 
+                        if(selectedDeckId){ return; }
+                        //@todo - use getDeck instead based on getCell -> if Math.abs(x - cellX(colNr)) < margin etc 
+                        const cell = getCell([e.clientX, e.clientY], true);
+                        if(cell?.deckId){
+                            onClickDeck(e, { id: cell.deckId });
+                            e.stopPropagation();
+                        }
+                    })
+                    .call(zoom)
+
+                startLongpress = function(deckId){ deckComponents[deckId].startLongpress() }
+                endLongpress = function(deckId){ deckComponents[deckId].endLongpress() }
+                handleDrag = function(e, deckId){ deckComponents[deckId].handleDrag(e) }
 
             }
 
@@ -167,6 +197,15 @@ export default function decksComponent() {
         selectedDeckId = value;
         return decks;
     };
+    decks.selectedCardNr = function (value) {
+        if (!arguments.length) { 
+            return selectedDeckId ? deckComponents[selectedDeckId].selectedCardNr() : ""; 
+        }
+        if(selectedDeckId){
+            deckComponents[selectedDeckId].selectedCardNr(value)
+        }
+        return decks;
+    };
     decks.longpressedDeckId = function (value) {
         if (!arguments.length) { return longpressedDeckId; }
         longpressedDeckId = value;
@@ -177,6 +216,11 @@ export default function decksComponent() {
     decks.format = function (value) {
         if (!arguments.length) { return format; }
         format = value;
+        return decks;
+    };
+    decks.zoom = function (value) {
+        if (!arguments.length) { return zoom; }
+        zoom = value;
         return decks;
     };
     decks.updateItemStatus = function (value) {
@@ -204,6 +248,11 @@ export default function decksComponent() {
         onSetLongpressedDeckId = value;
         return decks;
     };
+    decks.onSetSelectedCardNr = function (value) {
+        if (!arguments.length) { return onSetSelectedCardNr; }
+        onSetSelectedCardNr = value;
+        return decks;
+    };
     decks.onMoveDeck = function (value) {
         if (!arguments.length) { return onMoveDeck; }
         onMoveDeck = value;
@@ -219,5 +268,8 @@ export default function decksComponent() {
         onArchiveDeck = value;
         return decks;
     };
+    decks.startLongpress = function (deckId) { startLongpress(deckId); };
+    decks.endLongpress = function (deckId) { endLongpress(deckId); };
+    decks.handleDrag = function (e, deckId) { handleDrag(e, deckId); };
     return decks;
 }

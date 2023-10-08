@@ -169,6 +169,7 @@ export default function deckComponent() {
 
     let onClickDeck = function(){};
     let onSetLongpressed = function(){};
+    let onSetSelectedCardNr = function(){};
     let onMoveDeck = function(){};
     let onDeleteDeck = function(){};
     let onArchiveDeck = function(){};
@@ -177,10 +178,14 @@ export default function deckComponent() {
     let updateFrontCardNr = function(){};
 
     let deckIsLongpressed = false;
-    let wasLongpressDragged = false;
+    let wasDragged = false;
 
-    let longpressStart;
-    let longpressEnd;
+    let handleDrag;
+    let startLongpress;
+    let endLongpress;
+
+    let selectCard;
+    let deselectCard;
 
     let containerG;
     let contentsG;
@@ -273,7 +278,8 @@ export default function deckComponent() {
                     .attr("width", width)
                     .attr("height", height)
                     .on("click", e => {
-                        deselectCard();
+                        //deselectCard();
+                        onSetSelectedCardNr("")
                         e.stopPropagation();
                         setForm(null);
                     })
@@ -302,12 +308,10 @@ export default function deckComponent() {
                     .margin(menuMargin)
                     .onClick((e,d) => {
                         if(d.key === "delete"){
-                            console.log("delete")
                             onDeleteDeck(id);
                             cleanupLongpress();
                         }
                         if(d.key === "archive"){
-                            console.log("archive")
                             onArchiveDeck(id);
                             cleanupLongpress();
                         }
@@ -318,12 +322,11 @@ export default function deckComponent() {
                 enhancedDrag
                     .dragThreshold(100)
                     .onLongpressStart(function(){
-                        console.log("lp start") //this not being triggered after delete
                         onSetLongpressed(true); 
                     })
                     .onLongpressDragged(longpressDragged)
                     .onLongpressEnd(function(){
-                        if(wasLongpressDragged){
+                        if(wasDragged){
                             onSetLongpressed(false);
                         }
                     });
@@ -334,18 +337,21 @@ export default function deckComponent() {
                     .on("end", deckIsSelected ? null : enhancedDrag(dragEnd))
 
                 function dragStart(e,d){
+                    //console.log("deck dragstart")
                 }
 
                 function dragged(e,d){
-                    if(longpressedDeckId === id){ wasLongpressDragged = true; }
+                    //console.log("deck drag")
+                    if(longpressedDeckId === id){ wasDragged = true; }
                     handleDrag(e);
                 }
 
                 function dragEnd(e,d){ if(longpressedDeckId === id){ onSetLongpressed(false); } }
 
                 //issue - cloneG is a child of container, which moves, making the clone move too????
-                longpressStart = function(e,d){
-                    d3.selectAll("g.deck").filter(d => d.id !== id).attr("pointer-events", "none")
+                startLongpress = function(e,d){
+                    d3.selectAll("g.deck").filter(d => d.id !== id).attr("pointer-events", "none");
+
                     //create a clone 
                     cloneG = containerG
                         .clone(true)
@@ -363,14 +369,15 @@ export default function deckComponent() {
                     //now we have cloned it, we hide the original
                     containerG.attr("opacity", 0)
 
-                    onSetLongpressed(true)
+                    //onSetLongpressed(true)
                 }
                 function longpressDragged(e,d){
-                    wasLongpressDragged = true;
+                    wasDragged = true;
                     handleDrag(e);
                 }
 
-                function handleDrag(e,d){
+                handleDrag = function(e,d){
+                    wasDragged = true;
                     if(!cloneG) { return; }
                     cloneG.select("g.context-menu").remove();
 
@@ -399,9 +406,8 @@ export default function deckComponent() {
                     cloneG.attr("transform", `translate(${newX},${newY})`);
                 }
 
-                longpressEnd = function(e,d){
-                    if(wasLongpressDragged){
-                        console.log("newCell", newCell)
+                endLongpress = function(){
+                    if(newCell){
                         //@todo - handle grid format if layoutFormat is grid
                         onMoveDeck(listPos, newCell.listPos);
 
@@ -409,15 +415,12 @@ export default function deckComponent() {
                             .transition("clone")
                             .duration(TRANSITIONS.MED)
                             .attr("transform", `translate(${newCell.deckX},${newCell.deckY})`)
-                            .on("end", function(){
-                                cleanupLongpress();
-                            })
-                        wasLongpressDragged = false;
+                            .on("end", function(){ cleanupLongpress(); })
                     }else{
                         cleanupLongpress();
                     }
                 
-                    d3.selectAll("g.deck").filter(d => d.id !== id).attr("pointer-events", "all");
+                    d3.selectAll("g.deck").filter(d => d.id !== id).attr("pointer-events", null);
                 }
 
                 function cleanupLongpress(){
@@ -430,7 +433,8 @@ export default function deckComponent() {
                         .attr("stroke", null)
                         .attr("stroke-width", null)
 
-                    onSetLongpressed(false)
+                    onSetLongpressed(false);
+                    newCell = null;
 
                 }
 
@@ -488,10 +492,10 @@ export default function deckComponent() {
                 const selectedCardWidth = selectedCardDimns.width;
                 const selectedCardHeight = selectedCardDimns.height;
 
-                function selectCard(d){
+                selectCard = function(cardNr){
                     //hide/show others
                     //@todo - this can be part of update process instead
-                    containerG.selectAll("g.card").filter(cardD => cardD.cardNr !== d.cardNr)
+                    containerG.selectAll("g.card").filter(cardD => cardD.cardNr !== cardNr)
                         .attr("pointer-events", "none")
                         .transition("cards")
                         .duration(400)
@@ -504,8 +508,9 @@ export default function deckComponent() {
                            .attr("opacity", 0)
                            .on("end", function(){ d3.select(this).attr("display", "none"); })
 
-                    selectedCardNr = d.cardNr;
-                    update(deckData);
+                    //selectedCardNr = d.cardNr;
+                    //onSetSelectedCardNr(d.cardNr);
+                    //update(deckData);
                 }
 
                 //2 issues - clicking card backgrounddoes nothing, but it should still prevent 
@@ -514,7 +519,7 @@ export default function deckComponent() {
                 //2nd - swiping the placed cards is not being picked up - perhaps start with clicking
                 //all cards, check that is picked up, it should just prevetn ptopagtion thats all
 
-                function deselectCard(){
+                deselectCard = function(){
                     //hide/show others
                     //@todo - this can be part of update process instead
                     containerG.selectAll("g.card")//.filter(d => d.cardNr !== cardD.cardNr)
@@ -531,8 +536,9 @@ export default function deckComponent() {
                             .duration(600)
                             .attr("opacity", 1)
 
-                    selectedCardNr = null
-                    update(deckData);
+                    //selectedCardNr = null
+                    //update(deckData);
+                    //onSetSelectedCardNr("");
                 }
 
 
@@ -586,10 +592,12 @@ export default function deckComponent() {
                         .onClickCard(function(e, d){
                             if(!deckIsSelected){
                                 onClickDeck(e, _deckData);
-                            } else if(d.isSelected){
-                                deselectCard(d);
+                            } else if(selectedCardNr === d.cardNr){
+                                //deselectCard(d);
+                                onSetSelectedCardNr("")
                             } else{
-                                selectCard(d);
+                                //selectCard(d);
+                                onSetSelectedCardNr(d.cardNr)
                             }
                         })
                         .onPickUp(function(d){
@@ -639,6 +647,17 @@ export default function deckComponent() {
         deckIsSelected = value; 
         return deck;
     };
+    deck.selectedCardNr = function (value) {
+        if (!arguments.length) { return selectedCardNr; }
+        if(isNumber(value) && selectedCardNr !== value){
+            selectCard(value)
+        }
+        if(value === "" && selectedCardNr !== ""){
+            deselectCard();
+        }
+        selectedCardNr = value;
+        return deck;
+    };
     deck.format = function (value) {
         if (!arguments.length) { return format; }
         format = value;
@@ -652,9 +671,9 @@ export default function deckComponent() {
     deck.longpressedDeckId = function (value) {
         if (!arguments.length) { return longpressedDeckId; }
         if(longpressedDeckId === id && value !== id){
-            longpressEnd();
+            endLongpress();
         }else if(longpressedDeckId !== id && value === id){
-            longpressStart();
+            startLongpress();
         }
         longpressedDeckId = value;
         return deck;
@@ -690,6 +709,11 @@ export default function deckComponent() {
         onSetLongpressed = value;
         return deck;
     };
+    deck.onSetSelectedCardNr = function (value) {
+        if (!arguments.length) { return onSetSelectedCardNr; }
+        onSetSelectedCardNr = value;
+        return deck;
+    };
     deck.updateItemStatus = function (value) {
         if (!arguments.length) { return updateItemStatus; }
         updateItemStatus = value;
@@ -705,5 +729,8 @@ export default function deckComponent() {
         setForm = value;
         return deck;
     };
+    deck.startLongpress = function () { startLongpress(); };
+    deck.endLongpress = function () { endLongpress(); };
+    deck.handleDrag = function (e) { handleDrag(e); };
     return deck;
 }

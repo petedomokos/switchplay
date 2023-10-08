@@ -18,6 +18,7 @@ import IconComponent from './IconComponent';
 import { Table } from '@material-ui/core';
 import { isNumber } from 'lodash';
 const { GOLD } = COLOURS;
+import dragEnhancements from '../journey/enhancedDragHandler';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -78,9 +79,11 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
+const enhancedZoom = dragEnhancements();
+
 //note: heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, datasets, asyncProcesses, width, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
+const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel, tableMarginTop, heightK, nrCols, datasets, asyncProcesses, width, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
   //console.log("Decks", data.map(d => d.title || d.id ))
   //processed props
   const stringifiedData = JSON.stringify({ data, table });
@@ -89,6 +92,7 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, dat
   const [decks, setDecks] = useState(() => decksComponent());
   const [zoom, setZoom] = useState(() => d3.zoom());
   const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
+  const [selectedCardNr, setSelectedCardNr] = useState(customSelectedCardNr);
   const [longpressedDeckId, setLongpressedDeckId] = useState("");
   //console.log("Decks longpressedDeckId", longpressedDeckId)
   const [form, setForm] = useState(null);
@@ -97,15 +101,15 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, dat
   //refs
   const zoomRef = useRef(null);
   const containerRef = useRef(null);
-  //const deckHeadersRef = useRef(null);
+  //we will store zoom state when selecting a deck so we can return to it when deselecting the deck
   const zoomStateRef = useRef(d3.zoomIdentity);
+ 
   //dimns
-
   const deckAspectRatio = width / height;
   const deckOuterMargin = {
     left:10, //width * 0.05,
     right:10,//width * 0.05,
-    top:15,//height * 0.05,
+    top:15, //height * 0.05,
     bottom:15//height * 0.05
   }
   const deckWidthWithMargins = width/nrCols;// d3.min([width/3, 220]);
@@ -118,16 +122,20 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, dat
 
   const zoomScale = width / deckWidth;
 
+
   const cellX = d => d.colNr * deckWidthWithMargins;
   const cellY = d => d.rowNr * deckHeightWithMargins;
   const deckX = d => cellX(d) + deckOuterMargin.left;
   const deckY = d => cellY(d) + deckOuterMargin.top;
 
-  const getColNr = x => Math.round(x / deckWidthWithMargins);
-  const getRowNr = y => Math.round(y / deckHeightWithMargins)
-  const getCell = pos => {
-    const colNr = getColNr(pos[0]);
-    const rowNr = getRowNr(pos[1]);
+  const getColNr = x => Math.floor(x / deckWidthWithMargins);
+  const getRowNr = y => Math.floor(y / deckHeightWithMargins)
+  const getCell = (pos, posIsAbsolute=false) => {
+    const zoomTransform = d3.zoomTransform(zoomRef.current)
+    let x = posIsAbsolute ? pos[0] : pos[0];
+    let y = posIsAbsolute ? pos[1] - tableMarginTop : pos[1];
+    const colNr = getColNr(x - zoomTransform.x);
+    const rowNr = getRowNr(y - zoomTransform.y);
     const deck = data.find(deck => deck.colNr === colNr && deck.rowNr === rowNr);
     //handle case of dragging deck into the next available slot or any cell that is empty ie in a list that means 
     //a cell after teh last filled one
@@ -142,6 +150,11 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, dat
       deckId:deck?.id
     }
   };
+
+
+  const nrRows = d3.max(data, d => d.rowNr) + 1
+  const tableWidth = width;
+  const tableHeight = (nrRows + 1) * deckHeightWithMargins;
 
   //new icon goes in next avail slot
   const nextAvailableCol = data.length % nrCols;
@@ -214,13 +227,20 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, dat
 
   const setSelectedDeck = useCallback((id) => {
     const deck = data.find(d => d.id === id);
-    const newX = deck ? -deckX(deck) : 0;
-    const newY = deck ? -deckY(deck) : 0;
-    const newScale = deck ? zoomScale : 1;
-    const newTransformState = d3.zoomIdentity.translate(newX * newScale, newY * newScale).scale(newScale);
-    zoomStateRef.current = newTransformState;
+    if(deck){
+      //store the non selected zoom state so we can return to it when deselecting the deck
+      //console.log("zoom into deck so store zoom state", d3.zoomTransform(zoomRef.current))
+      zoomStateRef.current = d3.zoomTransform(zoomRef.current);
+      const newX = -deckX(deck);
+      const newY = -deckY(deck);
+      const newK = zoomScale;
+      const newTransformState = d3.zoomIdentity.translate(newX * newK, newY * newK).scale(newK);
+      d3.select(zoomRef.current).call(zoom.transform, newTransformState)
+    }else{
+      //console.log("returning to prev state", zoomStateRef.current)
+      d3.select(zoomRef.current).call(zoom.transform, zoomStateRef.current)
+    }
 
-    d3.select(zoomRef.current).call(zoom.transform, newTransformState)
     //if req, update state in react, may need it with delay so it happens at end of zoom
     setSelectedDeckId(id);
     setSel(id)
@@ -228,8 +248,11 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, dat
 
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
-    console.log("bg click")
     e.stopPropagation();
+    if(isNumber(selectedCardNr)){
+      setSelectedCardNr("");
+      return;
+    }
     if(longpressedDeckId){
       setLongpressedDeckId("");
       return;
@@ -240,11 +263,10 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, dat
       return; 
     }
     setSelectedDeck("");
-  }, [stringifiedData, selectedDeckId, longpressedDeckId, form]);
+  }, [stringifiedData, selectedDeckId, longpressedDeckId, selectedCardNr, form]);
 
   const onClickDeck = useCallback((e, d) => {
     setSelectedDeck(selectedDeck ? "" : d.id)
-    //setSelectedDeck(d.id); 
     e.stopPropagation();
     setForm(null);
   }, [stringifiedData, selectedDeckId]);
@@ -255,7 +277,6 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, dat
   }, [stringifiedData, form, selectedDeckId]);
 
   const updateDeckTitle = useCallback(title => {
-    //console.log("updateDeckTitle", title)
     updateDeck({ ...selectedDeck, title })
   }, [stringifiedData, form, selectedDeckId]);
 
@@ -280,9 +301,16 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, dat
 
   //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
+    if(!longpressedDeckId){
+      d3.select(containerRef.current).attr("pointer-events", "none");
+    }
     decks.longpressedDeckId(longpressedDeckId);
     setForm(null);
   }, [longpressedDeckId])
+
+  useEffect(() => {
+    decks.selectedCardNr(selectedCardNr);
+  }, [selectedCardNr])
 
   //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
@@ -292,10 +320,18 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, dat
 
   }, [stringifiedData, selectedDeckId])
 
+  /*
+  issue 1 - addDeckIcon doesnt scroll up along with decks, so it needs to be replaced with 
+  an svg version inside decks itself
+
+  2nd - change name of width and height to containerWidth and containerHeight 
+  (ie in our case, its the full screen width and height)
+
+  */
   useEffect(() => {
     decks
       .width(width)
-      .height(height)
+      .height(tableHeight + deckHeightWithMargins)
       .selectedDeckId(selectedDeckId)
       .x(deckX)
       .y(deckY)
@@ -304,18 +340,19 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, dat
       .getCell(getCell)
       .onClickDeck(onClickDeck)
       .onSetLongpressedDeckId(setLongpressedDeckId)
+      .onSetSelectedCardNr(setSelectedCardNr)
       .onMoveDeck(moveDeck)
       .onDeleteDeck(onDeleteDeck)
       .onArchiveDeck(archiveDeck)
-      //.zoom(zoom)
+      .zoom(zoom)
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
       .setForm(setForm)
   }, [stringifiedData, width, height, selectedDeckId])
 
   useEffect(() => {
-    d3.select(containerRef.current).call(decks);
-  }, [stringifiedData, width, height, selectedDeckId])
+    d3.select(containerRef.current).attr("pointer-events", "none").call(decks);
+  }, [stringifiedData, width, height, selectedDeckId, selectedCardNr])
 
   //zoom
   //@note - atm, all manual events are disabled, but if we actually start using zoom events properly 
@@ -323,30 +360,116 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, dat
   //then for the times when we have a sourceEvent and are not using it, we need to make the transform state 
   //stay as it is, because otherwise it gets out of sync with teh element being zoomed ie the svg
   useEffect(() => {
-    zoom
-    //.extent(extent)
-    //.scaleExtent([0.125, 10])
-    .on("start", function(e){
-      //console.log("start zoom......")
-    })
-    .on("zoom", function(e){
-      //console.log("zoomed", e.transform)
+
+    //todo next - when a deck is selected, we must store the current zoom Transform, 
+    //and when teh deck is deselected, we return to that rather than to 0,0
+
+    //DONT USE EXTENT BECAUSE WE NEED TRANSFORM TO WORK FULLY FOR DRAGGING DECKS TOO
+    //INSTEAD, SET MAX VALUES AND MANAGE IT MANUALLY
+    //see the way I did it for kpis, as we need to keep the transform also stuck at the max
+    //so it picks it up from the correct value on a 2nd scroll.
+    const horizGap = tableWidth - width;
+    const vertGap = tableHeight - height;
+    
+    const scrollMin = -vertGap;
+    const scrollMax = 0;
+
+    let zoomTransformStart;
+    let zoomTransformPrev;
+    let deckPointerEventsEnabled = false;
+    let wasDragged = false;
+
+    let location;
+    let deckId;
+
+    enhancedZoom
+      .dragThreshold(100)
+      .onLongpressStart(function(e){
+        location = [
+          e.sourceEvent.clientX || e.sourceEvent.touches[0].clientX,
+          e.sourceEvent.clientY || e.sourceEvent.touches[0].clientY,
+        ]
+        const cell = getCell(location, false);
+        deckId = cell?.deckId;
+        zoomTransformStart = e.transform;
+        zoomTransformPrev = e.transform;
+        //if user ends longpress, we want them to be able to drag 
+        //deckPointerEventsEnabled = true;
+        d3.select(containerRef.current).attr("pointer-events", "all");
+        setLongpressedDeckId(deckId)
+      })
+      //next thing is on dragEnd or longressEnd (when wasDragged=true) => need to call the tarsition in endLongpress
+      //or pass through wasDragged?? or newCell??
+      .onLongpressDragged(function(e){
+        //user has dragged as part of the longpress itself, so we dont want them to be able to drag after it anymore
+        wasDragged = true;
+        deckPointerEventsEnabled = false;
+        const pseudoE = { dx: e.transform.x - zoomTransformPrev.x, dy:e.transform.y - zoomTransformPrev.y }
+        decks.handleDrag(pseudoE, deckId);
+        zoomTransformPrev = e.transform;
+      })
+      .onLongpressEnd(function(e){
+        if(wasDragged){ 
+          wasDragged = false;
+          setLongpressedDeckId(""); 
+        }
+       
+        //reset zoom transform to what it was at start so next actual zoom is not affected
+        //this shouldnt have any visual affect, because we havent been calling the zoom handlers
+        //for the transform changes that occured as a result of a lpdrag
+        //@todo - check how can I just reset the transform object without triggering a call to the zoom handlers
+        d3.select(zoomRef.current).call(zoom.transform, zoomTransformStart)
+
+      });
+    
+    function zoomStart(e){
+      if(zoomTransformStart){
+        //do nothing as this is just a call to reset transform 
+        return;
+      }
+    }
+    function zoomed(e){
+      if(zoomTransformStart){
+        //do nothing as this is just a call to reset transform 
+        return;
+      }
+
+      if(e.sourceEvent){
+        const y = d3.min([d3.max([scrollMin, e.transform.y]), scrollMax])
+        d3.select(containerRef.current).attr("transform", `translate(${0},${y})`)
+        return;
+      }
       d3.select(containerRef.current)
         .transition()
         .duration(TRANSITIONS.MED)
           .attr("transform", e.transform)
-    })
-    .on("end", function(e){
-      //console.log("end zoom")
-    })
-    //DISABLE ALL MANUAL ZOOMS
-    //.on(".zoom", null) not working so use filter instead
-    .filter(() => false)
+    }
+    function zoomEnd(e){
+      if(zoomTransformStart){
+        //do nothing as this is just a call to reset transform just reset
+        zoomTransformStart = null;
+        return;
+      }
+      console.log("zoomEnd")
+      if(e.sourceEvent){
+        //manual scroll so reset to min/max if its gone past min/max
+        e.transform.x = 0;
+        if(e.transform.y < scrollMin){
+          e.transform.y = scrollMin;
+        }else if(e.transform.y > scrollMax){ //replace with max
+          e.transform.y = scrollMax; //replace with max
+        }
+      }
+    }
+  
+    zoom 
+      .on("start", enhancedZoom(zoomStart))
+      .on("zoom", enhancedZoom(zoomed))
+      .on("end", enhancedZoom(zoomEnd))
 
-    //console.log("attach zoom to ", zoomRef.current)
-    d3.select(zoomRef.current).call(zoom);
+    //d3.select(zoomRef.current).call(zoom).on("click", handleClick);
     //need to add a zoomlayerG inside the svg which gets zoomed when svg is acted on
-  }, [width, height])
+  }, [data])
 
   return (
     <div className={`cards-root ${classes.root}`} onClick={onClickBg} >
@@ -354,8 +477,8 @@ const Decks = ({ table, data, customSelectedDeckId, setSel, heightK, nrCols, dat
         <div key={`cell-${deckData.id}`} className={classes.cell} style={{ left: cellX(deckData), top: cellY(deckData) }}></div>
       )}
       <svg className={classes.svg} id={`cards-svg`} overflow="visible">
-        <g ref={zoomRef} display="none"><rect width={width} height={height} fill="transparent" /></g>
-        <g ref={containerRef} />
+        <g ref={zoomRef} className="zoom"><rect width={width} height={height} fill="transparent" /></g>
+        <g ref={containerRef} className="decks-container" pointerEvents="none" />
         <defs>
           <filter id="shine">
             <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
@@ -391,7 +514,8 @@ Decks.defaultProps = {
   datasets: [], 
   width:300,
   height:600,
-  nrCols:3
+  nrCols:3,
+  tableMarginTop:0
 }
 
 export default Decks;

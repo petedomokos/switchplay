@@ -119,10 +119,11 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const [form, setForm] = useState(null);
 
   //we follow d3 margin convention here (eg html padding)
+  const tableMarginTop = selectedDeckId ? 0 : 35;
   const margin = { 
     left:0,//width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
     right:0,//width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
-    top: selectedDeckId ? 0 : 35,// height * 0.1,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
+    top:tableMarginTop,// height * 0.1,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
     bottom:0,//height * 0.1// selectedDeckId ? 0 :  height * 0.05
   }
   const contentsWidth = width - margin.left - margin.right;
@@ -181,6 +182,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
           <Decks 
             table={table} setSel={setSelectedDeckId} nrCols={nrCols} 
             data={decksData} width={contentsWidth} height={contentsHeight} heightK={height/contentsHeight}
+            tableMarginTop={tableMarginTop}
             onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} 
             updateTable={updateTable} updateDeck={updateDeck} />
         }
