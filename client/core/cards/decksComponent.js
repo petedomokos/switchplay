@@ -24,6 +24,7 @@ export default function decksComponent() {
     let selectedCardNr = () => "";
     let format;
 
+    let onCreateDeck = function(){}
     let onClickDeck = function(){}
     let onSetLongpressedDeckId = function(){}
     let onSetSelectedCardNr = function(){}
@@ -68,8 +69,8 @@ export default function decksComponent() {
                 containerG
                     .append("rect")
                         .attr("class", "decks-bg")
-                        .attr("fill", "blue")
-                        .attr("stroke", "white");
+                        .attr("fill", "transparent")
+                        .attr("stroke", "none");
             }
 
             function update(decksData, options={}){
@@ -121,6 +122,94 @@ export default function decksComponent() {
                         })
 
                 deckG.exit().remove();
+
+                //new deck icon
+                const deckWidth = _deckWidth();
+                const deckHeight = _deckHeight();
+                const nrCols = d3.max(decksData, d => d.colNr + 1) || 0;
+                const newDeckIconData = [{
+                    colNr: decksData.length % nrCols,
+                    rowNr: Math.floor(decksData.length / nrCols),
+                    withText:decksData.length === 0
+                }]
+                const newDeckIconG = containerG.selectAll("g.new-deck-icon").data(newDeckIconData)
+                newDeckIconG.enter()
+                    .append("g")
+                        .attr("class", "new-deck-icon")
+                        .attr("pointer-events", "all")
+                        .each(function(d){
+                            const newDeckIconG = d3.select(this);
+                            const wordsG = newDeckIconG.append("g").attr("class", "words");
+                            wordsG.append("text")
+                                .attr("text-anchor", "middle")
+                                .attr("dominant-baseline", "middle")
+                                .attr("font-size", "16px")
+                                .attr("stroke", "white")
+                                .attr("fill", "white")
+                                .attr("stroke-width", 0.2)
+
+                            wordsG.append("rect")
+                                .attr("fill", "transparent");
+
+                            const iconG = newDeckIconG.append("g").attr("class", "icon")
+                            iconG.append("circle")
+                                .attr("transform", "translate(-1,0) scale(1.7)")
+                                .attr("r", 10)
+                                .attr("fill", "none")
+                                .attr("stroke", grey10(4))
+                                .attr("stroke-width", 1.5)
+                                .attr("cx", 12)
+                                .attr("cy", 12)
+
+                            iconG.append("path")
+                                .attr("transform", "translate(-1,0) scale(1.7)")
+                                .attr("fill", "none")
+                                .attr("stroke", grey10(4))
+                                .attr("stroke-width", 1.5)
+                                .attr("stroke-linecap", "round")
+                                .attr("d", "M15 12L12 12M12 12L9 12M12 12L12 9M12 12L12 15")
+
+                            iconG.append("rect")
+                                .attr("fill", "transparent");
+
+                        })
+                        .merge(newDeckIconG)
+                        .attr("transform", d => `translate(${x(d)},${y(d)})`)
+                        .each(function(d){
+                            const wordsWidth = 80;
+                            const wordsHeight = 25;
+                            const iconWidth = 40;
+                            const iconHeight = 40;
+                            const middleGap = 10;
+
+                            const newDeckIconG = d3.select(this);
+                            const wordsG = newDeckIconG.select("g.words")
+                                .attr("display", d.withText ? null : "none")
+                                .attr("transform", `translate(
+                                    ${(deckWidth - wordsWidth)/2},
+                                    ${(deckHeight - iconHeight)/2 - middleGap - wordsHeight})`)
+
+                            const iconG = newDeckIconG.select("g.icon")
+                                .attr("transform", `translate(
+                                    ${(deckWidth - iconWidth)/2},
+                                    ${(deckHeight - iconHeight)/2})`)
+
+                            wordsG.select("rect")
+                                .attr("width", wordsWidth)
+                                .attr("height", wordsHeight)
+
+                            iconG.select("rect")
+                                .attr("width", iconWidth)
+                                .attr("height", iconHeight)
+
+                            wordsG.select("text")
+                                .attr("x", wordsWidth/2)
+                                .attr("y", wordsHeight/2)
+                                .text("Add a deck")
+                        })
+                        .on("click", onCreateDeck)
+                
+                newDeckIconG.exit().remove();
 
                 d3.select("g.zoom")
                     .on("click", (e) => { 
@@ -236,6 +325,11 @@ export default function decksComponent() {
     decks.setForm = function (value) {
         if (!arguments.length) { return setForm; }
         setForm = value;
+        return decks;
+    };
+    decks.onCreateDeck = function (value) {
+        if (!arguments.length) { return onCreateDeck; }
+        onCreateDeck = value;
         return decks;
     };
     decks.onClickDeck = function (value) {

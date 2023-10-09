@@ -36,25 +36,6 @@ const useStyles = makeStyles((theme) => ({
   keyPhrase:{
     color:grey10(1)
   },
-  addDeckIconContainer:{
-    position:"absolute",
-    left:props => props.addDeckIconContainer.left,
-    top:props => props.addDeckIconContainer.top,
-    width:props => `${props.addDeckIconContainer.width}px`,
-    height:props => `${props.addDeckIconContainer.height}px`,
-    display:"flex",
-    flexDirection:"column",
-    justifyContent:"center",
-    alignItems:"center",
-    /*border:"solid",
-    borderColor:"white",*/
-  },
-  addDeckText:{
-    color:"white",
-    height:"40px",
-    display:"flex",
-    alignItems:"center"
-  },
   cell:{
     position:"absolute",
     display:props => props.cell.display,
@@ -103,6 +84,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
   const containerRef = useRef(null);
   //we will store zoom state when selecting a deck so we can return to it when deselecting the deck
   const zoomStateRef = useRef(d3.zoomIdentity);
+  const newDeckRef = useRef(null);
  
   //dimns
   const deckAspectRatio = width / height;
@@ -181,13 +163,6 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
     },
     svg:{
       pointerEvents:selectedDeckId ? "all" : "none",
-    },
-    addDeckIconContainer:{
-      left:addDeckIconLeft,
-      top:addDeckIconTop,
-      width:deckWidth,
-      //height:45
-      height:deckHeight,
     },
     form:{ 
       display: form ? null : "none",
@@ -338,6 +313,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
       ._deckWidth((d,i) => deckWidth)
       ._deckHeight((d,i) => deckHeight)
       .getCell(getCell)
+      .onCreateDeck(createNewDeck)
       .onClickDeck(onClickDeck)
       .onSetLongpressedDeckId(setLongpressedDeckId)
       .onSetSelectedCardNr(setSelectedCardNr)
@@ -361,8 +337,8 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
   //stay as it is, because otherwise it gets out of sync with teh element being zoomed ie the svg
   useEffect(() => {
 
-    //todo next - when a deck is selected, we must store the current zoom Transform, 
-    //and when teh deck is deselected, we return to that rather than to 0,0
+    //todo next - move addnewdeck icon and area intodecks so it zooms
+    //then fully test everything here and then push it and fully test on android and iphone
 
     //DONT USE EXTENT BECAUSE WE NEED TRANSFORM TO WORK FULLY FOR DRAGGING DECKS TOO
     //INSTEAD, SET MAX VALUES AND MANAGE IT MANUALLY
@@ -443,6 +419,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
         .transition()
         .duration(TRANSITIONS.MED)
           .attr("transform", e.transform)
+
     }
     function zoomEnd(e){
       if(zoomTransformStart){
@@ -450,7 +427,6 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
         zoomTransformStart = null;
         return;
       }
-      console.log("zoomEnd")
       if(e.sourceEvent){
         //manual scroll so reset to min/max if its gone past min/max
         e.transform.x = 0;
@@ -485,16 +461,6 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
           </filter>
         </defs>
       </svg>
-      {!selectedDeckId &&
-          <div className={classes.addDeckIconContainer}>
-            {data.length === 0 && 
-              <div className={classes.addDeckText} onClick={createNewDeck} >
-                Add a deck
-              </div>
-            }
-            <IconComponent text="New" onClick={createNewDeck} />
-          </div>
-      }
       <div className={classes.formContainer}>
         {form?.formType === "item" && 
           <ItemForm item={form.value} fontSize={form.height * 0.5} save={updateItemTitle} close={() => setForm(null)} />
