@@ -138,12 +138,6 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
   const tableWidth = width;
   const tableHeight = (nrRows + 1) * deckHeightWithMargins;
 
-  //new icon goes in next avail slot
-  const nextAvailableCol = data.length % nrCols;
-  const nextAvailableRow = Math.floor(data.length / nrCols)
-  const addDeckIconLeft = deckX({ colNr: nextAvailableCol });
-  const addDeckIconTop = deckY({ rowNr:nextAvailableRow });
-
   const deckFormMarginLeft = DIMNS.burgerBarWidth + 8; //not sure why this 8 is needed
   const deckFormMarginTop = 2; //not sure why this is needed
   const deckFormDimns = {
@@ -295,14 +289,6 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
 
   }, [stringifiedData, selectedDeckId])
 
-  /*
-  issue 1 - addDeckIcon doesnt scroll up along with decks, so it needs to be replaced with 
-  an svg version inside decks itself
-
-  2nd - change name of width and height to containerWidth and containerHeight 
-  (ie in our case, its the full screen width and height)
-
-  */
   useEffect(() => {
     decks
       .width(width)
@@ -336,9 +322,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
   //then for the times when we have a sourceEvent and are not using it, we need to make the transform state 
   //stay as it is, because otherwise it gets out of sync with teh element being zoomed ie the svg
   useEffect(() => {
-
-    //todo next - move addnewdeck icon and area intodecks so it zooms
-    //then fully test everything here and then push it and fully test on android and iphone
+    next - fully test everything here and then push it and fully test on android and iphone
 
     //DONT USE EXTENT BECAUSE WE NEED TRANSFORM TO WORK FULLY FOR DRAGGING DECKS TOO
     //INSTEAD, SET MAX VALUES AND MANAGE IT MANUALLY
