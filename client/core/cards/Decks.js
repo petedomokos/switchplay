@@ -39,9 +39,9 @@ const useStyles = makeStyles((theme) => ({
   cell:{
     position:"absolute",
     display:props => props.cell.display,
-    /*border:"solid",
+    border:"solid",
     borderWidth:"thin",
-    borderColor:"white",*/
+    borderColor:"white",
     width:props => props.cell.width,
     height:props => props.cell.height
   },
@@ -317,17 +317,9 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
   }, [stringifiedData, width, height, selectedDeckId, selectedCardNr])
 
   //zoom
-  //@note - atm, all manual events are disabled, but if we actually start using zoom events properly 
-  //to zoom to users required level,
-  //then for the times when we have a sourceEvent and are not using it, we need to make the transform state 
-  //stay as it is, because otherwise it gets out of sync with teh element being zoomed ie the svg
   useEffect(() => {
-    next - fully test everything here and then push it and fully test on android and iphone
-
     //DONT USE EXTENT BECAUSE WE NEED TRANSFORM TO WORK FULLY FOR DRAGGING DECKS TOO
     //INSTEAD, SET MAX VALUES AND MANAGE IT MANUALLY
-    //see the way I did it for kpis, as we need to keep the transform also stuck at the max
-    //so it picks it up from the correct value on a 2nd scroll.
     const horizGap = tableWidth - width;
     const vertGap = tableHeight - height;
     
