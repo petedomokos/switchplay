@@ -114,9 +114,14 @@ export default function pentagonComponent() {
 
                         const sectionContentsG = sectionG.append("g").attr("class", "section-contents show-with-section");
                         sectionContentsG
+                            .append("rect")
+                                .attr("fill", grey10(1));
+                        
+                        sectionContentsG
                             .append("text")
-                                .attr("text-anchor", "middle")
-                                .attr("dominant-baseline", "central")
+                                //.attr("text-anchor", "middle")
+                                //.attr("dominant-baseline", "central")
+                                .attr("dominant-baseline", "hanging")
                                 .attr("font-size", "9px")
                                 .attr("stroke-width", 0.1)
                                 .attr("stroke", grey10(7))
@@ -236,14 +241,68 @@ export default function pentagonComponent() {
                             text = `Item ${d.itemNr + 1}`;
                         }
 
+                        const _textAreaWidth = () => {
+                            if(i === 0){ return r2 * 0.45 }
+                            if(i === 4){ return r2 * 0.45 }
+                            //middle 2
+                            if(i === 1) { return r2 * 0.5; }
+                            if(i === 3) { return r2 * 0.5; }
+                            //bottom 1
+                            if(i === 2) { return r2 * 0.5; }
+                        }
+                        const _textAreaHeight = () => {
+                            if(i === 0){ return r2 * 0.4 }
+                            if(i === 4){ return r2 * 0.4 }
+                            //middle 2
+                            if(i === 1) { return r2 * 0.35; }
+                            if(i === 3) { return r2 * 0.35; }
+                            //bottom 1
+                            if(i === 2) { return r2 * 0.4; }
+                        }
+                        const textAreaWidth = _textAreaWidth();
+                        const textAreaHeight = _textAreaHeight();
+
+                        const xShift = () => {
+                            //top 2
+                            if(i === 0){ return textAreaWidth * 0 }
+                            if(i === 4){ return -textAreaWidth * 0 }
+                            //middle 2
+                            if(i === 1) { return 0; }
+                            if(i === 3) { return 0; }
+                            //bottom 1
+                            if(i === 2) { return 0; }
+
+                        }
+                        const yShift = () => {
+                            //top 2
+                            if(i === 0){ return 0 }
+                            if(i === 4){ return 0 }
+                            //middle 2
+                            if(i === 1) { return -textAreaHeight * 0.12; }
+                            if(i === 3) { return -textAreaHeight * 0.12; }
+                            //bottom 1
+                            if(i === 2) { return textAreaHeight * 0.2; }
+
+                        }
+
+                        const transX = () => segmentVertices[i][0] - textAreaWidth * 0.5 + xShift();
+                        const transY = () => segmentVertices[i][1] - textAreaHeight * 0.5 + yShift();
+
                         //contents
                         const sectionContentsG = sectionG.select("g.section-contents")
                         sectionContentsG
                             .transition()
                             //.delay(sizeIsIncreasing ? 300 : 0)
                             .duration(TRANSITIONS.MED)
-                                .attr("transform", `translate(${segmentVertices[i][0]}, ${segmentVertices[i][1]})`)
+                                //.attr("transform", `translate(${segmentVertices[i][0]}, ${segmentVertices[i][1]})`)
+                                .attr("transform", `translate(${transX()}, ${transY()})`)
 
+                        //bg
+                        sectionContentsG.select("rect")
+                            //.attr("x", -textAreaWidth * 0.5 + xShift())
+                            //.attr("y", -textAreaHeight * 0.5 + yShift())
+                            .attr("width", textAreaWidth)
+                            .attr("height", textAreaHeight)
                         //text
                         sectionContentsG.select("text")
                             .attr("font-size", r2/10)

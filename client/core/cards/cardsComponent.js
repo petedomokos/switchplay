@@ -256,11 +256,11 @@ export default function cardsComponent() {
                         contentsG.selectAll("g.card-header")
                             .attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
                             .datum(headerDatum)
-                            .call(header)
+                            /*.call(header)
                                 .transition() //hide if small
                                 .delay(200)
                                 .duration(200)
-                                    .attr("opacity", /*deckIsSelected &*/ (isHeld || isSelected) ? 1 : 0);
+                                    .attr("opacity", (isHeld || isSelected) ? 1 : 0);*/
 
                         //ITEMS
                         const cardIsEditable = (isHeld && isFront) || isSelected;
