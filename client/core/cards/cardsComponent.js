@@ -242,7 +242,6 @@ export default function cardsComponent() {
                         
                         //const infoHeight;
                         //components
-                        /*
                         const header = headerComponents[cardNr]
                             .width(contentsWidth)
                             .height(infoHeight)
@@ -264,7 +263,7 @@ export default function cardsComponent() {
                                 .transition() //hide if small
                                 .delay(200)
                                 .duration(200)
-                                    .attr("opacity", (isHeld || isSelected) ? 1 : 0);*/
+                                    .attr("opacity", (isHeld || isSelected) ? 1 : 0);
 
                         //ITEMS
                         const cardIsEditable = deckIsSelected && ((isHeld && isFront) || isSelected);
