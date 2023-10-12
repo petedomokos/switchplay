@@ -9,14 +9,11 @@ import decksComponent from "./decksComponent";
 import ItemForm from "./forms/ItemForm";
 import DeckTitleForm from './forms/DeckTitleForm';
 import { sortAscending, moveElementPosition } from '../../util/ArrayHelpers';
+import { isNumber } from '../../data/dataHelpers';
 import { initDeck } from '../../data/cards';
 //import { createId } from './helpers';
 import { TRANSITIONS, DIMNS } from "./constants"
 import { grey10, COLOURS } from './constants';
-import { trophy } from "../../../assets/icons/milestoneIcons.js"
-import IconComponent from './IconComponent';
-import { Table } from '@material-ui/core';
-import { isNumber } from 'lodash';
 const { GOLD } = COLOURS;
 import dragEnhancements from '../journey/enhancedDragHandler';
 
@@ -64,8 +61,7 @@ const enhancedZoom = dragEnhancements();
 
 //note: heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel, tableMarginTop, heightK, nrCols, datasets, asyncProcesses, width, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
-  //console.log("Decks", data.map(d => d.title || d.id ))
+const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, setSel, tableMarginTop, heightK, nrCols, datasets, asyncProcesses, width, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
   //processed props
   const stringifiedData = JSON.stringify({ data, table });
   //state
@@ -74,6 +70,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
   const [zoom, setZoom] = useState(() => d3.zoom());
   const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
   const [selectedCardNr, setSelectedCardNr] = useState(customSelectedCardNr);
+  const [selectedItemNr, setSelectedItemNr] = useState(customSelectedItemNr);
   const [longpressedDeckId, setLongpressedDeckId] = useState("");
   //console.log("Decks longpressedDeckId", longpressedDeckId)
   const [form, setForm] = useState(null);
@@ -122,7 +119,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
     //handle case of dragging deck into the next available slot or any cell that is empty ie in a list that means 
     //a cell after teh last filled one
     return {
-      key:`cell-${colNr}-${rowNr}`,
+      key:`cell-${colNr}${rowNr}`,
       pos:[colNr, rowNr],
       x:cellX({ colNr }),
       y:cellY({ rowNr }),
@@ -134,7 +131,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
   };
 
 
-  const nrRows = d3.max(data, d => d.rowNr) + 1
+  const nrRows = d3.max(data, d => d.rowNr) + 1 || 0;
   const tableWidth = width;
   const tableHeight = (nrRows + 1) * deckHeightWithMargins;
 
@@ -197,6 +194,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
   const setSelectedDeck = useCallback((id) => {
     const deck = data.find(d => d.id === id);
     if(deck){
+      //console.log("selecting deck zoom")
       //store the non selected zoom state so we can return to it when deselecting the deck
       //console.log("zoom into deck so store zoom state", d3.zoomTransform(zoomRef.current))
       zoomStateRef.current = d3.zoomTransform(zoomRef.current);
@@ -214,6 +212,16 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
     setSelectedDeckId(id);
     setSel(id)
   }, [stringifiedData, width, height]);
+
+  const onSelectItem = useCallback((item) => {
+    if(item){
+      setForm({ formType: "item", value:item })
+      setSelectedItemNr(item.itemNr) 
+    }else{
+      setForm(null)
+      setSelectedItemNr("") 
+    }
+  }, []);
 
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
@@ -255,6 +263,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
   }, [stringifiedData, selectedDeckId]);
 
   const updateItemTitle = useCallback(updatedTitle => {
+    console.log("updateTitle", selectedDeckId, selectedDeck)
     const { cardNr, itemNr } = form.value;
     const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
     const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title: updatedTitle }));
@@ -281,6 +290,10 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
     decks.selectedCardNr(selectedCardNr);
   }, [selectedCardNr])
 
+  useEffect(() => {
+    decks.selectedItemNr(selectedItemNr);
+  }, [selectedItemNr])
+
   //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
     const processedDeckData = data.map(deckData => layout(deckData));
@@ -293,6 +306,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
     decks
       .width(width)
       .height(tableHeight + deckHeightWithMargins)
+      .nrCols(nrCols)
       .selectedDeckId(selectedDeckId)
       .x(deckX)
       .y(deckY)
@@ -303,6 +317,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
       .onClickDeck(onClickDeck)
       .onSetLongpressedDeckId(setLongpressedDeckId)
       .onSetSelectedCardNr(setSelectedCardNr)
+      .onSelectItem(onSelectItem)
       .onMoveDeck(moveDeck)
       .onDeleteDeck(onDeleteDeck)
       .onArchiveDeck(archiveDeck)
@@ -314,7 +329,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
 
   useEffect(() => {
     d3.select(containerRef.current).attr("pointer-events", "none").call(decks);
-  }, [stringifiedData, width, height, selectedDeckId, selectedCardNr])
+  }, [stringifiedData, width, height, selectedDeckId, selectedCardNr, selectedItemNr])
 
   //zoom
   useEffect(() => {
@@ -374,6 +389,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
 
       });
     
+    let wasZoomed = false;
     function zoomStart(e){
       if(zoomTransformStart){
         //do nothing as this is just a call to reset transform 
@@ -381,12 +397,14 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
       }
     }
     function zoomed(e){
+      //console.log("zoomed", e.transform)
       if(zoomTransformStart){
         //do nothing as this is just a call to reset transform 
         return;
       }
 
       if(e.sourceEvent){
+        wasZoomed = true;
         const y = d3.min([d3.max([scrollMin, e.transform.y]), scrollMax])
         d3.select(containerRef.current).attr("transform", `translate(${0},${y})`)
         return;
@@ -395,15 +413,16 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
         .transition()
         .duration(TRANSITIONS.MED)
           .attr("transform", e.transform)
-
     }
     function zoomEnd(e){
+      //console.log("zoomEnd-------", wasZoomed)
       if(zoomTransformStart){
         //do nothing as this is just a call to reset transform just reset
         zoomTransformStart = null;
         return;
       }
-      if(e.sourceEvent){
+      if(e.sourceEvent && wasZoomed){
+        wasZoomed = false;
         //manual scroll so reset to min/max if its gone past min/max
         e.transform.x = 0;
         if(e.transform.y < scrollMin){
@@ -439,7 +458,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, setSel
       </svg>
       <div className={classes.formContainer}>
         {form?.formType === "item" && 
-          <ItemForm item={form.value} fontSize={form.height * 0.5} save={updateItemTitle} close={() => setForm(null)} />
+          <ItemForm item={form.value} fontSize={form.height * 0.5} save={updateItemTitle} close={() => onSelectItem()} />
         }
         {form?.formType === "deck-title" && 
           <DeckTitleForm deck={selectedDeck} save={updateDeckTitle} close={() => setForm(null)}

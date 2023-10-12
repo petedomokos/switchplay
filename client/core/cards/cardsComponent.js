@@ -6,6 +6,7 @@ import cardItemsComponent from './cardItemsComponent';
 import { remove } from '../journey/domHelpers';
 import { updateTransform } from '../journey/transitionHelpers';
 import { icons } from '../../util/icons';
+import { isNumber } from '../../data/dataHelpers';
 
 const { GOLD } = COLOURS;
 
@@ -52,6 +53,8 @@ export default function cardsComponent() {
     //state
     let deckIsSelected;
     let format = "actual";
+    let selectedCardNr;
+    let selectedItemNr;
 
     let transformTransition = { 
         enter: null, 
@@ -239,6 +242,7 @@ export default function cardsComponent() {
                         
                         //const infoHeight;
                         //components
+                        /*
                         const header = headerComponents[cardNr]
                             .width(contentsWidth)
                             .height(infoHeight)
@@ -260,10 +264,10 @@ export default function cardsComponent() {
                                 .transition() //hide if small
                                 .delay(200)
                                 .duration(200)
-                                    .attr("opacity", (isHeld || isSelected) ? 1 : 0);
+                                    .attr("opacity", (isHeld || isSelected) ? 1 : 0);*/
 
                         //ITEMS
-                        const cardIsEditable = (isHeld && isFront) || isSelected;
+                        const cardIsEditable = deckIsSelected && ((isHeld && isFront) || isSelected);
 
                         const items = itemsComponents[cardNr]
                             .styles({ 
@@ -291,7 +295,8 @@ export default function cardsComponent() {
                             .width(contentsWidth)
                             .height(itemsAreaHeight)
                             .withSections(cardIsEditable)
-                            .withText(deckIsSelected)
+                            .withText(deckIsSelected && isFront)
+                            .selectedItemNr(selectedItemNr)
                             .editable(cardIsEditable)
                             .onSelectItem(onSelectItem)
                             .onUpdateItemStatus(function(itemNr, newStatus){
@@ -526,6 +531,28 @@ export default function cardsComponent() {
     cards.deckIsSelected = function (value) {
         if (!arguments.length) { return deckIsSelected; }
         deckIsSelected = value;
+        return cards;
+    };
+    cards.selectedCardNr = function (value) {
+        if (!arguments.length) { return selectedCardNr; }
+        if(isNumber(value) && selectedCardNr !== value){
+            //select
+        }
+        if(value === "" && selectedCardNr !== ""){
+            //deselect
+        }
+        selectedCardNr = value;
+        return cards;
+    };
+    cards.selectedItemNr = function (value) {
+        if (!arguments.length) { return selectedItemNr; }
+        if(isNumber(value) && selectedItemNr !== value){
+            //select
+        }
+        if(value === "" && selectedItemNr !== ""){
+            //deselect
+        }
+        selectedItemNr = value;
         return cards;
     };
     cards.format = function (value) {

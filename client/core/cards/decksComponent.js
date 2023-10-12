@@ -10,6 +10,7 @@ export default function decksComponent() {
     // dimensions
     let width = 300;
     let height = 600;
+    let nrCols = 3;
 
     function updateDimns(){
 
@@ -21,9 +22,9 @@ export default function decksComponent() {
 
     let selectedDeckId = "";
     let longpressedDeckId = "";
-    let selectedCardNr = () => "";
     let format;
 
+    let onSelectItem = function(){};
     let onCreateDeck = function(){}
     let onClickDeck = function(){}
     let onSetLongpressedDeckId = function(){}
@@ -110,6 +111,7 @@ export default function decksComponent() {
                                     onSetLongpressedDeckId( isLongpressed ? d.id : "") 
                                 })
                                 .onSetSelectedCardNr(onSetSelectedCardNr)
+                                .onSelectItem(onSelectItem)
                                 .onMoveDeck(onMoveDeck)
                                 .onDeleteDeck(onDeleteDeck)
                                 .onArchiveDeck(onArchiveDeck)
@@ -126,7 +128,7 @@ export default function decksComponent() {
                 //new deck icon
                 const deckWidth = _deckWidth();
                 const deckHeight = _deckHeight();
-                const nrCols = d3.max(decksData, d => d.colNr + 1) || 0;
+
                 const newDeckIconData = [{
                     colNr: decksData.length % nrCols,
                     rowNr: Math.floor(decksData.length / nrCols),
@@ -245,6 +247,11 @@ export default function decksComponent() {
         height = value;
         return decks;
     };
+    decks.nrCols = function (value) {
+        if (!arguments.length) { return nrCols; }
+        nrCols = value;
+        return decks;
+    };
     //each deck
     decks._deckWidth = function (func) {
         if (!arguments.length) { return _deckWidth; }
@@ -290,9 +297,26 @@ export default function decksComponent() {
         if (!arguments.length) { 
             return selectedDeckId ? deckComponents[selectedDeckId].selectedCardNr() : ""; 
         }
-        if(selectedDeckId){
-            deckComponents[selectedDeckId].selectedCardNr(value)
+        Object.keys(deckComponents).forEach(deckId => {
+            if(deckId === selectedDeckId){
+                deckComponents[deckId].selectedCardNr(value);
+            }else{
+                deckComponents[deckId].selectedCardNr("");
+            }
+        })
+        return decks;
+    };
+    decks.selectedItemNr = function (value) {
+        if (!arguments.length) { 
+            return selectedDeckId ? deckComponents[selectedDeckId].selectedItemNr() : ""; 
         }
+        Object.keys(deckComponents).forEach(deckId => {
+            if(deckId === selectedDeckId){
+                deckComponents[deckId].selectedItemNr(value);
+            }else{
+                deckComponents[deckId].selectedItemNr("");
+            }
+        })
         return decks;
     };
     decks.longpressedDeckId = function (value) {
@@ -320,6 +344,11 @@ export default function decksComponent() {
     decks.updateFrontCardNr = function (value) {
         if (!arguments.length) { return updateFrontCardNr; }
         updateFrontCardNr = value;
+        return decks;
+    };
+    decks.onSelectItem = function (value) {
+        if (!arguments.length) { return onSelectItem; }
+        onSelectItem = value;
         return decks;
     };
     decks.setForm = function (value) {

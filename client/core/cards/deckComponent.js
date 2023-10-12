@@ -7,7 +7,6 @@ import dragEnhancements from '../journey/enhancedDragHandler';
 import { updateRectDimns } from '../journey/transitionHelpers';
 import { getTransformationFromTrans } from '../journey/helpers';
 import { isNumber } from '../../data/dataHelpers';
-import { ContactSupportOutlined } from '@material-ui/icons';
 
 function maxDimns(maxWidth, maxHeight, aspectRatio){
     const potentialHeight = maxWidth * aspectRatio;
@@ -155,6 +154,7 @@ export default function deckComponent() {
     //settings
     let deckIsSelected;
     let selectedCardNr;
+    let selectedItemNr;
     let format;
     let transformTransition;
     let longpressedDeckId;
@@ -167,6 +167,7 @@ export default function deckComponent() {
     //data 
     let id;
 
+    let onSelectItem = function(){};
     let onClickDeck = function(){};
     let onSetLongpressed = function(){};
     let onSetSelectedCardNr = function(){};
@@ -585,9 +586,7 @@ export default function deckComponent() {
                             const vertShiftUpForMultiview = heldCardsAreaHeight * 0.15; 
                             return heldCardsAreaHeight + placedCardMarginVert //- (deckIsSelected ? 0 : vertShiftUpForMultiview);
                         })
-                        .onSelectItem(function(item){ 
-                            setForm({ formType: "item", value:item }) 
-                        })
+                        .onSelectItem(onSelectItem)
                         .onUpdateItemStatus(updateItemStatus)
                         .onClickCard(function(e, d){
                             if(!deckIsSelected){
@@ -650,12 +649,22 @@ export default function deckComponent() {
     deck.selectedCardNr = function (value) {
         if (!arguments.length) { return selectedCardNr; }
         if(isNumber(value) && selectedCardNr !== value){
-            selectCard(value)
+            selectCard(value);
+            //pass it on
+            cards.selectedCardNr(value);
         }
         if(value === "" && selectedCardNr !== ""){
             deselectCard();
+            //pass it on
+            cards.selectedCardNr("");
         }
         selectedCardNr = value;
+        return deck;
+    };
+    deck.selectedItemNr = function (value) {
+        if (!arguments.length) { return selectedItemNr; }
+            selectedItemNr = value;
+            cards.selectedItemNr(value);
         return deck;
     };
     deck.format = function (value) {
@@ -712,6 +721,11 @@ export default function deckComponent() {
     deck.onSetSelectedCardNr = function (value) {
         if (!arguments.length) { return onSetSelectedCardNr; }
         onSetSelectedCardNr = value;
+        return deck;
+    };
+    deck.onSelectItem = function (value) {
+        if (!arguments.length) { return onSelectItem; }
+        onSelectItem = value;
         return deck;
     };
     deck.updateItemStatus = function (value) {

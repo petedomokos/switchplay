@@ -84,8 +84,7 @@ export default function pentagonComponent() {
             enhancedDrag
                 .dragThreshold(100)
                 .onLongpressStart(onLongpressStart)
-                .onLongpressEnd(onLongpressEnd)
-                .onClick(function(e,d){ onClick.call(this, e, d) });
+                .onLongpressEnd(onLongpressEnd);
 
             const drag = d3.drag()
                 .on("start", enhancedDrag(onDragStart))
@@ -108,29 +107,21 @@ export default function pentagonComponent() {
                         sectionG.append("line").attr("class", "outer visible");
                         //sectionG.append("line").attr("class", "outer-line-hitbox")
                             //.style("stroke", "transparent");
-                            
-                        sectionG.append("path").attr("class", "section-hitbox")
-                            .attr("fill", "transparent")
-                            //.style("fill", i % 2 === 0 ? "blue" : "yellow");
 
                         const sectionContentsG = sectionG.append("g").attr("class", "section-contents show-with-section");
                         const textContentsG = sectionContentsG.append("g").attr("class", "text-contents")
                             .style("opacity", withText ? 1 : 0)
-                            .attr("pointer-events", withText ? null : "none")
+                            
+                        sectionG.append("path").attr("class", "section-hitbox")
+                            .attr("fill", "transparent")
+                            //.style("fill", i % 2 === 0 ? "blue" : "yellow")
+                            .on("click", onClick);
+
+                       
 
                         textContentsG
                             .append("rect")
-                                .attr("fill", "none");
-                        
-                        //sectionContentsG
-                            //.append("text")
-                                //.attr("text-anchor", "middle")
-                                //.attr("dominant-baseline", "central")
-                                /*.attr("dominant-baseline", "hanging")
-                                .attr("font-size", "9px")
-                                .attr("stroke-width", 0.1)
-                                .attr("stroke", grey10(7))
-                                .attr("fill", grey10(7));*/
+                                .attr("fill", "transparent");
 
                         textboxes[i] = new TextBox()
                             .select(textContentsG.node())
@@ -150,7 +141,7 @@ export default function pentagonComponent() {
                     //click if its been longpressed. eg store an isLongpress here in outer scope
                     .call(drag)
                     .merge(sectionG)
-                    .attr("pointer-events", editable ? null : "none")
+                    .style("pointer-events", editable ? "all" : "none")
                     .each(function(d,i){
                         const { deckId, cardNr, itemNr } = d;
                         const key = `deck-${deckId}-card-${cardNr}-item-${itemNr}`;
@@ -316,35 +307,33 @@ export default function pentagonComponent() {
                             "width": textAreaWidth,
                             "height": textAreaHeight,
                             "text": d.title || `Enter Item ${d.itemNr + 1}` 
-                            //"30 Pressups in 1 min longerwordhere and thats it hiduh dhuied e eh",// that should be wrapped.",
                           }];
 
                         //show or hide text based on deck status
                         textContentsG.selectAll("text")
                             .attr("display", withText ? null : "none")
 
-                        //we put a delay on rendering so it doesnt clash with zooming transitions,
-                        //as for some reason it stops the zooming happening smoothly
-                        setTimeout(() => {
-                            textboxes[i]
-                                    .data(textData)
-                                    .render();
 
-                                textContentsG.selectAll("text")
-                                    .style("fill", grey10(6))
-                                    .style("stroke", grey10(6))
-                                    .style("stroke-width", 0.1)
+                        textContentsG
+                            .transition(`text-${key}`)
+                            .duration(TRANSITIONS.FAST)
+                                .style("opacity", withText ? 1 : 0)
+                       
+                        if(withText){
+                            //we put a fake delay on rendering so it doesnt clash with zooming transitions,
+                            //as for some reason it stops the zooming happening smoothly
+                            setTimeout(() => {
+                                textboxes[i]
+                                        .data(textData)
+                                        .render();
 
-                                textContentsG
-                                    .attr("pointer-events", withText ? null : "none")
-                                    .transition(`text-${key}`)
-                                    .duration(TRANSITIONS.FAST)
-                                        .style("opacity", withText ? 1 : 0)
-                                        //display causes transitoion to fail
-                                        //.on("end", function(){ d3.select(this).attr("display", withText ? null : "none") })
-                                    
+                                    textContentsG.selectAll("text")
+                                        .style("fill", grey10(6))
+                                        .style("stroke", grey10(6))
+                                        .style("stroke-width", 0.1);            
 
-                        }, 100)
+                            }, 0)
+                        }
                            
                     })
 

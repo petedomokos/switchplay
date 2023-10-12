@@ -87,7 +87,7 @@ export default function cardHeaderComponent() {
     let onMouseover = function(){};
     let onMouseout = function(){};
 
-    const pentagon = pentagonComponent();
+    const pentagon = pentagonComponent().withSections(false).withText(false).editable(false);
     let dateIntervalTimer;
     let showDateCount = false;
 
@@ -210,8 +210,6 @@ export default function cardHeaderComponent() {
                                         .datum(d.itemsData)
                                         .call(pentagon
                                             .r2(d3.min([progressSummaryContentsWidth * 0.5, progressSummaryContentsHeight * 0.5]))
-                                            .withSections(false)
-                                            .editable(false)
                                             .styles({
                                                 _lineStrokeWidth:(itemD) => {
                                                     const { status } = itemD;

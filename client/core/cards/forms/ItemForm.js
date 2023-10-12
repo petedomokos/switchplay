@@ -68,7 +68,6 @@ export default function ItemForm({ item, fontSize, save, close }) {
   const handleChange = event => { 
     const newTitle = event.target.value;
     setValue(prevState => ({ ...prevState, title:newTitle })) 
-    //console.log("calling save", newTitle)
     save(newTitle)
   }
 

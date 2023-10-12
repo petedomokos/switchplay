@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { DIMNS, grey10, TRANSITIONS } from "./constants";
 import pentagonComponent from './pentagonComponent';
+import { isNumber } from '../../data/dataHelpers';
 
 /*
 
@@ -55,6 +56,7 @@ export default function cardItemsComponent() {
     let editable = true;
     let proposedNewStatus;
     let statusTimer;
+    let selectedItemNr;
 
 ;    //API CALLBACKS
     let onSelectItem = function(){};
@@ -93,7 +95,6 @@ export default function cardItemsComponent() {
         }
 
         function update(data){
-            //console.log("cardItems", data)
             const { } = data;
 
             const contentsG = d3.select(this).select("g.card-items-contents")
@@ -114,7 +115,7 @@ export default function cardItemsComponent() {
                     .r1(innerRadius)
                     .r2(outerRadius)
                     .withSections(withSections)
-                    .withText(withText)
+                    .withText(withText && !isNumber(selectedItemNr))
                     .editable(editable)
                     .styles(styles)
                     .onClick(function(e,d){
@@ -123,7 +124,6 @@ export default function cardItemsComponent() {
                     })
                     .onLongpressStart(function(e,d){
                         if(!editable){ return; }
-                        //console.log("this", this)
                         //d3.select(this).raise();
                         const changeStatus = (prevStatus) => {
                             newStatus = (prevStatus + 1) % 3;
@@ -184,6 +184,11 @@ export default function cardItemsComponent() {
     cardItems.withText = function (value) {
         if (!arguments.length) { return withText; }
         withText = value;
+        return cardItems;
+    };
+    cardItems.selectedItemNr = function (value) {
+        if (!arguments.length) { return selectedItemNr; }
+        selectedItemNr = value;
         return cardItems;
     };
     cardItems.editable = function (value) {
