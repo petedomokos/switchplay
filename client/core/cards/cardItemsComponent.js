@@ -51,6 +51,7 @@ export default function cardItemsComponent() {
     }
 
     let withSections = true;
+    let withText = true;
     let editable = true;
     let proposedNewStatus;
     let statusTimer;
@@ -113,6 +114,7 @@ export default function cardItemsComponent() {
                     .r1(innerRadius)
                     .r2(outerRadius)
                     .withSections(withSections)
+                    .withText(withText)
                     .editable(editable)
                     .styles(styles)
                     .onClick(function(e,d){
@@ -177,6 +179,11 @@ export default function cardItemsComponent() {
     cardItems.withSections = function (value) {
         if (!arguments.length) { return withSections; }
         withSections = value;
+        return cardItems;
+    };
+    cardItems.withText = function (value) {
+        if (!arguments.length) { return withText; }
+        withText = value;
         return cardItems;
     };
     cardItems.editable = function (value) {

@@ -3,6 +3,8 @@ import { DIMNS, grey10, OVERLAY, COLOURS, TRANSITIONS } from "./constants";
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
 import { toRadians } from '../journey/screenGeometryHelpers';
 import dragEnhancements from '../journey/enhancedDragHandler';
+import { TextBox } from "d3plus-text";
+import { grey } from '@material-ui/core/colors';
 
 const { GOLD } = COLOURS;
 
@@ -27,6 +29,7 @@ export default function pentagonComponent() {
     let r1 = 0;
     let r2 = 100;
     let withSections = true;
+    let withText = true;
     let editable = true;
 
     let innerVertices;
@@ -66,6 +69,7 @@ export default function pentagonComponent() {
     //let onMouseout = function(){};
 
     let enhancedDrag = dragEnhancements();
+    let textboxes = {};
 
     function pentagon(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true } = options;
@@ -81,10 +85,7 @@ export default function pentagonComponent() {
                 .dragThreshold(100)
                 .onLongpressStart(onLongpressStart)
                 .onLongpressEnd(onLongpressEnd)
-                .onClick(function(e,d){
-                    console.log("section click")
-                    onClick.call(this, e, d)
-                });
+                .onClick(function(e,d){ onClick.call(this, e, d) });
 
             const drag = d3.drag()
                 .on("start", enhancedDrag(onDragStart))
@@ -113,19 +114,32 @@ export default function pentagonComponent() {
                             //.style("fill", i % 2 === 0 ? "blue" : "yellow");
 
                         const sectionContentsG = sectionG.append("g").attr("class", "section-contents show-with-section");
-                        sectionContentsG
+                        const textContentsG = sectionContentsG.append("g").attr("class", "text-contents")
+                            .style("opacity", withText ? 1 : 0)
+                            .attr("pointer-events", withText ? null : "none")
+
+                        textContentsG
                             .append("rect")
-                                .attr("fill", grey10(1));
+                                .attr("fill", "none");
                         
-                        sectionContentsG
-                            .append("text")
+                        //sectionContentsG
+                            //.append("text")
                                 //.attr("text-anchor", "middle")
                                 //.attr("dominant-baseline", "central")
-                                .attr("dominant-baseline", "hanging")
+                                /*.attr("dominant-baseline", "hanging")
                                 .attr("font-size", "9px")
                                 .attr("stroke-width", 0.1)
                                 .attr("stroke", grey10(7))
-                                .attr("fill", grey10(7));
+                                .attr("fill", grey10(7));*/
+
+                        textboxes[i] = new TextBox()
+                            .select(textContentsG.node())
+                            .fontSize(2)
+                            .fontMin(1)
+                            .fontMax(12)
+                            .verticalAlign("middle")
+                            .overflow("visible")
+                            .maxLines(4);
 
                     })
                     //WARNING: drag is before merge so it doesnt get broken when a longpress causes an update
@@ -138,6 +152,8 @@ export default function pentagonComponent() {
                     .merge(sectionG)
                     .attr("pointer-events", editable ? null : "none")
                     .each(function(d,i){
+                        const { deckId, cardNr, itemNr } = d;
+                        const key = `deck-${deckId}-card-${cardNr}-item-${itemNr}`;
                         //segement points start from centre (a) clockwise around the quadrilateral
                         const ax = innerVertices[i][0];
                         const ay = innerVertices[i][1];
@@ -232,15 +248,8 @@ export default function pentagonComponent() {
                             .duration(TRANSITIONS.MED)
                                 .attr("opacity", withSections ? 1 : 0)
 
-                        //text
-                        const truncateIfNecc = text => shouldTruncate ? `${text.slice(0,7)}...` : text;
-                        let text;
-                        if(d.title){
-                            text = truncateIfNecc(d.title);
-                        } else {
-                            text = `Item ${d.itemNr + 1}`;
-                        }
 
+                        //text
                         const _textAreaWidth = () => {
                             if(i === 0){ return r2 * 0.45 }
                             if(i === 4){ return r2 * 0.45 }
@@ -289,7 +298,8 @@ export default function pentagonComponent() {
                         const transY = () => segmentVertices[i][1] - textAreaHeight * 0.5 + yShift();
 
                         //contents
-                        const sectionContentsG = sectionG.select("g.section-contents")
+                        const sectionContentsG = sectionG.select("g.section-contents");
+                        const textContentsG = sectionContentsG.select("g.text-contents");
                         sectionContentsG
                             .transition()
                             //.delay(sizeIsIncreasing ? 300 : 0)
@@ -298,16 +308,44 @@ export default function pentagonComponent() {
                                 .attr("transform", `translate(${transX()}, ${transY()})`)
 
                         //bg
-                        sectionContentsG.select("rect")
-                            //.attr("x", -textAreaWidth * 0.5 + xShift())
-                            //.attr("y", -textAreaHeight * 0.5 + yShift())
+                        textContentsG.select("rect")
                             .attr("width", textAreaWidth)
                             .attr("height", textAreaHeight)
                         //text
-                        sectionContentsG.select("text")
-                            .attr("font-size", r2/10)
-                            .text(text)
+                        const textData = [{
+                            "width": textAreaWidth,
+                            "height": textAreaHeight,
+                            "text": d.title || `Enter Item ${d.itemNr + 1}` 
+                            //"30 Pressups in 1 min longerwordhere and thats it hiduh dhuied e eh",// that should be wrapped.",
+                          }];
 
+                        //show or hide text based on deck status
+                        textContentsG.selectAll("text")
+                            .attr("display", withText ? null : "none")
+
+                        //we put a delay on rendering so it doesnt clash with zooming transitions,
+                        //as for some reason it stops the zooming happening smoothly
+                        setTimeout(() => {
+                            textboxes[i]
+                                    .data(textData)
+                                    .render();
+
+                                textContentsG.selectAll("text")
+                                    .style("fill", grey10(6))
+                                    .style("stroke", grey10(6))
+                                    .style("stroke-width", 0.1)
+
+                                textContentsG
+                                    .attr("pointer-events", withText ? null : "none")
+                                    .transition(`text-${key}`)
+                                    .duration(TRANSITIONS.FAST)
+                                        .style("opacity", withText ? 1 : 0)
+                                        //display causes transitoion to fail
+                                        //.on("end", function(){ d3.select(this).attr("display", withText ? null : "none") })
+                                    
+
+                        }, 100)
+                           
                     })
 
             sectionG.exit().remove();
@@ -332,6 +370,11 @@ export default function pentagonComponent() {
     pentagon.withSections = function (value) {
         if (!arguments.length) { return withSections; }
         withSections = value;
+        return pentagon;
+    };
+    pentagon.withText = function (value) {
+        if (!arguments.length) { return withText; }
+        withText = value;
         return pentagon;
     };
     pentagon.editable = function (value) {
