@@ -217,18 +217,18 @@ export default function deckComponent() {
 
             function init(){
                 //bg
-                containerG
+                /*containerG
                     .append("rect")
                         .attr("class", "deck-bg")
                         .attr("width", width)
                         .attr("height", height)
-                        .attr("fill", grey10(9));
+                        .attr("fill", grey10(9));*/
 
                 contentsG = containerG.append("g").attr("class", "deck-contents");
 
                 contentsG.append("rect")
                     .attr("class", "contents-bg")
-                    .attr("pointer-events", "none")
+                    //.attr("pointer-events", "none")
                     .attr("fill", "none")
                     .attr("stroke", grey10(8))
                     .attr("rx", 3)
@@ -274,6 +274,7 @@ export default function deckComponent() {
                     });
 
                 //bg
+                /*
                 containerG.select("rect.deck-bg")
                     .attr("display", isNumber(selectedCardNr) ? null : "none")
                     .attr("width", width)
@@ -284,12 +285,6 @@ export default function deckComponent() {
                         onSetSelectedCardNr("")
                         e.stopPropagation();
                         setForm(null);
-                    })
-                    /*.call(updateRectDimns, { 
-                        width: () => width, 
-                        height:() => height,
-                        transition:transformTransition,
-                        name:d => `deck-dimns-${d.id}`
                     })*/
 
                 //contextMenu
@@ -352,19 +347,19 @@ export default function deckComponent() {
 
                 //issue - cloneG is a child of container, which moves, making the clone move too????
                 startLongpress = function(e,d){
-                    d3.selectAll("g.deck").filter(d => d.id !== id).attr("pointer-events", "none");
+                    //d3.selectAll("g.deck").filter(d => d.id !== id).attr("pointer-events", "none");
 
                     //create a clone 
                     cloneG = containerG
                         .clone(true)
                         .attr("class", "cloned-deck")
-                        .attr("pointer-events", "none") //this allows orig deck to be dragged
+                        //.attr("pointer-events", "none") //this allows orig deck to be dragged
                         .attr("opacity", 1)
                         .raise();
                     
                     cloneG.select("rect.deck-overlay").attr("fill", "green")
                     cloneG.select("g.context-menu")
-                        .attr("pointer-events", "all")
+                        //.attr("pointer-events", "all")
                         .datum(contextMenuData)
                         .call(contextMenu)
 
@@ -422,7 +417,7 @@ export default function deckComponent() {
                         cleanupLongpress();
                     }
                 
-                    d3.selectAll("g.deck").filter(d => d.id !== id).attr("pointer-events", null);
+                    //d3.selectAll("g.deck").filter(d => d.id !== id).attr("pointer-events", null);
                 }
 
                 function cleanupLongpress(){
@@ -447,6 +442,7 @@ export default function deckComponent() {
                     .attr("width", width)
                     .attr("height", height)
                     .on("click", e => {
+                        console.log("click deck overlay")
                         if(longpressedDeckId === id){ 
                             e.stopPropagation();
                             return;
@@ -470,7 +466,7 @@ export default function deckComponent() {
                 
                 //header
                 headerG
-                    .style("pointer-events", deckIsSelected ? "all" : null)
+                    //.style("pointer-events", deckIsSelected ? "all" : null)
                     .datum({ ..._deckData, title:_deckData.title || id })
                     .call(header
                         .width(headerWidth)
@@ -481,14 +477,6 @@ export default function deckComponent() {
                             setForm({ formType: "deck-title" }) 
                         })
                         .onClickProgressIcon(onClickDeck))
-                
-
-                //Cards area
-                /*cardsAreaG
-                    .select("rect.cards-area-bg")
-                        .attr("width", cardsAreaWidth)
-                        .attr("height", cardsAreaHeight)*/
-
 
                 //selected card dimns
                 const selectedCardDimns = maxDimns(cardsAreaWidth, cardsAreaHeight, cardAspectRatio)
@@ -499,7 +487,7 @@ export default function deckComponent() {
                     //hide/show others
                     //@todo - this can be part of update process instead
                     containerG.selectAll("g.card").filter(cardD => cardD.cardNr !== cardNr)
-                        .attr("pointer-events", "none")
+                        //.attr("pointer-events", "none")
                         .transition("cards")
                         .duration(400)
                             .attr("opacity", 0)
@@ -590,10 +578,12 @@ export default function deckComponent() {
                         })
                         .onSelectItem(onSelectItem)
                         .onClickCardTitle(() => {
+                            console.log("onClickCardTitle")
                             setForm({ formType: "card-title" }) 
                         })
                         .onUpdateItemStatus(updateItemStatus)
                         .onClickCard(function(e, d){
+                            console.log("onClickCard")
                             if(!deckIsSelected){
                                 onClickDeck(e, _deckData);
                             } else if(selectedCardNr === d.cardNr){
@@ -612,7 +602,7 @@ export default function deckComponent() {
                                 selectedCardNr = null;
                                 //show other deck as we need to deselect the card too
                                 containerG.selectAll("g.card").filter(dat => dat.cardNr !== d.cardNr)
-                                    .attr("pointer-events", null)
+                                    //.attr("pointer-events", null)
                                     .attr("opacity", 1);
                             }
                             updateFrontCardNr(d.cardNr + 1);

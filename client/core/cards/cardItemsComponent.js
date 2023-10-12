@@ -133,13 +133,6 @@ export default function cardItemsComponent() {
                             d3.select(this).selectAll("line.visible")
                                 .attr("stroke-width", styles._lineStrokeWidth(newD))
                                 .attr("stroke", styles._lineStroke(newD))
-
-                            /*const finishLineStroke = newStatus === 0 ? 0 : (newStatus === 1 ? 4.5 : 5.5)
-                            //first, show the 4th line (finish line)
-                            d3.select(this).select("line.finish")
-                                .attr("display", null)
-                                .attr("opacity", 1)
-                                .attr("stroke-width", finishLineStroke)*/
                         }
                         changeStatus(d.status);
                         statusTimer = d3.interval(() => {

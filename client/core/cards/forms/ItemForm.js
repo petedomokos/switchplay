@@ -20,6 +20,7 @@ const mockDesc = " ewiof efojjew fewfjew xxxx xccxx eiofj efj fewiof efojjew few
 
 const useStyles = makeStyles(theme => ({
   root: {
+    pointerEvents:"all",
     width:"100%",
     height:"100%",
     paddingTop:"30px",

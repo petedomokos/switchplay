@@ -67,7 +67,7 @@ export default function headerComponent() {
                     .attr("class", "header-bg")
                     .attr("width", width)
                     .attr("height", height)
-                    .attr("pointer-events", "none")
+                    //.attr("pointer-events", "none")
                     .attr("fill", COLOURS.HEADER.BG)
                     .attr("rx", 3)
                     .attr("ry", 3);

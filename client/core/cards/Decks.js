@@ -44,14 +44,14 @@ const useStyles = makeStyles((theme) => ({
     height:props => props.cell.height
   },
   svg:{
-    pointerEvents:"all",
-    //pointerEvents:props => props.svg.pointerEvents,
     position:"absolute",
   },
   formContainer:{
     position:"absolute",
     left:"0px",
     top:"0px",
+    //we give dimns to formContainer so it covers screen and 
+    //on next click, a bg click will trigger rather than a d3 click
     width:props => `${props.width}px`,
     height:props => `${props.height}px`,
     display:props => props.form.display,
@@ -146,6 +146,8 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
     marginTop:deckFormMarginTop
   }
 
+  //next - calc the pos and dimns of CardForm
+  //note - if card is selected, then position and size is different
   const cardFormDimns = {
     width:50,
     height:10,
@@ -164,7 +166,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
       height:deckHeightWithMargins,
     },
     svg:{
-      pointerEvents:selectedDeckId ? "all" : "none",
+      //pointerEvents:selectedDeckId ? "all" : "none",
     },
     form:{ 
       display: form ? null : "none",
@@ -294,7 +296,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
     if(!longpressedDeckId){
-      d3.select(containerRef.current).attr("pointer-events", "none");
+      //d3.select(containerRef.current).attr("pointer-events", "none");
     }
     decks.longpressedDeckId(longpressedDeckId);
     setForm(null);
@@ -345,7 +347,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   }, [stringifiedData, width, height, selectedDeckId])
 
   useEffect(() => {
-    d3.select(containerRef.current).attr("pointer-events", "none").call(decks);
+    d3.select(containerRef.current)/*.attr("pointer-events", "none")*/.call(decks);
   }, [stringifiedData, width, height, selectedDeckId, selectedCardNr, selectedItemNr])
 
   //zoom
@@ -379,7 +381,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
         zoomTransformPrev = e.transform;
         //if user ends longpress, we want them to be able to drag 
         //deckPointerEventsEnabled = true;
-        d3.select(containerRef.current).attr("pointer-events", "all");
+        //d3.select(containerRef.current).attr("pointer-events", "all");
         setLongpressedDeckId(deckId)
       })
       //next thing is on dragEnd or longressEnd (when wasDragged=true) => need to call the tarsition in endLongpress
@@ -460,13 +462,13 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   }, [data])
 
   return (
-    <div className={`cards-root ${classes.root}`} onClick={onClickBg} style={{ pointerEvents:"none" }} >
+    <div className={`cards-root ${classes.root}`} onClick={onClickBg} style={{ /*pointerEvents:"none"*/ }} >
       {data.map(deckData => 
         <div key={`cell-${deckData.id}`} className={classes.cell} style={{ left: cellX(deckData), top: cellY(deckData) }}></div>
       )}
       <svg className={classes.svg} id={`cards-svg`} overflow="visible">
+        <g ref={containerRef} className="decks-container"  />
         <g ref={zoomRef} className="zoom"><rect width={width} height={height} fill="transparent" /></g>
-        <g ref={containerRef} className="decks-container" pointerEvents="none" />
         <defs>
           <filter id="shine">
             <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
@@ -482,11 +484,11 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
             dimns={deckFormDimns} 
           />
         }
-        {/**form?.formType === "card-title" && 
+        {form?.formType === "card-title" && 
           <CardTitleForm deck={selectedDeck} cardNr={selectedCardNr} save={updateDeckTitle} close={() => setForm(null)}
             dimns={deckFormDimns} 
           />
-      */}
+        }
       </div>
     </div>
   )

@@ -172,22 +172,20 @@ export default function cardsComponent() {
                                 .attr("stroke", getCardStroke(d))
                                 .attr("fill", getCardFill(d))
                                 .on("click", e => {
-                                    console.log("card bg click...do nothing")
+                                    console.log("card bg click")
+                                    onClickCard.call(this, e, d)
                                     e.stopPropagation();
                                 })
                         
                         contentsG
                             .append("g")
                                 .attr("class", "card-header")
-                                .attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
+                                //.attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
                                 .attr("opacity", deckIsSelected & (isHeld || isSelected) ? 1 : 0)
                         
                         contentsG
                             .append("g")
-                                .attr("class", "items-area")
-                                    .append("rect")
-                                        .attr("class", "items-area-bg")
-                                        .attr("fill", "blue");
+                                .attr("class", "items-area");
 
                         /*contentsG
                             .append("rect")
@@ -262,7 +260,7 @@ export default function cardsComponent() {
                         
                         const headerDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr };
                         contentsG.selectAll("g.card-header")
-                            .attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
+                            //.attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
                             .datum(headerDatum)
                             .call(header)
                                 .transition() //hide if small
@@ -316,16 +314,11 @@ export default function cardsComponent() {
 
                         //remove items for cards behind
                         const shouldHideItems = isHeld && !isFront && !isSelected;
-                        contentsG.select("g.items-area")
-                            .attr("pointer-events", shouldHideItems ? "none" : null)
+                        /*contentsG.select("g.items-area")
+                            //.attr("pointer-events", shouldHideItems ? "none" : null)
                             .transition("items-trans")
                                 .duration(100)
-                                .attr("opacity", shouldHideItems ? 0 : 1)
-                        
-                        contentsG.select("rect.items-area-bg")
-                            .attr("width", contentsWidth)
-                            .attr("height", itemsAreaHeight)
-                            .attr("fill", "none");
+                                .attr("opacity", shouldHideItems ? 0 : 1)*/
 
                         //btm right btn
                         const expandBtnDatum = { 
@@ -335,7 +328,7 @@ export default function cardsComponent() {
                             shouldDisplay:!isSelected
                         }
                         const collapseBtnDatum = { 
-                            key:"expand", 
+                            key:"collapse", 
                             onClick:e => { onClickCard(e, cardD) },
                             icon:icons.collapse,
                             shouldDisplay:isSelected
@@ -354,7 +347,7 @@ export default function cardsComponent() {
                             .append("g")
                                 .attr("class", "bottom-right-btn")
                                 .attr("opacity", d => d.shouldDisplay ? 1 : 0)
-                                .attr("pointer-events",d => d.shouldDisplay ? "all" : "none")
+                                //.attr("pointer-events",d => d.shouldDisplay ? "all" : "none")
                                 .each(function(d){
                                     const btnG = d3.select(this);
                                     btnG.append("path")

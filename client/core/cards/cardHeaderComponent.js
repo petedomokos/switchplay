@@ -147,7 +147,7 @@ export default function cardHeaderComponent() {
 
                                     contentsG.append("rect")
                                         .attr("class", "hitbox")
-                                        .attr("fill","red")// "transparent")
+                                        .attr("fill", "transparent")
                                         .attr("stroke", "none");
                                     
                                 })
@@ -279,7 +279,7 @@ export default function cardHeaderComponent() {
                                 })
                                 .merge(dateG)
                                 //.attr("transform", d => `translate(${x(d)},${y(d)}) rotate(-45)`) //rotates from start
-                                .attr("pointer-events", showDateCount ? "none" : "all")
+                                //.attr("pointer-events", showDateCount ? "none" : "all")
                                 .each(function(d){
                                     const contentsG = d3.select(this).select("g.date-contents")
                                         .attr("transform", `translate(${dateMargin.left},${dateMargin.top})`)
@@ -339,7 +339,7 @@ export default function cardHeaderComponent() {
                                 })
                                 .merge(dateCountG)
                                 .attr("transform", d => `translate(${dateMargin.left},${dateMargin.top})`) //rotates from start
-                                .attr("pointer-events", showDateCount ? "all" : "none")
+                                //.attr("pointer-events", showDateCount ? "all" : "none")
                                 .each(function(d){
                                     const width = dateWidth;
                                     const numberHeight = contentsHeight * 0.65;

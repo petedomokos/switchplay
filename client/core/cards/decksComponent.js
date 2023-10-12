@@ -67,17 +67,17 @@ export default function decksComponent() {
             update(decksData);
 
             function init(){
-                containerG
+                /*containerG
                     .append("rect")
                         .attr("class", "decks-bg")
                         .attr("fill", "transparent")
-                        .attr("stroke", "none");
+                        .attr("stroke", "none");*/
             }
 
             function update(decksData, options={}){
-                containerG.select("rect.decks-bg")
+                /*containerG.select("rect.decks-bg")
                     .attr("width", width)
-                    .attr("height", height)
+                    .attr("height", height)*/
 
 
                 const deckG = containerG.selectAll("g.deck").data(decksData, d => d.id);
@@ -129,7 +129,7 @@ export default function decksComponent() {
                 const deckWidth = _deckWidth();
                 const deckHeight = _deckHeight();
 
-                const newDeckIconData = [{
+                const newDeckIconData = selectedDeckId ? [] : [{
                     colNr: decksData.length % nrCols,
                     rowNr: Math.floor(decksData.length / nrCols),
                     withText:decksData.length === 0
@@ -138,7 +138,7 @@ export default function decksComponent() {
                 newDeckIconG.enter()
                     .append("g")
                         .attr("class", "new-deck-icon")
-                        .attr("pointer-events", "all")
+                        //.attr("pointer-events", "all")
                         .each(function(d){
                             const newDeckIconG = d3.select(this);
                             const wordsG = newDeckIconG.append("g").attr("class", "words");
