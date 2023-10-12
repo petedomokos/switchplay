@@ -222,7 +222,7 @@ export default function deckComponent() {
                         .attr("class", "deck-bg")
                         .attr("width", width)
                         .attr("height", height)
-                        .attr("fill", grey10(9))
+                        .attr("fill", grey10(9));
 
                 contentsG = containerG.append("g").attr("class", "deck-contents");
 
@@ -279,6 +279,7 @@ export default function deckComponent() {
                     .attr("width", width)
                     .attr("height", height)
                     .on("click", e => {
+                        console.log("deck-bg click")
                         //deselectCard();
                         onSetSelectedCardNr("")
                         e.stopPropagation();
@@ -469,6 +470,7 @@ export default function deckComponent() {
                 
                 //header
                 headerG
+                    .style("pointer-events", deckIsSelected ? "all" : null)
                     .datum({ ..._deckData, title:_deckData.title || id })
                     .call(header
                         .width(headerWidth)
@@ -587,6 +589,9 @@ export default function deckComponent() {
                             return heldCardsAreaHeight + placedCardMarginVert //- (deckIsSelected ? 0 : vertShiftUpForMultiview);
                         })
                         .onSelectItem(onSelectItem)
+                        .onClickCardTitle(() => {
+                            setForm({ formType: "card-title" }) 
+                        })
                         .onUpdateItemStatus(updateItemStatus)
                         .onClickCard(function(e, d){
                             if(!deckIsSelected){

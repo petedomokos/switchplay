@@ -214,6 +214,7 @@ export default function decksComponent() {
                 newDeckIconG.exit().remove();
 
                 d3.select("g.zoom")
+                    .style("display", selectedDeckId ? "none" : null)
                     .on("click", (e) => { 
                         if(selectedDeckId){ return; }
                         //@todo - use getDeck instead based on getCell -> if Math.abs(x - cellX(colNr)) < margin etc 

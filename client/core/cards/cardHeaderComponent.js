@@ -61,7 +61,8 @@ export default function cardHeaderComponent() {
 
         titleHeight = contentsHeight;
         titleWidth = contentsWidth - dateWidth - progressSummaryWidth;
-        titleMargin = { 
+        titleMargin = {
+            //left:titleWidth * 0.4, right:titleWidth * 0.4, top: infoItemsMarginValue, bottom: infoItemsMarginValue
             left: infoItemsMarginValue, right:infoItemsMarginValue, 
             top:infoItemsMarginValue, bottom:infoItemsMarginValue 
         };
@@ -84,6 +85,7 @@ export default function cardHeaderComponent() {
 
     //API CALLBACKS
     let onClick = function(){};
+    let onClickTitle = function(){};
     let onMouseover = function(){};
     let onMouseout = function(){};
 
@@ -143,9 +145,9 @@ export default function cardHeaderComponent() {
                                             .attr("stroke-width", 0.5)
                                             .attr("fill", grey10(8));
 
-                                    d3.select(this).append("rect")
+                                    contentsG.append("rect")
                                         .attr("class", "hitbox")
-                                        .attr("fill", "transparent")
+                                        .attr("fill","red")// "transparent")
                                         .attr("stroke", "none");
                                     
                                 })
@@ -166,11 +168,11 @@ export default function cardHeaderComponent() {
                                         .text(d.title || `Card ${cardNr + 1}`)
 
                                     //hitbox
-                                    d3.select(this).select("rect.hitbox")
-                                        .attr("width", titleWidth)
-                                        .attr("height", titleHeight)
-                                        //.on("click", (e,d) => { onClick.call(this, e, d, data, "date") })
+                                    contentsG.select("rect.hitbox")
+                                        .attr("width", titleContentsWidth)
+                                        .attr("height", titleContentsHeight)
                                 })
+                                .on("click", onClickTitle)
 
                         //TITLE
                         const progressSummaryG = contentsG.selectAll("g.progress-summary").data([data])
@@ -424,6 +426,11 @@ export default function cardHeaderComponent() {
     header.onClick = function (value) {
         if (!arguments.length) { return onClick; }
         onClick = value;
+        return header;
+    };
+    header.onClickTitle = function (value) {
+        if (!arguments.length) { return onClickTitle; }
+        onClickTitle = value;
         return header;
     };
     header.onMouseover = function (value) {

@@ -8,6 +8,7 @@ import deckLayout from './deckLayout';
 import decksComponent from "./decksComponent";
 import ItemForm from "./forms/ItemForm";
 import DeckTitleForm from './forms/DeckTitleForm';
+import CardTitleForm from './forms/CardTitleForm';
 import { sortAscending, moveElementPosition } from '../../util/ArrayHelpers';
 import { isNumber } from '../../data/dataHelpers';
 import { initDeck } from '../../data/cards';
@@ -74,6 +75,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   const [longpressedDeckId, setLongpressedDeckId] = useState("");
   //console.log("Decks longpressedDeckId", longpressedDeckId)
   const [form, setForm] = useState(null);
+  console.log("form", form)
   //processed state
   const selectedDeck = data.find(deck => deck.id === selectedDeckId);
   //refs
@@ -142,6 +144,15 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
     height:DIMNS.DECK.HEADER_HEIGHT * zoomScale - deckFormMarginTop,
     marginLeft:deckFormMarginLeft,
     marginTop:deckFormMarginTop
+  }
+
+  const cardFormDimns = {
+    width:50,
+    height:10,
+    marginLeft:deckFormMarginLeft,
+    marginTop:deckFormMarginTop,
+    left:40,
+    right:40
   }
 
   let styleProps = {
@@ -225,6 +236,10 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
 
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
+    //for soem reason, this is being called and no pointer-events in d3 occur when form is set to not null
+    //but now we haev set bg div (root here_ to have pointer-events none, they work again)
+    //pointerevetns are out of control!!
+    console.log("click bg")
     e.stopPropagation();
     if(isNumber(selectedCardNr)){
       setSelectedCardNr("");
@@ -263,7 +278,6 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   }, [stringifiedData, selectedDeckId]);
 
   const updateItemTitle = useCallback(updatedTitle => {
-    console.log("updateTitle", selectedDeckId, selectedDeck)
     const { cardNr, itemNr } = form.value;
     const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
     const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title: updatedTitle }));
@@ -316,7 +330,10 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
       .onCreateDeck(createNewDeck)
       .onClickDeck(onClickDeck)
       .onSetLongpressedDeckId(setLongpressedDeckId)
-      .onSetSelectedCardNr(setSelectedCardNr)
+      .onSetSelectedCardNr(cardNr => {
+        setForm(null)
+        setSelectedCardNr(cardNr)
+      })
       .onSelectItem(onSelectItem)
       .onMoveDeck(moveDeck)
       .onDeleteDeck(onDeleteDeck)
@@ -443,7 +460,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   }, [data])
 
   return (
-    <div className={`cards-root ${classes.root}`} onClick={onClickBg} >
+    <div className={`cards-root ${classes.root}`} onClick={onClickBg} style={{ pointerEvents:"none" }} >
       {data.map(deckData => 
         <div key={`cell-${deckData.id}`} className={classes.cell} style={{ left: cellX(deckData), top: cellY(deckData) }}></div>
       )}
@@ -465,6 +482,11 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
             dimns={deckFormDimns} 
           />
         }
+        {/**form?.formType === "card-title" && 
+          <CardTitleForm deck={selectedDeck} cardNr={selectedCardNr} save={updateDeckTitle} close={() => setForm(null)}
+            dimns={deckFormDimns} 
+          />
+      */}
       </div>
     </div>
   )

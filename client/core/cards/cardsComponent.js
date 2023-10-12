@@ -66,6 +66,7 @@ export default function cardsComponent() {
 
     //API CALLBACKS
     let onClickCard = function(){};
+    let onClickCardTitle = function(){};
     let onSelectItem = function(){};
     let onUpdateItemStatus = function(){};
     let onPickUp = function(){};
@@ -254,6 +255,10 @@ export default function cardsComponent() {
                             .onClick(function(e){
                                 onClickCard(e, cardD); 
                             })
+                            .onClickTitle(function(e){
+                                e.stopPropagation(); 
+                                onClickCardTitle(e, cardD) 
+                            })
                         
                         const headerDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr };
                         contentsG.selectAll("g.card-header")
@@ -360,7 +365,6 @@ export default function cardsComponent() {
                                         //.attr("fill", "red")
                                         .attr("opacity", 0.3)
                                         .attr("stroke", "none")
-
                                 })
                                 .merge(botRightBtnG)
                                 .attr("transform", `translate(${contentsWidth - btnWidth + btnMargin},${contentsHeight - btnHeight + btnMargin})`)
@@ -381,13 +385,19 @@ export default function cardsComponent() {
                                         .attr("height", btnContentsHeight)
 
                                 })
-                                .on("click", (e,d) => d.onClick(e, d));
+                                .on("click", (e,d) => { 
+                                    console.log("botrightclick")
+                                    d.onClick(e, d) 
+                                });
 
                         botRightBtnG.exit().remove();
 
                     })
                     .call(drag)
-                    .on("click", e => { e.stopPropagation(); })
+                    .on("click", e => { 
+                        console.log("card click")
+                        e.stopPropagation(); 
+                    })
   
             //EXIT
             cardG.exit().call(remove);
@@ -591,6 +601,11 @@ export default function cardsComponent() {
     cards.onClickCard = function (value) {
         if (!arguments.length) { return onClickCard; }
         onClickCard = value;
+        return cards;
+    };
+    cards.onClickCardTitle = function (value) {
+        if (!arguments.length) { return onClickCardTitle; }
+        onClickCardTitle = value;
         return cards;
     };
     cards.onSelectItem = function (value) {
