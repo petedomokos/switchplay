@@ -23,6 +23,7 @@ export default function decksComponent() {
     let selectedDeckId = "";
     let longpressedDeckId = "";
     let format;
+    let form;
 
     let onSelectItem = function(){};
     let onCreateDeck = function(){}
@@ -105,6 +106,7 @@ export default function decksComponent() {
                                 .width(deckWidth)
                                 .height(deckHeight)
                                 .deckIsSelected(selectedDeckId === d.id)
+                                .form(form)
                                 .getCell(getCell)
                                 .onClickDeck(onClickDeck)
                                 .onSetLongpressed(isLongpressed => { 
@@ -138,7 +140,7 @@ export default function decksComponent() {
                 newDeckIconG.enter()
                     .append("g")
                         .attr("class", "new-deck-icon")
-                        //.attr("pointer-events", "all")
+                        .attr("pointer-events", "all") //override pointer-events none for containerG
                         .each(function(d){
                             const newDeckIconG = d3.select(this);
                             const wordsG = newDeckIconG.append("g").attr("class", "words");
@@ -330,6 +332,11 @@ export default function decksComponent() {
     decks.format = function (value) {
         if (!arguments.length) { return format; }
         format = value;
+        return decks;
+    };
+    decks.form = function (value) {
+        if (!arguments.length) { return form; }
+        form = value;
         return decks;
     };
     decks.zoom = function (value) {

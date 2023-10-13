@@ -21,10 +21,14 @@ const mockDesc = " ewiof efojjew fewfjew xxxx xccxx eiofj efj fewiof efojjew few
 const useStyles = makeStyles(theme => ({
   root: {
     pointerEvents:"all",
+    position:"absolute",
+    left:props => props.left,
+    top:props => props.top,
     width:props => props.width,
     height:props => props.height,
-    marginLeft:props => props.marginLeft,
-    marginTop:props => props.marginTop,
+    marginLeft:0,//props => props.marginLeft,
+    marginTop:0,//props => props.marginTop,
+    background:"yellow"
   },
   form:{
   },
@@ -37,7 +41,7 @@ const useStyles = makeStyles(theme => ({
     overflow:"hidden",
     //cursor:"pointer",
     pointerEvents:"all",
-    background:COLOURS.HEADER.BG,
+    background:props => props.background,
   },
   closeBtn:{
     width:"80px",
@@ -50,14 +54,15 @@ export function splitMultilineString(str){
   return str.split("\n");
 }
 
-export default function CardTitleForm({ deck, cardNr, dimns, save, close }) {
-//todo - impl code in this component
+export default function CardTitleForm({ deck, cardD, dimns, save, close }) {
+  //todo next - impl code in this component and through to server to process text and save cardTitle
   const [value, setValue] = useState(deck)
-  //console.log("DeckTitleForm", deck)
+  console.log("CardTitleForm", cardD)
   const [editing, setEditing] = useState(false);
   //const descLines = desc ? splitMultilineString(desc) : ["No Desc"];
   const styleProps = {
-    ...dimns
+    ...dimns,
+    background:COLOURS.CARD.FILL(cardD)
   }
   const classes = useStyles(styleProps);
 
@@ -73,14 +78,14 @@ export default function CardTitleForm({ deck, cardNr, dimns, save, close }) {
 
   return (
     <div className={classes.root} onClick={e => { e.stopPropagation() }}>
-      <form className={classes.form}>
+      {<form className={classes.form}>
         {editing && 
           <Input
             id="desc" onChange={handleChange} margin="dense" autoFocus className={classes.input}
             disableUnderline defaultValue={value.title}
           />
         }
-      </form>
+      </form>}
     </div>
   )
 }

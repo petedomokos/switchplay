@@ -53,6 +53,7 @@ export default function cardsComponent() {
     //state
     let deckIsSelected;
     let format = "actual";
+    let form;
     let selectedCardNr;
     let selectedItemNr;
 
@@ -170,9 +171,9 @@ export default function cardsComponent() {
                                 .attr("width", contentsWidth)
                                 .attr("height", contentsHeight)
                                 .attr("stroke", getCardStroke(d))
-                                .attr("fill", getCardFill(d))
+                                .attr("fill", COLOURS.CARD.FILL(d))
                                 .on("click", e => {
-                                    console.log("card bg click")
+                                    //console.log("card bg click")
                                     onClickCard.call(this, e, d)
                                     e.stopPropagation();
                                 })
@@ -229,7 +230,7 @@ export default function cardsComponent() {
                             .transition("card-bg-appearance")
                             .delay(200)
                             .duration(400)
-                                .attr("fill", getCardFill(cardD))
+                                .attr("fill", COLOURS.CARD.FILL(cardD))
                                 .attr("stroke", getCardStroke(cardD))
 
                         contentsG.select("rect.card-bg")
@@ -251,11 +252,13 @@ export default function cardsComponent() {
                             })
                             .fontSizes(fontSizes.info)
                             .onClick(function(e){
+                                //console.log("header click ->")
                                 onClickCard(e, cardD); 
                             })
                             .onClickTitle(function(e){
+                                //console.log("card title click ->")
                                 e.stopPropagation(); 
-                                onClickCardTitle(e, cardD) 
+                                onClickCardTitle(cardD) 
                             })
                         
                         const headerDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr };
@@ -269,7 +272,8 @@ export default function cardsComponent() {
                                     .attr("opacity", (isHeld || isSelected) ? 1 : 0);
 
                         //ITEMS
-                        const cardIsEditable = deckIsSelected && ((isHeld && isFront) || isSelected);
+                        //note - deckIsSelected && form is handled in Decks - it turns the entire container pointer-events on/off
+                        const cardIsEditable = ((isHeld && isFront) || isSelected);
 
                         const items = itemsComponents[cardNr]
                             .styles({ 
@@ -379,7 +383,7 @@ export default function cardsComponent() {
 
                                 })
                                 .on("click", (e,d) => { 
-                                    console.log("botrightclick")
+                                    //console.log("botrightclick")
                                     d.onClick(e, d) 
                                 });
 
@@ -388,7 +392,7 @@ export default function cardsComponent() {
                     })
                     .call(drag)
                     .on("click", e => { 
-                        console.log("card click")
+                        //console.log("card click")
                         e.stopPropagation(); 
                     })
   
@@ -397,7 +401,8 @@ export default function cardsComponent() {
 
             let swipeTriggered = false;
             function dragged(e , d){
-                console.log("card dragged")
+                if(d.isSelected){ return; }
+                //console.log("card dragged")
                 if(swipeTriggered){ return; }
                 const swipeDirection = e.dy <= 0 ? "up" : "down";
                 const frontCard = data.find(c => c.isFront);
@@ -441,6 +446,7 @@ export default function cardsComponent() {
                 if(enhancedDrag.isClick()) {
                     return; 
                 }
+                if(d.isSelected){ return; }
                 //reset
                 swipeTriggered = false;
                 //onDragEnd.call(this, e, d);
@@ -533,6 +539,11 @@ export default function cardsComponent() {
     cards.deckIsSelected = function (value) {
         if (!arguments.length) { return deckIsSelected; }
         deckIsSelected = value;
+        return cards;
+    };
+    cards.form = function (value) {
+        if (!arguments.length) { return form; }
+        form = value;
         return cards;
     };
     cards.selectedCardNr = function (value) {

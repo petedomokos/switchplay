@@ -156,6 +156,7 @@ export default function deckComponent() {
     let selectedCardNr;
     let selectedItemNr;
     let format;
+    let form;
     let transformTransition;
     let longpressedDeckId;
 
@@ -545,6 +546,7 @@ export default function deckComponent() {
                         .selectedCardWidth(selectedCardWidth)
                         .selectedCardHeight(selectedCardHeight)
                         .deckIsSelected(deckIsSelected)
+                        .form(form)
                         .transformTransition(transformTransition)
                         .x((d,i) => {
                             if(d.isSelected){
@@ -577,13 +579,13 @@ export default function deckComponent() {
                             return heldCardsAreaHeight + placedCardMarginVert //- (deckIsSelected ? 0 : vertShiftUpForMultiview);
                         })
                         .onSelectItem(onSelectItem)
-                        .onClickCardTitle(() => {
-                            console.log("onClickCardTitle")
-                            setForm({ formType: "card-title" }) 
+                        .onClickCardTitle(cardD => {
+                            //console.log("onClickCardTitle", cardD)
+                            setForm({ formType: "card-title", value:cardD }) 
                         })
                         .onUpdateItemStatus(updateItemStatus)
                         .onClickCard(function(e, d){
-                            console.log("onClickCard")
+                            //console.log("onClickCard")
                             if(!deckIsSelected){
                                 onClickDeck(e, _deckData);
                             } else if(selectedCardNr === d.cardNr){
@@ -598,13 +600,13 @@ export default function deckComponent() {
                             updateFrontCardNr(d.cardNr)
                         })
                         .onPutDown(function(d){
-                            if(d.isSelected){
+                            /*if(d.isSelected){
                                 selectedCardNr = null;
                                 //show other deck as we need to deselect the card too
                                 containerG.selectAll("g.card").filter(dat => dat.cardNr !== d.cardNr)
                                     //.attr("pointer-events", null)
                                     .attr("opacity", 1);
-                            }
+                            }*/
                             updateFrontCardNr(d.cardNr + 1);
                         }))
 
@@ -665,6 +667,11 @@ export default function deckComponent() {
     deck.format = function (value) {
         if (!arguments.length) { return format; }
         format = value;
+        return deck;
+    };
+    deck.form = function (value) {
+        if (!arguments.length) { return form; }
+        form = value;
         return deck;
     };
     deck.transformTransition = function (value) {

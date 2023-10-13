@@ -141,7 +141,7 @@ export default function pentagonComponent() {
                     //click if its been longpressed. eg store an isLongpress here in outer scope
                     .call(drag)
                     .merge(sectionG)
-                    .style("pointer-events", editable ? "all" : "none")
+                    .style("pointer-events", editable ? null : "none")
                     .each(function(d,i){
                         const { deckId, cardNr, itemNr } = d;
                         const key = `deck-${deckId}-card-${cardNr}-item-${itemNr}`;

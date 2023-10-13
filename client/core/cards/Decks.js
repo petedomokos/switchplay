@@ -11,6 +11,8 @@ import DeckTitleForm from './forms/DeckTitleForm';
 import CardTitleForm from './forms/CardTitleForm';
 import { sortAscending, moveElementPosition } from '../../util/ArrayHelpers';
 import { isNumber } from '../../data/dataHelpers';
+import { getPosition } from "../journey/domHelpers";
+import { getTransformationFromTrans } from '../journey/helpers';
 import { initDeck } from '../../data/cards';
 //import { createId } from './helpers';
 import { TRANSITIONS, DIMNS } from "./constants"
@@ -27,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
     //flexDirection:"column",
     width:props => props.width,
     height:props => props.height,
-    /*border:"solid",
+   /*border:"solid",
     borderWidth:"thin",
     borderColor:"red"*/
   },
@@ -75,7 +77,6 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   const [longpressedDeckId, setLongpressedDeckId] = useState("");
   //console.log("Decks longpressedDeckId", longpressedDeckId)
   const [form, setForm] = useState(null);
-  console.log("form", form)
   //processed state
   const selectedDeck = data.find(deck => deck.id === selectedDeckId);
   //refs
@@ -144,17 +145,6 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
     height:DIMNS.DECK.HEADER_HEIGHT * zoomScale - deckFormMarginTop,
     marginLeft:deckFormMarginLeft,
     marginTop:deckFormMarginTop
-  }
-
-  //next - calc the pos and dimns of CardForm
-  //note - if card is selected, then position and size is different
-  const cardFormDimns = {
-    width:50,
-    height:10,
-    marginLeft:deckFormMarginLeft,
-    marginTop:deckFormMarginTop,
-    left:40,
-    right:40
   }
 
   let styleProps = {
@@ -236,17 +226,54 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
     }
   }, []);
 
+    //next - calc the pos and dimns of CardForm
+  //note - if card is selected, then position and size is different
+  //OPTION 1
+  //all deck dimns calcs should be here
+  //then from that, we get two funcs, cardX and cardY, whcih are passed through to deckComponent
+  //along with any of the dimns that are needed
+  //Then we can also use cardX and Y here to position the form
+
+  //OPTION 2
+  //grab the translate dimns from the card itself, and also from the containers
+  //create a function that sumsn all of the parents xs and ys going right up to a specific element that matches 
+  //a given classname
+
+  //next thing to do - when card zoomed, we need to apply the scale from the non-scale cardG 
+  //or have another way to get there
+  const getFormDimns = useCallback(() => {
+    const { formType, value } = form;
+    if(formType === "card-title"){
+      //select the correct deck abd card
+      const cardG = d3.select(containerRef.current)
+        .selectAll("g.deck").filter(deckD => deckD.id === selectedDeckId)
+        .selectAll("g.card").filter(cardD => cardD.cardNr === form.value.cardNr);
+
+      const deckToCardPos = getPosition(cardG, "deck")
+      const cardScale = getTransformationFromTrans(cardG.attr("transform")).scaleX;
+      const cardTitleG = cardG.select("g.card-header").select("g.title-contents");
+      const width = +cardTitleG.select("rect").attr("width") * zoomScale * cardScale
+      const height = +cardTitleG.select("rect").attr("height") * zoomScale * cardScale
+      const cardToTitlePos = getPosition(cardTitleG, "card");
+
+      return {
+        width,
+        height,
+        marginLeft:0,
+        marginTop:0,
+        left:deckToCardPos.x * zoomScale + cardToTitlePos.x * zoomScale * cardScale,
+        top:deckToCardPos.y * zoomScale + cardToTitlePos.y * zoomScale * cardScale
+      }
+    }
+  }, [form, selectedDeckId, data]);
+
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
     //for soem reason, this is being called and no pointer-events in d3 occur when form is set to not null
     //but now we haev set bg div (root here_ to have pointer-events none, they work again)
     //pointerevetns are out of control!!
-    console.log("click bg")
+    //console.log("click bg", form)
     e.stopPropagation();
-    if(isNumber(selectedCardNr)){
-      setSelectedCardNr("");
-      return;
-    }
     if(longpressedDeckId){
       setLongpressedDeckId("");
       return;
@@ -255,6 +282,10 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
     if(form){  
       setForm(null);
       return; 
+    }
+    if(isNumber(selectedCardNr)){
+      setSelectedCardNr("");
+      return;
     }
     setSelectedDeck("");
   }, [stringifiedData, selectedDeckId, longpressedDeckId, selectedCardNr, form]);
@@ -324,6 +355,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
       .height(tableHeight + deckHeightWithMargins)
       .nrCols(nrCols)
       .selectedDeckId(selectedDeckId)
+      .form(form)
       .x(deckX)
       .y(deckY)
       ._deckWidth((d,i) => deckWidth)
@@ -344,7 +376,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
       .setForm(setForm)
-  }, [stringifiedData, width, height, selectedDeckId])
+  }, [stringifiedData, width, height, selectedDeckId, form?.formType])
 
   useEffect(() => {
     d3.select(containerRef.current)/*.attr("pointer-events", "none")*/.call(decks);
@@ -462,13 +494,13 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   }, [data])
 
   return (
-    <div className={`cards-root ${classes.root}`} onClick={onClickBg} style={{ /*pointerEvents:"none"*/ }} >
+    <div className={`cards-root ${classes.root}`} onClick={onClickBg} >
       {data.map(deckData => 
         <div key={`cell-${deckData.id}`} className={classes.cell} style={{ left: cellX(deckData), top: cellY(deckData) }}></div>
       )}
       <svg className={classes.svg} id={`cards-svg`} overflow="visible">
-        <g ref={containerRef} className="decks-container"  />
         <g ref={zoomRef} className="zoom"><rect width={width} height={height} fill="transparent" /></g>
+        <g ref={containerRef} className="decks" pointerEvents={selectedDeckId && !form ? "all" : "none"} />
         <defs>
           <filter id="shine">
             <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
@@ -485,8 +517,8 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
           />
         }
         {form?.formType === "card-title" && 
-          <CardTitleForm deck={selectedDeck} cardNr={selectedCardNr} save={updateDeckTitle} close={() => setForm(null)}
-            dimns={deckFormDimns} 
+          <CardTitleForm deck={selectedDeck} cardD={form.value} save={updateDeckTitle} close={() => setForm(null)}
+            dimns={getFormDimns()} 
           />
         }
       </div>

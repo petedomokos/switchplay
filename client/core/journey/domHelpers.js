@@ -1,8 +1,57 @@
 import * as d3 from "d3";
 import { TRANSITIONS } from "./constants";
+import { getTransformationFromTrans } from './helpers';
 
 const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
 const AUTO_SCROLL_DURATION = TRANSITIONS.KPIS.AUTO_SCROLL.DURATION;
+
+
+const classMatches = (selection, classNameToTest) => {
+    //console.log("classNameToTest", classNameToTest)
+    //console.log("node", selection.node())
+    //console.log("class", selection.attr("class"))
+    const classStr = selection.attr("class");
+    if(!classStr){ return false; }
+
+    const classNames = classStr.split(" ");
+    //console.log("classNames", classNames)
+    return !!classNames.find(c => c === classNameToTest)
+}
+
+const identifierMatches = (selection, identifier) => {
+    return classMatches(selection, identifier) || selection.attr("id") === identifier;
+}
+
+
+/*
+Note - this doesnt handle scales because if an element has a scale, then it is only applied to all elements from it onwards
+so to handle scale, we need to make it more complex rather than just accumulating all values, we need a bracketed formula
+
+*/
+export function getPosition(initSelection, containerIdentifier=""){
+    //console.log("getPosition.....", initSelection.node(), containerIdentifier)
+    function next(selection, posSoFar={ x: 0, y: 0 }){
+        //console.log("next...", posSoFar, selection.node())
+        //base case
+        //test if we have reached top element in dom or the required container
+        if(selection.node().nodeName === "BODY" || identifierMatches(selection, containerIdentifier)){
+            //console.log("base case reached...",posSoFar)
+            return posSoFar;
+        }
+        //next case
+        const { translateX, translateY, scaleX } = getTransformationFromTrans(selection.attr("transform"));
+        //console.log("tx ty k", translateX, translateY, scaleX)
+        const newPos =  { 
+            x: posSoFar.x + translateX, 
+            y: posSoFar.y + translateY,
+        };
+        //recursive call
+        const nextSelection = d3.select(selection.node().parentNode);
+        return next(nextSelection, newPos)
+    }
+    //init call
+    return next(initSelection);
+}
 
 /*
 function deletor(){

@@ -52,5 +52,14 @@ export const COLOURS = {
     GOLD:"#FFE10A",// brighter #ffd700,   darker #ccad00
     HEADER:{
         BG:grey10(8)
+    },
+    CARD:{
+        FILL:cardD => {
+            const { isSelected, isFront, isNext, isSecondNext, status } = cardD;
+            if(isFront || isSelected){ return grey10(3); }
+            if(isNext){ return grey10(5); }
+            if(isSecondNext){ return "#989898"; }
+            return (cardD.isHeld ? grey10(6) : grey10(8))
+        }
     }
 }
