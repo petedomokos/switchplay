@@ -77,7 +77,7 @@ export default function DeckTitleForm({ deck, dimns, save, close }) {
         {editing && 
           <Input
             id="desc" onChange={handleChange} margin="dense" autoFocus className={classes.input}
-            disableUnderline defaultValue={value.title}
+            disableUnderline defaultValue={value.title} placeholder="Enter Title..."
           />
         }
       </form>

@@ -10,7 +10,7 @@ import { isNumber } from '../../data/dataHelpers';
 import IconComponent from './IconComponent';
 import Instructions from "./Instructions"
 import Decks from './Decks';
-import { grey10, TRANSITIONS } from './constants';
+import { grey10, TRANSITIONS, COLOURS } from './constants';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
     transition: `all ${TRANSITIONS.MED}ms`,
     //display:"flex",
     //flexDirection:"column",
-    background:grey10(9)
+    background:COLOURS.CARDS_TABLE
     //border:"solid",
     //borderWidth:"thin",
   },

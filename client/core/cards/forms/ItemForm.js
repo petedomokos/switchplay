@@ -14,7 +14,7 @@ import DialogActions from '@material-ui/core/DialogActions'
 import DialogContent from '@material-ui/core/DialogContent'
 import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
-import { grey10 } from '../constants';
+import { grey10, COLOURS } from '../constants';
 
 const mockDesc = " ewiof efojjew fewfjew xxxx xccxx eiofj efj fewiof efojjew fewfjew xxxx xccxx eiofj efj fw fefjw efoe wfe fjf ewof oef hhhhhhhh kjdlkd dj uhd dhud dud d houh zzzz zz zz"
 
@@ -28,7 +28,7 @@ const useStyles = makeStyles(theme => ({
     display:"flex",
     flexDirection:"column",
     alignItems:"center",
-    background:grey10(8)
+    background:COLOURS.CARDS_TABLE
   },
   formTitle:{
     margin:"10px",
@@ -43,7 +43,8 @@ const useStyles = makeStyles(theme => ({
     //cursor:"pointer",
     pointerEvents:"all",
     fontSize:props => props.fontSize,
-    background:"white"
+    background:"transparent",
+    color:"white"
   },
   closeBtn:{
     width:"80px",
@@ -56,9 +57,8 @@ export function splitMultilineString(str){
   return str.split("\n");
 }
 
-export default function ItemForm({ item, fontSize, save, close }) {
+export default function ItemForm({ cardTitle, item, fontSize, save, close }) {
   const [value, setValue] = useState(item)
-  //console.log("ItemForm", value)
   const [editing, setEditing] = useState(false);
   //const descLines = desc ? splitMultilineString(desc) : ["No Desc"];
   const styleProps = {
@@ -77,12 +77,13 @@ export default function ItemForm({ item, fontSize, save, close }) {
 
   return (
     <div className={classes.root} onClick={e => { e.stopPropagation() }}>
-      <p className={classes.formTitle}>Card {value.cardNr+1} Item {value.itemNr+1}</p>
+      <p className={classes.formTitle}>{cardTitle || `Card ${value.cardNr+1}`}</p>
+      <p className={classes.formTitle}>Item {value.itemNr+1}</p>
       <form>
         {editing && 
           <Input
             id="desc" onChange={handleChange} margin="dense" autoFocus className={classes.input}
-            disableUnderline defaultValue={value.title}
+            disableUnderline defaultValue={value.title} placeholder="Enter Title..."
           />}
       </form>
       <Button color="primary" variant="contained" onClick={close} className={classes.closeBtn}>Done</Button>

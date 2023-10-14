@@ -83,6 +83,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   //refs
   const zoomRef = useRef(null);
   const containerRef = useRef(null);
+  const formRef = useRef(null);
   //we will store zoom state when selecting a deck so we can return to it when deselecting the deck
   const zoomStateRef = useRef(d3.zoomIdentity);
   const newDeckRef = useRef(null);
@@ -219,37 +220,61 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
 
   const onSelectItem = useCallback((item) => {
     if(item){
-      setForm({ formType: "item", value:item })
-      setSelectedItemNr(item.itemNr) 
+      //fade out d3
+      d3.select(containerRef.current)
+        .style("opacity", 1)
+          .transition()
+          .duration(400)
+            .style("opacity", 0)
+            .on("end", function(){ 
+              d3.select(this).style("display", "none");
+              //set the state
+              setSelectedItemNr(item.itemNr);
+              setForm({ formType: "item", value:item });
+              //manage the fade in of the form
+              d3.select(formRef.current)
+                .style("display", null)
+                .style("opacity", 0)
+                  .transition()
+                  .duration(400)
+                    .style("opacity", 1);
+            })
     }else{
-      setForm(null)
-      setSelectedItemNr("") 
+      //fade out the form
+      d3.select(formRef.current)
+        .style("opacity", 1)
+          .transition()
+          .duration(400)
+            .style("opacity", 0)
+            .on("end", function(){ 
+              d3.select(this).style("display", "none");
+              //set state
+              setForm(null)
+              setSelectedItemNr("") 
+              //magae the fade in of d3
+              d3.select(containerRef.current)
+                .style("display", null)
+                  .transition()
+                  .duration(400)
+                    .style("opacity", 1);
+            
+            
+            
+            
+          })
     }
   }, []);
 
-    //next - calc the pos and dimns of CardForm
-  //note - if card is selected, then position and size is different
-  //OPTION 1
-  //all deck dimns calcs should be here
-  //then from that, we get two funcs, cardX and cardY, whcih are passed through to deckComponent
-  //along with any of the dimns that are needed
-  //Then we can also use cardX and Y here to position the form
-
-  //OPTION 2
-  //grab the translate dimns from the card itself, and also from the containers
-  //create a function that sumsn all of the parents xs and ys going right up to a specific element that matches 
-  //a given classname
-
-  //next thing to do - when card zoomed, we need to apply the scale from the non-scale cardG 
-  //or have another way to get there
   const getFormDimns = useCallback(() => {
     const { formType, value } = form;
     if(formType === "card-title"){
-      //select the correct deck abd card
+      //select the correct deck and card
       const cardG = d3.select(containerRef.current)
         .selectAll("g.deck").filter(deckD => deckD.id === selectedDeckId)
         .selectAll("g.card").filter(cardD => cardD.cardNr === form.value.cardNr);
 
+      //we need all transforms form the deck onwards (because deck is in top-left of screen)
+      //we also need to break it up at the card, because a scale is applied to the card if it is selected
       const deckToCardPos = getPosition(cardG, "deck")
       const cardScale = getTransformationFromTrans(cardG.attr("transform")).scaleX;
       const cardTitleG = cardG.select("g.card-header").select("g.title-contents");
@@ -267,7 +292,11 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
         fontSize:12 * cardScale
       }
     }
-  }, [form, selectedDeckId, data]);
+  }, [form, selectedDeckId, stringifiedData]);
+
+  const getCardTitle = useCallback((cardNr) => {
+    return selectedDeck?.cards.find(c => c.cardNr === cardNr)?.title
+  }, [selectedDeckId]);
 
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
@@ -515,9 +544,9 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
           </filter>
         </defs>
       </svg>
-      <div className={classes.formContainer}>
+      <div className={classes.formContainer} ref={formRef}>
         {form?.formType === "item" && 
-          <ItemForm item={form.value} fontSize={form.height * 0.5} save={updateItemTitle} close={() => onSelectItem()} />
+          <ItemForm item={form.value} cardTitle={getCardTitle(form.value.cardNr)} fontSize={form.height * 0.5} save={updateItemTitle} close={() => onSelectItem()} />
         }
         {form?.formType === "deck-title" && 
           <DeckTitleForm deck={selectedDeck} save={updateDeckTitle} close={() => setForm(null)}
