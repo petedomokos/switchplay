@@ -79,6 +79,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   const [form, setForm] = useState(null);
   //processed state
   const selectedDeck = data.find(deck => deck.id === selectedDeckId);
+  const selectedCard = selectedDeck?.cards.find(c => c.cardNr === selectedCardNr);
   //refs
   const zoomRef = useRef(null);
   const containerRef = useRef(null);
@@ -262,7 +263,8 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
         marginLeft:0,
         marginTop:0,
         left:deckToCardPos.x * zoomScale + cardToTitlePos.x * zoomScale * cardScale,
-        top:deckToCardPos.y * zoomScale + cardToTitlePos.y * zoomScale * cardScale
+        top:deckToCardPos.y * zoomScale + cardToTitlePos.y * zoomScale * cardScale,
+        fontSize:12 * cardScale
       }
     }
   }, [form, selectedDeckId, data]);
@@ -309,6 +311,12 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
     const updatedCards = selectedDeck.cards.map(c => c.cardNr !== updatedCard.cardNr ? c : updatedCard);
     updateDeck({ ...selectedDeck, cards:updatedCards })
   }, [stringifiedData, selectedDeckId]);
+
+  const updateCardTitle = useCallback(title => {
+    //we need the card from state, not the d3 datum
+    const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === form.value.cardNr);
+    updateCard({ ...cardToUpdate, title })
+  }, [stringifiedData, form, selectedDeckId, selectedCardNr]);
 
   const updateItemTitle = useCallback(updatedTitle => {
     const { cardNr, itemNr } = form.value;
@@ -517,7 +525,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
           />
         }
         {form?.formType === "card-title" && 
-          <CardTitleForm deck={selectedDeck} cardD={form.value} save={updateDeckTitle} close={() => setForm(null)}
+          <CardTitleForm deck={selectedDeck} cardD={form.value} save={updateCardTitle} close={() => setForm(null)}
             dimns={getFormDimns()} 
           />
         }

@@ -1,6 +1,12 @@
 import * as d3 from 'd3';
 import { OPEN_CHANNEL_EXT_WIDTH } from './constants';
 import { channelContainsPoint, channelContainsDate } from './screenGeometryHelpers';
+import { isNumber } from "../../data/dataHelpers";
+
+export function truncateIfNecc(str, max){
+    if(!str || !isNumber(max)){ return str; }
+    return str.length <= max ? str : `${str.slice(0, max)}...`;   
+}
 
 export function calcPlanetHeight(svgHeight){
     return d3.min([svgHeight * 0.2, 100]);

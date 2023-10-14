@@ -28,7 +28,6 @@ const useStyles = makeStyles(theme => ({
     height:props => props.height,
     marginLeft:0,//props => props.marginLeft,
     marginTop:0,//props => props.marginTop,
-    background:"yellow"
   },
   form:{
   },
@@ -36,8 +35,8 @@ const useStyles = makeStyles(theme => ({
     width:props => props.width,
     height:props => props.height,
     margin:0,
-    color:"white",
-    fontSize:"20px",
+    color:grey10(7),
+    fontSize:props => props.fontSize,
     overflow:"hidden",
     //cursor:"pointer",
     pointerEvents:"all",
@@ -55,14 +54,13 @@ export function splitMultilineString(str){
 }
 
 export default function CardTitleForm({ deck, cardD, dimns, save, close }) {
-  //todo next - impl code in this component and through to server to process text and save cardTitle
-  const [value, setValue] = useState(deck)
-  console.log("CardTitleForm", cardD)
+  const [value, setValue] = useState(cardD)
+  //console.log("CardTitleForm", cardD)
   const [editing, setEditing] = useState(false);
   //const descLines = desc ? splitMultilineString(desc) : ["No Desc"];
   const styleProps = {
     ...dimns,
-    background:COLOURS.CARD.FILL(cardD)
+    background:COLOURS.CARD.FILL(cardD),
   }
   const classes = useStyles(styleProps);
 

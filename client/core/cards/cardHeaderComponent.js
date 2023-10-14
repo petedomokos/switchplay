@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { DIMNS, grey10, OVERLAY, COLOURS, TRANSITIONS } from "./constants";
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
 import pentagonComponent from './pentagonComponent';
+import { truncateIfNecc } from '../journey/helpers';
 
 const { GOLD } = COLOURS;
 
@@ -165,7 +166,7 @@ export default function cardHeaderComponent() {
                                         .attr("stroke-width", 0.1)
                                         //.attr("fill", d.isFuture ? "grey" : "white")
                                         //.text(d.title || d.id)
-                                        .text(d.title || `Card ${cardNr + 1}`)
+                                        .text(truncateIfNecc(d.title, 17) || `Card ${d.cardNr + 1}`)
 
                                     //hitbox
                                     contentsG.select("rect.hitbox")
