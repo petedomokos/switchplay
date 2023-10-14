@@ -131,7 +131,7 @@ const actions = [
 //helper
 const timeInSecs = (timeInMS, pts=0) => (timeInMS/1000).toFixed(pts)
 
-export default function NonUserHome(){
+export default function VideoApp(){
   const [playing, setPlaying] = useState(false);
   const [timer, setTimer] = useState(null);
   const [timerIsPaused, setTimerIsPaused] = useState(false);

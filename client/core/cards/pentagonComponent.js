@@ -8,6 +8,8 @@ import { grey } from '@material-ui/core/colors';
 
 const { GOLD } = COLOURS;
 
+const videoIconD = "M85.527,80.647c2.748,0,4.973-2.225,4.973-4.974V24.327c0-2.749-2.225-4.974-4.973-4.974H14.474c-2.748,0-4.974,2.225-4.974,4.974v51.346c0,2.749,2.225,4.974,4.974,4.974H85.527z M80.553,70.699H19.446V29.301h61.107V70.699z"
+const videoIconPolygonPoints = "64.819,50.288 52.839,57.201 40.865,64.118 40.865,50.288 40.865,36.462 52.839,43.38"
 function pentagonVertices(options={}){
     const { r=1, centre=[0,0], theta, n=5 } = options;
     const a = [centre[0], -r];
@@ -109,7 +111,7 @@ export default function pentagonComponent() {
                             //.style("stroke", "transparent");
 
                         const sectionContentsG = sectionG.append("g").attr("class", "section-contents show-with-section");
-                        const textContentsG = sectionContentsG.append("g").attr("class", "text-contents")
+                        const itemContentsG = sectionContentsG.append("g").attr("class", "item-contents")
                             .style("opacity", withText ? 1 : 0)
                             
                         sectionG.append("path").attr("class", "section-hitbox")
@@ -117,20 +119,18 @@ export default function pentagonComponent() {
                             //.style("fill", i % 2 === 0 ? "blue" : "yellow")
                             .on("click", onClick);
 
-                       
-
-                        textContentsG
+                        itemContentsG
                             .append("rect")
-                                .attr("fill", "transparent");
+                                //.attr("fill","white")
+                                .attr("fill","transparent");
 
                         textboxes[i] = new TextBox()
-                            .select(textContentsG.node())
+                            .select(itemContentsG.node())
                             .fontSize(2)
                             .fontMin(1)
                             .fontMax(12)
                             .verticalAlign("middle")
-                            .overflow("visible")
-                            .maxLines(4);
+                            .overflow("visible");
 
                     })
                     //WARNING: drag is before merge so it doesnt get broken when a longpress causes an update
@@ -143,7 +143,11 @@ export default function pentagonComponent() {
                     .merge(sectionG)
                     .style("pointer-events", editable ? null : "none")
                     .each(function(d,i){
-                        const { deckId, cardNr, itemNr } = d;
+                        const { deckId, cardNr, itemNr, title } = d;
+                        //for now, we fake a video attachment using a special item name
+                        const includesVideo = title.includes("Video") || title.includes("Video");
+                        const attachments = includesVideo ? [{ key:"att-1", type: "video" }] : [];
+                        //console.log("d", d)
                         const key = `deck-${deckId}-card-${cardNr}-item-${itemNr}`;
                         //segement points start from centre (a) clockwise around the quadrilateral
                         const ax = innerVertices[i][0];
@@ -241,7 +245,7 @@ export default function pentagonComponent() {
 
 
                         //text
-                        const _textAreaWidth = () => {
+                        const _itemAreaWidth = () => {
                             if(i === 0){ return r2 * 0.45 }
                             if(i === 4){ return r2 * 0.45 }
                             //middle 2
@@ -259,13 +263,29 @@ export default function pentagonComponent() {
                             //bottom 1
                             if(i === 2) { return r2 * 0.4; }
                         }
-                        const textAreaWidth = _textAreaWidth();
-                        const textAreaHeight = _textAreaHeight();
+
+                        const hasAttachments = attachments.length > 0;
+                        const maxNrLines = hasAttachments ? 3 : 4;
+                        const itemAreaWidth = _itemAreaWidth();
+                        const itemAreaHeight = _textAreaHeight();
+                        const textLineHeight = itemAreaHeight * 0.25;
+
+                        const textAreaMaxHeight = maxNrLines * textLineHeight;
+                        const attachmentsAreaHeight = itemAreaHeight - textAreaMaxHeight;
+
+                        const attachmentWidth = 4;
+                        const attachmentHeight = attachmentsAreaHeight;
+                        const attachmentMargin = { 
+                            left:0, right:attachmentWidth * 0.2, 
+                            top:attachmentHeight * 0.1, bottom: attachmentHeight * 0.1 
+                        }
+                        const attachmentContentsWidth = attachmentWidth - attachmentMargin.left - attachmentMargin.right;
+                        const attachmentContentsHeight = attachmentHeight - attachmentMargin.top - attachmentMargin.bottom;
 
                         const xShift = () => {
                             //top 2
-                            if(i === 0){ return textAreaWidth * 0 }
-                            if(i === 4){ return -textAreaWidth * 0 }
+                            if(i === 0){ return itemAreaWidth * 0 }
+                            if(i === 4){ return -itemAreaWidth * 0 }
                             //middle 2
                             if(i === 1) { return 0; }
                             if(i === 3) { return 0; }
@@ -278,19 +298,19 @@ export default function pentagonComponent() {
                             if(i === 0){ return 0 }
                             if(i === 4){ return 0 }
                             //middle 2
-                            if(i === 1) { return -textAreaHeight * 0.12; }
-                            if(i === 3) { return -textAreaHeight * 0.12; }
+                            if(i === 1) { return -textAreaMaxHeight * 0.12; }
+                            if(i === 3) { return -textAreaMaxHeight * 0.12; }
                             //bottom 1
-                            if(i === 2) { return textAreaHeight * 0.2; }
+                            if(i === 2) { return textAreaMaxHeight * 0.2; }
 
                         }
 
-                        const transX = () => segmentVertices[i][0] - textAreaWidth * 0.5 + xShift();
-                        const transY = () => segmentVertices[i][1] - textAreaHeight * 0.5 + yShift();
+                        const transX = () => segmentVertices[i][0] - itemAreaWidth * 0.5 + xShift();
+                        const transY = () => segmentVertices[i][1] - itemAreaHeight * 0.5 + yShift();
 
                         //contents
                         const sectionContentsG = sectionG.select("g.section-contents");
-                        const textContentsG = sectionContentsG.select("g.text-contents");
+                        const itemContentsG = sectionContentsG.select("g.item-contents");
                         sectionContentsG
                             .transition()
                             //.delay(sizeIsIncreasing ? 300 : 0)
@@ -299,22 +319,22 @@ export default function pentagonComponent() {
                                 .attr("transform", `translate(${transX()}, ${transY()})`)
 
                         //bg
-                        textContentsG.select("rect")
-                            .attr("width", textAreaWidth)
-                            .attr("height", textAreaHeight)
+                        itemContentsG.select("rect")
+                            .attr("width", itemAreaWidth)
+                            .attr("height", itemAreaHeight)
                         //text
                         const textData = [{
-                            "width": textAreaWidth,
-                            "height": textAreaHeight,
-                            "text": d.title || `Enter Item ${d.itemNr + 1}` 
+                            "width": itemAreaWidth,
+                            "height": textAreaMaxHeight,
+                            "text": title || `Enter Item ${d.itemNr + 1}` 
                           }];
 
                         //show or hide text based on deck status
-                        textContentsG.selectAll("text")
+                        itemContentsG.selectAll("text")
                             .attr("display", withText ? null : "none")
 
 
-                        textContentsG
+                        itemContentsG
                             .transition(`text-${key}`)
                             .duration(TRANSITIONS.FAST)
                                 .style("opacity", withText ? 1 : 0)
@@ -323,17 +343,89 @@ export default function pentagonComponent() {
                             //we put a fake delay on rendering so it doesnt clash with zooming transitions,
                             //as for some reason it stops the zooming happening smoothly
                             setTimeout(() => {
+                                //text
                                 textboxes[i]
                                         .data(textData)
+                                        .maxLines(maxNrLines)
                                         .render();
 
-                                    textContentsG.selectAll("text")
+                                    itemContentsG.selectAll("text")
                                         .style("fill", grey10(6))
                                         .style("stroke", grey10(6))
-                                        .style("stroke-width", 0.1);            
+                                        .style("stroke-width", 0.1);          
+
+                                //attachments
+                                //first we need to know how many lines of text there are so we can shoft attachments up if necc
+                                const actualNrLines = itemContentsG.selectAll("text").nodes().length;
+                                const textAreaActualHeight = () => {
+                                    if(actualNrLines === 1){
+                                        return 1.9 * textLineHeight;
+                                    }
+                                    if(actualNrLines === 2){
+                                        return 2.5 * textLineHeight;
+                                    }
+                                    if(actualNrLines === 3){
+                                        return 2.8 * textLineHeight;
+                                    }
+                                }
+
+                                const attachmentsG = sectionContentsG.selectAll("g.item-attachments").data(hasAttachments ? [1] : []);
+                                attachmentsG.enter()
+                                    .append("g")
+                                        .attr("class", "item-attachments")
+                                        .attr("pointer-events", "none")
+                                        .each(function(){
+                                            d3.select(this).append("rect").attr("fill", "none")
+                                        })
+                                        .merge(attachmentsG)
+                                        .attr("transform", `translate(0,${textAreaActualHeight()})`)
+                                        .each(function(){
+                                            d3.select(this).select("rect")
+                                                .attr("width", itemAreaWidth)
+                                                .attr("height", attachmentsAreaHeight)
+
+                                            const attachmentG = d3.select(this).selectAll("g.attachment").data(attachments, d => d.type);
+                                            attachmentG.enter()
+                                                .append("g")
+                                                    .attr("class", "attachment")
+                                                    .each(function(d){
+                                                        const contentsG = d3.select(this).append("g")
+                                                        contentsG.append("rect")
+                                                            .attr("fill", "transparent")
+
+                                                        const iconG = contentsG.append("g").attr("class", "icon");
+                                                        
+                                                        if(d.type === "video"){
+                                                            iconG.append("path")
+                                                                .attr("d", videoIconD)
+                                                                .attr("fill", grey10(7))
+
+                                                            iconG.append("polygon")
+                                                                .attr("points", videoIconPolygonPoints)
+                                                                .attr("fill", grey10(7))
+                                                        }
+                                                    })
+                                                    .merge(attachmentG)
+                                                    .attr("transform", (d,i) => `translate(${i * attachmentWidth},0)`)
+                                                    .each(function(d){
+                                                        const contentsG = d3.select(this).select("g")
+                                                            .attr("transform", (d,i) => `translate(${attachmentMargin.left}, ${attachmentMargin.top})`)
+                                                        contentsG.select("rect")
+                                                            .attr("width", attachmentContentsWidth)
+                                                            .attr("height", attachmentContentsHeight)
+
+                                                        contentsG.select("g.icon").attr("transform", "scale(0.03) translate(0, -15)")
+                                                    })
+
+                                            attachmentG.exit().remove();
+
+                                        })
+
+                                attachmentsG.exit().remove();
 
                             }, 0)
                         }
+
                            
                     })
 

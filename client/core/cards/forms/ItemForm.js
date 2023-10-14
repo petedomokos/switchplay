@@ -15,6 +15,7 @@ import DialogContent from '@material-ui/core/DialogContent'
 import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import { grey10, COLOURS } from '../constants';
+import VideoPlayer from "../../VideoPlayer"
 
 const mockDesc = " ewiof efojjew fewfjew xxxx xccxx eiofj efj fewiof efojjew fewfjew xxxx xccxx eiofj efj fw fefjw efoe wfe fjf ewof oef hhhhhhhh kjdlkd dj uhd dhud dud d houh zzzz zz zz"
 
@@ -46,6 +47,11 @@ const useStyles = makeStyles(theme => ({
     background:"transparent",
     color:"white"
   },
+  attachments:{
+
+  },
+  attachment:{
+  },
   closeBtn:{
     width:"80px",
     height:"30px",
@@ -58,6 +64,8 @@ export function splitMultilineString(str){
 }
 
 export default function ItemForm({ cardTitle, item, fontSize, save, close }) {
+  const { title } = item;
+
   const [value, setValue] = useState(item)
   const [editing, setEditing] = useState(false);
   //const descLines = desc ? splitMultilineString(desc) : ["No Desc"];
@@ -75,6 +83,9 @@ export default function ItemForm({ cardTitle, item, fontSize, save, close }) {
   //this is a fix to esure autoFocus is triggered
   useEffect(() => { d3.timeout(() => { setEditing(true) }, 1) }, [])
 
+  const includesVideo = title.includes("Video") || title.includes("Video");
+  const attachments = includesVideo ? [{ key:"att-1", type: "video", link: "https://www.youtube.com/watch?v=6L89Uexdbwg" }] : [];
+
   return (
     <div className={classes.root} onClick={e => { e.stopPropagation() }}>
       <p className={classes.formTitle}>{cardTitle || `Card ${value.cardNr+1}`}</p>
@@ -86,6 +97,15 @@ export default function ItemForm({ cardTitle, item, fontSize, save, close }) {
             disableUnderline defaultValue={value.title} placeholder="Enter Title..."
           />}
       </form>
+      <div className={classes.attachments}>
+        {attachments.map(att => 
+          <div className={classes.attachment} key={att.key} >
+            {att.type === "video" &&
+              <VideoPlayer link={att.link} height={200} />
+            }
+          </div>
+        )}
+      </div>
       <Button color="primary" variant="contained" onClick={close} className={classes.closeBtn}>Done</Button>
     </div>
   )
