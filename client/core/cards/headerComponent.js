@@ -53,7 +53,7 @@ export default function headerComponent() {
         updateDimns();
         // expression elements
         selection.each(function (data) {
-            console.log("header", data)
+            //console.log("header", data.completion)
             containerG = d3.select(this);
 
             if(containerG.select("g").empty()){
@@ -119,7 +119,7 @@ export default function headerComponent() {
             function update(data, options={}){
                 //console.log("update")
                 const { } = options;
-                const { id, title, status } = data
+                const { id, title, status, completion } = data
 
                 //bg
                 containerG
@@ -183,8 +183,7 @@ export default function headerComponent() {
                     .attr("fill", GOLD)// status === 2 ? GOLD : (status === 1 ? grey10(2) : grey10(6)))
                     .attr("transform", `translate(${iconX},${iconY}) scale(${iconScale})`);
 
-                const completionProportion = 0.7;
-                const completionPoint = progressIconHeight * (1 - completionProportion);
+                const completionPoint = progressIconHeight * (1 - completion);
                 d3.select(`clipPath#deck-trophy-${id}`).select("rect")
                     .attr("y", completionPoint)
                     .attr("width", progressIconWidth)

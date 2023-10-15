@@ -147,6 +147,8 @@ export default function pentagonComponent() {
                         //for now, we fake a video attachment using a special item name
                         const includesVideo = title.includes("Video") || title.includes("video");
                         const attachments = includesVideo ? [{ key:"att-1", type: "video" }] : [];
+                        //if a title is set, this means the item exists as a defined task or target
+                        const itemIsDefined = !!title;
                         //console.log("d", d)
                         const key = `deck-${deckId}-card-${cardNr}-item-${itemNr}`;
                         //segement points start from centre (a) clockwise around the quadrilateral
@@ -234,7 +236,7 @@ export default function pentagonComponent() {
                             .delay(sizeIsIncreasing ? 300 : 0)
                             .duration(TRANSITIONS.MED)
                                 .attr("stroke", styles._lineStroke(d,i))
-                                .attr("stroke-width", styles._lineStrokeWidth(d,i))
+                                .attr("stroke-width",itemIsDefined ? styles._lineStrokeWidth(d,i) : 0.05)
 
                         sectionG.selectAll(".show-with-section")
                             .attr("pointer-events", withSections ? null : "none")
@@ -333,7 +335,6 @@ export default function pentagonComponent() {
                         itemContentsG.selectAll("text")
                             .attr("display", withText ? null : "none")
 
-
                         itemContentsG
                             .transition(`text-${key}`)
                             .duration(TRANSITIONS.FAST)
@@ -352,7 +353,8 @@ export default function pentagonComponent() {
                                     itemContentsG.selectAll("text")
                                         .style("fill", grey10(6))
                                         .style("stroke", grey10(6))
-                                        .style("stroke-width", 0.1);          
+                                        .style("stroke-width", 0.1)
+                                        .style("opacity", itemIsDefined ? 1 : 0.5);          
 
                                 //attachments
                                 //first we need to know how many lines of text there are so we can shoft attachments up if necc

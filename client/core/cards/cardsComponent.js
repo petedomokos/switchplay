@@ -272,9 +272,9 @@ export default function cardsComponent() {
                                     .attr("opacity", (isHeld || isSelected) ? 1 : 0);
 
                         //ITEMS
+                        
                         //note - deckIsSelected && form is handled in Decks - it turns the entire container pointer-events on/off
                         const cardIsEditable = ((isHeld && isFront) || isSelected);
-
                         const items = itemsComponents[cardNr]
                             .styles({ 
                                 _lineStrokeWidth:lineD => {
@@ -301,7 +301,7 @@ export default function cardsComponent() {
                             .width(contentsWidth)
                             .height(itemsAreaHeight)
                             .withSections(cardIsEditable)
-                            .withText(deckIsSelected && isFront)
+                            .withText(deckIsSelected && (isFront || isSelected))
                             .selectedItemNr(selectedItemNr)
                             .editable(cardIsEditable)
                             .onSelectItem(onSelectItem)

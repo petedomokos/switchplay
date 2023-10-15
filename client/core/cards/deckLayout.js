@@ -7,6 +7,18 @@ const calcDeckStatus = cards => {
     return 0;
 }
 
+const calcCompletion = cards => {
+    const allItems = cards
+        .map(c => c.items)
+        .reduce((a,b) => [...a, ...b], [])
+        .filter(it => it.title);
+
+    if(allItems.length === 0) { return 0; }
+
+    const completedItems = allItems.filter(it => it.status === 2);
+    return completedItems.length / allItems.length;
+}
+
 export default function decksLayout(){
     let datasets = [];
     let info = {};
@@ -20,7 +32,8 @@ export default function decksLayout(){
         return {
             ...deckData,
             cards:processedCards,
-            status:calcDeckStatus(processedCards)
+            status:calcDeckStatus(processedCards),
+            completion:calcCompletion(processedCards)
         }
     }
 
