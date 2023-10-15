@@ -535,13 +535,14 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
       {data.map(deckData => 
         <div key={`cell-${deckData.id}`} className={classes.cell} style={{ left: cellX(deckData), top: cellY(deckData) }}></div>
       )}
-      <svg className={classes.svg} id={`cards-svg`} overflow="visible">
+      <svg className={classes.svg} id={`decks-svg`} overflow="visible">
         <g ref={zoomRef} className="zoom"><rect width={width} height={height} fill="transparent" /></g>
         <g ref={containerRef} className="decks" pointerEvents={selectedDeckId && !form ? "all" : "none"} />
         <defs>
           <filter id="shine">
             <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
           </filter>
+          {data.map(deck => <clipPath id={`deck-trophy-${deck.id}`}><rect></rect></clipPath> )}
         </defs>
       </svg>
       <div className={classes.formContainer} ref={formRef}>

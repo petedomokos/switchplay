@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { grey10, COLOURS, TRANSITIONS, DIMNS } from "./constants";
 import { updateRectDimns } from '../journey/transitionHelpers';
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
+const { GOLD } = COLOURS;
 
 export default function headerComponent() {
     //API SETTINGS
@@ -52,16 +53,16 @@ export default function headerComponent() {
         updateDimns();
         // expression elements
         selection.each(function (data) {
-            //console.log("header", data)
-            containerG = d3.select(this)
+            console.log("header", data)
+            containerG = d3.select(this);
 
             if(containerG.select("g").empty()){
-                init();
+                init(data);
             }
 
             update(data);
 
-            function init(){
+            function init(data){
                 //bg
                 containerG.append("rect")
                     .attr("class", "header-bg")
@@ -96,7 +97,15 @@ export default function headerComponent() {
                     .attr("class", "progress-icon")
                     .attr("transform", `translate(${contentsWidth - progressIconWidth}, 0)`);
 
-                progressIconG.append("path");
+                progressIconG
+                    .append("g")
+                        .attr("class", "non-completed-trophy")
+                            .append("path");
+
+                progressIconG
+                    .append("g")
+                        .attr("class", "completed-trophy")
+                            .append("path");
                 
                 progressIconG.append("rect")
                     .attr("class", "progress-icon-hitbox")
@@ -110,7 +119,7 @@ export default function headerComponent() {
             function update(data, options={}){
                 //console.log("update")
                 const { } = options;
-                const { title, status } = data
+                const { id, title, status } = data
 
                 //bg
                 containerG
@@ -168,10 +177,26 @@ export default function headerComponent() {
                 const iconScale = progressIconContentsWidth/actualIconWidth;
                 const iconX = 0
                 const iconY = -0.7;
-                progressIconG.select("path")
+                const completedIconG = progressIconG.select("g.completed-trophy")
+                completedIconG.select("path")
                     .attr("d", trophy.pathD)
-                    .attr("fill", status === 2 ? GOLD : (status === 1 ? grey10(2) : grey10(6)))
-                    .attr("transform", `translate(${iconX},${iconY}) scale(${iconScale})`)
+                    .attr("fill", GOLD)// status === 2 ? GOLD : (status === 1 ? grey10(2) : grey10(6)))
+                    .attr("transform", `translate(${iconX},${iconY}) scale(${iconScale})`);
+
+                const completionProportion = 0.7;
+                const completionPoint = progressIconHeight * (1 - completionProportion);
+                d3.select(`clipPath#deck-trophy-${id}`).select("rect")
+                    .attr("y", completionPoint)
+                    .attr("width", progressIconWidth)
+                    .attr("height", progressIconHeight - completionPoint)
+
+                completedIconG.attr('clip-path', `url(#deck-trophy-${id})`);
+
+                //non-completed icon
+                progressIconG.select("g.non-completed-trophy").select("path")
+                    .attr("d", trophy.pathD)
+                    .attr("fill", grey10(6))
+                    .attr("transform", `translate(${iconX},${iconY}) scale(${iconScale})`);
 
             }
 

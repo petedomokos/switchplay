@@ -145,7 +145,7 @@ export default function pentagonComponent() {
                     .each(function(d,i){
                         const { deckId, cardNr, itemNr, title } = d;
                         //for now, we fake a video attachment using a special item name
-                        const includesVideo = title.includes("Video") || title.includes("Video");
+                        const includesVideo = title.includes("Video") || title.includes("video");
                         const attachments = includesVideo ? [{ key:"att-1", type: "video" }] : [];
                         //console.log("d", d)
                         const key = `deck-${deckId}-card-${cardNr}-item-${itemNr}`;
