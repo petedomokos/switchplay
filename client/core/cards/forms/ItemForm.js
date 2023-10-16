@@ -101,7 +101,7 @@ export default function ItemForm({ cardTitle, item, fontSize, save, close }) {
         {attachments.map(att => 
           <div className={classes.attachment} key={att.key} >
             {att.type === "video" &&
-              <VideoPlayer link={att.link} height={200} />
+              <VideoPlayer link={att.link} height={150} />
             }
           </div>
         )}

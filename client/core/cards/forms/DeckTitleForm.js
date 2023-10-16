@@ -20,11 +20,12 @@ const mockDesc = " ewiof efojjew fewfjew xxxx xccxx eiofj efj fewiof efojjew few
 
 const useStyles = makeStyles(theme => ({
   root: {
-    pointerEvents:"all",
+    position:"absolute",
+    left:props => props.left,
+    top:props => props.top,
     width:props => props.width,
     height:props => props.height,
-    marginLeft:props => props.marginLeft,
-    marginTop:props => props.marginTop,
+    pointerEvents:"all",
   },
   form:{
   },
@@ -37,7 +38,7 @@ const useStyles = makeStyles(theme => ({
     overflow:"hidden",
     //cursor:"pointer",
     pointerEvents:"all",
-    background:COLOURS.HEADER.BG,
+    background:"red",//COLOURS.HEADER.BG,
   },
   closeBtn:{
     width:"80px",

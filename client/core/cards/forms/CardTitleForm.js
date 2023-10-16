@@ -20,14 +20,12 @@ const mockDesc = " ewiof efojjew fewfjew xxxx xccxx eiofj efj fewiof efojjew few
 
 const useStyles = makeStyles(theme => ({
   root: {
-    pointerEvents:"all",
     position:"absolute",
     left:props => props.left,
     top:props => props.top,
     width:props => props.width,
     height:props => props.height,
-    marginLeft:0,//props => props.marginLeft,
-    marginTop:0,//props => props.marginTop,
+    pointerEvents:"all",
   },
   form:{
   },

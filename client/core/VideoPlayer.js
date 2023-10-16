@@ -73,6 +73,18 @@ export default function VideoPlayer({link, withTime, width, height}){
   }
   */
 
+
+  let requiredWidth;
+  let requiredHeight;
+  if(!width && !height){
+    //these are the defaults anyway but we make it explicit here
+    requiredWidth = 640;
+    requiredHeight = 360;
+  }else{
+    requiredWidth =  width || height * (640/360);
+    requiredHeight = height || width / (640/360);
+  }
+
   return (
       <div className={classes.root}>
         <div className={classes.videoPlayerContainer}>
@@ -80,8 +92,8 @@ export default function VideoPlayer({link, withTime, width, height}){
               controls={true}
               playing={playing}
               url={link} 
-              width={width}
-              height={height}
+              width={requiredWidth}
+              height={requiredHeight}
           />
           {/**<div className={classes.videoCtrls}>
               <button 

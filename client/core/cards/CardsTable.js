@@ -65,7 +65,6 @@ const createMockDecks = (userId, nrDecks=1) => d3.range(nrDecks).map((nr,i) =>
   })
 )
 */
-const DEFAULT_NR_COLS = 3;
 const calcColNr = (i, nrCols) => i % nrCols;
 const calcRowNr = (i, nrCols) => Math.floor(i/nrCols);
 
@@ -109,11 +108,6 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const containerWidth = 100000;
   const containerHeight = 100000;
 
-  const nrCols = DEFAULT_NR_COLS;
-
-  const decksData = embellishedDecks(tableDecks, nrCols);
-  const stringifiedData = JSON.stringify(tableDecks);
-
   const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
   const [shouldDisplayInstructions, setShouldDisplayInstructions] = useState(false);
   const [form, setForm] = useState(null);
@@ -128,6 +122,14 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   }
   const contentsWidth = width - margin.left - margin.right;
   const contentsHeight = height - margin.top - margin.bottom;
+
+  const minDeckWidthWithMargins = 125;
+  const nrCols = Math.floor(contentsWidth / minDeckWidthWithMargins);
+  const remainingSpace = contentsWidth - nrCols * minDeckWidthWithMargins;
+  const deckWidthWithMargins = minDeckWidthWithMargins + (remainingSpace/nrCols);
+
+  const decksData = embellishedDecks(tableDecks, nrCols);
+  const stringifiedData = JSON.stringify(tableDecks);
 
   //const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
 
@@ -180,8 +182,8 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
           <Instructions />
           :
           <Decks 
-            table={table} setSel={setSelectedDeckId} nrCols={nrCols} 
-            data={decksData} width={contentsWidth} height={contentsHeight} heightK={height/contentsHeight}
+            table={table} setSel={setSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
+            data={decksData} height={contentsHeight}
             tableMarginTop={tableMarginTop}
             onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} 
             updateTable={updateTable} updateDeck={updateDeck} />

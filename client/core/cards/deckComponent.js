@@ -7,14 +7,7 @@ import dragEnhancements from '../journey/enhancedDragHandler';
 import { updateRectDimns } from '../journey/transitionHelpers';
 import { getTransformationFromTrans } from '../journey/helpers';
 import { isNumber } from '../../data/dataHelpers';
-
-function maxDimns(maxWidth, maxHeight, aspectRatio){
-    const potentialHeight = maxWidth * aspectRatio;
-    if(potentialHeight <= maxHeight){
-        return { width: maxWidth, height: potentialHeight }
-    }
-    return { width: maxHeight/aspectRatio, height: maxHeight }
-}
+import { maxDimns } from "../../util/geometryHelpers";
 
 const CONTEXT_MENU_ITEM_HEIGHT = 50;
 const CONTEXT_MENU_GAP = 10;
@@ -56,7 +49,7 @@ export default function deckComponent() {
     let heldCardWidth;
     let heldCardHeight;
     //const cardAspectRatio = 88/62; - normal deck
-    const cardAspectRatio = (88/62) * 0.925; //wider
+    const cardAspectRatio = (62/88) * 1.1; //wider
 
     let placedCardWidth;
     let placedCardHeight;
@@ -324,7 +317,9 @@ export default function deckComponent() {
                     })
                     .onLongpressDragged(longpressDragged)
                     .onLongpressEnd(function(){
+                        //console.log("deck lpendnnnnnnnnnnnnnnn", wasDragged)
                         if(wasDragged){
+                            //console.log("deck onLPEnd..set to nullaaaaaaaaaaaaaaaaa")
                             onSetLongpressed(false);
                         }
                     });
@@ -335,16 +330,18 @@ export default function deckComponent() {
                     .on("end", deckIsSelected ? null : enhancedDrag(dragEnd))
 
                 function dragStart(e,d){
-                    //console.log("deck dragstart")
                 }
 
                 function dragged(e,d){
-                    //console.log("deck drag")
                     if(longpressedDeckId === id){ wasDragged = true; }
                     handleDrag(e);
                 }
 
-                function dragEnd(e,d){ if(longpressedDeckId === id){ onSetLongpressed(false); } }
+                function dragEnd(e,d){ 
+                    if(longpressedDeckId === id && wasDragged){ 
+                        onSetLongpressed(false); 
+                    }
+                }
 
                 //issue - cloneG is a child of container, which moves, making the clone move too????
                 startLongpress = function(e,d){
@@ -354,13 +351,14 @@ export default function deckComponent() {
                     cloneG = containerG
                         .clone(true)
                         .attr("class", "cloned-deck")
+                        .attr("pointer-events", "all") //override the pointerevents none for d3 when in multideck view
                         //.attr("pointer-events", "none") //this allows orig deck to be dragged
                         .attr("opacity", 1)
+                        .call(drag)
                         .raise();
                     
                     cloneG.select("rect.deck-overlay").attr("fill", "green")
                     cloneG.select("g.context-menu")
-                        //.attr("pointer-events", "all")
                         .datum(contextMenuData)
                         .call(contextMenu)
 
@@ -382,10 +380,10 @@ export default function deckComponent() {
                     const { translateX, translateY } = getTransformationFromTrans(cloneG.attr("transform"));
                     const newX = translateX + e.dx;
                     const newY = translateY + e.dy;
-                    const latestNewCell = getCell([newX, newY]);
-                    const currentNewCell = newCell;
-                    if(!newCell || latestNewCell.key !== currentNewCell.key){
-                        newCell = latestNewCell;
+                    const currentNewCell = getCell([newX, newY]);
+                    const prevNewCell = newCell;
+                    if(!prevNewCell || currentNewCell.key !== prevNewCell.key){
+                        newCell = currentNewCell;
                         // add newCell stroke
                         d3.select(`g.deck-${newCell.deckId}`).select("rect.deck-overlay")
                             .attr("opacity", 0.8)
@@ -393,13 +391,12 @@ export default function deckComponent() {
                             .attr("stroke-width", 3)
                     
                         //remove prev 
-                        d3.select(`g.deck-${currentNewCell?.deckId}`).select("rect.deck-overlay")
+                        d3.select(`g.deck-${prevNewCell?.deckId}`).select("rect.deck-overlay")
                             .attr("opacity", 0.3)
                             .attr("stroke", null)
                             .attr("stroke-width", null)
                     }
                        
-                    //console.log("newcell", newCell)
                     //drag the clone
                     cloneG.attr("transform", `translate(${newX},${newY})`);
                 }
@@ -422,6 +419,7 @@ export default function deckComponent() {
                 }
 
                 function cleanupLongpress(){
+                    //console.log("cleanup lpllllllll")
                     cloneG.remove();
                     containerG.attr("opacity", 1);
 
@@ -436,14 +434,14 @@ export default function deckComponent() {
 
                 }
 
-                containerG.call(drag)
+                //containerG.call(drag);
                     
                 containerG.select("rect.deck-overlay")
                     .attr("display", deckIsSelected ? "none" : null)
                     .attr("width", width)
                     .attr("height", height)
                     .on("click", e => {
-                        console.log("click deck overlay")
+                        //console.log("click deck overlay")
                         if(longpressedDeckId === id){ 
                             e.stopPropagation();
                             return;
@@ -681,7 +679,9 @@ export default function deckComponent() {
     };
     deck.longpressedDeckId = function (value) {
         if (!arguments.length) { return longpressedDeckId; }
+        //console.log("value, longpressedId, id", value, longpressedDeckId, id)
         if(longpressedDeckId === id && value !== id){
+            //console.log("calling endLP on deck", id)
             endLongpress();
         }else if(longpressedDeckId !== id && value === id){
             startLongpress();
