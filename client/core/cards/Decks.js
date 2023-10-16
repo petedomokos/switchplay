@@ -208,9 +208,9 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   const setSelectedDeck = useCallback((id) => {
     const deck = data.find(d => d.id === id);
     if(deck){
-      //console.log("selecting deck zoom")
+      //go to single selected deck view
+
       //store the non selected zoom state so we can return to it when deselecting the deck
-      //console.log("zoom into deck so store zoom state", d3.zoomTransform(zoomRef.current))
       zoomStateRef.current = d3.zoomTransform(zoomRef.current);
       const newX = -deckX(deck);
       const newY = -deckY(deck);
@@ -218,15 +218,27 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
       //the extrahozShift is an abs amount to get it to center of screen so shouldnt be scaled up
       const newTransformState = d3.zoomIdentity.translate(newX * newK + extraHozShiftToCentreWhenSelected, newY * newK).scale(newK);
       d3.select(zoomRef.current).call(zoom.transform, newTransformState)
+      //fade the decks that will remian non-selected out
+      d3.select(containerRef.current).selectAll("g.deck").filter(d => d.id !== id)
+        .attr("opacity", 1)
+        .transition("deck-opacity")
+        .duration(TRANSITIONS.MED)
+          .attr("opacity", 0.3)
     }else{
-      //console.log("returning to prev state", zoomStateRef.current)
+      //return to multideck view
+      
+      //fade the non-selected decks back in
+      d3.select(containerRef.current).selectAll("g.deck").filter(d => d.id !== selectedDeckId)
+        .transition("deck-opacity")
+        .duration(TRANSITIONS.MED)
+          .attr("opacity", 1)
       d3.select(zoomRef.current).call(zoom.transform, zoomStateRef.current)
     }
 
     //if req, update state in react, may need it with delay so it happens at end of zoom
     setSelectedDeckId(id);
     setSel(id)
-  }, [stringifiedData, width, height]);
+  }, [stringifiedData, width, height, selectedDeckId]);
 
   const onSelectItem = useCallback((item) => {
     if(item){
