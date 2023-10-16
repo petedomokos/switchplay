@@ -114,7 +114,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   const selectedDeckDimns = maxDimns(width, height, deckAspectRatio);
   const zoomScale = selectedDeckDimns.width / deckWidth;
 
-  const extraHozShiftToCentreWhenSelected = (width - selectedDeckDimns.width)/2;
+  const extraHozShiftToCentreWhenSelected = 0;// (width - selectedDeckDimns.width)/2;
 
   const cellX = d => d.colNr * deckWidthWithMargins;
   const cellY = d => d.rowNr * deckHeightWithMargins;
@@ -279,11 +279,13 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
 
   const getFormDimns = useCallback(() => {
     const { formType, value } = form;
-    console.log("extraHoz", extraHozShiftToCentreWhenSelected)
+    //console.log("extraHoz", extraHozShiftToCentreWhenSelected)
     if(formType === "deck-title"){
       return {
         width:selectedDeckDimns.width - (DIMNS.DECK.PROGRESS_ICON_WIDTH * zoomScale) - deckFormMarginLeft,
         height:(DIMNS.DECK.HEADER_HEIGHT - deckFormMarginTop) * zoomScale,
+        //next - put deckX and deckY into this just to see it works even though we dont really need it
+        //then apply same to card form dimns
         left: DIMNS.burgerBarWidth + 8 + extraHozShiftToCentreWhenSelected, //messes it all up!!!!
         top:0
       }
@@ -298,6 +300,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
       //we also need to break it up at the card, because a scale is applied to the card if it is selected
       const deckToCardPos = getPosition(cardG, "deck")
       const cardScale = getTransformationFromTrans(cardG.attr("transform")).scaleX;
+      console.log("cardScale", cardScale)
       const cardTitleG = cardG.select("g.card-header").select("g.title-contents");
       const width = +cardTitleG.select("rect").attr("width") * zoomScale * cardScale
       const height = +cardTitleG.select("rect").attr("height") * zoomScale * cardScale
@@ -306,8 +309,9 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
       return {
         width,
         height,
-        left:deckToCardPos.x * zoomScale + cardToTitlePos.x * zoomScale * cardScale,
-        top:deckToCardPos.y * zoomScale + cardToTitlePos.y * zoomScale * cardScale,
+        left:(deckToCardPos.x * zoomScale) + (cardToTitlePos.x * zoomScale * cardScale)
+          + extraHozShiftToCentreWhenSelected,
+        top:(deckToCardPos.y * zoomScale) + (cardToTitlePos.y * zoomScale * cardScale),
         fontSize:12 * cardScale
       }
     }
@@ -561,7 +565,9 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
           <filter id="shine">
             <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
           </filter>
-          {data.map(deck => <clipPath id={`deck-trophy-${deck.id}`}><rect></rect></clipPath> )}
+          {data.map(deck => 
+            <clipPath id={`deck-trophy-${deck.id}`} key={`deck-trophy-${deck.id}`}><rect></rect></clipPath> 
+          )}
         </defs>
       </svg>
       <div className={classes.formContainer} ref={formRef}>
