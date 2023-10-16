@@ -113,12 +113,15 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
   const [form, setForm] = useState(null);
 
   //we follow d3 margin convention here (eg html padding)
-  const tableMarginTop = selectedDeckId ? 0 : 35;
+  //NOTE: WIDTH < HEIGHT TEMP FIXES A BUG WITH CARDTITLEFORM POSITIONING ON LARGER SCREENS
+  //IT DOESNT FIX THE ISSUE FULLY ON SS WHEN IN LANDSCAPE ORIENTATION
+  const tableMarginTop = selectedDeckId && width < height ? 0 : 35;
+  const tableMarginBottom = width < height ? 0 : 35;
   const margin = { 
     left:0,//width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
     right:0,//width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
     top:tableMarginTop,// height * 0.1,// selectedDeckId ? 20 : 40,// d3.max([vertSpaceForHeader + 10, height * 0.05]), 
-    bottom:0,//height * 0.1// selectedDeckId ? 0 :  height * 0.05
+    bottom:tableMarginBottom,//height * 0.1// selectedDeckId ? 0 :  height * 0.05
   }
   const contentsWidth = width - margin.left - margin.right;
   const contentsHeight = height - margin.top - margin.bottom;

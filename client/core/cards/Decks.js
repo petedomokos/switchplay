@@ -93,8 +93,6 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   //this one defaults to null and is used to check lpdrag - to cancel out the transform if the lpis used to drag a deck instead
   //using a pseudo call to deck.handleDrag
   const zoomTransformLpStartRef = useRef(null);
-
-  const newDeckRef = useRef(null);
  
   //dimns
   const width = nrCols * deckWidthWithMargins;
@@ -114,7 +112,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   const selectedDeckDimns = maxDimns(width, height, deckAspectRatio);
   const zoomScale = selectedDeckDimns.width / deckWidth;
 
-  const extraHozShiftToCentreWhenSelected = 0;// (width - selectedDeckDimns.width)/2;
+  const extraHozShiftToCentreWhenSelected = (width - selectedDeckDimns.width)/2;
 
   const cellX = d => d.colNr * deckWidthWithMargins;
   const cellY = d => d.rowNr * deckHeightWithMargins;
@@ -279,7 +277,6 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
 
   const getFormDimns = useCallback(() => {
     const { formType, value } = form;
-    //console.log("extraHoz", extraHozShiftToCentreWhenSelected)
     if(formType === "deck-title"){
       return {
         width:selectedDeckDimns.width - (DIMNS.DECK.PROGRESS_ICON_WIDTH * zoomScale) - deckFormMarginLeft,
@@ -300,7 +297,6 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
       //we also need to break it up at the card, because a scale is applied to the card if it is selected
       const deckToCardPos = getPosition(cardG, "deck")
       const cardScale = getTransformationFromTrans(cardG.attr("transform")).scaleX;
-      console.log("cardScale", cardScale)
       const cardTitleG = cardG.select("g.card-header").select("g.title-contents");
       const width = +cardTitleG.select("rect").attr("width") * zoomScale * cardScale
       const height = +cardTitleG.select("rect").attr("height") * zoomScale * cardScale

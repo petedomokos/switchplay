@@ -38,7 +38,7 @@ const useStyles = makeStyles(theme => ({
     overflow:"hidden",
     //cursor:"pointer",
     pointerEvents:"all",
-    background:"red",//COLOURS.HEADER.BG,
+    background:COLOURS.HEADER.BG,
   },
   closeBtn:{
     width:"80px",
