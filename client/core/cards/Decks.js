@@ -96,7 +96,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
  
   //dimns
   const width = nrCols * deckWidthWithMargins;
-  const deckAspectRatio = 0.667;
+  const deckAspectRatio = 9/16;
   const deckOuterMargin = {
     left:10, //width * 0.05,
     right:10,//width * 0.05,
