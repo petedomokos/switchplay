@@ -198,6 +198,7 @@ export default function cardItemsComponent() {
                                 .call(itemTitle
                                     .width(listItemWidth)
                                     .height(listItemHeight)
+                                    .withAttachments(false)
                                     .styles((d,i) => ({
                                         text:{
                                             opacity:d.title ? 1 : 0.5,

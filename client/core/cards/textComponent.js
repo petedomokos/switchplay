@@ -25,6 +25,7 @@ export default function textComponent() {
 
     let getText = d => typeof d === "string" ? d : (d.text || d.title || d.name);
     let editable = true;
+    let withAttachments = true;
     
     function updateDimns(){
         contentsWidth = width - margin.left - margin.right;
@@ -124,15 +125,13 @@ export default function textComponent() {
                 .fontMax(styles.text.fontMax)
                     .render();
 
-            console.log("styles", styles)
-
             contentsG.selectAll("text")
                 .style("fill", styles.text.fill)
                 .style("stroke", styles.text.stroke)
                 .style("stroke-width", styles.text.strokeWidth)
                 .style("opacity", styles.text.opacity);          
 
-            //attachments
+            //@todo - attachments
             //first we need to know how many lines of text there are so we can shoft attachments up if necc
             /*
             const actualNrLines = itemContentsG.selectAll("text").nodes().length;
@@ -230,6 +229,11 @@ export default function textComponent() {
     text.editable = function (value) {
         if (!arguments.length) { return editable; }
         editable = value;
+        return text;
+    };
+    text.withAttachments = function (value) {
+        if (!arguments.length) { return withAttachments; }
+        withAttachments = value;
         return text;
     };
     text.styles = function (value) {
