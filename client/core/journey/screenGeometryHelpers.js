@@ -1,4 +1,6 @@
 
+import { isNumber } from '../../data/dataHelpers';
+
 export function ptIsOnMilestone(pt, milestone){
     const _x = pt.x || pt[0];
     const _y = pt.y || pt[1];
@@ -183,22 +185,45 @@ export const angleOfElevation = (from, to) => {
     //console.log("angleOfRot", angleOfRotation)
 }
 
-export function angleFromVertical(points) {
-    // Must be at least two points
-    if (!points[1]) { return undefined; }
+export function angleFromVertical(points){
     // assume straight line so just take first two points
-    const p1 = points[0];
-    const p2 = points[1];
-    let deltaX;
-    let deltaY;
-    if (p1[0]) {
-        deltaX = Math.abs(p1[0] - p2[0]);
-        deltaY = Math.abs(p1[1] - p2[1]);
-    } else {
-        deltaX = Math.abs(p1.x - p2.x);
-        deltaY = Math.abs(p1.y - p2.y);
+    const p1 = points.length === 1 ? [0,0] : points[0];
+    const p2 = points.length === 1 ? points[0] : points[1];
+    //allow arrays or objects
+    const deltaX = isNumber(p1[0]) ? p2[0] - p1[0] : p2.x - p1.x;
+    const deltaY = isNumber(p1[0]) ? p2[1] - p1[1] : p2.y - p1.y;
+
+    return toDegrees(Math.atan(Math.abs(deltaX) / Math.abs(deltaY)));
+}
+
+//if one point provided, it goes from root
+//gives the angle from north or south
+export function angleFromNorth(points) {
+    // assume straight line so just take first two points
+    const p1 = points.length === 1 ? [0,0] : points[0];
+    const p2 = points.length === 1 ? points[0] : points[1];
+    //allow arrays or objects
+    const deltaX = isNumber(p1[0]) ? p2[0] - p1[0] : p2.x - p1.x;
+    const deltaY = isNumber(p1[0]) ? p2[1] - p1[1] : p2.y - p1.y;
+ 
+    const theta = toDegrees(Math.atan(Math.abs(deltaX) / Math.abs(deltaY)));
+    //quadrants clockwise from North
+    //quad 1
+    if(deltaX > 0 && deltaY < 0){
+        return theta;
     }
-    const theta = toDegrees(Math.atan(deltaX / deltaY));
+    //quad 2
+    if(deltaX > 0 && deltaY > 0){
+        return 180 - theta;
+    }
+    //quad 3
+    if(deltaX < 0 && deltaY > 0){
+        return 180 + theta;
+    }
+    //quad 4
+    if(deltaX < 0 && deltaY < 0){
+        return 360 - theta;
+    }
     return theta;
 }
 

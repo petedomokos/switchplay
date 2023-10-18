@@ -99,10 +99,11 @@ export default function pentagonComponent() {
             const sectionG = containerG.selectAll("g.section").data(sectionsData, s => s.key);
             sectionG.enter()
                 .append("g")
-                    .attr("class", "section")
+                    .attr("class", d => `section section-${d.sectionNr}`)
                     .attr("display", (d,i) => !isNumber(selectedSectionNr) || selectedSectionNr === i ? null : "none")
                     .each(function(d,i){
                         const sectionG = d3.select(this);
+                        sectionG.append("path").attr("class", "section-bg").attr("fill", "transparent");
                         sectionG.append("line").attr("class", "start show-with-section visible");
                         sectionG.append("line").attr("class", "finish show-with-section visible")
                             //.attr("opacity", 1)
@@ -119,7 +120,6 @@ export default function pentagonComponent() {
                             
                         sectionG.append("path").attr("class", "section-hitbox")
                             .attr("fill", "transparent")
-                            //.style("fill", i % 2 === 0 ? "blue" : "yellow")
                             .on("click", onClick);
 
                         itemContentsG
@@ -231,8 +231,11 @@ export default function pentagonComponent() {
                             .attr("stroke-width", hitlineStrokeWidth)
                             .attr("display", editable ? null : "none")*/
 
+                        sectionG.select("path.section-bg")
+                            .attr("d", `M${ax},${ay} L${bx},${by} L${cx},${cy} L${dx},${dy}`);
+
                         sectionG.select("path.section-hitbox")
-                            .attr("d", `M${ax},${ay} L${bx},${by} L${cx},${cy} L${dx},${dy}`)
+                            .attr("d", `M${ax},${ay} L${bx},${by} L${cx},${cy} L${dx},${dy}`);
 
                         //all lines
                         sectionG.selectAll("line.visible")

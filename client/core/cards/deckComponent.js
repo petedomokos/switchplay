@@ -8,8 +8,9 @@ import { updateRectDimns } from '../journey/transitionHelpers';
 import { getTransformationFromTrans } from '../journey/helpers';
 import { isNumber } from '../../data/dataHelpers';
 import { maxDimns } from "../../util/geometryHelpers";
+import { angleFromNorth } from '../journey/screenGeometryHelpers';
 import { icons } from '../../util/icons';
-import { fadeIn, remove } from '../journey/domHelpers';
+import { fadeIn, remove, getPosition } from '../journey/domHelpers';
 
 const magIconPath1D = "M39.94,44.142c-3.387,2.507 7.145,-8.263 4.148,-4.169c0.075,-0.006 -0.064,0.221 -0.53,0.79c0,0 8.004,7.95 11.933,11.996c1.364,1.475 -1.097,4.419 -2.769,2.882c-3.558,-3.452 -11.977,-12.031 -11.99,-12.045l-0.792,0.546Z"
 const magIconPath2D = "M28.179,48.162c5.15,-0.05 10.248,-2.183 13.914,-5.806c4.354,-4.303 6.596,-10.669 5.814,-16.747c-1.34,-10.415 -9.902,-17.483 -19.856,-17.483c-7.563,0 -14.913,4.731 -18.137,11.591c-2.468,5.252 -2.473,11.593 0,16.854c3.201,6.812 10.431,11.518 18.008,11.591c0.086,0 0.172,0 0.257,0Zm-0.236,-3.337c-7.691,-0.074 -14.867,-6.022 -16.294,-13.648c-1.006,-5.376 0.893,-11.194 4.849,-15.012c4.618,-4.459 11.877,-5.952 17.913,-3.425c5.4,2.261 9.442,7.511 10.187,13.295c0.638,4.958 -1.141,10.154 -4.637,13.733c-3.067,3.14 -7.368,5.014 -11.803,5.057c-0.072,0 -0.143,0 -0.215,0Z"
@@ -45,7 +46,7 @@ export default function deckComponent() {
 
     let heldCardsAreaHeight;
     let placedCardsAreaHeight;
-    let heldCardInfoHeight;
+    let cardHeaderHeight;
 
     //next - go through hw this space is done, as we want it reduced when small
     let vertSpaceForIncs;
@@ -84,8 +85,8 @@ export default function deckComponent() {
         //this aspectRatio is only needed to aid with selecting a card to takeover entire area
         cardsAreaAspectRatio = cardsAreaWidth/cardsAreaHeight;
 
-        heldCardInfoHeight = contentsHeight * INFO_HEIGHT_PROPORTION_OF_CARDS_AREA;
-        const minInc = heldCardInfoHeight * 0.9;
+        cardHeaderHeight = contentsHeight * INFO_HEIGHT_PROPORTION_OF_CARDS_AREA;
+        const minInc = cardHeaderHeight * 0.9;
         const visibleVertCardInc = i => {
             const incA = minInc * 0.6;// 16;
             const incB = minInc * 0.4;// 10;
@@ -112,7 +113,7 @@ export default function deckComponent() {
         };
 
         //when deck is reduced in size, the cards behind are not visible exceot a tiny bit
-        const nonVisibleVertInc = i => i * heldCardInfoHeight * 0.2;
+        const nonVisibleVertInc = i => i * cardHeaderHeight * 0.2;
         const nonVisibleHorizInc = i => (i/5) * horizSpaceForNonVisibleIncs; //5 cards
 
         vertCardInc = deckIsSelected ? visibleVertCardInc : nonVisibleVertInc;
@@ -338,9 +339,7 @@ export default function deckComponent() {
                     })
                     .onLongpressDragged(longpressDragged)
                     .onLongpressEnd(function(){
-                        //console.log("deck lpendnnnnnnnnnnnnnnn", wasDragged)
                         if(wasDragged){
-                            //console.log("deck onLPEnd..set to nullaaaaaaaaaaaaaaaaa")
                             onSetLongpressed(false);
                         }
                     });
@@ -440,7 +439,6 @@ export default function deckComponent() {
                 }
 
                 function cleanupLongpress(){
-                    //console.log("cleanup lpllllllll")
                     cloneG.remove();
                     containerG.attr("opacity", 1);
 
@@ -559,7 +557,7 @@ export default function deckComponent() {
                     .call(cards
                         .heldCardWidth(heldCardWidth)
                         .heldCardHeight(heldCardHeight)
-                        .infoHeight(heldCardInfoHeight)
+                        .headerHeight(cardHeaderHeight)
                         .placedCardWidth(placedCardWidth)
                         .placedCardHeight(placedCardHeight)
                         .selectedCardWidth(selectedCardWidth)
@@ -609,19 +607,15 @@ export default function deckComponent() {
                         })
                         .onSelectItem(onSelectItem)
                         .onClickCardTitle(cardD => {
-                            //console.log("onClickCardTitle", cardD)
                             setForm({ formType: "card-title", value:cardD }) 
                         })
                         .onUpdateItemStatus(updateItemStatus)
                         .onClickCard(function(e, d){
-                            //console.log("onClickCard")
                             if(!deckIsSelected){
                                 onClickDeck(e, _deckData);
                             } else if(selectedCardNr === d.cardNr){
-                                //deselectCard(d);
                                 onSetSelectedCardNr("")
                             } else{
-                                //selectCard(d);
                                 onSetSelectedCardNr(d.cardNr)
                             }
                         })
@@ -658,7 +652,12 @@ export default function deckComponent() {
             const controlsHeight = controlsContentsHeight + 2 * controlsMarginVert;
             
             const spaceAvailableOnLeftOfCards = (width - heldCardWidth)/2;
-            const controlsOuterMarginLeft = (spaceAvailableOnLeftOfCards - controlsWidth)/2
+            const controlsOuterMarginLeft = (spaceAvailableOnLeftOfCards - controlsWidth)/2;
+
+            const xToCentre = -controlsOuterMarginLeft + (width - btnWidth)/2;//+ deckToCentrePos.x   // -controlsOuterMarginLeft + (width - btnWidth)/2;
+            const cardItemsAreaHeight = heldCardHeight - cardHeaderHeight;
+            const yToCentre = controlsMarginVert - cardItemsAreaHeight/2 + btnHeight/2 + 1;
+
             controlsG
                 .attr("transform", `translate(${controlsOuterMarginLeft},${height - placedCardsAreaHeight - controlsHeight})`)
                     .transition()
@@ -672,16 +671,23 @@ export default function deckComponent() {
                 .attr("rx", 1.5)
                 .attr("ry", 1.5)
 
-            /*next: section view
-                -> add attachmnents to section view texts
-                -> ondrag, work out which item it is over (get coods to centre of polygon, and from ther ecan just use 
-                //the polygon coods to see which item it is over)
-                -> onDrag, make cards disappear and only show all items in potentialsection, with the rest if the items on 
-                the front card still showing on much-reduced opacity, like a preview of which items are included
-                -> onDragEnd, check that all updates as expected, and clean up.
-            */
-
             let potentialSelectedSectionNr;
+
+            const highlightSection = sectionNr => {
+                containerG.selectAll("g.card").selectAll(`g.section-${sectionNr}`).select("path.section-bg")
+                    .transition("highlight")
+                    .duration(TRANSITIONS.VERY_FAST)
+                        .attr("fill", grey10(2))
+            }
+
+            const unhighlightSection = sectionNr => {
+                containerG.selectAll("g.card").selectAll(`g.section-${sectionNr}`).select("path.section-bg")
+                    .transition("unhighlight")
+                    .duration(TRANSITIONS.VERY_FAST)
+                        .attr("fill", "transparent")
+
+            }
+        
             btnDrag
                 .on("start", function(e,d){
                 })
@@ -692,12 +698,39 @@ export default function deckComponent() {
                     const newY = translateY + e.dy;
                     btnG.attr("transform", `translate(${newX}, ${newY}) scale(${btnScaleWhenDragged})`);
 
-                    //@todo - impl geo methid to determine section
-                    potentialSelectedSectionNr = 0;
+                    //Determine the section
+                    //const _x = newX - centreX;
+                    //const _y = newY - centreY;
+                    const _x = newX - xToCentre;
+                    const _y = newY - yToCentre;
+
+                    //console.log("_x", _x)
+                    const distFromCentre = Math.sqrt(_x ** 2 + _y ** 2);
+                    //console.log("distFromCentre", distFromCentre)
+                    const theta = angleFromNorth([[_x, _y]])
+                    //console.log("theta", Math.round(theta))
+                    if(distFromCentre > cards.itemsOuterRadius()){ 
+                        if(potentialSelectedSectionNr !== ""){ unhighlightSection(potentialSelectedSectionNr); }
+                        potentialSelectedSectionNr = ""; 
+                    }
+                    else {
+                        const newPotentialSelectedSectionNr = Math.floor(theta/(360/5))
+                        if(potentialSelectedSectionNr === ""){ highlightSection(newPotentialSelectedSectionNr) }
+                        else { 
+                            unhighlightSection(potentialSelectedSectionNr);
+                            highlightSection(newPotentialSelectedSectionNr);
+                        }
+                        potentialSelectedSectionNr = newPotentialSelectedSectionNr;
+                    }
+                    //console.log("pot", potentialSelectedSectionNr)  
                 })
                 .on("end", function(e,d){
-                    if(isNumber(potentialSelectedSectionNr)){
+                    if(selectedSectionNr !== potentialSelectedSectionNr){
                         onSelectSection(potentialSelectedSectionNr)
+                        potentialSelectedSectionNr = "";
+                    }else{
+                        //call update here to clean up
+                        update(_deckData)
                     }
                 })
             
@@ -712,23 +745,28 @@ export default function deckComponent() {
                         const btnG = d3.select(this);
                         
                         const btnContentsG = btnG.append("g").attr("class", 'btn-contents');
-                        btnContentsG.append("rect").attr("class", "btn-bg")
-                            .attr("fill", COLOURS.DECK.CONTROLS)
-                            .attr("opacity", 0.6)
-                            .attr("rx", 1)
-                            .attr("ry", 1)
-                            .attr("stroke", "yellow")
-                            .attr("stroke-width", 0.05);
-
-                        const iconG = btnContentsG.append("g").attr("class", "icon")
-
                         if(d.key === "section-view"){
+                            btnContentsG.append("circle").attr("class", "btn-bg")
+                                .attr("fill", COLOURS.DECK.CONTROLS)
+                                .attr("opacity", 0.6)
+
+                            const iconG = btnContentsG.append("g").attr("class", "icon")
                             iconG.append("path").attr("class", "path1")
                                 .attr("fill", grey10(4));
                             iconG.append("path").attr("class", "path2")
                                 .attr("fill", grey10(4));
+                        }else{
+                            btnContentsG.append("rect").attr("class", "btn-bg")
+                                .attr("fill", COLOURS.DECK.CONTROLS)
+                                .attr("opacity", 0.6)
+                                .attr("rx", 1)
+                                .attr("ry", 1);
+
+                            const iconG = btnContentsG.append("g").attr("class", "icon");
+                            //@todo - impl icons for other controls as they are added
                         }
 
+                        //hitbox
                         btnG.append("rect")
                             .attr("class", "hitbox")
                             .attr("fill", "transparent");
@@ -736,9 +774,11 @@ export default function deckComponent() {
                     })
                     .merge(btnG)
                     .attr("transform-origin",(d,i) => `${btnWidth/2} ${btnY(d,i) + btnHeight/2}`)
+                    //.attr("transform", (d,i) => `translate(0, ${btnY(d,i)})`)
                     .attr("transform", (d,i) => `translate(0, ${btnY(d,i)})`)
                     .each(function(d){
                         const btnG = d3.select(this);
+
                         btnG.select("rect.hitbox")
                             .attr("width", btnWidth)
                             .attr("height", btnHeight)
@@ -746,19 +786,29 @@ export default function deckComponent() {
                         const btnContentsG = btnG.select("g.btn-contents")
                             .attr("transform", `translate(${btnMargin.left},${btnMargin.top})`);
 
-                        btnContentsG.select("rect.btn-bg")
-                            .attr("width", btnContentsWidth)
-                            .attr("height", btnContentsHeight)
-
-
                         if(d.key === "section-view"){
+                            //bg
+                            const r = btnContentsWidth/2;
+                            btnContentsG.select("circle.btn-bg")
+                                .attr("cx", r)
+                                .attr("cy", r)
+                                .attr("r", r)
+                                .attr("stroke", "white")
+                                .attr("stroke-width", 0.05)
+
+                            //icon
                             const iconG = btnContentsG.select("g.icon")
-                            .attr("transform", `translate(1,0.75) scale(0.1)`);
+                            .attr("transform", `translate(0.6,0.6) scale(0.12)`);
 
                             iconG.select("path.path1")
                                 .attr("d", magIconPath1D)
                             iconG.select("path.path2")
                                 .attr("d", magIconPath2D)
+                        }else{
+                            //bg
+                            btnContentsG.select("rect.btn-bg")
+                                .attr("width", btnContentsWidth)
+                                .attr("height", btnContentsHeight)
                         }
 
                     })
@@ -770,7 +820,6 @@ export default function deckComponent() {
              const closeBtnDatum = { 
                 key:"close", 
                 onClick:e => { 
-                    console.log("close")
                     e.stopPropagation();
                     onSelectSection() 
                 },
@@ -901,9 +950,7 @@ export default function deckComponent() {
     };
     deck.longpressedDeckId = function (value) {
         if (!arguments.length) { return longpressedDeckId; }
-        //console.log("value, longpressedId, id", value, longpressedDeckId, id)
         if(longpressedDeckId === id && value !== id){
-            //console.log("calling endLP on deck", id)
             endLongpress();
         }else if(longpressedDeckId !== id && value === id){
             startLongpress();

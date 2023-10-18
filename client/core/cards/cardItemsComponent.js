@@ -33,8 +33,8 @@ export default function cardItemsComponent() {
     function updateDimns(){
         margin = { 
             left: width * 0.05, right:width * 0.05, 
-            top:height * (isNumber(selectedSectionNr) ? 0 : 0.05),
-            bottom:height * (isNumber(selectedSectionNr) ? 0.15 : 0.05)
+            top:0,//height * (isNumber(selectedSectionNr) ? 0 : 0.05),
+            bottom:0,//height * (isNumber(selectedSectionNr) ? 0.15 : 0.05)
         }
         const availContentsWidth = width - margin.left - margin.right;
         const availContentsHeight = height - margin.top - margin.bottom;
@@ -51,6 +51,7 @@ export default function cardItemsComponent() {
         //radius is slightly linger than half contentsWidt, because the total length is nerve quite 2 * radius
         //due to angles
         outerRadius = contentsWidth * 0.53;
+        onSetOuterRadius(outerRadius)
         //we need to shift down by theis extra 0.03 of contentsWidth to centre it. 
         extraShiftDownForAngleDiscrepancy = contentsWidth * 0.03;
 
@@ -72,7 +73,8 @@ export default function cardItemsComponent() {
     let selectedItemNr;
     let selectedSectionNr;
 
-;    //API CALLBACKS
+    //API CALLBACKS
+    let onSetOuterRadius = function(){};
     let onSelectItem = function(){};
     let onUpdateItemStatus = function(){};
     let onDragStart = function(){};
@@ -263,6 +265,11 @@ export default function cardItemsComponent() {
     cardItems.editable = function (value) {
         if (!arguments.length) { return editable; }
         editable = value;
+        return cardItems;
+    };
+    cardItems.onSetOuterRadius = function (value) {
+        if (!arguments.length) { return onSetOuterRadius; }
+        onSetOuterRadius = value;
         return cardItems;
     };
     cardItems.onSelectItem = function (value) {

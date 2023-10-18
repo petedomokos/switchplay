@@ -16,7 +16,7 @@ export default function cardsComponent() {
     // dimensions
     let heldCardWidth = 300;
     let heldCardHeight = 600;
-    let margin = { left:3, right: 3, top:5, bottom:0 }
+    let margin = { left:3, right: 3, top:2.5, bottom:2.5 }
     let contentsWidth;
     let contentsHeight;
     //non-section view dimns
@@ -32,10 +32,11 @@ export default function cardsComponent() {
     let sectionViewHeldCardWidth;
     let sectionViewHeldCardHeight;
 
-    let infoHeight = 30;
-    let gapBetweenInfoAndItems;
-    let bottomBarHeight = 0
+    let headerHeight = 30;
+    let gapBetweenHeaderAndItems = 0;
     let itemsAreaHeight;
+
+    let itemsOuterRadius;
 
     function updateDimns(){
         normalContentsWidth = heldCardWidth - margin.left - margin.right;
@@ -45,9 +46,7 @@ export default function cardsComponent() {
         contentsWidth = heldCardWidthToUse - margin.left - margin.right;
         contentsHeight = heldCardHeightToUse - margin.top - margin.bottom; 
 
-        gapBetweenInfoAndItems = 0;
-        bottomBarHeight = 0;
-        itemsAreaHeight = contentsHeight - infoHeight - gapBetweenInfoAndItems - bottomBarHeight;
+        itemsAreaHeight = contentsHeight - headerHeight - gapBetweenHeaderAndItems;
     }
 
     let fontSizes = {
@@ -106,7 +105,6 @@ export default function cardsComponent() {
     let itemsComponents = {};
 
     function cards(selection, options={}) {
-        //check the height of info, make smaller if necc and create a bottom bar, so the pentagon is in centre
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
         updateDimns();
         selection.each(function (data) {
@@ -249,12 +247,12 @@ export default function cardsComponent() {
                                 .attr("width", isHeld ? contentsWidth : normalContentsWidth)
                                 .attr("height", isHeld ? contentsHeight : normalContentsHeight);
                         
-                        //const infoHeight;
+                        //const headerHeight;
                         //components
                         const dateColour = isNumber(selectedSectionNr) ? grey10(5) : grey10(7);
                         const header = headerComponents[cardNr]
                             .width(contentsWidth)
-                            .height(infoHeight)
+                            .height(headerHeight)
                             .styles({
                                 statusFill:() => getProgressStatusFill(cardD),
                                 trophyTranslate:isHeld || isSelected ? 
@@ -321,6 +319,7 @@ export default function cardsComponent() {
                             .withText(deckIsSelected && (isFront || isSelected))
                             .selectedItemNr(selectedItemNr)
                             .editable(cardIsEditable)
+                            .onSetOuterRadius(r => { itemsOuterRadius = r })
                             .onSelectItem(onSelectItem)
                             .onUpdateItemStatus(function(itemNr, newStatus){
                                 onUpdateItemStatus(cardNr, itemNr, newStatus);
@@ -329,7 +328,7 @@ export default function cardsComponent() {
                             .onDragEnd(e => dragEnd(e, cardD))
 
                         contentsG.select("g.items-area")
-                            .attr("transform", `translate(0, ${infoHeight + gapBetweenInfoAndItems})`)
+                            .attr("transform", `translate(0, ${headerHeight + gapBetweenHeaderAndItems})`)
                             .datum(isNumber(selectedSectionNr) ? cardD.items.filter(it => it.sectionNr === selectedSectionNr) : cardD.items)
                             .call(items)
 
@@ -493,9 +492,14 @@ export default function cardsComponent() {
         heldCardHeight = value;
         return cards;
     };
-    cards.infoHeight = function (value) {
-        if (!arguments.length) { return infoHeight; }
-        infoHeight = value;
+    cards.headerHeight = function (value) {
+        if (!arguments.length) { return headerHeight; }
+        headerHeight = value;
+        return cards;
+    };
+    cards.gapBetweenHeaderAndItems = function (value) {
+        if (!arguments.length) { return gapBetweenHeaderAndItems; }
+        gapBetweenHeaderAndItems = value;
         return cards;
     };
     cards.placedCardWidth = function (value) {
@@ -526,6 +530,11 @@ export default function cardsComponent() {
     cards.sectionViewHeldCardHeight = function (value) {
         if (!arguments.length) { return sectionViewHeldCardHeight; }
         sectionViewHeldCardHeight = value;
+        return cards;
+    };
+    cards.itemsOuterRadius = function (value) {
+        if (!arguments.length) { return itemsOuterRadius; }
+        itemsOuterRadius = value;
         return cards;
     };
     cards.margin = function (value) {
