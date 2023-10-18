@@ -5,6 +5,7 @@ import { toRadians } from '../journey/screenGeometryHelpers';
 import dragEnhancements from '../journey/enhancedDragHandler';
 import { TextBox } from "d3plus-text";
 import { grey } from '@material-ui/core/colors';
+import { isNumber } from '../../data/dataHelpers';
 
 const { GOLD } = COLOURS;
 
@@ -33,6 +34,7 @@ export default function pentagonComponent() {
     let withSections = true;
     let withText = true;
     let editable = true;
+    let selectedSectionNr;
 
     let innerVertices;
     let outerVertices;
@@ -98,6 +100,7 @@ export default function pentagonComponent() {
             sectionG.enter()
                 .append("g")
                     .attr("class", "section")
+                    .attr("display", (d,i) => !isNumber(selectedSectionNr) || selectedSectionNr === i ? null : "none")
                     .each(function(d,i){
                         const sectionG = d3.select(this);
                         sectionG.append("line").attr("class", "start show-with-section visible");
@@ -141,6 +144,7 @@ export default function pentagonComponent() {
                     //click if its been longpressed. eg store an isLongpress here in outer scope
                     .call(drag)
                     .merge(sectionG)
+                    .attr("display", (d,i) => !isNumber(selectedSectionNr) || selectedSectionNr === i ? null : "none")
                     .style("pointer-events", editable ? null : "none")
                     .each(function(d,i){
                         const { deckId, cardNr, itemNr, title } = d;
@@ -463,6 +467,11 @@ export default function pentagonComponent() {
     pentagon.editable = function (value) {
         if (!arguments.length) { return editable; }
         editable = value;
+        return pentagon;
+    };
+    pentagon.selectedSectionNr = function (value) {
+        if (!arguments.length) { return selectedSectionNr; }
+        selectedSectionNr = value;
         return pentagon;
     };
     

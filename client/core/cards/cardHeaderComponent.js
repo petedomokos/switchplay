@@ -3,6 +3,8 @@ import { DIMNS, grey10, OVERLAY, COLOURS, TRANSITIONS } from "./constants";
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
 import pentagonComponent from './pentagonComponent';
 import { truncateIfNecc } from '../journey/helpers';
+import { isNumber } from '../../data/dataHelpers';
+import { fadeIn, remove } from '../journey/domHelpers';
 
 const { GOLD } = COLOURS;
 
@@ -79,10 +81,24 @@ export default function cardHeaderComponent() {
     };
     let styles = {
         statusFill:"white",
-        trophyTranslate:`translate(-3,3) scale(0.25)`
+        trophyTranslate:`translate(-3,3) scale(0.25)`,
+        date:{
+            fill:grey10(7),
+            stroke:grey10(7),
+            strokeWidth:0.075
+        },
+        dateCount:{
+            numberFill:grey10(7),
+            numberStroke:grey10(7),
+            numberStrokeWidth:0.1,
+            wordsFill:grey10(7),
+            wordsStroke:grey10(7),
+            wordsStrokeWidth:0.1
+        }
     }
 
     let editable;
+    let selectedSectionNr;
 
     //API CALLBACKS
     let onClick = function(){};
@@ -176,10 +192,12 @@ export default function cardHeaderComponent() {
                                 .on("click", onClickTitle)
 
                         //TITLE
-                        const progressSummaryG = contentsG.selectAll("g.progress-summary").data([data])
+                        const progressSummaryData = isNumber(selectedSectionNr) ? [] : [data];
+                        const progressSummaryG = contentsG.selectAll("g.progress-summary").data(progressSummaryData)
                         progressSummaryG.enter()
                             .append("g")
                                 .attr("class", "progress-summary")
+                                .call(fadeIn)
                                 .each(function(d){
                                     const contentsG = d3.select(this).append("g").attr("class", "summary-contents");
 
@@ -250,6 +268,8 @@ export default function cardHeaderComponent() {
                                         .attr("width", progressSummaryWidth)
                                         .attr("height", progressSummaryHeight);
                                 })
+                                
+                        progressSummaryG.exit().call(remove)
 
 
                         //DATE
@@ -267,10 +287,7 @@ export default function cardHeaderComponent() {
                                             .attr("class", "primary")
                                             .attr("dominant-baseline", "central")
                                             .attr("text-anchor", "middle")
-                                            .style("font-family", "helvetica, sans-serifa")
-                                            .attr("stroke", grey10(7))
-                                            .attr("stroke-width", 0.1)
-                                            .attr("fill", grey10(7))
+                                            .style("font-family", "helvetica, sans-serifa");
                                     
                                     d3.select(this)
                                         .append("rect")
@@ -288,6 +305,9 @@ export default function cardHeaderComponent() {
                                     contentsG.select("text.primary")
                                         .attr("transform", d => `translate(${dateContentsWidth/2},${dateContentsHeight/2}) rotate(-45)`)
                                         .attr("font-size", dateHeight * 0.3)
+                                        .attr("stroke", styles.date.stroke)
+                                        .attr("stroke-width", styles.date.strokeWidth)
+                                        .attr("fill", styles.date.fill)
                                         .text(format(d.date))
 
                                     d3.select(this).select("rect.hitbox")
@@ -328,10 +348,7 @@ export default function cardHeaderComponent() {
                                     d3.select(this).selectAll("text")
                                         .attr("dominant-baseline", "central")
                                         .attr("text-anchor", "middle")
-                                        .style("font-family", "helvetica, sans-serifa")
-                                        .attr("stroke", grey10(7))
-                                        .attr("stroke-width", 0.5)
-                                        .attr("fill", grey10(7))
+                                        .style("font-family", "helvetica, sans-serifa");
                                     
                                     d3.select(this).append("rect").attr("class", "hitbox")
                                         .attr("fill", "transparent")
@@ -358,8 +375,9 @@ export default function cardHeaderComponent() {
                                         .attr("dominant-baseline", "auto") //line at bottom of text
                                         //.attr("font-size", numberFontSize)
                                         .attr("font-size", numberFontSize)
-                                        .attr("stroke", grey10(7))
-                                        .attr("stroke-width", 0.1)
+                                        .attr("fill", styles.dateCount.numberFill)
+                                        .attr("stroke", styles.dateCount.numberStroke)
+                                        .attr("stroke-width", styles.dateCount.numberStrokeWidth)
                                         //.attr("fill", isFuture ? "grey" : "white")
                                         .text(d => Math.abs(d.value))
 
@@ -368,8 +386,9 @@ export default function cardHeaderComponent() {
                                         .attr("y", numberHeight + extraGapBetween/2 - extraShiftUp)
                                         .attr("dominant-baseline", "hanging")
                                         .attr("font-size", wordsFontSize)
-                                        .attr("stroke", grey10(7))
-                                        .attr("stroke-width", 0.1)
+                                        .attr("fill", styles.dateCount.wordsFill)
+                                        .attr("stroke", styles.dateCount.wordsStroke)
+                                        .attr("stroke-width", styles.dateCount.wordsStrokeWidth)
                                         //.attr("fill", isFuture ? "grey" : "white")
                                         .text(d => `${d.label} ${d.value < 0 ? "ago" : ""}`)
 
@@ -407,9 +426,13 @@ export default function cardHeaderComponent() {
     };
     header.styles = function (obj) {
         if (!arguments.length) { return styles; }
+        const date = obj.date ? { ...styles.date, ...obj.date } : styles.date;
+        const dateCount = obj.dateCount ? { ...styles.dateCount, ...obj.dateCount } : styles.dateCount;
         styles = {
             ...styles,
             ...obj,
+            date,
+            dateCount
         };
         return header;
     };
@@ -421,6 +444,11 @@ export default function cardHeaderComponent() {
     header.editable = function (value) {
         if (!arguments.length) { return editable; }
         editable = value;
+        return header;
+    };
+    header.selectedSectionNr = function (value) {
+        if (!arguments.length) { return selectedSectionNr; }
+        selectedSectionNr = value;
         return header;
     };
    

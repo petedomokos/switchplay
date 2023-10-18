@@ -8,7 +8,11 @@ import { updateRectDimns } from '../journey/transitionHelpers';
 import { getTransformationFromTrans } from '../journey/helpers';
 import { isNumber } from '../../data/dataHelpers';
 import { maxDimns } from "../../util/geometryHelpers";
+import { icons } from '../../util/icons';
+import { fadeIn, remove } from '../journey/domHelpers';
 
+const magIconPath1D = "M39.94,44.142c-3.387,2.507 7.145,-8.263 4.148,-4.169c0.075,-0.006 -0.064,0.221 -0.53,0.79c0,0 8.004,7.95 11.933,11.996c1.364,1.475 -1.097,4.419 -2.769,2.882c-3.558,-3.452 -11.977,-12.031 -11.99,-12.045l-0.792,0.546Z"
+const magIconPath2D = "M28.179,48.162c5.15,-0.05 10.248,-2.183 13.914,-5.806c4.354,-4.303 6.596,-10.669 5.814,-16.747c-1.34,-10.415 -9.902,-17.483 -19.856,-17.483c-7.563,0 -14.913,4.731 -18.137,11.591c-2.468,5.252 -2.473,11.593 0,16.854c3.201,6.812 10.431,11.518 18.008,11.591c0.086,0 0.172,0 0.257,0Zm-0.236,-3.337c-7.691,-0.074 -14.867,-6.022 -16.294,-13.648c-1.006,-5.376 0.893,-11.194 4.849,-15.012c4.618,-4.459 11.877,-5.952 17.913,-3.425c5.4,2.261 9.442,7.511 10.187,13.295c0.638,4.958 -1.141,10.154 -4.637,13.733c-3.067,3.14 -7.368,5.014 -11.803,5.057c-0.072,0 -0.143,0 -0.215,0Z"
 const CONTEXT_MENU_ITEM_HEIGHT = 50;
 const CONTEXT_MENU_GAP = 10;
 const contextMenuData = [ 
@@ -62,7 +66,10 @@ export default function deckComponent() {
     let vertCardInc;
     let horizCardInc;
 
-    function updateDimns(){
+    let sectionViewHeldCardWidth;
+    let sectionViewHeldCardHeight;
+
+    function updateDimns(data){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
@@ -138,6 +145,11 @@ export default function deckComponent() {
 
         extraMarginLeftForCards = (cardsAreaWidth - heldCardWidth)/2;
         placedCardMarginVert = (placedCardsAreaHeight - placedCardHeight)/2;
+
+        //section view changes
+        //note - for now, its 1 item per card per section
+        sectionViewHeldCardWidth = heldCardWidth;
+        sectionViewHeldCardHeight = heldCardsAreaHeight / data.cards.length;
     }
     let DEFAULT_STYLES = {
         deck:{ info:{ date:{ fontSize:9 } } },
@@ -148,6 +160,7 @@ export default function deckComponent() {
     let deckIsSelected;
     let selectedCardNr;
     let selectedItemNr;
+    let selectedSectionNr;
     let format;
     let form;
     let transformTransition;
@@ -158,10 +171,14 @@ export default function deckComponent() {
     let cloneG;
     let newCell;
 
+    //controlbtns
+    const btnDrag = d3.drag();
+
     //data 
     let id;
 
     let onSelectItem = function(){};
+    let onSelectSection = function(){};
     let onClickDeck = function(){};
     let onSetLongpressed = function(){};
     let onSetSelectedCardNr = function(){};
@@ -187,6 +204,7 @@ export default function deckComponent() {
     let headerG;
     let cardsAreaG;
     let contextMenuG;
+    let controlsG;
 
     //components
     const header = headerComponent();
@@ -197,9 +215,9 @@ export default function deckComponent() {
     function deck(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true } = options;
 
-        updateDimns();
         // expression elements
         selection.each(function (deckData) {
+            updateDimns(deckData);
             id = deckData.id;
             containerG = d3.select(this)
 
@@ -246,6 +264,9 @@ export default function deckComponent() {
 
                 contextMenuG = containerG.append("g")
                     .attr("class", "context-menu")
+
+                controlsG = contentsG.append("g").attr("class", "controls").attr("opacity", deckIsSelected ? 0 : 1)
+                controlsG.append("rect").attr("class", "controls-bg").attr("fill", COLOURS.DECK.CONTROLS)
             }
 
             function update(_deckData, options={}){
@@ -536,17 +557,24 @@ export default function deckComponent() {
                     .attr("transform", `translate(0, ${headerHeight})`)
                     .datum(cardsData)
                     .call(cards
-                        .width(heldCardWidth)
-                        .height(heldCardHeight)
+                        .heldCardWidth(heldCardWidth)
+                        .heldCardHeight(heldCardHeight)
                         .infoHeight(heldCardInfoHeight)
                         .placedCardWidth(placedCardWidth)
                         .placedCardHeight(placedCardHeight)
                         .selectedCardWidth(selectedCardWidth)
                         .selectedCardHeight(selectedCardHeight)
+                        .sectionViewHeldCardWidth(sectionViewHeldCardWidth)
+                        .sectionViewHeldCardHeight(sectionViewHeldCardHeight)
                         .deckIsSelected(deckIsSelected)
                         .form(form)
                         .transformTransition(transformTransition)
                         .x((d,i) => {
+                            if(isNumber(selectedSectionNr) && d.isHeld){
+                                const gapForHorizIncs = contentsWidth - sectionViewHeldCardWidth;
+                                const horizInc = gapForHorizIncs / 4;
+                                return (4 - i) * horizInc;
+                            }
                             if(d.isSelected){
                                 //keep it centred
                                 return (cardsAreaWidth - selectedCardWidth)/2;
@@ -557,6 +585,9 @@ export default function deckComponent() {
                             return extraMarginLeftForCards + d.cardNr * (placedCardWidth + placedCardHorizGap);
                         })
                         .y((d,i) => {
+                            if(isNumber(selectedSectionNr) && d.isHeld){
+                                return i * sectionViewHeldCardHeight;
+                            }
                             if(d.isSelected){
                                 return (cardsAreaHeight - selectedCardHeight)/2;
                             }
@@ -607,6 +638,191 @@ export default function deckComponent() {
                             }*/
                             updateFrontCardNr(d.cardNr + 1);
                         }))
+
+
+            //controls
+            const controlsData = deckIsSelected && !isNumber(selectedSectionNr) ? [
+                { key:"section-view" }
+            ] : [];
+
+            const btnWidth = 10;
+            const btnHeight = 18;
+            const btnMargin = { left: 1, right: 1, top:5, bottom:5 }
+            const btnContentsWidth = btnWidth - btnMargin.left - btnMargin.right;
+            const btnContentsHeight = btnHeight - btnMargin.top - btnMargin.bottom;
+
+            const controlsMarginVert = 0;
+            const controlsContentsWidth = btnWidth;
+            const controlsWidth = controlsContentsWidth;
+            const controlsContentsHeight = controlsData.length * btnHeight;
+            const controlsHeight = controlsContentsHeight + 2 * controlsMarginVert;
+            
+            const spaceAvailableOnLeftOfCards = (width - heldCardWidth)/2;
+            const controlsOuterMarginLeft = (spaceAvailableOnLeftOfCards - controlsWidth)/2
+            controlsG
+                .attr("transform", `translate(${controlsOuterMarginLeft},${height - placedCardsAreaHeight - controlsHeight})`)
+                    .transition()
+                    .duration(TRANSITIONS.MED)
+                    .attr("opacity", deckIsSelected && !isNumber(selectedCardNr) ? 1 : 0)
+
+
+            controlsG.select("rect.controls-bg")
+                .attr("width", controlsWidth)
+                .attr("height", controlsHeight)
+                .attr("rx", 1.5)
+                .attr("ry", 1.5)
+
+            /*next: section view
+                -> add attachmnents to section view texts
+                -> ondrag, work out which item it is over (get coods to centre of polygon, and from ther ecan just use 
+                //the polygon coods to see which item it is over)
+                -> onDrag, make cards disappear and only show all items in potentialsection, with the rest if the items on 
+                the front card still showing on much-reduced opacity, like a preview of which items are included
+                -> onDragEnd, check that all updates as expected, and clean up.
+            */
+
+            let potentialSelectedSectionNr;
+            btnDrag
+                .on("start", function(e,d){
+                })
+                .on("drag", function(e,d, i){
+                    const btnG = d3.select(this);
+                    const { translateX, translateY } = getTransformationFromTrans(btnG.attr("transform"));
+                    const newX = translateX + e.dx;
+                    const newY = translateY + e.dy;
+                    btnG.attr("transform", `translate(${newX}, ${newY}) scale(${btnScaleWhenDragged})`);
+
+                    //@todo - impl geo methid to determine section
+                    potentialSelectedSectionNr = 0;
+                })
+                .on("end", function(e,d){
+                    if(isNumber(potentialSelectedSectionNr)){
+                        onSelectSection(potentialSelectedSectionNr)
+                    }
+                })
+            
+            const btnY = (d,i) => controlsMarginVert + i * btnHeight;
+            const btnScaleWhenDragged = 1.8;
+            
+            const btnG = controlsG.selectAll("g.deck-control-btn").data(controlsData, d => d.key);
+            btnG.enter()
+                .append("g")
+                    .attr("class", "deck-control-btn")
+                    .each(function(d){
+                        const btnG = d3.select(this);
+                        
+                        const btnContentsG = btnG.append("g").attr("class", 'btn-contents');
+                        btnContentsG.append("rect").attr("class", "btn-bg")
+                            .attr("fill", COLOURS.DECK.CONTROLS)
+                            .attr("opacity", 0.6)
+                            .attr("rx", 1)
+                            .attr("ry", 1)
+                            .attr("stroke", "yellow")
+                            .attr("stroke-width", 0.05);
+
+                        const iconG = btnContentsG.append("g").attr("class", "icon")
+
+                        if(d.key === "section-view"){
+                            iconG.append("path").attr("class", "path1")
+                                .attr("fill", grey10(4));
+                            iconG.append("path").attr("class", "path2")
+                                .attr("fill", grey10(4));
+                        }
+
+                        btnG.append("rect")
+                            .attr("class", "hitbox")
+                            .attr("fill", "transparent");
+
+                    })
+                    .merge(btnG)
+                    .attr("transform-origin",(d,i) => `${btnWidth/2} ${btnY(d,i) + btnHeight/2}`)
+                    .attr("transform", (d,i) => `translate(0, ${btnY(d,i)})`)
+                    .each(function(d){
+                        const btnG = d3.select(this);
+                        btnG.select("rect.hitbox")
+                            .attr("width", btnWidth)
+                            .attr("height", btnHeight)
+
+                        const btnContentsG = btnG.select("g.btn-contents")
+                            .attr("transform", `translate(${btnMargin.left},${btnMargin.top})`);
+
+                        btnContentsG.select("rect.btn-bg")
+                            .attr("width", btnContentsWidth)
+                            .attr("height", btnContentsHeight)
+
+
+                        if(d.key === "section-view"){
+                            const iconG = btnContentsG.select("g.icon")
+                            .attr("transform", `translate(1,0.75) scale(0.1)`);
+
+                            iconG.select("path.path1")
+                                .attr("d", magIconPath1D)
+                            iconG.select("path.path2")
+                                .attr("d", magIconPath2D)
+                        }
+
+                    })
+                    .call(btnDrag)
+
+            btnG.exit().remove();
+
+            //deck botright btn
+             const closeBtnDatum = { 
+                key:"close", 
+                onClick:e => { 
+                    console.log("close")
+                    e.stopPropagation();
+                    onSelectSection() 
+                },
+                icon:icons.close,
+            }
+            const cornerBtnData = isNumber(selectedSectionNr) && deckIsSelected ? [closeBtnDatum] : [];
+            const cornerBtnHeight = 20;
+            const cornerBtnWidth = cornerBtnHeight;
+            //assumme all are square
+            //note: 0.8 is a bodge coz iconsseems to be bigger than they state
+            const scale = d => (0.8 * cornerBtnHeight)/d.icon.height;
+            const cornerBtnMargin = cornerBtnHeight * 0.1;
+            const cornerBtnContentsWidth = cornerBtnWidth - 2 * cornerBtnMargin;
+            const cornerBtnContentsHeight = cornerBtnHeight - 2 * cornerBtnMargin;
+            const cornerBtnG = contentsG.selectAll("g.corner-btn").data(cornerBtnData, d => d.key);
+            cornerBtnG.enter()
+                .append("g")
+                    .attr("class", "corner-btn")
+                    .call(fadeIn)
+                    .each(function(d){
+                        const btnG = d3.select(this);
+                        btnG.append("path")
+                            .attr("fill", grey10(5));
+
+                        btnG.append("rect").attr("class", "btn-hitbox")
+                            .attr("fill", "transparent")
+                            //.attr("fill", "red")
+                            .attr("opacity", 0.3)
+                            .attr("stroke", "none")
+                    })
+                    .merge(cornerBtnG)
+                    .attr("transform", `translate(
+                        ${contentsWidth - cornerBtnWidth + cornerBtnMargin},
+                        ${contentsHeight - cornerBtnHeight + cornerBtnMargin})`)
+                    .each(function(d){
+                        const btnG = d3.select(this);
+                        btnG.select("path")
+                            .attr("transform", `scale(${scale(d)})`)
+                            .attr("d", d.icon.d)
+                            .attr("fill", grey10(3))
+                
+                        btnG.select("rect.btn-hitbox")
+                            .attr("width", cornerBtnContentsWidth)
+                            .attr("height", cornerBtnContentsHeight)
+
+                    })
+                    .on("click", (e,d) => { 
+                        d.onClick(e, d) 
+                    });
+
+                cornerBtnG.exit().remove();
+            
 
             }
 
@@ -660,6 +876,12 @@ export default function deckComponent() {
         if (!arguments.length) { return selectedItemNr; }
             selectedItemNr = value;
             cards.selectedItemNr(value);
+        return deck;
+    };
+    deck.selectedSectionNr = function (value) {
+        if (!arguments.length) { return selectedSectionNr; }
+        selectedSectionNr = value;
+        cards.selectedSectionNr(value);
         return deck;
     };
     deck.format = function (value) {
@@ -728,6 +950,11 @@ export default function deckComponent() {
     deck.onSelectItem = function (value) {
         if (!arguments.length) { return onSelectItem; }
         onSelectItem = value;
+        return deck;
+    };
+    deck.onSelectSection = function (value) {
+        if (!arguments.length) { return onSelectSection; }
+        onSelectSection = value;
         return deck;
     };
     deck.updateItemStatus = function (value) {

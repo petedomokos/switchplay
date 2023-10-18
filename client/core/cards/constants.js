@@ -12,7 +12,6 @@ export const TRANSITIONS = {
 export const INFO_HEIGHT_PROPORTION_OF_CARDS_AREA = 0.07;
 
 export const grey10 = (i) => ["#FFFFFF", "#E8E8E8","#D3D3D3", "#BEBEBE", "#A8A8A8", "#888888", "#696969", "#505050", "#303030", "#000000"][i-1];
-
 //@todo - whats time for in book??? '/api/user/photo/' +user._id +'?'+new Date().getTime()
 export const getURLForUser = userId => (photoId, locationKey) => {
     if(!userId || !photoId){
@@ -51,8 +50,11 @@ export const DIMNS = {
 export const COLOURS = {
     CARDS_TABLE:grey10(9),
     GOLD:"#FFE10A",// brighter #ffd700,   darker #ccad00
-    HEADER:{
-        BG:grey10(8)
+    DECK:{
+        HEADER:{
+            BG:grey10(8)
+        },
+        CONTROLS:"#404040"
     },
     CARD:{
         FILL:cardD => {
@@ -61,6 +63,8 @@ export const COLOURS = {
             if(isNext){ return grey10(5); }
             if(isSecondNext){ return "#989898"; }
             return (cardD.isHeld ? grey10(6) : grey10(8))
-        }
+        },
+        SECTION_VIEW_FILL:grey10(7),
+        SECTION_VIEW_STROKE:grey10(5)
     }
 }

@@ -3,21 +3,25 @@ import { DIMNS, grey10, COLOURS, TRANSITIONS } from "./constants";
 import dragEnhancements from '../journey/enhancedDragHandler';
 import cardHeaderComponent from './cardHeaderComponent';
 import cardItemsComponent from './cardItemsComponent';
-import { remove } from '../journey/domHelpers';
+import { fadeIn, remove } from '../journey/domHelpers';
 import { updateTransform } from '../journey/transitionHelpers';
 import { icons } from '../../util/icons';
 import { isNumber } from '../../data/dataHelpers';
+
 
 const { GOLD } = COLOURS;
 
 export default function cardsComponent() {
     //API SETTINGS
     // dimensions
-    let width = 300;
-    let height = 600;
-    let margin = { left:3, right: 3, top:10, bottom:0 }
+    let heldCardWidth = 300;
+    let heldCardHeight = 600;
+    let margin = { left:3, right: 3, top:5, bottom:0 }
     let contentsWidth;
     let contentsHeight;
+    //non-section view dimns
+    let normalContentsWidth;
+    let normalContentsHeight;
 
     let placedCardWidth = 0;
     let placedCardHeight = 0;
@@ -25,14 +29,22 @@ export default function cardsComponent() {
     let selectedCardWidth = contentsWidth;
     let selectedCardHeight = contentsHeight;
 
+    let sectionViewHeldCardWidth;
+    let sectionViewHeldCardHeight;
+
     let infoHeight = 30;
     let gapBetweenInfoAndItems;
     let bottomBarHeight = 0
     let itemsAreaHeight;
 
     function updateDimns(){
-        contentsWidth = width - margin.left - margin.right;
-        contentsHeight = height - margin.top - margin.bottom; 
+        normalContentsWidth = heldCardWidth - margin.left - margin.right;
+        normalContentsHeight = heldCardHeight - margin.top - margin.bottom;
+        const heldCardWidthToUse = isNumber(selectedSectionNr) ? sectionViewHeldCardWidth : heldCardWidth;
+        const heldCardHeightToUse = isNumber(selectedSectionNr) ? sectionViewHeldCardHeight : heldCardHeight;
+        contentsWidth = heldCardWidthToUse - margin.left - margin.right;
+        contentsHeight = heldCardHeightToUse - margin.top - margin.bottom; 
+
         gapBetweenInfoAndItems = 0;
         bottomBarHeight = 0;
         itemsAreaHeight = contentsHeight - infoHeight - gapBetweenInfoAndItems - bottomBarHeight;
@@ -56,6 +68,7 @@ export default function cardsComponent() {
     let form;
     let selectedCardNr;
     let selectedItemNr;
+    let selectedSectionNr;
 
     let transformTransition = { 
         enter: null, 
@@ -168,10 +181,11 @@ export default function cardsComponent() {
                                 .attr("class", "card-bg")
                                 .attr("rx", 3)
                                 .attr("ry", 3)
-                                .attr("width", contentsWidth)
-                                .attr("height", contentsHeight)
-                                .attr("stroke", getCardStroke(d))
-                                .attr("fill", COLOURS.CARD.FILL(d))
+                                //for placed cards, we dont want the dimns to be changed when in section view
+                                .attr("width", isHeld ? contentsWidth : normalContentsWidth)
+                                .attr("height", isHeld ? contentsHeight : normalContentsHeight)
+                                .attr("fill", isNumber(selectedSectionNr) ? COLOURS.CARD.SECTION_VIEW_FILL :COLOURS.CARD.FILL(d))
+                                .attr("stroke", isNumber(selectedSectionNr) ? COLOURS.CARD.SECTION_VIEW_STROKE : getCardStroke(d))
                                 .on("click", e => {
                                     //console.log("card bg click")
                                     onClickCard.call(this, e, d)
@@ -200,7 +214,7 @@ export default function cardsComponent() {
                     .call(updateTransform, { 
                         x, 
                         y,
-                        k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),  
+                        k:d => d.isSelected ? (selectedCardHeight/heldCardHeight) : (d.isHeld ? 1 : placedCardHeight/heldCardHeight),  
                         transition:transformTransition.enter,
                         name:d => `card-pos-${d.id}`,
                         force:true
@@ -209,7 +223,7 @@ export default function cardsComponent() {
                     .call(updateTransform, { 
                         x, 
                         y, 
-                        k:d => d.isSelected ? (selectedCardHeight/height) : (d.isHeld ? 1 : placedCardHeight/height),
+                        k:d => d.isSelected ? (selectedCardHeight/heldCardHeight) : (d.isHeld ? 1 : placedCardHeight/heldCardHeight),
                         transition:transformTransition.update,
                         name:(d,i) => `card-pos-${i}-${d.id}`,
                         force:true
@@ -218,11 +232,6 @@ export default function cardsComponent() {
                         const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status } = cardD; 
                         const contentsG = d3.select(this).select("g.card-contents")
                             .attr("transform", `translate(${margin.left},${margin.top})`);
-                        
-                        /*contentsG.select("rect.card-overlay")
-                            .attr("width", contentsWidth)
-                            .attr("height", contentsHeight)
-                            .attr("display", deckIsSelected ? "none" : null)*/
 
                         
                         //bg colour
@@ -230,25 +239,33 @@ export default function cardsComponent() {
                             .transition("card-bg-appearance")
                             .delay(200)
                             .duration(400)
-                                .attr("fill", COLOURS.CARD.FILL(cardD))
-                                .attr("stroke", getCardStroke(cardD))
+                                .attr("fill", isNumber(selectedSectionNr) ? COLOURS.CARD.SECTION_VIEW_FILL :COLOURS.CARD.FILL(cardD))
+                                .attr("stroke", isNumber(selectedSectionNr) ? COLOURS.CARD.SECTION_VIEW_STROKE : getCardStroke(cardD))
 
                         contentsG.select("rect.card-bg")
                             .transition("card-bg-dimns")
                             //.delay(200)
                             .duration(TRANSITIONS.MED)
-                                .attr("width", contentsWidth)
-                                .attr("height", contentsHeight)
+                                .attr("width", isHeld ? contentsWidth : normalContentsWidth)
+                                .attr("height", isHeld ? contentsHeight : normalContentsHeight);
                         
                         //const infoHeight;
                         //components
+                        const dateColour = isNumber(selectedSectionNr) ? grey10(5) : grey10(7);
                         const header = headerComponents[cardNr]
                             .width(contentsWidth)
                             .height(infoHeight)
                             .styles({
                                 statusFill:() => getProgressStatusFill(cardD),
                                 trophyTranslate:isHeld || isSelected ? 
-                                    "translate(-3,3) scale(0.25)" : "translate(-45,3) scale(0.6)"
+                                    "translate(-3,3) scale(0.25)" : "translate(-45,3) scale(0.6)",
+                                date:{ 
+                                    fill:dateColour, stroke:dateColour 
+                                },
+                                dateCount:{
+                                    numberFill:dateColour, wordsFill:dateColour,
+                                    numberStroke:dateColour, wordsStroke:dateColour
+                                }
                             })
                             .fontSizes(fontSizes.info)
                             .onClick(function(e){
@@ -313,7 +330,7 @@ export default function cardsComponent() {
 
                         contentsG.select("g.items-area")
                             .attr("transform", `translate(0, ${infoHeight + gapBetweenInfoAndItems})`)
-                            .datum(cardD.items)
+                            .datum(isNumber(selectedSectionNr) ? cardD.items.filter(it => it.sectionNr === selectedSectionNr) : cardD.items)
                             .call(items)
 
                         //remove items for cards behind
@@ -329,16 +346,14 @@ export default function cardsComponent() {
                             key:"expand", 
                             onClick:e => { onClickCard(e, cardD);  },
                             icon:icons.expand,
-                            shouldDisplay:!isSelected
                         }
                         const collapseBtnDatum = { 
                             key:"collapse", 
                             onClick:e => { onClickCard(e, cardD) },
                             icon:icons.collapse,
-                            shouldDisplay:isSelected
                         }
-                        const botRightBtnData = [collapseBtnDatum, expandBtnDatum];
-                        const btnHeight = d3.max([1, d3.min([15, 0.12 * contentsHeight])]);
+                        const botRightBtnData = isNumber(selectedSectionNr) ? [] : (isSelected ? [collapseBtnDatum] : [expandBtnDatum]);
+                        const btnHeight = d3.max([1, d3.min([15, 0.12 * normalContentsHeight])]);
                         const btnWidth = btnHeight;
                         //assumme all are square
                         //note: 0.8 is a bodge coz iconsseems to be bigger than they state
@@ -346,12 +361,11 @@ export default function cardsComponent() {
                         const btnMargin = btnHeight * 0.1;
                         const btnContentsWidth = btnWidth - 2 * btnMargin;
                         const btnContentsHeight = btnHeight - 2 * btnMargin;
-                        const botRightBtnG = contentsG.selectAll("g.bottom-right-btn").data(botRightBtnData);
+                        const botRightBtnG = contentsG.selectAll("g.bottom-right-btn").data(botRightBtnData, d => d.key);
                         botRightBtnG.enter()
                             .append("g")
                                 .attr("class", "bottom-right-btn")
-                                .attr("opacity", d => d.shouldDisplay ? 1 : 0)
-                                //.attr("pointer-events",d => d.shouldDisplay ? "all" : "none")
+                                .call(fadeIn, { transition:{ delay:TRANSITIONS.MED }})
                                 .each(function(d){
                                     const btnG = d3.select(this);
                                     btnG.append("path")
@@ -367,12 +381,6 @@ export default function cardsComponent() {
                                 .attr("transform", `translate(${contentsWidth - btnWidth + btnMargin},${contentsHeight - btnHeight + btnMargin})`)
                                 .each(function(d){
                                     const btnG = d3.select(this);
-                                    //visibility
-                                    btnG
-                                        .transition()
-                                        .duration(TRANSITIONS.MED)
-                                            .attr("opacity", d.shouldDisplay ? 1 : 0);
-
                                     btnG.select("path")
                                         .attr("transform", `scale(${scale(d)})`)
                                         .attr("d", d.icon.d)
@@ -383,7 +391,6 @@ export default function cardsComponent() {
 
                                 })
                                 .on("click", (e,d) => { 
-                                    //console.log("botrightclick")
                                     d.onClick(e, d) 
                                 });
 
@@ -476,14 +483,14 @@ export default function cardsComponent() {
     }
     
     //api
-    cards.width = function (value) {
-        if (!arguments.length) { return width; }
-        width = value;
+    cards.heldCardWidth = function (value) {
+        if (!arguments.length) { return heldCardWidth; }
+        heldCardWidth = value;
         return cards;
     };
-    cards.height = function (value) {
-        if (!arguments.length) { return height; }
-        height = value;
+    cards.heldCardHeight = function (value) {
+        if (!arguments.length) { return heldCardHeight; }
+        heldCardHeight = value;
         return cards;
     };
     cards.infoHeight = function (value) {
@@ -509,6 +516,16 @@ export default function cardsComponent() {
     cards.selectedCardHeight = function (value) {
         if (!arguments.length) { return selectedCardHeight; }
         selectedCardHeight = value;
+        return cards;
+    };
+    cards.sectionViewHeldCardWidth = function (value) {
+        if (!arguments.length) { return sectionViewHeldCardWidth; }
+        sectionViewHeldCardWidth = value;
+        return cards;
+    };
+    cards.sectionViewHeldCardHeight = function (value) {
+        if (!arguments.length) { return sectionViewHeldCardHeight; }
+        sectionViewHeldCardHeight = value;
         return cards;
     };
     cards.margin = function (value) {
@@ -566,6 +583,17 @@ export default function cardsComponent() {
             //deselect
         }
         selectedItemNr = value;
+        return cards;
+    };
+    cards.selectedSectionNr = function (value) {
+        if (!arguments.length) { return selectedSectionNr; }
+        selectedSectionNr = value;
+        Object.values(headerComponents).forEach(headerComponent => {
+            headerComponent.selectedSectionNr(value);
+        })
+        Object.values(itemsComponents).forEach(itemsComponent => {
+            itemsComponent.selectedSectionNr(value);
+        })
         return cards;
     };
     cards.format = function (value) {

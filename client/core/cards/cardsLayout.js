@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import { calcDateCount } from '../../util/TimeHelpers';
+import { isNumber } from '../../data/dataHelpers';
 
 const calcCardStatus = items => {
     if(items.filter(it => it.status !== 2).length === 0){ return 2; }
@@ -23,6 +24,8 @@ export default function cardsLayout(){
                     ...it, 
                     deckId,
                     cardNr, 
+                    //sectioning defaults to by itemNr
+                    sectionNr:isNumber(it.definedSectionNr) ? it.definedSectionNr : it.itemNr,
                     title:it.title || "" ,
                     key:`deck-${deckId}-card-${cardNr}-item-${it.itemNr}`
                 })),

@@ -22,10 +22,12 @@ export default function decksComponent() {
 
     let selectedDeckId = "";
     let longpressedDeckId = "";
+    let selectedSectionNr;
     let format;
     let form;
 
     let onSelectItem = function(){};
+    let onSelectSection = function(){};
     let onCreateDeck = function(){}
     let onClickDeck = function(){}
     let onSetLongpressedDeckId = function(){}
@@ -114,6 +116,7 @@ export default function decksComponent() {
                                 })
                                 .onSetSelectedCardNr(onSetSelectedCardNr)
                                 .onSelectItem(onSelectItem)
+                                .onSelectSection(onSelectSection)
                                 .onMoveDeck(onMoveDeck)
                                 .onDeleteDeck(onDeleteDeck)
                                 .onArchiveDeck(onArchiveDeck)
@@ -328,6 +331,15 @@ export default function decksComponent() {
         })
         return decks;
     };
+    decks.selectedSectionNr = function (value) {
+        if (!arguments.length) { return selectedSectionNr; }
+        Object.keys(deckComponents).forEach(deckId => {
+            //@todo - when sections can be selected by title/key, then it is possible not all decks will have 
+            //same sections, so need to store the deckId along with seciton selection, and allow multiple at once
+            deckComponents[deckId].selectedSectionNr(value);
+        })
+        return decks;
+    };
     decks.longpressedDeckId = function (value) {
         if (!arguments.length) { return longpressedDeckId; }
         longpressedDeckId = value;
@@ -363,6 +375,11 @@ export default function decksComponent() {
     decks.onSelectItem = function (value) {
         if (!arguments.length) { return onSelectItem; }
         onSelectItem = value;
+        return decks;
+    };
+    decks.onSelectSection = function (value) {
+        if (!arguments.length) { return onSelectSection; }
+        onSelectSection = value;
         return decks;
     };
     decks.setForm = function (value) {

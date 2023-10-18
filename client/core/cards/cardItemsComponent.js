@@ -1,7 +1,9 @@
 import * as d3 from 'd3';
 import { DIMNS, grey10, TRANSITIONS } from "./constants";
 import pentagonComponent from './pentagonComponent';
+import textComponent from './textComponent';
 import { isNumber } from '../../data/dataHelpers';
+import { fadeIn, remove } from '../journey/domHelpers';
 
 /*
 
@@ -25,13 +27,20 @@ export default function cardItemsComponent() {
     let innerRadius;
     let outerRadius;
 
+    let listItemWidth;
+    let listItemHeight;
+
     function updateDimns(){
-        margin = { left: width * 0.05, right:width * 0.05, top:height * 0.05, bottom:height * 0.05 }
+        margin = { 
+            left: width * 0.05, right:width * 0.05, 
+            top:height * (isNumber(selectedSectionNr) ? 0 : 0.05),
+            bottom:height * (isNumber(selectedSectionNr) ? 0.15 : 0.05)
+        }
         const availContentsWidth = width - margin.left - margin.right;
         const availContentsHeight = height - margin.top - margin.bottom;
         const actualContentsLength = d3.min([availContentsWidth, availContentsHeight]);
-        contentsWidth = actualContentsLength;
-        contentsHeight = actualContentsLength; 
+        contentsWidth = isNumber(selectedSectionNr) ? availContentsWidth : actualContentsLength;
+        contentsHeight = isNumber(selectedSectionNr) ? availContentsHeight : actualContentsLength; 
         extraHorizMargin = availContentsWidth - contentsWidth;
         extraVertMargin = availContentsHeight - contentsHeight;
 
@@ -44,6 +53,10 @@ export default function cardItemsComponent() {
         outerRadius = contentsWidth * 0.53;
         //we need to shift down by theis extra 0.03 of contentsWidth to centre it. 
         extraShiftDownForAngleDiscrepancy = contentsWidth * 0.03;
+
+        //list
+        listItemWidth = contentsWidth;
+        listItemHeight = contentsHeight;
     }
 
     let styles = {
@@ -57,6 +70,7 @@ export default function cardItemsComponent() {
     let proposedNewStatus;
     let statusTimer;
     let selectedItemNr;
+    let selectedSectionNr;
 
 ;    //API CALLBACKS
     let onSelectItem = function(){};
@@ -69,6 +83,8 @@ export default function cardItemsComponent() {
     //let onMouseout = function(){};
 
     const pentagon = pentagonComponent();
+    const itemTitle = textComponent()
+        .getText(it => it.title || "Enter Title...");
     /*
 
     */
@@ -80,7 +96,7 @@ export default function cardItemsComponent() {
 
         // expression elements
         selection.each(function (data, i) {
-            if(d3.select(this).select("g.centre").empty()){
+            if(d3.select(this).select("g.card-items-contents").empty()){
                 init.call(this);
             }
             //update
@@ -90,8 +106,8 @@ export default function cardItemsComponent() {
         function init(data){
             const contentsG = d3.select(this).append("g").attr("class", "card-items-contents");
             contentsG.append("rect").attr("class", "card-items-contents-bg")
-                .attr("fill", "none");
-            contentsG.append("g").attr("class", "centre");
+                .attr("fill", "none")
+                .attr("stroke", "none");
         }
 
         function update(data){
@@ -105,46 +121,99 @@ export default function cardItemsComponent() {
             contentsG.select("rect.card-items-contents-bg")
                 .attr("width", contentsWidth)
                 .attr("height", contentsHeight)
-                .attr("fill", "none")
 
-            let newStatus;
-            contentsG.select("g.centre")
-                .attr("transform", `translate(${contentsWidth/2},${contentsHeight/2 + extraShiftDownForAngleDiscrepancy})`)
-                .datum(data)
-                .call(pentagon
-                    .r1(innerRadius)
-                    .r2(outerRadius)
-                    .withSections(withSections)
-                    .withText(withText && !isNumber(selectedItemNr))
-                    .editable(editable)
-                    .styles(styles)
-                    .onClick(function(e,d){
-                        if(!editable){ return; }
-                        onSelectItem(d);
-                    })
-                    .onLongpressStart(function(e,d){
-                        if(!editable){ return; }
-                        //d3.select(this).raise();
-                        const changeStatus = (prevStatus) => {
-                            newStatus = (prevStatus + 1) % 3;
-                            const newD = { ...d, status: newStatus }
-                            //update stroke
+            const polygonCentreG = contentsG.selectAll("g.polygon-centre").data(contentsHeight < 40 ? [] : [1]);
+            polygonCentreG.enter()
+                .append("g")
+                    .attr("class", "polygon-centre")
+                    .call(fadeIn)
+                    .each(function(){
+                        const polygonCentreG = d3.select(this);
 
-                            d3.select(this).selectAll("line.visible")
-                                .attr("stroke-width", styles._lineStrokeWidth(newD))
-                                .attr("stroke", styles._lineStroke(newD))
-                        }
-                        changeStatus(d.status);
-                        statusTimer = d3.interval(() => {
-                            changeStatus(newStatus);
-                        }, 600)
                     })
-                    .onLongpressEnd(function(e,d){
-                        if(!editable){ return; }
-                        statusTimer.stop();
-                        onUpdateItemStatus(d.itemNr, newStatus);
+                    .merge(polygonCentreG)
+                    .each(function(){
+                        const polygonCentreG = d3.select(this);
+                        let newStatus;
+                        polygonCentreG
+                            .attr("transform", `translate(${contentsWidth/2},${contentsHeight/2 + extraShiftDownForAngleDiscrepancy})`)
+                            .datum(data)
+                            .call(pentagon
+                                .r1(innerRadius)
+                                .r2(outerRadius)
+                                .withSections(withSections)
+                                .withText(withText && !isNumber(selectedItemNr))
+                                .editable(editable)
+                                .styles(styles)
+                                .onClick(function(e,d){
+                                    if(!editable){ return; }
+                                    onSelectItem(d);
+                                })
+                                .onLongpressStart(function(e,d){
+                                    if(!editable){ return; }
+                                    //d3.select(this).raise();
+                                    const changeStatus = (prevStatus) => {
+                                        newStatus = (prevStatus + 1) % 3;
+                                        const newD = { ...d, status: newStatus }
+                                        //update stroke
+
+                                        d3.select(this).selectAll("line.visible")
+                                            .attr("stroke-width", styles._lineStrokeWidth(newD))
+                                            .attr("stroke", styles._lineStroke(newD))
+                                    }
+                                    changeStatus(d.status);
+                                    statusTimer = d3.interval(() => {
+                                        changeStatus(newStatus);
+                                    }, 600)
+                                })
+                                .onLongpressEnd(function(e,d){
+                                    if(!editable){ return; }
+                                    statusTimer.stop();
+                                    onUpdateItemStatus(d.itemNr, newStatus);
+                                })
+                                .onDrag(onDrag));
+                                    
                     })
-                    .onDrag(onDrag));
+
+            polygonCentreG.exit().call(remove, { transition:{ duration:TRANSITIONS.FAST }});
+
+            const listG = contentsG.selectAll("g.list").data(contentsHeight < 40 ? [1] : []);
+            listG.enter()
+                .append("g")
+                    .attr("class", "list")
+                    .call(fadeIn)
+                    .each(function(){
+                        const listG = d3.select(this);
+                    })
+                    .merge(listG)
+                    .each(function(){
+                        //need to decide whether to do enter-exit here or in textComp
+                        const listG = d3.select(this);
+                        const itemG = listG.selectAll("g.item").data(data, it => it.itemNr);
+                        itemG.enter()
+                            .append("g")
+                                .attr("class", "item")
+                                .merge(itemG)
+                                .attr("transform", (d,i) => `translate(0, ${i * listItemHeight})`)
+                                .call(itemTitle
+                                    .width(listItemWidth)
+                                    .height(listItemHeight)
+                                    .styles((d,i) => ({
+                                        text:{
+                                            opacity:d.title ? 1 : 0.5,
+                                            stroke:grey10(2),
+                                            strokeWidth:0.05,
+                                            fill:grey10(2),
+                                            fontMin:1,
+                                            fontMax:5,
+                                            fontSize:3
+                                        }
+                                    })))
+
+                        
+                    })
+
+            listG.exit().call(remove, { transition:{ duration:TRANSITIONS.FAST }});
         }
 
         return selection;
@@ -182,6 +251,12 @@ export default function cardItemsComponent() {
     cardItems.selectedItemNr = function (value) {
         if (!arguments.length) { return selectedItemNr; }
         selectedItemNr = value;
+        return cardItems;
+    };
+    cardItems.selectedSectionNr = function (value) {
+        if (!arguments.length) { return selectedSectionNr; }
+        selectedSectionNr = value;
+        pentagon.selectedSectionNr(value);
         return cardItems;
     };
     cardItems.editable = function (value) {
