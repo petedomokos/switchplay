@@ -289,7 +289,7 @@ export default function cardsComponent() {
                         //ITEMS
                         
                         //note - deckIsSelected && form is handled in Decks - it turns the entire container pointer-events on/off
-                        const cardIsEditable = ((isHeld && isFront) || isSelected);
+                        const cardIsEditable = isNumber(selectedSectionNr) || ((isHeld && isFront) || isSelected);
                         const items = itemsComponents[cardNr]
                             .styles({ 
                                 _lineStrokeWidth:lineD => {

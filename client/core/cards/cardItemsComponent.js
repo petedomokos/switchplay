@@ -195,8 +195,16 @@ export default function cardItemsComponent() {
                         itemG.enter()
                             .append("g")
                                 .attr("class", "item")
+                                .each(function(){ 
+                                    d3.select(this).append("rect").attr("fill", "transparent") 
+                                })
                                 .merge(itemG)
                                 .attr("transform", (d,i) => `translate(0, ${i * listItemHeight})`)
+                                .each(function(){
+                                    d3.select(this).select("rect")
+                                        .attr("width", listItemWidth)
+                                        .attr("height", listItemHeight)
+                                })
                                 .call(itemTitle
                                     .width(listItemWidth)
                                     .height(listItemHeight)
@@ -211,7 +219,12 @@ export default function cardItemsComponent() {
                                             fontMax:5,
                                             fontSize:3
                                         }
-                                    })))
+                                    }))
+                                )
+                                .on("click", function(e,d){
+                                    if(!editable){ return; }
+                                    onSelectItem(d);
+                                })
 
                         
                     })
