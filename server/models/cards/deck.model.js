@@ -6,6 +6,7 @@ export default new mongoose.Schema({
   owner:{type:mongoose.Schema.ObjectId, ref:'User'},
   admin:[{type:mongoose.Schema.ObjectId, ref:'User'}],
   player:{type:mongoose.Schema.ObjectId, ref:'User'},
+  purpose:[String],
   cards:String,
   frontCardNr:{ type: Number, default: 0 },
   isArchived:{ type: Boolean, default: false },

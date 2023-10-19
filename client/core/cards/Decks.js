@@ -9,6 +9,7 @@ import decksComponent from "./decksComponent";
 import ItemForm from "./forms/ItemForm";
 import DeckTitleForm from './forms/DeckTitleForm';
 import CardTitleForm from './forms/CardTitleForm';
+import PurposeParagraphForm from './forms/PurposeParagraphForm';
 import { sortAscending, moveElementPosition } from '../../util/ArrayHelpers';
 import { isNumber } from '../../data/dataHelpers';
 import { getPosition } from "../journey/domHelpers";
@@ -67,6 +68,7 @@ const enhancedZoom = dragEnhancements();
 //without it, each deckHeight is slighlty wrong
 const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSectionNr, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
   //processed props
+  //console.log("Decks", data)
   const stringifiedData = JSON.stringify({ data, table });
   //state
   const [layout, setLayout] = useState(() => deckLayout());
@@ -77,7 +79,6 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   const [selectedCardNr, setSelectedCardNr] = useState(customSelectedCardNr);
   const [selectedItemNr, setSelectedItemNr] = useState(customSelectedItemNr);
   const [longpressedDeckId, setLongpressedDeckId] = useState("");
-  //console.log("Decks longpressedDeckId", longpressedDeckId)
   const [form, setForm] = useState(null);
   //processed state
   const selectedDeck = data.find(deck => deck.id === selectedDeckId);
@@ -333,6 +334,17 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
         fontSize:12 * cardScale
       }
     }
+
+    if(formType === "purpose"){
+      const { formDimns } = value;
+      return {
+        width: formDimns.width * zoomScale,
+        height: formDimns.height * zoomScale,
+        left: formDimns.left * zoomScale + 7,
+        top: formDimns.top * zoomScale,
+        fontSize:formDimns.fontSize * zoomScale
+      }
+    }
   }, [form, selectedDeckId, stringifiedData]);
 
   const getCardTitle = useCallback((cardNr) => {
@@ -341,7 +353,6 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
 
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
-    //console.log("click bg---------------------------------------", longpressedDeckId)
     e.stopPropagation();
     //bg click shouldnt change anything else if its just clicking to comeo out a form
     if(form){  
@@ -370,10 +381,16 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
     updateDeck({ ...selectedDeck, title })
   }, [stringifiedData, form, selectedDeckId]);
 
+  const updatePurposeParagraph = useCallback((newPara, i) => {
+    const updatedPurpose = selectedDeck.purpose.map((para,j) => i === j ? newPara : para)
+    updateDeck({ ...selectedDeck, purpose:updatedPurpose })
+  }, [stringifiedData, form, selectedDeckId, selectedCardNr]);
+
   const updateCard = useCallback((updatedCard) => {
     const updatedCards = selectedDeck.cards.map(c => c.cardNr !== updatedCard.cardNr ? c : updatedCard);
     updateDeck({ ...selectedDeck, cards:updatedCards })
   }, [stringifiedData, selectedDeckId]);
+
 
   const updateCardTitle = useCallback(title => {
     //we need the card from state, not the d3 datum
@@ -604,6 +621,11 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
         }
         {form?.formType === "card-title" && 
           <CardTitleForm deck={selectedDeck} cardD={form.value} save={updateCardTitle} close={() => setForm(null)}
+            dimns={getFormDimns()} 
+          />
+        }
+        {form?.formType === "purpose" && 
+          <PurposeParagraphForm deck={selectedDeck} paraD={form.value} save={updatePurposeParagraph} close={() => setForm(null)}
             dimns={getFormDimns()} 
           />
         }

@@ -113,11 +113,9 @@ export default function decksComponent() {
                                 .form(form)
                                 .getCell(getCell)
                                 .onClickDeck(onClickDeck)
-                                .onClickProgressIcon(function(e,d){
-                                    e.stopPropagation();
-                                    deckContent = "purpose";
+                                .onSetContent(function(content){
+                                    deckContent = content;
                                     update(decksData);
-                                    //setForm(null);
                                 })
                                 .onSetLongpressed(isLongpressed => { 
                                     onSetLongpressedDeckId( isLongpressed ? d.id : "") 

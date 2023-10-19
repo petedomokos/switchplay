@@ -86,7 +86,8 @@ export default function cardItemsComponent() {
 
     const pentagon = pentagonComponent();
     const itemTitle = textComponent()
-        .getText(it => it.title || "Enter Title...");
+        .text(it => it.title)
+        .placeholder("Enter Title...");
     /*
 
     */
@@ -210,15 +211,13 @@ export default function cardItemsComponent() {
                                     .height(listItemHeight)
                                     .withAttachments(false)
                                     .styles((d,i) => ({
-                                        text:{
-                                            opacity:d.title ? 1 : 0.5,
-                                            stroke:grey10(2),
-                                            strokeWidth:0.05,
-                                            fill:grey10(2),
-                                            fontMin:1,
-                                            fontMax:5,
-                                            fontSize:3
-                                        }
+                                        opacity:d.title ? 1 : 0.5,
+                                        stroke:grey10(2),
+                                        strokeWidth:0.05,
+                                        fill:grey10(2),
+                                        fontMin:1,
+                                        fontMax:5,
+                                        fontSize:3
                                     }))
                                 )
                                 .on("click", function(e,d){

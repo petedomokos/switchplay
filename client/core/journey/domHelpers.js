@@ -14,7 +14,6 @@ export function fadeInOut(selection, shouldDisplay, options){
         if(shouldDisplay && displayValue === "none" && !isFadingIn){
             sel.call(fadeIn, options);
         }else if(!shouldDisplay && displayValue !== "none" && !isFadingOut){
-            console.log("fade out", options)
             sel.call(fadeOut, options);
         }
     })
@@ -22,14 +21,10 @@ export function fadeInOut(selection, shouldDisplay, options){
 
 
 const classMatches = (selection, classNameToTest) => {
-    //console.log("classNameToTest", classNameToTest)
-    //console.log("node", selection.node())
-    //console.log("class", selection.attr("class"))
     const classStr = selection.attr("class");
     if(!classStr){ return false; }
 
     const classNames = classStr.split(" ");
-    //console.log("classNames", classNames)
     return !!classNames.find(c => c === classNameToTest)
 }
 
@@ -158,7 +153,6 @@ export function fadeIn(selection, options={}){
                     .duration(transition?.duration || CONTENT_FADE_DURATION)
                     .attr("opacity", 1)
                     .on("end", function() { 
-                        //console.log("removed")
                         d3.select(this).classed("fading-in", false); 
                     });
         }

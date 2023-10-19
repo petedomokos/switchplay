@@ -23,7 +23,7 @@ export default function textComponent() {
     let contentsWidth;
     let contentsHeight;
 
-    let getText = d => typeof d === "string" ? d : (d.text || d.title || d.name);
+    let text = d => typeof d === "string" ? d : (d.text || d.title || d.name);
     let editable = true;
     let withAttachments = true;
     
@@ -33,8 +33,23 @@ export default function textComponent() {
     }
 
     let DEFAULT_STYLES = {
+        fill:grey10(9),
+        stroke:grey10(9),
+        strokeWidth:0.1,
+        opacity:1,
+        placeholderFill:grey10(8),
+        placeholderStroke:grey10(8),
+        placeholderStrokeWidth:0.05,
+        placeholderOpacity:0.7,
+        fontFamily:"arial",
+        fontStyle:"normal",
+        fontSize:12,
+        minFont:12,
+        maxFont:12
     }
     let _styles = () => DEFAULT_STYLES;
+
+    let placeholder = () => "";
 
     //API CALLBACKS
     let onClick = function(){};
@@ -50,7 +65,7 @@ export default function textComponent() {
     let enhancedDrag = dragEnhancements();
     let textboxes = {};
 
-    function text(selection, options={}) {
+    function myText(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true } = options;
         updateDimns();
         enhancedDrag
@@ -77,9 +92,7 @@ export default function textComponent() {
         function init(d, i){
             const contentsG = d3.select(this).append("g").attr("class", "contents");
             textboxes[i] = new TextBox()
-                .select(contentsG.node())
-                .verticalAlign("middle")
-                .overflow("visible");
+                .select(contentsG.node());
         }
 
         function update(d, i){
@@ -105,7 +118,8 @@ export default function textComponent() {
             */
 
             //bg
-            const contentsG = d3.select(this).select("g.contents");
+            const contentsG = d3.select(this).select("g.contents")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
             contentsG.select("rect")
                 .attr("width", contentsWidth)
                 .attr("height", contentsHeight)
@@ -113,23 +127,29 @@ export default function textComponent() {
             const textData = [{
                 "width": contentsWidth,
                 "height": textAreaMaxHeight,
-                "text": getText(d,i)
-                }];
+                "text": text(d,i) || placeholder(d,i)
+            }];
+
+            const placeholderUsed = !text(d,i);
                        
             //text
             textboxes[i]
                 .data(textData)
                 .maxLines(maxNrLines)
-                .fontSize(styles.text.fontSize)
-                .fontMin(styles.text.fontMin)
-                .fontMax(styles.text.fontMax)
+                .fontSize(styles.fontSize)
+                .fontMin(styles.fontMin)
+                .fontMax(styles.fontMax)
+                .fontFamily(styles.fontFamily)
+                .verticalAlign(styles.verticalAlign || "middle")
+                .overflow(styles.overflow || "visible")
                     .render();
 
             contentsG.selectAll("text")
-                .style("fill", styles.text.fill)
-                .style("stroke", styles.text.stroke)
-                .style("stroke-width", styles.text.strokeWidth)
-                .style("opacity", styles.text.opacity);          
+                .style("fill", placeholderUsed ? styles.placeholderFill : styles.fill)
+                .style("stroke", placeholderUsed ? styles.placeholderStroke : styles.stroke)
+                .style("stroke-width", placeholderUsed ? styles.placeholderStrokeWidth : styles.strokeWidth)
+                .style("opacity", placeholderUsed ? styles.placeholderOpacity : styles.opacity)
+                .style("font-style", styles.fontStyle)        
 
             //@todo - attachments
             //first we need to know how many lines of text there are so we can shoft attachments up if necc
@@ -211,69 +231,87 @@ export default function textComponent() {
     }
     
     //api
-    text.width = function (value) {
+    myText.width = function (value) {
         if (!arguments.length) { return width; }
         width = value;
-        return text;
+        return myText;
     };
-    text.height = function (value) {
+    myText.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
-        return text;
+        return myText;
     };
-    text.getText = function (func) {
-        if (!arguments.length) { return getText; }
-        getText = func;
-        return text;
+    myText.margin = function (value) {
+        if (!arguments.length) { return margin; }
+        margin = value;
+        return myText;
     };
-    text.editable = function (value) {
+    myText.text = function (value) {
+        if (!arguments.length) { return text; }
+        if(typeof value === "function"){
+            text = value;
+        }else{
+            text = () => value;
+        }
+        return myText;
+    };
+    myText.placeholder = function (value) {
+        if (!arguments.length) { return placeholder; }
+        if(typeof value === "function"){
+            placeholder = value;
+        }else{
+            placeholder = () => value;
+        }
+        return myText;
+    };
+    myText.editable = function (value) {
         if (!arguments.length) { return editable; }
         editable = value;
-        return text;
+        return myText;
     };
-    text.withAttachments = function (value) {
+    myText.withAttachments = function (value) {
         if (!arguments.length) { return withAttachments; }
         withAttachments = value;
-        return text;
+        return myText;
     };
-    text.styles = function (value) {
+    myText.styles = function (value) {
         if (!arguments.length) { return _styles; }
         if(typeof value === "function"){
             _styles = (d,i) => ({ ...DEFAULT_STYLES, ...value(d,i) });
         }else{
             _styles = (d,i) => ({ ...DEFAULT_STYLES, ...value });
         }
-        return text;
+        return myText;
     };
-    text.onClick = function (value) {
+    myText.onClick = function (value) {
         if (!arguments.length) { return onClick; }
         onClick = value;
-        return text;
+        return myText;
     };
-    text.onLongpressStart = function (value) {
+    myText.onLongpressStart = function (value) {
         if (!arguments.length) { return onLongpressStart; }
         onLongpressStart = value;
-        return text;
+        return myText;
     };
-    text.onLongpressEnd = function (value) {
+    myText.onLongpressEnd = function (value) {
         if (!arguments.length) { return onLongpressEnd; }
         onLongpressEnd = value;
-        return text;
+        return myText;
     };
-    text.onDragStart = function (value) {
+    myText.onDragStart = function (value) {
         if (!arguments.length) { return onDragStart; }
         onDragStart = value;
-        return text;
+        return myText;
     };
-    text.onDrag = function (value) {
+    myText.onDrag = function (value) {
         if (!arguments.length) { return onDrag; }
         onDrag = value;
-        return text;
+        return myText;
     };
-    text.onDragEnd = function (value) {
+    myText.onDragEnd = function (value) {
         if (!arguments.length) { return onDragEnd; }
         onDragEnd = value;
-        return text;
+        return myText;
     };
-    return text;
+    return myText;
 }

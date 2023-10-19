@@ -166,7 +166,9 @@ export default function headerComponent() {
                         .attr("transform", `translate(${contentsWidth - progressIconWidth}, 0)`)
                 
                 contentsG.select("rect.progress-icon-hitbox")
-                    .on("click", function(e){ onClickProgressIcon(e, data); })
+                    .on("click", function(e){ 
+                        e.stopPropagation();
+                        onClickProgressIcon(e, data); })
                     .transition("progress-icon-hitbox")
                     .duration(TRANSITIONS.MED)
                         .attr("width", progressIconWidth)

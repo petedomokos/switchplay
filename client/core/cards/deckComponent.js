@@ -3,6 +3,7 @@ import { grey10, COLOURS, DIMNS, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIO
 import cardsComponent from './cardsComponent';
 import headerComponent from './headerComponent';
 import contextMenuComponent from "./contextMenuComponent";
+import textComponent from './textComponent';
 import dragEnhancements from '../journey/enhancedDragHandler';
 import { updateRectDimns } from '../journey/transitionHelpers';
 import { getTransformationFromTrans } from '../journey/helpers';
@@ -11,6 +12,8 @@ import { maxDimns } from "../../util/geometryHelpers";
 import { angleFromNorth } from '../journey/screenGeometryHelpers';
 import { icons } from '../../util/icons';
 import { fadeIn, remove, getPosition, fadeInOut } from '../journey/domHelpers';
+import { TextBox } from 'd3plus-text';
+import { ContactSupportOutlined } from '@material-ui/icons';
 
 const magIconPath1D = "M39.94,44.142c-3.387,2.507 7.145,-8.263 4.148,-4.169c0.075,-0.006 -0.064,0.221 -0.53,0.79c0,0 8.004,7.95 11.933,11.996c1.364,1.475 -1.097,4.419 -2.769,2.882c-3.558,-3.452 -11.977,-12.031 -11.99,-12.045l-0.792,0.546Z"
 const magIconPath2D = "M28.179,48.162c5.15,-0.05 10.248,-2.183 13.914,-5.806c4.354,-4.303 6.596,-10.669 5.814,-16.747c-1.34,-10.415 -9.902,-17.483 -19.856,-17.483c-7.563,0 -14.913,4.731 -18.137,11.591c-2.468,5.252 -2.473,11.593 0,16.854c3.201,6.812 10.431,11.518 18.008,11.591c0.086,0 0.172,0 0.257,0Zm-0.236,-3.337c-7.691,-0.074 -14.867,-6.022 -16.294,-13.648c-1.006,-5.376 0.893,-11.194 4.849,-15.012c4.618,-4.459 11.877,-5.952 17.913,-3.425c5.4,2.261 9.442,7.511 10.187,13.295c0.638,4.958 -1.141,10.154 -4.637,13.733c-3.067,3.14 -7.368,5.014 -11.803,5.057c-0.072,0 -0.143,0 -0.215,0Z"
@@ -48,7 +51,6 @@ export default function deckComponent() {
     let placedCardsAreaHeight;
     let cardHeaderHeight;
 
-    //next - go through hw this space is done, as we want it reduced when small
     let vertSpaceForIncs;
 
     let heldCardWidth;
@@ -181,7 +183,7 @@ export default function deckComponent() {
 
     let onSelectItem = function(){};
     let onSelectSection = function(){};
-    let onClickProgressIcon = function(){};
+    let onSetContent = function(){};
     let onClickDeck = function(){};
     let onSetLongpressed = function(){};
     let onSetSelectedCardNr = function(){};
@@ -214,6 +216,7 @@ export default function deckComponent() {
     const cards = cardsComponent();
     const contextMenu = contextMenuComponent();
     const enhancedDrag = dragEnhancements();
+    const purposeTextComponents = {};
 
     function deck(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true } = options;
@@ -268,7 +271,7 @@ export default function deckComponent() {
                 contextMenuG = containerG.append("g")
                     .attr("class", "context-menu")
 
-                controlsG = contentsG.append("g").attr("class", "controls").attr("opacity", deckIsSelected ? 0 : 1)
+                controlsG = contentsG.append("g").attr("class", "controls");
                 controlsG.append("rect").attr("class", "controls-bg").attr("fill", COLOURS.DECK.CONTROLS)
             }
 
@@ -278,23 +281,114 @@ export default function deckComponent() {
 
                 cardsAreaG.call(fadeInOut, content === "cards" /*{ transition:{ duration: 1000 } }*/);
 
-                const purposeData = content === "purpose" ? [{ id, purpose }] : [];
-                const purposeG = contentsG.selectAll("g.purpose").data(purposeData)
+                const purposeWidth = contentsWidth;
+                const purposeHeight = contentsHeight - headerHeight;
+                const purposeMargin = {
+                    left: purposeWidth * 0.1, right:purposeWidth * 0.1,
+                    top:purposeHeight * 0.1, bottom:purposeHeight * 0.1
+                }
+                const purposeContentsWidth = purposeWidth - purposeMargin.left - purposeMargin.right;
+                const purposeContentsHeight = purposeHeight - purposeMargin.top - purposeMargin.bottom;
+
+                const paragraphWidth = purposeContentsWidth;
+                const paragraphHeight = purposeContentsHeight * 0.4;
+                const paragraphMargin = { left:0, right:0, top:paragraphHeight * 0.1, bottom:paragraphHeight * 0.1 }
+                const paragraphContentsWidth = paragraphWidth - paragraphMargin.left - paragraphMargin.right;
+                const paragraphContentsHeight = paragraphHeight - paragraphMargin.top - paragraphMargin.bottom;
+
+                const getPlaceholder = (d,i) => {
+                    if(i === 0){ return "I will achieve..." }
+                    if(i === 1){ return "I will do this by..." }
+                    return "";
+                }
+
+                const nrLines = purpose?.length || 0;
+                const paraFontSize = 6.5;
+                const paragraphs = nrLines > 1 ? purpose : (nrLines === 1 ? [...purpose, ""] : ["", ""]);
+                const paragraphsData = paragraphs
+                    .map((text,i) => ({ 
+                        text, 
+                        i,
+                        deckId:id,
+                        placeholder:getPlaceholder(text, i),
+                        formDimns:{
+                            //@todo - vert can calc this based ont he variable length of previous paragraphs
+                            width:paragraphContentsWidth,
+                            height:paragraphContentsHeight,
+                            left:margin.left + purposeMargin.left,
+                            //extra added on end - not sure why it is needed
+                            top:margin.top + headerHeight + purposeMargin.top 
+                                + i * paragraphHeight + paragraphMargin.top - (4 + i * 1.5),
+                            fontSize:paraFontSize
+                        }
+                    }))
+
+                const purposeG = contentsG.selectAll("g.purpose").data(content === "purpose" ? [1] : [])
+
                 purposeG.enter()
                     .append("g")
                         .attr("class", "purpose")
                         .call(fadeIn, { transition:{ delay:400 }})
-                        .each(function(){
-                            const purposeG = d3.select(this);
-                            purposeG.append("text")
-
-                        })
                         .merge(purposeG)
+                        .attr("transform", () => `translate(${purposeMargin.left}, ${headerHeight + purposeMargin.top})`)
                         .each(function(){
+                            
                             const purposeG = d3.select(this);
-                            purposeG.select("text")
-                                .attr("y", 50)
-                                .text("jkhsdkuf f hd fhdf dhf ahfs dshd sh jshiodh dhd dhsa dsdah sdhsd whd s faskf h")
+                            //enter-exit each paragraph
+                            const paragraphG = purposeG.selectAll("g.paragraph").data(paragraphsData);
+                            paragraphG.enter()
+                                .append("g")
+                                    .attr("class", "paragraph")
+                                    .each(function(d,i){
+                                        const paragraphG = d3.select(this);
+
+                                        paragraphG.append("rect").attr("class", "bg")
+                                            .attr("fill", "transparent");
+
+                                        purposeTextComponents[i] = textComponent()
+                                            .text(d => d.text);
+            
+                                    })
+                                    .merge(paragraphG)
+                                    .attr("transform", (d,i) => `translate(0, ${i * paragraphHeight})`)
+                                    .each(function(d,i){
+                                        const paragraphG = d3.select(this);
+                                        paragraphG.select("rect.bg")
+                                            .attr("width", paragraphWidth)
+                                            .attr("height", paragraphHeight)
+
+                                        paragraphG.call(purposeTextComponents[i]
+                                                .width(paragraphWidth)
+                                                .height(paragraphHeight)
+                                                .margin(paragraphMargin)
+                                                .withAttachments(false)
+                                                .placeholder(d.placeholder)
+                                                .styles((d,i) => ({
+                                                    verticalAlign:"top",
+                                                    opacity:1,
+                                                    fontFamily: "Avant Garde",
+                                                    fontStyle:"italic",
+                                                    stroke:grey10(2),
+                                                    strokeWidth:0.05,
+                                                    fill:grey10(3),
+                                                    fontMin:4,
+                                                    fontMax:10,
+                                                    fontSize:paraFontSize,
+                                                    placeholderFill:grey10(5),
+                                                    placeholderStroke:grey10(5),
+                                                    placeholderOpacity:0.5
+                                                }))
+                                            )
+                                    })
+                                    .on("click", function(e,d){
+                                        setForm({ formType:"purpose", value:d } )
+                                        e.stopPropagation();
+                                    })
+
+                            paragraphG.exit().call(remove);
+
+
+                           
 
                         })
 
@@ -520,7 +614,7 @@ export default function deckComponent() {
                             e.stopPropagation();
                             setForm({ formType: "deck-title" }) 
                         })
-                        .onClickProgressIcon(onClickProgressIcon))
+                        .onClickProgressIcon(() => onSetContent("purpose")))
 
                 //selected card dimns
                 const selectedCardDimns = maxDimns(cardsAreaWidth, cardsAreaHeight, cardAspectRatio)
@@ -660,9 +754,9 @@ export default function deckComponent() {
 
 
             //controls
-            const controlsData = deckIsSelected && !isNumber(selectedSectionNr) ? [
+            const controlsData = [
                 { key:"section-view" }
-            ] : [];
+            ];
 
             const btnWidth = 10;
             const btnHeight = 18;
@@ -683,11 +777,9 @@ export default function deckComponent() {
             const cardItemsAreaHeight = heldCardHeight - cardHeaderHeight;
             const yToCentre = controlsMarginVert - cardItemsAreaHeight/2 + btnHeight/2 + 1;
 
+            controlsG.call(fadeInOut, content === "cards" && deckIsSelected && !isNumber(selectedCardNr) && !isNumber(selectedSectionNr))
             controlsG
                 .attr("transform", `translate(${controlsOuterMarginLeft},${height - placedCardsAreaHeight - controlsHeight})`)
-                    .transition()
-                    .duration(TRANSITIONS.MED)
-                    .attr("opacity", deckIsSelected && !isNumber(selectedCardNr) ? 1 : 0)
 
 
             controlsG.select("rect.controls-bg")
@@ -846,11 +938,16 @@ export default function deckComponent() {
                 key:"close", 
                 onClick:e => { 
                     e.stopPropagation();
-                    onSelectSection() 
+                    if(isNumber(selectedSectionNr)){
+                        onSelectSection() 
+                    }else{
+                        onSetContent("cards");
+                    }
                 },
                 icon:icons.close,
             }
-            const cornerBtnData = isNumber(selectedSectionNr) && deckIsSelected ? [closeBtnDatum] : [];
+            const inSectionOrPurposeView = isNumber(selectedSectionNr) || content === "purpose";
+            const cornerBtnData =  deckIsSelected && inSectionOrPurposeView ? [closeBtnDatum] : [];
             const cornerBtnHeight = 20;
             const cornerBtnWidth = cornerBtnHeight;
             //assumme all are square
@@ -994,9 +1091,9 @@ export default function deckComponent() {
         return deck;
     };
     //functions
-    deck.onClickProgressIcon = function (value) {
-        if (!arguments.length) { return onClickProgressIcon; }
-        onClickProgressIcon = value;
+    deck.onSetContent = function (value) {
+        if (!arguments.length) { return onSetContent; }
+        onSetContent = value;
         return deck;
     };
     deck.onClickDeck = function (value) {

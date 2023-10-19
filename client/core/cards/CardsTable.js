@@ -186,7 +186,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
           :
           <Decks 
             table={table} setSel={setSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
-            data={decksData[0] ? [decksData[0]] : []} height={contentsHeight}
+            data={decksData} height={contentsHeight}
             tableMarginTop={tableMarginTop}
             onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} 
             updateTable={updateTable} updateDeck={updateDeck} />

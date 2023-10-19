@@ -18,13 +18,15 @@ export const transformTableForClient = serverTable => {
 }
 
 export const transformDeckForClient = serverDeck => {
-	//console.log("transformDeckForClient", serverDeck)
-	const { created, updated, cards, ...clientDeck } = serverDeck;
+	const { created, updated, cards, purpose=[], ...clientDeck } = serverDeck;
+	//ensure prupose has at least two paragraphs
+	const hydratedPurpose = purpose.length === 0 ? ["",""] : purpose.length === 1 ? [purpose[0], ""] : purpose;
 	return {
 		...clientDeck,
 		created:new Date(created),
 		updated:updated ? new Date(updated) : null,
 		id:serverDeck._id,
+		purpose:hydratedPurpose,
 		cards:JSON.parse(cards).map(c => ({
 			...c,
 			date:new Date(c.date),
