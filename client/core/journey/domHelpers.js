@@ -5,6 +5,21 @@ import { getTransformationFromTrans } from './helpers';
 const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
 const AUTO_SCROLL_DURATION = TRANSITIONS.KPIS.AUTO_SCROLL.DURATION;
 
+export function fadeInOut(selection, shouldDisplay, options){
+    selection.each(function(){
+        const sel = d3.select(this);
+        const displayValue = sel.attr("display");
+        const isFadingIn = sel.attr("class").includes("fading-in");
+        const isFadingOut = sel.attr("class").includes("fading-in");
+        if(shouldDisplay && displayValue === "none" && !isFadingIn){
+            sel.call(fadeIn, options);
+        }else if(!shouldDisplay && displayValue !== "none" && !isFadingOut){
+            console.log("fade out", options)
+            sel.call(fadeOut, options);
+        }
+    })
+}
+
 
 const classMatches = (selection, classNameToTest) => {
     //console.log("classNameToTest", classNameToTest)
@@ -132,8 +147,11 @@ export function fadeIn(selection, options={}){
     selection.each(function(){
         //will be multiple exits because of the delay in removing
         if(!d3.select(this).attr("class").includes("fading-in")){
+            const currDisplayValue = d3.select(this).attr("display");
             d3.select(this)
                 .attr("opacity", d3.select(this).attr("opacity") || 0)
+                //remove any none setting of display so it will fade in
+                .attr("display", currDisplayValue === "none" ? null : currDisplayValue)
                 .classed("fading-in", true)
                 .transition()
                     .delay(transition?.delay || 0)
@@ -142,6 +160,27 @@ export function fadeIn(selection, options={}){
                     .on("end", function() { 
                         //console.log("removed")
                         d3.select(this).classed("fading-in", false); 
+                    });
+        }
+    })
+}
+
+export function fadeOut(selection, options={}){
+    const { transition } = options;
+    selection.each(function(){
+        //will be multiple exits because of the delay in removing
+        if(!d3.select(this).attr("class").includes("fading-out")){
+            d3.select(this)
+                .attr("opacity", d3.select(this).attr("opacity") || 1)
+                .classed("fading-out", true)
+                .transition("fade-out")
+                    .delay(transition?.delay || 0)
+                    .duration(transition?.duration || CONTENT_FADE_DURATION)
+                    .attr("opacity", 0)
+                    .on("end", function() { 
+                        d3.select(this)
+                            .attr("display", "none")
+                            .classed("fading-out", false); 
                     });
         }
     })

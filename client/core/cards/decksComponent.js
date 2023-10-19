@@ -23,7 +23,8 @@ export default function decksComponent() {
     let selectedDeckId = "";
     let longpressedDeckId = "";
     let selectedSectionNr;
-    let format;
+    let displayFormat = "list";
+    let deckContent = "cards";
     let form;
 
     let onSelectItem = function(){};
@@ -108,9 +109,16 @@ export default function decksComponent() {
                                 .width(deckWidth)
                                 .height(deckHeight)
                                 .deckIsSelected(selectedDeckId === d.id)
+                                .content(deckContent)
                                 .form(form)
                                 .getCell(getCell)
                                 .onClickDeck(onClickDeck)
+                                .onClickProgressIcon(function(e,d){
+                                    e.stopPropagation();
+                                    deckContent = "purpose";
+                                    update(decksData);
+                                    //setForm(null);
+                                })
                                 .onSetLongpressed(isLongpressed => { 
                                     onSetLongpressedDeckId( isLongpressed ? d.id : "") 
                                 })
@@ -347,9 +355,9 @@ export default function decksComponent() {
         Object.values(deckComponents).forEach(deck => deck.longpressedDeckId(value))
         return decks;
     };
-    decks.format = function (value) {
-        if (!arguments.length) { return format; }
-        format = value;
+    decks.displayFormat = function (value) {
+        if (!arguments.length) { return displayFormat; }
+        displayFormat = value;
         return decks;
     };
     decks.form = function (value) {

@@ -10,7 +10,7 @@ import { isNumber } from '../../data/dataHelpers';
 import { maxDimns } from "../../util/geometryHelpers";
 import { angleFromNorth } from '../journey/screenGeometryHelpers';
 import { icons } from '../../util/icons';
-import { fadeIn, remove, getPosition } from '../journey/domHelpers';
+import { fadeIn, remove, getPosition, fadeInOut } from '../journey/domHelpers';
 
 const magIconPath1D = "M39.94,44.142c-3.387,2.507 7.145,-8.263 4.148,-4.169c0.075,-0.006 -0.064,0.221 -0.53,0.79c0,0 8.004,7.95 11.933,11.996c1.364,1.475 -1.097,4.419 -2.769,2.882c-3.558,-3.452 -11.977,-12.031 -11.99,-12.045l-0.792,0.546Z"
 const magIconPath2D = "M28.179,48.162c5.15,-0.05 10.248,-2.183 13.914,-5.806c4.354,-4.303 6.596,-10.669 5.814,-16.747c-1.34,-10.415 -9.902,-17.483 -19.856,-17.483c-7.563,0 -14.913,4.731 -18.137,11.591c-2.468,5.252 -2.473,11.593 0,16.854c3.201,6.812 10.431,11.518 18.008,11.591c0.086,0 0.172,0 0.257,0Zm-0.236,-3.337c-7.691,-0.074 -14.867,-6.022 -16.294,-13.648c-1.006,-5.376 0.893,-11.194 4.849,-15.012c4.618,-4.459 11.877,-5.952 17.913,-3.425c5.4,2.261 9.442,7.511 10.187,13.295c0.638,4.958 -1.141,10.154 -4.637,13.733c-3.067,3.14 -7.368,5.014 -11.803,5.057c-0.072,0 -0.143,0 -0.215,0Z"
@@ -162,6 +162,7 @@ export default function deckComponent() {
     let selectedCardNr;
     let selectedItemNr;
     let selectedSectionNr;
+    let content = "cards"; //can be "purpose"
     let format;
     let form;
     let transformTransition;
@@ -180,6 +181,7 @@ export default function deckComponent() {
 
     let onSelectItem = function(){};
     let onSelectSection = function(){};
+    let onClickProgressIcon = function(){};
     let onClickDeck = function(){};
     let onSetLongpressed = function(){};
     let onSetSelectedCardNr = function(){};
@@ -272,7 +274,31 @@ export default function deckComponent() {
 
             function update(_deckData, options={}){
                 const { } = options;
-                const { id, frontCardNr, listPos, colNr, rowNr } = _deckData;
+                const { id, frontCardNr, listPos, colNr, rowNr, purpose } = _deckData;
+
+                cardsAreaG.call(fadeInOut, content === "cards" /*{ transition:{ duration: 1000 } }*/);
+
+                const purposeData = content === "purpose" ? [{ id, purpose }] : [];
+                const purposeG = contentsG.selectAll("g.purpose").data(purposeData)
+                purposeG.enter()
+                    .append("g")
+                        .attr("class", "purpose")
+                        .call(fadeIn, { transition:{ delay:400 }})
+                        .each(function(){
+                            const purposeG = d3.select(this);
+                            purposeG.append("text")
+
+                        })
+                        .merge(purposeG)
+                        .each(function(){
+                            const purposeG = d3.select(this);
+                            purposeG.select("text")
+                                .attr("y", 50)
+                                .text("jkhsdkuf f hd fhdf dhf ahfs dshd sh jshiodh dhd dhsa dsdah sdhsd whd s faskf h")
+
+                        })
+
+                purposeG.exit().call(remove)
 
                 //dimns for specific chart
                 const cardsData = _deckData.cards
@@ -494,7 +520,7 @@ export default function deckComponent() {
                             e.stopPropagation();
                             setForm({ formType: "deck-title" }) 
                         })
-                        .onClickProgressIcon(onClickDeck))
+                        .onClickProgressIcon(onClickProgressIcon))
 
                 //selected card dimns
                 const selectedCardDimns = maxDimns(cardsAreaWidth, cardsAreaHeight, cardAspectRatio)
@@ -549,7 +575,6 @@ export default function deckComponent() {
                     //update(deckData);
                     //onSetSelectedCardNr("");
                 }
-
 
                 cardsAreaG
                     .attr("transform", `translate(0, ${headerHeight})`)
@@ -933,6 +958,11 @@ export default function deckComponent() {
         cards.selectedSectionNr(value);
         return deck;
     };
+    deck.content = function (value) {
+        if (!arguments.length) { return content; }
+        content = value;
+        return deck;
+    };
     deck.format = function (value) {
         if (!arguments.length) { return format; }
         format = value;
@@ -964,6 +994,11 @@ export default function deckComponent() {
         return deck;
     };
     //functions
+    deck.onClickProgressIcon = function (value) {
+        if (!arguments.length) { return onClickProgressIcon; }
+        onClickProgressIcon = value;
+        return deck;
+    };
     deck.onClickDeck = function (value) {
         if (!arguments.length) { return onClickDeck; }
         onClickDeck = value;
