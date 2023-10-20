@@ -153,7 +153,7 @@ export default function cardItemsComponent() {
                                     onSelectItem(d);
                                 })
                                 .onLongpressStart(function(e,d){
-                                    if(!editable){ return; }
+                                    //if(!editable || !d.title){ return; }
                                     //d3.select(this).raise();
                                     const changeStatus = (prevStatus) => {
                                         newStatus = (prevStatus + 1) % 3;
@@ -170,7 +170,7 @@ export default function cardItemsComponent() {
                                     }, 600)
                                 })
                                 .onLongpressEnd(function(e,d){
-                                    if(!editable){ return; }
+                                    //if(!editable || !d.title){ return; }
                                     statusTimer.stop();
                                     onUpdateItemStatus(d.itemNr, newStatus);
                                 })

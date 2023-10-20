@@ -108,6 +108,7 @@ export default function cardsComponent() {
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
         updateDimns();
         selection.each(function (data) {
+            console.log("data", data)
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
@@ -287,7 +288,6 @@ export default function cardsComponent() {
                                     .attr("opacity", (isHeld || isSelected) ? 1 : 0);
 
                         //ITEMS
-                        
                         //note - deckIsSelected && form is handled in Decks - it turns the entire container pointer-events on/off
                         const cardIsEditable = isNumber(selectedSectionNr) || ((isHeld && isFront) || isSelected);
                         const items = itemsComponents[cardNr]
@@ -307,6 +307,9 @@ export default function cardsComponent() {
                                     
                                 },
                                 _lineStroke:(lineD,i) => {
+                                    //deal with non-defined items separately, incase a user deletes title of an item
+                                    if(!lineD.title) { return isHeld || isSelected ? "#989898" : grey10(6)}
+
                                     if(isHeld || isSelected){
                                         return lineD.status === 2 ? GOLD : (lineD.status === 1 ? grey10(2) : "#989898")
                                     }
