@@ -339,6 +339,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
       const width = +cardTitleG.select("rect").attr("width") 
       const height = +cardTitleG.select("rect").attr("height")
       const cardToTitlePos = getPosition(cardTitleG, "card");
+      alert(`cardScale ${cardScale}`)
 
       return {
         width:width * zoomScale * cardScale,
