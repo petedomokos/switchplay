@@ -70,8 +70,14 @@ export default function deckComponent() {
     let vertCardInc;
     let horizCardInc;
 
+    let selectedCardWidth;
+    let selectedCardHeight;
+
     let sectionViewHeldCardWidth;
     let sectionViewHeldCardHeight;
+
+    let cardX;
+    let cardY;
 
     function updateDimns(data){
         contentsWidth = width - margin.left - margin.right;
@@ -152,6 +158,52 @@ export default function deckComponent() {
         //note - for now, its 1 item per card per section
         sectionViewHeldCardWidth = heldCardWidth;
         sectionViewHeldCardHeight = heldCardsAreaHeight / data.cards.length;
+
+        //selected card dimns
+        const selectedCardDimns = maxDimns(cardsAreaWidth, cardsAreaHeight, cardAspectRatio)
+        selectedCardWidth = selectedCardDimns.width;
+        selectedCardHeight = selectedCardDimns.height;
+
+        //cardX and Y
+        cardX = (d,i) => {
+            if(isNumber(selectedSectionNr) && d.isHeld){
+                const gapForHorizIncs = contentsWidth - sectionViewHeldCardWidth;
+                const horizInc = gapForHorizIncs / 4;
+                return (4 - i) * horizInc;
+            }
+            if(d.isSelected){
+                //keep it centred
+                return (cardsAreaWidth - selectedCardWidth)/2;
+            }
+            if(d.isHeld){
+                return extraMarginLeftForCards + horizCardInc(d.handPos);
+            }
+            return extraMarginLeftForCards + d.cardNr * (placedCardWidth + placedCardHorizGap);
+        }
+
+        cardY = (d,i) => {
+            if(isNumber(selectedSectionNr) && d.isHeld){
+                return i * sectionViewHeldCardHeight;
+            }
+            if(d.isSelected){
+                return (cardsAreaHeight - selectedCardHeight)/2;
+            }
+            
+            if(d.isHeld){
+                //extra shift up in multiview to create a pseudo margin between decks
+                //const vertShiftUpForMultiview = heldCardsAreaHeight * 0.25; 
+                //in multideck view, not all the incr space is taken up
+                const totalVertIncs = vertSpaceForIncs;// deckIsSelected ? vertSpaceForIncs : vertCardInc(4);
+                const extraMarginTop = (heldCardsAreaHeight - heldCardHeight - totalVertIncs)/2;
+                //return extraMarginTop + totalVertIncs - vertCardInc(d.handPos) 
+                return extraMarginTop + totalVertIncs - vertCardInc(d.handPos) 
+                    // - (deckIsSelected ? 0 : vertShiftUpForMultiview)
+            }
+
+            //extra shift up in multiview to create a pseudo margin between decks
+            const vertShiftUpForMultiview = heldCardsAreaHeight * 0.15; 
+            return heldCardsAreaHeight + placedCardMarginVert //- (deckIsSelected ? 0 : vertShiftUpForMultiview);
+        }
     }
     let DEFAULT_STYLES = {
         deck:{ info:{ date:{ fontSize:9 } } },
@@ -311,18 +363,18 @@ export default function deckComponent() {
                         i,
                         deckId:id,
                         placeholder:getPlaceholder(text, i),
-                        formDimns:{
-                            //@todo - vert can calc this based ont he variable length of previous paragraphs
-                            width:paragraphContentsWidth,
-                            height:paragraphContentsHeight,
-                            left:margin.left + purposeMargin.left,
-                            //extra added on end - not sure why it is needed
-                            top:margin.top + headerHeight + purposeMargin.top 
-                                + i * paragraphHeight + paragraphMargin.top - (4 + i * 1.5),
-                            fontSize:paraFontSize
-                        }
                     }))
-
+                const getPurposeFormDimns = i => ({
+                    //@todo - vert can calc this based ont he variable length of previous paragraphs
+                    width:paragraphContentsWidth,
+                    height:paragraphContentsHeight,
+                    left:margin.left + purposeMargin.left,
+                    //extra added on end - not sure why it is needed
+                    top:margin.top + headerHeight + purposeMargin.top 
+                        + i * paragraphHeight + paragraphMargin.top - (4 + i * 1.5),
+                    fontSize:paraFontSize
+                })
+        
                 const purposeG = contentsG.selectAll("g.purpose").data(content === "purpose" ? [1] : [])
 
                 purposeG.enter()
@@ -381,7 +433,7 @@ export default function deckComponent() {
                                             )
                                     })
                                     .on("click", function(e,d){
-                                        setForm({ formType:"purpose", value:d } )
+                                        setForm({ formType:"purpose", value:d, formDimns:getPurposeFormDimns(d.i) } )
                                         e.stopPropagation();
                                     })
 
@@ -618,11 +670,6 @@ export default function deckComponent() {
                         })
                         .onClickProgressIcon(() => onSetContent("purpose")))
 
-                //selected card dimns
-                const selectedCardDimns = maxDimns(cardsAreaWidth, cardsAreaHeight, cardAspectRatio)
-                const selectedCardWidth = selectedCardDimns.width;
-                const selectedCardHeight = selectedCardDimns.height;
-
                 selectCard = function(cardNr){
                     //hide/show others
                     //@todo - this can be part of update process instead
@@ -688,47 +735,21 @@ export default function deckComponent() {
                         .deckIsSelected(deckIsSelected)
                         .form(form)
                         .transformTransition(transformTransition)
-                        .x((d,i) => {
-                            if(isNumber(selectedSectionNr) && d.isHeld){
-                                const gapForHorizIncs = contentsWidth - sectionViewHeldCardWidth;
-                                const horizInc = gapForHorizIncs / 4;
-                                return (4 - i) * horizInc;
-                            }
-                            if(d.isSelected){
-                                //keep it centred
-                                return (cardsAreaWidth - selectedCardWidth)/2;
-                            }
-                            if(d.isHeld){
-                                return extraMarginLeftForCards + horizCardInc(d.handPos);
-                            }
-                            return extraMarginLeftForCards + d.cardNr * (placedCardWidth + placedCardHorizGap);
-                        })
-                        .y((d,i) => {
-                            if(isNumber(selectedSectionNr) && d.isHeld){
-                                return i * sectionViewHeldCardHeight;
-                            }
-                            if(d.isSelected){
-                                return (cardsAreaHeight - selectedCardHeight)/2;
-                            }
-                            
-                            if(d.isHeld){
-                                //extra shift up in multiview to create a pseudo margin between decks
-                                //const vertShiftUpForMultiview = heldCardsAreaHeight * 0.25; 
-                                //in multideck view, not all the incr space is taken up
-                                const totalVertIncs = vertSpaceForIncs;// deckIsSelected ? vertSpaceForIncs : vertCardInc(4);
-                                const extraMarginTop = (heldCardsAreaHeight - heldCardHeight - totalVertIncs)/2;
-                                //return extraMarginTop + totalVertIncs - vertCardInc(d.handPos) 
-                                return extraMarginTop + totalVertIncs - vertCardInc(d.handPos) 
-                                   // - (deckIsSelected ? 0 : vertShiftUpForMultiview)
-                            }
-
-                            //extra shift up in multiview to create a pseudo margin between decks
-                            const vertShiftUpForMultiview = heldCardsAreaHeight * 0.15; 
-                            return heldCardsAreaHeight + placedCardMarginVert //- (deckIsSelected ? 0 : vertShiftUpForMultiview);
-                        })
+                        .x(cardX)
+                        .y(cardY)
                         .onSelectItem(onSelectItem)
-                        .onClickCardTitle(cardD => {
-                            setForm({ formType: "card-title", value:cardD }) 
+                        .onClickCardTitle((cardD, i, cardDimns) => {
+                            setForm({ 
+                                formType: "card-title", 
+                                value:cardD, 
+                                formDimns:{
+                                    ...cardDimns,
+                                    left:margin.left + cardX(cardD, i) + cardDimns.left,
+                                    top:margin.top + headerHeight + cardY(cardD, i) + cardDimns.top,
+                                    //todo - scale for selected card
+
+                                }
+                            }) 
                         })
                         .onUpdateItemStatus(updateItemStatus)
                         .onClickCard(function(e, d){

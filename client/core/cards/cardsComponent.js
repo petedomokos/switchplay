@@ -16,7 +16,7 @@ export default function cardsComponent() {
     // dimensions
     let heldCardWidth = 300;
     let heldCardHeight = 600;
-    let margin = { left:3, right: 3, top:2.5, bottom:2.5 }
+    let margin = { left:3, right: 3, top:0, bottom:0}//2.5 }
     let contentsWidth;
     let contentsHeight;
     //non-section view dimns
@@ -270,11 +270,14 @@ export default function cardsComponent() {
                                 //console.log("header click ->")
                                 onClickCard(e, cardD); 
                             })
-                            .onClickTitle(function(e){
-                                console.log("card title click...")
-                                alert("card title click")
-                                e.stopPropagation(); 
-                                onClickCardTitle(cardD) 
+                            .onClickTitle(function(d, headerDimns){
+                                //alert("card title click")
+                                const dimns = {
+                                    ...headerDimns,
+                                    left:margin.left + headerDimns.left,
+                                    top:margin.top + headerDimns.top
+                                }
+                                onClickCardTitle(cardD, i, dimns);
                             })
                         
                         const headerDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr };

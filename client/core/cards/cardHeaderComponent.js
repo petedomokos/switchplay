@@ -67,7 +67,7 @@ export default function cardHeaderComponent() {
         titleMargin = {
             //left:titleWidth * 0.4, right:titleWidth * 0.4, top: infoItemsMarginValue, bottom: infoItemsMarginValue
             left: infoItemsMarginValue, right:infoItemsMarginValue, 
-            top:infoItemsMarginValue, bottom:infoItemsMarginValue 
+            top:0, bottom:0, //infoItemsMarginValue, bottom:infoItemsMarginValue 
         };
         titleContentsWidth = titleWidth - titleMargin.left - titleMargin.right;
         titleContentsHeight = titleHeight - titleMargin.top - titleMargin.bottom;
@@ -164,6 +164,7 @@ export default function cardHeaderComponent() {
 
                                     contentsG.append("rect")
                                         .attr("class", "hitbox")
+                                        .attr("opacity", 0.2)
                                         .attr("fill", "transparent")
                                         .attr("stroke", "none");
                                     
@@ -189,7 +190,17 @@ export default function cardHeaderComponent() {
                                         .attr("width", titleContentsWidth)
                                         .attr("height", titleContentsHeight)
                                 })
-                                .on("click", onClickTitle)
+                                .on("click", (e,d) => {
+                                    alert("title clicked")
+                                    const formDimns = {
+                                        left:margin.left + dateWidth + titleMargin.left,
+                                        top:margin.top + titleMargin.top,
+                                        width:titleContentsWidth,
+                                        height:titleContentsHeight
+                                    }
+                                    onClickTitle(d, formDimns)
+                                    e.stopPropagation();
+                                })
 
                         //TITLE
                         const progressSummaryData = isNumber(selectedSectionNr) ? [] : [data];

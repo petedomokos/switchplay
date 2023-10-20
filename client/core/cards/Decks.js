@@ -312,7 +312,8 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   }, []);
 
   const getFormDimns = useCallback(() => {
-    const { formType, value } = form;
+    const { formType, value, formDimns } = form;
+
     if(formType === "deck-title"){
       return {
         width:selectedDeckDimns.width - (DIMNS.DECK.PROGRESS_ICON_WIDTH * zoomScale) - deckFormMarginLeft,
@@ -324,6 +325,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
       }
     }
     if(formType === "card-title"){
+  
       //select the correct deck and card
       const cardG = d3.select(containerRef.current)
         .selectAll("g.deck").filter(deckD => deckD.id === selectedDeckId)
@@ -334,22 +336,23 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
       const deckToCardPos = getPosition(cardG, "deck")
       const cardScale = getTransformationFromTrans(cardG.attr("transform")).scaleX;
       const cardTitleG = cardG.select("g.card-header").select("g.title-contents");
-      const width = +cardTitleG.select("rect").attr("width") * zoomScale * cardScale
-      const height = +cardTitleG.select("rect").attr("height") * zoomScale * cardScale
+      const width = +cardTitleG.select("rect").attr("width") 
+      const height = +cardTitleG.select("rect").attr("height")
       const cardToTitlePos = getPosition(cardTitleG, "card");
 
       return {
-        width,
-        height,
-        left:(deckToCardPos.x * zoomScale) + (cardToTitlePos.x * zoomScale * cardScale)
-          + extraHozShiftToCentreWhenSelected,
-        top:(deckToCardPos.y * zoomScale) + (cardToTitlePos.y * zoomScale * cardScale),
+        width:width * zoomScale * cardScale,
+        height:height * zoomScale * cardScale,
+        //alternative optin is to used the dimsn that have been passed through
+        //left:formDimns.left * zoomScale,
+        //top:formDimns.top * zoomScale * 0.95,
+        left:(deckToCardPos.x * zoomScale) + (cardToTitlePos.x * zoomScale * cardScale),
+        top:(deckToCardPos.y * zoomScale * 0.95) + (cardToTitlePos.y * zoomScale * cardScale),
         fontSize:12 * cardScale
       }
     }
 
     if(formType === "purpose"){
-      const { formDimns } = value;
       return {
         width: formDimns.width * zoomScale,
         height: formDimns.height * zoomScale,
