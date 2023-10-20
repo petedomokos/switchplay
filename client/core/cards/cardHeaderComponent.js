@@ -59,6 +59,7 @@ export default function cardHeaderComponent() {
             left: infoItemsMarginValue, right:infoItemsMarginValue, 
             top:infoItemsMarginValue, bottom:infoItemsMarginValue 
         };
+
         progressSummaryContentsWidth = progressSummaryWidth - progressSummaryMargin.left - progressSummaryMargin.right;
         progressSummaryContentsHeight = progressSummaryHeight - progressSummaryMargin.top - progressSummaryMargin.bottom;
 
@@ -66,7 +67,7 @@ export default function cardHeaderComponent() {
         titleWidth = contentsWidth - dateWidth - progressSummaryWidth;
         titleMargin = {
             //left:titleWidth * 0.4, right:titleWidth * 0.4, top: infoItemsMarginValue, bottom: infoItemsMarginValue
-            left: infoItemsMarginValue, right:infoItemsMarginValue, 
+            left: infoItemsMarginValue * 3, right:infoItemsMarginValue * 3, 
             top:0, bottom:0, //infoItemsMarginValue, bottom:infoItemsMarginValue 
         };
         titleContentsWidth = titleWidth - titleMargin.left - titleMargin.right;
@@ -191,7 +192,7 @@ export default function cardHeaderComponent() {
                                         .attr("height", titleContentsHeight)
                                 })
                                 .on("click", (e,d) => {
-                                    alert("title clicked")
+                                    //alert("title clicked")
                                     const formDimns = {
                                         left:margin.left + dateWidth + titleMargin.left,
                                         top:margin.top + titleMargin.top,
