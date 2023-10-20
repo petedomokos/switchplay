@@ -108,7 +108,6 @@ export default function cardsComponent() {
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
         updateDimns();
         selection.each(function (data) {
-            console.log("data", data)
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
             enhancedDrag
@@ -272,7 +271,8 @@ export default function cardsComponent() {
                                 onClickCard(e, cardD); 
                             })
                             .onClickTitle(function(e){
-                                //console.log("card title click ->")
+                                console.log("card title click...")
+                                alert("card title click")
                                 e.stopPropagation(); 
                                 onClickCardTitle(cardD) 
                             })
