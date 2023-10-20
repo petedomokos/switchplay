@@ -196,7 +196,8 @@ export const updateTable = (table, shouldPersist=true, shouldUpdateStore=true) =
 export const createDeck = (settings, tableId) => dispatch => {
 	const jwt = auth.isAuthenticated();
 	//@todo - move this to server
-	const deck = initDeck(jwt.user._id, settings);
+
+	const deck = settings?.copy || initDeck(jwt.user._id, settings);
 	const serverDeck = transformDeckForServer(deck);
 	const requestBody = { deck:serverDeck, tableId }
 	fetchThenDispatch(dispatch, 

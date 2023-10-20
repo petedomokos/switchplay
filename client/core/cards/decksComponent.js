@@ -36,6 +36,7 @@ export default function decksComponent() {
     let onMoveDeck = function(){};
     let onDeleteDeck = function(){};
     let onArchiveDeck = function(){};
+    let onCopyDeck = function(){};
     let updateItemStatus = function(){};
     let updateFrontCardNr = function(){};
     let setForm = function(){};
@@ -126,6 +127,7 @@ export default function decksComponent() {
                                 .onMoveDeck(onMoveDeck)
                                 .onDeleteDeck(onDeleteDeck)
                                 .onArchiveDeck(onArchiveDeck)
+                                .onCopyDeck(onCopyDeck)
                                 .updateItemStatus(updateItemStatus)
                                 .updateFrontCardNr(updateFrontCardNr)
                                 .transformTransition(transformTransition)
@@ -426,6 +428,11 @@ export default function decksComponent() {
     decks.onArchiveDeck = function (value) {
         if (!arguments.length) { return onArchiveDeck; }
         onArchiveDeck = value;
+        return decks;
+    };
+    decks.onCopyDeck = function (value) {
+        if (!arguments.length) { return onCopyDeck; }
+        onCopyDeck = value;
         return decks;
     };
     decks.startLongpress = function (deckId) { startLongpress(deckId); };

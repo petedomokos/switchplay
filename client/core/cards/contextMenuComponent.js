@@ -7,25 +7,19 @@ export default function contextMenuComponent() {
     // dimensions
     let width;
     let height;
-    let margin = { left: 10, right: 10, top: 10, bottom: 10 };
+    let menuMargin = { left: 10, right: 10, top: 10, bottom: 10 };
     let contentsWidth;
     let contentsHeight;
 
     let itemWidth = 40;
     let itemHeight = 40;
-    let itemMargin;
-    let itemContentsWidth;
-    let itemContentsHeight;
+    let itemGap = 15;
 
     function updateDimns(data){
-        const contentsWidth = data.length * itemWidth;
+        const contentsWidth = data.length * itemWidth +(data.length - 1) * itemGap;
         const contentsHeight = itemHeight;
-        width = contentsWidth + margin.left + margin.right;
-        height = contentsHeight + margin.top + margin.bottom;
-
-        itemMargin = { left: itemWidth * 0.2, right:itemWidth * 0.2, top:itemHeight * 0.1, bottom:itemHeight * 0.1 };
-        itemContentsWidth = itemWidth - itemMargin.left - itemMargin.right;
-        itemContentsHeight = itemHeight - itemMargin.top - itemMargin.bottom;
+        width = contentsWidth + menuMargin.left + menuMargin.right;
+        height = contentsHeight + menuMargin.top + menuMargin.bottom;
     }
 
     let DEFAULT_STYLES = {
@@ -84,7 +78,7 @@ export default function contextMenuComponent() {
                     })*/
 
                 //contents
-                contentsG.attr("transform", `translate(${margin.left}, ${margin.top})`)
+                contentsG.attr("transform", `translate(${menuMargin.left}, ${menuMargin.top})`)
 
                 //items
                 //todo next - enter-update for data - each has a rect and text for now (icon tomorrow), and do onClick
@@ -97,22 +91,32 @@ export default function contextMenuComponent() {
                                 .attr("class", "item-contents")
 
                             itemContentsG.append("rect")
-                                //.attr("stroke", "white")
+                                .attr("stroke", "none")
                                 .attr("fill", "transparent")
 
                             //append img
+                            let x, y, k;
+                            if(d.key === "copy"){
+                                x = -3;
+                                y = 6;
+                                k = 0.5;
+                            }else{
+                                x = -8;
+                                y = 0;
+                                k= 0.55;
+                            }
                             itemContentsG.append("image")
-                                .attr("transform", `translate(-8,0) scale(0.5)`); //imgs are 80 x 80
+                                .attr("transform", `translate(${x},${y}) scale(${k})`); //imgs are 80 x 80
 
                         })
                         .merge(itemG)
-                        .attr("transform", (d,i) => `translate(${i * itemWidth}, 0)`)
+                        .attr("transform", (d,i) => `translate(${i * (itemWidth + itemGap)}, 0)`)
                         .each(function(d,i){
-                            const itemContentsG = d3.select(this).select("g.item-contents")
-                                .attr("transform", `translate(${itemMargin.left}, ${itemMargin.top})`);
+                            //@todo - add text desc word under each icon on hover? (or just have an undo button appear prominently)
+                            const itemContentsG = d3.select(this).select("g.item-contents");
                             itemContentsG.select("rect")
-                                .attr("width", itemContentsWidth)
-                                .attr("height", itemContentsHeight);
+                                .attr("width", itemWidth)
+                                .attr("height", itemHeight);
 
                             itemContentsG.select("image")
                                 .attr("xlink:href", d.url)
@@ -140,9 +144,14 @@ export default function contextMenuComponent() {
         itemHeight = value;
         return contextMenu;
     };
-    contextMenu.margin = function (value) {
-        if (!arguments.length) { return margin; }
-        margin = value;
+    contextMenu.itemGap = function (value) {
+        if (!arguments.length) { return itemGap; }
+        itemGap = value;
+        return contextMenu;
+    };
+    contextMenu.menuMargin = function (value) {
+        if (!arguments.length) { return menuMargin; }
+        menuMargin = value;
         return contextMenu;
     };
     contextMenu.styles = function (value) {

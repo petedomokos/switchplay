@@ -187,7 +187,7 @@ const createDeck = async (req, res) => {
     const result = await user.save()
     //console.log("saved1")
     const newDeckId = result.decks[result.decks.length - 1]._id;
-    //console.log("newDeckId", newDeckId)
+    console.log("newDeckId", newDeckId)
 
     //note - mapping doesnt change table.decks to the new version
     user.tables.forEach(t => {

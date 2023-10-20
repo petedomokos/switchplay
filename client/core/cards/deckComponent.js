@@ -17,11 +17,14 @@ import { ContactSupportOutlined } from '@material-ui/icons';
 
 const magIconPath1D = "M39.94,44.142c-3.387,2.507 7.145,-8.263 4.148,-4.169c0.075,-0.006 -0.064,0.221 -0.53,0.79c0,0 8.004,7.95 11.933,11.996c1.364,1.475 -1.097,4.419 -2.769,2.882c-3.558,-3.452 -11.977,-12.031 -11.99,-12.045l-0.792,0.546Z"
 const magIconPath2D = "M28.179,48.162c5.15,-0.05 10.248,-2.183 13.914,-5.806c4.354,-4.303 6.596,-10.669 5.814,-16.747c-1.34,-10.415 -9.902,-17.483 -19.856,-17.483c-7.563,0 -14.913,4.731 -18.137,11.591c-2.468,5.252 -2.473,11.593 0,16.854c3.201,6.812 10.431,11.518 18.008,11.591c0.086,0 0.172,0 0.257,0Zm-0.236,-3.337c-7.691,-0.074 -14.867,-6.022 -16.294,-13.648c-1.006,-5.376 0.893,-11.194 4.849,-15.012c4.618,-4.459 11.877,-5.952 17.913,-3.425c5.4,2.261 9.442,7.511 10.187,13.295c0.638,4.958 -1.141,10.154 -4.637,13.733c-3.067,3.14 -7.368,5.014 -11.803,5.057c-0.072,0 -0.143,0 -0.215,0Z"
+const CONTEXT_MENU_ITEM_WIDTH = 30;
 const CONTEXT_MENU_ITEM_HEIGHT = 50;
-const CONTEXT_MENU_GAP = 10;
+const CONTEXT_MENU_ITEM_GAP = 15;
+
 const contextMenuData = [ 
     { key:"delete", url:"/delete.png" }, 
-    { key:"archive", url:"/archive.png" } 
+    { key:"archive", url:"/archive.png" },
+    { key:"copy", url:"/copy.png" }
 ]
 
 export default function deckComponent() {
@@ -35,8 +38,6 @@ export default function deckComponent() {
 
     let contentsWidth;
     let contentsHeight;
-
-    let contextMenuWidth;
 
     let headerWidth;
     let headerHeight;
@@ -75,8 +76,6 @@ export default function deckComponent() {
     function updateDimns(data){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
-
-        contextMenuWidth = contentsWidth;
 
         headerWidth = contentsWidth;
         headerHeight = DIMNS.DECK.HEADER_HEIGHT;
@@ -190,6 +189,7 @@ export default function deckComponent() {
     let onMoveDeck = function(){};
     let onDeleteDeck = function(){};
     let onArchiveDeck = function(){};
+    let onCopyDeck = function(){};
     let setForm = function(){};
     let updateItemStatus = function(){};
     let updateFrontCardNr = function(){};
@@ -425,29 +425,31 @@ export default function deckComponent() {
 
                 //contextMenu
                 //note - hoz and vert margins are not the same proportion of total
+
                 const menuMargin = {
-                    left: contextMenuWidth * 0.1, right:contextMenuWidth * 0.1,
+                    left: CONTEXT_MENU_ITEM_WIDTH * 0.4, right:CONTEXT_MENU_ITEM_WIDTH * 0.4,
                     top:CONTEXT_MENU_ITEM_HEIGHT * 0.1, bottom: CONTEXT_MENU_ITEM_HEIGHT * 0.1
                 }
+    
                 const nrItems = contextMenuData.length;
-                const menuItemWidth = (contextMenuWidth - menuMargin.left - menuMargin.right)/nrItems;
+                const contextMenuWidth = nrItems * CONTEXT_MENU_ITEM_WIDTH + (nrItems - 1) * CONTEXT_MENU_ITEM_GAP + menuMargin.left + menuMargin.right;
                 const contextMenuHeight = CONTEXT_MENU_ITEM_HEIGHT + menuMargin.top + menuMargin.bottom;
+    
+                
+                const gapBetweenDeckAndMenu = rowNr === 0 ? -10 : 10;
                 contextMenuG
-                    .attr("transform", `translate(${(width - contextMenuWidth)/2},${-contextMenuHeight - CONTEXT_MENU_GAP})`)
+                    .attr("transform", `translate(${(width - contextMenuWidth)/2},${-contextMenuHeight - gapBetweenDeckAndMenu})`)
                 
                 contextMenu
-                    .itemWidth(menuItemWidth)
+                    .itemWidth(CONTEXT_MENU_ITEM_WIDTH)
                     .itemHeight(CONTEXT_MENU_ITEM_HEIGHT)
-                    .margin(menuMargin)
+                    .itemGap(CONTEXT_MENU_ITEM_GAP)
+                    .menuMargin(menuMargin)
                     .onClick((e,d) => {
-                        if(d.key === "delete"){
-                            onDeleteDeck(id);
-                            cleanupLongpress();
-                        }
-                        if(d.key === "archive"){
-                            onArchiveDeck(id);
-                            cleanupLongpress();
-                        }
+                        if(d.key === "delete"){ onDeleteDeck(id); }
+                        if(d.key === "archive"){ onArchiveDeck(id); }
+                        if(d.key === "copy"){ onCopyDeck(id); }
+                        cleanupLongpress();
                         e.stopPropagation();
                     })
 
@@ -1114,6 +1116,11 @@ export default function deckComponent() {
     deck.onArchiveDeck = function (value) {
         if (!arguments.length) { return onArchiveDeck; }
         onArchiveDeck = value;
+        return deck;
+    };
+    deck.onCopyDeck = function (value) {
+        if (!arguments.length) { return onCopyDeck; }
+        onCopyDeck = value;
         return deck;
     };
     deck.onSetLongpressed = function (value) {

@@ -207,6 +207,19 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
     })
   }, [stringifiedData]); 
 
+  const onCopyDeck = useCallback(id => {
+    const deckToCopy = data.find(d => d.id === id);
+    const newDeck = { 
+      ...deckToCopy,
+      title:deckToCopy.title ? `${deckToCopy.title} (Copy)` : `${deckToCopy.id} (Copy)`,
+      created: new Date() 
+    };
+    delete newDeck.id;
+    delete newDeck._id;
+    //delete id and _id
+    onCreateDeck({ copy:newDeck });
+  }, [stringifiedData]);
+
   const setSelectedDeck = useCallback((id) => {
     const deck = data.find(d => d.id === id);
     if(deck){
@@ -465,6 +478,7 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
       .onMoveDeck(moveDeck)
       .onDeleteDeck(onDeleteDeck)
       .onArchiveDeck(archiveDeck)
+      .onCopyDeck(onCopyDeck)
       .zoom(zoom)
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
