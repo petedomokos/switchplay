@@ -79,7 +79,7 @@ const embellishedDecks = (decks, nrCols=DEFAULT_NR_COLS) => decks
 
 const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, screen, createTable, updateTable, createDeck, updateDeck, deleteDeck }) => {
   const { tables=[], decks=[] } = user;
-  //console.log("CardsTable...tables", tables)
+  console.log("CardsTable...tables", tables)
 
   //@todo - move creating flag to asyncProcesses
   const [creatingTable, setCreatingTable] = useState(false);

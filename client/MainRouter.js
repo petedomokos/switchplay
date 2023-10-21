@@ -19,9 +19,7 @@ import Profile from './core/profile/Profile'
 import auth from './auth/auth-helper'
 import ImportDataContainer from './data/ImportDataContainer'
 import VisualsContainer from './visuals/VisualsContainer'
-import CardsTableContainer from './core/cards/CardsTableContainer'
 import './assets/styles/main.css'
-// import JourneyContainer from './core/journey/JourneyContainer'
 
 const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
   //console.log("MainRouter", userId)
@@ -81,6 +79,8 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
  //we dont use?: because we if there is a loading delay for User, we dont want display to revert to NonUserHome 
  //todo - find a graceful way of handling this potential issue
  // <Route exact path="/" render={() => <UserHomeContainer screen={screen} />} />
+ console.log("MR", jwt)
+ //took exact away from UserHome path
   return (
     <div>
       <MenuContainer />
@@ -88,12 +88,11 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
       <Route path="/signin" component={SigninContainer}/>
       <Switch>
           <Route path="/profile" component={Profile}/>
-          <Route path="/cards" component={CardsTableContainer}/>
           <Route path="/visuals" component={VisualsContainer} />
           <PrivateRoute path="/import" component={ImportDataContainer} />
           <PrivateRoute path="/datasets/new" component={CreateDatasetContainer}/>
           {jwt ?
-            <Route exact path="/" component={UserHomeContainer} />
+            <Route path="/" component={UserHomeContainer} />
             :
             <>
               {/**<div>

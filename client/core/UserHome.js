@@ -8,7 +8,8 @@ import UserProfile from '../user/UserProfile'
 import UsersContainer from '../user/containers/UsersContainer'
 import GroupsContainer from '../group/containers/GroupsContainer'
 import DatasetsContainer from '../dataset/containers/DatasetsContainer'
-import JourneyContainer from "./journey/JourneyContainer"
+import JourneyContainer from "./journey/JourneyContainer";
+import CardsTableContainer from './cards/CardsTableContainer';
 import C from "../Constants"
 
 const { URL_BAR_HEIGHT } = C;
@@ -73,12 +74,14 @@ const UserHome = ({screen, user, loading, loadingError}) => {
     {label:"Add datapoint", to:"/datapoints/new"}
   ]
 
+  console.log("UserHome")
   return (
     <div className={classes.root}>
       {user._id && 
         <>
           <div className={classes.fullScreen}>
             <Switch>
+              <Route path="/cards" component={CardsTableContainer}/>
               <Route path="/" component={JourneyContainer} />
             </Switch>
           </div>
