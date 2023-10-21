@@ -25,6 +25,7 @@ export default function decksComponent() {
     let selectedSectionNr;
     let displayFormat = "list";
     let deckContent = "cards";
+    let cardsAreFlipped = false;
     let form;
 
     let onSelectItem = function(){};
@@ -111,9 +112,14 @@ export default function decksComponent() {
                                 .height(deckHeight)
                                 .deckIsSelected(selectedDeckId === d.id)
                                 .content(deckContent)
+                                .cardsAreFlipped(cardsAreFlipped)
                                 .form(form)
                                 .getCell(getCell)
                                 .onClickDeck(onClickDeck)
+                                .onFlipCards(() => {
+                                    cardsAreFlipped = !cardsAreFlipped;
+                                    update(decksData)
+                                })
                                 .onSetContent(function(content){
                                     deckContent = content;
                                     update(decksData);

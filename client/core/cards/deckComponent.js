@@ -217,6 +217,7 @@ export default function deckComponent() {
     let selectedSectionNr;
     let content = "cards"; //can be "purpose"
     let format;
+    let cardsAreFlipped = false;
     let form;
     let transformTransition;
     let longpressedDeckId;
@@ -232,6 +233,7 @@ export default function deckComponent() {
     //data 
     let id;
 
+    let onFlipCards = function(){};
     let onSelectItem = function(){};
     let onSelectSection = function(){};
     let onSetContent = function(){};
@@ -733,6 +735,7 @@ export default function deckComponent() {
                         .sectionViewHeldCardWidth(sectionViewHeldCardWidth)
                         .sectionViewHeldCardHeight(sectionViewHeldCardHeight)
                         .deckIsSelected(deckIsSelected)
+                        .cardsAreFlipped(cardsAreFlipped)
                         .form(form)
                         .transformTransition(transformTransition)
                         .x(cardX)
@@ -795,14 +798,15 @@ export default function deckComponent() {
             
             const spaceAvailableOnLeftOfCards = (width - heldCardWidth)/2;
             const controlsOuterMarginLeft = (spaceAvailableOnLeftOfCards - controlsWidth)/2;
+            const controlsOuterMarginBottom = controlsOuterMarginLeft;
 
             const xToCentre = -controlsOuterMarginLeft + (width - btnWidth)/2;//+ deckToCentrePos.x   // -controlsOuterMarginLeft + (width - btnWidth)/2;
             const cardItemsAreaHeight = heldCardHeight - cardHeaderHeight;
-            const yToCentre = controlsMarginVert - cardItemsAreaHeight/2 + btnHeight/2 + 1;
+            const yToCentre = controlsOuterMarginBottom + controlsMarginVert - placedCardsAreaHeight - cardItemsAreaHeight/2 + btnHeight/2 + 1;
 
             controlsG.call(fadeInOut, content === "cards" && deckIsSelected && !isNumber(selectedCardNr) && !isNumber(selectedSectionNr))
             controlsG
-                .attr("transform", `translate(${controlsOuterMarginLeft},${height - placedCardsAreaHeight - controlsHeight})`)
+                .attr("transform", `translate(${controlsOuterMarginLeft},${height - controlsOuterMarginBottom - controlsHeight})`)
 
 
             controlsG.select("rect.controls-bg")
@@ -957,7 +961,7 @@ export default function deckComponent() {
             btnG.exit().remove();
 
             //deck botright btn
-             const closeBtnDatum = { 
+            const closeBtnDatum = { 
                 key:"close", 
                 onClick:e => { 
                     e.stopPropagation();
@@ -967,10 +971,22 @@ export default function deckComponent() {
                         onSetContent("cards");
                     }
                 },
+                fill:grey10(3),
                 icon:icons.close,
             }
+
+            const flipBtnDatum = { 
+                key:"flip", 
+                onClick:e => { 
+                    e.stopPropagation();
+                    onFlipCards();
+                },
+                fill:grey10(5),
+                icon:icons.flip,
+            }
+
             const inSectionOrPurposeView = isNumber(selectedSectionNr) || content === "purpose";
-            const cornerBtnData =  deckIsSelected && inSectionOrPurposeView ? [closeBtnDatum] : [];
+            let cornerBtnData = !deckIsSelected ? [] : (inSectionOrPurposeView ? [closeBtnDatum] : [flipBtnDatum]);
             const cornerBtnHeight = 20;
             const cornerBtnWidth = cornerBtnHeight;
             //assumme all are square
@@ -986,8 +1002,7 @@ export default function deckComponent() {
                     .call(fadeIn)
                     .each(function(d){
                         const btnG = d3.select(this);
-                        btnG.append("path")
-                            .attr("fill", grey10(5));
+                        btnG.append("path");
 
                         btnG.append("rect").attr("class", "btn-hitbox")
                             .attr("fill", "transparent")
@@ -1004,7 +1019,7 @@ export default function deckComponent() {
                         btnG.select("path")
                             .attr("transform", `scale(${scale(d)})`)
                             .attr("d", d.icon.d)
-                            .attr("fill", grey10(3))
+                            .attr("fill", d.fill)
                 
                         btnG.select("rect.btn-hitbox")
                             .attr("width", cornerBtnContentsWidth)
@@ -1083,6 +1098,11 @@ export default function deckComponent() {
         content = value;
         return deck;
     };
+    deck.cardsAreFlipped = function (value) {
+        if (!arguments.length) { return cardsAreFlipped; }
+        cardsAreFlipped = value;
+        return deck;
+    };
     deck.format = function (value) {
         if (!arguments.length) { return format; }
         format = value;
@@ -1114,6 +1134,11 @@ export default function deckComponent() {
         return deck;
     };
     //functions
+    deck.onFlipCards = function (value) {
+        if (!arguments.length) { return onFlipCards; }
+        onFlipCards = value;
+        return deck;
+    };
     deck.onSetContent = function (value) {
         if (!arguments.length) { return onSetContent; }
         onSetContent = value;

@@ -3,7 +3,7 @@ import { DIMNS, grey10, COLOURS, TRANSITIONS } from "./constants";
 import dragEnhancements from '../journey/enhancedDragHandler';
 import cardHeaderComponent from './cardHeaderComponent';
 import cardItemsComponent from './cardItemsComponent';
-import { fadeIn, remove } from '../journey/domHelpers';
+import { fadeIn, fadeInOut, remove } from '../journey/domHelpers';
 import { updateTransform } from '../journey/transitionHelpers';
 import { icons } from '../../util/icons';
 import { isNumber } from '../../data/dataHelpers';
@@ -16,7 +16,7 @@ export default function cardsComponent() {
     // dimensions
     let heldCardWidth = 300;
     let heldCardHeight = 600;
-    let margin = { left:3, right: 3, top:0, bottom:0}//2.5 }
+    let margin = { left:3, right: 3, top:2.5, bottom:2.5 }
     let contentsWidth;
     let contentsHeight;
     //non-section view dimns
@@ -64,6 +64,7 @@ export default function cardsComponent() {
     //state
     let deckIsSelected;
     let format = "actual";
+    let cardsAreFlipped = false;
     let form;
     let selectedCardNr;
     let selectedItemNr;
@@ -121,14 +122,6 @@ export default function cardsComponent() {
                 .on("drag", enhancedDrag(dragged))
                 .on("end", enhancedDrag(dragEnd))
 
-            const getCardFill = d => { 
-                const { isSelected, isFront, isNext, isSecondNext, status } = d;
-                if(isFront || isSelected){ return grey10(3); }
-                if(isNext){ return grey10(5); }
-                if(isSecondNext){ return "#989898"; }
-                return (d.isHeld ? grey10(6) : grey10(8))
-            };
-
             const getProgressStatusFill = d => { 
                 const { isSelected, isFront, isNext, isSecondNext, info } = d;
                 const { status } = info;
@@ -173,6 +166,7 @@ export default function cardsComponent() {
 
                         //ENTER
                         const contentsG = d3.select(this).append("g").attr("class", "contents card-contents")
+                        const backContentsG = d3.select(this).append("g").attr("class", "contents card-back-contents")
 
                         contentsG
                             .append("rect")
@@ -189,6 +183,15 @@ export default function cardsComponent() {
                                     onClickCard.call(this, e, d)
                                     e.stopPropagation();
                                 })
+
+                        backContentsG
+                            .append("rect")
+                                .attr("class", "card-back-bg")
+                                .attr("rx", 3)
+                                .attr("ry", 3)
+                                .attr("width", isHeld ? contentsWidth : normalContentsWidth)
+                                .attr("height", isHeld ? contentsHeight : normalContentsHeight)
+                                .attr("fill", "aqua");
                         
                         contentsG
                             .append("g")
@@ -229,7 +232,12 @@ export default function cardsComponent() {
                     .each(function(cardD,i){
                         const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status } = cardD; 
                         const contentsG = d3.select(this).select("g.card-contents")
-                            .attr("transform", `translate(${margin.left},${margin.top})`);
+                            .attr("transform", `translate(${margin.left},${margin.top})`)
+                            .call(fadeInOut, !cardsAreFlipped);
+
+                        const backContentsG = d3.select(this).select("g.card-back-contents")
+                            .attr("transform", `translate(${margin.left},${margin.top})`)
+                            .call(fadeInOut, cardsAreFlipped);
 
                         
                         //bg colour
@@ -242,6 +250,13 @@ export default function cardsComponent() {
 
                         contentsG.select("rect.card-bg")
                             .transition("card-bg-dimns")
+                            //.delay(200)
+                            .duration(TRANSITIONS.MED)
+                                .attr("width", isHeld ? contentsWidth : normalContentsWidth)
+                                .attr("height", isHeld ? contentsHeight : normalContentsHeight);
+    
+                        backContentsG.select("rect.card-back-bg")
+                            .transition("card-back-bg-dimns")
                             //.delay(200)
                             .duration(TRANSITIONS.MED)
                                 .attr("width", isHeld ? contentsWidth : normalContentsWidth)
@@ -614,6 +629,11 @@ export default function cardsComponent() {
     cards.format = function (value) {
         if (!arguments.length) { return format; }
         format = value;
+        return cards;
+    };
+    cards.cardsAreFlipped = function (value) {
+        if (!arguments.length) { return cardsAreFlipped; }
+        cardsAreFlipped = value;
         return cards;
     };
     cards.transformTransition = function (value) {
