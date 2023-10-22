@@ -11,6 +11,7 @@ import IconComponent from './IconComponent';
 import Instructions from "./Instructions"
 import Decks from './Decks';
 import { grey10, TRANSITIONS, COLOURS } from './constants';
+import { withLoader } from '../../util/HOCs';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -77,18 +78,16 @@ const embellishedDecks = (decks, nrCols=DEFAULT_NR_COLS) => decks
   listPos:i
 }))
 
-const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, screen, createTable, updateTable, createDeck, updateDeck, deleteDeck }) => {
+const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, deleteDeck }) => {
   const { tables=[], decks=[] } = user;
-  console.log("CardsTable...tables", tables)
+  //console.log("CardsTable...jData")
 
   //@todo - move creating flag to asyncProcesses
   const [creatingTable, setCreatingTable] = useState(false);
   //for now, we just assume its the first table
-  //console.log("CardsTable", user._id, creatingTable, user.tables)
   useEffect(() => {
     if(user._id && tables.length === 0 && !creatingTable){
       setCreatingTable(true);
-      //console.log("call createTable..................")
       createTable();
       return;
     }
@@ -100,7 +99,6 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
 
   const table = tables[0];
   const tableDecks = table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
-  //console.log("tableDecks", tableDecks.map(d => d.id))
 
   const width = screen.width || 300;
   const height = screen.height || 600;
@@ -186,7 +184,8 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, asyncProcesses, scre
           :
           <Decks 
             table={table} setSel={setSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
-            data={decksData} height={contentsHeight}
+            data={decksData[0] ? [decksData[0]] : []} height={contentsHeight}
+            journeyData={journeyData}
             tableMarginTop={tableMarginTop}
             onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} 
             updateTable={updateTable} updateDeck={updateDeck} />
@@ -203,4 +202,5 @@ CardsTable.defaultProps = {
   screen: {}
 }
 
-export default CardsTable;
+//export default CardsTable;
+export default withLoader(CardsTable, ["allDatasetsFullyLoaded"] )

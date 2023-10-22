@@ -66,7 +66,7 @@ export default function progressBarComponent() {
             const boundsFontMultiplier = 1;
             //end tooltips - these will all be the same
             const endTooltipAspectRatio = 1;
-            const extraSpaceBeforeTooltips = status === "closed" && kpiD.milestoneId !== "current" ? 10 : 0;
+            const extraSpaceBeforeTooltips = nrEndTooltips !== 0 && status === "closed" && kpiD.milestoneId !== "current" ? 10 : 0;
             //width is based on height, because height must be same as contentsHeight
             const endTooltipsHeight = status === "closed" ? contentsHeight : 0;
 
@@ -98,7 +98,7 @@ export default function progressBarComponent() {
             const numberWidth = contentsWidth * 0.2;
             const numbersContentsWidth = nrNumberCols * numberWidth;
             const numbersMargin = { 
-                left: numbersContentsWidth * 0.1, 
+                left: 0,//numbersContentsWidth * 0.1, 
                 right:0, 
                 top:numbersMarginVert, 
                 bottom:numbersMarginVert, 
@@ -360,7 +360,6 @@ export default function progressBarComponent() {
     function progressBar(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log} = options;
         updateDimns(selection.data());
-        //console.log("progbar data", selection.data())
 
         selection
             .call(background()
@@ -368,7 +367,7 @@ export default function progressBarComponent() {
                 .height((d,i) => dimns[i].height)
                 .styles((d, i) => ({
                     stroke:"none",
-                    fill:_styles(d).bg?.fill || "transparent"
+                    fill:"none"//_styles(d).bg?.fill || "transparent"
                 }))
             )
             .call(container("progress-bar-contents")
@@ -380,8 +379,9 @@ export default function progressBarComponent() {
                 .width((d,i) => dimns[i].contentsWidth)
                 .height((d,i) => dimns[i].contentsHeight)
                 .styles((d, i) => ({
-                    stroke:"none",
-                    fill:_styles(d).bg?.fill || "transparent"
+                    //stroke:"black",//"none",
+                    //strokeWidth:0.05,
+                    fill:"none"//_styles(d).bg?.fill || "transparent"
                 }))
             )
             .call(container("bar")
@@ -463,6 +463,7 @@ export default function progressBarComponent() {
 
         let totalValueDelta = 0;
         selection.select("g.tooltips")
+            .attr("display", "none")
             .data(enrichedTooltipsData)
             .call(tooltips
                 .width((d,i) => dimns[i].contentsWidth)

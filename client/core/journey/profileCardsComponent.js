@@ -7,7 +7,7 @@ import kpisComponent from './kpis/kpisComponent';
 import goalComponent from './goal/goalComponent';
 import { Oscillator } from './domHelpers';
 import { getTransformationFromTrans } from './helpers';
-import { AllOutSharp } from '@material-ui/icons';
+
 const noop = () => {};
 
 const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;

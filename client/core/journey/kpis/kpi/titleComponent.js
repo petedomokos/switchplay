@@ -85,26 +85,35 @@ export default function titleComponent() {
                 .transform((d, i) => `translate(${_margin(d,i).left}, ${_margin(d,i).top})`)
                 .enter(function(d,i){
                     const styles = _styles(d, i);
+                    const { contentsWidth, contentsHeight }= getDimns(d, i);
+                    
+                    d3.select(this)
+                        .append("rect")
+                            .attr("class", "title-bg")
+                            
+
                     const contentsG = d3.select(this);
 
                     contentsG
                         .append("rect")
-                            .attr("class", "title-bg")
-                            .attr("stroke", "black")
-                            .attr("fill", "white");
+                            .attr("class", "title-contents-bg")
+                            .attr("fill", "none")
+                            //.attr("stroke", "black")
+                            //.attr("stroke-width", 0.05);
 
                     //for now, just have one bg rect for the whole title
                     contentsG
                         .append("g")
                             .attr("class", "name")
                                 .append("text")
-                                    .attr("font-size", styles.primaryTitle.fontSize) //init
+                                    .attr("font-size", contentsHeight * 0.9)
+                                    //.attr("font-size", styles.primaryTitle.fontSize) //init
                                     .style("font-family", styles.primaryTitle.fontFamily)
 
                 })
                 .update(function(d,i){
                     const styles = _styles(d, i);
-                    const { contentsWidth, contentsHeight }= getDimns(d, i);
+                    const { width, height, contentsWidth, contentsHeight }= getDimns(d, i);
 
                     enhancedDrag
                         .onClick(onNameClick)
@@ -118,12 +127,17 @@ export default function titleComponent() {
                     //todo - need to actually remove drag too if necc - check out expBuilder how i did it there - for now, just dont use
                     const drag = withInteraction ? d3Drag : function(){};
 
-                    const contentsG = d3.select(this);
-                    contentsG.select("rect.title-bg")
-                        .attr("width", contentsWidth)
-                        .attr("height", contentsHeight)
+                    //bg
+                    d3.select(this).select("rect.title-bg")
+                        .attr("width", width)
+                        .attr("height", height)
                         .attr("fill", styles.bg.fill)
                         .attr("stroke", styles.bg.stroke)
+
+                    const contentsG = d3.select(this);
+                    contentsG.select("rect.title-contents-bg")
+                        .attr("width", contentsWidth)
+                        .attr("height", contentsHeight)
                     
                     //nameG.select("rect")
                         //.attr("width", nameCharWidth * _primaryTitle(data).length)
@@ -149,7 +163,8 @@ export default function titleComponent() {
                         .transition()
                             .duration(fontSizeTransition?.duration || 0)
                             .delay(fontSizeTransition?.delay || 0)
-                            .attr("font-size", styles.primaryTitle.fontSize)
+                            .attr("font-size", contentsHeight * 0.9)
+                            //.attr("font-size", styles.primaryTitle.fontSize)
     
                 })
                 .exit(function(){

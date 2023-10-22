@@ -52,7 +52,7 @@ export default function numbersComponent() {
                 left: numberWidth * 0, right: numberWidth * 0,
                 top: numberHeight * 0, bottom:numberHeight * 0
             }
-            const fontSize = d3.max([12, d3.min([16, numberHeight * 0.8])]);
+            const fontSize = numberHeight * 0.8 //d3.max([12, d3.min([16, numberHeight * 0.8])]);
  
             dimns.push({
                 width, height, margin, contentsWidth, contentsHeight,

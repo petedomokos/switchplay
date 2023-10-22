@@ -93,7 +93,7 @@ export default function numberComponent() {
 
                     d3.select(this)
                         .append("text")
-                            .attr("text-anchor", "middle")
+                            .attr("text-anchor", "end")
                             .attr("dominant-baseline", "central")
                 })
                 .update(function(d,i){
@@ -107,7 +107,7 @@ export default function numberComponent() {
                         .attr("stroke", styles.bg.stroke)
 
                     d3.select(this).select("text")
-                        .attr("x", contentsWidth/2)
+                        .attr("x", contentsWidth)
                         .attr("y", contentsHeight/2)
                         .attr("font-size", styles.fontSize)
                         .attr("fill", d.fill || styles.fill)

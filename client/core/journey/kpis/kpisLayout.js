@@ -13,6 +13,8 @@ export default function kpisLayout(){
     let milestoneId = "";
 
     function update(data){
+        //const data = _data.slice(0,1);
+        //console.log("kpislayout", data)
         //flag
         const nrDatasetKpis = data.filter(kpi => kpi.datasetKey).length;
         const kpisData = data.map((kpi,i) => {
@@ -20,6 +22,8 @@ export default function kpisLayout(){
                 steps=[], stepsValues, allSteps=[], statProgressStatus, stepsProgressStatus, minStandard, orientationFocus,
                 dataStart, dataEnd 
             } = kpi; 
+
+            //console.log("values", values)
             
             const shouldLog = false;// milestoneId === "profile-2" && datasetKey === "meditation"
             const start = values.start?.actual;
@@ -38,6 +42,7 @@ export default function kpisLayout(){
                 expectedBehind:"red",
                 expectedAhead:currentColour,
                 stepsCurrent:"blue",
+                currentDefenceBar:"#dcf3ff", //light-blue
                 currentDefenceTooltip:"#dcf3ff",
                 currentDefenceNumber:"#90d9ff",
                 redZone:"red"

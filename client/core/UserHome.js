@@ -74,7 +74,6 @@ const UserHome = ({screen, user, loading, loadingError}) => {
     {label:"Add datapoint", to:"/datapoints/new"}
   ]
 
-  console.log("UserHome")
   return (
     <div className={classes.root}>
       {user._id && 

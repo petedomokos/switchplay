@@ -53,6 +53,7 @@ export default function kpisComponent() {
     let gapBetweenKpis;
 
     let fixedSelectedKpiHeight;
+    let fixedGapBetweenKpis;
     let openedKpiHeight;
 
     let closeBtnWidth;
@@ -75,7 +76,7 @@ export default function kpisComponent() {
         contentsHeight = height - margin.top - margin.bottom;
 
         ctrlsWidth = contentsWidth * (contentsWidth < 200 ? 0.8 : 0.7);
-        ctrlsHeight = nrCtrlsButtons !== 0 ? 30 : 0;
+        ctrlsHeight = 0;// nrCtrlsButtons !== 0 ? 30 : 0;
         ctrlsMargin = { left: contentsWidth * 0.1, right: contentsWidth * 0.1, top: ctrlsHeight * 0.1, bottom: ctrlsHeight * 0.1 };
         ctrlsContentsWidth = ctrlsWidth - ctrlsMargin.left - ctrlsMargin.right;
         ctrlsContentsHeight = ctrlsHeight - ctrlsMargin.top - ctrlsMargin.bottom;
@@ -93,7 +94,10 @@ export default function kpisComponent() {
         //title to create a little jump
         //but also we should make 
         listHeight = contentsHeight - ctrlsHeight;
+        //console.log("ch ctrlsh", contentsHeight, ctrlsHeight)
         kpiHeight = fixedKpiHeight || d3.min([maxKpiHeight, listHeight/5]);
+        //console.log("listH kpiH",listHeight, kpiHeight)
+        //console.log("kpiH", kpiHeight)
         //selectedKpi must expand for tooltip rows, by 0.75 of kpiHeight per tooltip
         const expandedContentsHeight = expandedHeight - margin.top - margin.bottom;
         //const expandedListHeight = expandedContentsHeight - ctrlsHeight;
@@ -105,8 +109,8 @@ export default function kpisComponent() {
         scrollMax = 0;
 
         //kpi margin (top must be constant so title pos doesnt shift when opening a kpi)
-        gapBetweenKpis = kpiHeight * 0.5;// 0.15;
-        kpiMargin = { top: 0, bottom: gapBetweenKpis, left:0, right:0 }
+        gapBetweenKpis = fixedGapBetweenKpis || kpiHeight * 0.5;// 0.15;
+        kpiMargin = { top: gapBetweenKpis/2, bottom: gapBetweenKpis/2, left:0, right:0 }
 
         closeBtnWidth = 40;// contentsWidth * 0.1;
         closeBtnHeight = closeBtnWidth;
@@ -117,12 +121,19 @@ export default function kpisComponent() {
     }
 
     let fontSizes = {
+        ctrls:10
     };
-    let styles = {}
+    let styles = {
+        kpi:{
+        },
+        ctrls:{
+        }
+    }
 
     let milestoneId;
     let kpiFormat = "actual";
     let withTooltips = true;
+    let withNumbers = true;
     let withCtrls = true;
     let displayFormat = "both";
     let profileIsSelected = false;
@@ -184,7 +195,6 @@ export default function kpisComponent() {
 
         // expression elements
         selection.each(function (data,i) {
-            //console.log("data", data)
             prevData = data;
             const { kpisData, milestoneId } = data;
             const nrDefenceKpis = kpisData.filter(kpi => kpi.orientationFocus === "defence").length;
@@ -208,6 +218,7 @@ export default function kpisComponent() {
             //and we know that only closed bars have end tooltips, so we can assume its closed
 
             const getNrEndTooltips = (status, displayFormat) => {
+                if(!withTooltips){ return 0; }
                 if(data.milestoneId === "current") { return 0; }
                 const nrPerKpi = kpisData.map(kpiD => kpiD.tooltipsData
                     .filter(d => d.shouldDisplay(status, null, displayFormat))
@@ -218,6 +229,7 @@ export default function kpisComponent() {
             }
 
             const getNrNumbers = (status, displayFormat) => {
+                if(!withNumbers){ return 0; }
                 const nrPerKpi = kpisData.map(kpiD => kpiD.numbersData
                     .filter(d => d.shouldDisplay("closed", null, displayFormat))
                     .length
@@ -242,6 +254,7 @@ export default function kpisComponent() {
             const closeBtnData = openedKpi ? [openedKpi] : [];
             //const openOrClosingKpi = kpisData.find(d => status(d) === "open" || status(d) === "closing");
             //const closeBtnData = openOrClosingKpi ? [openOrClosingKpi] : [];
+            /*
             const closeBtnG = containerG.selectAll("g.close-btn").data(closeBtnData);
             closeBtnG.enter()
                 .append("g")
@@ -261,7 +274,7 @@ export default function kpisComponent() {
                             updateSelected("", data, false, true);
                             onUpdateSelected(d.milestoneId, null, true, true);
                         }));
-            closeBtnG.exit().call(remove);
+            closeBtnG.exit().call(remove);*/
     
             const contentsG = containerG.selectAll("g.contents").data([1]);
             contentsG.enter()
@@ -430,11 +443,13 @@ export default function kpisComponent() {
                             .call(kpi
                                 .width(() => kpiWidth)
                                 .height((d,i) => status(d) === "open" || status(d) === "closing" ? openedKpiHeight : kpiHeight)
-                                .status(d => status(d) || "closed")
+                                //.status(d => status(d) || "closed")
                                 .displayFormat(displayFormat)
+                                /*
                                 //we pass thru the 2 geNrNumbers and getNrEndTooltips funcs here, and then the open/closed progressbars can use it to calc 
                                 //the space rrequired, even though some of them wont actually display anything
                                 //no need to pass through the editing status as we dont want that to afect any positions
+                                */
                                 .getNrEndTooltips(getNrEndTooltips)
                                 .getNrNumbers(getNrNumbers)
                                 .margin(() => kpiMargin)
@@ -444,6 +459,7 @@ export default function kpisComponent() {
                                     const kpiContentsHeight = kpiHeight - kpiMargin.top - kpiMargin.bottom;
                                     const width = kpiContentsWidth * 0.5;
                                     const height = d3.min([kpiContentsHeight * 0.5, 14]);
+                                    //console.log("kpih kpich texth",kpiHeight, kpiContentsHeight, height)
                                     const margin = { top: height * 0.1, bottom: height * 0.4 };
                                     const fontSize = status(d) === "open" || status(d) === "opening" ? height * 0.8 : height * 0.5;
                                     return { width, height, margin, fontSize }
@@ -452,7 +468,9 @@ export default function kpisComponent() {
                                     bg:{
                                         fill:profileIsSelected ? COLOURS.selectedMilestone : COLOURS.milestone
                                     },
-                                    name:{
+                                    title:{
+                                    },
+                                    progressBar:{
                                     },
                                     step:{
                                         fill:"transparent",
@@ -461,6 +479,7 @@ export default function kpisComponent() {
                                         strokeWidth:0.1,
                                     }
                                 }))
+                                /*
                                 .onDblClick(onDblClickKpi)
                                 .onClick(function(e, d){
                                     if(selected !== d.key){
@@ -494,13 +513,14 @@ export default function kpisComponent() {
                                 .onUpdateSteps(onUpdateSteps)
                                 .onDeleteStep(onDeleteStep)
                                 .onSaveValue(onSaveValue)
-                                .onSetEditing(onSetEditing)
+                                .onSetEditing(onSetEditing)*/
                             )
 
                         //EXIT
                         kpiG.exit().call(remove);
                         
                         //ctrls
+                        /*
                         //change so its positioned from the bottom and not part of contents
                         const ctrlsG = contentsG.select("g.kpis-ctrls")
                             //.attr("transform", d => `translate(${ctrlsMargin.left +((contentsWidth-ctrlsWidth)/2)},${listHeight + ctrlsMargin.top})`);
@@ -556,6 +576,7 @@ export default function kpisComponent() {
                                         .text(d => d.label)
 
                                 })
+                        btnG.exit().remove();*/
 
                     })
 
@@ -791,6 +812,11 @@ export default function kpisComponent() {
         height = value;
         return kpis;
     };
+    kpis.gapBetweenKpis = function (value) {
+        if (!arguments.length) { return gapBetweenKpis; }
+        fixedGapBetweenKpis = value;
+        return kpis;
+    };
     kpis.expandedHeight = function (value) {
         if (!arguments.length) { return expandedHeight; }
         expandedHeight = value;
@@ -813,7 +839,9 @@ export default function kpisComponent() {
     };
     kpis.styles = function (values) {
         if (!arguments.length) { return styles; }
-        styles = { ...styles, ...values };
+        const kpi = values.kpi ? { ...styles.kpi, ...values.kpi } : styles.kpi;
+        const ctrls = values.ctrls ? { ...styles.ctrls, ...values.ctrls } : styles.ctrls;
+        styles = { ...styles, ...values, kpi, ctrls };
         return kpis;
     };
     kpis.withTooltips = function (value) {

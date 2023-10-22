@@ -76,10 +76,6 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
     }
   });
   
- //we dont use?: because we if there is a loading delay for User, we dont want display to revert to NonUserHome 
- //todo - find a graceful way of handling this potential issue
- // <Route exact path="/" render={() => <UserHomeContainer screen={screen} />} />
- console.log("MR", jwt)
  //took exact away from UserHome path
   return (
     <div>

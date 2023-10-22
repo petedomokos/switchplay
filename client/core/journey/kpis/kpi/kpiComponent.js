@@ -69,8 +69,8 @@ export default function kpiComponent() {
                 //@todo - decide if we need a margin when closed
                 left:status(d) === "open" ? 0 : progressBarWidth * 0, 
                 right: 0, 
-                top: 0, 
-                bottom: 0 
+                top: progressBarHeight * 0.2, 
+                bottom: progressBarHeight * 0.2 
             };
             //console.log("kpiH kpiCH titleH pbh", height, contentsHeight, titleDimns.height, progressBarHeight)
             dimns[d.key] = {
@@ -99,7 +99,12 @@ export default function kpiComponent() {
         })
     }
 
-    const DEFAULT_STYLES = {};
+    const DEFAULT_STYLES = {
+        bg:{},
+        title:{},
+        progressBar:{},
+        step:{}
+    };
     let _styles = () => DEFAULT_STYLES;
 
     let _name = d => d.name;
@@ -159,6 +164,7 @@ export default function kpiComponent() {
         const { transitionEnter=true, transitionUpdate=true, log } = options;
         updateDimns(selection.data());
         updateComponents(selection.data());
+        //console.log("kpi", selection.data())
 
         /*const drag = d3.drag()
             .on("start", enhancedDrag())
@@ -167,6 +173,15 @@ export default function kpiComponent() {
 
         // expression elements
         selection
+            .call(background()
+                .width((d,i) => dimns[d.key].width)
+                .height((d,i) => dimns[d.key].height)
+                .styles((d, i) => ({
+                    //stroke:"none",
+                    //need to trabnsition bg, but may aswell just be transparent
+                    fill:"none"//grey10(3)
+                }))
+            )
             .call(container()
                 .className("kpi-contents")
                 .transform((d, i) => `translate(${dimns[d.key].margin.left},${dimns[d.key].margin.top})`)
@@ -177,9 +192,10 @@ export default function kpiComponent() {
                 .width((d,i) => dimns[d.key].contentsWidth)
                 .height((d,i) => dimns[d.key].contentsHeight)
                 .styles((d, i) => ({
-                    stroke:"none",
+                    //stroke:"none",
+                    //strokeWidth:0.05,
                     //need to trabnsition bg, but may aswell just be transparent
-                    fill:/*_styles(d).bg.fill ||*/ "transparent"
+                    fill:"none",// i % 2 === 0 ? grey10(2) : "white"// "transparent"
                 })))
             .call(container().className("name"))
             //.call(container().className("non-selected-progress-bar")
@@ -195,12 +211,12 @@ export default function kpiComponent() {
                 .margin((d,i) => dimns[d.key].titleDimns.margin)
                 .styles((d,i) => ({
                     primaryTitle:{ 
-                        fontSize:dimns[d.key].titleDimns.fontSize,
+                        fontSize:3,//dimns[d.key].titleDimns.fontSize,
                         strokeWidth:0.1,
                         ..._styles(d,i).name,
-                        dominantBaseline:"central",
+                        dominantBaseline:"hanging",//central",
                         fontFamily:"helvetica, sans-serifa",
-                        fill:grey10(4)
+                        fill:grey10(4),
                     },
                     secondaryTitle:{
 
@@ -231,10 +247,12 @@ export default function kpiComponent() {
             closedContentsG.enter()
                 .append("g")
                     .attr("class", "closed-kpi-contents")
+                    .attr("display", "none")
                     .call(fadeIn)
                     .merge(closedContentsG)
                     //closedkpi doesnt show info so that space is just turned into an extra margin
-                    .attr("transform", `translate(10,${titleDimns.height})`)
+                    //.attr("transform", `translate(10,${titleDimns.height})`)
+                    .attr("transform", `translate(0,${titleDimns.height})`)
                     .each(function(d){
                         d3.select(this)
                             .call(closedProgressBars[d.key]
@@ -250,7 +268,7 @@ export default function kpiComponent() {
 
             closedContentsG.exit().call(remove)
                 
-            const openContentsG = kpiContentsG.selectAll("g.open-kpi-contents").data(openData, d => d.key);
+           /* const openContentsG = kpiContentsG.selectAll("g.open-kpi-contents").data(openData, d => d.key);
             openContentsG.enter()
                 .append("g")
                     .attr("class", "open-kpi-contents")
@@ -333,9 +351,10 @@ export default function kpiComponent() {
                                  
                     })
 
-            openContentsG.exit().call(remove, { transition:{ duration: CONTENT_FADE_DURATION }});
+            openContentsG.exit().call(remove, { transition:{ duration: CONTENT_FADE_DURATION }});*/
 
             //history
+            /*
             const historyData = status(data) === "open" && data.lastDataUpdate ? [data] : [];
             const historyG = kpiContentsG.selectAll("g.history").data(historyData, d => d.key);
             historyG.enter()
@@ -374,7 +393,7 @@ export default function kpiComponent() {
                             .text(d3.timeFormat("%_d %b, %y")(d.lastDataUpdate))
                     })
             
-            historyG.exit().call(remove, { transition:{ duration: CONTENT_FADE_DURATION }});
+            historyG.exit().call(remove, { transition:{ duration: CONTENT_FADE_DURATION }});*/
         })
         
         /*kpiContents.select("g.numbers")
@@ -440,7 +459,16 @@ export default function kpiComponent() {
     };
     kpi.styles = function (func) {
         if (!arguments.length) { return _styles; }
-        _styles = (d,i) => ({ ...DEFAULT_STYLES, ...func(d,i) });
+       
+        _styles = (d,i) => {
+            const values = func(d,i);
+            const bg = values.bg ? { ...DEFAULT_STYLES.bg, ...values.bg } : DEFAULT_STYLES.bg;
+            const title = values.title ? { ...DEFAULT_STYLES.title, ...values.title } : DEFAULT_STYLES.title;
+            const progressBar = values.progressBar ? { ...DEFAULT_STYLES.progressBar, ...values.progressBar } : DEFAULT_STYLES.progressBar;
+            const step = values.step ? { ...DEFAULT_STYLES.step, ...values.step } : DEFAULT_STYLES.step;
+
+            return { ...DEFAULT_STYLES, ...values, bg, title, progressBar, step }
+        };
         return kpi;
     };
     kpi.isEditable = function (value) {

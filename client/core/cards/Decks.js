@@ -6,6 +6,7 @@ import Button from '@material-ui/core/Button'
 import DeckHeader from './DeckHeader';
 import deckLayout from './deckLayout';
 import decksComponent from "./decksComponent";
+import milestonesLayout from "../journey/milestonesLayout";
 import ItemForm from "./forms/ItemForm";
 import DeckTitleForm from './forms/DeckTitleForm';
 import CardTitleForm from './forms/CardTitleForm';
@@ -66,9 +67,9 @@ const enhancedZoom = dragEnhancements();
 
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSectionNr, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
+const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSectionNr, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
   //processed props
-  //console.log("Decks", data)
+  //console.log("Decks")
   const stringifiedData = JSON.stringify({ data, table });
   //state
   const [layout, setLayout] = useState(() => deckLayout());
@@ -80,6 +81,11 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
   const [selectedItemNr, setSelectedItemNr] = useState(customSelectedItemNr);
   const [longpressedDeckId, setLongpressedDeckId] = useState("");
   const [form, setForm] = useState(null);
+
+  //profiles state
+  const [profilesLayout, setProfilesLayout] = useState(() => milestonesLayout());
+  const [kpiFormat, setKpiFormat] = useState("actual");
+
   //processed state
   const selectedDeck = data.find(deck => deck.id === selectedDeckId);
   const selectedCard = selectedDeck?.cards.find(c => c.cardNr === selectedCardNr);
@@ -451,7 +457,28 @@ const Decks = ({ table, data, customSelectedDeckId, customSelectedCardNr, custom
 
   //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
-    const processedDeckData = data.map(deckData => layout(deckData));
+    //journeyData
+    profilesLayout
+      .format(kpiFormat)
+      .datasets(datasets)
+      .info(journeyData.player)
+      //.getURL(getURLForUser(user._id));
+
+    //profiles go before contracts of same date
+    const orderedProfiles = sortAscending(journeyData.profiles, d => d.date)
+      .filter(d => !d.isCurrent);
+    const profilesData = profilesLayout(orderedProfiles)
+    //console.log("ordered", profilesData)
+
+    //decksdata
+    const processedDeckData = data
+      .map(deckData => layout(deckData))
+      .map(d => ({
+        ...d,
+        //cards:d.cards.map((c,i) => ({ ...c, profile:profilesData[i] }))
+        cards:d.cards.map((c,i) => ({ ...c, profile:profilesData[0] }))
+      }));
+    //console.log("deckdata", processedDeckData)
     //just use first deck for now
     d3.select(containerRef.current).datum(processedDeckData)
 

@@ -130,8 +130,8 @@ export default function barComponent() {
                 .height((d,i) => dimns[i].contentsHeight)
                 .styles((d, i) => ({
                     //if all datasets will have the start and end defined for bar
-                    stroke:"none",//d.statKey ? "grey" : "none",
-                    strokeWidth:0.1,
+                    //stroke:"blue",//"none",//d.statKey ? "grey" : "none",
+                    //strokeWidth:0.05,
                     fill:"transparent"
                 })), { transitionEnter, transitionUpdate} 
             )
@@ -191,7 +191,9 @@ export default function barComponent() {
 
 
                 //line
-                const scaleLine = barContentsG.selectAll("line.scale").data(!shouldDisplaySteps || stepsData.length === 0 ? [1] : []);
+                const scaleLine = barContentsG.selectAll("line.scale")
+                    .data(!shouldDisplaySteps || stepsData.length === 0 ? [1] : []);
+                    //.data(shouldDisplaySteps && stepsData.length === 0 ? [1] : []);
                 scaleLine.enter()
                     .append("line")
                         .attr("class", "scale")
@@ -201,7 +203,7 @@ export default function barComponent() {
                         .attr("x2", contentsWidth)
                         .attr("y1", contentsHeight/2)
                         .attr("y2", contentsHeight/2)
-                        .attr("stroke-width", 0.5)
+                        .attr("stroke-width", 0.1)
                         .attr("stroke", grey10(4))
                         
 
@@ -227,9 +229,8 @@ export default function barComponent() {
                             })
                             .merge(barSectionG)
                             .attr("transform", `translate(0,${(contentsHeight-barHeight)/2})`)
-                            //.attr("display", displayFormat !== "steps" ? null : "none")
+                            .attr("display", shouldDisplaySteps ? "none" : null)
                             //this was the new one when line was created .attr("display", milestoneId === "current" || displayFormat === "steps" ? null : "none")
-                            .attr("display", "none")
                             .each(function(d,j){
                                 const sectionWidth = scale(bound(d.endValue)) - scale.range()[0];
                                 //adjust rect width to end - start
@@ -240,13 +241,13 @@ export default function barComponent() {
                                             .attr("width", sectionWidth || 0)
                                             .attr("height", barHeight)
                                             .attr("fill", d.fill)
-                                            .attr("opacity", d.opacity || 1);
+                                            .attr("opacity", 1)// d.opacity || 1);
                                 }else{
                                     d3.select(this).select("rect.bar-section")
                                         .attr("width", sectionWidth || 0)
                                         .attr("height", barHeight)
                                         .attr("fill", d.fill || "transparent")
-                                        .attr("opacity", d.opacity || 1);
+                                        .attr("opacity", 1)// d.opacity || 1);
                                 }
                             })
 
@@ -298,7 +299,7 @@ export default function barComponent() {
                                             .attr("stroke", "black")
                                             .attr("stroke-opacity", 0.5)
                                             .attr("stroke-width", d.strokeWidth || 0.2)
-                                            .attr("stroke-dasharray", d.key === "minimum" ? null : 1.5)
+                                            .attr("stroke-dasharray", d.key === "minimum" ? null : 0.3)
                                     })
                                     .merge(standardG)
                                     .attr("transform", d => `translate(${scale(d.value)}, ${-extraLineLength/2})`)

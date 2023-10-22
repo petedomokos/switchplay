@@ -3,10 +3,13 @@ import { DIMNS, grey10, COLOURS, TRANSITIONS } from "./constants";
 import dragEnhancements from '../journey/enhancedDragHandler';
 import cardHeaderComponent from './cardHeaderComponent';
 import cardItemsComponent from './cardItemsComponent';
+import profileInfoComponent from '../journey/profileInfoComponent';
+import kpisComponent from '../journey/kpis/kpisComponent';
 import { fadeIn, fadeInOut, remove } from '../journey/domHelpers';
 import { updateTransform } from '../journey/transitionHelpers';
 import { icons } from '../../util/icons';
 import { isNumber } from '../../data/dataHelpers';
+
 
 
 const { GOLD } = COLOURS;
@@ -38,6 +41,10 @@ export default function cardsComponent() {
 
     let itemsOuterRadius;
 
+    //back
+    let profileInfoHeight;
+    let kpisHeight;
+
     function updateDimns(){
         normalContentsWidth = heldCardWidth - margin.left - margin.right;
         normalContentsHeight = heldCardHeight - margin.top - margin.bottom;
@@ -47,6 +54,10 @@ export default function cardsComponent() {
         contentsHeight = heldCardHeightToUse - margin.top - margin.bottom; 
 
         itemsAreaHeight = contentsHeight - headerHeight - gapBetweenHeaderAndItems;
+
+        //back
+        profileInfoHeight = contentsHeight * 0.33;
+        kpisHeight = contentsHeight - profileInfoHeight;
     }
 
     let fontSizes = {
@@ -73,7 +84,7 @@ export default function cardsComponent() {
     let transformTransition = { 
         enter: null, 
         update: { duration:d => TRANSITIONS.MED,// d.statusChanging ? 200 : 500,
-            delay:d => 0,//d => d.statusChanging ? 0 : 100,
+            delay:() => 0,//d => d.statusChanging ? 0 : 100,
             //ease:d3.easeQuadInOut
         } 
     };
@@ -104,6 +115,8 @@ export default function cardsComponent() {
     //components
     let headerComponents = {};
     let itemsComponents = {};
+    let profileInfo;
+    let kpis;
 
     function cards(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
@@ -159,10 +172,14 @@ export default function cardsComponent() {
                     .attr("class", d => `card card-${d.cardNr}`)
                     .attr("opacity", 1)
                     .each(function(d,i){
-                        const { cardNr, isHeld, isSelected } = d;
+                        const { cardNr, isHeld, isSelected, profile } = d;
 
+                        //front components
                         headerComponents[cardNr] = cardHeaderComponent();
                         itemsComponents[cardNr] = cardItemsComponent();
+                        //back components
+                        profileInfo = profileInfoComponent();
+                        kpis = kpisComponent();
 
                         //ENTER
                         const contentsG = d3.select(this).append("g").attr("class", "contents card-contents")
@@ -176,8 +193,9 @@ export default function cardsComponent() {
                                 //for placed cards, we dont want the dimns to be changed when in section view
                                 .attr("width", isHeld ? contentsWidth : normalContentsWidth)
                                 .attr("height", isHeld ? contentsHeight : normalContentsHeight)
-                                .attr("fill", isNumber(selectedSectionNr) ? COLOURS.CARD.SECTION_VIEW_FILL :COLOURS.CARD.FILL(d))
+                                .attr("fill", isNumber(selectedSectionNr) ? COLOURS.CARD.SECTION_VIEW_FILL : COLOURS.CARD.FILL(d))
                                 .attr("stroke", isNumber(selectedSectionNr) ? COLOURS.CARD.SECTION_VIEW_STROKE : getCardStroke(d))
+                                .attr("stroke-width", 0.5)
                                 .on("click", e => {
                                     //console.log("card bg click")
                                     onClickCard.call(this, e, d)
@@ -191,7 +209,9 @@ export default function cardsComponent() {
                                 .attr("ry", 3)
                                 .attr("width", isHeld ? contentsWidth : normalContentsWidth)
                                 .attr("height", isHeld ? contentsHeight : normalContentsHeight)
-                                .attr("fill", "aqua");
+                                .attr("fill", grey10(1))
+                                .attr("stroke", grey10(2))
+                                .attr("stroke-width", 0.5);
                         
                         contentsG
                             .append("g")
@@ -230,7 +250,7 @@ export default function cardsComponent() {
                         force:true
                     })
                     .each(function(cardD,i){
-                        const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status } = cardD; 
+                        const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile } = cardD;
                         const contentsG = d3.select(this).select("g.card-contents")
                             .attr("transform", `translate(${margin.left},${margin.top})`)
                             .call(fadeInOut, !cardsAreFlipped);
@@ -239,7 +259,6 @@ export default function cardsComponent() {
                             .attr("transform", `translate(${margin.left},${margin.top})`)
                             .call(fadeInOut, cardsAreFlipped);
 
-                        
                         //bg colour
                         contentsG.select("rect.card-bg")
                             .transition("card-bg-appearance")
@@ -415,6 +434,47 @@ export default function cardsComponent() {
                                 });
 
                         botRightBtnG.exit().remove();
+
+
+                        //back contents
+                        if(isFront){
+                            const getTextInfoHeight = () => 20;
+                            kpis
+                                .width(contentsWidth)
+                                .height(kpisHeight)
+                                .expandedHeight(contentsHeight - getTextInfoHeight())
+                                .gapBetweenKpis(2)
+                                .styles({
+                                    kpi:{
+                                        title:{
+
+                                        },
+                                        progressBar:{
+
+                                        }
+                                    },
+                                    ctrls:{
+
+                                    }
+                                })
+                                //.kpiHeight(10)//kpiHeight)
+                                .fontSizes(4)//fontSizes.kpis)
+                                //.kpiFormat(kpiFormat)
+                                .displayFormat("stats")
+                                .withTooltips(false)
+                                .editable(false)
+                                .scrollable(false)
+                                .profileIsSelected(false)
+
+                            const kpisG = backContentsG.selectAll("g.kpis").data([1]);
+                            kpisG.enter()
+                                .append("g")
+                                    .attr("class", "kpis")
+                                    .merge(kpisG)
+                                    .attr("transform", `translate(0, ${profileInfoHeight})`)
+                                    .datum(profile.kpis)
+                                    .call(kpis);
+                        }
 
                     })
                     .call(drag)
