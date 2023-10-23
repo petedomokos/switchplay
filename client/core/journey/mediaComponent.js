@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { DIMNS, PROFILE_PAGES, grey10, OVERLAY } from "./constants";
 import container from './kpis/kpi/container';
 import dragEnhancements from './enhancedDragHandler';
+import { icons } from '../../util/icons';
 
 //helpers
 const isSportsman = () => true;// personType => ["footballer", "athlete", "boxer"].includes(personType);
@@ -18,11 +19,13 @@ export default function mediaComponent() {
     let height = DIMNS.profile.height / 2;
     let withTextInfo = true;
     let textInfoHeight;
+    let photoWidth;
     let photoHeight;
 
     function updateDimns(data){
         textInfoHeight = withTextInfo ? d3.max([45, height * 0.2]) : 0;
-        photoHeight = height - textInfoHeight;
+        photoWidth = width/2;
+        photoHeight = height;// - textInfoHeight;
     }
 
     let fontSizes = {
@@ -102,44 +105,60 @@ export default function mediaComponent() {
                     .attr("stroke", grey10(5))
                     .attr("stroke-width", 0.03)
 
-            const photoG = containerG.selectAll("g.photo").data(photosData);
+            const photoG = containerG.selectAll("g.photo").data(photosData, d => d.key);
             photoG.enter()
                 .append("g")
                     .attr("class", "photo")
                     .each(function(d){
+                        const photoG = d3.select(this);
                         d3.select("svg#milestones-bar").select('defs')
                             .append('clipPath')
                                 .attr('id', `photo-clip-${id}`)
                                     .append('rect');
                             
-                        d3.select(this)
+                        photoG
                             .insert("image","text");
                         
-                        d3.select(this)
+                        photoG
                             .attr('clip-path', `url(#photo-clip-${id})`)
 
-                        d3.select(this).append("rect")
+                        photoG.append("rect")
                             .attr('class', "photo-border")
+
+                        photoG
+                            .append("g")
+                                .attr("class", "video-icon")
+                                    .append("path")
+                                        .attr("fill", grey10(7));
                     })
                     .merge(photoG)
+                    .attr("transform", (d,i) => `translate(${i * photoWidth}, 0)`)
                     .each(function(d){
+                        const photoG = d3.select(this);
+
                         d3.select("svg#milestones-bar").select(`#photo-clip-${id}`)
                             .select("rect")
-                                .attr("width", width)
+                                .attr("width", photoWidth)
                                 .attr("height", photoHeight)
 
-                        d3.select(this).select("rect.photo-border")
-                            .attr("width", width)
+                        photoG.select("rect.photo-border")
+                            .attr("width", photoWidth)
                             .attr("height", photoHeight)
                             .attr("fill", "none")
                             .attr("stroke", beingEdited === "photo" ? "orange" : "none")
                             .attr("stroke-width", 5)
 
-                        const img = d3.select(this).select("image")  
+                        photoG.select("image")  
                             //.attr("width", width)
                             .attr("xlink:href", d.url)
                             .attr("transform", "scale(0.0675)")
                             //.attr("height", photoHeight)
+
+                        const videoIconG = photoG.select("g.video-icon")
+                            .attr("transform", `translate(${photoWidth/2 - 2},${photoHeight - 5})`);
+
+                        videoIconG.select("path").attr("transform", `scale(0.02)`)
+                            .attr("d", icons.video.d)
 
                         //console.log("actual w h", img.attr("width"), img.attr("height"))
                     })

@@ -445,11 +445,9 @@ export default function cardsComponent() {
 
 
                         //BACK CONTENTS ---------------------------------------
-                        
                         /*
-                        todo next
-                         - make date editible on both sides and persist it
-                         - replace media photo with a link to a video - youtube player clips
+                         - add links to different videos for left and right of each card - not just default image
+                         - transition to show card being flipped
 
                         */
                         //if(!isFront){ return; }
@@ -472,7 +470,6 @@ export default function cardsComponent() {
                             .fontSizes(fontSizes.info)
                             .rightContent("")
                             .onClick(function(e){
-                                //console.log("header click ->")
                                 onClickCard(e, cardD); 
                             })
                             .onClickDate(function(e){
@@ -480,7 +477,6 @@ export default function cardsComponent() {
                                 e.stopPropagation();
                             })
                             .onClickTitle(function(d, headerDimns){
-                                //alert("card title click")
                                 const dimns = {
                                     ...headerDimns,
                                     left:margin.left + headerDimns.left,
