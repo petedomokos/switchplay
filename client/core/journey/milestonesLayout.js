@@ -43,7 +43,8 @@ export default function milestonesLayout(){
                         ...info, 
                         photos:{
                             goal:isCurrent ? null : [{ key:"goal", url:getURL(goalMedia.mediaId, "goal"), ...goalMedia }],
-                            profile:[{ key:"profile", url:getURL(profileMedia.mediaId, "profile"), ...profileMedia }]
+                            //profile:[{ key:"profile", url:getURL(profileMedia.mediaId, "profile"), ...profileMedia }]
+                            profile:[{ key:"profile", url:'/api/users/defaultphoto', ...profileMedia }]
                         },
                         age:playerAge, 
                         isCurrent, isPast, isFuture, 

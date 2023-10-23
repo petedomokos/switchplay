@@ -5,16 +5,19 @@ import { getTransformationFromTrans } from './helpers';
 const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
 const AUTO_SCROLL_DURATION = TRANSITIONS.KPIS.AUTO_SCROLL.DURATION;
 
-export function fadeInOut(selection, shouldDisplay, options){
+export function fadeInOut(selection, shouldDisplay, options={}){
+    const { transitionIn, transitionOut, transition } = options;
     selection.each(function(){
         const sel = d3.select(this);
         const displayValue = sel.attr("display");
         const isFadingIn = sel.attr("class").includes("fading-in");
         const isFadingOut = sel.attr("class").includes("fading-in");
         if(shouldDisplay && displayValue === "none" && !isFadingIn){
-            sel.call(fadeIn, options);
+            const transitionToUse = transitionIn || transition;
+            sel.call(fadeIn, { ...options, transition:transitionToUse });
         }else if(!shouldDisplay && displayValue !== "none" && !isFadingOut){
-            sel.call(fadeOut, options);
+            const transitionToUse = transitionOut || transition;
+            sel.call(fadeOut, { ...options, transition:transitionToUse });
         }
     })
 }

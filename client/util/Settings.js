@@ -62,7 +62,7 @@ const createOptions = setting => {
   return [];
 }
 
-export default function Settings({ title, emptyMesg, options, moreSettings, shouldShowMoreSettings, selectedValue, onClickOption, onClickMoreSettings, primaryText, secondaryText, styles}) {
+export default function Settings({ title, dimns, emptyMesg, options, moreSettings, shouldShowMoreSettings, selectedValue, onClickOption, onClickMoreSettings, primaryText, secondaryText, styles}) {
   const stylesProps = {...styles, moreSettings, shouldShowMoreSettings }
   const classes = useStyles(stylesProps);
 
@@ -108,5 +108,6 @@ Settings.defaultProps = {
     options:[],
     primaryText:() =>'',
     secondaryText:() =>'',
-    styles:{}
+    styles:{},
+    dimns:{}
 }

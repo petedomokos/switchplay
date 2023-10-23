@@ -3,7 +3,7 @@ import { DIMNS, grey10, COLOURS, TRANSITIONS } from "./constants";
 import dragEnhancements from '../journey/enhancedDragHandler';
 import cardHeaderComponent from './cardHeaderComponent';
 import cardItemsComponent from './cardItemsComponent';
-import profileInfoComponent from '../journey/profileInfoComponent';
+import mediaComponent from '../journey/mediaComponent';
 import kpisComponent from '../journey/kpis/kpisComponent';
 import { fadeIn, fadeInOut, remove } from '../journey/domHelpers';
 import { updateTransform } from '../journey/transitionHelpers';
@@ -42,7 +42,7 @@ export default function cardsComponent() {
     let itemsOuterRadius;
 
     //back
-    let profileInfoHeight;
+    let mediaHeight;
     let kpisHeight;
 
     function updateDimns(){
@@ -56,8 +56,8 @@ export default function cardsComponent() {
         itemsAreaHeight = contentsHeight - headerHeight - gapBetweenHeaderAndItems;
 
         //back
-        profileInfoHeight = contentsHeight * 0.33;
-        kpisHeight = contentsHeight - profileInfoHeight;
+        mediaHeight = (contentsHeight - headerHeight) * 0.33;
+        kpisHeight = contentsHeight - headerHeight - mediaHeight;
     }
 
     let fontSizes = {
@@ -91,6 +91,7 @@ export default function cardsComponent() {
 
     //API CALLBACKS
     let onClickCard = function(){};
+    let onClickCardDate = function(){};
     let onClickCardTitle = function(){};
     let onSelectItem = function(){};
     let onUpdateItemStatus = function(){};
@@ -113,10 +114,11 @@ export default function cardsComponent() {
     //dom
     let containerG;
     //components
-    let headerComponents = {};
+    let frontHeaderComponents = {};
     let itemsComponents = {};
-    let profileInfo;
-    let kpis;
+    let backHeaderComponents = {};
+    let mediaComponents = {};
+    let kpisComponents = {};
 
     function cards(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
@@ -175,15 +177,15 @@ export default function cardsComponent() {
                         const { cardNr, isHeld, isSelected, profile } = d;
 
                         //front components
-                        headerComponents[cardNr] = cardHeaderComponent();
+                        frontHeaderComponents[cardNr] = cardHeaderComponent();
                         itemsComponents[cardNr] = cardItemsComponent();
                         //back components
-                        profileInfo = profileInfoComponent();
-                        kpis = kpisComponent();
+                        backHeaderComponents[cardNr] = cardHeaderComponent();
+                        mediaComponents[cardNr] = mediaComponent();
+                        kpisComponents[cardNr] = kpisComponent();
 
-                        //ENTER
+                        //FRONT
                         const contentsG = d3.select(this).append("g").attr("class", "contents card-contents")
-                        const backContentsG = d3.select(this).append("g").attr("class", "contents card-back-contents")
 
                         contentsG
                             .append("rect")
@@ -201,17 +203,6 @@ export default function cardsComponent() {
                                     onClickCard.call(this, e, d)
                                     e.stopPropagation();
                                 })
-
-                        backContentsG
-                            .append("rect")
-                                .attr("class", "card-back-bg")
-                                .attr("rx", 3)
-                                .attr("ry", 3)
-                                .attr("width", isHeld ? contentsWidth : normalContentsWidth)
-                                .attr("height", isHeld ? contentsHeight : normalContentsHeight)
-                                .attr("fill", grey10(1))
-                                .attr("stroke", grey10(2))
-                                .attr("stroke-width", 0.5);
                         
                         contentsG
                             .append("g")
@@ -223,14 +214,25 @@ export default function cardsComponent() {
                             .append("g")
                                 .attr("class", "items-area");
 
-                        /*contentsG
+                        //BACK
+                        const backContentsG = d3.select(this).append("g").attr("class", "contents card-back-contents")
+                        backContentsG
                             .append("rect")
-                                .attr("class", "card-overlay")
+                                .attr("class", "card-back-bg")
                                 .attr("rx", 3)
                                 .attr("ry", 3)
-                                .attr("stroke", "none")
-                                .attr("fill", "transparent")
-                                .on("click", onClickCard)*/
+                                .attr("width", isHeld ? contentsWidth : normalContentsWidth)
+                                .attr("height", isHeld ? contentsHeight : normalContentsHeight)
+                                .attr("fill", grey10(2))
+                                .attr("stroke", grey10(3))
+                                .attr("stroke-width", 0.5);
+
+                        backContentsG
+                            .append("g")
+                                .attr("class", "card-back-header")
+                                //.attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
+                                .attr("opacity", deckIsSelected & (isHeld || isSelected) ? 1 : 0)
+                        
                     })
                     .call(updateTransform, { 
                         x, 
@@ -284,7 +286,7 @@ export default function cardsComponent() {
                         //const headerHeight;
                         //components
                         const dateColour = isNumber(selectedSectionNr) ? grey10(5) : grey10(7);
-                        const header = headerComponents[cardNr]
+                        const frontHeader = frontHeaderComponents[cardNr]
                             .width(contentsWidth)
                             .height(headerHeight)
                             .styles({
@@ -303,6 +305,11 @@ export default function cardsComponent() {
                             .onClick(function(e){
                                 //console.log("header click ->")
                                 onClickCard(e, cardD); 
+                                e.stopPropagation();
+                            })
+                            .onClickDate(function(e){
+                                onClickCardDate(cardD, i); 
+                                e.stopPropagation();
                             })
                             .onClickTitle(function(d, headerDimns){
                                 //alert("card title click")
@@ -312,13 +319,14 @@ export default function cardsComponent() {
                                     top:margin.top + headerDimns.top
                                 }
                                 onClickCardTitle(cardD, i, dimns);
+                                e.stopPropagation();
                             })
                         
-                        const headerDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr };
+                        const frontHeaderDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr };
                         contentsG.selectAll("g.card-header")
                             //.attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
-                            .datum(headerDatum)
-                            .call(header)
+                            .datum(frontHeaderDatum)
+                            .call(frontHeader)
                                 .transition() //hide if small
                                 .delay(200)
                                 .duration(200)
@@ -436,46 +444,162 @@ export default function cardsComponent() {
                         botRightBtnG.exit().remove();
 
 
-                        //back contents
-                        if(isFront){
-                            const getTextInfoHeight = () => 20;
-                            kpis
-                                .width(contentsWidth)
-                                .height(kpisHeight)
-                                .expandedHeight(contentsHeight - getTextInfoHeight())
-                                .gapBetweenKpis(2)
-                                .styles({
-                                    kpi:{
-                                        title:{
+                        //BACK CONTENTS ---------------------------------------
+                        
+                        /*
+                        todo next
+                         - make date editible on both sides and persist it
+                         - replace media photo with a link to a video - youtube player clips
 
-                                        },
-                                        progressBar:{
+                        */
+                        //if(!isFront){ return; }
+                        //header
+                        const backHeader = backHeaderComponents[cardNr]
+                            .width(contentsWidth)
+                            .height(headerHeight)
+                            .styles({
+                                statusFill:() => getProgressStatusFill(cardD),
+                                trophyTranslate:isHeld || isSelected ? 
+                                    "translate(-3,3) scale(0.25)" : "translate(-45,3) scale(0.6)",
+                                date:{ 
+                                    fill:dateColour, stroke:dateColour 
+                                },
+                                dateCount:{
+                                    numberFill:dateColour, wordsFill:dateColour,
+                                    numberStroke:dateColour, wordsStroke:dateColour
+                                }
+                            })
+                            .fontSizes(fontSizes.info)
+                            .rightContent("")
+                            .onClick(function(e){
+                                //console.log("header click ->")
+                                onClickCard(e, cardD); 
+                            })
+                            .onClickDate(function(e){
+                                onClickCardDate(cardD, i); 
+                                e.stopPropagation();
+                            })
+                            .onClickTitle(function(d, headerDimns){
+                                //alert("card title click")
+                                const dimns = {
+                                    ...headerDimns,
+                                    left:margin.left + headerDimns.left,
+                                    top:margin.top + headerDimns.top
+                                }
+                                onClickCardTitle(cardD, i, dimns);
+                            })
 
-                                        }
+                        const backHeaderDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr };
+                        backContentsG.selectAll("g.card-back-header")
+                            //.attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
+                            .datum(backHeaderDatum)
+                            .call(backHeader)
+                                .transition() //hide if small
+                                .delay(200)
+                                .duration(200)
+                                    .attr("opacity", (isHeld || isSelected) ? 1 : 0);
+
+                        //media
+                        const media = mediaComponents[cardNr]
+                            .width(contentsWidth)
+                            .height(mediaHeight)
+
+                        const mediaG = backContentsG.selectAll("g.profile-info").data([1]);
+                        mediaG.enter()
+                            .append("g")
+                                .attr("display", cardsAreFlipped ? null : "none")
+                                .attr("class", "profile-info")
+                                //fade in so it doesnt show up for a glimpse on first load of page
+                                //.call(fadeIn, { transition:{ delay: 500, duration:500 }})
+                                .merge(mediaG)
+                                .attr("transform", `translate(0,${headerHeight})`)
+                                .datum(profile.info)
+                                .call(media)
+                                .call(fadeInOut, isFront, { 
+                                    transitionIn:{ delay: 0, duration:200 },
+                                    transitionOut:{ delay: 200, duration:200 }
+                                });
+
+                                mediaG.exit().remove();
+                        
+                        
+
+                        //kpis
+                        //const textInfoHeight = 20;
+                        const kpis = kpisComponents[cardNr]
+                            .width(contentsWidth)
+                            .height(kpisHeight)
+                            //.expandedHeight(contentsHeight - textInfoHeight)
+                            .gapBetweenKpis(2)
+                            .styles({
+                                kpi:{
+                                    title:{
+
                                     },
-                                    ctrls:{
+                                    progressBar:{
+                                        
 
                                     }
+                                },
+                                ctrls:{
+
+                                }
+                            })
+                            //.kpiHeight(10)//kpiHeight)
+                            .fontSizes(4)//fontSizes.kpis)
+                            //.kpiFormat(kpiFormat)
+                            .displayFormat("stats")
+                            .withTooltips(false)
+                            .editable(false)
+                            .scrollable(false)
+                            .profileIsSelected(false)
+
+                        const kpisG = backContentsG.selectAll("g.kpis").data([1]);
+                        kpisG.enter()
+                            .append("g")
+                                .attr("class", "kpis")
+                                .merge(kpisG)
+                                .attr("transform", `translate(0, ${headerHeight + mediaHeight})`)
+                                .datum(profile.kpis)
+                                .call(kpis);
+
+                        kpisG.exit().remove();
+
+                        //back botright btn
+                        const backBotRightBtnG = backContentsG.selectAll("g.bottom-right-btn").data(botRightBtnData, d => d.key);
+                        backBotRightBtnG.enter()
+                            .append("g")
+                                .attr("class", "bottom-right-btn")
+                                .call(fadeIn, { transition:{ delay:TRANSITIONS.MED }})
+                                .each(function(d){
+                                    const btnG = d3.select(this);
+                                    btnG.append("path")
+                                        .attr("fill", grey10(5));
+
+                                    btnG.append("rect").attr("class", "btn-hitbox")
+                                        .attr("fill", "transparent")
+                                        //.attr("fill", "red")
+                                        .attr("opacity", 0.3)
+                                        .attr("stroke", "none")
                                 })
-                                //.kpiHeight(10)//kpiHeight)
-                                .fontSizes(4)//fontSizes.kpis)
-                                //.kpiFormat(kpiFormat)
-                                .displayFormat("stats")
-                                .withTooltips(false)
-                                .editable(false)
-                                .scrollable(false)
-                                .profileIsSelected(false)
+                                .merge(backBotRightBtnG)
+                                .attr("transform", `translate(${contentsWidth - btnWidth + btnMargin},${contentsHeight - btnHeight + btnMargin})`)
+                                .each(function(d){
+                                    const btnG = d3.select(this);
+                                    btnG.select("path")
+                                        .attr("transform", `scale(${scale(d)})`)
+                                        .attr("d", d.icon.d)
+                            
+                                    btnG.select("rect.btn-hitbox")
+                                        .attr("width", btnContentsWidth)
+                                        .attr("height", btnContentsHeight)
 
-                            const kpisG = backContentsG.selectAll("g.kpis").data([1]);
-                            kpisG.enter()
-                                .append("g")
-                                    .attr("class", "kpis")
-                                    .merge(kpisG)
-                                    .attr("transform", `translate(0, ${profileInfoHeight})`)
-                                    .datum(profile.kpis)
-                                    .call(kpis);
-                        }
+                                })
+                                .on("click", (e,d) => { 
+                                    d.onClick(e, d) 
+                                });
 
+                        backBotRightBtnG.exit().remove();
                     })
                     .call(drag)
                     .on("click", e => { 
@@ -728,6 +852,11 @@ export default function cardsComponent() {
     cards.onClickCard = function (value) {
         if (!arguments.length) { return onClickCard; }
         onClickCard = value;
+        return cards;
+    };
+    cards.onClickCardDate = function (value) {
+        if (!arguments.length) { return onClickCardDate; }
+        onClickCardDate = value;
         return cards;
     };
     cards.onClickCardTitle = function (value) {

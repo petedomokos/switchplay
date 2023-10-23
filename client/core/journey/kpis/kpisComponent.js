@@ -76,7 +76,7 @@ export default function kpisComponent() {
         contentsHeight = height - margin.top - margin.bottom;
 
         ctrlsWidth = contentsWidth * (contentsWidth < 200 ? 0.8 : 0.7);
-        ctrlsHeight = 0;// nrCtrlsButtons !== 0 ? 30 : 0;
+        ctrlsHeight = nrCtrlsButtons !== 0 ? contentsHeight * 0.15 : 0;
         ctrlsMargin = { left: contentsWidth * 0.1, right: contentsWidth * 0.1, top: ctrlsHeight * 0.1, bottom: ctrlsHeight * 0.1 };
         ctrlsContentsWidth = ctrlsWidth - ctrlsMargin.left - ctrlsMargin.right;
         ctrlsContentsHeight = ctrlsHeight - ctrlsMargin.top - ctrlsMargin.bottom;

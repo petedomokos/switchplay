@@ -8,6 +8,7 @@ import Typography from '@material-ui/core/Typography'
 import Icon from '@material-ui/core/Icon'
 import { makeStyles } from '@material-ui/core/styles'
 import SelectDate from "../../util/SelectDate";
+import { TrainRounded } from '@material-ui/icons'
 
 /*
 const useStyles = makeStyles(theme => ({
@@ -24,7 +25,7 @@ const useStyles = makeStyles(theme => ({
 */
 
 
-export default function MilestoneDate({ date, startDate, handleDateChange, handleCancelForm, handleSaveForm, classes, hasChanged, shouldAutosaveForm }) {
+export default function MilestoneDate({ date, startDate, handleDateChange, handleCancelForm, handleSaveForm, classes, hasChanged, shouldAutosaveForm, editable }) {
   //const classes = useStyles(styleProps);
   const defaultName = nr => nr < 0 ? `Past ${-nr}` : (nr > 0 ? `Future ${nr}` : "Current")
 
@@ -69,4 +70,13 @@ export default function MilestoneDate({ date, startDate, handleDateChange, handl
 }
 
 MilestoneDate.defaultProps = {
+  date:new Date() ,
+  startDate:new Date(),
+  handleDateChange:() => {}, 
+  handleCancelForm:() => {}, 
+  handleSaveForm:() => {},  
+  classes:{}, 
+  hasChanged:TrainRounded, 
+  shouldAutosaveForm:false,
+  editable:true
 }

@@ -4,7 +4,7 @@ import container from './kpis/kpi/container';
 import dragEnhancements from './enhancedDragHandler';
 
 //helpers
-const isSportsman = personType => ["footballer", "athlete", "boxer"].includes(personType);
+const isSportsman = () => true;// personType => ["footballer", "athlete", "boxer"].includes(personType);
 //note - for some user eg adults, the profile pages wont even render this info component
 const shouldShowTextInfo = (pageKey, personType) => pageKey === "profile" && (isSportsman(personType) || personType === "child");
 
@@ -16,7 +16,7 @@ export default function profileInfoComponent() {
     // dimensions
     let width = DIMNS.profile.width;
     let height = DIMNS.profile.height / 2;
-    let withTextInfo = false;
+    let withTextInfo = true;
     let textInfoHeight;
     let photoHeight;
 
@@ -51,23 +51,10 @@ export default function profileInfoComponent() {
     //let enhancedDrag = dragEnhancements();
     let dateIntervalTimer;
     let showDateCount = false;
-    let currentPage = PROFILE_PAGES[0];
+    let currentPage = PROFILE_PAGES[1];
 
     //dom
     let containerG;
-    /*
-    decide how user can change the main photo
-    (ideally, user should be able to have a different photo under current card for each path, but thats later)
-
-    refactor the way photos Data is created, both in hydrateUser and in Journey, so that each profile has a ne-item array
-    just as now, except the label in the item is the photoLabel of that profile, not always main
-
-    we also want some kind of carousel or gallery option for user to select a different photolabel for eahc profile
-
-    if user does this on current, then it updates the photo that is stored in "main" I think
-    Otherwise need a way to store photoLabel for current = could just store it on top level of Journey
-
-    */
 
     const photoZoom = d3.zoom();
     const photoDrag = d3.drag();
@@ -75,6 +62,19 @@ export default function profileInfoComponent() {
     function profileInfo(selection, options={}) {
         //console.log("profileinfo", height)
         const { transitionEnter=true, transitionUpdate=true } = options;
+
+        /*next - bring in cardsHeader as we will beed date and title, 
+        even tho title may be different to card title
+
+        but first, need to diecide ont design - how to incorporate photo with increments
+         - we dont really want parts of the photo shoiwing through - maybe just have the phots
+         only appear on the front card? so its a bit dynamic.
+
+         //will teh date relate to a specific session - no, its all sessions and date from the date range
+         //but this can be adjusted in settings to show a specific session
+
+
+        */
 
         // expression elements
         selection.each(function (data) {
@@ -87,6 +87,7 @@ export default function profileInfoComponent() {
         })
 
         function update(data){
+            //console.log("data", withTextInfo, data)
             const { id, firstname, surname, age, position, isCurrent, isFuture, settings, personType } = data;
             const photosData = isCurrent ? data.photos["profile"] : data.photos[currentPage.key];
 
@@ -101,26 +102,7 @@ export default function profileInfoComponent() {
                     .attr("rx", 3)
                     .attr("ry", 3)
 
-            //can use same enhancements object for outer and inner as click is same for both
             /*
-            enhancedDrag
-                .onDblClick(onDblClick)
-                .onClick(onClick);
-
-            const drag = d3.drag()
-                .on("start", enhancedDrag())
-                .on("drag", enhancedDrag())
-                .on("end", enhancedDrag());*/
-
-            // todo - append photo, name, age, pos
-            //helper
-            //todo next - new url
-
-            //const photoUrl = d => (`/users/${firstname}_${surname}/${d.label}.png`).toLowerCase();
-
-            //next - try a clipPath over the image
-            //also, longpress at bottom of kpiscoponent to create a new kpi
-            //and target completion
             const photoG = containerG.selectAll("g.photo").data(photosData);
             photoG.enter()
                 .append("g")
@@ -252,7 +234,7 @@ export default function profileInfoComponent() {
                     }
                 }))
 
-            photoG.exit().remove();
+            photoG.exit().remove();*/
 
             const format = d3.timeFormat("%_d %b, %y");
 
@@ -280,7 +262,7 @@ export default function profileInfoComponent() {
             //settings are only defined for current card
             const currentValueDataMethod = settings?.find(s => s.key === "currentValueDataMethod");
             
-            const dateG = containerG.selectAll("g.date").data([data])
+            /*const dateG = containerG.selectAll("g.date").data([data])
             dateG.enter()
                 .append("g")
                     .attr("class", "date date-info")
@@ -416,8 +398,9 @@ export default function profileInfoComponent() {
                     dateIntervalTimer.stop();
                     dateIntervalTimer = null;
                 })
-                .remove();
+                .remove();*/
 
+            /*
             const textInfoG = containerG.selectAll("g.text-info").data(withTextInfo ? [data] : []);
             textInfoG.enter()
                 .append("g")
@@ -532,7 +515,7 @@ export default function profileInfoComponent() {
 
                     })
 
-            textInfoG.exit().remove();
+            textInfoG.exit().remove();*/
 
         }
 

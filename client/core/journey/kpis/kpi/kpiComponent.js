@@ -211,12 +211,13 @@ export default function kpiComponent() {
                 .margin((d,i) => dimns[d.key].titleDimns.margin)
                 .styles((d,i) => ({
                     primaryTitle:{ 
-                        fontSize:3,//dimns[d.key].titleDimns.fontSize,
-                        strokeWidth:0.1,
+                        //fontSize:3,//dimns[d.key].titleDimns.fontSize,
+                        strokeWidth:0.075,
                         ..._styles(d,i).name,
                         dominantBaseline:"hanging",//central",
                         fontFamily:"helvetica, sans-serifa",
-                        fill:grey10(4),
+                        fill:grey10(5),
+                        stroke:grey10(5)
                     },
                     secondaryTitle:{
 

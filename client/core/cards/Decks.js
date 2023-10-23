@@ -10,6 +10,7 @@ import milestonesLayout from "../journey/milestonesLayout";
 import ItemForm from "./forms/ItemForm";
 import DeckTitleForm from './forms/DeckTitleForm';
 import CardTitleForm from './forms/CardTitleForm';
+import CardDateForm from "./CardDateForm";
 import PurposeParagraphForm from './forms/PurposeParagraphForm';
 import { sortAscending, moveElementPosition } from '../../util/ArrayHelpers';
 import { isNumber } from '../../data/dataHelpers';
@@ -358,6 +359,22 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       }
     }
 
+    if(formType === "card-date"){
+      //select the correct deck and card
+      const cardG = d3.select(containerRef.current)
+        .selectAll("g.deck").filter(deckD => deckD.id === selectedDeckId)
+        .selectAll("g.card").filter(cardD => cardD.cardNr === form.value.cardNr);
+
+      const deckToCardContentsPos = getPosition(cardG.select("g.card-contents"), "deck")
+      const cardScale = getTransformationFromTrans(cardG.attr("transform")).scaleX;
+      return {
+        width:100,
+        height:100,
+        left: cardScale === 1 ? deckToCardContentsPos.x * zoomScale * 1.15 : 30,
+        top:deckToCardContentsPos.y * zoomScale * 0.95 +(cardScale === 1 ? 0 : 10)
+      }
+    }
+
     if(formType === "purpose"){
       return {
         width: formDimns.width * zoomScale,
@@ -375,6 +392,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
+    console.log("bgClick")
     e.stopPropagation();
     //bg click shouldnt change anything else if its just clicking to comeo out a form
     if(form){  
@@ -637,6 +655,58 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
     //need to add a zoomlayerG inside the svg which gets zoomed when svg is acted on
   }, [data])
 
+
+  //DATE
+  if(form){
+    //console.log("form", form)
+  }
+
+
+  const handleDateChange = useCallback(dateKey => e => {
+    console.log("date change", dateKey)
+    //do date change here, then do saving, plus put last couple of props into DateForm that are commented out
+    if(!e.target?.value){ return; }
+    const dateValue = e.target.value; //must declare it before the setform call as the cb messes the timing of updates up
+    if(dateKey === "startDate"){
+      //save it as a startdate and a custom date too
+      setForm(prevState => ({ ...prevState, hasChanged:true, value:{ ...prevState.value, startDate:dateValue, customStartDate:dateValue } }))
+    }else{
+      //its just a date
+      setForm(prevState => ({ ...prevState, hasChanged:true, value:{ ...prevState.value, date:dateValue } }))
+    }
+  }, [form]);
+
+  const handleCancelForm = useCallback(e => {
+    console.log("cancel form")
+    //milestonesBar.updateDatesShown(allMilestones);
+    setForm(null);
+  }, [form]);
+
+  const handleSaveDate = useCallback(e => {
+    const newStartDateValue = form.value.startDate;
+    const newDateValue = form.value.date;
+    const newDate = new Date(newDateValue);
+    newDate.setUTCHours(12);
+    const newStartDate = new Date(newStartDateValue);
+    newStartDate.setUTCHours(12);
+    if(newStartDate && newDate < newStartDate){
+      alert("The start date must be earlier than the target date.")
+      return;
+    }
+    const card = selectedDeck.cards.find(c => c.cardNr === form.value.cardNr)
+    if(newStartDate){
+      updateCard({ ...card, date:newDate, startDate:newStartDate })
+    }else{
+      updateCard({ ...card, date:newDate })
+    }
+    
+    setForm(null);
+
+    //@Todo - adjust the card order if required - remove cardNr from persistance (add it in hydrate func), just rearrange array order and persist it like that
+    //see MilestoneDate Component for code
+    //cardNr can be added in hydration
+}, [form, selectedDeckId]);
+
   return (
     <div className={`cards-root ${classes.root}`} onClick={onClickBg} >
       {data.map(deckData => 
@@ -671,6 +741,13 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
         {form?.formType === "purpose" && 
           <PurposeParagraphForm deck={selectedDeck} paraD={form.value} save={updatePurposeParagraph} close={() => setForm(null)}
             dimns={getFormDimns()} 
+          />
+        }
+        {form?.formType === "card-date" && 
+          <CardDateForm dimns={getFormDimns()} date={form.value.date} startDate={form.value.startDate} 
+              handleDateChange={handleDateChange} handleCancelForm={handleCancelForm} handleSave={handleSaveDate}
+              hasChanged={form.hasChanged}
+            
           />
         }
       </div>

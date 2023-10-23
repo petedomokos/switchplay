@@ -100,9 +100,11 @@ export default function cardHeaderComponent() {
 
     let editable;
     let selectedSectionNr;
+    let rightContent = "progress";
 
     //API CALLBACKS
     let onClick = function(){};
+    let onClickDate = function(){};
     let onClickTitle = function(){};
     let onMouseover = function(){};
     let onMouseout = function(){};
@@ -179,7 +181,7 @@ export default function cardHeaderComponent() {
                                     contentsG.select("text.primary")
                                         .attr("x", titleContentsWidth/2)
                                         .attr("y", titleContentsHeight/2)
-                                        .attr("font-size", titleContentsHeight * 0.5)
+                                        .attr("font-size", titleContentsHeight * 0.4)
                                         .attr("stroke", grey10(7))
                                         .attr("stroke-width", 0.1)
                                         //.attr("fill", d.isFuture ? "grey" : "white")
@@ -232,6 +234,7 @@ export default function cardHeaderComponent() {
                                             .attr("stroke", "none");  
                                 })
                                 .merge(progressSummaryG)
+                                .attr("display", rightContent === "progress" ? null : "none")
                                 .attr("transform", `translate(${dateWidth + titleWidth},${0})`)
                                 .each(function(d,i){
                                     const { isFront, isNext, isSecondNext, isSelected, isHeld } = d;
@@ -316,7 +319,7 @@ export default function cardHeaderComponent() {
 
                                     contentsG.select("text.primary")
                                         .attr("transform", d => `translate(${dateContentsWidth/2},${dateContentsHeight/2}) rotate(-45)`)
-                                        .attr("font-size", dateHeight * 0.3)
+                                        .attr("font-size", dateHeight * 0.25)
                                         .attr("stroke", styles.date.stroke)
                                         .attr("stroke-width", styles.date.strokeWidth)
                                         .attr("fill", styles.date.fill)
@@ -327,6 +330,7 @@ export default function cardHeaderComponent() {
                                         .attr("height", dateHeight)
                                         .on("click", (e,d) => { onClick.call(this, e, d, data, "date") })
                                 })
+                                .on("click", onClickDate)
 
                         dateG.exit().remove();
 
@@ -375,8 +379,8 @@ export default function cardHeaderComponent() {
                                     const numberHeight = contentsHeight * 0.65;
                                     const wordsHeight = contentsHeight - numberHeight;
 
-                                    const numberFontSize = numberHeight * 0.9;
-                                    const wordsFontSize = wordsHeight * 0.9;
+                                    const numberFontSize = numberHeight * 0.7;
+                                    const wordsFontSize = wordsHeight * 0.7;
 
                                     const extraShiftUp = 1.5;
                                     const extraGapBetween = 0;// height < 30 ? 5 : 0;
@@ -410,6 +414,7 @@ export default function cardHeaderComponent() {
                                         .attr("height", height);
 
                                 })
+                                .on("click", onClickDate)
 
                         dateCountG.exit()
                             .each(() => {
@@ -463,10 +468,20 @@ export default function cardHeaderComponent() {
         selectedSectionNr = value;
         return header;
     };
+    header.rightContent = function (value) {
+        if (!arguments.length) { return rightContent; }
+        rightContent = value;
+        return header;
+    };
    
     header.onClick = function (value) {
         if (!arguments.length) { return onClick; }
         onClick = value;
+        return header;
+    };
+    header.onClickDate = function (value) {
+        if (!arguments.length) { return onClickDate; }
+        onClickDate = value;
         return header;
     };
     header.onClickTitle = function (value) {

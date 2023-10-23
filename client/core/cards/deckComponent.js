@@ -741,6 +741,12 @@ export default function deckComponent() {
                         .x(cardX)
                         .y(cardY)
                         .onSelectItem(onSelectItem)
+                        .onClickCardDate((cardD,i) => {
+                            setForm({
+                                formType: "card-date",
+                                value:cardD
+                            })
+                        })
                         .onClickCardTitle((cardD, i, cardDimns) => {
                             setForm({ 
                                 formType: "card-title", 
