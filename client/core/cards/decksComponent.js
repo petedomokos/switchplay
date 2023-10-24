@@ -88,16 +88,11 @@ export default function decksComponent() {
                     .attr("width", width)
                     .attr("height", height)*/
 
-                const time = new Date().getUTCSeconds()
-                console.log("decks update", time)
-                alert(`deck-${time}`)
-
-
                 const deckG = containerG.selectAll("g.deck").data(decksData, d => d.id);
                 deckG.enter()
                     .append("g")
                         .attr("class", d => `deck deck-${d.id}`)
-                        //.call(fadeIn, { transition:{ duration: 1000 /*TRANSITIONS.MED*/ } })
+                        .call(fadeIn, { transition:{ duration: TRANSITIONS.MED } })
                         .each(function(d,i){
                             deckComponents[d.id] = deckComponent();
                         })
