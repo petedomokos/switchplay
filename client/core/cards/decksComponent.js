@@ -88,9 +88,9 @@ export default function decksComponent() {
                     .attr("width", width)
                     .attr("height", height)*/
 
-                const time = new Date().getTime()
+                const time = new Date().getUTCSeconds()
                 console.log("decks update", time)
-                alert(`update time-${time}`)
+                alert(`deck-${time}`)
 
 
                 const deckG = containerG.selectAll("g.deck").data(decksData, d => d.id);
