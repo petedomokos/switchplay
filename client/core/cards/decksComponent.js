@@ -92,7 +92,7 @@ export default function decksComponent() {
                 deckG.enter()
                     .append("g")
                         .attr("class", d => `deck deck-${d.id}`)
-                        .call(fadeIn)
+                        .call(fadeIn, { transition:{ duration: TRANSITIONS.MED } })
                         .each(function(d,i){
                             deckComponents[d.id] = deckComponent();
                         })

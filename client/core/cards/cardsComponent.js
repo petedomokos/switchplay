@@ -559,7 +559,11 @@ export default function cardsComponent() {
                             .scrollable(false)
                             .profileIsSelected(false)
 
-                        /*const kpisG = backContentsG.selectAll("g.kpis").data(isNumber(selectedSectionNr) ? [] : [1]);
+                        const shouldShowKpis = deckIsSelected && isFront && cardsAreFlipped && !isNumber(selectedSectionNr);
+                        if(deckIsSelected && isFront)
+                        console.log("shouldShowKpis", shouldShowKpis)
+
+                        const kpisG = backContentsG.selectAll("g.kpis").data(shouldShowKpis ? [1] : []);
                         kpisG.enter()
                             .append("g")
                                 .attr("class", "kpis")
@@ -569,7 +573,7 @@ export default function cardsComponent() {
                                 .datum(profile.kpis)
                                 .call(kpis);
 
-                        kpisG.exit().remove();*/
+                        kpisG.exit().remove();
                     })
                     .call(drag)
                     .on("click", e => { 
