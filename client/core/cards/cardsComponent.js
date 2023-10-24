@@ -513,7 +513,7 @@ export default function cardsComponent() {
                             .width(contentsWidth)
                             .height(mediaHeight)
 
-                        const mediaG = backContentsG.selectAll("g.profile-info").data([1]);
+                        const mediaG = backContentsG.selectAll("g.profile-info").data(deckIsSelected && isFront && cardsAreFlipped ? [1] : []);
                         mediaG.enter()
                             .append("g")
                                 .attr("display", cardsAreFlipped ? null : "none")

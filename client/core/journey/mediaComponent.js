@@ -150,7 +150,7 @@ export default function mediaComponent() {
 
                         photoG.select("image")  
                             //.attr("width", width)
-                            //.attr("xlink:href", d.url)
+                            .attr("xlink:href", d.url)
                             .attr("transform", d.transform)
                             //.attr("height", photoHeight)
 
