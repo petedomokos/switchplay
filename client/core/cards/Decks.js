@@ -99,6 +99,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
   //this one stores the prev zoom state before a zoom to select a deck, so we know where excactly to return to
   const zoomStateRef = useRef(d3.zoomIdentity);
+  const zoomCallbackRef = useRef(null);
   //this one defaults to null and is used to check lpdrag - to cancel out the transform if the lpis used to drag a deck instead
   //using a pseudo call to deck.handleDrag
   const zoomTransformLpStartRef = useRef(null);
@@ -248,11 +249,16 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       //first tell CardsTable so it can remove top margin
       setSel("")
       //zoom out
+
+      zoomCallbackRef.current = () => {
+        alert("zoom cb")
+        setSelectedDeckId("");
+      }
       d3.select(zoomRef.current).call(zoom.transform, zoomStateRef.current)
       //dont add all decks until after zoom
-      setTimeout(() => {
+      /*setTimeout(() => {
         setSelectedDeckId("");
-      }, TRANSITIONS.MED)
+      }, TRANSITIONS.MED - 100)*/
       
     }
   }, [stringifiedData, width, height, selectedDeckId]);
@@ -618,9 +624,14 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
         .transition()
         .duration(TRANSITIONS.MED)
           .attr("transform", e.transform)
+            .on("end", () => {
+              if(zoomCallbackRef.current){
+                zoomCallbackRef.current();
+                zoomCallbackRef.current = null;
+              }
+            })
     }
     function zoomEnd(e){
-      //console.log("zoomEnd-------", zoomTransformLpStartRef.current)
       e.sourceEvent?.stopPropagation();
       if(zoomTransformLpStartRef.current){
         //console.log("do nothing")
