@@ -250,14 +250,15 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       setSel("")
       //zoom out
 
-      zoomCallbackRef.current = () => {
+      /*zoomCallbackRef.current = () => {
+        console.log("zoomcb")
         setSelectedDeckId("");
-      }
+      }*/
       d3.select(zoomRef.current).call(zoom.transform, zoomStateRef.current)
       //dont add all decks until after zoom
-      /*setTimeout(() => {
+      setTimeout(() => {
         setSelectedDeckId("");
-      }, TRANSITIONS.MED - 100)*/
+      }, 500)
       
     }
   }, [stringifiedData, width, height, selectedDeckId]);
