@@ -240,26 +240,21 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       //the extrahozShift is an abs amount to get it to center of screen so shouldnt be scaled up
       const newTransformState = d3.zoomIdentity.translate(newX * newK + extraHozShiftToCentreWhenSelected, newY * newK).scale(newK);
       d3.select(zoomRef.current).call(zoom.transform, newTransformState)
-      //fade the decks that will remian non-selected out
-      d3.select(containerRef.current).selectAll("g.deck").filter(d => d.id !== id)
-        .attr("opacity", 1)
-        .transition("deck-opacity")
-        .duration(TRANSITIONS.MED)
-          .attr("opacity", 0.3)
+      //if req, update state in react, may need it with delay so it happens at end of zoom
+      setSelectedDeckId(id);
+      setSel(id)
     }else{
       //return to multideck view
-      
-      //fade the non-selected decks back in
-      d3.select(containerRef.current).selectAll("g.deck").filter(d => d.id !== selectedDeckId)
-        .transition("deck-opacity")
-        .duration(TRANSITIONS.MED)
-          .attr("opacity", 1)
+      //first tell CardsTable so it can remove top margin
+      setSel("")
+      //zoom out
       d3.select(zoomRef.current).call(zoom.transform, zoomStateRef.current)
+      //dont add all decks until after zoom
+      setTimeout(() => {
+        setSelectedDeckId("");
+      }, TRANSITIONS.MED)
+      
     }
-
-    //if req, update state in react, may need it with delay so it happens at end of zoom
-    setSelectedDeckId(id);
-    setSel(id)
   }, [stringifiedData, width, height, selectedDeckId]);
 
   const onSelectItem = useCallback((item) => {
@@ -488,7 +483,8 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
     //console.log("ordered", profilesData)
 
     //decksdata
-    const processedDeckData = data
+    const decksToDisplay = selectedDeckId ? [selectedDeck] : data;
+    const processedDeckData = decksToDisplay
       .map(deckData => layout(deckData))
       .map(d => ({
         ...d,
@@ -606,7 +602,6 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       e.sourceEvent?.stopPropagation();
     }
     function zoomed(e){
-      //console.log("zoomed", e.transform)
       if(zoomTransformLpStartRef.current){
         //do nothing as this is just a call to reset transform 
         return;

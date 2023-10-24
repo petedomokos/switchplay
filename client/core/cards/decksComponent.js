@@ -3,6 +3,7 @@ import { grey10, COLOURS, TRANSITIONS } from "./constants";
 import { updateTransform } from '../journey/transitionHelpers';
 import deckComponent from './deckComponent';
 import { getTransformationFromTrans } from '../journey/helpers';
+import { fadeIn, remove } from '../journey/domHelpers';
 
 const transformTransition = { update: { duration: TRANSITIONS.MED } };
 
@@ -91,6 +92,7 @@ export default function decksComponent() {
                 deckG.enter()
                     .append("g")
                         .attr("class", d => `deck deck-${d.id}`)
+                        .call(fadeIn)
                         .each(function(d,i){
                             deckComponents[d.id] = deckComponent();
                         })
@@ -224,7 +226,7 @@ export default function decksComponent() {
                             d3.select(this).call(deck)
                         })
 
-                deckG.exit().remove();
+                deckG.exit().call(remove, { transition:{ duration:100 } });
 
                 //new deck icon
                 const deckWidth = _deckWidth();
