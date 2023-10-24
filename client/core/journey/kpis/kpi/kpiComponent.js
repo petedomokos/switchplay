@@ -164,7 +164,7 @@ export default function kpiComponent() {
         const { transitionEnter=true, transitionUpdate=true, log } = options;
         updateDimns(selection.data());
         updateComponents(selection.data());
-        //console.log("kpi", selection.data())
+        //console.log("kpi", selection.datum())
 
         /*const drag = d3.drag()
             .on("start", enhancedDrag())
@@ -195,7 +195,7 @@ export default function kpiComponent() {
                     //stroke:"none",
                     //strokeWidth:0.05,
                     //need to trabnsition bg, but may aswell just be transparent
-                    fill:"none",// i % 2 === 0 ? grey10(2) : "white"// "transparent"
+                    fill: "none"//i % 2 === 0 ? grey10(7) : "white"// "transparent"
                 })))
             .call(container().className("name"))
             //.call(container().className("non-selected-progress-bar")

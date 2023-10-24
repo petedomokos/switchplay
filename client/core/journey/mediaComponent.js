@@ -1,8 +1,9 @@
 import * as d3 from 'd3';
-import { DIMNS, PROFILE_PAGES, grey10, OVERLAY } from "./constants";
+import { DIMNS, PROFILE_PAGES, grey10, OVERLAY, TRANSITIONS } from "./constants";
 import container from './kpis/kpi/container';
 import dragEnhancements from './enhancedDragHandler';
 import { icons } from '../../util/icons';
+import { fadeIn, remove } from '../journey/domHelpers';
 
 //helpers
 const isSportsman = () => true;// personType => ["footballer", "athlete", "boxer"].includes(personType);
@@ -109,6 +110,7 @@ export default function mediaComponent() {
             photoG.enter()
                 .append("g")
                     .attr("class", "photo")
+                    .call(fadeIn, { transition:{ duration:700 } })
                     .each(function(d){
                         const photoG = d3.select(this);
                         d3.select("svg#milestones-bar").select('defs')
@@ -257,7 +259,7 @@ export default function mediaComponent() {
                     }
                 }))*/
 
-            photoG.exit().remove();
+            photoG.exit().call(remove);
         }
 
         return selection;

@@ -414,7 +414,7 @@ export default function cardsComponent() {
                             onClick:e => { onClickCard(e, cardD) },
                             icon:icons.collapse,
                         }
-                        const botRightBtnData = isNumber(selectedSectionNr) ? [] : (isSelected ? [collapseBtnDatum] : [expandBtnDatum]);
+                        const botRightBtnData = isNumber(selectedSectionNr) || !isFront ? [] : (isSelected ? [collapseBtnDatum] : [expandBtnDatum]);
                         const btnHeight = d3.max([1, d3.min([15, 0.12 * normalContentsHeight])]);
                         const btnWidth = btnHeight;
                         //assumme all are square
@@ -459,11 +459,6 @@ export default function cardsComponent() {
 
 
                         //BACK CONTENTS ---------------------------------------
-                        /*  - add links to different videos for left and right of each card - not just default image
-                         - transition to show card being flipped
-                         - fix zooming issues - when more than one deck, the back contentsare making it not smooth
-
-                        */
                         //header
                         const backHeader = backHeaderComponents[cardNr]
                             .width(contentsWidth)
@@ -513,7 +508,8 @@ export default function cardsComponent() {
                             .width(contentsWidth)
                             .height(mediaHeight)
 
-                        const mediaG = backContentsG.selectAll("g.profile-info").data(deckIsSelected && isFront && cardsAreFlipped ? [1] : []);
+                        const shouldShowMedia = isFront && cardsAreFlipped && !isNumber(selectedSectionNr);
+                        const mediaG = backContentsG.selectAll("g.profile-info").data(shouldShowMedia ? [1] : []);
                         mediaG.enter()
                             .append("g")
                                 .attr("display", cardsAreFlipped ? null : "none")
@@ -529,7 +525,7 @@ export default function cardsComponent() {
                                     transitionOut:{ delay: 200, duration:200 }
                                 });
 
-                                mediaG.exit().remove();
+                        mediaG.exit().remove();
                         
                         
 
@@ -563,12 +559,13 @@ export default function cardsComponent() {
                             .scrollable(false)
                             .profileIsSelected(false)
 
-                        const kpisG = backContentsG.selectAll("g.kpis").data([1]);
+                        const kpisG = backContentsG.selectAll("g.kpis").data(isNumber(selectedSectionNr) ? [] : [1]);
                         kpisG.enter()
                             .append("g")
                                 .attr("class", "kpis")
                                 .merge(kpisG)
                                 .attr("transform", `translate(0, ${headerHeight + mediaHeight})`)
+                                .call(fadeInOut, isFront)
                                 .datum(profile.kpis)
                                 .call(kpis);
 
@@ -775,8 +772,8 @@ export default function cardsComponent() {
     cards.selectedSectionNr = function (value) {
         if (!arguments.length) { return selectedSectionNr; }
         selectedSectionNr = value;
-        Object.values(headerComponents).forEach(headerComponent => {
-            headerComponent.selectedSectionNr(value);
+        Object.values(frontHeaderComponents).forEach(header => {
+            header.selectedSectionNr(value);
         })
         Object.values(itemsComponents).forEach(itemsComponent => {
             itemsComponent.selectedSectionNr(value);

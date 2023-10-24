@@ -462,8 +462,7 @@ export default function progressBarComponent() {
         //which is what dimnns needs
 
         let totalValueDelta = 0;
-        selection.select("g.tooltips")
-            .attr("display", "none")
+        /*selection.select("g.tooltips")
             .data(enrichedTooltipsData)
             .call(tooltips
                 .width((d,i) => dimns[i].contentsWidth)
@@ -551,11 +550,9 @@ export default function progressBarComponent() {
                             return tooltips.open.expected.height/2;
                         }
                         //expectedSteps
-                        /*
-                        if(d.rowNr === -1){
-                            return heightAboveBottomTooltips + tooltips.open.expectedSteps.height/2;
-                        }
-                        */
+                        //if(d.rowNr === -1){
+                            //return heightAboveBottomTooltips + tooltips.open.expectedSteps.height/2;
+                        //}
                         return 0;
                     }
                     //closed
@@ -567,22 +564,6 @@ export default function progressBarComponent() {
                     //@todo - impl the code below, by refactoring the way tooltips are keyed so teh key that you click 
                     //(eg end) is same as the key that gets set to editing (eg target)
                     //so should have same key name, but have another property to determine if its the editing version or the display version
-                    /*
-                    if(editing?.desc !== d.key){
-                        editing = { milestoneId:d.milestoneId, desc:d.key }
-                        console.log("set edit to ", editing)
-                        selection.call(progressBar)
-                        //tell react so overlay can be applied
-                        onSetEditing(editing);
-                        return;
-                    } else{
-                        //cancel editing
-                        editing = null
-                        selection.call(progressBar)
-                        //tell react so overlay can be removed
-                        onSetEditing(null)
-                    }
-                    */
 
                     //for now, handle each case separately
                     //CASE 1 - START
@@ -653,14 +634,6 @@ export default function progressBarComponent() {
                     const newX = translateX + e.dx;
                     d3.select(this).attr("transform", `translate(${newX},${translateY})`)
                     //update bar standardsLine position
-                    /*
-                    const progBarG = this.parentNode.parentNode;
-                    d3.select(progBarG).select("g.standards").selectAll("g.standard").each(function(d,i){
-                        const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
-                        const newX = translateX + e.dx;
-                        d3.select(this).attr("transform", `translate(${newX},${translateY})`)
-                    })
-                    */
 
                     //update tooltip value
                     const scale = xScales[d.progBarKey];
@@ -724,7 +697,7 @@ export default function progressBarComponent() {
                 })
                 .onMouseout(function(e,d){
                     //console.log("mout")
-                }))
+                }))*/
 
         return selection;
     }

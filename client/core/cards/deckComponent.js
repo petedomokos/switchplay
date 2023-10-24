@@ -786,7 +786,7 @@ export default function deckComponent() {
 
 
             //controls
-            const controlsData = [
+            const controlsData = cardsAreFlipped ? [] : [
                 { key:"section-view" }
             ];
 

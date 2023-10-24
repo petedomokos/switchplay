@@ -122,6 +122,11 @@ export default function decksComponent() {
                                     const fadeDuration = 100;
                                     const flipDuration = 300;
 
+                                    setTimeout(() => {
+                                        cardsAreFlipped = !cardsAreFlipped;
+                                        update(decksData)
+                                    }, fadeDuration + flipDuration + fadeDuration)
+
                                     containerG.selectAll("g.card")
                                         //.filter(d => d.isHeld)
                                         .each(function(d){
@@ -177,28 +182,24 @@ export default function decksComponent() {
                                                                     .attr("width", cardWidth)
                                                         })
 
-                                                const selectionOut = flippingToBack ?  cardG.select("g.front-contents") : cardG.select("g.back-contents");
-                                                const selectionIn = flippingToBack ?  cardG.select("g.back-contents") : cardG.select("g.front-contents");
-                                                selectionOut
-                                                    .attr("opacity", 1)
-                                                    .attr("display", null)
-                                                        .transition("front-out")
-                                                        .duration(fadeDuration)
-                                                            .attr("opacity", 0)
-                                                                .on("end", function(){
-                                                                    d3.select(this).attr("display", "none");
-                                                                    selectionIn
-                                                                        .attr("opacity", 0)
-                                                                        .attr("display", null)
-                                                                        .transition("back-in")
-                                                                        .delay(flipDuration) //add remainder of first trans plus whole of second
-                                                                        .duration(fadeDuration)
-                                                                            .attr("opacity", 1)
-                                                                            .on("end", () => {
-                                                                                cardsAreFlipped = !cardsAreFlipped;
-                                                                                update(decksData)
-                                                                            })
-                                                                })
+                                            const selectionOut = flippingToBack ?  cardG.select("g.front-contents") : cardG.select("g.back-contents");
+                                            const selectionIn = flippingToBack ?  cardG.select("g.back-contents") : cardG.select("g.front-contents");
+                                            selectionOut
+                                                .attr("opacity", 1)
+                                                .attr("display", null)
+                                                    .transition("front-out")
+                                                    .duration(fadeDuration)
+                                                        .attr("opacity", 0)
+                                                            .on("end", function(){
+                                                                d3.select(this).attr("display", "none");
+                                                                selectionIn
+                                                                    .attr("opacity", 0)
+                                                                    .attr("display", null)
+                                                                    .transition("back-in")
+                                                                    .delay(flipDuration) //add remainder of first trans plus whole of second
+                                                                    .duration(fadeDuration)
+                                                                        .attr("opacity", 1);
+                                                            })
                                         })
                                 })
                                 .onSetContent(function(content){

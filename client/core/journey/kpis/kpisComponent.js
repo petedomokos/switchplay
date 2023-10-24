@@ -199,7 +199,6 @@ export default function kpisComponent() {
             const { kpisData, milestoneId } = data;
             const nrDefenceKpis = kpisData.filter(kpi => kpi.orientationFocus === "defence").length;
             //const attackKpisData = kpisData.filter(kpi => kpi.orientationFocus === "attack")
-            //console.log("def", defenceKpisData)
             //next - go down this file implementing two nest lists instead, 
             //but all one list just display with a label before each nest
             openedKpiDiv = d3.select(`div#opened-kpi-${milestoneId}`)
@@ -336,14 +335,6 @@ export default function kpisComponent() {
                     .attr("transform", `translate(${margin.left},${margin.top})`)
                     .each(function(){
                         const contentsG = d3.select(this);
-                        /*
-                        these rect increases now occur in updateselected function.
-                        @todo - check that the only time they need to increase is when a kpi is selected
-                        contentsG.select("rect.contents-bg")
-                            .attr("width", contentsWidth)
-                            .attr("height", contentsHeight)
-                        */
-
                         //kpi list
                         //scroll
                         //todo - 1. put clipPath in place
@@ -445,11 +436,6 @@ export default function kpisComponent() {
                                 .height((d,i) => status(d) === "open" || status(d) === "closing" ? openedKpiHeight : kpiHeight)
                                 //.status(d => status(d) || "closed")
                                 .displayFormat(displayFormat)
-                                /*
-                                //we pass thru the 2 geNrNumbers and getNrEndTooltips funcs here, and then the open/closed progressbars can use it to calc 
-                                //the space rrequired, even though some of them wont actually display anything
-                                //no need to pass through the editing status as we dont want that to afect any positions
-                                */
                                 .getNrEndTooltips(getNrEndTooltips)
                                 .getNrNumbers(getNrNumbers)
                                 .margin(() => kpiMargin)
@@ -607,6 +593,8 @@ export default function kpisComponent() {
     }
 
     function updateSelected(key, data, shouldUpdateScroll=false, shouldUpdateDom=false){
+        console.log("updateSelected")
+        return;
         const { kpisData } = data;
         const newSelectedDatum = kpisData.find(d => d.key === key);
         //console.log("updateSel key--------------", key)

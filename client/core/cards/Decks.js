@@ -392,7 +392,6 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
-    console.log("bgClick")
     e.stopPropagation();
     //bg click shouldnt change anything else if its just clicking to comeo out a form
     if(form){  
