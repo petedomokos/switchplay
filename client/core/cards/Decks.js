@@ -365,7 +365,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
         .selectAll("g.deck").filter(deckD => deckD.id === selectedDeckId)
         .selectAll("g.card").filter(cardD => cardD.cardNr === form.value.cardNr);
 
-      const deckToCardContentsPos = getPosition(cardG.select("g.card-contents"), "deck")
+      const deckToCardContentsPos = getPosition(cardG.select("g.card-front-contents"), "deck")
       const cardScale = getTransformationFromTrans(cardG.attr("transform")).scaleX;
       return {
         width:100,

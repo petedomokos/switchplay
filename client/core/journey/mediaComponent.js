@@ -150,8 +150,8 @@ export default function mediaComponent() {
 
                         photoG.select("image")  
                             //.attr("width", width)
-                            .attr("xlink:href", d.url)
-                            .attr("transform", "scale(0.0675)")
+                            //.attr("xlink:href", d.url)
+                            .attr("transform", d.transform)
                             //.attr("height", photoHeight)
 
                         const videoIconG = photoG.select("g.video-icon")
@@ -161,6 +161,8 @@ export default function mediaComponent() {
                             .attr("d", icons.video.d)
 
                         //console.log("actual w h", img.attr("width"), img.attr("height"))
+
+                        //mit kereset isten a napallimban (sarga)
                     })
                     //.on("click", (e,d) => {
                         //console.log("native photo click")

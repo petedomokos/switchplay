@@ -45,8 +45,16 @@ export default function milestonesLayout(){
                             goal:isCurrent ? null : [{ key:"goal", url:getURL(goalMedia.mediaId, "goal"), ...goalMedia }],
                             //profile:[{ key:"profile", url:getURL(profileMedia.mediaId, "profile"), ...profileMedia }]
                             profile:[
-                                { key:"profile-1", url:'/api/users/defaultphoto', ...profileMedia, isVideo:true },
-                                { key:"profile-2", url:'/api/users/defaultphoto', ...profileMedia, isVideo:true }
+                                { 
+                                    key:"profile-1", url:'/api/users/defaultphoto', 
+                                    transform:`scale(0.0675)`,
+                                    ...profileMedia, isVideo:true 
+                                },
+                                { 
+                                    key:"profile-2", url:'/manOnMountain.png', 
+                                    transform:`scale(0.09)`,
+                                    ...profileMedia, isVideo:true 
+                                }
                             ]
                         },
                         age:playerAge, 

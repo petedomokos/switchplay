@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { grey10, COLOURS, TRANSITIONS } from "./constants";
 import { updateTransform } from '../journey/transitionHelpers';
 import deckComponent from './deckComponent';
+import { getTransformationFromTrans } from '../journey/helpers';
 
 const transformTransition = { update: { duration: TRANSITIONS.MED } };
 
@@ -117,8 +118,88 @@ export default function decksComponent() {
                                 .getCell(getCell)
                                 .onClickDeck(onClickDeck)
                                 .onFlipCards(() => {
-                                    cardsAreFlipped = !cardsAreFlipped;
-                                    update(decksData)
+                                    const flippingToBack = !cardsAreFlipped;
+                                    const fadeDuration = 100;
+                                    const flipDuration = 300;
+
+                                    containerG.selectAll("g.card")
+                                        //.filter(d => d.isHeld)
+                                        .each(function(d){
+                                            const cardG = d3.select(this);
+                                            const { translateX, translateY, scaleX } = getTransformationFromTrans(cardG.attr("transform"));
+
+                                            //the bottom right button must fade out and in 
+                                            cardG.select("g.bottom-right-btn")
+                                                .attr("opacity", 1)
+                                                    .transition("button-out")
+                                                    .duration(fadeDuration)
+                                                        .attr("opacity", 0)
+                                                            .on("end", function(){
+                                                                d3.select(this)
+                                                                    .transition("button-in")
+                                                                    .delay(flipDuration)
+                                                                    .duration(fadeDuration)
+                                                                        .attr("opacity", 1)
+                                                            })
+
+                                            //the card must slide across and back so it remains centred as width reduces and increases again
+                                            //we use front with wlog as both are same
+                                            const cardWidth = cardG.select("rect.card-front-bg").attr("width")
+                                            cardG
+                                                .transition("card-pos-1")
+                                                .delay(fadeDuration * 0.8)
+                                                .duration(flipDuration/2)
+                                                    .attr("transform", `translate(${translateX + cardWidth/2},${translateY}) scale(${scaleX})`)
+                                                        .on("end", function(){
+                                                            d3.select(this)
+                                                                .transition("card-pos-2")
+                                                                .duration(flipDuration/2)
+                                                                    .attr("transform", `translate(${translateX},${translateY}) scale(${scaleX})`)
+                                                        })
+                                            
+                                            //Both bgs must slide onto width 0 then back out (note - one of their display switches over at 0)
+                                            cardG.selectAll("rect.card-bg")
+                                                .transition("reduce-width")
+                                                .delay(fadeDuration * 0.8)
+                                                .duration(flipDuration/2)
+                                                    .attr("width", 0)
+                                                        .on("end", function(d){
+                                                            //hide the bg of the side that is now not seen, and display the side that is seen
+                                                            const isFrontOfCard = d3.select(this).attr("class").includes("front");
+                                                            const shouldDisplay = isFrontOfCard ? !flippingToBack: flippingToBack;
+                                                            d3.select(this)
+                                                                .attr("display", shouldDisplay ? null : "none")
+                                                                .attr("opacity", shouldDisplay ? 1 : 0)
+                                                            //const cardG = containerG.select(`g.card-${d.cardNr}`);
+                                                            d3.select(this)
+                                                                .transition("increase-width")
+                                                                .duration(flipDuration/2)
+                                                                    .attr("width", cardWidth)
+                                                        })
+
+                                                const selectionOut = flippingToBack ?  cardG.select("g.front-contents") : cardG.select("g.back-contents");
+                                                const selectionIn = flippingToBack ?  cardG.select("g.back-contents") : cardG.select("g.front-contents");
+                                                selectionOut
+                                                    .attr("opacity", 1)
+                                                    .attr("display", null)
+                                                        .transition("front-out")
+                                                        .duration(fadeDuration)
+                                                            .attr("opacity", 0)
+                                                                .on("end", function(){
+                                                                    d3.select(this).attr("display", "none");
+                                                                    selectionIn
+                                                                        .attr("opacity", 0)
+                                                                        .attr("display", null)
+                                                                        .transition("back-in")
+                                                                        .delay(flipDuration) //add remainder of first trans plus whole of second
+                                                                        .duration(fadeDuration)
+                                                                            .attr("opacity", 1)
+                                                                            .on("end", () => {
+                                                                                cardsAreFlipped = !cardsAreFlipped;
+                                                                                update(decksData)
+                                                                            })
+                                                                })
+                                        })
                                 })
                                 .onSetContent(function(content){
                                     deckContent = content;

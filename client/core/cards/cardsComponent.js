@@ -185,11 +185,14 @@ export default function cardsComponent() {
                         kpisComponents[cardNr] = kpisComponent();
 
                         //FRONT
-                        const contentsG = d3.select(this).append("g").attr("class", "contents card-contents")
+                        const contentsG = d3.select(this).append("g").attr("class", "contents card-contents");
 
+                        //bgs for front and back
                         contentsG
                             .append("rect")
-                                .attr("class", "card-bg")
+                                .attr("class", "card-bg card-front-bg")
+                                .attr("opacity", cardsAreFlipped ? 0 : 1)
+                                .attr("display", cardsAreFlipped ? "none" : null)
                                 .attr("rx", 3)
                                 .attr("ry", 3)
                                 //for placed cards, we dont want the dimns to be changed when in section view
@@ -203,22 +206,12 @@ export default function cardsComponent() {
                                     onClickCard.call(this, e, d)
                                     e.stopPropagation();
                                 })
-                        
-                        contentsG
-                            .append("g")
-                                .attr("class", "card-header")
-                                //.attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
-                                .attr("opacity", deckIsSelected & (isHeld || isSelected) ? 1 : 0)
-                        
-                        contentsG
-                            .append("g")
-                                .attr("class", "items-area");
 
-                        //BACK
-                        const backContentsG = d3.select(this).append("g").attr("class", "contents card-back-contents")
-                        backContentsG
+                        contentsG
                             .append("rect")
-                                .attr("class", "card-back-bg")
+                                .attr("class", "card-bg card-back-bg")
+                                .attr("opacity", cardsAreFlipped ? 1 : 0)
+                                .attr("display", cardsAreFlipped ? null : "none")
                                 .attr("rx", 3)
                                 .attr("ry", 3)
                                 .attr("width", isHeld ? contentsWidth : normalContentsWidth)
@@ -227,11 +220,33 @@ export default function cardsComponent() {
                                 .attr("stroke", grey10(3))
                                 .attr("stroke-width", 0.5);
 
+                        //inner contents of front and back
+                        const frontContentsG = contentsG.append("g").attr("class", "front-contents")
+                            .attr("opacity", cardsAreFlipped ? 0 : 1)
+                            .attr("display", cardsAreFlipped ? "none" : null);
+                            
+                        const backContentsG = contentsG.append("g").attr("class", "back-contents")
+                            .attr("opacity", cardsAreFlipped ? 1 : 0)
+                            .attr("display", cardsAreFlipped ? null : "none");
+
+                        frontContentsG
+                            .append("g")
+                                .attr("class", "card-header")
+                                //.attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
+                                .attr("opacity", deckIsSelected & (isHeld || isSelected) ? 1 : 0)
+                        
+                        frontContentsG
+                            .append("g")
+                                .attr("class", "items-area");
+
+                        //BACK
                         backContentsG
                             .append("g")
                                 .attr("class", "card-back-header")
                                 //.attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
                                 .attr("opacity", deckIsSelected & (isHeld || isSelected) ? 1 : 0)
+
+                        //other two back contents components are using their own enter-exit pattern below
                         
                     })
                     .call(updateTransform, { 
@@ -255,33 +270,33 @@ export default function cardsComponent() {
                         const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile } = cardD;
                         const contentsG = d3.select(this).select("g.card-contents")
                             .attr("transform", `translate(${margin.left},${margin.top})`)
-                            .call(fadeInOut, !cardsAreFlipped);
 
-                        const backContentsG = d3.select(this).select("g.card-back-contents")
-                            .attr("transform", `translate(${margin.left},${margin.top})`)
-                            .call(fadeInOut, cardsAreFlipped);
-
-                        //bg colour
-                        contentsG.select("rect.card-bg")
-                            .transition("card-bg-appearance")
+                        //bgs for front and back
+                        contentsG.select("rect.card-front-bg")
+                            .transition("card-front-bg-appearance")
                             .delay(200)
                             .duration(400)
                                 .attr("fill", isNumber(selectedSectionNr) ? COLOURS.CARD.SECTION_VIEW_FILL :COLOURS.CARD.FILL(cardD))
                                 .attr("stroke", isNumber(selectedSectionNr) ? COLOURS.CARD.SECTION_VIEW_STROKE : getCardStroke(cardD))
 
-                        contentsG.select("rect.card-bg")
-                            .transition("card-bg-dimns")
+                        contentsG.select("rect.card-front-bg")
+                            .transition("card-front-bg-dimns")
                             //.delay(200)
                             .duration(TRANSITIONS.MED)
                                 .attr("width", isHeld ? contentsWidth : normalContentsWidth)
                                 .attr("height", isHeld ? contentsHeight : normalContentsHeight);
     
-                        backContentsG.select("rect.card-back-bg")
+                        contentsG.select("rect.card-back-bg")
                             .transition("card-back-bg-dimns")
                             //.delay(200)
                             .duration(TRANSITIONS.MED)
                                 .attr("width", isHeld ? contentsWidth : normalContentsWidth)
                                 .attr("height", isHeld ? contentsHeight : normalContentsHeight);
+
+                        //inner contents for front and back
+                        const frontContentsG = d3.select(this).select("g.front-contents")
+                        const backContentsG = d3.select(this).select("g.back-contents")
+                            //.call(fadeInOut, cardsAreFlipped);
                         
                         //const headerHeight;
                         //components
@@ -323,7 +338,7 @@ export default function cardsComponent() {
                             })
                         
                         const frontHeaderDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr };
-                        contentsG.selectAll("g.card-header")
+                        frontContentsG.selectAll("g.card-header")
                             //.attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
                             .datum(frontHeaderDatum)
                             .call(frontHeader)
@@ -375,7 +390,7 @@ export default function cardsComponent() {
                             .onDrag(e => dragged(e, cardD))
                             .onDragEnd(e => dragEnd(e, cardD))
 
-                        contentsG.select("g.items-area")
+                        frontContentsG.select("g.items-area")
                             .attr("transform", `translate(0, ${headerHeight + gapBetweenHeaderAndItems})`)
                             .datum(isNumber(selectedSectionNr) ? cardD.items.filter(it => it.sectionNr === selectedSectionNr) : cardD.items)
                             .call(items)
@@ -412,7 +427,6 @@ export default function cardsComponent() {
                         botRightBtnG.enter()
                             .append("g")
                                 .attr("class", "bottom-right-btn")
-                                .call(fadeIn, { transition:{ delay:TRANSITIONS.MED }})
                                 .each(function(d){
                                     const btnG = d3.select(this);
                                     btnG.append("path")
@@ -445,12 +459,11 @@ export default function cardsComponent() {
 
 
                         //BACK CONTENTS ---------------------------------------
-                        /*
-                         - add links to different videos for left and right of each card - not just default image
+                        /*  - add links to different videos for left and right of each card - not just default image
                          - transition to show card being flipped
+                         - fix zooming issues - when more than one deck, the back contentsare making it not smooth
 
                         */
-                        //if(!isFront){ return; }
                         //header
                         const backHeader = backHeaderComponents[cardNr]
                             .width(contentsWidth)
@@ -560,42 +573,6 @@ export default function cardsComponent() {
                                 .call(kpis);
 
                         kpisG.exit().remove();
-
-                        //back botright btn
-                        const backBotRightBtnG = backContentsG.selectAll("g.bottom-right-btn").data(botRightBtnData, d => d.key);
-                        backBotRightBtnG.enter()
-                            .append("g")
-                                .attr("class", "bottom-right-btn")
-                                .call(fadeIn, { transition:{ delay:TRANSITIONS.MED }})
-                                .each(function(d){
-                                    const btnG = d3.select(this);
-                                    btnG.append("path")
-                                        .attr("fill", grey10(5));
-
-                                    btnG.append("rect").attr("class", "btn-hitbox")
-                                        .attr("fill", "transparent")
-                                        //.attr("fill", "red")
-                                        .attr("opacity", 0.3)
-                                        .attr("stroke", "none")
-                                })
-                                .merge(backBotRightBtnG)
-                                .attr("transform", `translate(${contentsWidth - btnWidth + btnMargin},${contentsHeight - btnHeight + btnMargin})`)
-                                .each(function(d){
-                                    const btnG = d3.select(this);
-                                    btnG.select("path")
-                                        .attr("transform", `scale(${scale(d)})`)
-                                        .attr("d", d.icon.d)
-                            
-                                    btnG.select("rect.btn-hitbox")
-                                        .attr("width", btnContentsWidth)
-                                        .attr("height", btnContentsHeight)
-
-                                })
-                                .on("click", (e,d) => { 
-                                    d.onClick(e, d) 
-                                });
-
-                        backBotRightBtnG.exit().remove();
                     })
                     .call(drag)
                     .on("click", e => { 
