@@ -550,7 +550,7 @@ export default function cardsComponent() {
 
                                 }
                             })
-                            //.kpiHeight(10)//kpiHeight)
+                            //.kpiHeight(10)//kpiHeight)...
                             .fontSizes(4)//fontSizes.kpis)
                             //.kpiFormat(kpiFormat)
                             .displayFormat("stats")
@@ -560,8 +560,6 @@ export default function cardsComponent() {
                             .profileIsSelected(false)
 
                         const shouldShowKpis = deckIsSelected && isFront && cardsAreFlipped && !isNumber(selectedSectionNr);
-                        if(deckIsSelected && isFront)
-                        console.log("shouldShowKpis", shouldShowKpis)
 
                         const kpisG = backContentsG.selectAll("g.kpis").data(shouldShowKpis ? [1] : []);
                         kpisG.enter()
