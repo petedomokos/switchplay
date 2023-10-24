@@ -267,7 +267,7 @@ export default function cardsComponent() {
                         force:true
                     })
                     .each(function(cardD,i){
-                        const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile } = cardD;
+                        const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile, deckListPos } = cardD;
                         const contentsG = d3.select(this).select("g.card-contents")
                             .attr("transform", `translate(${margin.left},${margin.top})`)
 
@@ -509,6 +509,16 @@ export default function cardsComponent() {
                             .height(mediaHeight)
 
                         const shouldShowMedia = isFront && cardsAreFlipped && !isNumber(selectedSectionNr);
+                        const photosData = [
+                            { 
+                                key:"profile-1", url:`/d${deckListPos}c${cardNr}p1.png`, 
+                                transform:`scale(0.0675)`, isVideo:true 
+                            },
+                            { 
+                                key:"profile-2", url:`/d${deckListPos}c${cardNr}p2.png`,
+                                transform:`scale(0.09)`, isVideo:true 
+                            },
+                        ]
                         const mediaG = backContentsG.selectAll("g.profile-info").data(shouldShowMedia ? [1] : []);
                         mediaG.enter()
                             .append("g")
@@ -518,7 +528,7 @@ export default function cardsComponent() {
                                 //.call(fadeIn, { transition:{ delay: 500, duration:500 }})
                                 .merge(mediaG)
                                 .attr("transform", `translate(0,${headerHeight})`)
-                                .datum(profile.info)
+                                .datum({ ...profile.info, photosData })
                                 .call(media)
                                 .call(fadeInOut, isFront, { 
                                     transitionIn:{ delay: 0, duration:200 },

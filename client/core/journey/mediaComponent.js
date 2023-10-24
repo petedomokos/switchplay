@@ -93,7 +93,8 @@ export default function mediaComponent() {
         function update(data){
             //console.log("data", withTextInfo, data)
             const { id, firstname, surname, age, position, isCurrent, isFuture, settings, personType } = data;
-            const photosData = isCurrent ? data.photos["profile"] : data.photos[currentPage.key];
+            //photosdata can be passed in, or otherwise it constructs the data from the photos array
+            const photosData = data.photosData || (isCurrent ? data.photos["profile"] : data.photos[currentPage.key]);
 
             const bgRect = containerG.selectAll("rect.info-bg").data([1]);
             bgRect.enter()
@@ -136,6 +137,7 @@ export default function mediaComponent() {
                     .merge(photoG)
                     .attr("transform", (d,i) => `translate(${i * photoWidth}, 0)`)
                     .each(function(d){
+                        //w = 29.116, h = 21.389, ar = 1.361 (ie w = 1.361 * h)
                         const photoG = d3.select(this);
 
                         d3.select("svg#milestones-bar").select(`#photo-clip-${id}`)

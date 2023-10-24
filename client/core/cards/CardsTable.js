@@ -75,7 +75,7 @@ const embellishedDecks = (decks, nrCols=DEFAULT_NR_COLS) => decks
   //@todo - impl layoutFormat grid
   colNr: /*layoutFormat === "grid" ? d.fixedColNr :*/ calcColNr(i, nrCols),
   rowNr: /*layoutFormat === "grid" ? d.fixedRowNr :*/ calcRowNr(i, nrCols),
-  listPos:i
+  listPos:i,
 }))
 
 const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, deleteDeck }) => {

@@ -27,8 +27,8 @@ export default function decksLayout(){
     const _cardsLayout = cardsLayout();
 
     function update(deckData){
-        const { cards, id } = deckData;
-        const processedCards = _cardsLayout(cards.map(c => ({ ...c, deckId:id })));
+        const { cards, id, listPos } = deckData;
+        const processedCards = _cardsLayout(cards.map(c => ({ ...c, deckId:id, deckListPos:listPos })));
         return {
             ...deckData,
             cards:processedCards,
