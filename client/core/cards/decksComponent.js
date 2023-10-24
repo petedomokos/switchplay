@@ -81,18 +81,23 @@ export default function decksComponent() {
                         .attr("fill", "transparent")
                         .attr("stroke", "none");*/
             }
+            //local delta = 12ms
 
             function update(decksData, options={}){
                 /*containerG.select("rect.decks-bg")
                     .attr("width", width)
                     .attr("height", height)*/
 
+                const time = new Date().getTime()
+                console.log("decks update", time)
+                alert(`update time-${time}`)
+
 
                 const deckG = containerG.selectAll("g.deck").data(decksData, d => d.id);
                 deckG.enter()
                     .append("g")
                         .attr("class", d => `deck deck-${d.id}`)
-                        .call(fadeIn, { transition:{ duration: 1000 /*TRANSITIONS.MED*/ } })
+                        //.call(fadeIn, { transition:{ duration: 1000 /*TRANSITIONS.MED*/ } })
                         .each(function(d,i){
                             deckComponents[d.id] = deckComponent();
                         })

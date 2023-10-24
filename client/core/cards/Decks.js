@@ -251,7 +251,9 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       //zoom out
 
       zoomCallbackRef.current = () => {
-        console.log("zoom cb")
+        const time = new Date().getTime();
+        console.log("zoom cb", time)
+        alert(`zoomcb time-${time}`)
         setSelectedDeckId("");
       }
       d3.select(zoomRef.current).call(zoom.transform, zoomStateRef.current)
