@@ -4,6 +4,7 @@ const items = [
     { itemNr:0, status:0 }, { itemNr:1, status:0 }, { itemNr:2, status:0 }, { itemNr:3, status:0 }, { itemNr:4, status:0 },
 ]
 export const initDeck = (userId, settings={}) => {    
+    const now = new Date();
     return {
         owner:userId,
         id:`temp-${Date.now()}`,

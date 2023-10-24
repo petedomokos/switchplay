@@ -504,7 +504,7 @@ export default function cardsComponent() {
                                     .attr("opacity", (isHeld || isSelected) ? 1 : 0);
 
                         //media
-                        const media = mediaComponents[cardNr]
+                        /*const media = mediaComponents[cardNr]
                             .width(contentsWidth)
                             .height(mediaHeight)
 
@@ -525,7 +525,7 @@ export default function cardsComponent() {
                                     transitionOut:{ delay: 200, duration:200 }
                                 });
 
-                        mediaG.exit().remove();
+                        mediaG.exit().remove();*/
                         
                         
 
@@ -559,7 +559,7 @@ export default function cardsComponent() {
                             .scrollable(false)
                             .profileIsSelected(false)
 
-                        const kpisG = backContentsG.selectAll("g.kpis").data(isNumber(selectedSectionNr) ? [] : [1]);
+                        /*const kpisG = backContentsG.selectAll("g.kpis").data(isNumber(selectedSectionNr) ? [] : [1]);
                         kpisG.enter()
                             .append("g")
                                 .attr("class", "kpis")
@@ -569,7 +569,7 @@ export default function cardsComponent() {
                                 .datum(profile.kpis)
                                 .call(kpis);
 
-                        kpisG.exit().remove();
+                        kpisG.exit().remove();*/
                     })
                     .call(drag)
                     .on("click", e => { 
