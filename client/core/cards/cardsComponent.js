@@ -504,7 +504,7 @@ export default function cardsComponent() {
                                     .attr("opacity", (isHeld || isSelected) ? 1 : 0);
 
                         //media
-                        /*const media = mediaComponents[cardNr]
+                        const media = mediaComponents[cardNr]
                             .width(contentsWidth)
                             .height(mediaHeight)
 
@@ -525,7 +525,7 @@ export default function cardsComponent() {
                                     transitionOut:{ delay: 200, duration:200 }
                                 });
 
-                        mediaG.exit().remove();*/
+                        mediaG.exit().remove();
                         
                         
 
