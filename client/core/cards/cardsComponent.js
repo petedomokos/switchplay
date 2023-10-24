@@ -577,7 +577,6 @@ export default function cardsComponent() {
                     })
                     .call(drag)
                     .on("click", e => { 
-                        //console.log("card click")
                         e.stopPropagation(); 
                     })
   
