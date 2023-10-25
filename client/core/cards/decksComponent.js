@@ -24,7 +24,7 @@ export default function decksComponent() {
 
     let selectedDeckId = "";
     let longpressedDeckId = "";
-    let selectedSectionNr;
+    let selectedSectionKey;
     let displayFormat = "list";
     let deckContent = "cards";
     let cardsAreFlipped = false;
@@ -432,12 +432,12 @@ export default function decksComponent() {
         })
         return decks;
     };
-    decks.selectedSectionNr = function (value) {
-        if (!arguments.length) { return selectedSectionNr; }
+    decks.selectedSectionKey = function (value) {
+        if (!arguments.length) { return selectedSectionKey; }
         Object.keys(deckComponents).forEach(deckId => {
             //@todo - when sections can be selected by title/key, then it is possible not all decks will have 
             //same sections, so need to store the deckId along with seciton selection, and allow multiple at once
-            deckComponents[deckId].selectedSectionNr(value);
+            deckComponents[deckId].selectedSectionKey(value);
         })
         return decks;
     };

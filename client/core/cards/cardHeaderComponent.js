@@ -99,7 +99,7 @@ export default function cardHeaderComponent() {
     }
 
     let editable;
-    let selectedSectionNr;
+    let selectedSectionKey;
     let rightContent = "progress";
 
     //API CALLBACKS
@@ -206,7 +206,7 @@ export default function cardHeaderComponent() {
                                 })
 
                         //TITLE
-                        const progressSummaryData = isNumber(selectedSectionNr) ? [] : [data];
+                        const progressSummaryData = selectedSectionKey ? [] : [data];
                         const progressSummaryG = contentsG.selectAll("g.progress-summary").data(progressSummaryData)
                         progressSummaryG.enter()
                             .append("g")
@@ -464,9 +464,9 @@ export default function cardHeaderComponent() {
         editable = value;
         return header;
     };
-    header.selectedSectionNr = function (value) {
-        if (!arguments.length) { return selectedSectionNr; }
-        selectedSectionNr = value;
+    header.selectedSectionKey = function (value) {
+        if (!arguments.length) { return selectedSectionKey; }
+        selectedSectionKey = value;
         return header;
     };
     header.rightContent = function (value) {

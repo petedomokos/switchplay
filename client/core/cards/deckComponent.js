@@ -166,7 +166,7 @@ export default function deckComponent() {
 
         //cardX and Y
         cardX = (d,i) => {
-            if(isNumber(selectedSectionNr) && d.isHeld){
+            if(selectedSectionKey && d.isHeld){
                 const gapForHorizIncs = contentsWidth - sectionViewHeldCardWidth;
                 const horizInc = gapForHorizIncs / 4;
                 return (4 - i) * horizInc;
@@ -182,7 +182,7 @@ export default function deckComponent() {
         }
 
         cardY = (d,i) => {
-            if(isNumber(selectedSectionNr) && d.isHeld){
+            if(selectedSectionKey && d.isHeld){
                 return i * sectionViewHeldCardHeight;
             }
             if(d.isSelected){
@@ -214,7 +214,7 @@ export default function deckComponent() {
     let deckIsSelected;
     let selectedCardNr;
     let selectedItemNr;
-    let selectedSectionNr;
+    let selectedSectionKey;
     let content = "cards"; //can be "purpose"
     let format;
     let cardsAreFlipped = false;
@@ -279,7 +279,7 @@ export default function deckComponent() {
         selection.each(function (deckData) {
             updateDimns(deckData);
             id = deckData.id;
-            //console.log("update", id, selectedSectionNr)
+            //console.log("update", id, selectedSectionKey)
             containerG = d3.select(this)
 
             if(containerG.select("g").empty()){
@@ -660,7 +660,7 @@ export default function deckComponent() {
                         .attr("height", contentsHeight)
                 
                 //header
-                const selectedSection = sections?.find(s => s.nr === selectedSectionNr);
+                const selectedSection = sections?.find(s => s.key === selectedSectionKey);
                 headerG
                     //.style("pointer-events", deckIsSelected ? "all" : null)
                     .datum({ ..._deckData, title:_deckData.title || id, subtitle:selectedSection?.title })
@@ -672,6 +672,10 @@ export default function deckComponent() {
                         .onClickTitle(function(e){
                             e.stopPropagation();
                             setForm({ formType: "deck-title" }) 
+                        })
+                        .onClickSubtitle(function(e){
+                            e.stopPropagation();
+                            setForm({ formType: "section-title" }) 
                         })
                         .onClickProgressIcon(() => onSetContent("purpose")))
 
@@ -813,7 +817,7 @@ export default function deckComponent() {
             const cardItemsAreaHeight = heldCardHeight - cardHeaderHeight;
             const yToCentre = controlsOuterMarginBottom + controlsMarginVert - placedCardsAreaHeight - cardItemsAreaHeight/2 + btnHeight/2 + 1;
 
-            controlsG.call(fadeInOut, content === "cards" && deckIsSelected && !isNumber(selectedCardNr) && !isNumber(selectedSectionNr))
+            controlsG.call(fadeInOut, content === "cards" && deckIsSelected && !isNumber(selectedCardNr) && !selectedSectionKey)
             controlsG
                 .attr("transform", `translate(${controlsOuterMarginLeft},${height - controlsOuterMarginBottom - controlsHeight})`)
 
@@ -824,9 +828,9 @@ export default function deckComponent() {
                 .attr("rx", 1.5)
                 .attr("ry", 1.5)
 
-            let potentialSelectedSectionNr;
-            const highlightSection = sectionNr => {
-                const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${sectionNr}`);
+            let potentialSelectedSectionItemNr;
+            const highlightSection = key => {
+                const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${key}`);
                 sectionG.select("path.section-bg")
                     .transition("highlight")
                     .duration(TRANSITIONS.VERY_FAST)
@@ -843,8 +847,8 @@ export default function deckComponent() {
                 
             }
 
-            const unhighlightSection = sectionNr => {
-                const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${sectionNr}`);
+            const unhighlightSection = key => {
+                const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${key}`);
                 sectionG.select("path.section-bg")
                     .transition("unhighlight")
                     .duration(TRANSITIONS.VERY_FAST)
@@ -858,11 +862,11 @@ export default function deckComponent() {
                         .attr("opacity", STYLES.SECTION_ID_OPACITY)
 
             }
-        
+
             btnDrag
                 .on("start", function(e,d){
                 })
-                .on("drag", function(e,d, i){
+                .on("drag", function(e, d, i){
                     const btnG = d3.select(this);
                     const { translateX, translateY } = getTransformationFromTrans(btnG.attr("transform"));
                     const newX = translateX + e.dx;
@@ -881,24 +885,26 @@ export default function deckComponent() {
                     const theta = angleFromNorth([[_x, _y]])
                     //console.log("theta", Math.round(theta))
                     if(distFromCentre > cards.itemsOuterRadius()){ 
-                        if(potentialSelectedSectionNr !== ""){ unhighlightSection(potentialSelectedSectionNr); }
-                        potentialSelectedSectionNr = ""; 
+                        if(potentialSelectedSectionItemNr !== ""){ unhighlightSection(potentialSelectedSectionItemNr); }
+                        potentialSelectedSectionItemNr = ""; 
                     }
                     else {
-                        const newPotentialSelectedSectionNr = Math.floor(theta/(360/5))
-                        if(potentialSelectedSectionNr === ""){ highlightSection(newPotentialSelectedSectionNr) }
+                        const newPotentialSelectedSectionItemNr = Math.floor(theta/(360/5));
+                        
+                        if(potentialSelectedSectionItemNr === ""){ highlightSection(newPotentialSelectedSectionItemNr) }
                         else { 
-                            unhighlightSection(potentialSelectedSectionNr);
-                            highlightSection(newPotentialSelectedSectionNr);
+                            unhighlightSection(potentialSelectedSectionItemNr);
+                            highlightSection(newPotentialSelectedSectionItemNr);
                         }
-                        potentialSelectedSectionNr = newPotentialSelectedSectionNr;
+                        potentialSelectedSectionItemNr = newPotentialSelectedSectionItemNr;
                     }
-                    //console.log("pot", potentialSelectedSectionNr)  
+                    //console.log("pot", potentialSelectedSectionItemNr)  
                 })
                 .on("end", function(e,d){
-                    if(selectedSectionNr !== potentialSelectedSectionNr){
-                        onSelectSection(potentialSelectedSectionNr)
-                        potentialSelectedSectionNr = "";
+                    if(selectedSectionKey !== potentialSelectedSectionItemNr){
+                        const section = sections.find(s => s.itemNr === potentialSelectedSectionItemNr)
+                        onSelectSection(section.key)
+                        potentialSelectedSectionItemNr = "";
                     }else{
                         //call update here to clean up
                         update(_deckData)
@@ -992,7 +998,7 @@ export default function deckComponent() {
                 key:"close", 
                 onClick:e => { 
                     e.stopPropagation();
-                    if(isNumber(selectedSectionNr)){
+                    if(selectedSectionKey){
                         onSelectSection() 
                     }else{
                         onSetContent("cards");
@@ -1012,7 +1018,7 @@ export default function deckComponent() {
                 icon:icons.flip,
             }
 
-            const inSectionOrPurposeView = isNumber(selectedSectionNr) || content === "purpose";
+            const inSectionOrPurposeView = selectedSectionKey || content === "purpose";
             let cornerBtnData = !deckIsSelected ? [] : (inSectionOrPurposeView ? [closeBtnDatum] : [flipBtnDatum]);
             const cornerBtnHeight = 20;
             const cornerBtnWidth = cornerBtnHeight;
@@ -1114,10 +1120,10 @@ export default function deckComponent() {
             cards.selectedItemNr(value);
         return deck;
     };
-    deck.selectedSectionNr = function (value) {
-        if (!arguments.length) { return selectedSectionNr; }
-        selectedSectionNr = value;
-        cards.selectedSectionNr(value);
+    deck.selectedSectionKey = function (value) {
+        if (!arguments.length) { return selectedSectionKey; }
+        selectedSectionKey = value;
+        cards.selectedSectionKey(value);
         return deck;
     };
     deck.content = function (value) {

@@ -33,14 +33,14 @@ export default function cardItemsComponent() {
     function updateDimns(){
         margin = { 
             left: width * 0.05, right:width * 0.05, 
-            top:0,//height * (isNumber(selectedSectionNr) ? 0 : 0.05),
-            bottom:0,//height * (isNumber(selectedSectionNr) ? 0.15 : 0.05)
+            top:0,//height * (selectedSectionKey ? 0 : 0.05),
+            bottom:0,//height * (selectedSectionKey ? 0.15 : 0.05)
         }
         const availContentsWidth = width - margin.left - margin.right;
         const availContentsHeight = height - margin.top - margin.bottom;
         const actualContentsLength = d3.min([availContentsWidth, availContentsHeight]);
-        contentsWidth = isNumber(selectedSectionNr) ? availContentsWidth : actualContentsLength;
-        contentsHeight = isNumber(selectedSectionNr) ? availContentsHeight : actualContentsLength; 
+        contentsWidth = selectedSectionKey ? availContentsWidth : actualContentsLength;
+        contentsHeight = selectedSectionKey ? availContentsHeight : actualContentsLength; 
         extraHorizMargin = availContentsWidth - contentsWidth;
         extraVertMargin = availContentsHeight - contentsHeight;
 
@@ -71,7 +71,7 @@ export default function cardItemsComponent() {
     let proposedNewStatus;
     let statusTimer;
     let selectedItemNr;
-    let selectedSectionNr;
+    let selectedSectionKey;
 
     //API CALLBACKS
     let onSetOuterRadius = function(){};
@@ -190,6 +190,7 @@ export default function cardItemsComponent() {
                     })
                     .merge(listG)
                     .each(function(){
+                        console.log("list data", data)
                         //need to decide whether to do enter-exit here or in textComp
                         const listG = d3.select(this);
                         const itemG = listG.selectAll("g.item").data(data, it => it.itemNr);
@@ -268,10 +269,10 @@ export default function cardItemsComponent() {
         selectedItemNr = value;
         return cardItems;
     };
-    cardItems.selectedSectionNr = function (value) {
-        if (!arguments.length) { return selectedSectionNr; }
-        selectedSectionNr = value;
-        pentagon.selectedSectionNr(value);
+    cardItems.selectedSectionKey = function (value) {
+        if (!arguments.length) { return selectedSectionKey; }
+        selectedSectionKey = value;
+        pentagon.selectedSectionKey(value);
         return cardItems;
     };
     cardItems.editable = function (value) {

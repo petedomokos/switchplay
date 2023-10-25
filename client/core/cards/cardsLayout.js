@@ -10,6 +10,7 @@ const calcCardStatus = items => {
 
 export default function cardsLayout(){
     let datasets = [];
+    let sections;
     let info = {};
     let format = "profiles";
 
@@ -25,7 +26,7 @@ export default function cardsLayout(){
                     deckId,
                     cardNr, 
                     //sectioning defaults to by itemNr
-                    sectionNr:isNumber(it.definedSectionNr) ? it.definedSectionNr : it.itemNr,
+                    section:sections?.find(s => s.itemNr === it.itemNr),
                     title:it.title || "" ,
                     key:`deck-${deckId}-card-${cardNr}-item-${it.itemNr}`
                 })),
@@ -48,6 +49,11 @@ export default function cardsLayout(){
     update.format = function (value) {
         if (!arguments.length) { return format; }
         if(value){ format = value; }
+        return update;
+    };
+    update.sections = function (value) {
+        if (!arguments.length) { return sections; }
+        sections = value;
         return update;
     };
     update.datasets = function (value) {

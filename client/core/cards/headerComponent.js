@@ -55,6 +55,7 @@ export default function headerComponent() {
     let maxTitleFont = 16;
 
     let onClickTitle = function(){};
+    let onClickSubtitle = function(){};
     let onClickProgressIcon = function(){};
 
     let withSubtitle = false;
@@ -323,6 +324,11 @@ export default function headerComponent() {
     header.onClickTitle = function (value) {
         if (!arguments.length) { return onClickTitle; }
         onClickTitle = value;
+        return header;
+    };
+    header.onClickSubtitle = function (value) {
+        if (!arguments.length) { return onClickSubtitle; }
+        onClickSubtitle = value;
         return header;
     };
     header.onClickProgressIcon = function (value) {

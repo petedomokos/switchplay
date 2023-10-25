@@ -68,7 +68,7 @@ const enhancedZoom = dragEnhancements();
 
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSectionNr, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
+const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSectionKey, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
   //processed props
   //console.log("Decks")
   const stringifiedData = JSON.stringify({ data, table });
@@ -77,7 +77,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   const [decks, setDecks] = useState(() => decksComponent());
   const [zoom, setZoom] = useState(() => d3.zoom());
   const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
-  const [selectedSectionNr, setSelectedSectionNr] = useState(customSelectedSectionNr);
+  const [selectedSectionKey, setSelectedSectionKey] = useState(customSelectedSectionKey);
   const [selectedCardNr, setSelectedCardNr] = useState(customSelectedCardNr);
   const [selectedItemNr, setSelectedItemNr] = useState(customSelectedItemNr);
   const [longpressedDeckId, setLongpressedDeckId] = useState("");
@@ -306,17 +306,18 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   }, []);
 
 
-  const onSelectSection = useCallback((sectionNr) => {
-    setSelectedSectionNr(sectionNr);
-    /*if(sectionNr){
-      
-    }else{
-    }*/
+  const onSelectSection = useCallback(key => {
+    setSelectedSectionKey(key);
   }, []);
 
   const getFormDimns = useCallback(() => {
     const { formType, value, formDimns } = form;
 
+    if(formType === "section-title"){
+      //first - check c ards that they show teh items that have the same secitonName not sectin Nr, 
+      //so if a deck doesmt have that section, then it shows blank cards 
+
+    }
     if(formType === "deck-title"){
       return {
         width:selectedDeckDimns.width - (DIMNS.DECK.PROGRESS_ICON_WIDTH * zoomScale) - deckFormMarginLeft,
@@ -449,8 +450,8 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
 
   useEffect(() => {
-    decks.selectedSectionNr(selectedSectionNr);
-  }, [selectedSectionNr])
+    decks.selectedSectionKey(selectedSectionKey);
+  }, [selectedSectionKey])
   //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
     //if(!longpressedDeckId){
@@ -499,13 +500,15 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
   }, [stringifiedData, selectedDeckId])
 
+  console.log("form", form)
+
   useEffect(() => {
     decks
       .width(width)
       .height(tableHeight + deckHeightWithMargins)
       .nrCols(nrCols)
       .selectedDeckId(selectedDeckId)
-      .selectedSectionNr(selectedSectionNr)
+      .selectedSectionKey(selectedSectionKey)
       .form(form)
       .x(deckX)
       .y(deckY)
@@ -529,11 +532,11 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
       .setForm(setForm)
-  }, [stringifiedData, width, height, selectedDeckId, selectedSectionNr, form?.formType])
+  }, [stringifiedData, width, height, selectedDeckId, selectedSectionKey, form?.formType])
 
   useEffect(() => {
     d3.select(containerRef.current).call(decks);
-  }, [stringifiedData, width, height, selectedDeckId, selectedCardNr, selectedItemNr,  selectedSectionNr])
+  }, [stringifiedData, width, height, selectedDeckId, selectedCardNr, selectedItemNr,  selectedSectionKey])
 
   //zoom
   useEffect(() => {

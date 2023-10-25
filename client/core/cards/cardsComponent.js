@@ -48,8 +48,8 @@ export default function cardsComponent() {
     function updateDimns(){
         normalContentsWidth = heldCardWidth - margin.left - margin.right;
         normalContentsHeight = heldCardHeight - margin.top - margin.bottom;
-        const heldCardWidthToUse = isNumber(selectedSectionNr) ? sectionViewHeldCardWidth : heldCardWidth;
-        const heldCardHeightToUse = isNumber(selectedSectionNr) ? sectionViewHeldCardHeight : heldCardHeight;
+        const heldCardWidthToUse = selectedSectionKey ? sectionViewHeldCardWidth : heldCardWidth;
+        const heldCardHeightToUse = selectedSectionKey ? sectionViewHeldCardHeight : heldCardHeight;
         contentsWidth = heldCardWidthToUse - margin.left - margin.right;
         contentsHeight = heldCardHeightToUse - margin.top - margin.bottom; 
 
@@ -79,7 +79,7 @@ export default function cardsComponent() {
     let form;
     let selectedCardNr;
     let selectedItemNr;
-    let selectedSectionNr;
+    let selectedSectionKey;
 
     let transformTransition = { 
         enter: null, 
@@ -198,8 +198,8 @@ export default function cardsComponent() {
                                 //for placed cards, we dont want the dimns to be changed when in section view
                                 .attr("width", isHeld ? contentsWidth : normalContentsWidth)
                                 .attr("height", isHeld ? contentsHeight : normalContentsHeight)
-                                .attr("fill", isNumber(selectedSectionNr) ? COLOURS.CARD.SECTION_VIEW_FILL : COLOURS.CARD.FILL(d))
-                                .attr("stroke", isNumber(selectedSectionNr) ? COLOURS.CARD.SECTION_VIEW_STROKE : getCardStroke(d))
+                                .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL : COLOURS.CARD.FILL(d))
+                                .attr("stroke", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_STROKE : getCardStroke(d))
                                 .attr("stroke-width", 0.5)
                                 .on("click", e => {
                                     //console.log("card bg click")
@@ -276,8 +276,8 @@ export default function cardsComponent() {
                             .transition("card-front-bg-appearance")
                             .delay(200)
                             .duration(400)
-                                .attr("fill", isNumber(selectedSectionNr) ? COLOURS.CARD.SECTION_VIEW_FILL :COLOURS.CARD.FILL(cardD))
-                                .attr("stroke", isNumber(selectedSectionNr) ? COLOURS.CARD.SECTION_VIEW_STROKE : getCardStroke(cardD))
+                                .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL :COLOURS.CARD.FILL(cardD))
+                                .attr("stroke", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_STROKE : getCardStroke(cardD))
 
                         contentsG.select("rect.card-front-bg")
                             .transition("card-front-bg-dimns")
@@ -300,7 +300,7 @@ export default function cardsComponent() {
                         
                         //const headerHeight;
                         //components
-                        const dateColour = isNumber(selectedSectionNr) ? grey10(5) : grey10(7);
+                        const dateColour = selectedSectionKey ? grey10(5) : grey10(7);
                         const frontHeader = frontHeaderComponents[cardNr]
                             .width(contentsWidth)
                             .height(headerHeight)
@@ -348,7 +348,7 @@ export default function cardsComponent() {
 
                         //ITEMS
                         //note - deckIsSelected && form is handled in Decks - it turns the entire container pointer-events on/off
-                        const cardIsEditable = isNumber(selectedSectionNr) || ((isHeld && isFront) || isSelected);
+                        const cardIsEditable = selectedSectionKey || ((isHeld && isFront) || isSelected);
                         const items = itemsComponents[cardNr]
                             .styles({ 
                                 _lineStrokeWidth:lineD => {
@@ -391,7 +391,7 @@ export default function cardsComponent() {
 
                         frontContentsG.select("g.items-area")
                             .attr("transform", `translate(0, ${headerHeight + gapBetweenHeaderAndItems})`)
-                            .datum(isNumber(selectedSectionNr) ? cardD.items.filter(it => it.sectionNr === selectedSectionNr) : cardD.items)
+                            .datum(selectedSectionKey ? cardD.items.filter(it => it.section.key === selectedSectionKey) : cardD.items)
                             .call(items)
 
                         //remove items for cards behind
@@ -413,7 +413,7 @@ export default function cardsComponent() {
                             onClick:e => { onClickCard(e, cardD) },
                             icon:icons.collapse,
                         }
-                        const botRightBtnData = isNumber(selectedSectionNr) || !isFront ? [] : (isSelected ? [collapseBtnDatum] : [expandBtnDatum]);
+                        const botRightBtnData = selectedSectionKey || !isFront ? [] : (isSelected ? [collapseBtnDatum] : [expandBtnDatum]);
                         const btnHeight = d3.max([1, d3.min([15, 0.12 * normalContentsHeight])]);
                         const btnWidth = btnHeight;
                         //assumme all are square
@@ -507,7 +507,7 @@ export default function cardsComponent() {
                             .width(contentsWidth)
                             .height(mediaHeight)
 
-                        const shouldShowMedia = isFront && cardsAreFlipped && !isNumber(selectedSectionNr);
+                        const shouldShowMedia = isFront && cardsAreFlipped && !selectedSectionKey;
                         const photosData = [
                             { 
                                 key:"profile-1", 
@@ -570,7 +570,7 @@ export default function cardsComponent() {
                             .scrollable(false)
                             .profileIsSelected(false)
 
-                        const shouldShowKpis = deckIsSelected && isFront && cardsAreFlipped && !isNumber(selectedSectionNr);
+                        const shouldShowKpis = deckIsSelected && isFront && cardsAreFlipped && !selectedSectionKey;
 
                         const kpisG = backContentsG.selectAll("g.kpis").data(shouldShowKpis ? [1] : []);
                         kpisG.enter()
@@ -781,14 +781,14 @@ export default function cardsComponent() {
         selectedItemNr = value;
         return cards;
     };
-    cards.selectedSectionNr = function (value) {
-        if (!arguments.length) { return selectedSectionNr; }
-        selectedSectionNr = value;
+    cards.selectedSectionKey = function (value) {
+        if (!arguments.length) { return selectedSectionKey; }
+        selectedSectionKey = value;
         Object.values(frontHeaderComponents).forEach(header => {
-            header.selectedSectionNr(value);
+            header.selectedSectionKey(value);
         })
         Object.values(itemsComponents).forEach(itemsComponent => {
-            itemsComponent.selectedSectionNr(value);
+            itemsComponent.selectedSectionKey(value);
         })
         return cards;
     };

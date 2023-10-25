@@ -37,7 +37,7 @@ export default function pentagonComponent() {
     let withSectionLabels = true;
     let withText = true;
     let editable = true;
-    let selectedSectionNr;
+    let selectedSectionKey;
 
     let innerVertices;
     let outerVertices;
@@ -82,11 +82,11 @@ export default function pentagonComponent() {
     function pentagon(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true } = options;
         updateDimns();
-        selection.each(function (sectionsData, i) {
-            update.call(this, sectionsData);
+        selection.each(function (itemsData, i) {
+            update.call(this, itemsData);
         })
 
-        function update(sectionsData){
+        function update(itemsData){
 
             //drag
             enhancedDrag
@@ -100,11 +100,14 @@ export default function pentagonComponent() {
                 .on("end", enhancedDrag(onDragEnd))
 
             const containerG = d3.select(this);
-            const sectionG = containerG.selectAll("g.section").data(sectionsData, s => s.key);
+            const sectionG = containerG.selectAll("g.section").data(itemsData, s => s.key);
             sectionG.enter()
                 .append("g")
-                    .attr("class", d => `section section-${d.sectionNr}`)
-                    .attr("display", (d,i) => !isNumber(selectedSectionNr) || selectedSectionNr === i ? null : "none")
+                    //section is identified in the dom by its itemNr ie it pos in the polygon
+                    //notice, we get this from thr secitn object, which allows user to reassign an item from a 
+                    //different pos in the polygon (ie a different itemNr) to another section
+                    .attr("class", d => `section section-${d.section?.itemNr}`)
+                    .attr("display", d => !selectedSectionKey || selectedSectionKey === d.section?.key ? null : "none")
                     .each(function(d,i){
                         const sectionG = d3.select(this);
                         sectionG.append("path").attr("class", "section-bg").attr("fill", "transparent");
@@ -150,10 +153,10 @@ export default function pentagonComponent() {
                     //click if its been longpressed. eg store an isLongpress here in outer scope
                     .call(drag)
                     .merge(sectionG)
-                    .attr("display", (d,i) => !isNumber(selectedSectionNr) || selectedSectionNr === i ? null : "none")
+                    .attr("display", d => !selectedSectionKey || selectedSectionKey === d.section?.key ? null : "none")
                     .style("pointer-events", editable ? null : "none")
                     .each(function(d,i){
-                        const { deckId, cardNr, itemNr, title, sectionInfo } = d;
+                        const { deckId, cardNr, itemNr, title, section } = d;
                         //for now, we fake a video attachment using a special item name
                         const includesVideo = title.includes("Video") || title.includes("video");
                         const attachments = includesVideo ? [{ key:"att-1", type: "video" }] : [];
@@ -442,7 +445,7 @@ export default function pentagonComponent() {
                         }
 
                         //section initial/icon;
-                        const sectionDatum = sectionInfo || {};
+                        const sectionDatum = section || {};
                         const sectionIdentifierG = sectionG.selectAll("g.section-identifier").data(withSectionLabels ? [sectionDatum] : [])
 
                         sectionIdentifierG.enter()
@@ -517,9 +520,9 @@ export default function pentagonComponent() {
         editable = value;
         return pentagon;
     };
-    pentagon.selectedSectionNr = function (value) {
-        if (!arguments.length) { return selectedSectionNr; }
-        selectedSectionNr = value;
+    pentagon.selectedSectionKey = function (value) {
+        if (!arguments.length) { return selectedSectionKey; }
+        selectedSectionKey = value;
         return pentagon;
     };
     
