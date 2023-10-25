@@ -34,9 +34,11 @@ export const TIME_SETTINGS = {
 }
 
 export const FONTSIZES = { 
+    SECTION_ID:3
 }
 
 export const STYLES = {
+    SECTION_ID_OPACITY:0.5
 }
 
 export const DIMNS = {
@@ -65,6 +67,7 @@ export const COLOURS = {
             return (cardD.isHeld ? grey10(6) : grey10(8))
         },
         SECTION_VIEW_FILL:grey10(7),
-        SECTION_VIEW_STROKE:grey10(5)
+        SECTION_VIEW_STROKE:grey10(5),
+        SECTION_ID:grey10(6)
     }
 }

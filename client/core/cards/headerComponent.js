@@ -2,6 +2,8 @@ import * as d3 from 'd3';
 import { grey10, COLOURS, TRANSITIONS, DIMNS } from "./constants";
 import { updateRectDimns } from '../journey/transitionHelpers';
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
+import { fadeIn, remove } from '../journey/domHelpers';
+import { truncateIfNecc } from '../journey/helpers';
 const { GOLD } = COLOURS;
 
 export default function headerComponent() {
@@ -19,6 +21,12 @@ export default function headerComponent() {
     let progressIconContentsWidth;
     let progressIconContentsHeight;
 
+    let titleWidth;
+    let titleHeight;
+
+    let subtitleWidth;
+    let subtitleHeight;
+
     function updateDimns(){
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
@@ -32,15 +40,24 @@ export default function headerComponent() {
         }
         progressIconContentsWidth = progressIconWidth - progressIconMargin.left - progressIconMargin.right;
         progressIconContentsHeight = progressIconHeight - progressIconMargin.top - progressIconMargin.bottom;
+
+        subtitleWidth = contentsWidth - progressIconWidth;
+        subtitleHeight = withSubtitle ? contentsHeight * 0.3 : 0;
+        titleWidth = contentsWidth - progressIconWidth;
+        titleHeight = contentsHeight - subtitleHeight;
+
     }
     let DEFAULT_STYLES = {
         header:{ info:{ date:{ fontSize:9 } } },
     }
     let _styles = () => DEFAULT_STYLES;
     let transformTransition;
+    let maxTitleFont = 16;
 
     let onClickTitle = function(){};
     let onClickProgressIcon = function(){};
+
+    let withSubtitle = false;
 
     let containerG;
     let contentsG;
@@ -50,6 +67,8 @@ export default function headerComponent() {
     function header(selection, options={}) {
         const { } = options;
 
+        withSubtitle = !!selection.data().find(d => d.subtitle);
+       
         updateDimns();
         // expression elements
         selection.each(function (data) {
@@ -82,15 +101,18 @@ export default function headerComponent() {
                 titleG = contentsG.append("g").attr("class", "title")
                 titleG.append("text")
                     .attr("class", "title")
-                    .attr("y", contentsHeight/2)
-                    .attr("font-size", contentsHeight * 0.3)
+                    .attr("y", titleHeight/2)
+                    .attr("font-size", d3.min([maxTitleFont, titleHeight * 0.5]))
                     .attr("dominant-baseline", "central");
                     
                 titleG.append("rect")
                     .attr("class", "title-hitbox")
-                    .attr("width", contentsWidth - progressIconWidth)
-                    .attr("height", contentsHeight)
+                    .attr("width", titleWidth)
+                    .attr("height", titleHeight)
                     .attr("fill", "transparent")
+                    //.attr("stroke", "yellow")
+                    //.attr("stroke-width", 0.03)
+
                     
                 //progress-icon
                 progressIconG = contentsG.append("g")
@@ -119,7 +141,7 @@ export default function headerComponent() {
             function update(data, options={}){
                 //console.log("update")
                 const { } = options;
-                const { id, title, status, completion } = data
+                const { id, title, subtitle, status, completion } = data
 
                 //bg
                 containerG
@@ -136,15 +158,19 @@ export default function headerComponent() {
                         .attr("transform", `translate(${margin.left}, ${margin.top})`)
 
                 //title
+                const titleFontSize = d3.min([maxTitleFont, titleHeight * 0.5]);
+                const maxTitleChars = 16;
+                titleG.select("text")
+                    .transition()
+                    .duration(TRANSITIONS.MED)
+                        .attr("y", titleHeight/2)
+                        .attr("font-size", titleFontSize);
+
                 titleG.select("text")
                     .attr("stroke", grey10(2))
                     .attr("fill", grey10(2))
                     .attr("stroke-width", 0.1)
-                    .text(title || "Enter Title...")
-                        .transition("title-text")
-                        .duration(TRANSITIONS.MED)
-                            .attr("y", contentsHeight/2)
-                            .attr("font-size", contentsHeight * 0.3)
+                    .text(truncateIfNecc(title, maxTitleChars) || "Enter Title...")
                     
                 
                 titleG.select("rect.title-hitbox")
@@ -158,6 +184,48 @@ export default function headerComponent() {
                         onClickTitle.call(this, e, data);
                         e.stopPropagation(); 
                     })
+
+                const subtitleG = contentsG.selectAll("g.subtitle").data(subtitle ? [1] : [])
+                subtitleG.enter()
+                    .append("g")
+                        .attr("class", "subtitle")
+                        .call(fadeIn)
+                        .each(function(){
+                            const subtitleG = d3.select(this);
+                            subtitleG.append("text")
+                                .attr("dominant-baseline", "hanging")
+                                //.attr("y", subtitleHeight/2)
+                                .attr("font-size", subtitleHeight * 0.7)
+                                .attr("stroke", grey10(5))
+                                .attr("fill", grey10(5))
+                                .attr("stroke-width", 0.05)
+
+                            subtitleG.append("rect").attr("class", "hitbox")
+                                .attr("fill", "transparent")
+                                //.attr("stroke", "white")
+                                //.attr("stroke-width", 0.03)
+
+                        })
+                        .merge(subtitleG)
+                        .attr("transform", `translate(0, ${titleHeight})`)
+                        .each(function(){
+                            const subtitleG = d3.select(this);
+
+                            subtitleG.select("text")
+                                .transition()
+                                .duration(TRANSITIONS.MED)
+                                    //.attr("y", subtitleHeight/2)
+                                    .attr("font-size", subtitleHeight * 0.7)
+
+                            subtitleG.select("text")
+                                .text(truncateIfNecc(subtitle, 16))
+
+                            subtitleG.select("rect")
+                                .attr("width", subtitleWidth)
+                                .attr("height", subtitleHeight)
+
+                        })
+                subtitleG.exit().call(remove);
 
                 //progress-icon
                 contentsG.select("g.progress-icon")
@@ -220,6 +288,11 @@ export default function headerComponent() {
     header.margin = function (value) {
         if (!arguments.length) { return margin; }
         margin = value;
+        return header;
+    };
+    header.maxTitleFont = function (value) {
+        if (!arguments.length) { return maxTitleFont; }
+        maxTitleFont = value;
         return header;
     };
     header.styles = function (value) {

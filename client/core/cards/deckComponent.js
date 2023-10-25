@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { grey10, COLOURS, DIMNS, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIONS } from "./constants";
+import { grey10, COLOURS, DIMNS, FONTSIZES, STYLES, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIONS } from "./constants";
 import cardsComponent from './cardsComponent';
 import headerComponent from './headerComponent';
 import contextMenuComponent from "./contextMenuComponent";
@@ -331,7 +331,7 @@ export default function deckComponent() {
 
             function update(_deckData, options={}){
                 const { } = options;
-                const { id, frontCardNr, listPos, colNr, rowNr, purpose } = _deckData;
+                const { id, frontCardNr, listPos, colNr, rowNr, purpose, sections } = _deckData;
 
                 cardsAreaG.call(fadeInOut, content === "cards" /*{ transition:{ duration: 1000 } }*/);
 
@@ -659,13 +659,15 @@ export default function deckComponent() {
                         .attr("height", contentsHeight)
                 
                 //header
+                const selectedSection = sections.find(s => s.nr === selectedSectionNr);
                 headerG
                     //.style("pointer-events", deckIsSelected ? "all" : null)
-                    .datum({ ..._deckData, title:_deckData.title || id })
+                    .datum({ ..._deckData, title:_deckData.title || id, subtitle:selectedSection?.title })
                     .call(header
                         .width(headerWidth)
                         .height(headerHeight)
                         .margin({ left:deckIsSelected ? 15 : 7.5, right: 0, top: 0, bottom: 0 } )
+                        .maxTitleFont(deckIsSelected ? 7 : 14)
                         .onClickTitle(function(e){
                             e.stopPropagation();
                             setForm({ formType: "deck-title" }) 
@@ -822,19 +824,37 @@ export default function deckComponent() {
                 .attr("ry", 1.5)
 
             let potentialSelectedSectionNr;
-
             const highlightSection = sectionNr => {
-                containerG.selectAll("g.card").selectAll(`g.section-${sectionNr}`).select("path.section-bg")
+                const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${sectionNr}`);
+                sectionG.select("path.section-bg")
                     .transition("highlight")
                     .duration(TRANSITIONS.VERY_FAST)
                         .attr("fill", grey10(2))
+
+                sectionG.selectAll("text.section-identifier")
+                    .attr("transform", "scale(1)")
+                        .transition("highlight")
+                        .duration(TRANSITIONS.VERY_FAST)
+                            .attr("fill", grey10(2))
+                            .attr("font-size", FONTSIZES.SECTION_ID * 1.2)
+                            .attr("opacity", 1)
+
+                
             }
 
             const unhighlightSection = sectionNr => {
-                containerG.selectAll("g.card").selectAll(`g.section-${sectionNr}`).select("path.section-bg")
+                const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${sectionNr}`);
+                sectionG.select("path.section-bg")
                     .transition("unhighlight")
                     .duration(TRANSITIONS.VERY_FAST)
                         .attr("fill", "transparent")
+
+                sectionG.selectAll("text.section-identifier")
+                    .transition("highlight")
+                    .duration(TRANSITIONS.VERY_FAST)
+                        .attr("fill", COLOURS.CARD.SECTION_ID)
+                        .attr("font-size", FONTSIZES.SECTION_ID)
+                        .attr("opacity", STYLES.SECTION_ID_OPACITY)
 
             }
         

@@ -19,6 +19,10 @@ const calcCompletion = cards => {
     return completedItems.length / allItems.length;
 }
 
+const createDefaultSections = cards => cards[0].items.map(it => ({ 
+    nr:it.itemNr, id:`section-${it.itemNr}`, title:`Section ${it.itemNr}`, initials:`S${it.itemNr}`
+}))
+
 export default function decksLayout(){
     let datasets = [];
     let info = {};
@@ -32,6 +36,7 @@ export default function decksLayout(){
         return {
             ...deckData,
             cards:processedCards,
+            sections:deckData.sections || createDefaultSections(cards),
             status:calcDeckStatus(processedCards),
             completion:calcCompletion(processedCards)
         }

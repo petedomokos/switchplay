@@ -511,12 +511,14 @@ export default function cardsComponent() {
                         const shouldShowMedia = isFront && cardsAreFlipped && !isNumber(selectedSectionNr);
                         const photosData = [
                             { 
-                                key:"profile-1", url:`/d${deckListPos}c${cardNr}p1.png`, 
-                                transform:`scale(0.0675)`, isVideo:true 
+                                key:"profile-1", 
+                                url:`/d${deckListPos}c${0}p1.png`,  //`/d${deckListPos}c${cardNr}p1.png`,
+                                transform:`scale(0.041)`, isVideo:true 
                             },
                             { 
-                                key:"profile-2", url:`/d${deckListPos}c${cardNr}p2.png`,
-                                transform:`scale(0.09)`, isVideo:true 
+                                key:"profile-2", 
+                                url:`/d${deckListPos}c${0}p2.png`, //`/d${deckListPos}c${cardNr}p2.png`,
+                                transform:`scale(0.041)`, isVideo:true 
                             },
                         ]
                         const mediaG = backContentsG.selectAll("g.profile-info").data(shouldShowMedia ? [1] : []);

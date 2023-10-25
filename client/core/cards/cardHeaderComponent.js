@@ -246,6 +246,7 @@ export default function cardHeaderComponent() {
                                         .datum(d.itemsData)
                                         .call(pentagon
                                             .r2(d3.min([progressSummaryContentsWidth * 0.5, progressSummaryContentsHeight * 0.5]))
+                                            .withSectionLabels(false)
                                             .styles({
                                                 _lineStrokeWidth:(itemD) => {
                                                     const { status } = itemD;

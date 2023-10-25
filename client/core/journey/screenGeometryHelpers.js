@@ -227,6 +227,27 @@ export function angleFromNorth(points) {
     return theta;
 }
 
+export function posFromCentre(angleFromNorth, radius){
+    const { sin, cos } = Math;
+    const theta = toRadians(angleFromNorth);
+    //quad 1
+    if(angleFromNorth < 90){
+        return { x: radius * sin(theta), y: radius * cos(theta) * -1 }
+    }
+    //quad2
+    if(angleFromNorth < 180){
+        return { x: radius * sin(theta), y: radius * cos(theta) * -1 }
+    }
+    //quad 3
+    if(angleFromNorth < 270){
+        return { x: radius * sin(theta), y: radius * cos(theta) * -1 }
+    }
+    //quad 4
+    if(angleFromNorth < 360){
+        return { x: radius * sin(theta), y: radius * cos(theta) * -1 }
+    }
+}
+
 export function toRadians(degrees) {
     return degrees * (Math.PI / 180);
 }

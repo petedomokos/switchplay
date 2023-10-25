@@ -1,13 +1,15 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10, OVERLAY, COLOURS, TRANSITIONS } from "./constants";
+import { DIMNS, FONTSIZES, STYLES, grey10, OVERLAY, COLOURS, TRANSITIONS } from "./constants";
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
-import { toRadians } from '../journey/screenGeometryHelpers';
+import { toRadians, posFromCentre } from '../journey/screenGeometryHelpers';
 import dragEnhancements from '../journey/enhancedDragHandler';
 import { TextBox } from "d3plus-text";
 import { grey } from '@material-ui/core/colors';
 import { isNumber } from '../../data/dataHelpers';
 
 const { GOLD } = COLOURS;
+
+const NR_SECTIONS = 5;
 
 const videoIconD = "M85.527,80.647c2.748,0,4.973-2.225,4.973-4.974V24.327c0-2.749-2.225-4.974-4.973-4.974H14.474c-2.748,0-4.974,2.225-4.974,4.974v51.346c0,2.749,2.225,4.974,4.974,4.974H85.527z M80.553,70.699H19.446V29.301h61.107V70.699z"
 const videoIconPolygonPoints = "64.819,50.288 52.839,57.201 40.865,64.118 40.865,50.288 40.865,36.462 52.839,43.38"
@@ -32,6 +34,7 @@ export default function pentagonComponent() {
     let r1 = 0;
     let r2 = 100;
     let withSections = true;
+    let withSectionLabels = true;
     let withText = true;
     let editable = true;
     let selectedSectionNr;
@@ -48,11 +51,12 @@ export default function pentagonComponent() {
     
     
     function updateDimns(){
+        const anglePerSection = 360 / NR_SECTIONS;
         hitlineStrokeWidth = r2 * 0.45;
-        innerVertices = pentagonVertices({ r:r1, theta:i => i * 72 });
-        outerVertices = pentagonVertices({ r:r2, theta:i => i * 72 });
-        //outerHitboxVertices = pentagonVertices({ r:r2+hitlineStrokeWidth/2, theta:i => i * 72 });
-        segmentVertices = pentagonVertices({ r:r1 + (r2 - r1)/2, theta:i => (i + 0.5) * 72 });
+        innerVertices = pentagonVertices({ r:r1, theta:i => i * anglePerSection });
+        outerVertices = pentagonVertices({ r:r2, theta:i => i * anglePerSection });
+        //outerHitboxVertices = pentagonVertices({ r:r2+hitlineStrokeWidth/2, theta:i => i * anglePerSection });
+        segmentVertices = pentagonVertices({ r:r1 + (r2 - r1)/2, theta:i => (i + 0.5) * anglePerSection });
 
         shouldTruncate = r2 - r1 < 100;
     }
@@ -135,6 +139,8 @@ export default function pentagonComponent() {
                             .verticalAlign("middle")
                             .overflow("visible");
 
+                        sectionG.append("g").attr("section-identifier")
+
                     })
                     //WARNING: drag is before merge so it doesnt get broken when a longpress causes an update
                     //if it breaks, the enhancedDH will trigger onClick because isLongpress is reset to false
@@ -147,7 +153,7 @@ export default function pentagonComponent() {
                     .attr("display", (d,i) => !isNumber(selectedSectionNr) || selectedSectionNr === i ? null : "none")
                     .style("pointer-events", editable ? null : "none")
                     .each(function(d,i){
-                        const { deckId, cardNr, itemNr, title } = d;
+                        const { deckId, cardNr, itemNr, title, sectionInfo } = d;
                         //for now, we fake a video attachment using a special item name
                         const includesVideo = title.includes("Video") || title.includes("video");
                         const attachments = includesVideo ? [{ key:"att-1", type: "video" }] : [];
@@ -435,6 +441,40 @@ export default function pentagonComponent() {
                             }, 0)
                         }
 
+                        //section initial/icon;
+                        const sectionDatum = sectionInfo || {};
+                        const sectionIdentifierG = sectionG.selectAll("g.section-identifier").data(withSectionLabels ? [sectionDatum] : [])
+
+                        sectionIdentifierG.enter()
+                            .append("g")
+                                .attr("class", "section-identifier")
+                                .attr("pointer-events", "none")
+                                .each(function(){
+                                    const idG = d3.select(this);
+                                    idG.append("text").attr("class", "initials section-identifier section-identifier-initials")
+                                        .attr("text-anchor", "middle")
+                                        .attr("dominant-baseline", "central")
+                                        .attr("stroke-width", 0.05)
+                                        //.attr("stroke", COLOURS.CARD.SECTION_ID)
+                                        .attr("fill", COLOURS.CARD.SECTION_ID)
+                                        .attr("opacity", STYLES.SECTION_ID_OPACITY)
+                                        .attr("font-size", FONTSIZES.SECTION_ID)
+                                })
+                                .merge(sectionIdentifierG)
+                                .attr("transform", (d,i) => {
+                                    const theta = (itemNr + 0.5) * (360/NR_SECTIONS);
+                                    const { x, y } = posFromCentre(theta, r2 * 0.95)
+                                    return `translate(${x},${y})`
+                                })
+                                .each(function(d){
+                                    const idG = d3.select(this);
+                                    idG.select("text.initials")
+                                        .text(d.initials || d?.title?.slice(0,2) || `S${itemNr}`)
+
+                                })
+
+                        sectionIdentifierG.exit().remove();
+
                            
                     })
 
@@ -460,6 +500,11 @@ export default function pentagonComponent() {
     pentagon.withSections = function (value) {
         if (!arguments.length) { return withSections; }
         withSections = value;
+        return pentagon;
+    };
+    pentagon.withSectionLabels = function (value) {
+        if (!arguments.length) { return withSectionLabels; }
+        withSectionLabels = value;
         return pentagon;
     };
     pentagon.withText = function (value) {
