@@ -225,6 +225,11 @@ export default function headerComponent() {
                                 .attr("height", subtitleHeight)
 
                         })
+                        .on("click", function(e){ 
+                            onClickSubtitle.call(this, e, data);
+                            e.stopPropagation(); 
+                        })
+
                 subtitleG.exit().call(remove);
 
                 //progress-icon

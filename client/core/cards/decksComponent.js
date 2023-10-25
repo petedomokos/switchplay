@@ -94,7 +94,10 @@ export default function decksComponent() {
                         .attr("class", d => `deck deck-${d.id}`)
                         .call(fadeIn, { transition:{ duration: 1000 } })
                         .each(function(d,i){
-                            deckComponents[d.id] = deckComponent();
+                            //dont overwrite deck if it has been removed from dom as it has up-to-date settings
+                            if(!deckComponents[d.id]){
+                                deckComponents[d.id] = deckComponent();
+                            }
                         })
                         .attr("transform", (d,i) => `translate(${x(d,i)}, ${y(d,i)})`)
                         .merge(deckG)

@@ -27,16 +27,23 @@ export default function decksLayout(){
     let datasets = [];
     let info = {};
     let format = "profiles";
+    let withSections = null; //true, false or null
 
     const _cardsLayout = cardsLayout();
 
     function update(deckData){
         const { cards, id, listPos } = deckData;
         const processedCards = _cardsLayout(cards.map(c => ({ ...c, deckId:id, deckListPos:listPos })));
+
+        //sections - if withSections, we create default sectins if none exist. if false, there are never sections
+        let sections;
+        if(withSections === null){ sections = deckData.sections }
+        else if(withSections === true){ sections = deckData.sections || createDefaultSections(cards) }
+
         return {
             ...deckData,
             cards:processedCards,
-            sections:deckData.sections || createDefaultSections(cards),
+            sections, //may be undefined
             status:calcDeckStatus(processedCards),
             completion:calcCompletion(processedCards)
         }
@@ -45,6 +52,11 @@ export default function decksLayout(){
     update.format = function (value) {
         if (!arguments.length) { return format; }
         if(value){ format = value; }
+        return update;
+    };
+    update.withSections = function (value) {
+        if (!arguments.length) { return withSections; }
+        withSections = value;
         return update;
     };
     update.datasets = function (value) {

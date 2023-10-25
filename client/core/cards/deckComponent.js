@@ -279,6 +279,7 @@ export default function deckComponent() {
         selection.each(function (deckData) {
             updateDimns(deckData);
             id = deckData.id;
+            //console.log("update", id, selectedSectionNr)
             containerG = d3.select(this)
 
             if(containerG.select("g").empty()){
@@ -659,14 +660,14 @@ export default function deckComponent() {
                         .attr("height", contentsHeight)
                 
                 //header
-                const selectedSection = sections.find(s => s.nr === selectedSectionNr);
+                const selectedSection = sections?.find(s => s.nr === selectedSectionNr);
                 headerG
                     //.style("pointer-events", deckIsSelected ? "all" : null)
                     .datum({ ..._deckData, title:_deckData.title || id, subtitle:selectedSection?.title })
                     .call(header
                         .width(headerWidth)
                         .height(headerHeight)
-                        .margin({ left:deckIsSelected ? 15 : 7.5, right: 0, top: 0, bottom: 0 } )
+                        .margin({ left:deckIsSelected ? 20 : 7.5, right: 0, top: 0, bottom: 0 } )
                         .maxTitleFont(deckIsSelected ? 7 : 14)
                         .onClickTitle(function(e){
                             e.stopPropagation();
@@ -788,7 +789,7 @@ export default function deckComponent() {
 
 
             //controls
-            const controlsData = cardsAreFlipped ? [] : [
+            const controlsData = !sections || cardsAreFlipped ? [] : [
                 { key:"section-view" }
             ];
 

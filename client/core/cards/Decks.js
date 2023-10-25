@@ -73,7 +73,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   //console.log("Decks")
   const stringifiedData = JSON.stringify({ data, table });
   //state
-  const [layout, setLayout] = useState(() => deckLayout());
+  const [decksLayout, setLayout] = useState(() => deckLayout());
   const [decks, setDecks] = useState(() => decksComponent());
   const [zoom, setZoom] = useState(() => d3.zoom());
   const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
@@ -484,9 +484,10 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
     //console.log("ordered", profilesData)
 
     //decksdata
+    decksLayout.withSections(true);
     const decksToDisplay = selectedDeckId ? [selectedDeck] : data;
     const processedDeckData = decksToDisplay
-      .map(deckData => layout(deckData))
+      .map(deckData => decksLayout(deckData))
       .map(d => ({
         ...d,
         //cards:d.cards.map((c,i) => ({ ...c, profile:profilesData[i] }))
@@ -504,6 +505,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       .height(tableHeight + deckHeightWithMargins)
       .nrCols(nrCols)
       .selectedDeckId(selectedDeckId)
+      .selectedSectionNr(selectedSectionNr)
       .form(form)
       .x(deckX)
       .y(deckY)
@@ -527,7 +529,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
       .setForm(setForm)
-  }, [stringifiedData, width, height, selectedDeckId, form?.formType])
+  }, [stringifiedData, width, height, selectedDeckId, selectedSectionNr, form?.formType])
 
   useEffect(() => {
     d3.select(containerRef.current).call(decks);
@@ -677,7 +679,6 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   }, [form]);
 
   const handleCancelForm = useCallback(e => {
-    console.log("cancel form")
     //milestonesBar.updateDatesShown(allMilestones);
     setForm(null);
   }, [form]);

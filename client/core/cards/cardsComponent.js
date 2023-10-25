@@ -334,7 +334,6 @@ export default function cardsComponent() {
                                     top:margin.top + headerDimns.top
                                 }
                                 onClickCardTitle(cardD, i, dimns);
-                                e.stopPropagation();
                             })
                         
                         const frontHeaderDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr };

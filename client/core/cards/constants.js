@@ -44,7 +44,7 @@ export const STYLES = {
 export const DIMNS = {
     burgerBarWidth:45,
     DECK:{
-        HEADER_HEIGHT:20,
+        HEADER_HEIGHT:25,
         PROGRESS_ICON_WIDTH:20
     }
 }
