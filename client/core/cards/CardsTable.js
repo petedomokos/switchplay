@@ -102,7 +102,6 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
 
   const width = screen.width || 300;
   const height = screen.height || 600;
-  console.log("w h ar", width, height, width/height)
 
   const containerWidth = 100000;
   const containerHeight = 100000;
@@ -195,7 +194,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
             journeyData={journeyData}
             tableMarginTop={tableMarginTop}
             onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} 
-            updateTable={updateTable} updateDeck={updateDeck} />
+            updateTable={updateTable} updateDeck={updateDeck} availWidth={width} availHeight={height} />
         }
       </div>
     </div>

@@ -70,7 +70,7 @@ const enhancedZoom = dragEnhancements();
 
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
+const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
   //processed props
   const stringifiedData = JSON.stringify({ data, table });
   //state
@@ -110,7 +110,6 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   //dimns
   const width = nrCols * deckWidthWithMargins;
   const deckAspectRatio = 9/16;
-  console.log("deck ar", deckAspectRatio)
   const deckOuterMargin = {
     left:10, //width * 0.05,
     right:10,//width * 0.05,
@@ -125,11 +124,30 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
   const selectedDeckDimns = maxDimns(width, height, deckAspectRatio);
   const zoomScale = selectedDeckDimns.width / deckWidth;
+  
+  /*
+  //ALTERNATIVE WAY TO DO DIMNS THAT KEEPS SAME AR, BUT IT MAKES SELECTED DECK
+  SHIFTED TO RIGHT SLIGHTLY SO STILL NOT CORRECT
+  const deckAspectRatio = 9/16;
+  //margin prop will be the same so we apply ar to margins too
+  const deckHeightWithMargins = deckWidthWithMargins / deckAspectRatio;
+  const width = nrCols * deckWidthWithMargins;
 
-  //need to work out why on a mobile screen in portrait, the max width is not being taken up,
-  //leading to this shift to centre the deck. BUT.....
-  //better is to remove burger bar when in selecteddeck mode -> pass it back to store from CardsTable
-  //and main menu can pick this up -> store it as a shouldDisplayBurgerMenu which inits to true;
+  const deckOuterMargin = {
+    left:deckWidthWithMargins * 0.03,//10, //width * 0.05,
+    right:deckWidthWithMargins * 0.03,//10,//width * 0.05,
+    top:deckHeightWithMargins * 0.03,//15, //height * 0.05,
+    bottom:deckHeightWithMargins * 0.03,//15//height * 0.05
+  }
+
+  const deckWidth = deckWidthWithMargins - deckOuterMargin.left - deckOuterMargin.right;
+  const deckHeight = deckHeightWithMargins - deckOuterMargin.top - deckOuterMargin.bottom;
+  const selectedDeckDimns = maxDimns(width, height, deckAspectRatio);
+  //console.log("selDimns", selectedDeckDimns, deckWidth, deckHeight)
+  const zoomScale = availWidth / deckWidth;
+
+  */
+
   const extraHozShiftToCentreWhenSelected = (width - selectedDeckDimns.width)/2;
 
   const cellX = d => d.colNr * deckWidthWithMargins;
@@ -246,7 +264,6 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       const newX = -deckX(deck);
       const newY = -deckY(deck);
       const newK = zoomScale;
-      console.log("extra", extraHozShiftToCentreWhenSelected)
       //the extrahozShift is an abs amount to get it to center of screen so shouldnt be scaled up
       const newTransformState = d3.zoomIdentity.translate(newX * newK + extraHozShiftToCentreWhenSelected, newY * newK).scale(newK);
       d3.select(zoomRef.current).call(zoom.transform, newTransformState)
@@ -324,7 +341,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
     if(formType === "section-title"){
       const subtitleHeight = DIMNS.DECK.HEADER_HEIGHT * DIMNS.DECK.HEADER_SUBTITLE_HEIGHT_PROP
       return {
-        left:DIMNS.burgerBarWidth + 30,
+        left:20 + extraHozShiftToCentreWhenSelected,
         //subtitle has dominant-baseline hanging
         top:(DIMNS.DECK.HEADER_HEIGHT - subtitleHeight * 1.4) * zoomScale,
         width:(selectedDeckDimns.width - (DIMNS.DECK.PROGRESS_ICON_WIDTH * zoomScale) - deckFormMarginLeft) * 0.8,
@@ -337,7 +354,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
         height:(DIMNS.DECK.HEADER_HEIGHT - deckFormMarginTop) * zoomScale,
         //next - put deckX and deckY into this just to see it works even though we dont really need it
         //then apply same to card form dimns
-        left: DIMNS.burgerBarWidth + 8 + extraHozShiftToCentreWhenSelected, //messes it all up!!!!
+        left: 20 + extraHozShiftToCentreWhenSelected,
         top:0
       }
     }
