@@ -9,6 +9,7 @@ import decksComponent from "./decksComponent";
 import milestonesLayout from "../journey/milestonesLayout";
 import ItemForm from "./forms/ItemForm";
 import DeckTitleForm from './forms/DeckTitleForm';
+import SectionTitleForm from './forms/SectionTitleForm';
 import CardTitleForm from './forms/CardTitleForm';
 import CardDateForm from "./CardDateForm";
 import PurposeParagraphForm from './forms/PurposeParagraphForm';
@@ -23,6 +24,7 @@ import { TRANSITIONS, DIMNS } from "./constants"
 import { grey10, COLOURS } from './constants';
 const { GOLD } = COLOURS;
 import dragEnhancements from '../journey/enhancedDragHandler';
+import { toCamelCase } from '../../data/measures';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -68,16 +70,15 @@ const enhancedZoom = dragEnhancements();
 
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSectionKey, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
+const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
   //processed props
-  //console.log("Decks")
   const stringifiedData = JSON.stringify({ data, table });
   //state
   const [decksLayout, setLayout] = useState(() => deckLayout());
   const [decks, setDecks] = useState(() => decksComponent());
   const [zoom, setZoom] = useState(() => d3.zoom());
   const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
-  const [selectedSectionKey, setSelectedSectionKey] = useState(customSelectedSectionKey);
+  const [selectedSection, setSelectedSection] = useState(customSelectedSection);
   const [selectedCardNr, setSelectedCardNr] = useState(customSelectedCardNr);
   const [selectedItemNr, setSelectedItemNr] = useState(customSelectedItemNr);
   const [longpressedDeckId, setLongpressedDeckId] = useState("");
@@ -90,6 +91,8 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   //processed state
   const selectedDeck = data.find(deck => deck.id === selectedDeckId);
   const selectedCard = selectedDeck?.cards.find(c => c.cardNr === selectedCardNr);
+  //console.log("selectedDeck", selectedDeck)
+  //console.log("selectedSection", selectedSection)
   //refs
   const zoomRef = useRef(null);
   const containerRef = useRef(null);
@@ -307,15 +310,19 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
 
   const onSelectSection = useCallback(key => {
-    setSelectedSectionKey(key);
-  }, []);
+    setSelectedSection(selectedDeck?.sections.find(s => s.key === key) || null);
+  }, [selectedDeckId]);
 
   const getFormDimns = useCallback(() => {
     const { formType, value, formDimns } = form;
-
     if(formType === "section-title"){
-      //first - check c ards that they show teh items that have the same secitonName not sectin Nr, 
-      //so if a deck doesmt have that section, then it shows blank cards 
+      const subtitleHeight = DIMNS.DECK.HEADER_HEIGHT * DIMNS.DECK.HEADER_SUBTITLE_HEIGHT_PROP
+      return {
+        left:DIMNS.burgerBarWidth + 30,
+        //subtitle has dominant-baseline hanging
+        top:(DIMNS.DECK.HEADER_HEIGHT - subtitleHeight * 1.4) * zoomScale,
+        width:(selectedDeckDimns.width - (DIMNS.DECK.PROGRESS_ICON_WIDTH * zoomScale) - deckFormMarginLeft) * 0.8,
+      }
 
     }
     if(formType === "deck-title"){
@@ -390,6 +397,10 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
     e.stopPropagation();
+    //if(form?.formType === "section-title"){
+      //need to persist the changes to section as these are not done dynamically
+      //also update the selectedSection to be the latest
+    //}
     //bg click shouldnt change anything else if its just clicking to comeo out a form
     if(form){  
       setForm(null);
@@ -416,6 +427,23 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   const updateDeckTitle = useCallback(title => {
     updateDeck({ ...selectedDeck, title })
   }, [stringifiedData, form, selectedDeckId]);
+
+  const updateSectionTitle = useCallback(title => {
+    //note - we dont store anything on an item, theitem is assigned the section in layout, based on sections itemNr
+    //@todo - give option to update it on all decks that share this section, inc those inot in this table
+    const newKey = toCamelCase(title);
+    const updatedSections = selectedDeck.sections
+      .map(s => s.key === selectedSection.key ? ({ ...s, title, key:newKey }) : s)
+
+    setSelectedSection(prevState => ({ ...prevState, key:newKey, title }))
+    updateDeck({ ...selectedDeck, sections:updatedSections })
+  }, [stringifiedData, form, selectedDeckId, selectedSection]);
+
+  const updateSectionInitials = useCallback(initials => {
+    const updatedSections = selectedDeck.sections.map(s => s.key === selectedSection.key ? ({ ...s, initials }) : s)
+    setSelectedSection(prevState => ({ ...prevState, initials }))
+    updateDeck({ ...selectedDeck, sections:updatedSections })
+  }, [stringifiedData, form, selectedDeckId, selectedSection]);
 
   const updatePurposeParagraph = useCallback((newPara, i) => {
     const updatedPurpose = selectedDeck.purpose.map((para,j) => i === j ? newPara : para)
@@ -450,8 +478,8 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
 
   useEffect(() => {
-    decks.selectedSectionKey(selectedSectionKey);
-  }, [selectedSectionKey])
+    decks.selectedSection(selectedSection);
+  }, [selectedSection])
   //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
     //if(!longpressedDeckId){
@@ -500,15 +528,13 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
   }, [stringifiedData, selectedDeckId])
 
-  console.log("form", form)
-
   useEffect(() => {
     decks
       .width(width)
       .height(tableHeight + deckHeightWithMargins)
       .nrCols(nrCols)
       .selectedDeckId(selectedDeckId)
-      .selectedSectionKey(selectedSectionKey)
+      .selectedSection(selectedSection)
       .form(form)
       .x(deckX)
       .y(deckY)
@@ -532,11 +558,11 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
       .setForm(setForm)
-  }, [stringifiedData, width, height, selectedDeckId, selectedSectionKey, form?.formType])
+  }, [stringifiedData, width, height, selectedDeckId, selectedSection, form?.formType])
 
   useEffect(() => {
     d3.select(containerRef.current).call(decks);
-  }, [stringifiedData, width, height, selectedDeckId, selectedCardNr, selectedItemNr,  selectedSectionKey])
+  }, [stringifiedData, width, height, selectedDeckId, selectedCardNr, selectedItemNr,  selectedSection, form?.formType])
 
   //zoom
   useEffect(() => {
@@ -668,7 +694,6 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
 
   const handleDateChange = useCallback(dateKey => e => {
-    console.log("date change", dateKey)
     //do date change here, then do saving, plus put last couple of props into DateForm that are commented out
     if(!e.target?.value){ return; }
     const dateValue = e.target.value; //must declare it before the setform call as the cb messes the timing of updates up
@@ -735,6 +760,11 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
         {form?.formType === "deck-title" && 
           <DeckTitleForm deck={selectedDeck} save={updateDeckTitle} close={() => setForm(null)}
             dimns={getFormDimns()} 
+          />
+        }
+        {form?.formType === "section-title" && 
+          <SectionTitleForm section={selectedSection} saveTitle={updateSectionTitle} saveInitials={updateSectionInitials} 
+            close={() => setForm(null)} dimns={getFormDimns()} 
           />
         }
         {form?.formType === "card-title" && 

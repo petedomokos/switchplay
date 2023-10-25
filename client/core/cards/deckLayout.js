@@ -19,10 +19,6 @@ const calcCompletion = cards => {
     return completedItems.length / allItems.length;
 }
 
-const createDefaultSections = cards => cards[0].items.map(it => ({ 
-    itemNr: it.itemNr, key:`section-${it.itemNr}`, title:`Section ${it.itemNr}`, initials:`S${it.itemNr}`
-}))
-
 export default function decksLayout(){
     let datasets = [];
     let info = {};
@@ -33,10 +29,12 @@ export default function decksLayout(){
 
     function update(deckData){
         const { cards, id, listPos } = deckData;
-         //sections - if withSections, we create default sectins if none exist. if false, there are never sections
-         let sections;
-         if(withSections === null){ sections = deckData.sections }
-         else if(withSections === true){ sections = deckData.sections || createDefaultSections(cards) }
+        //sections - if withSections, we create default sectins if none exist. if false, there are never sections
+        let sections;
+        if(withSections === null){ sections = deckData.sections }
+        else if(withSections === true){ 
+            sections = deckData.sections || createDefaultSections(cards) 
+        }
         //cards
         _cardsLayout.sections(sections);
         const processedCards = _cardsLayout(cards.map(c => ({ ...c, deckId:id, deckListPos:listPos })));

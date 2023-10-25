@@ -8,6 +8,7 @@ export default new mongoose.Schema({
   player:{type:mongoose.Schema.ObjectId, ref:'User'},
   purpose:[String],
   cards:String,
+  sections:String,
   frontCardNr:{ type: Number, default: 0 },
   isArchived:{ type: Boolean, default: false },
   colour:String,

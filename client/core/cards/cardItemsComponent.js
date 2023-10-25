@@ -190,7 +190,6 @@ export default function cardItemsComponent() {
                     })
                     .merge(listG)
                     .each(function(){
-                        console.log("list data", data)
                         //need to decide whether to do enter-exit here or in textComp
                         const listG = d3.select(this);
                         const itemG = listG.selectAll("g.item").data(data, it => it.itemNr);

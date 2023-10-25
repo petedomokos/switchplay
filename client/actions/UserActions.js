@@ -1,4 +1,5 @@
 import C from '../Constants'
+import * as d3 from 'd3';
 import { status, parseResponse, logError, 
 	fetchStart, fetchEnd, fetchThenDispatch} from './CommonActions'
 import auth from '../auth/auth-helper'
@@ -17,16 +18,28 @@ export const transformTableForClient = serverTable => {
 	}
 }
 
+const createDefaultSection = itemNr => ({ 
+	itemNr, key:`section-${itemNr}`, title:`Section ${itemNr}`, initials:`S${itemNr}`
+})
+
+//for each itemNr, if user has defined a section for the item, then use that, else use default
+const NR_CARD_ITEMS = 5;
+const hydrateDeckSections = sections => d3.range(NR_CARD_ITEMS)
+	.map(nr => sections?.find(s => s.itemNr === nr) || createDefaultSection(nr))
+	.map(s => ({ ...s, initials:s.initials || s.title.slice(0,2).toUpperCase() }))
+
 export const transformDeckForClient = serverDeck => {
-	const { created, updated, cards, purpose=[], ...clientDeck } = serverDeck;
+	const { created, updated, cards, purpose=[], sections, ...clientDeck } = serverDeck;
 	//ensure prupose has at least two paragraphs
 	const hydratedPurpose = purpose.length === 0 ? ["",""] : purpose.length === 1 ? [purpose[0], ""] : purpose;
+	const hydratedDeckSections = hydrateDeckSections(sections ? JSON.parse(sections) : undefined);
 	return {
 		...clientDeck,
 		created:new Date(created),
 		updated:updated ? new Date(updated) : null,
 		id:serverDeck._id,
 		purpose:hydratedPurpose,
+		sections:hydratedDeckSections,
 		cards:JSON.parse(cards).map(c => ({
 			...c,
 			date:new Date(c.date),
@@ -36,10 +49,11 @@ export const transformDeckForClient = serverDeck => {
 }
 
 export const transformDeckForServer = clientDeck => {
-	const { id, cards, ...serverDeck } = clientDeck;
+	const { id, cards, sections, ...serverDeck } = clientDeck;
 	return {
 		...serverDeck,
-		cards:JSON.stringify(cards)
+		cards:JSON.stringify(cards),
+		sections:JSON.stringify(sections)
 	}
 }
 

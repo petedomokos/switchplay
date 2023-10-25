@@ -268,7 +268,10 @@ export default function cardsComponent() {
                     })
                     .each(function(cardD,i){
                         const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile, deckListPos } = cardD;
-                        const contentsG = d3.select(this).select("g.card-contents")
+                        const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section.key === selectedSectionKey) : cardD.items;
+                        
+                        const cardG = d3.select(this).call(fadeInOut, itemsData.length !== 0)
+                        const contentsG = cardG.select("g.card-contents")
                             .attr("transform", `translate(${margin.left},${margin.top})`)
 
                         //bgs for front and back
@@ -391,7 +394,7 @@ export default function cardsComponent() {
 
                         frontContentsG.select("g.items-area")
                             .attr("transform", `translate(0, ${headerHeight + gapBetweenHeaderAndItems})`)
-                            .datum(selectedSectionKey ? cardD.items.filter(it => it.section.key === selectedSectionKey) : cardD.items)
+                            .datum(itemsData)
                             .call(items)
 
                         //remove items for cards behind

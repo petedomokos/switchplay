@@ -42,7 +42,7 @@ export default function headerComponent() {
         progressIconContentsHeight = progressIconHeight - progressIconMargin.top - progressIconMargin.bottom;
 
         subtitleWidth = contentsWidth - progressIconWidth;
-        subtitleHeight = withSubtitle ? contentsHeight * 0.3 : 0;
+        subtitleHeight = withSubtitle ? contentsHeight * DIMNS.DECK.HEADER_SUBTITLE_HEIGHT_PROP : 0;
         titleWidth = contentsWidth - progressIconWidth;
         titleHeight = contentsHeight - subtitleHeight;
 
@@ -182,6 +182,7 @@ export default function headerComponent() {
 
                 titleG
                     .on("click", function(e){ 
+                        console.log("title click")
                         onClickTitle.call(this, e, data);
                         e.stopPropagation(); 
                     })
@@ -227,6 +228,7 @@ export default function headerComponent() {
 
                         })
                         .on("click", function(e){ 
+                            console.log("subtitle click")
                             onClickSubtitle.call(this, e, data);
                             e.stopPropagation(); 
                         })
