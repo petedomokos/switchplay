@@ -53,6 +53,7 @@ export default function headerComponent() {
     let _styles = () => DEFAULT_STYLES;
     let transformTransition;
     let maxTitleFont = 16;
+    let maxTitleChars = 20;
 
     let onClickTitle = function(){};
     let onClickSubtitle = function(){};
@@ -160,7 +161,6 @@ export default function headerComponent() {
 
                 //title
                 const titleFontSize = d3.min([maxTitleFont, titleHeight * 0.5]);
-                const maxTitleChars = 16;
                 titleG.select("text")
                     .transition()
                     .duration(TRANSITIONS.MED)
@@ -220,7 +220,7 @@ export default function headerComponent() {
                                     .attr("font-size", subtitleHeight * 0.7)
 
                             subtitleG.select("text")
-                                .text(truncateIfNecc(subtitle, 16))
+                                .text(truncateIfNecc(subtitle, maxTitleChars))
 
                             subtitleG.select("rect")
                                 .attr("width", subtitleWidth)
@@ -301,6 +301,11 @@ export default function headerComponent() {
     header.maxTitleFont = function (value) {
         if (!arguments.length) { return maxTitleFont; }
         maxTitleFont = value;
+        return header;
+    };
+    header.maxTitleChars = function (value) {
+        if (!arguments.length) { return maxTitleChars; }
+        maxTitleChars = value;
         return header;
     };
     header.styles = function (value) {

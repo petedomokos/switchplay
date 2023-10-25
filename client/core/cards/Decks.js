@@ -110,6 +110,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   //dimns
   const width = nrCols * deckWidthWithMargins;
   const deckAspectRatio = 9/16;
+  console.log("deck ar", deckAspectRatio)
   const deckOuterMargin = {
     left:10, //width * 0.05,
     right:10,//width * 0.05,
@@ -125,6 +126,10 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   const selectedDeckDimns = maxDimns(width, height, deckAspectRatio);
   const zoomScale = selectedDeckDimns.width / deckWidth;
 
+  //need to work out why on a mobile screen in portrait, the max width is not being taken up,
+  //leading to this shift to centre the deck. BUT.....
+  //better is to remove burger bar when in selecteddeck mode -> pass it back to store from CardsTable
+  //and main menu can pick this up -> store it as a shouldDisplayBurgerMenu which inits to true;
   const extraHozShiftToCentreWhenSelected = (width - selectedDeckDimns.width)/2;
 
   const cellX = d => d.colNr * deckWidthWithMargins;
@@ -241,6 +246,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       const newX = -deckX(deck);
       const newY = -deckY(deck);
       const newK = zoomScale;
+      console.log("extra", extraHozShiftToCentreWhenSelected)
       //the extrahozShift is an abs amount to get it to center of screen so shouldnt be scaled up
       const newTransformState = d3.zoomIdentity.translate(newX * newK + extraHozShiftToCentreWhenSelected, newY * newK).scale(newK);
       d3.select(zoomRef.current).call(zoom.transform, newTransformState)

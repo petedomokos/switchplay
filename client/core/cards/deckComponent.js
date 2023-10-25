@@ -666,8 +666,9 @@ export default function deckComponent() {
                     .call(header
                         .width(headerWidth)
                         .height(headerHeight)
-                        .margin({ left:deckIsSelected ? 20 : 7.5, right: 0, top: 0, bottom: 0 } )
+                        .margin({ left: 7.5, right: 0, top: 0, bottom: 0 } )
                         .maxTitleFont(deckIsSelected ? 7 : 14)
+                        .maxTitleChars(deckIsSelected ? 24 : 14)
                         .onClickTitle(function(e){
                             e.stopPropagation();
                             setForm({ formType: "deck-title" }) 

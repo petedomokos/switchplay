@@ -78,7 +78,7 @@ const embellishedDecks = (decks, nrCols=DEFAULT_NR_COLS) => decks
   listPos:i,
 }))
 
-const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, deleteDeck }) => {
+const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, deleteDeck, hideMenus, showMenus }) => {
   const { tables=[], decks=[] } = user;
   //console.log("CardsTable...jData")
 
@@ -102,6 +102,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
 
   const width = screen.width || 300;
   const height = screen.height || 600;
+  console.log("w h ar", width, height, width/height)
 
   const containerWidth = 100000;
   const containerHeight = 100000;
@@ -176,6 +177,12 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
     })
   }, [form, stringifiedData])
 
+  const onSetSelectedDeckId = id => {
+    setSelectedDeckId(id);
+    if(id){ hideMenus() }
+    else{ showMenus() }
+  }
+
   return (
     <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
       <div className={classes.contents}>
@@ -183,7 +190,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
           <Instructions />
           :
           <Decks 
-            table={table} setSel={setSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
+            table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
             data={decksData} height={contentsHeight}
             journeyData={journeyData}
             tableMarginTop={tableMarginTop}

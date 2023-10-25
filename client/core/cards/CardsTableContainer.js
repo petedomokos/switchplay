@@ -4,6 +4,7 @@ import { createTable, updateTable,  createDeck, updateDeck, deleteDeck } from '.
 import { hydrateJourneyData } from "../journey/hydrateJourney";
 import { createEmptyJourney } from '../journey/constants'
 import { fetchMultipleFullDatasets } from '../../actions/DatasetActions'
+import { hideMenus, showMenus } from "../../actions/CommonActions"
 
 const mapStateToProps = (state, ownProps) => {
 	//console.log("CardsTableContainer...user", state.user)
@@ -54,6 +55,8 @@ const mapDispatchToProps = dispatch => ({
 			.map(dset => dset._id);
 		dispatch(fetchMultipleFullDatasets(datasetsToLoad, playerId))
 	},
+	hideMenus(){ dispatch(hideMenus()) },
+	showMenus(){ dispatch(showMenus()) },
 	createDeck(settings, tableId){
 		dispatch(createDeck(settings, tableId))
 	},
