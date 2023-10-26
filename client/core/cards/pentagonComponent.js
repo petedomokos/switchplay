@@ -252,7 +252,7 @@ export default function pentagonComponent() {
                             .delay(sizeIsIncreasing ? 300 : 0)
                             .duration(TRANSITIONS.MED)
                                 .attr("stroke", styles._itemStroke(d,i))
-                                .attr("stroke-width",itemIsDefined ? styles._polygonLineStrokeWidth(d,i) : 0.05)
+                                .attr("stroke-width", styles._polygonLineStrokeWidth(d,i))
 
                         sectionG.selectAll(".show-with-section")
                             .attr("pointer-events", withSections ? null : "none")

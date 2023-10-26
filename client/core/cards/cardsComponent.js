@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10, COLOURS, TRANSITIONS } from "./constants";
+import { DIMNS, grey10, COLOURS, TRANSITIONS, STYLES } from "./constants";
 import dragEnhancements from '../journey/enhancedDragHandler';
 import cardHeaderComponent from './cardHeaderComponent';
 import cardItemsComponent from './cardItemsComponent';
@@ -158,8 +158,9 @@ export default function cardsComponent() {
             };
 
             const getItemStrokeWidth = (itemD, cardD={}) => {
-                const { status, isSectionView } = itemD;
+                const { status, isSectionView, title } = itemD;
                 const { isHeld, isSelected } = cardD;
+                if(!title){ return 0.15 }
                 if(deckIsSelected){
                     if(isHeld || isSelected){
                         return status === 2 ? 1 : (status === 1 ? 0.8 : 0.2);
@@ -178,13 +179,15 @@ export default function cardsComponent() {
                 const { title, status, isSectionView } = itemD;
                 const { isHeld, isSelected } = cardD;
 
+                if(!title){ return GOLD; }
+
                 if(isSectionView){
-                    if(!title) { return grey10(6); }
+                    //if(!title) { return grey10(6); }
                     return status === 2 ? GOLD : (status === 1 ? SILVER : COLOURS.CARD.SECTION_VIEW_STROKE);
                 }
 
                 //deal with non-defined items separately, incase a user deletes title of an item
-                if(!title) { return isHeld || isSelected ? "#989898" : grey10(6) }
+                //if(!title) { return isHeld || isSelected ? "#989898" : grey10(6) }
 
                 if(isHeld || isSelected){
                     return status === 2 ? GOLD : (status === 1 ? SILVER : "#989898")
@@ -198,13 +201,20 @@ export default function cardsComponent() {
                 if(d.isSecondNext){ return grey10(4); }
                 return (d.isSelected || d.isHeld ? grey10(5) : grey10(8))
             }
-
+            
+           
             //in section view, we use the card storke to show status compleitn of seciton item
             //@todo later - in future, this may be more than one item so we will need to use item bg stroke instead
             const getSectionViewCardStroke = itemsData => {
                 //can assume 1 item per card per section for now
                 const itemD = itemsData[0];
                 return getItemStroke({ ...itemD, isSectionView:true });
+            }
+
+            const getSectionViewCardStrokeWidth = itemsData => {
+                //can assume 1 item per card per section for now
+                const itemD = itemsData ? itemsData[0] : null;
+                return itemD?.title ? STYLES.CARD.STROKE_WIDTH : 0.15
             }
 
             //bgdrag
@@ -243,7 +253,7 @@ export default function cardsComponent() {
                                 .attr("height", isHeld ? contentsHeight : normalContentsHeight)
                                 .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL : COLOURS.CARD.FILL(d))
                                 .attr("stroke", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_STROKE : getCardStroke(d))
-                                .attr("stroke-width", 0.5)
+                                .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth() : STYLES.CARD.STROKE_WIDTH)
                                 .on("click", e => {
                                     //console.log("card bg click")
                                     onClickCard.call(this, e, d)
@@ -324,6 +334,7 @@ export default function cardsComponent() {
                             .duration(400)
                                 .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL :COLOURS.CARD.FILL(cardD))
                                 .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData) : getCardStroke(cardD))
+                                .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth(itemsData) : STYLES.CARD.STROKE_WIDTH)
 
                         contentsG.select("rect.card-front-bg")
                             .transition("card-front-bg-dimns")
@@ -421,6 +432,7 @@ export default function cardsComponent() {
 
                         frontContentsG.select("g.items-area")
                             .attr("transform", `translate(0, ${headerHeight + gapBetweenHeaderAndItems})`)
+                            .call(fadeInOut, isFront || !isHeld)
                             .datum(itemsData)
                             .call(items)
 

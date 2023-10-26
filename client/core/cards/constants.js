@@ -38,7 +38,10 @@ export const FONTSIZES = {
 }
 
 export const STYLES = {
-    SECTION_ID_OPACITY:0.5
+    SECTION_ID_OPACITY:0.5,
+    CARD:{
+        STROKE_WIDTH:0.5
+    }
 }
 
 export const DIMNS = {

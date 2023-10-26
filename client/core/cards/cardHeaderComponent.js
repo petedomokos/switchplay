@@ -249,11 +249,13 @@ export default function cardHeaderComponent() {
                                             .withSectionLabels(false)
                                             .styles({
                                                 _polygonLineStrokeWidth:(itemD) => {
-                                                    const { status } = itemD;
+                                                    const { status, title } = itemD;
+                                                    if(!title){ return 0.1; }
                                                     return status === 2 ? 2 : (status === 1 ? 1 : 0.5)
                                                 },
                                                 _itemStroke:(itemD) => {
-                                                    const { status } = itemD;
+                                                    const { status, title } = itemD;
+                                                    if(!title){ return GOLD; }
                                                     if(status === 2){
                                                         return isFront || isSelected ? GOLD : (isNext ? GOLD : GOLD);
                                                     }
