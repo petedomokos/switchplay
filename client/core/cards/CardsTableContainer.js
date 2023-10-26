@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import CardsTable  from './CardsTable'
-import { createTable, updateTable,  createDeck, updateDeck, deleteDeck } from '../../actions/UserActions'
+import { createTable, updateTable,  createDeck, updateDeck, updateDecks, deleteDeck } from '../../actions/UserActions'
 import { hydrateJourneyData } from "../journey/hydrateJourney";
 import { createEmptyJourney } from '../journey/constants'
 import { fetchMultipleFullDatasets } from '../../actions/DatasetActions'
@@ -62,6 +62,9 @@ const mapDispatchToProps = dispatch => ({
 	},
 	updateDeck(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
 		dispatch(updateDeck(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter));
+	},
+	updateDecks(details, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
+		dispatch(updateDecks(details, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter));
 	},
 	deleteDeck(deckId, updatedTable, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
 		dispatch(deleteDeck(deckId, updatedTable, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter));

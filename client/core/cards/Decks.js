@@ -70,7 +70,7 @@ const enhancedZoom = dragEnhancements();
 
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, onClick, onCreateDeck, updateTable, updateDeck, deleteDeck }) => {
+const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck }) => {
   //processed props
   const stringifiedData = JSON.stringify({ data, table });
   //state
@@ -459,7 +459,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
     updateDeck({ ...selectedDeck, title })
   }, [stringifiedData, form, selectedDeckId]);
 
-  const updateSectionTitle = useCallback(title => {
+  const updateSectionTitle = useCallback((title, applyToAllDecks) => {
     //note - we dont store anything on an item, theitem is assigned the section in layout, based on sections itemNr
     //@todo - give option to update it on all decks that share this section, inc those inot in this table
     const newKey = toCamelCase(title);
@@ -467,13 +467,25 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       .map(s => s.key === selectedSection.key ? ({ ...s, title, key:newKey }) : s)
 
     setSelectedSection(prevState => ({ ...prevState, key:newKey, title }))
-    updateDeck({ ...selectedDeck, sections:updatedSections })
+
+    if(applyToAllDecks){
+      const updatedSection = updatedSections.find(s => s.key === selectedSection.key);
+      updateDecks({ sectionKey:updatedSection.key, section: updatedSection })
+    }else{
+      updateDeck({ ...selectedDeck, sections:updatedSections })
+    }
   }, [stringifiedData, form, selectedDeckId, selectedSection]);
 
-  const updateSectionInitials = useCallback(initials => {
+  const updateSectionInitials = useCallback((initials, applyToAllDecks) => {
     const updatedSections = selectedDeck.sections.map(s => s.key === selectedSection.key ? ({ ...s, initials }) : s)
     setSelectedSection(prevState => ({ ...prevState, initials }))
-    updateDeck({ ...selectedDeck, sections:updatedSections })
+
+    if(applyToAllDecks){
+      const updatedSection = updatedSections.find(s => s.key === selectedSection.key);
+      updateDecks({ sectionKey:updatedSection.key, section: updatedSection })
+    }else{
+      updateDeck({ ...selectedDeck, sections:updatedSections })
+    }
   }, [stringifiedData, form, selectedDeckId, selectedSection]);
 
   const updatePurposeParagraph = useCallback((newPara, i) => {
@@ -487,17 +499,26 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   }, [stringifiedData, selectedDeckId]);
 
 
-  const updateCardTitle = useCallback(title => {
-    //we need the card from state, not the d3 datum
-    const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === form.value.cardNr);
-    updateCard({ ...cardToUpdate, title })
+  const updateCardTitle = useCallback((title, applyToAllDecks) => {
+    const { cardNr } = form.value;
+    if(applyToAllDecks){
+      updateDecks({ cardNr, title })
+    }else{
+      //we need the card from state, not the d3 datum
+      const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
+      updateCard({ ...cardToUpdate, title })
+    }
   }, [stringifiedData, form, selectedDeckId, selectedCardNr]);
 
-  const updateItemTitle = useCallback(updatedTitle => {
+  const updateItemTitle = useCallback((updatedTitle, applyToAllDecks) => {
     const { cardNr, itemNr } = form.value;
-    const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
-    const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title: updatedTitle }));
-    updateCard({ ...cardToUpdate, items:updatedItems })
+    if(applyToAllDecks){
+      updateDecks({ cardNr, itemNr, title })
+    }else{
+      const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
+      const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title: updatedTitle }));
+      updateCard({ ...cardToUpdate, items:updatedItems })
+    }
   }, [stringifiedData, form, selectedDeckId]);
 
   const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {

@@ -78,7 +78,7 @@ const embellishedDecks = (decks, nrCols=DEFAULT_NR_COLS) => decks
   listPos:i,
 }))
 
-const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, deleteDeck, hideMenus, showMenus }) => {
+const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, updateDecks, deleteDeck, hideMenus, showMenus }) => {
   const { tables=[], decks=[] } = user;
   //console.log("CardsTable...jData")
 
@@ -193,8 +193,8 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
             data={decksData} height={contentsHeight}
             journeyData={journeyData}
             tableMarginTop={tableMarginTop}
-            onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} 
-            updateTable={updateTable} updateDeck={updateDeck} availWidth={width} availHeight={height} />
+            onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={updateDeck}
+            updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />
         }
       </div>
     </div>
