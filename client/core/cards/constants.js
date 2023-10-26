@@ -53,6 +53,7 @@ export const DIMNS = {
 export const COLOURS = {
     CARDS_TABLE:grey10(9),
     GOLD:"#FFE10A",// brighter #ffd700,   darker #ccad00
+    SILVER:grey10(2),
     DECK:{
         HEADER:{
             BG:grey10(8)

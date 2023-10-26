@@ -12,7 +12,7 @@ import { isNumber } from '../../data/dataHelpers';
 
 
 
-const { GOLD } = COLOURS;
+const { GOLD, SILVER } = COLOURS;
 
 export default function cardsComponent() {
     //API SETTINGS
@@ -142,26 +142,34 @@ export default function cardsComponent() {
                 const { status } = info;
 
                 if(isFront || isSelected){ 
-                    return status === 2 ? GOLD : (status === 1 ? grey10(1) : grey10(2)) 
+                    return status === 2 ? GOLD : (status === 1 ? grey10(1) : SILVER) 
                 }
                 if(isNext){ 
-                    return status === 2 ? GOLD : (status === 1 ? grey10(2) : grey10(4))
+                    return status === 2 ? GOLD : (status === 1 ? SILVER : grey10(4))
                 }
                 if(isSecondNext){ 
-                    return status === 2 ? GOLD : (status === 1 ? grey10(2) : "#B0B0B0") //4.5 
+                    return status === 2 ? GOLD : (status === 1 ? SILVER : "#B0B0B0") //4.5 
                 }
                 if(d.isHeld){
-                    return status === 2 ? GOLD : (status === 1 ? grey10(2) : grey10(5))
+                    return status === 2 ? GOLD : (status === 1 ? SILVER : grey10(5))
                 }
                 //its placed
-                return status === 2 ? GOLD : (status === 1 ? grey10(2) : grey10(5))
+                return status === 2 ? GOLD : (status === 1 ? SILVER : grey10(5))
             };
 
             const getCardStroke = d => {
                 if(d.isFront){ return grey10(1); }
-                if(d.isNext){ return grey10(2); }
+                if(d.isNext){ return SILVER; }
                 if(d.isSecondNext){ return grey10(4); }
                 return (d.isSelected || d.isHeld ? grey10(5) : grey10(8))
+            }
+
+            //in section view, we use the card storke to show status compleitn of seciton item
+            //@todo later - in future, this may be more than one item so we will need to use item bg stroke instead
+            const getSectionViewCardStroke = itemsData => {
+                if(itemsData.filter(it => it.status < 2).length === 0){ return GOLD; }
+                if(itemsData.filter(it => it.status < 1).length === 0){ return SILVER; }
+                return COLOURS.CARD.SECTION_VIEW_STROKE;
             }
 
             //bgdrag
@@ -216,7 +224,7 @@ export default function cardsComponent() {
                                 .attr("ry", 3)
                                 .attr("width", isHeld ? contentsWidth : normalContentsWidth)
                                 .attr("height", isHeld ? contentsHeight : normalContentsHeight)
-                                .attr("fill", grey10(2))
+                                .attr("fill", SILVER)
                                 .attr("stroke", grey10(3))
                                 .attr("stroke-width", 0.5);
 
@@ -280,7 +288,7 @@ export default function cardsComponent() {
                             .delay(200)
                             .duration(400)
                                 .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL :COLOURS.CARD.FILL(cardD))
-                                .attr("stroke", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_STROKE : getCardStroke(cardD))
+                                .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData) : getCardStroke(cardD))
 
                         contentsG.select("rect.card-front-bg")
                             .transition("card-front-bg-dimns")
@@ -373,9 +381,9 @@ export default function cardsComponent() {
                                     if(!lineD.title) { return isHeld || isSelected ? "#989898" : grey10(6)}
 
                                     if(isHeld || isSelected){
-                                        return lineD.status === 2 ? GOLD : (lineD.status === 1 ? grey10(2) : "#989898")
+                                        return lineD.status === 2 ? GOLD : (lineD.status === 1 ? SILVER : "#989898")
                                     }
-                                    return lineD.status === 2 ? GOLD : (lineD.status === 1 ? grey10(2) : grey10(6))
+                                    return lineD.status === 2 ? GOLD : (lineD.status === 1 ? SILVER : grey10(6))
                                 }
                             })
                             .width(contentsWidth)
