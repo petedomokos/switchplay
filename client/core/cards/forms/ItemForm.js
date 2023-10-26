@@ -22,30 +22,49 @@ const mockDesc = " ewiof efojjew fewfjew xxxx xccxx eiofj efj fewiof efojjew few
 const useStyles = makeStyles(theme => ({
   root: {
     pointerEvents:"all",
-    width:"100%",
-    height:"100%",
-    paddingTop:"30px",
+    width:props => props.width - 40,
+    height:props => props.height,
+    padding:"30px 20px 10px 20px",
     textAlign:'center',
     display:"flex",
     flexDirection:"column",
-    alignItems:"center",
-    background:COLOURS.CARDS_TABLE
+    alignItems:"flex-start",
+    background:COLOURS.CARDS_TABLE,
   },
-  formTitle:{
-    margin:"10px",
-    color:grey10(3)
+  sectionTitle:{
+    margin:"15px 0px 10px 0px",
+    color:grey10(3),
+  },
+  cardAndItemTitle:{
+    display:"flex",
+  },
+  cardTitle:{
+    margin:"10px 10px 10px 0px",
+    color:grey10(5),
+  },
+  itemTitle:{
+    margin:"10px 5px 10px 0px",
+    color:grey10(5),
+  },
+  form:{
+    width:"100%",
+    height:"40px",
   },
   input:{
-    width:"250px",
+    width:"100%",
     height:"40px",
     margin:0,
+    padding:"0px 5px",
     fontSize:"10px",
     overflow:"hidden",
     //cursor:"pointer",
     pointerEvents:"all",
     fontSize:props => props.fontSize,
     background:"transparent",
-    color:"white"
+    color:"white",
+    border:"solid",
+    borderWidth:"thin",
+    borderColor:grey10(7)
   },
   attachments:{
 
@@ -55,7 +74,8 @@ const useStyles = makeStyles(theme => ({
   closeBtn:{
     width:"80px",
     height:"30px",
-    margin:"20px"
+    margin:"20px",
+    alignSelf:"center"
   }
 }))
 
@@ -63,14 +83,15 @@ export function splitMultilineString(str){
   return str.split("\n");
 }
 
-export default function ItemForm({ cardTitle, item, fontSize, save, close }) {
-  const { title } = item;
+export default function ItemForm({ cardTitle, item, dimns, fontSize, save, close }) {
+  const { title, section } = item;
 
   const [value, setValue] = useState(item)
   const [editing, setEditing] = useState(false);
   //const descLines = desc ? splitMultilineString(desc) : ["No Desc"];
   const styleProps = {
-    fontSize
+    fontSize,
+    ...dimns
   }
   const classes = useStyles(styleProps);
 
@@ -88,9 +109,12 @@ export default function ItemForm({ cardTitle, item, fontSize, save, close }) {
 
   return (
     <div className={classes.root} onClick={e => { e.stopPropagation() }}>
-      <p className={classes.formTitle}>{cardTitle || `Card ${value.cardNr+1}`}</p>
-      <p className={classes.formTitle}>Item {value.itemNr+1}</p>
-      <form>
+      {section && <p className={classes.sectionTitle}>{section.title}</p>}
+      <div className={classes.cardAndItemTitle}>
+        <p className={classes.cardTitle}>{cardTitle || `Card ${value.cardNr+1}`}</p>
+        <p className={classes.itemTitle}>Item {value.itemNr+1}</p>
+      </div>
+      <form className={classes.form}>
         {editing && 
           <Input
             id="desc" onChange={handleChange} margin="dense" autoFocus className={classes.input}

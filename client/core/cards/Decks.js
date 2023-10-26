@@ -338,6 +338,14 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
   const getFormDimns = useCallback(() => {
     const { formType, value, formDimns } = form;
+    if(formType === "item"){
+      return {
+        left:0,
+        right:0,
+        width:selectedDeckDimns.width,
+        height:selectedDeckDimns.height
+      }
+    }
     if(formType === "section-title"){
       const subtitleHeight = DIMNS.DECK.HEADER_HEIGHT * DIMNS.DECK.HEADER_SUBTITLE_HEIGHT_PROP
       return {
@@ -778,7 +786,8 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       </svg>
       <div className={classes.formContainer} ref={formRef}>
         {form?.formType === "item" && 
-          <ItemForm item={form.value} cardTitle={getCardTitle(form.value.cardNr)} fontSize={form.height * 0.5} save={updateItemTitle} close={() => onSelectItem()} />
+          <ItemForm item={form.value} cardTitle={getCardTitle(form.value.cardNr)} 
+            dimns={getFormDimns()} fontSize={form.height * 0.5} save={updateItemTitle} close={() => onSelectItem()} />
         }
         {form?.formType === "deck-title" && 
           <DeckTitleForm deck={selectedDeck} save={updateDeckTitle} close={() => setForm(null)}
