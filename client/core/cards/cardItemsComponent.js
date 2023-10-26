@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { DIMNS, grey10, TRANSITIONS } from "./constants";
 import pentagonComponent from './pentagonComponent';
 import textComponent from './textComponent';
+import dragEnhancements from '../journey/enhancedDragHandler';
 import { isNumber } from '../../data/dataHelpers';
 import { fadeIn, remove } from '../journey/domHelpers';
 
@@ -61,14 +62,15 @@ export default function cardItemsComponent() {
     }
 
     let styles = {
-        _lineStrokeWidth: () => 5,
-        _lineStroke:() => "white"
+        _polygonLineStrokeWidth: () => 5,
+        _itemStroke:() => "white"
     }
+    let getItemStroke = () => "grey"
 
     let withSections = true;
     let withText = true;
     let editable = true;
-    let proposedNewStatus;
+    let newStatus;
     let statusTimer;
     let selectedItemNr;
     let selectedSectionKey;
@@ -83,6 +85,9 @@ export default function cardItemsComponent() {
 
     //let onMouseover = function(){};
     //let onMouseout = function(){};
+
+    const itemDrag = d3.drag();
+    let enhancedItemDrag = dragEnhancements();
 
     const pentagon = pentagonComponent();
     const itemTitle = textComponent()
@@ -115,7 +120,6 @@ export default function cardItemsComponent() {
 
         function update(data){
             const { } = data;
-
             const contentsG = d3.select(this).select("g.card-items-contents")
                 .attr("transform", `translate(
                     ${margin.left + extraHorizMargin/2},
@@ -137,7 +141,6 @@ export default function cardItemsComponent() {
                     .merge(polygonCentreG)
                     .each(function(){
                         const polygonCentreG = d3.select(this);
-                        let newStatus;
                         polygonCentreG
                             .attr("transform", `translate(${contentsWidth/2},${contentsHeight/2 + extraShiftDownForAngleDiscrepancy})`)
                             .datum(data)
@@ -152,33 +155,61 @@ export default function cardItemsComponent() {
                                     if(!editable){ return; }
                                     onSelectItem(d);
                                 })
-                                .onLongpressStart(function(e,d){
-                                    if(!editable || !d.title){ return; }
-                                    d3.select(this).raise();
-                                    const changeStatus = (prevStatus) => {
-                                        newStatus = (prevStatus + 1) % 3;
-                                        const newD = { ...d, status: newStatus }
-                                        //update stroke
-
-                                        d3.select(this).selectAll("line.visible")
-                                            .attr("stroke-width", styles._lineStrokeWidth(newD))
-                                            .attr("stroke", styles._lineStroke(newD))
-                                    }
-                                    changeStatus(d.status);
-                                    statusTimer = d3.interval(() => {
-                                        changeStatus(newStatus);
-                                    }, 600)
-                                })
-                                .onLongpressEnd(function(e,d){
-                                    if(!editable || !d.title){ return; }
-                                    statusTimer.stop();
-                                    onUpdateItemStatus(d.itemNr, newStatus);
-                                })
+                                .onLongpressStart(longpressStart)
+                                .onLongpressEnd(longpressEnd)
                                 .onDrag(onDrag));
                                     
                     })
 
             polygonCentreG.exit().call(remove, { transition:{ duration:TRANSITIONS.FAST }});
+
+            const cardBgRect = d3.select(this.parentNode.parentNode).select("rect.card-front-bg")
+
+            function longpressStart(e,d){
+                console.log("lpstart")
+                if(!editable || !d.title){ return; }
+                d3.select(this).raise();
+                const changeStatus = (prevStatus) => {
+                    newStatus = (prevStatus + 1) % 3;
+                    const newD = { ...d, status: newStatus }
+                    //update stroke
+                    if(selectedSectionKey){
+                        //update card stroke
+                        cardBgRect.attr("stroke", styles._itemStroke({ ...newD, isSectionView:true }))
+
+                    }else{
+                        //update polygon section stroke
+                        d3.select(this).selectAll("line.visible")
+                            .attr("stroke-width", styles._polygonLineStrokeWidth(newD))
+                            .attr("stroke", styles._itemStroke(newD))
+                    }
+                }
+                changeStatus(d.status);
+                statusTimer = d3.interval(() => {
+                    changeStatus(newStatus);
+                }, 600)
+            }
+
+            function longpressEnd(e,d){
+                if(!editable || !d.title){ return; }
+                statusTimer.stop();
+                onUpdateItemStatus(d.itemNr, newStatus);
+            }
+
+            //@todo - impl drag handling - if longpressed, then allow dragging to move items between cards etc
+            function dragStart(e,d){}
+            function dragged(e,d){}
+            function dragEnd(e,d){}
+
+            enhancedItemDrag
+                .dragThreshold(100)
+                .onLongpressStart(longpressStart)
+                .onLongpressEnd(longpressEnd);
+
+            itemDrag
+                .on("start", enhancedItemDrag(dragStart))
+                .on("drag", enhancedItemDrag(dragged))
+                .on("end", enhancedItemDrag(dragEnd))
 
             const listG = contentsG.selectAll("g.list").data(contentsHeight < 40 ? [1] : []);
             listG.enter()
@@ -224,6 +255,7 @@ export default function cardItemsComponent() {
                                     if(!editable){ return; }
                                     onSelectItem(d);
                                 })
+                                .call(itemDrag)
 
                         
                     })
@@ -243,6 +275,11 @@ export default function cardItemsComponent() {
     cardItems.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
+        return cardItems;
+    };
+    cardItems.getItemStroke = function (func) {
+        if (!arguments.length) { return getItemStroke; }
+        getItemStroke = func;
         return cardItems;
     };
     cardItems.styles = function (obj) {

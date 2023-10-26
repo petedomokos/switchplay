@@ -62,8 +62,8 @@ export default function pentagonComponent() {
     }
 
     let styles = {
-        _lineStrokeWidth:() => 5,
-        _lineStroke:() => "grey"
+        _polygonLineStrokeWidth:() => 5,
+        _itemStroke:() => "grey"
     }
 
     //API CALLBACKS
@@ -251,8 +251,8 @@ export default function pentagonComponent() {
                             .transition("trans-stroke")
                             .delay(sizeIsIncreasing ? 300 : 0)
                             .duration(TRANSITIONS.MED)
-                                .attr("stroke", styles._lineStroke(d,i))
-                                .attr("stroke-width",itemIsDefined ? styles._lineStrokeWidth(d,i) : 0.05)
+                                .attr("stroke", styles._itemStroke(d,i))
+                                .attr("stroke-width",itemIsDefined ? styles._polygonLineStrokeWidth(d,i) : 0.05)
 
                         sectionG.selectAll(".show-with-section")
                             .attr("pointer-events", withSections ? null : "none")

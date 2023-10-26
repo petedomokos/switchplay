@@ -193,7 +193,7 @@ export default function cardHeaderComponent() {
                                         .attr("width", titleContentsWidth)
                                         .attr("height", titleContentsHeight)
                                 })
-                                .on("click", (e,d) => {
+                                .on("click", e => {
                                     //alert("title clicked")
                                     const formDimns = {
                                         left:margin.left + dateWidth + titleMargin.left,
@@ -201,7 +201,7 @@ export default function cardHeaderComponent() {
                                         width:titleContentsWidth,
                                         height:titleContentsHeight
                                     }
-                                    onClickTitle(d, formDimns)
+                                    onClickTitle(e, formDimns)
                                     e.stopPropagation();
                                 })
 
@@ -248,11 +248,11 @@ export default function cardHeaderComponent() {
                                             .r2(d3.min([progressSummaryContentsWidth * 0.5, progressSummaryContentsHeight * 0.5]))
                                             .withSectionLabels(false)
                                             .styles({
-                                                _lineStrokeWidth:(itemD) => {
+                                                _polygonLineStrokeWidth:(itemD) => {
                                                     const { status } = itemD;
                                                     return status === 2 ? 2 : (status === 1 ? 1 : 0.5)
                                                 },
-                                                _lineStroke:(itemD) => {
+                                                _itemStroke:(itemD) => {
                                                     const { status } = itemD;
                                                     if(status === 2){
                                                         return isFront || isSelected ? GOLD : (isNext ? GOLD : GOLD);

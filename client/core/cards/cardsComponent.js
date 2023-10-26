@@ -157,6 +157,41 @@ export default function cardsComponent() {
                 return status === 2 ? GOLD : (status === 1 ? SILVER : grey10(5))
             };
 
+            const getItemStrokeWidth = (itemD, cardD={}) => {
+                const { status, isSectionView } = itemD;
+                const { isHeld, isSelected } = cardD;
+                if(deckIsSelected){
+                    if(isHeld || isSelected){
+                        return status === 2 ? 1 : (status === 1 ? 0.8 : 0.2);
+                    }
+                    return status === 2 ? 3 : (status === 1 ? 2 : 0.2)
+                }
+                //multiple deck view
+                if(isHeld || isSelected){
+                    return status === 2 ? 3 : (status === 1 ? 3 : 0.2);
+                }
+                return status === 2 ? 3 : (status === 1 ? 2 : 0.2);
+            }
+
+            //we also use this for the card stoke when in section view, as each card only has one item
+            const getItemStroke = (itemD, cardD={}) => {
+                const { title, status, isSectionView } = itemD;
+                const { isHeld, isSelected } = cardD;
+
+                if(isSectionView){
+                    if(!title) { return grey10(6); }
+                    return status === 2 ? GOLD : (status === 1 ? SILVER : COLOURS.CARD.SECTION_VIEW_STROKE);
+                }
+
+                //deal with non-defined items separately, incase a user deletes title of an item
+                if(!title) { return isHeld || isSelected ? "#989898" : grey10(6) }
+
+                if(isHeld || isSelected){
+                    return status === 2 ? GOLD : (status === 1 ? SILVER : "#989898")
+                }
+                return status === 2 ? GOLD : (status === 1 ? SILVER : grey10(6))   
+            }
+
             const getCardStroke = d => {
                 if(d.isFront){ return grey10(1); }
                 if(d.isNext){ return SILVER; }
@@ -167,9 +202,9 @@ export default function cardsComponent() {
             //in section view, we use the card storke to show status compleitn of seciton item
             //@todo later - in future, this may be more than one item so we will need to use item bg stroke instead
             const getSectionViewCardStroke = itemsData => {
-                if(itemsData.filter(it => it.status < 2).length === 0){ return GOLD; }
-                if(itemsData.filter(it => it.status < 1).length === 0){ return SILVER; }
-                return COLOURS.CARD.SECTION_VIEW_STROKE;
+                //can assume 1 item per card per section for now
+                const itemD = itemsData[0];
+                return getItemStroke({ ...itemD, isSectionView:true });
             }
 
             //bgdrag
@@ -334,11 +369,16 @@ export default function cardsComponent() {
                                 e.stopPropagation();
                             })
                             .onClickDate(function(e){
-                                onClickCardDate(cardD, i); 
                                 e.stopPropagation();
+                                //@todo - enable date change from section view
+                                if(selectedSectionKey){ return; }
+                                onClickCardDate(cardD, i); 
+                               
                             })
-                            .onClickTitle(function(d, headerDimns){
-                                //alert("card title click")
+                            .onClickTitle(function(e, headerDimns){
+                                e.stopPropagation();
+                                //@todo - enable title change from section view
+                                if(selectedSectionKey){ return; }
                                 const dimns = {
                                     ...headerDimns,
                                     left:margin.left + headerDimns.left,
@@ -362,29 +402,8 @@ export default function cardsComponent() {
                         const cardIsEditable = selectedSectionKey || ((isHeld && isFront) || isSelected);
                         const items = itemsComponents[cardNr]
                             .styles({ 
-                                _lineStrokeWidth:lineD => {
-                                    if(deckIsSelected){
-                                        if(isHeld || isSelected){
-                                            return lineD.status === 2 ? 1 : (lineD.status === 1 ? 0.8 : 0.2);
-                                        }
-                                        return lineD.status === 2 ? 3 : (lineD.status === 1 ? 2 : 0.2)
-                                    }
-                                    //multiple deck view
-                                    if(isHeld || isSelected){
-                                        return lineD.status === 2 ? 3 : (lineD.status === 1 ? 3 : 0.2);
-                                    }
-                                    return lineD.status === 2 ? 3 : (lineD.status === 1 ? 2 : 0.2);
-                                    
-                                },
-                                _lineStroke:(lineD,i) => {
-                                    //deal with non-defined items separately, incase a user deletes title of an item
-                                    if(!lineD.title) { return isHeld || isSelected ? "#989898" : grey10(6)}
-
-                                    if(isHeld || isSelected){
-                                        return lineD.status === 2 ? GOLD : (lineD.status === 1 ? SILVER : "#989898")
-                                    }
-                                    return lineD.status === 2 ? GOLD : (lineD.status === 1 ? SILVER : grey10(6))
-                                }
+                                _polygonLineStrokeWidth:itemD => getItemStrokeWidth(itemD, cardD),
+                                _itemStroke:itemD => getItemStroke(itemD, cardD)
                             })
                             .width(contentsWidth)
                             .height(itemsAreaHeight)

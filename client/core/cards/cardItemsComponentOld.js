@@ -54,7 +54,7 @@ export default function cardItemsComponent() {
 
     let styles = {
         lineStrokeWidth:5,
-        _lineStroke:() => "white"
+        _itemStroke:() => "white"
     }
 
     let withLabels = true;
@@ -234,7 +234,7 @@ export default function cardItemsComponent() {
                         d3.select(this)
                             .transition("trans2")
                             .duration(200)
-                                .attr("stroke", styles._lineStroke(d,i))
+                                .attr("stroke", styles._itemStroke(d,i))
 
                     })
 
