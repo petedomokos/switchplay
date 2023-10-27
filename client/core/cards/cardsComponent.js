@@ -201,6 +201,11 @@ export default function cardsComponent() {
                 if(d.isSecondNext){ return grey10(4); }
                 return (d.isSelected || d.isHeld ? grey10(5) : grey10(8))
             }
+
+            const getBackCardFill = d =>  "#181818" //grey10.5
+            const getBackCardStroke = d => grey10(6);
+            const getBackCardStrokeWidth = d => 0.5;
+
             
            
             //in section view, we use the card storke to show status compleitn of seciton item
@@ -226,8 +231,8 @@ export default function cardsComponent() {
                 .append("g")
                     .attr("class", d => `card card-${d.cardNr}`)
                     .attr("opacity", 1)
-                    .each(function(d,i){
-                        const { cardNr, isHeld, isSelected, profile } = d;
+                    .each(function(cardD,i){
+                        const { cardNr, isHeld, isSelected, profile } = cardD;
 
                         //front components
                         frontHeaderComponents[cardNr] = cardHeaderComponent();
@@ -251,27 +256,26 @@ export default function cardsComponent() {
                                 //for placed cards, we dont want the dimns to be changed when in section view
                                 .attr("width", isHeld ? contentsWidth : normalContentsWidth)
                                 .attr("height", isHeld ? contentsHeight : normalContentsHeight)
-                                .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL : COLOURS.CARD.FILL(d))
-                                .attr("stroke", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_STROKE : getCardStroke(d))
+                                .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL : COLOURS.CARD.FILL(cardD))
+                                .attr("stroke", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_STROKE : getCardStroke(cardD))
                                 .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth() : STYLES.CARD.STROKE_WIDTH)
                                 .on("click", e => {
                                     //console.log("card bg click")
-                                    onClickCard.call(this, e, d)
+                                    onClickCard.call(this, e, cardD)
                                     e.stopPropagation();
                                 })
 
                         contentsG
                             .append("rect")
                                 .attr("class", "card-bg card-back-bg")
-                                .attr("opacity", cardsAreFlipped ? 1 : 0)
-                                .attr("display", cardsAreFlipped ? null : "none")
                                 .attr("rx", 3)
                                 .attr("ry", 3)
                                 .attr("width", isHeld ? contentsWidth : normalContentsWidth)
                                 .attr("height", isHeld ? contentsHeight : normalContentsHeight)
-                                .attr("fill", SILVER)
-                                .attr("stroke", grey10(3))
-                                .attr("stroke-width", 0.5);
+                                .attr("opacity", cardsAreFlipped ? 1 : 0)
+                                .attr("fill", getBackCardFill(cardD))
+                                .attr("stroke", getBackCardStroke(cardD))
+                                .attr("stroke-width", getBackCardStrokeWidth(cardD));
 
                         //inner contents of front and back
                         const frontContentsG = contentsG.append("g").attr("class", "front-contents")
@@ -297,7 +301,7 @@ export default function cardsComponent() {
                             .append("g")
                                 .attr("class", "card-back-header")
                                 //.attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
-                                .attr("opacity", deckIsSelected & (isHeld || isSelected) ? 1 : 0)
+                                //.attr("opacity", deckIsSelected & (isHeld || isSelected) ? 1 : 0)
 
                         //other two back contents components are using their own enter-exit pattern below
                         
@@ -344,6 +348,15 @@ export default function cardsComponent() {
                             .duration(TRANSITIONS.MED)
                                 .attr("width", isHeld ? contentsWidth : normalContentsWidth)
                                 .attr("height", isHeld ? contentsHeight : normalContentsHeight);
+
+                        contentsG.select("rect.card-back-bg")
+                            .transition("card-back-bg-appearance")
+                            .delay(200)
+                            .duration(400)
+                                .attr("opacity", cardsAreFlipped ? 1 : 0)
+                                .attr("fill", getBackCardFill(cardD))
+                                .attr("stroke", getBackCardStroke(cardD))
+                                .attr("stroke-width", getBackCardStrokeWidth(cardD))
     
                         contentsG.select("rect.card-back-bg")
                             .transition("card-back-bg-dimns")
@@ -548,7 +561,7 @@ export default function cardsComponent() {
 
                         //media
                         const media = mediaComponents[cardNr]
-                            .width(contentsWidth)
+                            .width(contentsWidth * 0.92)
                             .height(mediaHeight)
 
                         const shouldShowMedia = isFront && cardsAreFlipped && !selectedSectionKey;
@@ -572,7 +585,7 @@ export default function cardsComponent() {
                                 //fade in so it doesnt show up for a glimpse on first load of page
                                 //.call(fadeIn, { transition:{ delay: 500, duration:500 }})
                                 .merge(mediaG)
-                                .attr("transform", `translate(0,${headerHeight})`)
+                                .attr("transform", `translate(0.5,${headerHeight})`)
                                 .datum({ ...profile.info, photosData })
                                 .call(media)
                                 .call(fadeInOut, isFront, { 
@@ -614,19 +627,19 @@ export default function cardsComponent() {
                             .scrollable(false)
                             .profileIsSelected(false)
 
-                        const shouldShowKpis = deckIsSelected && isFront && cardsAreFlipped && !selectedSectionKey;
+                        const shouldShowKpis = /*deckIsSelected &&*/ isFront && cardsAreFlipped && !selectedSectionKey;
 
                         const kpisG = backContentsG.selectAll("g.kpis").data(shouldShowKpis ? [1] : []);
                         kpisG.enter()
                             .append("g")
                                 .attr("class", "kpis")
+                                .call(fadeIn)
                                 .merge(kpisG)
                                 .attr("transform", `translate(0, ${headerHeight + mediaHeight})`)
-                                .call(fadeInOut, isFront)
                                 .datum(profile.kpis)
                                 .call(kpis);
 
-                        kpisG.exit().remove();
+                        kpisG.exit().call(remove);
                     })
                     .call(drag)
                     .on("click", e => { 
