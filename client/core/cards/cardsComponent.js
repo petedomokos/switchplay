@@ -344,7 +344,6 @@ export default function cardsComponent() {
 
                         contentsG.select("rect.card-front-bg")
                             .transition("card-front-bg-dimns")
-                            //.delay(200)
                             .duration(TRANSITIONS.MED)
                                 .attr("width", isHeld ? contentsWidth : normalContentsWidth)
                                 .attr("height", isHeld ? contentsHeight : normalContentsHeight);
