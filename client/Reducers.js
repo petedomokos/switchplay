@@ -1,5 +1,5 @@
 import C from './Constants'
-import _ from 'lodash'
+import _, { map } from 'lodash'
 import * as cloneDeep from 'lodash/cloneDeep'
 import { isIn, isNotIn, isSame, filterUniqueById, filterUniqueByProperty } from './util/ArrayHelpers'
 import { InitialState } from './InitialState'
@@ -76,6 +76,55 @@ export const user = (state=InitialState.user, act) =>{
 				...state,
 				decks:state.decks.map(d => d.id === act.deck.id ? { ...d, ...act.deck } : d)
 			};
+		}
+		case C.UPDATE_DECKS:{
+			const { details:{ desc } } = act;
+			let decks;
+			if(desc === "item-title"){
+				const { cardNr, itemNr, title } = act.details;
+				decks = state.decks.map(d => ({ 
+					...d, 
+					cards:d.cards.map(c => c.cardNr !== cardNr ? c : ({
+						...c,
+						items:c.items.map(it => it.itemNr !== itemNr ? it : ({
+							...it,
+							title
+						}))
+					}))
+				}))
+			}else if(desc === "card-title"){
+				const { cardNr, title } = act.details;
+				decks = state.decks.map(d => ({ 
+					...d, 
+					cards:d.cards.map(c => c.cardNr !== cardNr ? c : ({ ...c, title }))
+				}))
+			}else{
+				//section
+				const { origSectionKey, section } = act.details;
+				console.log("reducer orig sect", origSectionKey, section)
+				console.log("state.decks before", state.decks.filter(d => d.title))
+				decks = state.decks.map(d => {
+					//if(d.title){
+						//console.log("title", d.title) 
+						//console.log("sections", d.sections)
+					//}
+					return {
+						...d, 
+						sections:d.sections.map(s => {
+							/*if(d.title){
+								console.log("testing s", s)
+								console.log("key origKey", s.sectionKey, origSectionKey)
+								console.log("shouldReplace?", s.sectionKey === origSectionKey)
+								const newSection = s.key === origSectionKey ? section : s;
+								console.log("newsection", newSection)
+							}*/
+							return s.key === origSectionKey ? section : s;
+						})
+					}
+				})
+				console.log("new decks", decks.filter(d => d.title))
+			}
+			return { ...state, decks };
 		}
 		case C.DELETE_DECK:{
 			return {

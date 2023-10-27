@@ -254,19 +254,11 @@ export const updateDeck = (deck, shouldPersist=true) => dispatch => {
 	)
 }
 
-/*
-todo next
- - user dialog to choose to update this deck or all decks
- - store/constants/reducers code for all 4 cases (card title, item title, section title, section initials)
- - user.controller code to persist to all decks
- - check it all works
-*/
-
 export const updateDecks = (details, shouldPersist=true) => dispatch => {
 	console.log("updateDecks", details)
-	/*
+	const { desc } = details;
 	//update in store
-	dispatch({ type:C.UPDATE_DECK, deck });
+	dispatch({ type:C.UPDATE_DECKS, details });
 
 	if(!shouldPersist){ return; }
 
@@ -276,17 +268,15 @@ export const updateDecks = (details, shouldPersist=true) => dispatch => {
 		return;
 	}
 
-	const serverDeck = transformDeckForServer(deck);
 	fetchThenDispatch(dispatch, 
 		'updating.user',
 		{
-			url: `/api/users/${jwt.user._id}/decks`,
+			url: `/api/users/${jwt.user._id}/decks/update`,
 			method: 'PUT',
-			body:JSON.stringify(serverDeck),
+			body:JSON.stringify(details),
 			requireAuth:true
 		}
 	)
-	*/
 }
 
 export const deleteDeck = (deckId, table, shouldPersist=true) => dispatch => {

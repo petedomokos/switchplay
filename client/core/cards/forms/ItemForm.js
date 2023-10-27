@@ -4,16 +4,14 @@ import Card from '@material-ui/core/Card'
 import CardActions from '@material-ui/core/CardActions'
 import CardContent from '@material-ui/core/CardContent'
 import Button from '@material-ui/core/Button'
+import { Checkbox } from '@material-ui/core';
+import { FormControlLabel } from '@material-ui/core';
+import { FormGroup } from '@material-ui/core';
 import TextField from '@material-ui/core/TextField'
 import Typography from '@material-ui/core/Typography'
 import { Input } from '@material-ui/core';
 import Icon from '@material-ui/core/Icon'
 import { makeStyles } from '@material-ui/core/styles'
-import Dialog from '@material-ui/core/Dialog'
-import DialogActions from '@material-ui/core/DialogActions'
-import DialogContent from '@material-ui/core/DialogContent'
-import DialogContentText from '@material-ui/core/DialogContentText'
-import DialogTitle from '@material-ui/core/DialogTitle'
 import { grey10, COLOURS } from '../constants';
 import VideoPlayer from "../../VideoPlayer"
 
@@ -31,29 +29,31 @@ const useStyles = makeStyles(theme => ({
     alignItems:"flex-start",
     background:COLOURS.CARDS_TABLE,
   },
+  sectionAndCardTitle:{
+    display:"flex",
+    margin:"20px"
+  },
   sectionTitle:{
-    margin:"15px 0px 10px 0px",
+    margin:"0px 15px 0px 0px",
     color:grey10(3),
   },
-  cardAndItemTitle:{
-    display:"flex",
-  },
   cardTitle:{
-    margin:"10px 10px 10px 0px",
+    margin:"0px", //if not section, we want this aligned at start, so no marginLeft
     color:grey10(5),
   },
   itemTitle:{
-    margin:"10px 5px 10px 0px",
+    margin:"10px 20px",
     color:grey10(5),
   },
   form:{
-    width:"100%",
+    width:"calc(100% - 40px)",
     height:"40px",
+    margin:"0px 20px 10px 20px",
   },
   input:{
     width:"100%",
     height:"40px",
-    margin:0,
+    marginBottom:"10px",
     padding:"0px 5px",
     fontSize:"10px",
     overflow:"hidden",
@@ -66,15 +66,25 @@ const useStyles = makeStyles(theme => ({
     borderWidth:"thin",
     borderColor:grey10(7)
   },
+  checkboxFormGroup:{
+    margin:"20px 0px 0px 0px",
+    alignSelf:"center"
+  },
+  checkbox:{
+    color:grey10(5)
+  },
+  checkboxLabel:{
+    color:grey10(6)
+  },
   attachments:{
-
+    margin:"20px",
   },
   attachment:{
   },
   closeBtn:{
     width:"80px",
     height:"30px",
-    margin:"20px",
+    margin:"10px",
     alignSelf:"center"
   }
 }))
@@ -88,6 +98,7 @@ export default function ItemForm({ cardTitle, item, dimns, fontSize, save, close
 
   const [value, setValue] = useState(item)
   const [editing, setEditing] = useState(false);
+  const [applyChangesToAllDecks, setApplyChangesToAllDecks] = useState(false);
   //const descLines = desc ? splitMultilineString(desc) : ["No Desc"];
   const styleProps = {
     fontSize,
@@ -95,10 +106,23 @@ export default function ItemForm({ cardTitle, item, dimns, fontSize, save, close
   }
   const classes = useStyles(styleProps);
 
+  //issue - we want dialog to ask if apply to all, but this would get called on first char change
+  //so need to move saving to end, OR forget dialogs, instead, have a toggle next to the name
+  //even if user doesnt toggle until end, 
+  //as long as we call an additonal save when they toggle, it will still apply to all decks and so the 
+  //others will "catch up" with the changes on that save
   const handleChange = event => { 
     const newTitle = event.target.value;
     setValue(prevState => ({ ...prevState, title:newTitle })) 
-    save(newTitle)
+    save(newTitle, applyChangesToAllDecks)
+  }
+
+  const toggleApplyChangesToAllDecks = () => {
+    if(!applyChangesToAllDecks){
+      //trigger a save so any changes so far go to all decks
+      save(value.title, true)
+    }
+    setApplyChangesToAllDecks(prevState => !prevState);
   }
 
   //this is a fix to esure autoFocus is triggered
@@ -109,11 +133,12 @@ export default function ItemForm({ cardTitle, item, dimns, fontSize, save, close
 
   return (
     <div className={classes.root} onClick={e => { e.stopPropagation() }}>
-      {section && <p className={classes.sectionTitle}>{section.title}</p>}
-      <div className={classes.cardAndItemTitle}>
+      
+      <div className={classes.sectionAndCardTitle}>
+        {section && <p className={classes.sectionTitle}>{section.title}</p>}
         <p className={classes.cardTitle}>{cardTitle || `Card ${value.cardNr+1}`}</p>
-        <p className={classes.itemTitle}>Item {value.itemNr+1}</p>
       </div>
+      <p className={classes.itemTitle}>Item {value.itemNr+1}</p>
       <form className={classes.form}>
         {editing && 
           <Input
@@ -125,11 +150,18 @@ export default function ItemForm({ cardTitle, item, dimns, fontSize, save, close
         {attachments.map(att => 
           <div className={classes.attachment} key={att.key} >
             {att.type === "video" &&
-              <VideoPlayer link={att.link} height={150} />
+              <VideoPlayer link={att.link} height={100} />
             }
           </div>
         )}
       </div>
+      <FormGroup className={classes.checkboxFormGroup}>
+        <FormControlLabel 
+          className={classes.checkboxLabel} 
+          onChange={toggleApplyChangesToAllDecks}
+          control={<Checkbox className={classes.checkbox} checked={applyChangesToAllDecks} />} label="Apply changes to all decks"
+        />
+      </FormGroup>
       <Button color="primary" variant="contained" onClick={close} className={classes.closeBtn}>Done</Button>
     </div>
   )

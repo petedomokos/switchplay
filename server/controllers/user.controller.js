@@ -248,6 +248,54 @@ const updateDeck = async (req, res) => {
   }
 }
 
+
+const updateDecks = async (req, res) => {
+  console.log('updateDecks for.................', req.user._id)
+  const { user, body } = req;
+  console.log("body", body)
+  const { desc, cardNr, itemNr, origSectionKey, prevTitle, title, section } = body;
+  const now = Date.now();
+  //updatedDeck.updated = now;
+  
+  //@todo - change so that it just adds updates to the stored deck
+  //user.decks = user.decks.map(deck => deck._id.equals(updatedDeck._id) ? updatedDeck : deck);
+  const newDecks = user.decks.map(d => {
+    if(desc === "card-title"){
+      const cards = JSON.parse(d.cards);
+      const newCards = cards.map(c => c.title !== prevTitle ? c : ({ ...c, title }));
+      return { ...d.toObject(), cards:JSON.stringify(newCards), updated:now }
+    }
+    else if(desc === "item-title"){
+      const cards = JSON.parse(d.cards);
+      const newCards = cards.map(c => {
+        const newItems = c.items.map(it => it.title !== prevTitle ? it : { ...it, title }); 
+        return { ...c, items:newItems }
+      });
+      return { ...d.toObject(), cards:JSON.stringify(newCards), updated:now }
+    }
+    else if(desc === "section"){
+      const sections = d.sections ? JSON.parse(d.sections) : [];
+      const newSections = sections.map(s => s.key !== origSectionKey ? s : section);
+      return { ...d.toObject(), sections:JSON.stringify(newSections), updated:now }
+    }else{
+      //default
+      return d;
+    }
+  })
+  user.decks = newDecks;
+  user.updated = now;
+  console.log("saving user...", user.decks.length)
+  try {
+    await user.save()
+    console.log("saved")
+    res.json(desc)
+  } catch (err) {
+    return res.status(400).json({
+      error: errorHandler.getErrorMessage(err)
+    })
+  }
+}
+
 const removeDeck = async (req, res) => {
   console.log('removeDeck... user deckId', req.user._id, req.body.deckId)
   const { user, body:{ deckId, table } } = req;
@@ -413,6 +461,7 @@ export default {
   updateTable,
   createDeck,
   updateDeck,
+  updateDecks,
   removeDeck,
   photos,
   photo,

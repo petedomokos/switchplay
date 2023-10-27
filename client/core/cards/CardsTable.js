@@ -8,6 +8,11 @@ import { sortAscending } from '../../util/ArrayHelpers';
 import { isNumber } from '../../data/dataHelpers';
 //import { createId } from './helpers';
 import IconComponent from './IconComponent';
+import Dialog from '@material-ui/core/Dialog'
+import DialogActions from '@material-ui/core/DialogActions'
+import DialogContent from '@material-ui/core/DialogContent'
+import DialogContentText from '@material-ui/core/DialogContentText'
+import DialogTitle from '@material-ui/core/DialogTitle'
 import Instructions from "./Instructions"
 import Decks from './Decks';
 import { grey10, TRANSITIONS, COLOURS } from './constants';
@@ -190,9 +195,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
           :
           <Decks 
             table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
-            data={decksData} height={contentsHeight}
-            journeyData={journeyData}
-            tableMarginTop={tableMarginTop}
+            data={decksData} height={contentsHeight} journeyData={journeyData} tableMarginTop={tableMarginTop}
             onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={updateDeck}
             updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />
         }

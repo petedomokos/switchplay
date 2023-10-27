@@ -661,8 +661,8 @@ export default function deckComponent() {
                 
                 //header
                 headerG
-                    //.style("pointer-events", deckIsSelected ? "all" : null)
-                    .datum({ ..._deckData, title:_deckData.title || id, subtitle:selectedSection?.title })
+                    //.datum({ ..._deckData, title:_deckData.title || id, subtitle:selectedSection?.title })
+                    .datum({ ..._deckData, title:_deckData.title || id, subtitle:selectedSection?.key })
                     .call(header
                         .width(headerWidth)
                         .height(headerHeight)
@@ -675,7 +675,7 @@ export default function deckComponent() {
                         })
                         .onClickSubtitle(function(e){
                             e.stopPropagation();
-                            setForm({ formType: "section-title" }) 
+                            setForm({ formType: "section", sectionKey:selectedSection.key }) 
                         })
                         .onClickProgressIcon(() => onSetContent("purpose")))
 

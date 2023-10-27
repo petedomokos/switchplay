@@ -70,7 +70,7 @@ const enhancedZoom = dragEnhancements();
 
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck }) => {
+const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
   //processed props
   const stringifiedData = JSON.stringify({ data, table });
   //state
@@ -194,6 +194,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
     marginTop:deckFormMarginTop
   }
 
+
   let styleProps = {
     width,
     height,
@@ -285,6 +286,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   }, [stringifiedData, width, height, selectedDeckId]);
 
   const onSelectItem = useCallback((item) => {
+    console.log("select item...", item)
     if(item){
       //fade out d3
       d3.select(containerRef.current)
@@ -313,20 +315,17 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
           .duration(400)
             .style("opacity", 0)
             .on("end", function(){ 
-              d3.select(this).style("display", "none");
+              //fade form back in ready for next time, as state will update anyway to set form display correctly
+              d3.select(this).style("opacity", 1)//.style("display", "none");
               //set state
               setForm(null)
               setSelectedItemNr("") 
-              //magae the fade in of d3
+              //manage the fade in of d3
               d3.select(containerRef.current)
                 .style("display", null)
                   .transition()
                   .duration(400)
                     .style("opacity", 1);
-            
-            
-            
-            
           })
     }
   }, []);
@@ -346,7 +345,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
         height:selectedDeckDimns.height
       }
     }
-    if(formType === "section-title"){
+    if(formType === "section"){
       const subtitleHeight = DIMNS.DECK.HEADER_HEIGHT * DIMNS.DECK.HEADER_SUBTITLE_HEIGHT_PROP
       return {
         left:20 + extraHozShiftToCentreWhenSelected,
@@ -428,7 +427,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
     e.stopPropagation();
-    //if(form?.formType === "section-title"){
+    //if(form?.formType === "section"){
       //need to persist the changes to section as these are not done dynamically
       //also update the selectedSection to be the latest
     //}
@@ -460,29 +459,34 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   }, [stringifiedData, form, selectedDeckId]);
 
   const updateSectionTitle = useCallback((title, applyToAllDecks) => {
+    //console.log("updateSectTitle--------------------------------------------",title, applyToAllDecks)
     //note - we dont store anything on an item, theitem is assigned the section in layout, based on sections itemNr
     //@todo - give option to update it on all decks that share this section, inc those inot in this table
     const newKey = toCamelCase(title);
+
     const updatedSections = selectedDeck.sections
       .map(s => s.key === selectedSection.key ? ({ ...s, title, key:newKey }) : s)
 
     setSelectedSection(prevState => ({ ...prevState, key:newKey, title }))
 
     if(applyToAllDecks){
-      const updatedSection = updatedSections.find(s => s.key === selectedSection.key);
-      updateDecks({ sectionKey:updatedSection.key, section: updatedSection })
+      //the new key has been applied to cerate updatedSections, so we use it to grab the section
+      const updatedSection = updatedSections.find(s => s.key === newKey);
+      //then update all decks with that section -> the action will updte the store via the reducer
+      updateDecks({ desc:"section", origSectionKey:form.sectionKey, section: updatedSection })
     }else{
       updateDeck({ ...selectedDeck, sections:updatedSections })
     }
   }, [stringifiedData, form, selectedDeckId, selectedSection]);
 
   const updateSectionInitials = useCallback((initials, applyToAllDecks) => {
+    //console.log("updateSectInit",initials, applyToAllDecks)
     const updatedSections = selectedDeck.sections.map(s => s.key === selectedSection.key ? ({ ...s, initials }) : s)
     setSelectedSection(prevState => ({ ...prevState, initials }))
 
     if(applyToAllDecks){
       const updatedSection = updatedSections.find(s => s.key === selectedSection.key);
-      updateDecks({ sectionKey:updatedSection.key, section: updatedSection })
+      updateDecks({ desc:"section", origSectionKey:form.sectionKey, section: updatedSection })
     }else{
       updateDeck({ ...selectedDeck, sections:updatedSections })
     }
@@ -500,31 +504,35 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
 
   const updateCardTitle = useCallback((title, applyToAllDecks) => {
+    //console.log("updateCardTitle",title, applyToAllDecks)
     const { cardNr } = form.value;
+    //we need the card from state, not the d3 datum
+    const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
+
     if(applyToAllDecks){
-      updateDecks({ cardNr, title })
+      updateDecks({ desc:"card-title", cardNr, title, prevTitle:cardToUpdate.title })
     }else{
-      //we need the card from state, not the d3 datum
-      const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
       updateCard({ ...cardToUpdate, title })
     }
   }, [stringifiedData, form, selectedDeckId, selectedCardNr]);
 
-  const updateItemTitle = useCallback((updatedTitle, applyToAllDecks) => {
+  const updateItemTitle = useCallback((title, applyToAllDecks) => {
+    //console.log("updateItemTitle", applyToAllDecks)
     const { cardNr, itemNr } = form.value;
+    const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
     if(applyToAllDecks){
-      updateDecks({ cardNr, itemNr, title })
+      const prevTitle = cardToUpdate.items.find(it => it.itemNr === itemNr).title
+      updateDecks({ desc:"item-title", cardNr, itemNr, title, prevTitle })
     }else{
-      const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
-      const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title: updatedTitle }));
+      const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title }));
       updateCard({ ...cardToUpdate, items:updatedItems })
     }
   }, [stringifiedData, form, selectedDeckId]);
 
-  const updateItemStatus = useCallback((cardNr, itemNr, updatedStatus) => {
+  const updateItemStatus = useCallback((cardNr, itemNr, status) => {
     setForm(null);
     const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
-    const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, status: updatedStatus }));
+    const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, status }));
     updateCard({ ...cardToUpdate, items:updatedItems })
   }, [stringifiedData, form, selectedDeckId]);
 
@@ -740,11 +748,6 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
 
   //DATE
-  if(form){
-    //console.log("form", form)
-  }
-
-
   const handleDateChange = useCallback(dateKey => e => {
     //do date change here, then do saving, plus put last couple of props into DateForm that are commented out
     if(!e.target?.value){ return; }
@@ -815,7 +818,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
             dimns={getFormDimns()} 
           />
         }
-        {form?.formType === "section-title" && 
+        {form?.formType === "section" && 
           <SectionTitleForm section={selectedSection} saveTitle={updateSectionTitle} saveInitials={updateSectionInitials} 
             close={() => setForm(null)} dimns={getFormDimns()} 
           />

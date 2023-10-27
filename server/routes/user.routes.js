@@ -23,6 +23,9 @@ router.route('/api/users/:userId/tables')
   .post(userCtrl.createTable)
   .put(authCtrl.requireSignin, authCtrl.hasAuthorization, userCtrl.updateTable)
 
+router.route('/api/users/:userId/decks/update')
+  .put(userCtrl.updateDecks)
+
 router.route('/api/users/:userId/decks')
   .post(userCtrl.createDeck)
   .put(authCtrl.requireSignin, authCtrl.hasAuthorization, userCtrl.updateDeck)

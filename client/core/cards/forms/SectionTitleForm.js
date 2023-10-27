@@ -5,15 +5,13 @@ import CardActions from '@material-ui/core/CardActions'
 import CardContent from '@material-ui/core/CardContent'
 import Button from '@material-ui/core/Button'
 import TextField from '@material-ui/core/TextField'
+import { Checkbox } from '@material-ui/core';
+import { FormControlLabel } from '@material-ui/core';
+import { FormGroup } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography'
 import { Input } from '@material-ui/core';
 import Icon from '@material-ui/core/Icon'
 import { makeStyles } from '@material-ui/core/styles'
-import Dialog from '@material-ui/core/Dialog'
-import DialogActions from '@material-ui/core/DialogActions'
-import DialogContent from '@material-ui/core/DialogContent'
-import DialogContentText from '@material-ui/core/DialogContentText'
-import DialogTitle from '@material-ui/core/DialogTitle'
 import { grey10, COLOURS } from '../constants';
 
 const mockDesc = " ewiof efojjew fewfjew xxxx xccxx eiofj efj fewiof efojjew fewfjew xxxx xccxx eiofj efj fw fefjw efoe wfe fjf ewof oef hhhhhhhh kjdlkd dj uhd dhud dud d houh zzzz zz zz"
@@ -51,7 +49,28 @@ const useStyles = makeStyles(theme => ({
     width:"80px",
     height:"30px",
     margin:"20px"
-  }
+  },
+  checkboxFormGroup:{
+    width:"130px",
+    margin:"10px 0px 0px 0px",
+    padding:"5px",
+    alignSelf:"center",
+    background:grey10(7),
+    opacity:0.7
+  },
+  checkboxContainer:{
+    display:"flex",
+    justifyContent:"center",
+  },
+  checkbox:{
+    color:grey10(1),
+    fontSize:"8px"
+  },
+  label:{
+    color:grey10(1),
+    fontSize:"12px",
+    opacity:1
+  },
 }))
 
 export function splitMultilineString(str){
@@ -60,8 +79,9 @@ export function splitMultilineString(str){
 
 export default function SectionTitleForm({ section, dimns, saveTitle, saveInitials, close }) {
   const [value, setValue] = useState(section)
-  //console.log("SectionTitleForm", section)
+  console.log("SectionTitleForm")
   const [editing, setEditing] = useState(false);
+  const [applyChangesToAllDecks, setApplyChangesToAllDecks] = useState(false);
   //const descLines = desc ? splitMultilineString(desc) : ["No Desc"];
   const styleProps = {
     ...dimns,
@@ -73,7 +93,7 @@ export default function SectionTitleForm({ section, dimns, saveTitle, saveInitia
     const newTitle = event.target.value;
     setValue(prevState => ({ ...prevState, title:newTitle })) 
     //console.log("calling save", newTitle)
-    saveTitle(newTitle)
+    saveTitle(newTitle, applyChangesToAllDecks)
   }
 
   const handleInitialsChange = event => { 
@@ -84,7 +104,17 @@ export default function SectionTitleForm({ section, dimns, saveTitle, saveInitia
     }
     setValue(prevState => ({ ...prevState, initials:newInitials })) 
     //console.log("calling save", newTitle)
-    saveInitials(newInitials)
+    saveInitials(newInitials);
+  }
+
+  const toggleApplyChangesToAllDecks = () => {
+    if(!applyChangesToAllDecks){
+      //trigger a save so any changes so far go to all decks
+      saveTitle(value.title, true);
+      saveInitials(value.initials, true);
+
+    }
+    setApplyChangesToAllDecks(prevState => !prevState);
   }
 
   //this is a fix to esure autoFocus is triggered
@@ -110,6 +140,17 @@ export default function SectionTitleForm({ section, dimns, saveTitle, saveInitia
                   className:classes.label
                 }}
             />
+            <FormGroup className={classes.checkboxFormGroup}>
+          <FormControlLabel 
+            className={classes.checkboxContainer}
+            classes={{
+              label: classes.label, // Pass your override css here
+            }}
+            onChange={toggleApplyChangesToAllDecks}
+            control={<Checkbox className={classes.checkbox} checked={applyChangesToAllDecks} />} 
+            label="Apply changes to all decks"
+          />
+        </FormGroup>
           </>
         }
       </form>}
