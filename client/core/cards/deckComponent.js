@@ -661,8 +661,7 @@ export default function deckComponent() {
                 
                 //header
                 headerG
-                    //.datum({ ..._deckData, title:_deckData.title || id, subtitle:selectedSection?.title })
-                    .datum({ ..._deckData, title:_deckData.title || id, subtitle:selectedSection?.key })
+                    .datum({ ..._deckData, title:_deckData.title || id, subtitle:selectedSection?.title })
                     .call(header
                         .width(headerWidth)
                         .height(headerHeight)
