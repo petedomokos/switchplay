@@ -10,8 +10,6 @@ import { updateTransform } from '../journey/transitionHelpers';
 import { icons } from '../../util/icons';
 import { isNumber } from '../../data/dataHelpers';
 
-
-
 const { GOLD, SILVER } = COLOURS;
 
 export default function cardsComponent() {
@@ -109,7 +107,7 @@ export default function cardsComponent() {
     let onMouseover = function(){};
     let onMouseout = function(){};
 
-    let enhancedDrag = dragEnhancements();
+    //let enhancedDrag = dragEnhancements()
 
     //dom
     let containerG;
@@ -126,7 +124,7 @@ export default function cardsComponent() {
         selection.each(function (data) {
             containerG = d3.select(this);
             //can use same enhancements object for outer and inner as click is same for both
-            enhancedDrag
+            /*enhancedDrag
                 .dragThreshold(100)
                 .onLongpressStart(longpressStart)
                 .onLongpressDragged(longpressDragged)
@@ -135,7 +133,11 @@ export default function cardsComponent() {
             const drag = d3.drag()
                 .on("start", enhancedDrag())
                 .on("drag", enhancedDrag(dragged))
-                .on("end", enhancedDrag(dragEnd))
+                .on("end", enhancedDrag(dragEnd))*/
+
+            const drag = d3.drag()
+                .on("drag", dragged)
+                .on("end", dragEnd)
 
             const getProgressStatusFill = d => { 
                 const { isSelected, isFront, isNext, isSecondNext, info } = d;
@@ -444,7 +446,7 @@ export default function cardsComponent() {
                             .onUpdateItemStatus(function(itemNr, newStatus){
                                 onUpdateItemStatus(cardNr, itemNr, newStatus);
                             })
-                            .onDrag(e => dragged(e, cardD))
+                            .onDrag(e => { dragged(e, cardD) })
                             .onDragEnd(e => dragEnd(e, cardD))
 
                         frontContentsG.select("g.items-area")
@@ -655,7 +657,6 @@ export default function cardsComponent() {
             let swipeTriggered = false;
             function dragged(e , d){
                 if(d.isSelected){ return; }
-                //console.log("card dragged")
                 if(swipeTriggered){ return; }
                 const swipeDirection = e.dy <= 0 ? "up" : "down";
                 const frontCard = data.find(c => c.isFront);
@@ -670,25 +671,29 @@ export default function cardsComponent() {
                         cardD = data.find(c => c.cardNr === nr);
                     } 
                 }else{
-                    //the crad itself has been dragged
-                    cardD =d;
+                    //the card itself has been dragged
+                    cardD = d;
                 }
 
                 if(swipeDirection === "up" && !cardD.isHeld){ 
+                    //console.log("CASE 1")
                     onPickUp(cardD);
                     swipeTriggered = true;
                 }
                 if(swipeDirection === "up" && cardD.isHeld){
                     const nr = d3.max([0, frontCard.cardNr - 1]);
                     const cardD = data.find(c => c.cardNr === nr);
+                    //console.log("CASE 2")
                     onPickUp(cardD);
                     swipeTriggered = true;
                 }
                 if(swipeDirection === "down" && cardD.isHeld){
+                    //console.log("CASE 3")
                     onPutDown(cardD);
                     swipeTriggered = true;
                 }
                 if(swipeDirection === "down" && !cardD.isHeld){
+                    //console.log("CASE 4")
                     onPutDown(frontCard);
                     swipeTriggered = true;
                 }
@@ -696,9 +701,10 @@ export default function cardsComponent() {
             }
 
             function dragEnd(e, d){
-                if(enhancedDrag.isClick()) {
-                    return; 
-                }
+                //console.log("dragEnd--------------------")
+                //if(enhancedDrag.isClick()) {
+                    //return; 
+                //}
                 if(d.isSelected){ return; }
                 //reset
                 swipeTriggered = false;
@@ -706,8 +712,9 @@ export default function cardsComponent() {
             }
 
             //DELETION
-            let deleted = false;
+            //let deleted = false;
             //longpress
+            /*
             function longpressStart(e, d) {
                 onLongpressStart.call(this, e, d)
             };
@@ -723,6 +730,7 @@ export default function cardsComponent() {
                 }
                 onLongpressEnd.call(this, e, d)
             };
+            */
         })
 
         return selection;

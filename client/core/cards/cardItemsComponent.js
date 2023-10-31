@@ -157,7 +157,8 @@ export default function cardItemsComponent() {
                                 })
                                 .onLongpressStart(longpressStart)
                                 .onLongpressEnd(longpressEnd)
-                                .onDrag(onDrag));
+                                .onDrag(onDrag)
+                                .onDragEnd(onDragEnd));
                                     
                     })
 

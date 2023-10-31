@@ -51,7 +51,6 @@ export default function dragEnhancements() {
 
     function withEnhancements(cb = () => { }) {
         return function (e, d) {
-            //console.log("ev", e)
             beforeAll.call(this, e, d);
             //programmatic zoom has no src ev
             if(!e.sourceEvent || e.sourceEvent.type === "wheel"){
@@ -137,12 +136,13 @@ export default function dragEnhancements() {
                     isClick = withClick && !wasMoved && !isLongpress && !isMultitouch;
 
                     if (isLongpress) {
+                        console.log("isLp...")
                         if(onLongpressEnd) { onLongpressEnd.call(this, e, d);}
                         reset();
                         break;
                     }
                     if (isClick) {
-                        //console.log("isClick dblClickTimer", dblClickTimer)
+                        console.log("isClick...")
                         const time = e.sourceEvent.timeStamp;
                         //console.log("time", time)
                         const diff = prevTime ? time - prevTime : null;
@@ -169,6 +169,7 @@ export default function dragEnhancements() {
                         break; 
                     }
 
+                    //console.log("calling cb")
                     cb.call(this, e, d);
                     reset();
                     break;

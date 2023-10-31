@@ -151,8 +151,9 @@ export default function pentagonComponent() {
                     //with the d that is sent through notbeing the latest)
                     //if so, could put it back bekow merge so it updates, but find another way to prevent 
                     //click if its been longpressed. eg store an isLongpress here in outer scope
-                    .call(drag)
+                    //.call(drag)
                     .merge(sectionG)
+                    .call(drag)
                     .attr("display", d => !selectedSectionKey || selectedSectionKey === d.section?.key ? null : "none")
                     .style("pointer-events", editable ? null : "none")
                     .each(function(d,i){

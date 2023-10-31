@@ -33,6 +33,10 @@ export const transformDeckForClient = serverDeck => {
 	//ensure prupose has at least two paragraphs
 	const hydratedPurpose = purpose.length === 0 ? ["",""] : purpose.length === 1 ? [purpose[0], ""] : purpose;
 	const hydratedDeckSections = hydrateDeckSections(sections ? JSON.parse(sections) : undefined);
+	//legcy - until they are newly saved, we will have some cardNrs that start from 0
+	const parsedCards = JSON.parse(cards);
+	const cardsZeroIndexed = d3.min(parsedCards, d => d.cardNr) === 0;
+	console.log("zeroed???", cardsZeroIndexed)
 	return {
 		...clientDeck,
 		created:new Date(created),
@@ -40,11 +44,18 @@ export const transformDeckForClient = serverDeck => {
 		id:serverDeck._id,
 		purpose:hydratedPurpose,
 		sections:hydratedDeckSections,
-		cards:JSON.parse(cards).map(c => ({
+		cards:parsedCards.map(c => ({
 			...c,
+			//temp adjust new crads back to have a zero index
+			cardNr: cardsZeroIndexed ? c.cardNr : c.cardNr - 1,
 			date:new Date(c.date),
 			items:c.items.map(it => ({ ...it, status:it.status || 0 }))
 		}))
+		/*cards:JSON.parse(cards).map(c => ({
+			...c,
+			date:new Date(c.date),
+			items:c.items.map(it => ({ ...it, status:it.status || 0 }))
+		}))*/
 	}
 }
 

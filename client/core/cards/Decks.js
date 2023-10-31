@@ -450,6 +450,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   }, [stringifiedData, selectedDeckId]);
 
   const updateFrontCardNr = useCallback(cardNr => {
+    console.log("Decks updateFrontCardNr", cardNr)
     updateDeck({ ...selectedDeck, frontCardNr:cardNr });
     setForm(null);
   }, [stringifiedData, form, selectedDeckId]);
