@@ -107,7 +107,7 @@ export default function cardsComponent() {
     let onMouseover = function(){};
     let onMouseout = function(){};
 
-    //let enhancedDrag = dragEnhancements()
+    let drag = d3.drag();
 
     //dom
     let containerG;
@@ -123,19 +123,8 @@ export default function cardsComponent() {
         updateDimns();
         selection.each(function (data) {
             containerG = d3.select(this);
-            //can use same enhancements object for outer and inner as click is same for both
-            /*enhancedDrag
-                .dragThreshold(100)
-                .onLongpressStart(longpressStart)
-                .onLongpressDragged(longpressDragged)
-                .onLongpressEnd(longpressEnd);
 
-            const drag = d3.drag()
-                .on("start", enhancedDrag())
-                .on("drag", enhancedDrag(dragged))
-                .on("end", enhancedDrag(dragEnd))*/
-
-            const drag = d3.drag()
+            drag
                 .on("drag", dragged)
                 .on("end", dragEnd)
 
@@ -676,61 +665,31 @@ export default function cardsComponent() {
                 }
 
                 if(swipeDirection === "up" && !cardD.isHeld){ 
-                    //console.log("CASE 1")
                     onPickUp(cardD);
                     swipeTriggered = true;
                 }
                 if(swipeDirection === "up" && cardD.isHeld){
                     const nr = d3.max([0, frontCard.cardNr - 1]);
                     const cardD = data.find(c => c.cardNr === nr);
-                    //console.log("CASE 2")
                     onPickUp(cardD);
                     swipeTriggered = true;
                 }
                 if(swipeDirection === "down" && cardD.isHeld){
-                    //console.log("CASE 3")
                     onPutDown(cardD);
                     swipeTriggered = true;
                 }
                 if(swipeDirection === "down" && !cardD.isHeld){
-                    //console.log("CASE 4")
                     onPutDown(frontCard);
                     swipeTriggered = true;
                 }
-                //onDrag.call(this, e, d)
             }
 
             function dragEnd(e, d){
-                //console.log("dragEnd--------------------")
-                //if(enhancedDrag.isClick()) {
-                    //return; 
-                //}
                 if(d.isSelected){ return; }
                 //reset
                 swipeTriggered = false;
-                //onDragEnd.call(this, e, d);
             }
 
-            //DELETION
-            //let deleted = false;
-            //longpress
-            /*
-            function longpressStart(e, d) {
-                onLongpressStart.call(this, e, d)
-            };
-            function longpressDragged(e, d) {
-                if(deleted) { return; }
-                onLongpressDragged.call(this, e, d)
-            };
-
-            function longpressEnd(e, d) {
-                if(deleted){ 
-                    deleted = false;
-                    return; 
-                }
-                onLongpressEnd.call(this, e, d)
-            };
-            */
         })
 
         return selection;
