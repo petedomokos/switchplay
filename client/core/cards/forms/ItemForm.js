@@ -138,7 +138,7 @@ export default function ItemForm({ cardTitle, item, dimns, fontSize, save, close
         {section && <p className={classes.sectionTitle}>{section.title}</p>}
         <p className={classes.cardTitle}>{cardTitle || `Card ${value.cardNr+1}`}</p>
       </div>
-      <p className={classes.itemTitle}>Item {value.itemNr+1}</p>
+      <p className={classes.itemTitle}>Item {value.itemNr}</p>
       <form className={classes.form}>
         {editing && 
           <Input

@@ -187,7 +187,7 @@ export default function cardItemsComponent() {
                         if(d.title){
                             text = truncateIfNecc(d.title);
                         } else {
-                            text = `Item ${d.itemNr + 1}`;
+                            text = `Item ${d.itemNr}`;
                         }
 
                         //text

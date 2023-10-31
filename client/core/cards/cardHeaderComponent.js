@@ -98,6 +98,7 @@ export default function cardHeaderComponent() {
         }
     }
 
+    let withTitle = true;
     let editable;
     let selectedSectionKey;
     let rightContent = "progress";
@@ -174,6 +175,7 @@ export default function cardHeaderComponent() {
                                 })
                                 .merge(titleG)
                                 .attr("transform", `translate(${dateWidth},${0})`)
+                                .attr("display", withTitle ? null : "none")
                                 .each(function(d,i){
                                     const contentsG = d3.select(this).select("g.title-contents")
                                         .attr("transform", `translate(${titleMargin.left},${titleMargin.top})`)
@@ -459,6 +461,11 @@ export default function cardHeaderComponent() {
     header.fontSizes = function (values) {
         if (!arguments.length) { return fontSizes; }
         fontSizes = { ...fontSizes, ...values };
+        return header;
+    };
+    header.withTitle = function (value) {
+        if (!arguments.length) { return withTitle; }
+        withTitle = value;
         return header;
     };
     header.editable = function (value) {

@@ -370,11 +370,13 @@ export default function cardsComponent() {
                             //.call(fadeInOut, cardsAreFlipped);
                         
                         //const headerHeight;
+                        const cardTitleIsBeingEdited = form?.formType !== "card-title" && form?.value?.cardNr === cardD.cardNr;
                         //components
                         const dateColour = selectedSectionKey ? grey10(5) : grey10(7);
                         const frontHeader = frontHeaderComponents[cardNr]
                             .width(contentsWidth)
                             .height(headerHeight)
+                            .withTitle(!cardTitleIsBeingEdited)
                             .styles({
                                 statusFill:() => getProgressStatusFill(cardD),
                                 trophyTranslate:isHeld || isSelected ? 
@@ -423,6 +425,7 @@ export default function cardsComponent() {
                                     .attr("opacity", (isHeld || isSelected) ? 1 : 0);
 
                         //ITEMS
+                        //helper
                         //note - deckIsSelected && form is handled in Decks - it turns the entire container pointer-events on/off
                         const cardIsEditable = selectedSectionKey || ((isHeld && isFront) || isSelected);
                         const items = itemsComponents[cardNr]
@@ -433,7 +436,7 @@ export default function cardsComponent() {
                             .width(contentsWidth)
                             .height(itemsAreaHeight)
                             .withSections(cardIsEditable)
-                            .withText(deckIsSelected && (isFront || isSelected))
+                            .withText(d => deckIsSelected && (isFront || isSelected))
                             .selectedItemNr(selectedItemNr)
                             .editable(cardIsEditable)
                             .onSetOuterRadius(r => { itemsOuterRadius = r })
@@ -518,6 +521,7 @@ export default function cardsComponent() {
                         const backHeader = backHeaderComponents[cardNr]
                             .width(contentsWidth)
                             .height(headerHeight)
+                            .withTitle(form?.formType !== "card-title")
                             .styles({
                                 statusFill:() => getProgressStatusFill(cardD),
                                 trophyTranslate:isHeld || isSelected ? 

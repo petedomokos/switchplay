@@ -157,6 +157,8 @@ export default function pentagonComponent() {
                     .style("pointer-events", editable ? null : "none")
                     .each(function(d,i){
                         const { deckId, cardNr, itemNr, title, section } = d;
+                        //ensure any items with titles are above those without
+                        if(title){ d3.select(this).raise(); }
                         //for now, we fake a video attachment using a special item name
                         const includesVideo = title.includes("Video") || title.includes("video");
                         const attachments = includesVideo ? [{ key:"att-1", type: "video" }] : [];
@@ -344,7 +346,7 @@ export default function pentagonComponent() {
                         const textData = [{
                             "width": itemAreaWidth,
                             "height": textAreaMaxHeight,
-                            "text": title || `Enter Item ${d.itemNr + 1}` 
+                            "text": title || `Enter Item ${d.itemNr}` 
                           }];
 
                         //show or hide text based on deck status
@@ -464,8 +466,9 @@ export default function pentagonComponent() {
                                         .attr("font-size", FONTSIZES.SECTION_ID)
                                 })
                                 .merge(sectionIdentifierG)
-                                .attr("transform", (d,i) => {
-                                    const theta = (itemNr + 0.5) * (360/NR_SECTIONS);
+                                .attr("transform", () => {
+                                    //i is the section index
+                                    const theta = (i + 0.5) * (360/NR_SECTIONS);
                                     const { x, y } = posFromCentre(theta, r2 * 0.95)
                                     return `translate(${x},${y})`
                                 })

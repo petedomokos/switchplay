@@ -153,7 +153,7 @@ export default function cardItemsComponent() {
                                 .styles(styles)
                                 .onClick(function(e,d){
                                     if(!editable){ return; }
-                                    onSelectItem(d);
+                                    onSelectItem.call(this, d);
                                 })
                                 .onLongpressStart(longpressStart)
                                 .onLongpressEnd(longpressEnd)
@@ -253,7 +253,7 @@ export default function cardItemsComponent() {
                                 )
                                 .on("click", function(e,d){
                                     if(!editable){ return; }
-                                    onSelectItem(d);
+                                    onSelectItem.call(this, d);
                                 })
                                 .call(itemDrag)
 

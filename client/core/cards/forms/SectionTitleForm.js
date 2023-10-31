@@ -79,7 +79,6 @@ export function splitMultilineString(str){
 
 export default function SectionTitleForm({ section, dimns, saveTitle, saveInitials, close }) {
   const [value, setValue] = useState(section)
-  console.log("SectionTitleForm")
   const [editing, setEditing] = useState(false);
   const [applyChangesToAllDecks, setApplyChangesToAllDecks] = useState(false);
   //const descLines = desc ? splitMultilineString(desc) : ["No Desc"];

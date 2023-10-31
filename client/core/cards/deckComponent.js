@@ -659,22 +659,29 @@ export default function deckComponent() {
                         .attr("width", contentsWidth)
                         .attr("height", contentsHeight)
                 
+                //helper
+                const deckTitleIsBeingEdited = form?.formType === "deck-title" && form?.deckId === id;
+                const deckSubtitleIsBeingEdited = form?.formType === "section" && form?.deckId === id;
                 //header
+                const subtitle = selectedSection?.title;
                 headerG
-                    .datum({ ..._deckData, title:_deckData.title || id, subtitle:selectedSection?.title })
+                    .datum({ ..._deckData, title:_deckData.title || id, subtitle })
                     .call(header
                         .width(headerWidth)
                         .height(headerHeight)
                         .margin({ left: 7.5, right: 0, top: 0, bottom: 0 } )
+                        .withTitle(!deckTitleIsBeingEdited)
+                        .withSubtitle(!deckSubtitleIsBeingEdited)
+                        .withSpaceForSubtitle(!!subtitle) //keep the space for subtitle, and just remove whilst being edited
                         .maxTitleFont(deckIsSelected ? 7 : 14)
                         .maxTitleChars(deckIsSelected ? 24 : 14)
                         .onClickTitle(function(e){
                             e.stopPropagation();
-                            setForm({ formType: "deck-title" }) 
+                            setForm({ formType: "deck-title", deckId:id }) 
                         })
                         .onClickSubtitle(function(e){
                             e.stopPropagation();
-                            setForm({ formType: "section", sectionKey:selectedSection.key }) 
+                            setForm({ formType: "section", sectionKey:selectedSection.key, deckId:id }) 
                         })
                         .onClickProgressIcon(() => onSetContent("purpose")))
 
