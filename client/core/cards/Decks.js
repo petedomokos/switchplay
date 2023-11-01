@@ -664,6 +664,17 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
         //user has dragged as part of the longpress itself, so we dont want them to be able to drag after it anymore
         wasDragged = true;
         deckPointerEventsEnabled = false;
+
+        const { sourceEvent } = e;
+        const clientY = isNumber(sourceEvent.clientY) ? sourceEvent.clientY : sourceEvent.touches[0].clientY;
+        //console.log("x y", clientX, clientY)
+        if(clientY < deckHeight/4){
+          console.log("near to border!!")
+          //scroll up if poss
+        }else if(height - clientY < deckHeight/4){
+          console.log("near bottom border")
+          //scroll down if poss
+        }
         const pseudoE = { dx: e.transform.x - zoomTransformPrev.x, dy:e.transform.y - zoomTransformPrev.y }
         decks.handleDrag(pseudoE, deckId);
         zoomTransformPrev = e.transform;
