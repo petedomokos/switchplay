@@ -667,7 +667,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
         const { sourceEvent } = e;
         const clientY = isNumber(sourceEvent.clientY) ? sourceEvent.clientY : sourceEvent.touches[0].clientY;
-        //console.log("x y", clientX, clientY)
+        // console.log("x y", clientX, clientY)
         if(clientY < deckHeight/4){
           console.log("near to border!!")
           //scroll up if poss
