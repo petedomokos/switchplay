@@ -195,7 +195,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
           :
           <Decks 
             table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
-            data={decksData[0] ? [decksData[0]] : []} height={contentsHeight} journeyData={journeyData} tableMarginTop={tableMarginTop}
+            data={decksData} height={contentsHeight} journeyData={journeyData} tableMarginTop={tableMarginTop}
             onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={updateDeck}
             updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />
         }

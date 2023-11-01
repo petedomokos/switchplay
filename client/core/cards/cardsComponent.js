@@ -214,7 +214,7 @@ export default function cardsComponent() {
             }
 
             //bgdrag
-            containerG.call(drag);
+            containerG.call(drag).on('click', function(){ console.log("clicked", this)});
 
             const cardG = containerG.selectAll("g.card").data(data, d => d.cardNr);
             cardG.enter()
@@ -436,9 +436,14 @@ export default function cardsComponent() {
                                 onUpdateItemStatus(cardNr, itemNr, newStatus);
                             })
                             .onDrag(e => { dragged(e, cardD) })
-                            .onDragEnd(e => dragEnd(e, cardD))
+                            .onDragEnd(function(e){
+                                console.log('calling de from items', this)
+                                dragEnd.call(this, e, cardD)
+                            })
 
                         frontContentsG.select("g.items-area")
+                            //not sure why we need this when entire containr shold have pointer-events none when no deck selected
+                            .attr("pointer-events", deckIsSelected ? null : "none")
                             .attr("transform", `translate(0, ${headerHeight + gapBetweenHeaderAndItems})`)
                             .call(fadeInOut, isFront || !isHeld)
                             .datum(itemsData)
@@ -685,6 +690,7 @@ export default function cardsComponent() {
             }
 
             function dragEnd(e, d){
+                console.log("cards dragEnd", this)
                 if(d.isSelected){ return; }
                 //reset
                 swipeTriggered = false;
