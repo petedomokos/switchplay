@@ -279,7 +279,7 @@ export default function deckComponent() {
         selection.each(function (deckData) {
             updateDimns(deckData);
             id = deckData.id;
-            //console.log("update", id, selectedSection?.key, selectedSection?.title)
+            console.log("update", deckData)
             containerG = d3.select(this)
 
             if(containerG.select("g").empty()){
