@@ -66,7 +66,7 @@ export const COLOURS = {
     CARD:{
         FILL:cardD => {
             const { isSelected, isFront, isNext, isSecondNext, status } = cardD;
-            if(isFront || isSelected){ return grey10(3); }
+            if(isFront || isSelected){ return grey10(1); }
             if(isNext){ return grey10(5); }
             if(isSecondNext){ return "#989898"; }
             return (cardD.isHeld ? grey10(6) : grey10(8))
