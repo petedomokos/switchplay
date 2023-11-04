@@ -317,12 +317,10 @@ export default function cardsComponent() {
                     .each(function(cardD,i){
                         const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile, deckListPos } = cardD;
                         if(selectedSectionKey){
+                            console.log("selectedSectionKey", selectedSectionKey)
                             console.log("items", cardD.items)
                         }
                         const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
-                        if(selectedSectionKey){
-                            console.log("itemsData", itemsData)
-                        }
                         const cardG = d3.select(this)
                             .call(fadeInOut, itemsData.length !== 0 && (!isNumber(selectedCardNr) || selectedCardNr === cardNr));
 

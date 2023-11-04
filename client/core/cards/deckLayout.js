@@ -35,6 +35,7 @@ export default function decksLayout(){
         const { cards, id, listPos } = deckData;
         //sections - if withSections, we create default sectins if none exist. if false, there are never sections
         let sections;
+        console.log("deckData.sections", deckData.sections)
         if(withSections === null){ sections = deckData.sections }
         else if(withSections === true){ 
             sections = deckData.sections || createDefaultSections(cards) 
