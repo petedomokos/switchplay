@@ -18,25 +18,29 @@ export const transformTableForClient = serverTable => {
 	}
 }
 
-const createDefaultSection = itemNr => ({ 
-	itemNr, key:`section-${itemNr}`, title:`Section ${itemNr}`, initials:`S${itemNr}`
+const createDefaultSection = sectionNr => ({ 
+	key:`section-${sectionNr}`, title:`Section ${sectionNr}`, initials:`S${sectionNr}`, nr:sectionNr
 })
 
 //for each itemNr, if user has defined a section for the item, then use that, else use default
 const NR_CARD_ITEMS = 5;
-const hydrateDeckSections = sections => d3.range(NR_CARD_ITEMS)
-	.map(nr => sections?.find(s => s.itemNr === nr) || createDefaultSection(nr))
-	.map(s => ({ ...s, initials:s.initials || s.title.slice(0,2).toUpperCase() }))
+const hydrateDeckSections = (sections=[]) => d3.range(NR_CARD_ITEMS)
+	.map(i => /*sections[i] ||*/ createDefaultSection(i+1))
+	.map((s,i) => ({ 
+		...s, 
+		initials:s.initials || s.title.slice(0,2).toUpperCase(), 
+		nr:s.nr || i + 1 //nr always starts from 1, cannot be changed and persisted 
+	}))
 
 export const transformDeckForClient = serverDeck => {
 	const { created, updated, cards, purpose=[], sections, ...clientDeck } = serverDeck;
 	//ensure prupose has at least two paragraphs
 	const hydratedPurpose = purpose.length === 0 ? ["",""] : purpose.length === 1 ? [purpose[0], ""] : purpose;
 	const hydratedDeckSections = hydrateDeckSections(sections ? JSON.parse(sections) : undefined);
+	//console.log("hydratedDeckSections", hydratedDeckSections)
 	//legcy - until they are newly saved, we will have some cardNrs that start from 0
 	const parsedCards = JSON.parse(cards);
 	const cardsZeroIndexed = d3.min(parsedCards, d => d.cardNr) === 0;
-	console.log("zeroed???", cardsZeroIndexed)
 	return {
 		...clientDeck,
 		created:new Date(created),

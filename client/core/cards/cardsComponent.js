@@ -316,10 +316,6 @@ export default function cardsComponent() {
                     })
                     .each(function(cardD,i){
                         const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile, deckListPos } = cardD;
-                        if(selectedSectionKey){
-                            console.log("selectedSectionKey", selectedSectionKey)
-                            console.log("items", cardD.items)
-                        }
                         const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
                         const cardG = d3.select(this)
                             .call(fadeInOut, itemsData.length !== 0 && (!isNumber(selectedCardNr) || selectedCardNr === cardNr));
@@ -440,7 +436,7 @@ export default function cardsComponent() {
                             })
                             .onDrag(e => { dragged(e, cardD) })
                             .onDragEnd(function(e){
-                                console.log('calling de from items', this)
+                                console.log('calling de from items')
                                 dragEnd.call(this, e, cardD)
                             })
 
@@ -693,7 +689,7 @@ export default function cardsComponent() {
             }
 
             function dragEnd(e, d){
-                console.log("cards dragEnd", this)
+                console.log("cards dragEnd")
                 if(d.isSelected){ return; }
                 //reset
                 swipeTriggered = false;

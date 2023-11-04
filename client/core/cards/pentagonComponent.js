@@ -106,7 +106,7 @@ export default function pentagonComponent() {
                     //section is identified in the dom by its itemNr ie it pos in the polygon
                     //notice, we get this from thr secitn object, which allows user to reassign an item from a 
                     //different pos in the polygon (ie a different itemNr) to another section
-                    .attr("class", d => `section section-${d.section?.itemNr}`)
+                    .attr("class", d => `section section-${d.section?.nr}`)
                     .attr("display", d => !selectedSectionKey || selectedSectionKey === d.section?.key ? null : "none")
                     .each(function(d,i){
                         const sectionG = d3.select(this);

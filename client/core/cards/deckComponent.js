@@ -279,7 +279,6 @@ export default function deckComponent() {
         selection.each(function (deckData) {
             updateDimns(deckData);
             id = deckData.id;
-            console.log("update", deckData)
             containerG = d3.select(this)
 
             if(containerG.select("g").empty()){
@@ -834,9 +833,9 @@ export default function deckComponent() {
                 .attr("rx", 1.5)
                 .attr("ry", 1.5)
 
-            let potentialSelectedSectionItemNr;
-            const highlightSection = key => {
-                const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${key}`);
+            let potentialSelectedSectionNr;
+            const highlightSection = nr => {
+                const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${nr}`);
                 sectionG.select("path.section-bg")
                     .transition("highlight")
                     .duration(TRANSITIONS.VERY_FAST)
@@ -853,8 +852,8 @@ export default function deckComponent() {
                 
             }
 
-            const unhighlightSection = key => {
-                const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${key}`);
+            const unhighlightSection = nr => {
+                const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${nr}`);
                 sectionG.select("path.section-bg")
                     .transition("unhighlight")
                     .duration(TRANSITIONS.VERY_FAST)
@@ -891,26 +890,25 @@ export default function deckComponent() {
                     const theta = angleFromNorth([[_x, _y]])
                     //console.log("theta", Math.round(theta))
                     if(distFromCentre > cards.itemsOuterRadius()){ 
-                        if(potentialSelectedSectionItemNr !== ""){ unhighlightSection(potentialSelectedSectionItemNr); }
-                        potentialSelectedSectionItemNr = ""; 
+                        if(potentialSelectedSectionNr !== ""){ unhighlightSection(potentialSelectedSectionNr); }
+                        potentialSelectedSectionNr = ""; 
                     }
                     else {
-                        const newPotentialSelectedSectionItemNr = Math.floor(theta/(360/5));
-                        
-                        if(potentialSelectedSectionItemNr === ""){ highlightSection(newPotentialSelectedSectionItemNr) }
+                        const newPotentialSelectedSectionNr = Math.floor(theta/(360/5)) + 1;
+                     
+                        if(potentialSelectedSectionNr === ""){ highlightSection(newPotentialSelectedSectionNr) }
                         else { 
-                            unhighlightSection(potentialSelectedSectionItemNr);
-                            highlightSection(newPotentialSelectedSectionItemNr);
+                            unhighlightSection(potentialSelectedSectionNr);
+                            highlightSection(newPotentialSelectedSectionNr);
                         }
-                        potentialSelectedSectionItemNr = newPotentialSelectedSectionItemNr;
+                        potentialSelectedSectionNr = newPotentialSelectedSectionNr;
                     }
-                    //console.log("pot", potentialSelectedSectionItemNr)  
                 })
                 .on("end", function(e,d){
-                    if(selectedSection?.key !== potentialSelectedSectionItemNr){
-                        const section = sections.find(s => s.itemNr === potentialSelectedSectionItemNr)
+                    if(selectedSection?.nr !== potentialSelectedSectionNr){
+                        const section = sections.find(s => s.nr === potentialSelectedSectionNr)
                         onSelectSection(section?.key || "")
-                        potentialSelectedSectionItemNr = "";
+                        potentialSelectedSectionNr = "";
                     }else{
                         //call update here to clean up
                         update(_deckData)
