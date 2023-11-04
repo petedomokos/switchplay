@@ -17,6 +17,11 @@ export default function cardsLayout(){
     function update(cardsData){
         const now = new Date();
 
+        const getSection = it => {
+            if(it.sectionKey){ return sections.find(s => s.key === it.sectionKey) }
+            return sections[it.itemNr]
+        }
+
         const _data = cardsData.map((c,i) => {
             const { deckId, cardNr, title="", date, items } = c;
             return {
@@ -26,7 +31,7 @@ export default function cardsLayout(){
                     deckId,
                     cardNr, 
                     //sectioning defaults to by itemNr
-                    section:sections?.find(s => s.itemNr === it.itemNr),
+                    section:getSection(it),
                     title:it.title || "" ,
                     key:`deck-${deckId}-card-${cardNr}-item-${it.itemNr}`
                 })),
