@@ -165,7 +165,6 @@ export default function pentagonComponent() {
                         const attachments = includesVideo ? [{ key:"att-1", type: "video" }] : [];
                         //if a title is set, this means the item exists as a defined task or target
                         const itemIsDefined = !!title;
-                        //console.log("d", d)
                         const key = `deck-${deckId}-card-${cardNr}-item-${itemNr}`;
                         //segement points start from centre (a) clockwise around the quadrilateral
                         const ax = innerVertices[i][0];

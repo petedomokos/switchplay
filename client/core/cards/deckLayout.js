@@ -38,8 +38,10 @@ export default function decksLayout(){
         console.log("deckData.sections", deckData.sections)
         if(withSections === null){ sections = deckData.sections }
         else if(withSections === true){ 
+            console.log("withSections", deckData.sections)
             sections = deckData.sections || createDefaultSections(cards) 
         }
+        console.log("sections are", sections)
         //cards
         _cardsLayout.sections(sections);
         const processedCards = _cardsLayout(cards.map(c => ({ ...c, deckId:id, deckListPos:listPos })));

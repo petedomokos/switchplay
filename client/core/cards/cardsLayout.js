@@ -17,6 +17,8 @@ export default function cardsLayout(){
     function update(cardsData){
         const now = new Date();
 
+        console.log("cardsLayout sections", sections)
+
         const getSection = it => {
             if(it.sectionKey){ return sections.find(s => s.key === it.sectionKey) }
             return sections[it.itemNr]
