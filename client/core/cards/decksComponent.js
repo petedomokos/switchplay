@@ -32,7 +32,7 @@ export default function decksComponent() {
     let onSelectItem = function(){};
     let onSelectSection = function(){};
     let onCreateDeck = function(){}
-    let onClickDeck = function(){}
+    let onSelectDeck = function(){}
     let onSetLongpressedDeckId = function(){}
     let onSetSelectedCardNr = function(){}
     let onMoveDeck = function(){};
@@ -120,7 +120,7 @@ export default function decksComponent() {
                                 .cardsAreFlipped(cardsAreFlipped)
                                 .form(form)
                                 .getCell(getCell)
-                                .onClickDeck(onClickDeck)
+                                .onSelectDeck(onSelectDeck)
                                 .onFlipCards(() => {
                                     const flippingToBack = !cardsAreFlipped;
                                     const fadeDuration = 100;
@@ -333,8 +333,7 @@ export default function decksComponent() {
                         const cell = getCell([e.clientX, e.clientY], true);
                         console.log('cell', cell)
                         if(cell?.deckId){
-                            onClickDeck(e, { id: cell.deckId });
-                            //e.stopPropagation();
+                            onSelectDeck(cell.deckId);
                         }
                     })
                     .call(zoom)
@@ -494,9 +493,9 @@ export default function decksComponent() {
         onCreateDeck = value;
         return decks;
     };
-    decks.onClickDeck = function (value) {
-        if (!arguments.length) { return onClickDeck; }
-        onClickDeck = value;
+    decks.onSelectDeck = function (value) {
+        if (!arguments.length) { return onSelectDeck; }
+        onSelectDeck = value;
         return decks;
     };
     decks.onSetLongpressedDeckId = function (value) {

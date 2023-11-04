@@ -443,9 +443,8 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
     setSelectedDeck("");
   }, [stringifiedData, selectedDeckId, longpressedDeckId, selectedCardNr, form]);
 
-  const onClickDeck = useCallback((e, d) => {
-    setSelectedDeck(selectedDeck ? "" : d.id)
-    e.stopPropagation();
+  const onSelectDeck = useCallback(id => {
+    setSelectedDeck(id || "");
     setForm(null);
   }, [stringifiedData, selectedDeckId]);
 
@@ -603,7 +602,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       ._deckHeight((d,i) => deckHeight)
       .getCell(getCell)
       .onCreateDeck(createNewDeck)
-      .onClickDeck(onClickDeck)
+      .onSelectDeck(onSelectDeck)
       .onSetLongpressedDeckId(setLongpressedDeckId)
       .onSetSelectedCardNr(cardNr => {
         setForm(null)

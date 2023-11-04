@@ -237,7 +237,7 @@ export default function deckComponent() {
     let onSelectItem = function(){};
     let onSelectSection = function(){};
     let onSetContent = function(){};
-    let onClickDeck = function(){};
+    let onSelectDeck = function(){};
     let onSetLongpressed = function(){};
     let onSetSelectedCardNr = function(){};
     let onMoveDeck = function(){};
@@ -441,9 +441,6 @@ export default function deckComponent() {
 
                             paragraphG.exit().call(remove);
 
-
-                           
-
                         })
 
                 purposeG.exit().call(remove)
@@ -635,14 +632,14 @@ export default function deckComponent() {
                     .attr("display", deckIsSelected ? "none" : null)
                     .attr("width", width)
                     .attr("height", height)
-                    .on("click", e => {
+                    /*.on("click", e => {
                         //console.log("click deck overlay")
                         if(longpressedDeckId === id){ 
                             e.stopPropagation();
                             return;
                         }
-                        onClickDeck(e, _deckData)
-                    })
+                        //onSelectDeck(_deckData.id)
+                    })*/
                     /*.call(updateRectDimns, { 
                         width: () => width, 
                         height:() => height,
@@ -775,7 +772,7 @@ export default function deckComponent() {
                         .onUpdateItemStatus(updateItemStatus)
                         .onClickCard(function(e, d){
                             if(!deckIsSelected){
-                                onClickDeck(e, _deckData);
+                                onSelectDeck(_deckData.id);
                             } else if(selectedCardNr === d.cardNr){
                                 onSetSelectedCardNr("")
                             } else{
@@ -797,279 +794,332 @@ export default function deckComponent() {
                         }))
 
 
-            //controls
-            const controlsData = !sections || cardsAreFlipped ? [] : [
-                { key:"section-view" }
-            ];
+                //controls
+                const controlsData = !sections || cardsAreFlipped ? [] : [
+                    { key:"section-view" }
+                ];
 
-            const btnWidth = 10;
-            const btnHeight = 18;
-            const btnMargin = { left: 1, right: 1, top:5, bottom:5 }
-            const btnContentsWidth = btnWidth - btnMargin.left - btnMargin.right;
-            const btnContentsHeight = btnHeight - btnMargin.top - btnMargin.bottom;
+                const btnWidth = 10;
+                const btnHeight = 18;
+                const btnMargin = { left: 1, right: 1, top:5, bottom:5 }
+                const btnContentsWidth = btnWidth - btnMargin.left - btnMargin.right;
+                const btnContentsHeight = btnHeight - btnMargin.top - btnMargin.bottom;
 
-            const controlsMarginVert = 0;
-            const controlsContentsWidth = btnWidth;
-            const controlsWidth = controlsContentsWidth;
-            const controlsContentsHeight = controlsData.length * btnHeight;
-            const controlsHeight = controlsContentsHeight + 2 * controlsMarginVert;
-            
-            const spaceAvailableOnLeftOfCards = (width - heldCardWidth)/2;
-            const controlsOuterMarginLeft = (spaceAvailableOnLeftOfCards - controlsWidth)/2;
-            const controlsOuterMarginBottom = controlsOuterMarginLeft;
+                const controlsMarginVert = 0;
+                const controlsContentsWidth = btnWidth;
+                const controlsWidth = controlsContentsWidth;
+                const controlsContentsHeight = controlsData.length * btnHeight;
+                const controlsHeight = controlsContentsHeight + 2 * controlsMarginVert;
+                
+                const spaceAvailableOnLeftOfCards = (width - heldCardWidth)/2;
+                const controlsOuterMarginLeft = (spaceAvailableOnLeftOfCards - controlsWidth)/2;
+                const controlsOuterMarginBottom = controlsOuterMarginLeft;
 
-            const xToCentre = -controlsOuterMarginLeft + (width - btnWidth)/2;//+ deckToCentrePos.x   // -controlsOuterMarginLeft + (width - btnWidth)/2;
-            const cardItemsAreaHeight = heldCardHeight - cardHeaderHeight;
-            const yToCentre = controlsOuterMarginBottom + controlsMarginVert - placedCardsAreaHeight - cardItemsAreaHeight/2 + btnHeight/2 + 1;
+                const xToCentre = -controlsOuterMarginLeft + (width - btnWidth)/2;//+ deckToCentrePos.x   // -controlsOuterMarginLeft + (width - btnWidth)/2;
+                const cardItemsAreaHeight = heldCardHeight - cardHeaderHeight;
+                const yToCentre = controlsOuterMarginBottom + controlsMarginVert - placedCardsAreaHeight - cardItemsAreaHeight/2 + btnHeight/2 + 1;
 
-            controlsG.call(fadeInOut, content === "cards" && deckIsSelected && !isNumber(selectedCardNr) && !selectedSection?.key)
-            controlsG
-                .attr("transform", `translate(${controlsOuterMarginLeft},${height - controlsOuterMarginBottom - controlsHeight})`)
+                controlsG.call(fadeInOut, content === "cards" && deckIsSelected && !isNumber(selectedCardNr) && !selectedSection?.key)
+                controlsG
+                    .attr("transform", `translate(${controlsOuterMarginLeft},${height - controlsOuterMarginBottom - controlsHeight})`)
 
 
-            controlsG.select("rect.controls-bg")
-                .attr("width", controlsWidth)
-                .attr("height", controlsHeight)
-                .attr("rx", 1.5)
-                .attr("ry", 1.5)
+                controlsG.select("rect.controls-bg")
+                    .attr("width", controlsWidth)
+                    .attr("height", controlsHeight)
+                    .attr("rx", 1.5)
+                    .attr("ry", 1.5)
 
-            let potentialSelectedSectionNr;
-            const highlightSection = nr => {
-                const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${nr}`);
-                sectionG.select("path.section-bg")
-                    .transition("highlight")
-                    .duration(TRANSITIONS.VERY_FAST)
-                        .attr("fill", grey10(2))
-
-                sectionG.selectAll("text.section-identifier")
-                    .attr("transform", "scale(1)")
+                let potentialSelectedSectionNr;
+                const highlightSection = nr => {
+                    const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${nr}`);
+                    sectionG.select("path.section-bg")
                         .transition("highlight")
                         .duration(TRANSITIONS.VERY_FAST)
                             .attr("fill", grey10(2))
-                            .attr("font-size", FONTSIZES.SECTION_ID * 1.2)
-                            .attr("opacity", 1)
 
-                
-            }
+                    sectionG.selectAll("text.section-identifier")
+                        .attr("transform", "scale(1)")
+                            .transition("highlight")
+                            .duration(TRANSITIONS.VERY_FAST)
+                                .attr("fill", grey10(2))
+                                .attr("font-size", FONTSIZES.SECTION_ID * 1.2)
+                                .attr("opacity", 1)
 
-            const unhighlightSection = nr => {
-                const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${nr}`);
-                sectionG.select("path.section-bg")
-                    .transition("unhighlight")
-                    .duration(TRANSITIONS.VERY_FAST)
-                        .attr("fill", "transparent")
+                    
+                }
 
-                sectionG.selectAll("text.section-identifier")
-                    .transition("highlight")
-                    .duration(TRANSITIONS.VERY_FAST)
-                        .attr("fill", COLOURS.CARD.SECTION_ID)
-                        .attr("font-size", FONTSIZES.SECTION_ID)
-                        .attr("opacity", STYLES.SECTION_ID_OPACITY)
-
-            }
-
-            btnDrag
-                .on("start", function(e,d){
-                })
-                .on("drag", function(e, d, i){
-                    const btnG = d3.select(this);
-                    const { translateX, translateY } = getTransformationFromTrans(btnG.attr("transform"));
-                    const newX = translateX + e.dx;
-                    const newY = translateY + e.dy;
-                    btnG.attr("transform", `translate(${newX}, ${newY}) scale(${btnScaleWhenDragged})`);
-
-                    //Determine the section
-                    //const _x = newX - centreX;
-                    //const _y = newY - centreY;
-                    const _x = newX - xToCentre;
-                    const _y = newY - yToCentre;
-
-                    //console.log("_x", _x)
-                    const distFromCentre = Math.sqrt(_x ** 2 + _y ** 2);
-                    //console.log("distFromCentre", distFromCentre)
-                    const theta = angleFromNorth([[_x, _y]])
-                    //console.log("theta", Math.round(theta))
-                    if(distFromCentre > cards.itemsOuterRadius()){ 
-                        if(potentialSelectedSectionNr !== ""){ unhighlightSection(potentialSelectedSectionNr); }
-                        potentialSelectedSectionNr = ""; 
-                    }
-                    else {
-                        const newPotentialSelectedSectionNr = Math.floor(theta/(360/5)) + 1;
-                     
-                        if(potentialSelectedSectionNr === ""){ highlightSection(newPotentialSelectedSectionNr) }
-                        else { 
-                            unhighlightSection(potentialSelectedSectionNr);
-                            highlightSection(newPotentialSelectedSectionNr);
-                        }
-                        potentialSelectedSectionNr = newPotentialSelectedSectionNr;
-                    }
-                })
-                .on("end", function(e,d){
-                    if(selectedSection?.nr !== potentialSelectedSectionNr){
-                        const section = sections.find(s => s.nr === potentialSelectedSectionNr)
-                        onSelectSection(section?.key || "")
-                        potentialSelectedSectionNr = "";
-                    }else{
-                        //call update here to clean up
-                        update(_deckData)
-                    }
-                })
-            
-            const btnY = (d,i) => controlsMarginVert + i * btnHeight;
-            const btnScaleWhenDragged = 1.8;
-            
-            const btnG = controlsG.selectAll("g.deck-control-btn").data(controlsData, d => d.key);
-            btnG.enter()
-                .append("g")
-                    .attr("class", "deck-control-btn")
-                    .each(function(d){
-                        const btnG = d3.select(this);
-                        
-                        const btnContentsG = btnG.append("g").attr("class", 'btn-contents');
-                        if(d.key === "section-view"){
-                            btnContentsG.append("circle").attr("class", "btn-bg")
-                                .attr("fill", COLOURS.DECK.CONTROLS)
-                                .attr("opacity", 0.6)
-
-                            const iconG = btnContentsG.append("g").attr("class", "icon")
-                            iconG.append("path").attr("class", "path1")
-                                .attr("fill", grey10(4));
-                            iconG.append("path").attr("class", "path2")
-                                .attr("fill", grey10(4));
-                        }else{
-                            btnContentsG.append("rect").attr("class", "btn-bg")
-                                .attr("fill", COLOURS.DECK.CONTROLS)
-                                .attr("opacity", 0.6)
-                                .attr("rx", 1)
-                                .attr("ry", 1);
-
-                            const iconG = btnContentsG.append("g").attr("class", "icon");
-                            //@todo - impl icons for other controls as they are added
-                        }
-
-                        //hitbox
-                        btnG.append("rect")
-                            .attr("class", "hitbox")
-                            .attr("fill", "transparent");
-
-                    })
-                    .merge(btnG)
-                    .attr("transform-origin",(d,i) => `${btnWidth/2} ${btnY(d,i) + btnHeight/2}`)
-                    //.attr("transform", (d,i) => `translate(0, ${btnY(d,i)})`)
-                    .attr("transform", (d,i) => `translate(0, ${btnY(d,i)})`)
-                    .each(function(d){
-                        const btnG = d3.select(this);
-
-                        btnG.select("rect.hitbox")
-                            .attr("width", btnWidth)
-                            .attr("height", btnHeight)
-
-                        const btnContentsG = btnG.select("g.btn-contents")
-                            .attr("transform", `translate(${btnMargin.left},${btnMargin.top})`);
-
-                        if(d.key === "section-view"){
-                            //bg
-                            const r = btnContentsWidth/2;
-                            btnContentsG.select("circle.btn-bg")
-                                .attr("cx", r)
-                                .attr("cy", r)
-                                .attr("r", r)
-                                .attr("stroke", "white")
-                                .attr("stroke-width", 0.05)
-
-                            //icon
-                            const iconG = btnContentsG.select("g.icon")
-                            .attr("transform", `translate(0.6,0.6) scale(0.12)`);
-
-                            iconG.select("path.path1")
-                                .attr("d", magIconPath1D)
-                            iconG.select("path.path2")
-                                .attr("d", magIconPath2D)
-                        }else{
-                            //bg
-                            btnContentsG.select("rect.btn-bg")
-                                .attr("width", btnContentsWidth)
-                                .attr("height", btnContentsHeight)
-                        }
-
-                    })
-                    .call(btnDrag)
-
-            btnG.exit().remove();
-
-            //deck botright btn
-            const closeBtnDatum = { 
-                key:"close", 
-                onClick:e => { 
-                    e.stopPropagation();
-                    if(selectedSection?.key){
-                        onSelectSection() 
-                    }else{
-                        onSetContent("cards");
-                    }
-                },
-                fill:grey10(3),
-                icon:icons.close,
-            }
-
-            const flipBtnDatum = { 
-                key:"flip", 
-                onClick:e => { 
-                    e.stopPropagation();
-                    onFlipCards();
-                },
-                fill:grey10(5),
-                icon:icons.flip,
-            }
-
-            const inSectionOrPurposeView = selectedSection?.key || content === "purpose";
-            let cornerBtnData = !deckIsSelected ? [] : (inSectionOrPurposeView ? [closeBtnDatum] : [flipBtnDatum]);
-            const cornerBtnHeight = 20;
-            const cornerBtnWidth = cornerBtnHeight;
-            //assumme all are square
-            //note: 0.8 is a bodge coz iconsseems to be bigger than they state
-            const scale = d => (0.8 * cornerBtnHeight)/d.icon.height;
-            const cornerBtnMargin = cornerBtnHeight * 0.1;
-            const cornerBtnContentsWidth = cornerBtnWidth - 2 * cornerBtnMargin;
-            const cornerBtnContentsHeight = cornerBtnHeight - 2 * cornerBtnMargin;
-            const cornerBtnG = contentsG.selectAll("g.corner-btn").data(cornerBtnData, d => d.key);
-            cornerBtnG.enter()
-                .append("g")
-                    .attr("class", "corner-btn")
-                    .call(fadeIn)
-                    .each(function(d){
-                        const btnG = d3.select(this);
-                        btnG.append("path");
-
-                        btnG.append("rect").attr("class", "btn-hitbox")
+                const unhighlightSection = nr => {
+                    const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${nr}`);
+                    sectionG.select("path.section-bg")
+                        .transition("unhighlight")
+                        .duration(TRANSITIONS.VERY_FAST)
                             .attr("fill", "transparent")
-                            //.attr("fill", "red")
-                            .attr("opacity", 0.3)
-                            .attr("stroke", "none")
+
+                    sectionG.selectAll("text.section-identifier")
+                        .transition("highlight")
+                        .duration(TRANSITIONS.VERY_FAST)
+                            .attr("fill", COLOURS.CARD.SECTION_ID)
+                            .attr("font-size", FONTSIZES.SECTION_ID)
+                            .attr("opacity", STYLES.SECTION_ID_OPACITY)
+
+                }
+
+                btnDrag
+                    .on("start", function(e,d){
                     })
-                    .merge(cornerBtnG)
-                    .attr("transform", `translate(
-                        ${contentsWidth - cornerBtnWidth + cornerBtnMargin},
-                        ${contentsHeight - cornerBtnHeight + cornerBtnMargin})`)
-                    .each(function(d){
+                    .on("drag", function(e, d, i){
                         const btnG = d3.select(this);
-                        btnG.select("path")
-                            .attr("transform", `scale(${scale(d)})`)
-                            .attr("d", d.icon.d)
-                            .attr("fill", d.fill)
-                
-                        btnG.select("rect.btn-hitbox")
-                            .attr("width", cornerBtnContentsWidth)
-                            .attr("height", cornerBtnContentsHeight)
+                        const { translateX, translateY } = getTransformationFromTrans(btnG.attr("transform"));
+                        const newX = translateX + e.dx;
+                        const newY = translateY + e.dy;
+                        btnG.attr("transform", `translate(${newX}, ${newY}) scale(${btnScaleWhenDragged})`);
 
+                        //Determine the section
+                        //const _x = newX - centreX;
+                        //const _y = newY - centreY;
+                        const _x = newX - xToCentre;
+                        const _y = newY - yToCentre;
+
+                        //console.log("_x", _x)
+                        const distFromCentre = Math.sqrt(_x ** 2 + _y ** 2);
+                        //console.log("distFromCentre", distFromCentre)
+                        const theta = angleFromNorth([[_x, _y]])
+                        //console.log("theta", Math.round(theta))
+                        if(distFromCentre > cards.itemsOuterRadius()){ 
+                            if(potentialSelectedSectionNr !== ""){ unhighlightSection(potentialSelectedSectionNr); }
+                            potentialSelectedSectionNr = ""; 
+                        }
+                        else {
+                            const newPotentialSelectedSectionNr = Math.floor(theta/(360/5)) + 1;
+                        
+                            if(potentialSelectedSectionNr === ""){ highlightSection(newPotentialSelectedSectionNr) }
+                            else { 
+                                unhighlightSection(potentialSelectedSectionNr);
+                                highlightSection(newPotentialSelectedSectionNr);
+                            }
+                            potentialSelectedSectionNr = newPotentialSelectedSectionNr;
+                        }
                     })
-                    .on("click", (e,d) => { 
-                        d.onClick(e, d) 
-                    });
-
-                cornerBtnG.exit().remove();
+                    .on("end", function(e,d){
+                        if(selectedSection?.nr !== potentialSelectedSectionNr){
+                            const section = sections.find(s => s.nr === potentialSelectedSectionNr)
+                            onSelectSection(section?.key || "")
+                            potentialSelectedSectionNr = "";
+                        }else{
+                            //call update here to clean up
+                            update(_deckData)
+                        }
+                    })
+                
+                const btnY = (d,i) => controlsMarginVert + i * btnHeight;
+                const btnScaleWhenDragged = 1.8;
             
+                const btnG = controlsG.selectAll("g.deck-control-btn").data(controlsData, d => d.key);
+                btnG.enter()
+                    .append("g")
+                        .attr("class", "deck-control-btn")
+                        .each(function(d){
+                            const btnG = d3.select(this);
+                            
+                            const btnContentsG = btnG.append("g").attr("class", 'btn-contents');
+                            if(d.key === "section-view"){
+                                btnContentsG.append("circle").attr("class", "btn-bg")
+                                    .attr("fill", COLOURS.DECK.CONTROLS)
+                                    .attr("opacity", 0.6)
 
+                                const iconG = btnContentsG.append("g").attr("class", "icon")
+                                iconG.append("path").attr("class", "path1")
+                                    .attr("fill", grey10(4));
+                                iconG.append("path").attr("class", "path2")
+                                    .attr("fill", grey10(4));
+                            }else{
+                                btnContentsG.append("rect").attr("class", "btn-bg")
+                                    .attr("fill", COLOURS.DECK.CONTROLS)
+                                    .attr("opacity", 0.6)
+                                    .attr("rx", 1)
+                                    .attr("ry", 1);
+
+                                const iconG = btnContentsG.append("g").attr("class", "icon");
+                                //@todo - impl icons for other controls as they are added
+                            }
+
+                            //hitbox
+                            btnG.append("rect")
+                                .attr("class", "hitbox")
+                                .attr("fill", "transparent");
+
+                        })
+                        .merge(btnG)
+                        .attr("transform-origin",(d,i) => `${btnWidth/2} ${btnY(d,i) + btnHeight/2}`)
+                        //.attr("transform", (d,i) => `translate(0, ${btnY(d,i)})`)
+                        .attr("transform", (d,i) => `translate(0, ${btnY(d,i)})`)
+                        .each(function(d){
+                            const btnG = d3.select(this);
+
+                            btnG.select("rect.hitbox")
+                                .attr("width", btnWidth)
+                                .attr("height", btnHeight)
+
+                            const btnContentsG = btnG.select("g.btn-contents")
+                                .attr("transform", `translate(${btnMargin.left},${btnMargin.top})`);
+
+                            if(d.key === "section-view"){
+                                //bg
+                                const r = btnContentsWidth/2;
+                                btnContentsG.select("circle.btn-bg")
+                                    .attr("cx", r)
+                                    .attr("cy", r)
+                                    .attr("r", r)
+                                    .attr("stroke", "white")
+                                    .attr("stroke-width", 0.05)
+
+                                //icon
+                                const iconG = btnContentsG.select("g.icon")
+                                .attr("transform", `translate(0.6,0.6) scale(0.12)`);
+
+                                iconG.select("path.path1")
+                                    .attr("d", magIconPath1D)
+                                iconG.select("path.path2")
+                                    .attr("d", magIconPath2D)
+                            }else{
+                                //bg
+                                btnContentsG.select("rect.btn-bg")
+                                    .attr("width", btnContentsWidth)
+                                    .attr("height", btnContentsHeight)
+                            }
+
+                        })
+                        .call(btnDrag)
+
+                btnG.exit().remove();
+
+                //deck botright btn
+                const closeBtnDatum = { 
+                    key:"close", 
+                    onClick:e => { 
+                        e.stopPropagation();
+                        if(selectedSection?.key){
+                            onSelectSection() 
+                        }else{
+                            onSetContent("cards");
+                        }
+                    },
+                    fill:grey10(3),
+                    icon:icons.close,
+                }
+
+                const flipBtnDatum = { 
+                    key:"flip", 
+                    onClick:e => { 
+                        e.stopPropagation();
+                        onFlipCards();
+                    },
+                    fill:grey10(5),
+                    icon:icons.flip,
+                }
+
+                const inSectionOrPurposeView = selectedSection?.key || content === "purpose";
+                let bottomRightBtnData = !deckIsSelected ? [] : (inSectionOrPurposeView ? [closeBtnDatum] : [flipBtnDatum]);
+                const bottomRightBtnHeight = 20;
+                const bottomRightBtnWidth = bottomRightBtnHeight;
+                //assumme all are square
+                //note: 0.8 is a bodge coz iconsseems to be bigger than they state
+                const botRightBtnScale = d => (0.8 * bottomRightBtnHeight)/d.icon.height;
+                const bottomRightBtnMargin = bottomRightBtnHeight * 0.1;
+                const bottomRightBtnContentsWidth = bottomRightBtnWidth - 2 * bottomRightBtnMargin;
+                const bottomRightBtnContentsHeight = bottomRightBtnHeight - 2 * bottomRightBtnMargin;
+                const bottomRightBtnG = contentsG.selectAll("g.bottom-right-btn").data(bottomRightBtnData, d => d.key);
+                bottomRightBtnG.enter()
+                    .append("g")
+                        .attr("class", "bottom-right-btn")
+                        .call(fadeIn)
+                        .each(function(d){
+                            const btnG = d3.select(this);
+                            btnG.append("path");
+
+                            btnG.append("rect").attr("class", "btn-hitbox")
+                                .attr("fill", "transparent")
+                                //.attr("fill", "red")
+                                .attr("opacity", 0.3)
+                                .attr("stroke", "none")
+                        })
+                        .merge(bottomRightBtnG)
+                        .attr("transform", `translate(
+                            ${contentsWidth - bottomRightBtnWidth + bottomRightBtnMargin},
+                            ${contentsHeight - bottomRightBtnHeight + bottomRightBtnMargin})`)
+                        .each(function(d){
+                            const btnG = d3.select(this);
+                            btnG.select("path")
+                                .attr("transform", `scale(${botRightBtnScale(d)})`)
+                                .attr("d", d.icon.d)
+                                .attr("fill", d.fill)
+                    
+                            btnG.select("rect.btn-hitbox")
+                                .attr("width", bottomRightBtnContentsWidth)
+                                .attr("height", bottomRightBtnContentsHeight)
+
+                        })
+                        .on("click", (e,d) => { 
+                            d.onClick(e, d) 
+                        });
+
+                bottomRightBtnG.exit().remove();
+
+
+                //deck topLeft btn
+                const backBtnDatum = { 
+                    key:"back", 
+                    onClick:e => { 
+                        e.stopPropagation();
+                        onSelectDeck("")
+                    },
+                    fill:grey10(5),
+                    icon:icons.back,
+                }
+                const topLeftBtnScale = d => topLeftBtnHeight/d.icon.height;
+
+                let topLeftBtnData = [];// deckIsSelected ? [backBtnDatum] : [];
+                const topLeftBtnHeight = 24;
+                const topLeftBtnWidth = topLeftBtnHeight;
+                //assumme all are square
+                //note: 0.8 is a bodge coz iconsseems to be bigger than they state
+                const topLeftBtnMargin = controlsOuterMarginLeft;
+                const topLeftBtnContentsWidth = topLeftBtnWidth - 2 * topLeftBtnMargin;
+                const topLeftBtnContentsHeight = topLeftBtnHeight - 2 * topLeftBtnMargin;
+                const topLeftBtnG = contentsG.selectAll("g.top-left-btn").data(topLeftBtnData, d => d.key);
+                topLeftBtnG.enter()
+                    .append("g")
+                        .attr("class", "top-left-btn")
+                        .call(fadeIn, { transition:{ delay: 400 }})
+                        .each(function(d){
+                            const btnG = d3.select(this);
+                            btnG.append("path");
+
+                            btnG.append("rect").attr("class", "btn-hitbox")
+                                .attr("fill", "transparent")
+                                //.attr("fill", "red")
+                                .attr("opacity", 0.3);
+                        })
+                        .merge(topLeftBtnG)
+                        .attr("transform", `translate(${topLeftBtnMargin},${headerHeight + topLeftBtnMargin})`)
+                        .each(function(d){
+                            const btnG = d3.select(this);
+                            btnG.select("path")
+                                .attr("transform", `scale(${topLeftBtnScale(d)})`)
+                                .attr("d", d.icon.d)
+                                .attr("fill", d.fill)
+                    
+                            btnG.select("rect.btn-hitbox")
+                                .attr("width", topLeftBtnContentsWidth)
+                                .attr("height", topLeftBtnContentsHeight)
+
+                        })
+                        .on("click", (e,d) => { 
+                            d.onClick(e, d) 
+                        });
+
+                topLeftBtnG.exit().remove();
             }
 
         })
@@ -1182,9 +1232,9 @@ export default function deckComponent() {
         onSetContent = value;
         return deck;
     };
-    deck.onClickDeck = function (value) {
-        if (!arguments.length) { return onClickDeck; }
-        onClickDeck = value;
+    deck.onSelectDeck = function (value) {
+        if (!arguments.length) { return onSelectDeck; }
+        onSelectDeck = value;
         return deck;
     };
     deck.onMoveDeck = function (value) {
