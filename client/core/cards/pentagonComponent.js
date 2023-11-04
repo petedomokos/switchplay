@@ -62,7 +62,7 @@ export default function pentagonComponent() {
     }
 
     let styles = {
-        _polygonLineStrokeWidth:() => 5,
+        _polygonLineStrokeWidth:() => 0.1,
         _itemStroke:() => "grey"
     }
 

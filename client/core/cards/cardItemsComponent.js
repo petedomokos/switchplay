@@ -62,7 +62,7 @@ export default function cardItemsComponent() {
     }
 
     let styles = {
-        _polygonLineStrokeWidth: () => 5,
+        _polygonLineStrokeWidth: () => 2,
         _itemStroke:() => "white"
     }
     let getItemStroke = () => "grey"

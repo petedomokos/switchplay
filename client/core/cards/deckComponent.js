@@ -455,6 +455,7 @@ export default function deckComponent() {
                             isFront:cardNr === frontCardNr,
                             isNext:cardNr - 1 === frontCardNr,
                             isSecondNext:cardNr - 2 === frontCardNr,
+                            isThirdNext:cardNr - 3 === frontCardNr,
                             isHeld:cardNr >= frontCardNr,
                             isSelected:selectedCardNr === card.cardNr
                         }
@@ -1022,13 +1023,17 @@ export default function deckComponent() {
                 const inSectionOrPurposeView = selectedSection?.key || content === "purpose";
                 let bottomRightBtnData = !deckIsSelected ? [] : (inSectionOrPurposeView ? [closeBtnDatum] : [flipBtnDatum]);
                 const bottomRightBtnHeight = 20;
+                const bottomRightBtnMarginHoz = bottomRightBtnHeight * 0.1;
+                const bottomRightBtnMarginVert = bottomRightBtnHeight * 0.1
                 const bottomRightBtnWidth = bottomRightBtnHeight;
+                const extraShiftDownForSelectedCard = isNumber(selectedCardNr) ? bottomRightBtnMarginVert : 0;
                 //assumme all are square
                 //note: 0.8 is a bodge coz iconsseems to be bigger than they state
                 const botRightBtnScale = d => (0.8 * bottomRightBtnHeight)/d.icon.height;
-                const bottomRightBtnMargin = bottomRightBtnHeight * 0.1;
-                const bottomRightBtnContentsWidth = bottomRightBtnWidth - 2 * bottomRightBtnMargin;
-                const bottomRightBtnContentsHeight = bottomRightBtnHeight - 2 * bottomRightBtnMargin;
+
+                const bottomRightBtnContentsWidth = bottomRightBtnWidth - 2 * bottomRightBtnMarginHoz;
+                const bottomRightBtnContentsHeight = bottomRightBtnHeight - 2 * bottomRightBtnMarginVert;
+
                 const bottomRightBtnG = contentsG.selectAll("g.bottom-right-btn").data(bottomRightBtnData, d => d.key);
                 bottomRightBtnG.enter()
                     .append("g")
@@ -1044,12 +1049,19 @@ export default function deckComponent() {
                                 .attr("opacity", 0.3)
                                 .attr("stroke", "none")
                         })
-                        .merge(bottomRightBtnG)
                         .attr("transform", `translate(
-                            ${contentsWidth - bottomRightBtnWidth + bottomRightBtnMargin},
-                            ${contentsHeight - bottomRightBtnHeight + bottomRightBtnMargin})`)
+                            ${contentsWidth - bottomRightBtnWidth + bottomRightBtnMarginHoz},
+                            ${contentsHeight - bottomRightBtnHeight + bottomRightBtnMarginVert + extraShiftDownForSelectedCard})`)
+                        .merge(bottomRightBtnG)
                         .each(function(d){
                             const btnG = d3.select(this);
+
+                            btnG.transition()
+                                .duration(TRANSITIONS.FAST)
+                                .attr("transform", `translate(
+                                    ${contentsWidth - bottomRightBtnWidth + bottomRightBtnMarginHoz},
+                                    ${contentsHeight - bottomRightBtnHeight + bottomRightBtnMarginVert + extraShiftDownForSelectedCard})`)
+
                             btnG.select("path")
                                 .attr("transform", `scale(${botRightBtnScale(d)})`)
                                 .attr("d", d.icon.d)
@@ -1079,7 +1091,7 @@ export default function deckComponent() {
                 }
                 const topLeftBtnScale = d => topLeftBtnHeight/d.icon.height;
 
-                let topLeftBtnData = deckIsSelected ? [backBtnDatum] : [];
+                let topLeftBtnData = deckIsSelected && !isNumber(selectedCardNr) ? [backBtnDatum] : [];
                 const topLeftBtnHeight = 24;
                 const topLeftBtnWidth = topLeftBtnHeight;
                 //assumme all are square
@@ -1091,7 +1103,7 @@ export default function deckComponent() {
                 topLeftBtnG.enter()
                     .append("g")
                         .attr("class", "top-left-btn")
-                        .call(fadeIn, { transition:{ delay: 400 }})
+                        .call(fadeIn, { transition:{ delay: TRANSITIONS.MED }})
                         .each(function(d){
                             const btnG = d3.select(this);
                             btnG.append("path");
@@ -1119,7 +1131,7 @@ export default function deckComponent() {
                             d.onClick(e, d) 
                         });
 
-                topLeftBtnG.exit().remove();
+                topLeftBtnG.exit().call(remove);
             }
 
         })

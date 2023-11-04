@@ -11,7 +11,17 @@ export const TRANSITIONS = {
 
 export const INFO_HEIGHT_PROPORTION_OF_CARDS_AREA = 0.07;
 
-export const grey10 = (i) => ["#FFFFFF", "#E8E8E8","#D3D3D3", "#BEBEBE", "#A8A8A8", "#888888", "#696969", "#505050", "#303030", "#000000"][i-1];
+export const grey3pt5 = "#C8C8C8";
+export const grey4pt5 = "#B0B0B0";
+export const grey5pt5 = "#989898";
+export const grey6pt5 = "#787878";
+export const grey10 = (i) => {
+    if(i === 3.5){ return grey3pt5; }
+    if(i === 4.5){ return grey4pt5; }
+    if(i === 5.5){ return grey5pt5; }
+    if(i === 6.5){ return grey6pt5; }
+    return ["#FFFFFF", "#E8E8E8","#D3D3D3", "#BEBEBE", "#A8A8A8", "#888888", "#696969", "#505050", "#303030", "#000000"][i-1]
+};
 //@todo - whats time for in book??? '/api/user/photo/' +user._id +'?'+new Date().getTime()
 export const getURLForUser = userId => (photoId, locationKey) => {
     if(!userId || !photoId){
@@ -65,11 +75,14 @@ export const COLOURS = {
     },
     CARD:{
         FILL:cardD => {
-            const { isSelected, isFront, isNext, isSecondNext, status } = cardD;
-            if(isFront || isSelected){ return grey10(1); }
-            if(isNext){ return grey10(5); }
-            if(isSecondNext){ return "#989898"; }
-            return (cardD.isHeld ? grey10(6) : grey10(8))
+            const { isHeld, isSelected, isFront, isNext, isSecondNext, isThirdNext, status } = cardD;
+            if(!isHeld){ return grey10(8); }
+            if(isFront || isSelected){ return grey10(3); }
+            if(isNext){ return grey10(4); }
+            if(isSecondNext){ return grey10(4.5); }
+            if(isThirdNext){ return grey10(5); }
+            //fourthNext
+            return grey10(5.5);
         },
         SECTION_VIEW_FILL:grey10(7),
         SECTION_VIEW_STROKE:grey10(5),

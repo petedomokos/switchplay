@@ -467,7 +467,8 @@ export default function cardsComponent() {
                             onClick:e => { onClickCard(e, cardD) },
                             icon:icons.collapse,
                         }
-                        const botRightBtnData = selectedSectionKey || !isFront ? [] : (isSelected ? [collapseBtnDatum] : [expandBtnDatum]);
+                        const botRightBtnData = !deckIsSelected || selectedSectionKey || !isFront ? [] : (isSelected ? [collapseBtnDatum] : [expandBtnDatum]);
+                        //console.log("btnRight", botRightBtnData)
                         const btnHeight = d3.max([1, d3.min([15, 0.12 * normalContentsHeight])]);
                         const btnWidth = btnHeight;
                         //assumme all are square
@@ -476,20 +477,17 @@ export default function cardsComponent() {
                         const btnMargin = btnHeight * 0.1;
                         const btnContentsWidth = btnWidth - 2 * btnMargin;
                         const btnContentsHeight = btnHeight - 2 * btnMargin;
-                        const botRightBtnG = contentsG.selectAll("g.bottom-right-btn").data(botRightBtnData, d => d.key);
+                        const botRightBtnG = contentsG.selectAll("g.card-bottom-right-btn").data(botRightBtnData, d => d.key);
                         botRightBtnG.enter()
                             .append("g")
-                                .attr("class", "bottom-right-btn")
+                                .attr("class", "card-bottom-right-btn")
                                 .each(function(d){
                                     const btnG = d3.select(this);
                                     btnG.append("path")
-                                        .attr("fill", grey10(5));
+                                        .attr("fill", grey10(5.5));
 
                                     btnG.append("rect").attr("class", "btn-hitbox")
                                         .attr("fill", "transparent")
-                                        //.attr("fill", "red")
-                                        .attr("opacity", 0.3)
-                                        .attr("stroke", "none")
                                 })
                                 .merge(botRightBtnG)
                                 .attr("transform", `translate(${contentsWidth - btnWidth + btnMargin},${contentsHeight - btnHeight + btnMargin})`)
