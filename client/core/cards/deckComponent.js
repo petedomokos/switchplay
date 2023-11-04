@@ -1079,7 +1079,7 @@ export default function deckComponent() {
                 }
                 const topLeftBtnScale = d => topLeftBtnHeight/d.icon.height;
 
-                let topLeftBtnData = [];// deckIsSelected ? [backBtnDatum] : [];
+                let topLeftBtnData = deckIsSelected ? [backBtnDatum] : [];
                 const topLeftBtnHeight = 24;
                 const topLeftBtnWidth = topLeftBtnHeight;
                 //assumme all are square
