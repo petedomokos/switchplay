@@ -100,6 +100,7 @@ export default function pentagonComponent() {
                 .on("end", enhancedDrag(onDragEnd))
 
             const containerG = d3.select(this);
+            console.log("pentagon", itemsData)
             const sectionG = containerG.selectAll("g.section").data(itemsData, s => s.key);
             sectionG.enter()
                 .append("g")

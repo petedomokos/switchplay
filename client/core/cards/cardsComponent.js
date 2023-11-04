@@ -319,8 +319,10 @@ export default function cardsComponent() {
                         if(selectedSectionKey){
                             console.log("items", cardD.items)
                         }
-                        const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section.key === selectedSectionKey) : cardD.items;
-                        
+                        const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
+                        if(selectedSectionKey){
+                            console.log("itemsData", itemsData)
+                        }
                         const cardG = d3.select(this)
                             .call(fadeInOut, itemsData.length !== 0 && (!isNumber(selectedCardNr) || selectedCardNr === cardNr));
 
