@@ -38,7 +38,7 @@ export default function decksLayout(){
         console.log("deckData.sections", deckData.sections)
         if(withSections === null){ sections = deckData.sections }
         else if(withSections === true){ 
-            console.log("withSections", deckData.sections)
+            console.log("sections exist already?", !!deckData.sections)
             sections = deckData.sections || createDefaultSections(cards) 
         }
         console.log("sections are", sections)
