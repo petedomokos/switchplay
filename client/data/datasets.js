@@ -3,7 +3,7 @@ import { getDerivedMeasures, hydrateMeasure } from './measures';
 import { mean, median, percentage, sum, difference } from "./Calculations"
 
 export function hydrateDatasets(datasets){
-    console.log("hydrate-----------------------------------", datasets)
+    //console.log("hydrate-----------------------------------", datasets)
     return datasets.map(dset => hydrateDataset(dset))
 }
 //may be shallow or deep

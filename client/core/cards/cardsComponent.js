@@ -118,6 +118,30 @@ export default function cardsComponent() {
     let mediaComponents = {};
     let kpisComponents = {};
 
+    /*
+    //darker blue-purple
+    background: hsla(211, 96%, 62%, 1);
+
+    background: linear-gradient(90deg, hsla(211, 96%, 62%, 1) 0%, hsla(295, 94%, 76%, 1) 100%);
+
+    background: -moz-linear-gradient(90deg, hsla(211, 96%, 62%, 1) 0%, hsla(295, 94%, 76%, 1) 100%);
+
+    background: -webkit-linear-gradient(90deg, hsla(211, 96%, 62%, 1) 0%, hsla(295, 94%, 76%, 1) 100%);
+
+    filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#439CFB", endColorstr="#F187FB", GradientType=1 );
+*/
+
+    /*background: hsla(206, 91%, 66%, 1);
+
+background: linear-gradient(90deg, hsla(206, 91%, 66%, 1) 0%, hsla(190, 90%, 51%, 1) 100%);
+
+background: -moz-linear-gradient(90deg, hsla(206, 91%, 66%, 1) 0%, hsla(190, 90%, 51%, 1) 100%);
+
+background: -webkit-linear-gradient(90deg, hsla(206, 91%, 66%, 1) 0%, hsla(190, 90%, 51%, 1) 100%);
+
+filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", endColorstr="#12CFF3", GradientType=1 );
+*/
+
     function cards(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
         updateDimns();
@@ -127,6 +151,8 @@ export default function cardsComponent() {
             drag
                 .on("drag", dragged)
                 .on("end", dragEnd)
+
+            const getFrontCardFill = d => COLOURS.CARD.FILL(d, deckIsSelected);
 
             const getProgressStatusFill = d => { 
                 const { isSelected, isFront, isNext, isSecondNext, info } = d;
@@ -216,6 +242,8 @@ export default function cardsComponent() {
             //bgdrag
             containerG.call(drag).on('click', function(){ console.log("clicked", this)});
 
+            console.log("update cards", deckIsSelected)
+
             const cardG = containerG.selectAll("g.card").data(data, d => d.cardNr);
             cardG.enter()
                 //.insert("g", ":first-child")
@@ -247,7 +275,7 @@ export default function cardsComponent() {
                                 //for placed cards, we dont want the dimns to be changed when in section view
                                 .attr("width", isHeld ? contentsWidth : normalContentsWidth)
                                 .attr("height", isHeld ? contentsHeight : normalContentsHeight)
-                                .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL : COLOURS.CARD.FILL(cardD))
+                                .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL : getFrontCardFill(cardD))
                                 .attr("stroke", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_STROKE : getCardStroke(cardD))
                                 .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth() : STYLES.CARD.STROKE_WIDTH)
                                 .on("click", e => {
@@ -328,7 +356,7 @@ export default function cardsComponent() {
                             .transition("card-front-bg-appearance")
                             .delay(200)
                             .duration(400)
-                                .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL :COLOURS.CARD.FILL(cardD))
+                                .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL : getFrontCardFill(cardD))
                                 .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData) : getCardStroke(cardD))
                                 .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth(itemsData) : STYLES.CARD.STROKE_WIDTH)
 

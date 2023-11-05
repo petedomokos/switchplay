@@ -163,27 +163,42 @@ export const GREY_COLOUR_THEME = {
     }
 }
 
-
-export const LIGHT_COLOUR_THEME = {
-    CARDS_TABLE:grey10(9),
+//reduce lightness when in multideck
+export const BLUE_COLOUR_THEME = {
+    CARDS_TABLE:"hsla(211, 96%, 12%, 1)",
     GOLD:"#FFE10A",// brighter #ffd700,   darker #ccad00
     SILVER:grey10(2),
     DECK:{
+        STROKE:"hsla(211, 96%, 18%, 1)",
         HEADER:{
-            BG:grey10(8)
+            BG:"hsla(211, 96%, 18%, 1)"
         },
         CONTROLS:"#404040"
     },
     CARD:{
-        FILL:cardD => {
+        FILL:(cardD, deckIsSelected) => {
             const { isHeld, isSelected, isFront, isNext, isSecondNext, isThirdNext, status } = cardD;
-            if(!isHeld){ return grey10(8); }
-            if(isFront || isSelected){ return grey10(3); }
-            if(isNext){ return grey10(4); }
-            if(isSecondNext){ return grey10(4.5); }
-            if(isThirdNext){ return grey10(5); }
+            let heldPos;
+            if(!isHeld) { heldPos = 4; }
+            else if(isFront || isSelected){ heldPos = 0; }
+            else if(isNext){ heldPos = 1; }
+            else if(isSecondNext){ heldPos = 2; }
+            else if(isThirdNext){ heldPos = 3; }
+            //isFourthNext or more
+            else { heldPos = 4; }
+            // lightness, l
+            const l = 62 * (deckIsSelected ? 1 : 0.6);
+            //shadow factor, s
+            const s = 0.9;
+            return `hsla(211, 96%, ${l * (s ** heldPos)}%, 1)`;
+
+            /*if(!isHeld){ return `hsla(211, 96%, ${l * (s **)}%, 1)`; }
+            if(isFront || isSelected){ return `hsla(211, ${l * (s ** 0)}%, 62%, 1)`; } //alternative...hsla(259, 84%, 78%, 1);
+            if(isNext){ return `hsla(211, 96%, 52%, 1)`; }
+            if(isSecondNext){ return `hsla(211, 96%, 42%, 1)`; }
+            if(isThirdNext){ return `hsla(211, 96%, 32%, 1)`; }
             //fourthNext
-            return grey10(5.5);
+            return `hsla(211, 96%, 22%, 1)`;*/
         },
         STROKE:cardD => {
             const { isHeld, isSelected, isFront, isNext, isSecondNext, isThirdNext, status } = cardD;
@@ -318,9 +333,19 @@ export const LIGHT_COLOUR_THEME = {
 }
 
 
+/* SCSS HSL */
+/*
+$ice-blue: hsla(177, 87%, 79%, 1);
+$non-photo-blue: hsla(191, 83%, 77%, 1);
+$light-sky-blue: hsla(202, 84%, 75%, 1);
+$jordy-blue: hsla(212, 86%, 74%, 1);
+$vista-blue: hsla(220, 87%, 73%, 1);
+$cornflower-blue: hsla(228, 89%, 72%, 1);
+$medium-slate-blue: hsla(235, 89%, 70%, 1);
+*/
 
-export const DARK_COLOUR_THEME = {
-    CARDS_TABLE:grey10(9),
+export const LIGHT_BLUE_COLOUR_THEME = {
+    CARDS_TABLE:"hsla(235, 89%, 70%, 1)",
     GOLD:"#FFE10A",// brighter #ffd700,   darker #ccad00
     SILVER:grey10(2),
     DECK:{
@@ -333,8 +358,8 @@ export const DARK_COLOUR_THEME = {
         FILL:cardD => {
             const { isHeld, isSelected, isFront, isNext, isSecondNext, isThirdNext, status } = cardD;
             if(!isHeld){ return grey10(8); }
-            if(isFront || isSelected){ return grey10(3); }
-            if(isNext){ return grey10(4); }
+            if(isFront || isSelected){ return "hsla(191, 83%, 77%, 1)"; }
+            if(isNext){ return "hsla(202, 84%, 75%, 1)"; }
             if(isSecondNext){ return grey10(4.5); }
             if(isThirdNext){ return grey10(5); }
             //fourthNext

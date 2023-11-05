@@ -70,7 +70,7 @@ const enhancedZoom = dragEnhancements();
 
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
+const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
   //processed props
   const stringifiedData = JSON.stringify({ data, table });
   //state
@@ -272,6 +272,11 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       setSelectedDeckId(id);
       setSel(id)
     }else{
+      //need to trigger an update of the currently selected deck with deckIsSelected immeditately,
+      //so fill etc changes as th ezoom occurs...then, trigger a 2nd update with all the other decks back in
+      //to data. The question is, ho best ot trigger this 1st updte of the selected deck???
+      d3.select(containerRef.current).call(decks.selectedDeckId(""))
+
       //return to multideck view
       //first tell CardsTable so it can remove top margin
       setSel("")
@@ -444,6 +449,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   }, [stringifiedData, selectedDeckId, longpressedDeckId, selectedCardNr, form]);
 
   const onSelectDeck = useCallback(id => {
+    console.log("set selected deck...", id)
     setSelectedDeck(id || "");
     setForm(null);
   }, [stringifiedData, selectedDeckId]);
@@ -621,6 +627,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   }, [stringifiedData, width, height, selectedDeckId, selectedSection, form?.formType])
 
   useEffect(() => {
+    console.log("calling decks update", selectedDeckId)
     d3.select(containerRef.current).call(decks);
   }, [stringifiedData, width, height, selectedDeckId, selectedCardNr, selectedItemNr,  selectedSection, form?.formType])
 
@@ -705,6 +712,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       e.sourceEvent?.stopPropagation();
     }
     function zoomed(e){
+      console.log("zoomed")
       if(zoomTransformLpStartRef.current){
         //do nothing as this is just a call to reset transform 
         return;
@@ -723,12 +731,14 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
           .attr("transform", e.transform)
             .on("end", () => {
               if(zoomCallbackRef.current){
+                console.log("zoom cb")
                 zoomCallbackRef.current();
                 zoomCallbackRef.current = null;
               }
             })
     }
     function zoomEnd(e){
+      console.log("zoom end")
       e.sourceEvent?.stopPropagation();
       if(zoomTransformLpStartRef.current){
         //console.log("do nothing")

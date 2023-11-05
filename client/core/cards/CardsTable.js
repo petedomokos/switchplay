@@ -118,7 +118,9 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   //we follow d3 margin convention here (eg html padding)
   //NOTE: WIDTH < HEIGHT TEMP FIXES A BUG WITH CARDTITLEFORM POSITIONING ON LARGER SCREENS
   //IT DOESNT FIX THE ISSUE FULLY ON SS WHEN IN LANDSCAPE ORIENTATION
-  const tableMarginTop = selectedDeckId && width < height ? 0 : 35;
+  const multiDeckMarginTop = 35;
+  const selectedDeckMarginTop = 0;
+  const tableMarginTop = selectedDeckId && width < height ? selectedDeckMarginTop : multiDeckMarginTop;
   const tableMarginBottom = width < height ? 0 : 35;
   const margin = { 
     left:0,//width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
@@ -128,6 +130,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   }
   const contentsWidth = width - margin.left - margin.right;
   const contentsHeight = height - margin.top - margin.bottom;
+  const selectedDeckContentsHeight = height - selectedDeckMarginTop - margin.bottom;
 
   const minDeckWidthWithMargins = 125;
   const nrCols = Math.floor(contentsWidth / minDeckWidthWithMargins);
@@ -195,7 +198,8 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
           :
           <Decks 
             table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
-            data={decksData} height={contentsHeight} journeyData={journeyData} tableMarginTop={tableMarginTop}
+            data={decksData} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
+            journeyData={journeyData} tableMarginTop={tableMarginTop}
             onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={updateDeck}
             updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />
         }

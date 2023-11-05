@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { GREY_COLOUR_THEME, LIGHT_COLOUR_THEME, DARK_COLOUR_THEME } from './colourThemes';
+import { GREY_COLOUR_THEME, BLUE_COLOUR_THEME } from './colourThemes';
 
 export const TRANSITIONS = {
     SLOW:800,
@@ -24,16 +24,13 @@ export const grey10 = (i) => {
     return ["#FFFFFF", "#E8E8E8","#D3D3D3", "#BEBEBE", "#A8A8A8", "#888888", "#696969", "#505050", "#303030", "#000000"][i-1]
 };
 
-export const colourTheme = "grey";
+export const colourTheme = "blue";// "grey";
 
 const getColours = colourTheme => {
-    if(colourTheme === "grey"){
-        return GREY_COLOUR_THEME;
+    if(colourTheme === "blue"){
+        return BLUE_COLOUR_THEME;
     }
-    if(["something-light", "something-else-light"].includes(colourTheme)){
-        return LIGHT_COLOUR_THEME;
-    }
-    else return DARK_COLOUR_THEME;
+    return GREY_COLOUR_THEME
 }
 
 //todo - get colours in CardsTable and pass down

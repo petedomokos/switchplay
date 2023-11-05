@@ -279,6 +279,7 @@ export default function deckComponent() {
         selection.each(function (deckData) {
             updateDimns(deckData);
             id = deckData.id;
+            console.log("update", id)
             containerG = d3.select(this)
 
             if(containerG.select("g").empty()){
@@ -302,7 +303,7 @@ export default function deckComponent() {
                     .attr("class", "contents-bg")
                     //.attr("pointer-events", "none")
                     .attr("fill", "none")
-                    .attr("stroke", grey10(8))
+                    .attr("stroke", COLOURS.DECK.STROKE)
                     .attr("rx", 3)
                     .attr("ry", 3);
                 
