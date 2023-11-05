@@ -188,7 +188,7 @@ export default function cardItemsComponent() {
                 changeStatus(d.status);
                 statusTimer = d3.interval(() => {
                     changeStatus(newStatus);
-                }, 600)
+                }, 1200)
             }
 
             function longpressEnd(e,d){

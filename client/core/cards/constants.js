@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import { GREY_COLOUR_THEME, LIGHT_COLOUR_THEME, DARK_COLOUR_THEME } from './colourThemes';
 
 export const TRANSITIONS = {
     SLOW:800,
@@ -22,6 +23,22 @@ export const grey10 = (i) => {
     if(i === 6.5){ return grey6pt5; }
     return ["#FFFFFF", "#E8E8E8","#D3D3D3", "#BEBEBE", "#A8A8A8", "#888888", "#696969", "#505050", "#303030", "#000000"][i-1]
 };
+
+export const colourTheme = "grey";
+
+const getColours = colourTheme => {
+    if(colourTheme === "grey"){
+        return GREY_COLOUR_THEME;
+    }
+    if(["something-light", "something-else-light"].includes(colourTheme)){
+        return LIGHT_COLOUR_THEME;
+    }
+    else return DARK_COLOUR_THEME;
+}
+
+//todo - get colours in CardsTable and pass down
+export const COLOURS = getColours(colourTheme);
+
 //@todo - whats time for in book??? '/api/user/photo/' +user._id +'?'+new Date().getTime()
 export const getURLForUser = userId => (photoId, locationKey) => {
     if(!userId || !photoId){
@@ -60,32 +77,5 @@ export const DIMNS = {
         HEADER_HEIGHT:25,
         HEADER_SUBTITLE_HEIGHT_PROP:0.3,
         PROGRESS_ICON_WIDTH:20
-    }
-}
-
-export const COLOURS = {
-    CARDS_TABLE:grey10(9),
-    GOLD:"#FFE10A",// brighter #ffd700,   darker #ccad00
-    SILVER:grey10(2),
-    DECK:{
-        HEADER:{
-            BG:grey10(8)
-        },
-        CONTROLS:"#404040"
-    },
-    CARD:{
-        FILL:cardD => {
-            const { isHeld, isSelected, isFront, isNext, isSecondNext, isThirdNext, status } = cardD;
-            if(!isHeld){ return grey10(8); }
-            if(isFront || isSelected){ return grey10(3); }
-            if(isNext){ return grey10(4); }
-            if(isSecondNext){ return grey10(4.5); }
-            if(isThirdNext){ return grey10(5); }
-            //fourthNext
-            return grey10(5.5);
-        },
-        SECTION_VIEW_FILL:grey10(7),
-        SECTION_VIEW_STROKE:grey10(5),
-        SECTION_ID:grey10(6)
     }
 }

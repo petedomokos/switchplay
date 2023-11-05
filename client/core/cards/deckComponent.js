@@ -1034,20 +1034,17 @@ export default function deckComponent() {
                 const bottomRightBtnContentsWidth = bottomRightBtnWidth - 2 * bottomRightBtnMarginHoz;
                 const bottomRightBtnContentsHeight = bottomRightBtnHeight - 2 * bottomRightBtnMarginVert;
 
-                const bottomRightBtnG = contentsG.selectAll("g.bottom-right-btn").data(bottomRightBtnData, d => d.key);
+                const bottomRightBtnG = contentsG.selectAll("g.deck-bottom-right-btn").data(bottomRightBtnData, d => d.key);
                 bottomRightBtnG.enter()
                     .append("g")
-                        .attr("class", "bottom-right-btn")
+                        .attr("class", "deck-bottom-right-btn")
                         .call(fadeIn)
                         .each(function(d){
                             const btnG = d3.select(this);
                             btnG.append("path");
 
                             btnG.append("rect").attr("class", "btn-hitbox")
-                                .attr("fill", "transparent")
-                                //.attr("fill", "red")
-                                .attr("opacity", 0.3)
-                                .attr("stroke", "none")
+                                .attr("fill", "transparent");
                         })
                         .attr("transform", `translate(
                             ${contentsWidth - bottomRightBtnWidth + bottomRightBtnMarginHoz},
@@ -1056,7 +1053,7 @@ export default function deckComponent() {
                         .each(function(d){
                             const btnG = d3.select(this);
 
-                            btnG.transition()
+                            btnG.transition("deck-btn-position")
                                 .duration(TRANSITIONS.FAST)
                                 .attr("transform", `translate(
                                     ${contentsWidth - bottomRightBtnWidth + bottomRightBtnMarginHoz},
@@ -1110,8 +1107,6 @@ export default function deckComponent() {
 
                             btnG.append("rect").attr("class", "btn-hitbox")
                                 .attr("fill", "transparent")
-                                //.attr("fill", "red")
-                                .attr("opacity", 0.3);
                         })
                         .merge(topLeftBtnG)
                         .attr("transform", `translate(${topLeftBtnMargin},${headerHeight + topLeftBtnMargin})`)

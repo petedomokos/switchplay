@@ -141,7 +141,7 @@ export function show(selection, options={}){
 
 
 export function fadeIn(selection, options={}){
-    const { transition } = options;
+    const { transition, opacity=1 } = options;
     selection.each(function(){
         //will be multiple exits because of the delay in removing
         if(!d3.select(this).attr("class").includes("fading-in")){
@@ -154,7 +154,7 @@ export function fadeIn(selection, options={}){
                 .transition()
                     .delay(transition?.delay || 0)
                     .duration(transition?.duration || CONTENT_FADE_DURATION)
-                    .attr("opacity", 1)
+                    .attr("opacity", opacity)
                     .on("end", function() { 
                         d3.select(this).classed("fading-in", false); 
                     });
