@@ -8,7 +8,7 @@ export const grey10 = (i) => {
     if(i === 5.5){ return grey5pt5; }
     if(i === 6.5){ return grey6pt5; }
     return ["#FFFFFF", "#E8E8E8","#D3D3D3", "#BEBEBE", "#A8A8A8", "#888888", "#696969", "#505050", "#303030", "#000000"][i-1]
-};
+}; 
 
 export const GREY_COLOUR_THEME = {
     CARDS_TABLE:grey10(9),
@@ -163,11 +163,11 @@ export const GREY_COLOUR_THEME = {
     }
 }
 
-//reduce lightness when in multideck
+//"#fe9923", //"#ffd700",  //"#FFE10A",// brighter #ffd700,   darker #ccad00
 export const BLUE_COLOUR_THEME = {
     CARDS_TABLE:"hsla(211, 96%, 12%, 1)",
-    GOLD:"#FFE10A",// brighter #ffd700,   darker #ccad00
-    SILVER:grey10(2),
+    GOLD:"#fe9923", //"#FFE10A",// brighter #ffd700,   darker #ccad00
+    SILVER:"#C0C0C0",
     DECK:{
         STROKE:"hsla(211, 96%, 18%, 1)",
         HEADER:{
@@ -346,8 +346,8 @@ $medium-slate-blue: hsla(235, 89%, 70%, 1);
 
 export const LIGHT_BLUE_COLOUR_THEME = {
     CARDS_TABLE:"hsla(235, 89%, 70%, 1)",
-    GOLD:"#FFE10A",// brighter #ffd700,   darker #ccad00
-    SILVER:grey10(2),
+    GOLD:"#fe9923", //"#ffd700",  //"#FFE10A",// brighter #ffd700,   darker #ccad00
+    SILVER:"#808080", //grey10(2),
     DECK:{
         HEADER:{
             BG:grey10(8)

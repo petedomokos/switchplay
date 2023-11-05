@@ -242,8 +242,6 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
             //bgdrag
             containerG.call(drag).on('click', function(){ console.log("clicked", this)});
 
-            console.log("update cards", deckIsSelected)
-
             const cardG = containerG.selectAll("g.card").data(data, d => d.cardNr);
             cardG.enter()
                 //.insert("g", ":first-child")

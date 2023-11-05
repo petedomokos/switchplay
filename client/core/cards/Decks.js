@@ -122,7 +122,8 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   const deckHeight = deckWidth / deckAspectRatio;
   const deckHeightWithMargins = deckHeight + deckOuterMargin.top + deckOuterMargin.bottom;
 
-  const selectedDeckDimns = maxDimns(width, height, deckAspectRatio);
+  //const selectedDeckDimns = maxDimns(width, height, deckAspectRatio);
+  const selectedDeckDimns = maxDimns(width, heightInSelectedDeckMode, deckAspectRatio);
   const zoomScale = selectedDeckDimns.width / deckWidth;
   
   /*
@@ -449,13 +450,11 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   }, [stringifiedData, selectedDeckId, longpressedDeckId, selectedCardNr, form]);
 
   const onSelectDeck = useCallback(id => {
-    console.log("set selected deck...", id)
     setSelectedDeck(id || "");
     setForm(null);
   }, [stringifiedData, selectedDeckId]);
 
   const updateFrontCardNr = useCallback(cardNr => {
-    console.log("Decks updateFrontCardNr", cardNr)
     updateDeck({ ...selectedDeck, frontCardNr:cardNr });
     setForm(null);
   }, [stringifiedData, form, selectedDeckId]);
@@ -594,12 +593,13 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
   }, [stringifiedData, selectedDeckId])
 
+  useEffect(() => { decks.selectedDeckId(selectedDeckId) }, [selectedDeckId])
+
   useEffect(() => {
     decks
       .width(width)
       .height(tableHeight + deckHeightWithMargins)
       .nrCols(nrCols)
-      .selectedDeckId(selectedDeckId)
       .selectedSection(selectedSection)
       .form(form)
       .x(deckX)
@@ -624,11 +624,10 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
       .setForm(setForm)
-  }, [stringifiedData, width, height, selectedDeckId, selectedSection, form?.formType])
+  }, [stringifiedData, width, height, selectedSection, form?.formType])
 
   useEffect(() => {
-    console.log("calling decks update", selectedDeckId)
-    d3.select(containerRef.current).call(decks);
+    d3.select(containerRef.current).call(decks); 
   }, [stringifiedData, width, height, selectedDeckId, selectedCardNr, selectedItemNr,  selectedSection, form?.formType])
 
   //zoom
@@ -712,7 +711,6 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       e.sourceEvent?.stopPropagation();
     }
     function zoomed(e){
-      console.log("zoomed")
       if(zoomTransformLpStartRef.current){
         //do nothing as this is just a call to reset transform 
         return;
@@ -731,14 +729,12 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
           .attr("transform", e.transform)
             .on("end", () => {
               if(zoomCallbackRef.current){
-                console.log("zoom cb")
                 zoomCallbackRef.current();
                 zoomCallbackRef.current = null;
               }
             })
     }
     function zoomEnd(e){
-      console.log("zoom end")
       e.sourceEvent?.stopPropagation();
       if(zoomTransformLpStartRef.current){
         //console.log("do nothing")

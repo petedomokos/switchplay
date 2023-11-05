@@ -6,7 +6,7 @@ import { truncateIfNecc } from '../journey/helpers';
 import { isNumber } from '../../data/dataHelpers';
 import { fadeIn, remove } from '../journey/domHelpers';
 
-const { GOLD } = COLOURS;
+const { GOLD, SILVER } = COLOURS;
 
 /*
 
@@ -262,7 +262,8 @@ export default function cardHeaderComponent() {
                                                         return isFront || isSelected ? GOLD : (isNext ? GOLD : GOLD);
                                                     }
                                                     if(status === 1){
-                                                        return isFront || isSelected ? grey10(1) : (isNext ? grey10(2) : grey10(3));
+                                                        return SILVER;
+                                                        //return isFront || isSelected ? grey10(1) : (isNext ? grey10(2) : grey10(3));
                                                     }
                                                     return isFront || isSelected ? grey10(5) : (isNext ? grey10(6) : grey10(7))
 
