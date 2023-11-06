@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { GREY_COLOUR_THEME, BLUE_COLOUR_THEME } from './colourThemes';
+import { GREY_COLOUR_THEME, BLUE_COLOUR_THEME, SATURATED_BLUE_COLOUR_THEME } from './colourThemes';
 
 export const TRANSITIONS = {
     SLOW:800,
@@ -24,11 +24,17 @@ export const grey10 = (i) => {
     return ["#FFFFFF", "#E8E8E8","#D3D3D3", "#BEBEBE", "#A8A8A8", "#888888", "#696969", "#505050", "#303030", "#000000"][i-1]
 };
 
-export const colourTheme = "blue";// "grey";
+//export const colourTheme = "blue";
+export const colourTheme = "saturatedBlue";
+//export const colourTheme = "grey";
+
 
 const getColours = colourTheme => {
     if(colourTheme === "blue"){
         return BLUE_COLOUR_THEME;
+    }
+    if(colourTheme === "saturatedBlue"){
+        return SATURATED_BLUE_COLOUR_THEME;
     }
     return GREY_COLOUR_THEME
 }

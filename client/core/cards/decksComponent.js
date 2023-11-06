@@ -138,7 +138,7 @@ export default function decksComponent() {
                                             const { translateX, translateY, scaleX } = getTransformationFromTrans(cardG.attr("transform"));
 
                                             //the bottom right button must fade out and in 
-                                            cardG.select("g.bottom-right-btn")
+                                            cardG.select("g.card-bottom-right-btn")
                                                 .attr("opacity", 1)
                                                     .transition("button-out")
                                                     .duration(fadeDuration)
@@ -244,6 +244,8 @@ export default function decksComponent() {
                     .append("g")
                         .attr("class", "new-deck-icon")
                         .attr("pointer-events", "all") //override pointer-events none for containerG
+                        //@todo: replce the hardcoded * 1.5 with proper delay so it fades in with cards
+                        .call(fadeIn, { transition:{ delay:TRANSITIONS.MED * 1.5 } }) 
                         .each(function(d){
                             const newDeckIconG = d3.select(this);
                             const wordsG = newDeckIconG.append("g").attr("class", "words");

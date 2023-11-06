@@ -95,7 +95,11 @@ export default function cardHeaderComponent() {
             wordsFill:grey10(7),
             wordsStroke:grey10(7),
             wordsStrokeWidth:0.1
-        }
+        },
+        title:{
+            fill:grey10(5)
+        },
+        getStatusFill:itemD => "grey"
     }
 
     let withTitle = true;
@@ -162,9 +166,9 @@ export default function cardHeaderComponent() {
                                             .attr("dominant-baseline", "central")
                                             .attr("text-anchor", "middle")
                                             .style("font-family", "helvetica, sans-serifa")
-                                            .attr("stroke", grey10(8))
+                                            .attr("stroke", styles.title.fill)
                                             .attr("stroke-width", 0.5)
-                                            .attr("fill", grey10(8));
+                                            .attr("fill", styles.title.fill);
 
                                     contentsG.append("rect")
                                         .attr("class", "hitbox")
@@ -184,9 +188,9 @@ export default function cardHeaderComponent() {
                                         .attr("x", titleContentsWidth/2)
                                         .attr("y", titleContentsHeight/2)
                                         .attr("font-size", titleContentsHeight * 0.4)
-                                        .attr("stroke", grey10(7))
+                                        .attr("stroke", styles.title.fill)
                                         .attr("stroke-width", 0.1)
-                                        //.attr("fill", d.isFuture ? "grey" : "white")
+                                        .attr("fill", styles.title.fill)
                                         //.text(d.title || d.id)
                                         .text(truncateIfNecc(d.title, 17) || `Card ${d.cardNr + 1}`)
 
@@ -255,19 +259,7 @@ export default function cardHeaderComponent() {
                                                     if(!title){ return 0.1; }
                                                     return status === 2 ? 1.3 : (status === 1 ? 1 : 0.5)
                                                 },
-                                                _itemStroke:(itemD) => {
-                                                    const { status, title } = itemD;
-                                                    if(!title){ return GOLD; }
-                                                    if(status === 2){
-                                                        return isFront || isSelected ? GOLD : (isNext ? GOLD : GOLD);
-                                                    }
-                                                    if(status === 1){
-                                                        return SILVER;
-                                                        //return isFront || isSelected ? grey10(1) : (isNext ? grey10(2) : grey10(3));
-                                                    }
-                                                    return isFront || isSelected ? grey10(5) : (isNext ? grey10(6) : grey10(7))
-
-                                                }
+                                                _itemStroke:styles.getStatusFill,
                                             }))
 
                                     /*
@@ -451,11 +443,13 @@ export default function cardHeaderComponent() {
         if (!arguments.length) { return styles; }
         const date = obj.date ? { ...styles.date, ...obj.date } : styles.date;
         const dateCount = obj.dateCount ? { ...styles.dateCount, ...obj.dateCount } : styles.dateCount;
+        const title = obj.title ? { ...styles.title, ...obj.title } : styles.title;
         styles = {
             ...styles,
             ...obj,
             date,
-            dateCount
+            dateCount,
+            title
         };
         return header;
     };

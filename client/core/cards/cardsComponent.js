@@ -10,7 +10,7 @@ import { updateTransform } from '../journey/transitionHelpers';
 import { icons } from '../../util/icons';
 import { isNumber } from '../../data/dataHelpers';
 
-const { GOLD, SILVER } = COLOURS;
+const { GOLD, SILVER, NOT_STARTED_FILL, SECTION_VIEW_NOT_STARTED_FILL } = COLOURS;
 
 export default function cardsComponent() {
     //API SETTINGS
@@ -152,29 +152,15 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                 .on("drag", dragged)
                 .on("end", dragEnd)
 
-            const getFrontCardFill = d => COLOURS.CARD.FILL(d, deckIsSelected);
+            //card fill and stroke
+            const getCardFill = d => COLOURS.CARD.FILL(d, deckIsSelected);
+            const getCardStroke = d => COLOURS.CARD.STROKE(d);
+            const getBackOfCardFill = d => COLOURS.BACK_OF_CARD.FILL(d);
+            const getBackOfCardStroke = d => COLOURS.BACK_OF_CARD.STROKE(d);
+            const getBackOfCardStrokeWidth = d => 0.5;
 
-            const getProgressStatusFill = d => { 
-                const { isSelected, isFront, isNext, isSecondNext, info } = d;
-                const { status } = info;
-
-                if(isFront || isSelected){ 
-                    return status === 2 ? GOLD : (status === 1 ? grey10(1) : SILVER) 
-                }
-                if(isNext){ 
-                    return status === 2 ? GOLD : (status === 1 ? SILVER : grey10(4))
-                }
-                if(isSecondNext){ 
-                    return status === 2 ? GOLD : (status === 1 ? SILVER : "#B0B0B0") //4.5 
-                }
-                if(d.isHeld){
-                    return status === 2 ? GOLD : (status === 1 ? SILVER : grey10(5))
-                }
-                //its placed
-                return status === 2 ? GOLD : (status === 1 ? SILVER : grey10(5))
-            };
-
-            const getItemStrokeWidth = (itemD, cardD={}) => {
+            //stroke-widths
+            const getItemStrokeWidth = (cardD, itemD) => {
                 const { status, isSectionView, title } = itemD;
                 const { isHeld, isSelected } = cardD;
                 if(!title){ return 0.15 }
@@ -190,53 +176,31 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                 }
                 return status === 2 ? 3 : (status === 1 ? 2 : 0.2);
             }
+            const getSectionViewCardStrokeWidth = itemsData => {
+                //can assume 1 item per card per section for now
+                const itemD = itemsData ? itemsData[0] : null;
+                return itemD?.title ? STYLES.CARD.STROKE_WIDTH : 0.15
+            }
 
-            //we also use this for the card stoke when in section view, as each card only has one item
-            const getItemStroke = (itemD, cardD={}) => {
-                const { title, status, isSectionView } = itemD;
-                const { isHeld, isSelected } = cardD;
-
+            //status fills
+            const getProgressStatusColour = (cardD, itemD) => { 
+                //const { isSelected, isFront, isNext, isSecondNext, info } = cardD;
+                const { status, title, isSectionView } = itemD;
                 if(!title){ return GOLD; }
+                if(status === 2){ return GOLD; }
+                if(status === 1){ return SILVER; }
+                return isSectionView ? SECTION_VIEW_NOT_STARTED_FILL : NOT_STARTED_FILL;
+            };
 
-                if(isSectionView){
-                    //if(!title) { return grey10(6); }
-                    return status === 2 ? GOLD : (status === 1 ? SILVER : COLOURS.CARD.SECTION_VIEW_STROKE);
-                }
-
-                //deal with non-defined items separately, incase a user deletes title of an item
-                //if(!title) { return isHeld || isSelected ? "#989898" : grey10(6) }
-
-                if(isHeld || isSelected){
-                    return status === 2 ? GOLD : (status === 1 ? SILVER : "#989898")
-                }
-                return status === 2 ? GOLD : (status === 1 ? SILVER : grey10(6))   
-            }
-
-            const getCardStroke = d => {
-                if(d.isFront){ return grey10(1); }
-                if(d.isNext){ return SILVER; }
-                if(d.isSecondNext){ return grey10(4); }
-                return (d.isSelected || d.isHeld ? grey10(5) : grey10(8))
-            }
-
-            const getBackCardFill = d =>  "#181818" //grey10.5
-            const getBackCardStroke = d => grey10(6);
-            const getBackCardStrokeWidth = d => 0.5;
-
-            
-           
             //in section view, we use the card storke to show status compleitn of seciton item
             //@todo later - in future, this may be more than one item so we will need to use item bg stroke instead
             const getSectionViewCardStroke = itemsData => {
                 //can assume 1 item per card per section for now
                 const itemD = itemsData[0];
-                return getItemStroke({ ...itemD, isSectionView:true });
-            }
-
-            const getSectionViewCardStrokeWidth = itemsData => {
-                //can assume 1 item per card per section for now
-                const itemD = itemsData ? itemsData[0] : null;
-                return itemD?.title ? STYLES.CARD.STROKE_WIDTH : 0.15
+                if(itemD){
+                    return getProgressStatusColour({}, { ...itemD, isSectionView:true });
+                }
+                return SECTION_VIEW_STROKL;
             }
 
             //bgdrag
@@ -273,7 +237,7 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                                 //for placed cards, we dont want the dimns to be changed when in section view
                                 .attr("width", isHeld ? contentsWidth : normalContentsWidth)
                                 .attr("height", isHeld ? contentsHeight : normalContentsHeight)
-                                .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL : getFrontCardFill(cardD))
+                                .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL : getCardFill(cardD))
                                 .attr("stroke", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_STROKE : getCardStroke(cardD))
                                 .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth() : STYLES.CARD.STROKE_WIDTH)
                                 .on("click", e => {
@@ -290,9 +254,9 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                                 .attr("width", isHeld ? contentsWidth : normalContentsWidth)
                                 .attr("height", isHeld ? contentsHeight : normalContentsHeight)
                                 .attr("opacity", cardsAreFlipped ? 1 : 0)
-                                .attr("fill", getBackCardFill(cardD))
-                                .attr("stroke", getBackCardStroke(cardD))
-                                .attr("stroke-width", getBackCardStrokeWidth(cardD));
+                                .attr("fill", getBackOfCardFill(cardD))
+                                .attr("stroke", getBackOfCardStroke(cardD))
+                                .attr("stroke-width", getBackOfCardStrokeWidth(cardD));
 
                         //inner contents of front and back
                         const frontContentsG = contentsG.append("g").attr("class", "front-contents")
@@ -354,7 +318,7 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                             .transition("card-front-bg-appearance")
                             .delay(200)
                             .duration(400)
-                                .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL : getFrontCardFill(cardD))
+                                .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL : getCardFill(cardD))
                                 .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData) : getCardStroke(cardD))
                                 .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth(itemsData) : STYLES.CARD.STROKE_WIDTH)
 
@@ -369,9 +333,9 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                             .delay(200)
                             .duration(400)
                                 .attr("opacity", cardsAreFlipped ? 1 : 0)
-                                .attr("fill", getBackCardFill(cardD))
-                                .attr("stroke", getBackCardStroke(cardD))
-                                .attr("stroke-width", getBackCardStrokeWidth(cardD))
+                                .attr("fill", getBackOfCardFill(cardD))
+                                .attr("stroke", getBackOfCardStroke(cardD))
+                                .attr("stroke-width", getBackOfCardStrokeWidth(cardD))
     
                         contentsG.select("rect.card-back-bg")
                             .transition("card-back-bg-dimns")
@@ -387,23 +351,44 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                         
                         //const headerHeight;
                         const cardTitleIsBeingEdited = form?.formType !== "card-title" && form?.value?.cardNr === cardD.cardNr;
-                        //components
-                        const dateColour = selectedSectionKey ? grey10(5) : grey10(7);
+                        //component colours
+                        //in section view, these are constants for all cards. Else they are functions of each card
+                        const dateColour = selectedSectionKey ? 
+                            COLOURS.CARD.SECTION_VIEW_HEADER.DATE : COLOURS.CARD.HEADER.DATE(cardD);
+
+                        const dateCountWordsColour = selectedSectionKey ? 
+                            COLOURS.CARD.SECTION_VIEW_HEADER.DATE_COUNT_WORDS : COLOURS.CARD.HEADER.DATE_COUNT_WORDS(cardD);
+
+                        const titleColour = selectedSectionKey ? 
+                            COLOURS.CARD.SECTION_VIEW_HEADER.TITLE : COLOURS.CARD.HEADER.TITLE(cardD);
+
+                        const backDateColour = selectedSectionKey ? 
+                            COLOURS.BACK_OF_CARD.SECTION_VIEW_HEADER.DATE : COLOURS.CARD.HEADER.DATE(cardD);
+
+                        const backDateCountWordsColour = selectedSectionKey ? 
+                            COLOURS.BACK_OF_CARD.SECTION_VIEW_HEADER.DATE_COUNT_WORDS : COLOURS.CARD.HEADER.DATE_COUNT_WORDS(cardD);
+
+                        const backTitleColour = selectedSectionKey ? 
+                            COLOURS.BACK_OF_CARD.SECTION_VIEW_HEADER.TITLE : COLOURS.CARD.HEADER.TITLE(cardD);
+
+                        //Components
                         const frontHeader = frontHeaderComponents[cardNr]
                             .width(contentsWidth)
                             .height(headerHeight)
                             .withTitle(!cardTitleIsBeingEdited)
                             .styles({
-                                statusFill:() => getProgressStatusFill(cardD),
+                                //need to decide whether to do stroke from here or just inside cardHeader
+                                getStatusFill:itemD => getProgressStatusColour(cardD, itemD),
                                 trophyTranslate:isHeld || isSelected ? 
                                     "translate(-3,3) scale(0.25)" : "translate(-45,3) scale(0.6)",
                                 date:{ 
                                     fill:dateColour, stroke:dateColour 
                                 },
                                 dateCount:{
-                                    numberFill:dateColour, wordsFill:dateColour,
-                                    numberStroke:dateColour, wordsStroke:dateColour
-                                }
+                                    numberFill:dateColour, wordsFill:dateCountWordsColour,
+                                    numberStroke:dateColour, wordsStroke:dateCountWordsColour
+                                },
+                                title:{ fill: titleColour }
                             })
                             .fontSizes(fontSizes.info)
                             .onClick(function(e){
@@ -446,8 +431,8 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                         const cardIsEditable = selectedSectionKey || ((isHeld && isFront) || isSelected);
                         const items = itemsComponents[cardNr]
                             .styles({ 
-                                _polygonLineStrokeWidth:itemD => getItemStrokeWidth(itemD, cardD),
-                                _itemStroke:itemD => getItemStroke(itemD, cardD)
+                                _polygonLineStrokeWidth:itemD => getItemStrokeWidth(cardD, itemD),
+                                _itemStroke:itemD => getProgressStatusColour(cardD, itemD)
                             })
                             .width(contentsWidth)
                             .height(itemsAreaHeight)
@@ -510,7 +495,7 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                                 .each(function(d){
                                     const btnG = d3.select(this);
                                     btnG.append("path")
-                                        .attr("fill", grey10(5.5));
+                                        .attr("fill", COLOURS.CARD.EXPAND_COLLAPSE_BTN);
 
                                     btnG.append("rect").attr("class", "btn-hitbox")
                                         .attr("fill", "transparent")
@@ -542,16 +527,17 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                             .height(headerHeight)
                             .withTitle(form?.formType !== "card-title")
                             .styles({
-                                statusFill:() => getProgressStatusFill(cardD),
+                                getStatusFill:(itemD) => getProgressStatusColour(cardD, itemD),
                                 trophyTranslate:isHeld || isSelected ? 
                                     "translate(-3,3) scale(0.25)" : "translate(-45,3) scale(0.6)",
                                 date:{ 
-                                    fill:dateColour, stroke:dateColour 
+                                    fill:backDateColour, stroke:backDateColour 
                                 },
                                 dateCount:{
-                                    numberFill:dateColour, wordsFill:dateColour,
-                                    numberStroke:dateColour, wordsStroke:dateColour
-                                }
+                                    numberFill:backDateColour, wordsFill:backDateCountWordsColour,
+                                    numberStroke:backDateColour, wordsStroke:backDateCountWordsColour
+                                },
+                                title:{ fill: backTitleColour }
                             })
                             .fontSizes(fontSizes.info)
                             .rightContent("")
@@ -673,8 +659,10 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
 
             let swipeTriggered = false;
             function dragged(e , d){
+                console.log("drg")
                 if(d.isSelected){ return; }
                 if(swipeTriggered){ return; }
+                console.log("dy......................................", e.dy)
                 const swipeDirection = e.dy <= 0 ? "up" : "down";
                 const frontCard = data.find(c => c.isFront);
 
@@ -691,6 +679,7 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                     //the card itself has been dragged
                     cardD = d;
                 }
+
 
                 if(swipeDirection === "up" && !cardD.isHeld){ 
                     onPickUp(cardD);

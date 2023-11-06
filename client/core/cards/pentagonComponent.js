@@ -8,6 +8,7 @@ import { grey } from '@material-ui/core/colors';
 import { isNumber } from '../../data/dataHelpers';
 
 const { GOLD } = COLOURS;
+console.log("colours", COLOURS)
 
 const NR_SECTIONS = 5;
 
@@ -63,7 +64,9 @@ export default function pentagonComponent() {
 
     let styles = {
         _polygonLineStrokeWidth:() => 0.1,
-        _itemStroke:() => "grey"
+        _itemStroke:() => "grey",
+        itemTextFill:COLOURS.CARD.ITEM_TEXT,
+        itemAttachmentFill:COLOURS.CARD.ITEM_ATTACHMENT
     }
 
     //API CALLBACKS
@@ -369,9 +372,9 @@ export default function pentagonComponent() {
                                         .render();
 
                                     itemContentsG.selectAll("text")
-                                        .style("fill", grey10(6))
-                                        .style("stroke", grey10(6))
-                                        .style("stroke-width", 0.1)
+                                        .style("fill", styles.itemTextFill)
+                                        .style("stroke", styles.itemTextFill)
+                                        .style("stroke-width", 0.01)
                                         .style("opacity", itemIsDefined ? 1 : 0.5);          
 
                                 //attachments
@@ -418,11 +421,11 @@ export default function pentagonComponent() {
                                                         if(d.type === "video"){
                                                             iconG.append("path")
                                                                 .attr("d", videoIconD)
-                                                                .attr("fill", grey10(7))
+                                                                .attr("fill", styles.itemAttachmentFill)
 
                                                             iconG.append("polygon")
                                                                 .attr("points", videoIconPolygonPoints)
-                                                                .attr("fill", grey10(7))
+                                                                .attr("fill", styles.itemAttachmentFill)
                                                         }
                                                     })
                                                     .merge(attachmentG)

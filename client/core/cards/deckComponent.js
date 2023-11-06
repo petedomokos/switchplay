@@ -278,6 +278,8 @@ export default function deckComponent() {
         // expression elements
         selection.each(function (deckData) {
             updateDimns(deckData);
+            if(deckIsSelected)
+            console.log("front", deckData.frontCardNr)
             id = deckData.id;
             containerG = d3.select(this)
 
@@ -781,6 +783,7 @@ export default function deckComponent() {
                             }
                         })
                         .onPickUp(function(d){
+                            console.log("pickup!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", d)
                             updateFrontCardNr(d.cardNr)
                         })
                         .onPutDown(function(d){
@@ -791,6 +794,7 @@ export default function deckComponent() {
                                     //.attr("pointer-events", null)
                                     .attr("opacity", 1);
                             }*/
+                            console.log("putdown!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", d)
                             updateFrontCardNr(d.cardNr + 1);
                         }))
 

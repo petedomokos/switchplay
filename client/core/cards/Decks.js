@@ -84,6 +84,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   const [longpressedDeckId, setLongpressedDeckId] = useState("");
   const [form, setForm] = useState(null);
 
+
   //profiles state
   const [profilesLayout, setProfilesLayout] = useState(() => milestonesLayout());
   const [kpiFormat, setKpiFormat] = useState("actual");
@@ -91,7 +92,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   //processed state
   const selectedDeck = data.find(deck => deck.id === selectedDeckId);
   const selectedCard = selectedDeck?.cards.find(c => c.cardNr === selectedCardNr);
-  //console.log("selectedDeck", selectedDeck)
+  //console.log("selectedDeck", selectedDeck?.frontCardNr)
   //console.log("selectedSection", selectedSection)
   //refs
   const zoomRef = useRef(null);
@@ -455,6 +456,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   }, [stringifiedData, selectedDeckId]);
 
   const updateFrontCardNr = useCallback(cardNr => {
+    console.log("updateFront", selectedDeckId, cardNr)
     updateDeck({ ...selectedDeck, frontCardNr:cardNr });
     setForm(null);
   }, [stringifiedData, form, selectedDeckId]);

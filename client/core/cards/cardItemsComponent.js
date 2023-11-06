@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, grey10, TRANSITIONS } from "./constants";
+import { COLOURS, DIMNS, grey10, TRANSITIONS } from "./constants";
 import pentagonComponent from './pentagonComponent';
 import textComponent from './textComponent';
 import dragEnhancements from '../journey/enhancedDragHandler';
@@ -244,9 +244,9 @@ export default function cardItemsComponent() {
                                     .withAttachments(false)
                                     .styles((d,i) => ({
                                         opacity:d.title ? 1 : 0.5,
-                                        stroke:grey10(2),
+                                        stroke:COLOURS.CARD.SECTION_VIEW_ITEM_TEXT,
                                         strokeWidth:0.05,
-                                        fill:grey10(2),
+                                        fill:COLOURS.CARD.SECTION_VIEW_ITEM_TEXT,
                                         fontMin:1,
                                         fontMax:5,
                                         fontSize:3
