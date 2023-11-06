@@ -175,6 +175,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   //keypresses
   useEffect(() => {
     d3.select("body").on("keypress", (e) => {
+      alert(`key-${e.key}-keycode-${e.keyCode}`)
       if(e.keyCode === "13" || e.key === "Enter"){
         e.preventDefault();
         if(form){
