@@ -229,7 +229,7 @@ export const SATURATED_BLUE_COLOUR_THEME = (bgColour) => ({
             const heldPos = calcCardHeldPos(cardD);
             // lightness, l
             const l = 62 * (deckIsSelected ? 1 : 0.6);
-            return `hsla(211, 45%, ${l * (cardsShadowFactor ** heldPos)}%, 1)`; //was 96% saturation in nrmal blue colour scheme
+            return `hsla(211, 35%, ${l * (cardsShadowFactor ** heldPos)}%, 1)`; //was 96% saturation in nrmal blue colour scheme
         },
         STROKE:cardD => {
             const heldPos = calcCardHeldPos(cardD);

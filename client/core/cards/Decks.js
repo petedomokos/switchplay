@@ -455,8 +455,11 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
     setForm(null);
   }, [stringifiedData, selectedDeckId]);
 
+  //console.log("Decks", selectedDeckId)
+
   const updateFrontCardNr = useCallback(cardNr => {
-    console.log("updateFront", selectedDeckId, cardNr)
+    //bug - selectedDeckId in here is sometime undefined even when its selected
+    //console.log("updateFront", selectedDeckId, cardNr)
     updateDeck({ ...selectedDeck, frontCardNr:cardNr });
     setForm(null);
   }, [stringifiedData, form, selectedDeckId]);

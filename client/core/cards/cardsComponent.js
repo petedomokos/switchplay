@@ -661,14 +661,18 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
             cardG.exit().call(remove);
 
             let swipeTriggered = false;
+            let deltaY = 0;
             function dragged(e , d){
-                console.log("drg")
+                //console.log("drg", deltaY, e.dy, d.isSelected, swipeTriggered)
                 if(d.isSelected){ return; }
                 if(swipeTriggered){ return; }
                 //bug next - this is 0 when swiping down on items 4/5 -> need to look at teh drag handler inside cardItems, why dy is 0
                 //also, dy should really be teh total of all dys so far, not just each dy
-                //console.log("dy......................................", e.dy)
-                const swipeDirection = e.dy <= 0 ? "up" : "down";
+                if(Math.abs(deltaY) < 10){
+                    deltaY += e.dy;
+                    return;
+                }
+                const swipeDirection = deltaY <= 0 ? "up" : "down";
                 const frontCard = data.find(c => c.isFront);
 
                 let cardD;
@@ -704,13 +708,19 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                     onPutDown(frontCard);
                     swipeTriggered = true;
                 }
+                //cleanup here because dragEnd seems to not be called sometimes - an update cuts off the drag handling
+                //@todo - fix the issue above properly
+                cleanUp();
             }
 
             function dragEnd(e, d){
                 console.log("cards dragEnd")
                 if(d.isSelected){ return; }
-                //reset
+                cleanUp();
+            }
+            function cleanUp(e,d){
                 swipeTriggered = false;
+                deltaY = 0;
             }
 
         })
