@@ -810,6 +810,21 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
     //cardNr can be added in hydration
 }, [form, selectedDeckId]);
 
+//keypresses
+useEffect(() => {
+  d3.select("body").on("keypress", (e) => {
+    alert(`key-${e.key}-keycode-${e.keyCode}`)
+    if(e.keyCode === "13" || e.key === "Enter"){
+      e.preventDefault();
+      if(form){
+        if(form.formType === "item") { onSelectItem(); }
+        if(form.formType === "card-date") { }
+        setForm(null)
+      }
+    }
+  })
+}, [form, stringifiedData])
+
   return (
     <div className={`cards-root ${classes.root}`} onClick={onClickBg} >
       {data.map(deckData => 
@@ -839,16 +854,16 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
         }
         {form?.formType === "section" && 
           <SectionTitleForm section={selectedSection} saveTitle={updateSectionTitle} saveInitials={updateSectionInitials} 
-            close={() => setForm(null)} dimns={getFormDimns()} 
+            close={handleCancelForm} dimns={getFormDimns()} 
           />
         }
         {form?.formType === "card-title" && 
-          <CardTitleForm deck={selectedDeck} cardD={form.value} save={updateCardTitle} close={() => setForm(null)}
+          <CardTitleForm deck={selectedDeck} cardD={form.value} save={updateCardTitle} close={handleCancelForm}
             dimns={getFormDimns()} 
           />
         }
         {form?.formType === "purpose" && 
-          <PurposeParagraphForm deck={selectedDeck} paraD={form.value} save={updatePurposeParagraph} close={() => setForm(null)}
+          <PurposeParagraphForm deck={selectedDeck} paraD={form.value} save={updatePurposeParagraph} close={handleCancelForm}
             dimns={getFormDimns()} 
           />
         }

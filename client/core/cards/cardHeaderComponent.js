@@ -94,10 +94,11 @@ export default function cardHeaderComponent() {
             numberStrokeWidth:0.1,
             wordsFill:grey10(7),
             wordsStroke:grey10(7),
-            wordsStrokeWidth:0.1
+            wordsStrokeWidth:0.03
         },
         title:{
-            fill:grey10(5)
+            fill:grey10(5),
+            strokeWidth:0.03
         },
         getStatusFill:itemD => "grey"
     }
@@ -167,7 +168,7 @@ export default function cardHeaderComponent() {
                                             .attr("text-anchor", "middle")
                                             .style("font-family", "helvetica, sans-serifa")
                                             .attr("stroke", styles.title.fill)
-                                            .attr("stroke-width", 0.5)
+                                            .attr("stroke-width", styles.title.strokeWidth)
                                             .attr("fill", styles.title.fill);
 
                                     contentsG.append("rect")
@@ -189,7 +190,7 @@ export default function cardHeaderComponent() {
                                         .attr("y", titleContentsHeight/2)
                                         .attr("font-size", titleContentsHeight * 0.4)
                                         .attr("stroke", styles.title.fill)
-                                        .attr("stroke-width", 0.1)
+                                        .attr("stroke-width", styles.title.strokeWidth)
                                         .attr("fill", styles.title.fill)
                                         //.text(d.title || d.id)
                                         .text(truncateIfNecc(d.title, 17) || `Card ${d.cardNr + 1}`)

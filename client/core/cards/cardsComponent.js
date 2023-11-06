@@ -354,22 +354,22 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                         //component colours
                         //in section view, these are constants for all cards. Else they are functions of each card
                         const dateColour = selectedSectionKey ? 
-                            COLOURS.CARD.SECTION_VIEW_HEADER.DATE : COLOURS.CARD.HEADER.DATE(cardD);
+                            COLOURS.CARD.SECTION_VIEW_HEADER.DATE : COLOURS.CARD.HEADER(cardD).DATE;
 
                         const dateCountWordsColour = selectedSectionKey ? 
-                            COLOURS.CARD.SECTION_VIEW_HEADER.DATE_COUNT_WORDS : COLOURS.CARD.HEADER.DATE_COUNT_WORDS(cardD);
+                            COLOURS.CARD.SECTION_VIEW_HEADER.DATE_COUNT_WORDS : COLOURS.CARD.HEADER(cardD).DATE_COUNT_WORDS;
 
                         const titleColour = selectedSectionKey ? 
-                            COLOURS.CARD.SECTION_VIEW_HEADER.TITLE : COLOURS.CARD.HEADER.TITLE(cardD);
+                            COLOURS.CARD.SECTION_VIEW_HEADER.TITLE : COLOURS.CARD.HEADER(cardD).TITLE;
 
                         const backDateColour = selectedSectionKey ? 
-                            COLOURS.BACK_OF_CARD.SECTION_VIEW_HEADER.DATE : COLOURS.CARD.HEADER.DATE(cardD);
+                            COLOURS.BACK_OF_CARD.SECTION_VIEW_HEADER.DATE : COLOURS.BACK_OF_CARD.HEADER(cardD).DATE;
 
                         const backDateCountWordsColour = selectedSectionKey ? 
-                            COLOURS.BACK_OF_CARD.SECTION_VIEW_HEADER.DATE_COUNT_WORDS : COLOURS.CARD.HEADER.DATE_COUNT_WORDS(cardD);
+                            COLOURS.BACK_OF_CARD.SECTION_VIEW_HEADER.DATE_COUNT_WORDS : COLOURS.BACK_OF_CARD.HEADER(cardD).DATE_COUNT_WORDS;
 
                         const backTitleColour = selectedSectionKey ? 
-                            COLOURS.BACK_OF_CARD.SECTION_VIEW_HEADER.TITLE : COLOURS.CARD.HEADER.TITLE(cardD);
+                            COLOURS.BACK_OF_CARD.SECTION_VIEW_HEADER.TITLE : COLOURS.BACK_OF_CARD.HEADER(cardD).TITLE;
 
                         //Components
                         const frontHeader = frontHeaderComponents[cardNr]
