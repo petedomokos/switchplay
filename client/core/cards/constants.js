@@ -27,16 +27,19 @@ export const grey10 = (i) => {
 //export const colourTheme = "blue";
 export const colourTheme = "saturatedBlue";
 //export const colourTheme = "grey";
+export const backgroundColour = "blue"
+//export const backgroundColour = "grey"
+//export const backgroundColour = "dark-grey"
 
 
 const getColours = colourTheme => {
     if(colourTheme === "blue"){
-        return BLUE_COLOUR_THEME;
+        return BLUE_COLOUR_THEME(backgroundColour);
     }
     if(colourTheme === "saturatedBlue"){
-        return SATURATED_BLUE_COLOUR_THEME;
+        return SATURATED_BLUE_COLOUR_THEME(backgroundColour);
     }
-    return GREY_COLOUR_THEME
+    return GREY_COLOUR_THEME(backgroundColour);
 }
 
 //todo - get colours in CardsTable and pass down

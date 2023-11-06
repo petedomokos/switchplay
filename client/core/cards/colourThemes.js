@@ -2,30 +2,44 @@ export const grey3pt5 = "#C8C8C8";
 export const grey4pt5 = "#B0B0B0";
 export const grey5pt5 = "#989898";
 export const grey6pt5 = "#787878";
-export const grey10pt5 = "#181818";
-export const grey8pt5 = "#404040"
+export const grey8pt5 = "#404040";
+export const grey9pt15 = "#282828";
+export const grey9pt35 = "#202020";
+export const grey9pt5 = "#181818";
+export const grey9pt75 = "#101010";
+
 export const grey10 = (i) => {
     if(i === 3.5){ return grey3pt5; }
     if(i === 4.5){ return grey4pt5; }
     if(i === 5.5){ return grey5pt5; }
     if(i === 6.5){ return grey6pt5; }
     if(i === 8.5){ return grey8pt5; }
-    if(i === 10.5){ return grey10pt5; }
+    if(i === 9.15){ return grey9pt15; }
+    if(i === 9.35){ return grey9pt35; }
+    if(i === 9.5){ return grey9pt5; }
+    if(i === 9.75){ return grey9pt75; }
     return ["#FFFFFF", "#E8E8E8","#D3D3D3", "#BEBEBE", "#A8A8A8", "#888888", "#696969", "#505050", "#303030", "#000000"][i-1]
 }; 
 
-export const GREY_COLOUR_THEME = {
-    CARDS_TABLE:grey10(9),
+
+const getTableAndDeckColours = bgColour => {
+    if(bgColour === "dark-grey"){ return { table: grey10(9.5), deck:grey10(9.15) } }
+    if(bgColour === "blue"){ return { table:"hsla(211, 45%, 10%, 1)", deck:"hsla(211, 45%, 15%, 1)" } }
+    return { table: grey10(9), deck:grey10(8.5) }
+}
+
+export const GREY_COLOUR_THEME = (backgroundColour) => ({
+    CARDS_TABLE:getTableAndDeckColours(bgColour).table,
     GOLD:"#FFE10A",// brighter #ffd700,   darker #ccad00
     SILVER:grey10(2),
     NOT_STARTED_FILL:grey10(6),
     SECTION_VIEW_NOT_STARTED_FILL:grey10(5),
     DECK:{
-        STROKE:grey10(8.5),
+        STROKE:getTableAndDeckColours(bgColour).deck,
         HEADER:{
-            BG:grey10(8.5)
+            BG:getTableAndDeckColours(bgColour).deck
         },
-        CONTROLS:"#404040"
+        CONTROLS:getTableAndDeckColours(bgColour).deck
     },
     CARD:{
         FILL:cardD => {
@@ -67,7 +81,7 @@ export const GREY_COLOUR_THEME = {
         SECTION_VIEW_ITEM_TEXT:grey10(2)
     },
     BACK_OF_CARD:{
-        FILL:cardD => { return grey10(10.5); },
+        FILL:cardD => { return grey10(9.75); },
         STROKE:cardD => { return grey10(5.5); },
         HEADER:{
             DATE:cardD => { return grey10(7); },
@@ -92,10 +106,10 @@ export const GREY_COLOUR_THEME = {
             }
         }
     }
-}
+})
 
 //"#fe9923", //"#ffd700",  //"#FFE10A",// brighter #ffd700,   darker #ccad00
-export const BLUE_COLOUR_THEME = {
+export const BLUE_COLOUR_THEME = (backgroundColour) => ({
     CARDS_TABLE:"hsla(211, 96%, 12%, 1)",
     GOLD:"#fe9923", //"#FFE10A",// brighter #ffd700,   darker #ccad00
     SILVER:"#C0C0C0",
@@ -154,7 +168,7 @@ export const BLUE_COLOUR_THEME = {
         SECTION_VIEW_STROKE:grey10(5),
         SECTION_VIEW_ITEM_TEXT:grey10(2),
         BACK_OF_CARD:{
-            FILL:cardD => { return grey10(10.5); },
+            FILL:cardD => { return grey10(9.75); },
             STROKE:cardD => { return grey10(5.5); },
             HEADER:{
                 DATE:cardD => { return grey10(7); },
@@ -180,7 +194,7 @@ export const BLUE_COLOUR_THEME = {
             }
         }
     }
-}
+})
 
 
 /* SCSS HSL */
@@ -194,18 +208,18 @@ $cornflower-blue: hsla(228, 89%, 72%, 1);
 $medium-slate-blue: hsla(235, 89%, 70%, 1);
 */
 
-export const SATURATED_BLUE_COLOUR_THEME = {
-    CARDS_TABLE:grey10(9),
+export const SATURATED_BLUE_COLOUR_THEME = (bgColour) => ({
+    CARDS_TABLE:getTableAndDeckColours(bgColour).table,
     GOLD:"#FFE10A",// brighter #ffd700,   darker #ccad00
     SILVER:grey10(2),
     NOT_STARTED_FILL:grey10(6),
     SECTION_VIEW_NOT_STARTED_FILL:grey10(5),
     DECK:{
-        STROKE:grey10(8.5),
+        STROKE:getTableAndDeckColours(bgColour).deck,
         HEADER:{
-            BG:grey10(8.5)
+            BG:getTableAndDeckColours(bgColour).deck
         },
-        CONTROLS:"#404040"
+        CONTROLS:getTableAndDeckColours(bgColour).deck
     },
     CARD:{
         FILL:(cardD, deckIsSelected) => {
@@ -253,7 +267,7 @@ export const SATURATED_BLUE_COLOUR_THEME = {
         SECTION_VIEW_ITEM_TEXT:grey10(2)
     },
     BACK_OF_CARD:{
-        FILL:cardD => { return grey10(10.5); },
+        FILL:cardD => { return grey10(9.75); },
         STROKE:cardD => { return grey10(5.5); },
         HEADER:{
             DATE:cardD => { return grey10(7); },
@@ -278,5 +292,5 @@ export const SATURATED_BLUE_COLOUR_THEME = {
             }
         }
     }
-}
+})
     

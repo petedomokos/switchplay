@@ -445,7 +445,10 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                             .onUpdateItemStatus(function(itemNr, newStatus){
                                 onUpdateItemStatus(cardNr, itemNr, newStatus);
                             })
-                            .onDrag(e => { dragged(e, cardD) })
+                            .onDrag(e => { 
+                                console.log("drag from items")
+                                dragged(e, cardD) 
+                            })
                             .onDragEnd(function(e){
                                 console.log('calling de from items')
                                 dragEnd.call(this, e, cardD)
@@ -662,7 +665,9 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                 console.log("drg")
                 if(d.isSelected){ return; }
                 if(swipeTriggered){ return; }
-                console.log("dy......................................", e.dy)
+                //bug next - this is 0 when swiping down on items 4/5 -> need to look at teh drag handler inside cardItems, why dy is 0
+                //also, dy should really be teh total of all dys so far, not just each dy
+                //console.log("dy......................................", e.dy)
                 const swipeDirection = e.dy <= 0 ? "up" : "down";
                 const frontCard = data.find(c => c.isFront);
 
