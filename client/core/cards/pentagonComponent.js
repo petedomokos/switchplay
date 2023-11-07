@@ -37,7 +37,7 @@ export default function pentagonComponent() {
     let withText = true;
     let editable = true;
     let selectedSectionKey;
-    let withStatusMenu = () => false;
+    let statusMenuItemNr = null;
 
     let innerVertices;
     let outerVertices;
@@ -161,11 +161,16 @@ export default function pentagonComponent() {
                     .merge(sectionG)
                     //.call(drag)
                     .attr("display", d => !selectedSectionKey || selectedSectionKey === d.section?.key ? null : "none")
+                    .attr("opacity", d => !isNumber(statusMenuItemNr) ? 1 : (statusMenuItemNr === d.itemNr ? 1 : 0.4))
                     .style("pointer-events", editable ? null : "none")
                     .each(function(d,i){
                         const { deckId, cardNr, itemNr, title, section } = d;
-                        //ensure any items with titles are above those without
-                        if(title){ d3.select(this).raise(); }
+                        //if a status menu is showing, we only raise that item
+                        //otherwise, we ensure any items with titles are above those without
+                        if(isNumber(statusMenuItemNr)){
+                            if(statusMenuItemNr === itemNr){ d3.select(this).raise(); }
+                        }
+                        else if(title){ d3.select(this).raise(); }
                         //for now, we fake a video attachment using a special item name
                         const includesVideo = title.includes("Video") || title.includes("video");
                         const attachments = includesVideo ? [{ key:"att-1", type: "video" }] : [];
@@ -508,7 +513,7 @@ export default function pentagonComponent() {
 
                         const statusMenuContainerG = sectionContentsG.select("g.status-menu-container");
                         const statusMenuG = statusMenuContainerG.selectAll("g.status-menu")
-                            .data(withStatusMenu(d) ? [1] : []);
+                            .data(statusMenuItemNr === d.itemNr ? [1] : []);
 
                         statusMenuG.enter()
                             .append("g")
@@ -593,9 +598,9 @@ export default function pentagonComponent() {
         selectedSectionKey = value;
         return pentagon;
     };
-    pentagon.withStatusMenu = function (value) {
-        if (!arguments.length) { return withStatusMenu; }
-        withStatusMenu = value;
+    pentagon.statusMenuItemNr = function (value) {
+        if (!arguments.length) { return statusMenuItemNr; }
+        statusMenuItemNr = value;
         return pentagon;
     };
     

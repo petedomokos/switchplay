@@ -144,7 +144,6 @@ export default function textComponent() {
                 .overflow(styles.overflow || "visible")
                     .render();
 
-                    console.log("kkkkkkkkkkkk")
             contentsG.selectAll("text")
                 .style("fill", placeholderUsed ? styles.placeholderFill : styles.fill)
                 .style("stroke", placeholderUsed ? styles.placeholderStroke : styles.stroke)

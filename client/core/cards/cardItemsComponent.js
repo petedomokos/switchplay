@@ -151,7 +151,7 @@ export default function cardItemsComponent() {
                                 .r2(outerRadius)
                                 .withSections(withSections)
                                 .withText(withText && !isNumber(selectedItemNr))
-                                .withStatusMenu(d => d.itemNr === clickedItemNr)
+                                .statusMenuItemNr(clickedItemNr)
                                 .editable(editable)
                                 .styles(styles)
                                 .onClick(function(e,d){
@@ -188,9 +188,7 @@ export default function cardItemsComponent() {
                 //BUG - click defined item twice, then clode the item page, then 
                 //click item again. It should reopen the status menu. Instead it closes deck.
                 //same if you click non-defined item -> it closes deck
-
                 //defined items open up status menu on first click
-                d3.select(this).raise();
                 clickedItemNr = itemNr;
                 update.call(containerG.node(), data);
 
