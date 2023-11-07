@@ -428,7 +428,7 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                         //ITEMS
                         //helper
                         //note - deckIsSelected && form is handled in Decks - it turns the entire container pointer-events on/off
-                        const cardIsEditable = selectedSectionKey || ((isHeld && isFront) || isSelected);
+                        const cardIsEditable = deckIsSelected && (selectedSectionKey || ((isHeld && isFront) || isSelected));
                         const items = itemsComponents[cardNr]
                             .styles({ 
                                 _polygonLineStrokeWidth:itemD => getItemStrokeWidth(cardD, itemD),
@@ -446,11 +446,11 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                                 onUpdateItemStatus(cardNr, itemNr, newStatus);
                             })
                             .onDrag(e => { 
-                                console.log("drag from items")
+                                //console.log("drag from items")
                                 dragged(e, cardD) 
                             })
                             .onDragEnd(function(e){
-                                console.log('calling de from items')
+                                //console.log('calling de from items')
                                 dragEnd.call(this, e, cardD)
                             })
 
@@ -652,8 +652,9 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
 
                         kpisG.exit().call(remove);
                     })
-                    .call(drag)
+                    //.call(drag)
                     .on("click", e => { 
+                        console.log("cards click")
                         e.stopPropagation(); 
                     })
   
@@ -714,7 +715,7 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
             }
 
             function dragEnd(e, d){
-                console.log("cards dragEnd")
+                //console.log("cards dragEnd")
                 if(d.isSelected){ return; }
                 cleanUp();
             }

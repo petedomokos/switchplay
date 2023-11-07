@@ -281,7 +281,7 @@ export default function deckComponent() {
             if(deckIsSelected)
             //console.log("front", deckData.frontCardNr)
             id = deckData.id;
-            containerG = d3.select(this)
+            containerG = d3.select(this).on("click", () => { console.log("deck clicked")})
 
             if(containerG.select("g").empty()){
                 init();

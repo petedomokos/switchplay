@@ -74,6 +74,7 @@ export default function cardItemsComponent() {
     let statusTimer;
     let selectedItemNr;
     let selectedSectionKey;
+    let clickedItemNr;
 
     //API CALLBACKS
     let onSetOuterRadius = function(){};
@@ -119,8 +120,12 @@ export default function cardItemsComponent() {
         }
 
         function update(data){
+            if(editable){
+                console.log("editable update", data)
+            }
             const { } = data;
-            const contentsG = d3.select(this).select("g.card-items-contents")
+            const containerG = d3.select(this);
+            const contentsG = containerG.select("g.card-items-contents")
                 .attr("transform", `translate(
                     ${margin.left + extraHorizMargin/2},
                     ${margin.top + extraVertMargin/2})`);
@@ -149,11 +154,15 @@ export default function cardItemsComponent() {
                                 .r2(outerRadius)
                                 .withSections(withSections)
                                 .withText(withText && !isNumber(selectedItemNr))
+                                .withStatusMenu(d => d.itemNr === clickedItemNr)
                                 .editable(editable)
                                 .styles(styles)
                                 .onClick(function(e,d){
+                                    console.log("pent.onClick")
+                                    e.stopPropagation();
                                     if(!editable){ return; }
-                                    onSelectItem.call(this, d);
+                                    handleClickItem.call(this, e, d)
+                                    //onSelectItem.call(this, d);
                                 })
                                 .onLongpressStart(longpressStart)
                                 .onLongpressEnd(longpressEnd)
@@ -165,6 +174,33 @@ export default function cardItemsComponent() {
             polygonCentreG.exit().call(remove, { transition:{ duration:TRANSITIONS.FAST }});
 
             const cardBgRect = d3.select(this.parentNode.parentNode).select("rect.card-front-bg")
+
+            function handleClickItem(e, d){
+                console.log("click", clickedItemNr, d.itemNr, d.title)
+                const { title, itemNr } = d;
+                //undefined items just open to edit mode on first click
+                if(!title){
+                    clickedItemNr = null;
+                    onSelectItem.call(this, d)
+                    return;
+                }
+                //defined items open to edit mode on second click
+                if(clickedItemNr === itemNr){
+                    clickedItemNr = null; 
+                    onSelectItem.call(this, d);
+                    return;
+                }
+
+                //BUG - click defined item twice, then clode the item page, then 
+                //click item again. It should reopen the status menu. Instead it closes deck.
+                //same if you click non-defined item -> it closes deck
+
+                //defined items open up status menu on first click
+                d3.select(this).raise();
+                clickedItemNr = itemNr;
+                update.call(containerG.node(), data);
+
+            }
 
             function longpressStart(e,d){
                 console.log("lpstart")
@@ -253,6 +289,8 @@ export default function cardItemsComponent() {
                                     }))
                                 )
                                 .on("click", function(e,d){
+                                    console.log("item list click")
+                                    e.stopPropagation();
                                     if(!editable){ return; }
                                     onSelectItem.call(this, d);
                                 })

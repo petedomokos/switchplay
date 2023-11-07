@@ -6,9 +6,7 @@ import dragEnhancements from '../journey/enhancedDragHandler';
 import { TextBox } from "d3plus-text";
 import { grey } from '@material-ui/core/colors';
 import { isNumber } from '../../data/dataHelpers';
-
-const { GOLD } = COLOURS;
-console.log("colours", COLOURS)
+import { fadeInOut, fadeIn, remove } from '../journey/domHelpers';
 
 const NR_SECTIONS = 5;
 
@@ -39,6 +37,7 @@ export default function pentagonComponent() {
     let withText = true;
     let editable = true;
     let selectedSectionKey;
+    let withStatusMenu = () => false;
 
     let innerVertices;
     let outerVertices;
@@ -90,7 +89,6 @@ export default function pentagonComponent() {
         })
 
         function update(itemsData){
-
             //drag
             enhancedDrag
                 .dragThreshold(100)
@@ -109,9 +107,10 @@ export default function pentagonComponent() {
                     //section is identified in the dom by its itemNr ie it pos in the polygon
                     //notice, we get this from thr secitn object, which allows user to reassign an item from a 
                     //different pos in the polygon (ie a different itemNr) to another section
-                    .attr("class", d => `section section-${d.section?.nr}`)
+                    .attr("class", d => `section section-${d.section?.nr || ""}`)
                     .attr("display", d => !selectedSectionKey || selectedSectionKey === d.section?.key ? null : "none")
                     .each(function(d,i){
+                        //why are these 5 entering every time item is clicked????
                         const sectionG = d3.select(this);
                         sectionG.append("path").attr("class", "section-bg").attr("fill", "transparent");
                         sectionG.append("line").attr("class", "start show-with-section visible");
@@ -124,28 +123,33 @@ export default function pentagonComponent() {
                         //sectionG.append("line").attr("class", "outer-line-hitbox")
                             //.style("stroke", "transparent");
 
+                        sectionG.append("g").attr("class", "section-identifier-container");
+
                         const sectionContentsG = sectionG.append("g").attr("class", "section-contents show-with-section");
                         const itemContentsG = sectionContentsG.append("g").attr("class", "item-contents")
                             .style("opacity", withText ? 1 : 0)
+
+                        //we always want status to appear on top of item title text, so append separate container
+                        sectionContentsG.append("g").attr("class", "status-menu-container");
                             
                         sectionG.append("path").attr("class", "section-hitbox")
                             .attr("fill", "transparent")
-                            .on("click", onClick);
 
                         itemContentsG
                             .append("rect")
                                 //.attr("fill","white")
-                                .attr("fill","transparent");
+                                .attr("fill","transparent")
+                                .attr("stroke", "black");
+                        
+                        const itemTitleG = itemContentsG.append("g").attr("class", "item-title");
 
                         textboxes[i] = new TextBox()
-                            .select(itemContentsG.node())
+                            .select(itemTitleG.node())
                             .fontSize(2)
                             .fontMin(1)
                             .fontMax(12)
                             .verticalAlign("middle")
                             .overflow("visible");
-
-                        sectionG.append("g").attr("section-identifier")
 
                     })
                     //WARNING: drag is before merge so it doesnt get broken when a longpress causes an update
@@ -156,9 +160,11 @@ export default function pentagonComponent() {
                     //click if its been longpressed. eg store an isLongpress here in outer scope
                     //.call(drag)
                     .merge(sectionG)
-                    .call(drag)
+                    //.call(drag)
                     .attr("display", d => !selectedSectionKey || selectedSectionKey === d.section?.key ? null : "none")
-                    .style("pointer-events", editable ? null : "none")
+                    //.style("pointer-events", editable ? null : "none")
+                    .style("pointer-events", "all")
+                    .attr("pointer-events", "all")
                     .each(function(d,i){
                         const { deckId, cardNr, itemNr, title, section } = d;
                         //ensure any items with titles are above those without
@@ -180,7 +186,8 @@ export default function pentagonComponent() {
                         const dy = innerVertices[i + 1] ? innerVertices[i+1][1] : innerVertices[0][1];
 
                         const sizeIsIncreasing = r2 - prevR2 > 0;
-                        const sectionG = d3.select(this);
+                        const sectionG = d3.select(this)
+                            .on("click", onClick);
                         //startLine
                         sectionG.select("line.start")
                             .transition("start-trans")
@@ -345,6 +352,8 @@ export default function pentagonComponent() {
                         itemContentsG.select("rect")
                             .attr("width", itemAreaWidth)
                             .attr("height", itemAreaHeight)
+
+                        //item text and attachments
                         //text
                         const textData = [{
                             "width": itemAreaWidth,
@@ -353,10 +362,9 @@ export default function pentagonComponent() {
                           }];
 
                         //show or hide text based on deck status
-                        itemContentsG.selectAll("text")
+                        const itemTitleG = itemContentsG.select("g.item-title");
+                        itemTitleG.selectAll("text")
                             .attr("display", withText ? null : "none")
-
-                        itemContentsG
                             .transition(`text-${key}`)
                             .duration(TRANSITIONS.FAST)
                                 .style("opacity", withText ? 1 : 0)
@@ -371,7 +379,7 @@ export default function pentagonComponent() {
                                         .maxLines(maxNrLines)
                                         .render();
 
-                                    itemContentsG.selectAll("text")
+                                    itemTitleG.selectAll("text")
                                         .style("fill", styles.itemTextFill)
                                         .style("stroke", styles.itemTextFill)
                                         .style("stroke-width", 0.01)
@@ -379,7 +387,7 @@ export default function pentagonComponent() {
 
                                 //attachments
                                 //first we need to know how many lines of text there are so we can shoft attachments up if necc
-                                const actualNrLines = itemContentsG.selectAll("text").nodes().length;
+                                const actualNrLines = itemTitleG.selectAll("text").nodes().length;
                                 const textAreaActualHeight = () => {
                                     if(actualNrLines === 1){
                                         return 1.9 * textLineHeight;
@@ -451,7 +459,9 @@ export default function pentagonComponent() {
 
                         //section initial/icon;
                         const sectionDatum = section || {};
-                        const sectionIdentifierG = sectionG.selectAll("g.section-identifier").data(withSectionLabels ? [sectionDatum] : [])
+                        const sectionIdenitifierContainerG = sectionG.select("g.section-identifier-container");
+                        const sectionIdentifierG = sectionIdenitifierContainerG.selectAll("g.section-identifier")
+                            .data(withSectionLabels ? [sectionDatum] : [])
 
                         sectionIdentifierG.enter()
                             .append("g")
@@ -483,6 +493,61 @@ export default function pentagonComponent() {
                                 })
 
                         sectionIdentifierG.exit().remove();
+
+
+                        //status
+                        const statusMenuOptionsData = [
+                            { key:"status-0" },
+                            { key:"status-1" },
+                            { key:"status-2" }
+                        ];
+                        const statusMenuTitleHeight = 5;
+                        const statusMenuMargin = { left: 1, right: 1, top: 1, bottom: 1 }
+                        const statusMenuItemWidth = 10;
+                        const statusMenuItemHeight = 10;
+                        const statusMenuWidth = statusMenuOptionsData.length * statusMenuItemWidth + statusMenuMargin.left + statusMenuMargin.right;
+                        const statusMenuHeight = statusMenuItemHeight + statusMenuMargin.top + statusMenuMargin.bottom;
+                        const gapBetweenItemAndMenu = 1;
+
+                        const statusMenuContainerG = sectionContentsG.select("g.status-menu-container");
+                        const statusMenuG = statusMenuContainerG.selectAll("g.status-menu")
+                            .data(withStatusMenu(d) ? [1] : []);
+
+                        statusMenuG.enter()
+                            .append("g")
+                                .attr("class", "status-menu")
+                                .call(fadeIn)
+                                .each(function(){
+                                    const statusMenuG = d3.select(this);
+                                    statusMenuG.append("rect").attr("class", "status-menu-bg")
+                                        .attr("rx", 1.5)
+                                        .attr("ry", 1.5)
+                                        .attr("fill", "black")
+                                        .attr("opacity", 1);
+
+                                    statusMenuG.append("text").attr("class", "status-menu-title")
+                                        .attr("text-anchor", "middle")
+                                        .attr("dominant-baseline", "central");
+
+                                    statusMenuG.append("g").attr("class", "options");
+                                })
+                                .merge(statusMenuG)
+                                .attr("transform", `translate(${(itemAreaWidth - statusMenuWidth)/2},${-statusMenuHeight - gapBetweenItemAndMenu})`)
+                                .each(function(){
+                                    const statusMenuG = d3.select(this);
+                                    statusMenuG.select("rect.status-menu-bg")
+                                        .attr("width", statusMenuWidth)
+                                        .attr("height", statusMenuHeight);
+
+                                    statusMenuG.append("text").attr("class", "status-menu-title")
+                                        .attr("x", statusMenuWidth/2)
+                                        .attr("y", statusMenuTitleHeight/2);
+
+                                    statusMenuG.append("g").attr("class", "options")
+                                        .attr("transform", `translate(0, ${statusMenuTitleHeight})`);
+                                })
+
+                        statusMenuG.exit().call(remove)
 
                            
                     })
@@ -529,6 +594,11 @@ export default function pentagonComponent() {
     pentagon.selectedSectionKey = function (value) {
         if (!arguments.length) { return selectedSectionKey; }
         selectedSectionKey = value;
+        return pentagon;
+    };
+    pentagon.withStatusMenu = function (value) {
+        if (!arguments.length) { return withStatusMenu; }
+        withStatusMenu = value;
         return pentagon;
     };
     

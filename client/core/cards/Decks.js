@@ -433,6 +433,9 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
+    console.log("bgClick")
+    //next - attack the issue from this end - is something causing  it to be picked up?????
+    return;
     e.stopPropagation();
     //if(form?.formType === "section"){
       //need to persist the changes to section as these are not done dynamically
@@ -816,7 +819,6 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 //keypresses
 useEffect(() => {
   d3.select("body").on("keypress", (e) => {
-    alert(`key-${e.key}-keycode-${e.keyCode}`)
     if(e.keyCode === "13" || e.key === "Enter"){
       e.preventDefault();
       if(form){
