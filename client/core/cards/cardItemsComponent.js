@@ -120,9 +120,6 @@ export default function cardItemsComponent() {
         }
 
         function update(data){
-            if(editable){
-                console.log("editable update", data)
-            }
             const { } = data;
             const containerG = d3.select(this);
             const contentsG = containerG.select("g.card-items-contents")
@@ -158,11 +155,9 @@ export default function cardItemsComponent() {
                                 .editable(editable)
                                 .styles(styles)
                                 .onClick(function(e,d){
-                                    console.log("pent.onClick")
                                     e.stopPropagation();
                                     if(!editable){ return; }
                                     handleClickItem.call(this, e, d)
-                                    //onSelectItem.call(this, d);
                                 })
                                 .onLongpressStart(longpressStart)
                                 .onLongpressEnd(longpressEnd)
@@ -176,7 +171,6 @@ export default function cardItemsComponent() {
             const cardBgRect = d3.select(this.parentNode.parentNode).select("rect.card-front-bg")
 
             function handleClickItem(e, d){
-                console.log("click", clickedItemNr, d.itemNr, d.title)
                 const { title, itemNr } = d;
                 //undefined items just open to edit mode on first click
                 if(!title){
@@ -280,9 +274,9 @@ export default function cardItemsComponent() {
                                     .withAttachments(false)
                                     .styles((d,i) => ({
                                         opacity:d.title ? 1 : 0.5,
-                                        stroke:COLOURS.CARD.SECTION_VIEW_ITEM_TEXT,
+                                        stroke:"white",//COLOURS.CARD.SECTION_VIEW_ITEM_TEXT,
                                         strokeWidth:0.05,
-                                        fill:COLOURS.CARD.SECTION_VIEW_ITEM_TEXT,
+                                        fill:"white",//COLOURS.CARD.SECTION_VIEW_ITEM_TEXT,
                                         fontMin:1,
                                         fontMax:5,
                                         fontSize:3
@@ -292,7 +286,7 @@ export default function cardItemsComponent() {
                                     console.log("item list click")
                                     e.stopPropagation();
                                     if(!editable){ return; }
-                                    onSelectItem.call(this, d);
+                                    handleClickItem.call(this, e, d)
                                 })
                                 .call(itemDrag)
 

@@ -33,19 +33,19 @@ export default function textComponent() {
     }
 
     let DEFAULT_STYLES = {
-        fill:grey10(9),
-        stroke:grey10(9),
+        fill:"white",
+        stroke:"white",
         strokeWidth:0.1,
         opacity:1,
-        placeholderFill:grey10(8),
-        placeholderStroke:grey10(8),
+        placeholderFill:"white",
+        placeholderStroke:"white",
         placeholderStrokeWidth:0.05,
-        placeholderOpacity:0.7,
+        placeholderOpacity:0.4,
+        fontMin:1,
+        fontMax:5,
+        fontSize:3,
         fontFamily:"arial",
         fontStyle:"normal",
-        fontSize:12,
-        minFont:12,
-        maxFont:12
     }
     let _styles = () => DEFAULT_STYLES;
 
@@ -98,7 +98,7 @@ export default function textComponent() {
         function update(d, i){
             const { title, attachments } = d;
             const containerG = d3.select(this);
-            const styles = _styles(d,i);
+            const styles =  _styles(d,i);
 
             const hasAttachments = false;// attachments.length > 0;
             const maxNrLines = hasAttachments ? 3 : 4;
@@ -144,6 +144,7 @@ export default function textComponent() {
                 .overflow(styles.overflow || "visible")
                     .render();
 
+                    console.log("kkkkkkkkkkkk")
             contentsG.selectAll("text")
                 .style("fill", placeholderUsed ? styles.placeholderFill : styles.fill)
                 .style("stroke", placeholderUsed ? styles.placeholderStroke : styles.stroke)

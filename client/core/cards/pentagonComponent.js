@@ -138,8 +138,7 @@ export default function pentagonComponent() {
                         itemContentsG
                             .append("rect")
                                 //.attr("fill","white")
-                                .attr("fill","transparent")
-                                .attr("stroke", "black");
+                                .attr("fill","transparent");
                         
                         const itemTitleG = itemContentsG.append("g").attr("class", "item-title");
 
@@ -162,9 +161,7 @@ export default function pentagonComponent() {
                     .merge(sectionG)
                     //.call(drag)
                     .attr("display", d => !selectedSectionKey || selectedSectionKey === d.section?.key ? null : "none")
-                    //.style("pointer-events", editable ? null : "none")
-                    .style("pointer-events", "all")
-                    .attr("pointer-events", "all")
+                    .style("pointer-events", editable ? null : "none")
                     .each(function(d,i){
                         const { deckId, cardNr, itemNr, title, section } = d;
                         //ensure any items with titles are above those without

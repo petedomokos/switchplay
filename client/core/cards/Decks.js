@@ -55,6 +55,7 @@ const useStyles = makeStyles((theme) => ({
     position:"absolute",
   },
   formContainer:{
+    pointerEvents:"none",
     position:"absolute",
     left:"0px",
     top:"0px",
@@ -337,10 +338,9 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
     }
   }, []);
 
-
   const onSelectSection = useCallback(key => {
     setSelectedSection(selectedDeck?.sections.find(s => s.key === key) || null);
-  }, [selectedDeckId]);
+  }, [selectedDeck, stringifiedData]);
 
   const getFormDimns = useCallback(() => {
     const { formType, value, formDimns } = form;
@@ -433,9 +433,6 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
-    console.log("bgClick")
-    //next - attack the issue from this end - is something causing  it to be picked up?????
-    return;
     e.stopPropagation();
     //if(form?.formType === "section"){
       //need to persist the changes to section as these are not done dynamically
@@ -632,7 +629,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
       .setForm(setForm)
-  }, [stringifiedData, width, height, selectedSection, form?.formType])
+  }, [stringifiedData, width, height, selectedSection, form?.formType, selectedDeckId])
 
   useEffect(() => {
     d3.select(containerRef.current).call(decks); 
@@ -851,7 +848,7 @@ useEffect(() => {
         {form?.formType === "item" && 
           <ItemForm item={form.value} cardTitle={getCardTitle(form.value.cardNr)} 
             dimns={getFormDimns()} fontSize={form.height * 0.5} save={updateItemTitle} close={() => onSelectItem()} />
-        }
+          }
         {form?.formType === "deck-title" && 
           <DeckTitleForm deck={selectedDeck} save={updateDeckTitle} close={() => setForm(null)}
             dimns={getFormDimns()} 

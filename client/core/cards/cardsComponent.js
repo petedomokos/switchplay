@@ -200,7 +200,7 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                 if(itemD){
                     return getProgressStatusColour({}, { ...itemD, isSectionView:true });
                 }
-                return SECTION_VIEW_STROKL;
+                return SECTION_VIEW_NOT_STARTED_FILL;
             }
 
             //bgdrag
@@ -428,7 +428,7 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                         //ITEMS
                         //helper
                         //note - deckIsSelected && form is handled in Decks - it turns the entire container pointer-events on/off
-                        const cardIsEditable = deckIsSelected && (selectedSectionKey || ((isHeld && isFront) || isSelected));
+                        const cardIsEditable = deckIsSelected && (!!selectedSectionKey || ((isHeld && isFront) || isSelected));
                         const items = itemsComponents[cardNr]
                             .styles({ 
                                 _polygonLineStrokeWidth:itemD => getItemStrokeWidth(cardD, itemD),
@@ -437,7 +437,7 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                             .width(contentsWidth)
                             .height(itemsAreaHeight)
                             .withSections(cardIsEditable)
-                            .withText(d => deckIsSelected && (isFront || isSelected))
+                            .withText(d => cardIsEditable)
                             .selectedItemNr(selectedItemNr)
                             .editable(cardIsEditable)
                             .onSetOuterRadius(r => { itemsOuterRadius = r })
@@ -458,7 +458,7 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                             //not sure why we need this when entire containr shold have pointer-events none when no deck selected
                             .attr("pointer-events", deckIsSelected ? null : "none")
                             .attr("transform", `translate(0, ${headerHeight + gapBetweenHeaderAndItems})`)
-                            .call(fadeInOut, isFront || !isHeld)
+                            .call(fadeInOut, isFront || !isHeld || selectedSectionKey)
                             .datum(itemsData)
                             .call(items)
 
@@ -652,11 +652,8 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
 
                         kpisG.exit().call(remove);
                     })
-                    //.call(drag)
-                    .on("click", e => { 
-                        console.log("cards click")
-                        e.stopPropagation(); 
-                    })
+                    .call(drag)
+                    .on("click", e => { e.stopPropagation(); })
   
             //EXIT
             cardG.exit().call(remove);
