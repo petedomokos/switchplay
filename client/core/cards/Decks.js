@@ -351,7 +351,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
     setSelectedSection(selectedDeck?.sections.find(s => s.key === key) || null);
   }, [selectedDeck, stringifiedData]);
 
-  const getFormDimns = useCallback(() => {
+  const getFormDimnsAndPos = useCallback(() => {
     const { formType, value, formDimns } = form;
     if(formType === "item"){
       return {
@@ -442,12 +442,8 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
-    console.log("bgClick")
+    //console.log("bgClick")
     e.stopPropagation();
-    //if(form?.formType === "section"){
-      //need to persist the changes to section as these are not done dynamically
-      //also update the selectedSection to be the latest
-    //}
     //bg click shouldnt change anything else if its just clicking to comeo out a form
     if(form){  
       setForm(null);
@@ -857,30 +853,30 @@ useEffect(() => {
       <div className={classes.formContainer} ref={formRef}>
         {form?.formType === "item" && 
           <ItemForm item={form.value} cardTitle={getCardTitle(form.value.cardNr)} 
-            dimns={getFormDimns()} fontSize={form.height * 0.5} save={updateItemTitle} close={() => onSelectItem()} />
+            dimns={getFormDimnsAndPos()} fontSize={form.height * 0.5} save={updateItemTitle} close={() => onSelectItem()} />
           }
         {form?.formType === "deck-title" && 
           <DeckTitleForm deck={selectedDeck} save={updateDeckTitle} close={() => setForm(null)}
-            dimns={getFormDimns()} 
+            dimns={getFormDimnsAndPos()} 
           />
         }
         {form?.formType === "section" && 
           <SectionTitleForm section={selectedSection} saveTitle={updateSectionTitle} saveInitials={updateSectionInitials} 
-            close={handleCancelForm} dimns={getFormDimns()} 
+            close={handleCancelForm} dimns={getFormDimnsAndPos()} 
           />
         }
         {form?.formType === "card-title" && 
           <CardTitleForm deck={selectedDeck} cardD={form.value} save={updateCardTitle} close={handleCancelForm}
-            dimns={getFormDimns()} 
+            dimns={getFormDimnsAndPos()} 
           />
         }
         {form?.formType === "purpose" && 
           <PurposeParagraphForm deck={selectedDeck} paraD={form.value} save={updatePurposeParagraph} close={handleCancelForm}
-            dimns={getFormDimns()} 
+            dimns={getFormDimnsAndPos()} 
           />
         }
         {form?.formType === "card-date" && 
-          <CardDateForm dimns={getFormDimns()} date={form.value.date} startDate={form.value.startDate} 
+          <CardDateForm dimns={getFormDimnsAndPos()} date={form.value.date} startDate={form.value.startDate} 
               handleDateChange={handleDateChange} handleCancelForm={handleCancelForm} handleSave={handleSaveDate}
               hasChanged={form.hasChanged}
             

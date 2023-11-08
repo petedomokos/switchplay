@@ -371,10 +371,10 @@ export default function deckComponent() {
                     //@todo - vert can calc this based ont he variable length of previous paragraphs
                     width:paragraphContentsWidth,
                     height:paragraphContentsHeight,
-                    left:margin.left + purposeMargin.left,
+                    left:margin.left + purposeMargin.left - 2,
                     //extra added on end - not sure why it is needed
                     top:margin.top + headerHeight + purposeMargin.top 
-                        + i * paragraphHeight + paragraphMargin.top - (4 + i * 1.5),
+                        + i * paragraphHeight + paragraphMargin.top - 1 /*- (4 + i * 1.5)*/,
                     fontSize:paraFontSize
                 })
         
