@@ -125,8 +125,6 @@ export default function cardItemsComponent() {
 
         function update(data, options){
             const { transitionEnter=true, transitionUpdate=true, updateShouldRaiseTitledItems=true } = options;
-            //console.log("items", clickedItemNr)
-            console.log("items", updateShouldRaiseTitledItems)
             const { } = data;
             const containerG = d3.select(this);
             const contentsG = containerG.select("g.card-items-contents")
@@ -178,11 +176,15 @@ export default function cardItemsComponent() {
                                     clickedItemNr = null;
                                     update.call(containerG.node(), data, { ...options, updateShouldRaiseTitledItems:false });
                                 })
+                                .onClickStatusOption(function(itemD, optD){ 
+                                    onUpdateItemStatus(itemD.itemNr, optD.status)
+                                })
                                 .onLongpressStart(longpressStart)
                                 .onLongpressEnd(longpressEnd)
                                 .onDrag(onDrag)
                                 .onDragEnd(onDragEnd)
-                                , { updateShouldRaiseTitledItems });
+                                //updates triggered by status change should not raise other items until statusmenu closed
+                                , { updateShouldRaiseTitledItems:updateShouldRaiseTitledItems && !isNumber(clickedItemNr) });
                                     
                     })
 
@@ -361,13 +363,14 @@ export default function cardItemsComponent() {
     };
     cardItems.selectedSectionKey = function (value) {
         if (!arguments.length) { return selectedSectionKey; }
+        if(value !== selectedSectionKey){ clickedItemNr = null; }
         selectedSectionKey = value;
-        clickedItemNr = null;
         pentagon.selectedSectionKey(value);
         return cardItems;
     };
     cardItems.clickedItemNr = function (value) {
         if (!arguments.length) { return clickedItemNr; }
+        console.log("setting clickedItemNr to", value)
         clickedItemNr = value;
         return cardItems;
     };

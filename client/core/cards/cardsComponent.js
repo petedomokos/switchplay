@@ -126,30 +126,6 @@ export default function cardsComponent() {
     let mediaComponents = {};
     let kpisComponents = {};
 
-    /*
-    //darker blue-purple
-    background: hsla(211, 96%, 62%, 1);
-
-    background: linear-gradient(90deg, hsla(211, 96%, 62%, 1) 0%, hsla(295, 94%, 76%, 1) 100%);
-
-    background: -moz-linear-gradient(90deg, hsla(211, 96%, 62%, 1) 0%, hsla(295, 94%, 76%, 1) 100%);
-
-    background: -webkit-linear-gradient(90deg, hsla(211, 96%, 62%, 1) 0%, hsla(295, 94%, 76%, 1) 100%);
-
-    filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#439CFB", endColorstr="#F187FB", GradientType=1 );
-*/
-
-    /*background: hsla(206, 91%, 66%, 1);
-
-background: linear-gradient(90deg, hsla(206, 91%, 66%, 1) 0%, hsla(190, 90%, 51%, 1) 100%);
-
-background: -moz-linear-gradient(90deg, hsla(206, 91%, 66%, 1) 0%, hsla(190, 90%, 51%, 1) 100%);
-
-background: -webkit-linear-gradient(90deg, hsla(206, 91%, 66%, 1) 0%, hsla(190, 90%, 51%, 1) 100%);
-
-filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", endColorstr="#12CFF3", GradientType=1 );
-*/
-
     function cards(selection, options={}) {
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
         updateDimns();
@@ -168,15 +144,15 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
             const getBackOfCardStrokeWidth = d => 0.5;
 
             //stroke-widths
-            const getItemStrokeWidth = (cardD, itemD) => {
+            const getMainItemStrokeWidth = (cardD, itemD) => {
                 const { status, isSectionView, title } = itemD;
                 const { isHeld, isSelected } = cardD;
                 if(!title){ return 0.15 }
                 if(deckIsSelected){
                     if(isHeld || isSelected){
-                        return status === 2 ? 1 : (status === 1 ? 0.8 : 0.2);
+                        return status === 2 ? 1 : 0.8;//(status === 1 ? 0.8 : 0.2);
                     }
-                    return status === 2 ? 3 : (status === 1 ? 2 : 0.2)
+                    return status === 2 ? 3 : (status === 1 ? 1.5 : 0.2)
                 }
                 //multiple deck view
                 if(isHeld || isSelected){
@@ -440,7 +416,7 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                         const cardIsEditable = deckIsSelected && (!!selectedSectionKey || ((isHeld && isFront) || isSelected));
                         const items = itemsComponents[cardNr]
                             .styles({ 
-                                _polygonLineStrokeWidth:itemD => getItemStrokeWidth(cardD, itemD),
+                                _polygonLineStrokeWidth:itemD => getMainItemStrokeWidth(cardD, itemD),
                                 _itemStroke:itemD => getProgressStatusColour(cardD, itemD)
                             })
                             .width(contentsWidth)

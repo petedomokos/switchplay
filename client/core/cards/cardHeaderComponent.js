@@ -258,7 +258,7 @@ export default function cardHeaderComponent() {
                                                 _polygonLineStrokeWidth:(itemD) => {
                                                     const { status, title } = itemD;
                                                     if(!title){ return 0.1; }
-                                                    return status === 2 ? 1.3 : (status === 1 ? 1 : 0.5)
+                                                    return status === 2 ? 1.3 : 1;// (status === 1 ? 1 : 0.5)
                                                 },
                                                 _itemStroke:styles.getStatusFill,
                                             }))
