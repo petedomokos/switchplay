@@ -75,6 +75,8 @@ export default function cardItemsComponent() {
     let editable = true;
     let newStatus;
     let statusTimer;
+
+    let cardIsSelected = false;
     let selectedItemNr;
     let selectedSectionKey;
     let clickedItemNr;
@@ -136,6 +138,9 @@ export default function cardItemsComponent() {
                 .attr("width", contentsWidth)
                 .attr("height", contentsHeight)
 
+            const statusMenuDimns = cardIsSelected ? { itemWidth: 12, itemHeight: 9, titleHeight: 5 } :
+                { itemWidth:20, itemHeight: 17, titleHeight:7 }
+
             const polygonCentreG = contentsG.selectAll("g.polygon-centre").data(contentsHeight < 40 ? [] : [1]);
             polygonCentreG.enter()
                 .append("g")
@@ -164,6 +169,7 @@ export default function cardItemsComponent() {
                                 .withSections(withSections)
                                 .withText(withText && !isNumber(selectedItemNr))
                                 .statusMenuItemNr(clickedItemNr)
+                                .statusMenuDimns(statusMenuDimns)
                                 .editable(editable)
                                 .styles(styles)
                                 .onClickSection(function(e,d){
@@ -356,6 +362,11 @@ export default function cardItemsComponent() {
         withText = value;
         return cardItems;
     };
+    cardItems.cardIsSelected = function (value) {
+        if (!arguments.length) { return cardIsSelected; }
+        cardIsSelected = value;
+        return cardItems;
+    };
     cardItems.selectedItemNr = function (value) {
         if (!arguments.length) { return selectedItemNr; }
         selectedItemNr = value;
@@ -370,7 +381,6 @@ export default function cardItemsComponent() {
     };
     cardItems.clickedItemNr = function (value) {
         if (!arguments.length) { return clickedItemNr; }
-        console.log("setting clickedItemNr to", value)
         clickedItemNr = value;
         return cardItems;
     };

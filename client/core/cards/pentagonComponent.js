@@ -40,6 +40,7 @@ export default function pentagonComponent() {
     let editable = true;
     let selectedSectionKey;
     let statusMenuItemNr = null;
+    let statusMenuDimns = { itemWidth:12, itemHeight:9, titleHeight: 5 }
 
     let innerVertices;
     let outerVertices;
@@ -48,6 +49,7 @@ export default function pentagonComponent() {
     let hitlineStrokeWidth;
 
     let shouldTruncate;
+
 
     let prevR2 = 0; //can say it starts at 0 as it doesnt exist at that point
 
@@ -520,11 +522,12 @@ export default function pentagonComponent() {
                             { key:"status-1", status:1, colour:SILVER },
                             { key:"status-2", status:2, colour:GOLD }
                         ];
+
                         const nrOptions = statusOptionsData.length;
-                        const statusMenuTitleHeight = 5;
+                        const statusMenuTitleHeight = statusMenuDimns.titleHeight;
                         const statusMenuMargin = { left: 1, right: 1, top: 0, bottom: 2 }
-                        const statusItemWidth = 12;
-                        const statusItemHeight = 9;
+                        const statusItemWidth = statusMenuDimns.itemWidth;
+                        const statusItemHeight = statusMenuDimns.itemHeight;
                         const statusItemMarginHoz = 1.5; //2 * 1.5 = 3 ensures square area for radio button
                         const statusItemContentsWidth = statusItemWidth - 2 * statusItemMarginHoz;
                         const statusItemContentsHeight = statusItemHeight;
@@ -692,7 +695,11 @@ export default function pentagonComponent() {
         statusMenuItemNr = value;
         return pentagon;
     };
-    
+    pentagon.statusMenuDimns = function (value) {
+        if (!arguments.length) { return statusMenuDimns; }
+        statusMenuDimns = { ...statusMenuDimns, ...value };
+        return pentagon;
+    };    
     pentagon.styles = function (obj) {
         if (!arguments.length) { return styles; }
         styles = {

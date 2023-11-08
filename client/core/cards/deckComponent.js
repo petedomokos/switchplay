@@ -280,7 +280,7 @@ export default function deckComponent() {
             updateDimns(deckData);
             if(deckIsSelected)
             id = deckData.id;
-            containerG = d3.select(this).on("click", () => { console.log("deck clicked")})
+            containerG = d3.select(this);
 
             if(containerG.select("g").empty()){
                 init();

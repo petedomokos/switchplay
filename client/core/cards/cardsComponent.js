@@ -424,6 +424,7 @@ export default function cardsComponent() {
                             .headerHeight(headerHeight)
                             .withSections(cardIsEditable)
                             .withText(d => cardIsEditable)
+                            .cardIsSelected(selectedCardNr === cardNr)
                             .selectedItemNr(selectedItemNr)
                             .editable(cardIsEditable)
                             .onSetOuterRadius(r => { itemsOuterRadius = r })
@@ -447,12 +448,7 @@ export default function cardsComponent() {
                             .attr("transform", `translate(0, ${headerHeight + gapBetweenHeaderAndItems})`)
                             .call(fadeInOut, isFront || !isHeld || selectedSectionKey)
                             .datum(itemsData)
-                            .call(items)
-                            .on("click", () => { 
-                                console.log("card-items area click")
-                                items.clickedItemNr(null)
-                                containerG.call(cards)
-                            })
+                            .call(items);
 
                         //remove items for cards behind
                         const shouldHideItems = isHeld && !isFront && !isSelected;
@@ -802,6 +798,9 @@ export default function cardsComponent() {
     cards.deckIsSelected = function (value) {
         if (!arguments.length) { return deckIsSelected; }
         deckIsSelected = value;
+        Object.values(itemsComponents).forEach(itemsComponent => {
+            itemsComponent.clickedItemNr(null);
+        })
         return cards;
     };
     cards.form = function (value) {

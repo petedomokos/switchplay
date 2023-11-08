@@ -55,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
     position:"absolute",
   },
   formContainer:{
-    pointerEvents:"none",
+    pointerEvents:props => props.form.pointerEvents,
     position:"absolute",
     left:"0px",
     top:"0px",
@@ -211,6 +211,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
     },
     form:{ 
       display: form ? null : "none",
+      pointerEvents: form ? "all" : "none"
     }
   };
   const classes = useStyles(styleProps);
@@ -432,6 +433,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
 
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
+    console.log("bgClick")
     e.stopPropagation();
     //if(form?.formType === "section"){
       //need to persist the changes to section as these are not done dynamically
