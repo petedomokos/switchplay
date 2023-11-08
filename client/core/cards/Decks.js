@@ -54,8 +54,13 @@ const useStyles = makeStyles((theme) => ({
   svg:{
     position:"absolute",
   },
+  formUnderlay:{
+    width:props => props.formUnderlay.width,
+    height:props => props.formUnderlay.height,
+    display:props => props.formUnderlay.display
+  },
   formContainer:{
-    pointerEvents:props => props.form.pointerEvents,
+    pointerEvents:"none",//props => props.form.pointerEvents,
     position:"absolute",
     left:"0px",
     top:"0px",
@@ -209,9 +214,13 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
     svg:{
       //pointerEvents:selectedDeckId ? "all" : "none",
     },
+    formUnderlay:{
+      width:"100%",
+      height:"100%",
+      display:form ? null : "none"
+    },
     form:{ 
       display: form ? null : "none",
-      pointerEvents: form ? "all" : "none"
     }
   };
   const classes = useStyles(styleProps);
@@ -844,6 +853,7 @@ useEffect(() => {
           )}
         </defs>
       </svg>
+      <div className={classes.formUnderlay} onClick={onClickBg}></div>
       <div className={classes.formContainer} ref={formRef}>
         {form?.formType === "item" && 
           <ItemForm item={form.value} cardTitle={getCardTitle(form.value.cardNr)} 

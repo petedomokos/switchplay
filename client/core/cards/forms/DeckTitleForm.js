@@ -62,6 +62,11 @@ export default function DeckTitleForm({ deck, dimns, save, close }) {
   }
   const classes = useStyles(styleProps);
 
+  const onClickBg = e => {
+    e.stopPropagation() 
+    close();
+  }
+
   const handleChange = event => { 
     const newTitle = event.target.value;
     setValue(prevState => ({ ...prevState, title:newTitle })) 
@@ -73,7 +78,7 @@ export default function DeckTitleForm({ deck, dimns, save, close }) {
   useEffect(() => { d3.timeout(() => { setEditing(true); }, 1) }, [])
 
   return (
-    <div className={classes.root} onClick={e => { e.stopPropagation() }}>
+    <div className={classes.root} onClick={onClickBg}>
       <form className={classes.form}>
         {editing && 
           <Input
