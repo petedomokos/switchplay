@@ -141,15 +141,15 @@ export function show(selection, options={}){
 
 
 export function fadeIn(selection, options={}){
-    const { transition, opacity=1 } = options;
+    const { transition, cb=()=>{}, display=null, opacity=1 } = options;
     selection.each(function(){
         //will be multiple exits because of the delay in removing
         if(!d3.select(this).attr("class").includes("fading-in")){
             const currDisplayValue = d3.select(this).attr("display");
             d3.select(this)
                 .attr("opacity", d3.select(this).attr("opacity") || 0)
-                //remove any none setting of display so it will fade in
-                .attr("display", currDisplayValue === "none" ? null : currDisplayValue)
+                //adjust display if required or if new value passed in
+                .attr("display", currDisplayValue === "none" || display ? display : currDisplayValue)
                 .classed("fading-in", true)
                 .transition()
                     .delay(transition?.delay || 0)
@@ -157,13 +157,14 @@ export function fadeIn(selection, options={}){
                     .attr("opacity", opacity)
                     .on("end", function() { 
                         d3.select(this).classed("fading-in", false); 
+                        cb.call(this);
                     });
         }
     })
 }
 
 export function fadeOut(selection, options={}){
-    const { transition } = options;
+    const { transition, cb=()=>{}, shouldRemove, display="none", opacity=0 } = options;
     selection.each(function(){
         //will be multiple exits because of the delay in removing
         if(!d3.select(this).attr("class").includes("fading-out")){
@@ -173,36 +174,24 @@ export function fadeOut(selection, options={}){
                 .transition("fade-out")
                     .delay(transition?.delay || 0)
                     .duration(transition?.duration || CONTENT_FADE_DURATION)
-                    .attr("opacity", 0)
+                    .attr("opacity", opacity)
                     .on("end", function() { 
-                        d3.select(this)
-                            .attr("display", "none")
-                            .classed("fading-out", false); 
+                        if(shouldRemove){ 
+                            d3.select(this).remove(); 
+                        }
+                        else{
+                            d3.select(this)
+                                .attr("display", display)
+                                .classed("fading-out", false); 
+                        }
+                        cb.call(this);
                     });
         }
     })
 }
 
-export function remove(selection, options={}){
-    const { transition } = options;
-    selection.each(function(){
-        //will be multiple exits because of the delay in removing
-        if(!d3.select(this).attr("class").includes("exiting")){
-            //console.log("removing............................",)
-            d3.select(this)
-                .attr("opacity", d3.select(this).attr("opacity") || 1)
-                .classed("exiting", true)
-                .transition()
-                    .delay(transition?.delay || 0)
-                    .duration(transition?.duration || CONTENT_FADE_DURATION)
-                    .attr("opacity", 0)
-                    .on("end", function() { 
-                        //console.log("removed")
-                        d3.select(this).remove(); 
-                    });
-        }
-    })
-
+export function remove(selection, options={}){ 
+    return fadeOut(selection, { ...options, shouldRemove:true })
 }
 
 

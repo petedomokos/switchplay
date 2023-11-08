@@ -9,6 +9,7 @@ import { fadeIn, fadeInOut, remove } from '../journey/domHelpers';
 import { updateTransform } from '../journey/transitionHelpers';
 import { icons } from '../../util/icons';
 import { isNumber } from '../../data/dataHelpers';
+import { update } from 'lodash';
 
 const { GOLD, SILVER, NOT_STARTED_FILL, SECTION_VIEW_NOT_STARTED_FILL } = COLOURS;
 
@@ -23,6 +24,9 @@ export default function cardsComponent() {
     //non-section view dimns
     let normalContentsWidth;
     let normalContentsHeight;
+
+    let getCardContentsWidth; 
+    let getCardContentsHeight;
 
     let placedCardWidth = 0;
     let placedCardHeight = 0;
@@ -50,6 +54,9 @@ export default function cardsComponent() {
         const heldCardHeightToUse = selectedSectionKey ? sectionViewHeldCardHeight : heldCardHeight;
         contentsWidth = heldCardWidthToUse - margin.left - margin.right;
         contentsHeight = heldCardHeightToUse - margin.top - margin.bottom; 
+
+        getCardContentsWidth = cardD => cardD.isHeld ? contentsWidth : normalContentsWidth;
+        getCardContentsHeight = cardD => cardD.isHeld ? contentsHeight : normalContentsHeight;
 
         itemsAreaHeight = contentsHeight - headerHeight - gapBetweenHeaderAndItems;
 
@@ -235,13 +242,13 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                                 .attr("rx", 3)
                                 .attr("ry", 3)
                                 //for placed cards, we dont want the dimns to be changed when in section view
-                                .attr("width", isHeld ? contentsWidth : normalContentsWidth)
-                                .attr("height", isHeld ? contentsHeight : normalContentsHeight)
+                                .attr("width", getCardContentsWidth(cardD))
+                                .attr("height", getCardContentsHeight(cardD))
                                 .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL : getCardFill(cardD))
                                 .attr("stroke", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_STROKE : getCardStroke(cardD))
                                 .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth() : STYLES.CARD.STROKE_WIDTH)
                                 .on("click", e => {
-                                    //console.log("card bg click")
+                                    console.log("card bg click")
                                     onClickCard.call(this, e, cardD)
                                     e.stopPropagation();
                                 })
@@ -251,8 +258,8 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                                 .attr("class", "card-bg card-back-bg")
                                 .attr("rx", 3)
                                 .attr("ry", 3)
-                                .attr("width", isHeld ? contentsWidth : normalContentsWidth)
-                                .attr("height", isHeld ? contentsHeight : normalContentsHeight)
+                                .attr("width", getCardContentsWidth(cardD))
+                                .attr("height", getCardContentsHeight(cardD))
                                 .attr("opacity", cardsAreFlipped ? 1 : 0)
                                 .attr("fill", getBackOfCardFill(cardD))
                                 .attr("stroke", getBackOfCardStroke(cardD))
@@ -275,7 +282,8 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                         
                         frontContentsG
                             .append("g")
-                                .attr("class", "items-area");
+                                .attr("class", "items-area")
+                                    .attr("pointer-events", "none");
 
                         //BACK
                         backContentsG
@@ -436,6 +444,7 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                             })
                             .width(contentsWidth)
                             .height(itemsAreaHeight)
+                            .headerHeight(headerHeight)
                             .withSections(cardIsEditable)
                             .withText(d => cardIsEditable)
                             .selectedItemNr(selectedItemNr)
@@ -461,6 +470,11 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                             .call(fadeInOut, isFront || !isHeld || selectedSectionKey)
                             .datum(itemsData)
                             .call(items)
+                            .on("click", () => { 
+                                console.log("card-items area click")
+                                items.clickedItemNr(null)
+                                containerG.call(cards)
+                            })
 
                         //remove items for cards behind
                         const shouldHideItems = isHeld && !isFront && !isSelected;

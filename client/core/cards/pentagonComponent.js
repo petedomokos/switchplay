@@ -7,6 +7,7 @@ import { TextBox } from "d3plus-text";
 import { grey } from '@material-ui/core/colors';
 import { isNumber } from '../../data/dataHelpers';
 import { fadeInOut, fadeIn, remove } from '../journey/domHelpers';
+import { icons } from '../../util/icons';
 
 const NR_SECTIONS = 5;
 
@@ -48,6 +49,10 @@ export default function pentagonComponent() {
     let shouldTruncate;
 
     let prevR2 = 0; //can say it starts at 0 as it doesnt exist at that point
+
+    let underlayDimnsAndPos = {
+        width:0, height:0, offsetX:0, offsetY:0
+    }
     
     
     function updateDimns(){
@@ -69,7 +74,8 @@ export default function pentagonComponent() {
     }
 
     //API CALLBACKS
-    let onClick = function(){};
+    let onClickSection = function(){};
+    let onUnclickSection = function(){};
     let onLongpressStart = function(){};
     let onLongpressEnd = function(){};
     let onDragStart = function(){};
@@ -112,6 +118,11 @@ export default function pentagonComponent() {
                     .each(function(d,i){
                         //why are these 5 entering every time item is clicked????
                         const sectionG = d3.select(this);
+                        sectionG.append("rect").attr("class", "section-underlay")
+                            .attr("opacity", 0.5)
+                            .attr("rx", 3) //@todo - store in constants and use in cardsComponent too
+                            .attr("ry", 3)
+
                         sectionG.append("path").attr("class", "section-bg").attr("fill", "transparent");
                         sectionG.append("line").attr("class", "start show-with-section visible");
                         sectionG.append("line").attr("class", "finish show-with-section visible")
@@ -152,7 +163,7 @@ export default function pentagonComponent() {
 
                     })
                     //WARNING: drag is before merge so it doesnt get broken when a longpress causes an update
-                    //if it breaks, the enhancedDH will trigger onClick because isLongpress is reset to false
+                    //if it breaks, the enhancedDH will trigger onClickSection because isLongpress is reset to false
                     //it still seems to be reset here, but is not reappended - this may cause a problem
                     //with the d that is sent through notbeing the latest)
                     //if so, could put it back bekow merge so it updates, but find another way to prevent 
@@ -161,8 +172,7 @@ export default function pentagonComponent() {
                     .merge(sectionG)
                     //.call(drag)
                     .attr("display", d => !selectedSectionKey || selectedSectionKey === d.section?.key ? null : "none")
-                    .attr("opacity", d => !isNumber(statusMenuItemNr) ? 1 : (statusMenuItemNr === d.itemNr ? 1 : 0.4))
-                    .style("pointer-events", editable ? null : "none")
+                    .style("pointer-events", withSections && editable ? null : "none")
                     .each(function(d,i){
                         const { deckId, cardNr, itemNr, title, section } = d;
                         //if a status menu is showing, we only raise that item
@@ -189,7 +199,16 @@ export default function pentagonComponent() {
 
                         const sizeIsIncreasing = r2 - prevR2 > 0;
                         const sectionG = d3.select(this)
-                            .on("click", onClick);
+                            .on("click", onClickSection);
+
+                        sectionG.select("rect.section-underlay")
+                            .call(fadeInOut, statusMenuItemNr === itemNr, { opacity:0.8 })
+                            //@todo - adjust polygon so its always centred exactly, or find the offset rather than hardcode it to 1.5
+                            .attr("transform", `translate(${underlayDimnsAndPos.offsetX},${underlayDimnsAndPos.offsetY - 1.5})`)
+                            .attr("width", underlayDimnsAndPos?.width || 0)
+                            .attr("height", underlayDimnsAndPos?.height || 0)
+                            .on("click", onUnclickSection)
+
                         //startLine
                         sectionG.select("line.start")
                             .transition("start-trans")
@@ -269,7 +288,6 @@ export default function pentagonComponent() {
                                 .attr("stroke-width", styles._polygonLineStrokeWidth(d,i))
 
                         sectionG.selectAll(".show-with-section")
-                            .attr("pointer-events", withSections ? null : "none")
                             .transition("outer-trans")
                             .delay(sizeIsIncreasing ? 300 : 0)
                             .duration(TRANSITIONS.MED)
@@ -498,17 +516,22 @@ export default function pentagonComponent() {
 
 
                         //status
-                        const statusMenuOptionsData = [
-                            { key:"status-0" },
-                            { key:"status-1" },
-                            { key:"status-2" }
+                        const statusOptionsData = [
+                            { key:"status-0", icon:icons.radio },
+                            { key:"status-1", icon:icons.radio },
+                            { key:"status-2", icon:icons.radio }
                         ];
+                        const nrOptions = statusOptionsData.length;
                         const statusMenuTitleHeight = 5;
-                        const statusMenuMargin = { left: 1, right: 1, top: 1, bottom: 1 }
-                        const statusMenuItemWidth = 10;
-                        const statusMenuItemHeight = 10;
-                        const statusMenuWidth = statusMenuOptionsData.length * statusMenuItemWidth + statusMenuMargin.left + statusMenuMargin.right;
-                        const statusMenuHeight = statusMenuItemHeight + statusMenuMargin.top + statusMenuMargin.bottom;
+                        const statusMenuMargin = { left: 1, right: 1, top: 0, bottom: 2 }
+                        const statusItemWidth = 10;
+                        const statusItemHeight = 7;
+                        const statusItemMarginHoz = 1.5; //2 * 1.5 = 3 ensures square area for radio button
+                        const statusItemContentsWidth = statusItemWidth - 2 * statusItemMarginHoz;
+                        const statusItemContentsHeight = statusItemHeight;
+
+                        const statusMenuWidth = nrOptions * statusItemWidth + statusMenuMargin.left + statusMenuMargin.right;
+                        const statusMenuHeight = statusMenuTitleHeight + statusItemHeight + statusMenuMargin.top + statusMenuMargin.bottom;
                         const gapBetweenItemAndMenu = 1;
 
                         const statusMenuContainerG = sectionContentsG.select("g.status-menu-container");
@@ -524,13 +547,21 @@ export default function pentagonComponent() {
                                     statusMenuG.append("rect").attr("class", "status-menu-bg")
                                         .attr("rx", 1.5)
                                         .attr("ry", 1.5)
-                                        .attr("fill", "black")
+                                        .attr("fill", "aqua")// "black")
                                         .attr("opacity", 1);
 
-                                    statusMenuG.append("text").attr("class", "status-menu-title")
-                                        .attr("text-anchor", "middle")
-                                        .attr("dominant-baseline", "central");
-
+                                    statusMenuG
+                                        .append("text")
+                                            .attr("class", "status-menu-title")
+                                            .attr("text-anchor", "middle")
+                                            .attr("dominant-baseline", "central")
+                                            .attr("stroke", grey10(3))
+                                            .attr("fill", grey10(3))
+                                            .attr("stroke-width", 0.03)
+                                            .attr("font-size", 2.5)
+                                            .attr("font-family", "helvetica")
+                                            .attr("font-style", "normal")
+                                        
                                     statusMenuG.append("g").attr("class", "options");
                                 })
                                 .merge(statusMenuG)
@@ -541,12 +572,53 @@ export default function pentagonComponent() {
                                         .attr("width", statusMenuWidth)
                                         .attr("height", statusMenuHeight);
 
-                                    statusMenuG.append("text").attr("class", "status-menu-title")
+                                    statusMenuG.select("text").attr("class", "status-menu-title")
                                         .attr("x", statusMenuWidth/2)
-                                        .attr("y", statusMenuTitleHeight/2);
+                                        .attr("y", statusMenuMargin.top + statusMenuTitleHeight/2)
+                                        .text("STATUS");
 
-                                    statusMenuG.append("g").attr("class", "options")
-                                        .attr("transform", `translate(0, ${statusMenuTitleHeight})`);
+                                    const optionsG = statusMenuG.select("g.options")
+                                        .attr("transform", `translate(${statusMenuMargin.left}, ${statusMenuMargin.top + statusMenuTitleHeight})`)
+                                    
+                                    const optionG = optionsG.selectAll("g.option").data(statusOptionsData, d => d.key)
+                                    optionG.enter()
+                                        .append("g")
+                                            .attr("class", "option")
+                                            .each(function(){
+                                                const optionG = d3.select(this);
+                                                optionG.append("path").attr("class", "outer")
+                                                optionG.append("path").attr("class", "inner")
+                                                //todo add icon here and fill in update section
+
+
+                                                optionG.append("rect")
+                                                    .attr("fill", "none")
+                                                    .attr("stroke", "white")
+                                                    .attr("stroke-width", 0.05)
+                                            })
+                                            .merge(optionG)
+                                            .attr("transform", (d,i) => `translate(${statusItemMarginHoz + i * statusItemWidth})`)
+                                            .each(function(d){
+                                                const optionG = d3.select(this);
+
+                                                //todo - get these paths working, or use circles instead, or pie chart with innder radius
+
+                                                optionG.select("path.outer")
+                                                    .attr("transform","scale(0.25)")
+                                                    //.attr("fill", "none")
+                                                    .attr("d", d.icon.ds[0])
+                                                optionG.select("path.inner")
+                                                    .attr("transform","scale(0.25)")
+                                                    .attr("fill", "none")
+                                                    .attr("d", d.icon.ds[1])
+
+                                                optionG.select("rect")
+                                                    .attr("width", statusItemContentsWidth)
+                                                    .attr("height", statusItemContentsHeight)
+
+                                            })
+
+                                    optionG.exit().remove();
                                 })
 
                         statusMenuG.exit().call(remove)
@@ -571,6 +643,11 @@ export default function pentagonComponent() {
         if (!arguments.length) { return r2; }
         prevR2 = r2;
         r2 = value;
+        return pentagon;
+    };
+    pentagon.underlayDimnsAndPos = function (value) {
+        if (!arguments.length) { return underlayDimnsAndPos; }
+        underlayDimnsAndPos = value;
         return pentagon;
     };
     pentagon.withSections = function (value) {
@@ -612,9 +689,14 @@ export default function pentagonComponent() {
         };
         return pentagon;
     };
-    pentagon.onClick = function (value) {
-        if (!arguments.length) { return onClick; }
-        onClick = value;
+    pentagon.onUnclickSection = function (value) {
+        if (!arguments.length) { return onUnclickSection; }
+        onUnclickSection = value;
+        return pentagon;
+    };
+    pentagon.onClickSection = function (value) {
+        if (!arguments.length) { return onClickSection; }
+        onClickSection = value;
         return pentagon;
     };
     pentagon.onLongpressStart = function (value) {
@@ -643,14 +725,14 @@ export default function pentagonComponent() {
         return pentagon;
     };
     /*
-    pentagon.onClickSectionLine = function (value) {
-        if (!arguments.length) { return onClickSectionLine; }
-        onClickSectionLine = value;
+    pentagon.onClickSectionSectionLine = function (value) {
+        if (!arguments.length) { return onClickSectionSectionLine; }
+        onClickSectionSectionLine = value;
         return pentagon;
     };
-    pentagon.onClickSectionContent = function (value) {
-        if (!arguments.length) { return onClickSectionContent; }
-        onClickSectionContent = value;
+    pentagon.onClickSectionSectionContent = function (value) {
+        if (!arguments.length) { return onClickSectionSectionContent; }
+        onClickSectionSectionContent = value;
         return pentagon;
     };
     pentagon.onMouseover = function (value) {

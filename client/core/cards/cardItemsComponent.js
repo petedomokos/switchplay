@@ -21,6 +21,9 @@ export default function cardItemsComponent() {
     let contentsWidth;
     let contentsHeight;
 
+    //needed for unerlay dimns
+    let headerHeight = 0;
+
     let extraShiftDownForAngleDiscrepancy;
 
     let itemWidth;
@@ -120,6 +123,7 @@ export default function cardItemsComponent() {
         }
 
         function update(data){
+            //console.log("items", clickedItemNr)
             const { } = data;
             const containerG = d3.select(this);
             const contentsG = containerG.select("g.card-items-contents")
@@ -149,15 +153,29 @@ export default function cardItemsComponent() {
                             .call(pentagon
                                 .r1(innerRadius)
                                 .r2(outerRadius)
+                                .underlayDimnsAndPos({
+                                    width:width,
+                                    height:height + headerHeight,
+                                    offsetX: -width/2,
+                                    //@todo: offset wont be accurat if pentagon is centred in cardItems -> But it should be centred
+                                    offsetY: -height/2 - headerHeight
+                                })
                                 .withSections(withSections)
                                 .withText(withText && !isNumber(selectedItemNr))
                                 .statusMenuItemNr(clickedItemNr)
                                 .editable(editable)
                                 .styles(styles)
-                                .onClick(function(e,d){
+                                .onClickSection(function(e,d){
                                     e.stopPropagation();
                                     if(!editable){ return; }
                                     handleClickItem.call(this, e, d)
+                                })
+                                .onUnclickSection(function(e){
+                                    //console.log("this", this)
+                                    e.stopPropagation();
+                                    clickedItemNr = null;
+                                    update.call(containerG.node(), data);
+                                    //setForm(null)
                                 })
                                 .onLongpressStart(longpressStart)
                                 .onLongpressEnd(longpressEnd)
@@ -172,6 +190,7 @@ export default function cardItemsComponent() {
 
             function handleClickItem(e, d){
                 const { title, itemNr } = d;
+                //console.log("handleClickItem", clickedItemNr)
                 //undefined items just open to edit mode on first click
                 if(!title){
                     clickedItemNr = null;
@@ -185,10 +204,6 @@ export default function cardItemsComponent() {
                     return;
                 }
 
-                //BUG - click defined item twice, then clode the item page, then 
-                //click item again. It should reopen the status menu. Instead it closes deck.
-                //same if you click non-defined item -> it closes deck
-                //defined items open up status menu on first click
                 clickedItemNr = itemNr;
                 update.call(containerG.node(), data);
 
@@ -308,6 +323,11 @@ export default function cardItemsComponent() {
         height = value;
         return cardItems;
     };
+    cardItems.headerHeight = function (value) {
+        if (!arguments.length) { return headerHeight; }
+        headerHeight = value;
+        return cardItems;
+    };
     cardItems.getItemStroke = function (func) {
         if (!arguments.length) { return getItemStroke; }
         getItemStroke = func;
@@ -339,7 +359,14 @@ export default function cardItemsComponent() {
     cardItems.selectedSectionKey = function (value) {
         if (!arguments.length) { return selectedSectionKey; }
         selectedSectionKey = value;
+        clickedItemNr = null;
         pentagon.selectedSectionKey(value);
+        return cardItems;
+    };
+    cardItems.clickedItemNr = function (value) {
+        if (!arguments.length) { return clickedItemNr; }
+        clickedItemNr = value;
+        console.log("set c to", value)
         return cardItems;
     };
     cardItems.editable = function (value) {

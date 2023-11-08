@@ -145,6 +145,15 @@ export default function textComponent() {
                     .render();
 
             contentsG.selectAll("text")
+            //next --am trying to turn off pointer-evetns for all sections except the selected one,
+            //and if no selected then turn on for all.
+            //but something is still picking up the click
+
+            //afer, we can then turn it off for cardHeader too, and then juts have the g.card itself have a click handler that
+            //simply resets clickedItemNr to null, so first click outside of status will simply remove the status menu.
+
+            
+                .style("pointer-events", "none")
                 .style("fill", placeholderUsed ? styles.placeholderFill : styles.fill)
                 .style("stroke", placeholderUsed ? styles.placeholderStroke : styles.stroke)
                 .style("stroke-width", placeholderUsed ? styles.placeholderStrokeWidth : styles.strokeWidth)
