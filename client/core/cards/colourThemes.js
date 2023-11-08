@@ -235,7 +235,7 @@ export const SATURATED_BLUE_COLOUR_THEME = (bgColour) => ({
             const heldPos = calcCardHeldPos(cardD);
             return `hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`;
         },
-        EXPAND_COLLAPSE_BTN:grey10(5.5),
+        EXPAND_COLLAPSE_BTN:grey10(4),
         HEADER:cardD => {
             const heldPos = calcCardHeldPos(cardD);
             return {

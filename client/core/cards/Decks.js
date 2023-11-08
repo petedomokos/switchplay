@@ -377,16 +377,18 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
         height:(DIMNS.DECK.HEADER_HEIGHT - deckFormMarginTop) * zoomScale,
         //next - put deckX and deckY into this just to see it works even though we dont really need it
         //then apply same to card form dimns
-        left: 20 + extraHozShiftToCentreWhenSelected,
-        top:0
+        left: 28 + extraHozShiftToCentreWhenSelected,
+        top:4
       }
     }
     if(formType === "card-title"){
+
+      const { cardNr } = form.value;
   
       //select the correct deck and card
       const cardG = d3.select(containerRef.current)
         .selectAll("g.deck").filter(deckD => deckD.id === selectedDeckId)
-        .selectAll("g.card").filter(cardD => cardD.cardNr === form.value.cardNr);
+        .selectAll("g.card").filter(cardD => cardD.cardNr === cardNr);
 
       //we need all transforms form the deck onwards (because deck is in top-left of screen)
       //we also need to break it up at the card, because a scale is applied to the card if it is selected
@@ -404,7 +406,8 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
         //left:formDimns.left * zoomScale,
         //top:formDimns.top * zoomScale * 0.95,
         left:(deckToCardPos.x * zoomScale) + (cardToTitlePos.x * zoomScale * cardScale),
-        top:(deckToCardPos.y * zoomScale * 0.95) + (cardToTitlePos.y * zoomScale * cardScale),
+        //must get lower prop to cardnr
+        top:(deckToCardPos.y * zoomScale) + (cardToTitlePos.y * zoomScale * cardScale),
         fontSize:12 * cardScale
       }
     }

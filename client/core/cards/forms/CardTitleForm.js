@@ -78,7 +78,7 @@ export default function CardTitleForm({ deck, cardD, dimns, save, close }) {
   //const descLines = desc ? splitMultilineString(desc) : ["No Desc"];
   const styleProps = {
     ...dimns,
-    background:COLOURS.CARD.FILL(cardD),
+    background:COLOURS.CARD.FILL(cardD, true),
   }
   const classes = useStyles(styleProps);
 

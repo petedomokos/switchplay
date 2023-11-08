@@ -446,7 +446,7 @@ export default function cardsComponent() {
                             //not sure why we need this when entire containr shold have pointer-events none when no deck selected
                             .attr("pointer-events", deckIsSelected ? null : "none")
                             .attr("transform", `translate(0, ${headerHeight + gapBetweenHeaderAndItems})`)
-                            .call(fadeInOut, isFront || !isHeld || selectedSectionKey)
+                            .call(fadeInOut, isSelected || isFront || !isHeld || selectedSectionKey)
                             .datum(itemsData)
                             .call(items);
 
@@ -469,7 +469,8 @@ export default function cardsComponent() {
                             onClick:e => { onClickCard(e, cardD) },
                             icon:icons.collapse,
                         }
-                        const botRightBtnData = !deckIsSelected || selectedSectionKey || !isFront ? [] : (isSelected ? [collapseBtnDatum] : [expandBtnDatum]);
+                        const botRightBtnData = !deckIsSelected || selectedSectionKey || (!isFront && !isSelected) ? 
+                            [] : (isSelected ? [collapseBtnDatum] : [expandBtnDatum]);
                         //console.log("btnRight", botRightBtnData)
                         const btnHeight = d3.max([1, d3.min([15, 0.12 * normalContentsHeight])]);
                         const btnWidth = btnHeight;
