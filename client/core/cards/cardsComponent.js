@@ -188,7 +188,7 @@ export default function cardsComponent() {
             }
 
             //bgdrag
-            containerG.call(drag).on('click', function(){ console.log("clicked", this)});
+            containerG.call(drag);
 
             const cardG = containerG.selectAll("g.card").data(data, d => d.cardNr);
             cardG.enter()
@@ -641,7 +641,10 @@ export default function cardsComponent() {
                         kpisG.exit().call(remove);
                     })
                     .call(drag)
-                    .on("click", e => { e.stopPropagation(); })
+                    .on("click", (e, cardD) => { 
+                        e.stopPropagation(); 
+                        if(!cardD.isHeld){ onPickUp(cardD); }
+                    })
   
             //EXIT
             cardG.exit().call(remove);

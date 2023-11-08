@@ -534,7 +534,7 @@ export default function pentagonComponent() {
 
                         const statusMenuWidth = nrOptions * statusItemWidth + statusMenuMargin.left + statusMenuMargin.right;
                         const statusMenuHeight = statusMenuTitleHeight + statusItemHeight + statusMenuMargin.top + statusMenuMargin.bottom;
-                        const gapBetweenItemAndMenu = 1;
+                        const gapBetweenItemAndMenu = 5;
 
                         const btnStrokeWidth = 1;
                         const btnRadius = statusItemContentsWidth/2 - btnStrokeWidth;

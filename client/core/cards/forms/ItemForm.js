@@ -10,7 +10,9 @@ import { FormGroup } from '@material-ui/core';
 import TextField from '@material-ui/core/TextField'
 import Typography from '@material-ui/core/Typography'
 import { Input } from '@material-ui/core';
+import IconButton from '@material-ui/core/IconButton'
 import Icon from '@material-ui/core/Icon'
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { makeStyles } from '@material-ui/core/styles'
 import { grey10, COLOURS } from '../constants';
 import VideoPlayer from "../../VideoPlayer"
@@ -28,6 +30,14 @@ const useStyles = makeStyles(theme => ({
     flexDirection:"column",
     alignItems:"flex-start",
     background:COLOURS.CARDS_TABLE,
+  },
+  backBtn:{
+    width:"50px",
+    height:"40px",
+    padding:"5px",
+  },
+  backBtnIcon:{
+    color:"white"
   },
   sectionAndCardTitle:{
     display:"flex",
@@ -133,6 +143,11 @@ export default function ItemForm({ cardTitle, item, dimns, fontSize, save, close
 
   return (
     <div className={classes.root} onClick={e => { e.stopPropagation() }}>
+      <div className={classes.backBtn} onClick={close}>
+      <IconButton aria-label="add-datapoint" color="primary">
+        <ArrowBackIcon className={classes.backBtnIcon} />
+      </IconButton>
+      </div>
       
       <div className={classes.sectionAndCardTitle}>
         {section && <p className={classes.sectionTitle}>{section.title}</p>}
