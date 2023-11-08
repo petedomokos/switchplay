@@ -423,8 +423,8 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       return {
         width:100,
         height:100,
-        left: cardScale === 1 ? deckToCardContentsPos.x * zoomScale * 1.15 : 30,
-        top:deckToCardContentsPos.y * zoomScale * 0.95 +(cardScale === 1 ? 0 : 10)
+        left: cardScale === 1 ? deckToCardContentsPos.x * zoomScale : 25,
+        top:deckToCardContentsPos.y * zoomScale + (cardScale === 1 ? 0 : 10)
       }
     }
 
