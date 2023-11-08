@@ -293,8 +293,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
     }
   }, [stringifiedData, width, height, selectedDeckId]);
 
-  const onSelectItem = useCallback((item) => {
-    console.log("select item...", item)
+  const onSelectItem = useCallback(function(item){
     if(item){
       //fade out d3
       d3.select(containerRef.current)
@@ -326,7 +325,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
               //fade form back in ready for next time, as state will update anyway to set form display correctly
               d3.select(this).style("opacity", 1)//.style("display", "none");
               //set state
-              setForm(null)
+              handleCancelForm();
               setSelectedItemNr("") 
               //manage the fade in of d3
               d3.select(containerRef.current)
@@ -784,7 +783,6 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   }, [form]);
 
   const handleCancelForm = useCallback(e => {
-    //milestonesBar.updateDatesShown(allMilestones);
     setForm(null);
   }, [form]);
 

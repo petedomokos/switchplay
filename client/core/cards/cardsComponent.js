@@ -103,6 +103,7 @@ export default function cardsComponent() {
     let onPickUp = function(){};
     let onPutDown = function(){};
     let onClickInfo = function(){};
+    let setForm = function(){};
 
     let onClick = function(){};
     let onDragStart = function() {};
@@ -462,6 +463,7 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
                                 //console.log('calling de from items')
                                 dragEnd.call(this, e, cardD)
                             })
+                            .setForm(setForm)
 
                         frontContentsG.select("g.items-area")
                             //not sure why we need this when entire containr shold have pointer-events none when no deck selected
@@ -941,6 +943,11 @@ filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#5AB2F7", en
     cards.onClickInfo = function (value) {
         if (!arguments.length) { return onClickInfo; }
         onClickInfo = value;
+        return cards;
+    };
+    cards.setForm = function (value) {
+        if (!arguments.length) { return setForm; }
+        setForm = value;
         return cards;
     };
     cards.onDragStart = function (value) {

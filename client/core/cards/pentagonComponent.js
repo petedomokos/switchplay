@@ -50,9 +50,7 @@ export default function pentagonComponent() {
 
     let prevR2 = 0; //can say it starts at 0 as it doesnt exist at that point
 
-    let underlayDimnsAndPos = {
-        width:0, height:0, offsetX:0, offsetY:0
-    }
+    let underlay;
     
     
     function updateDimns(){
@@ -88,7 +86,7 @@ export default function pentagonComponent() {
     let textboxes = {};
 
     function pentagon(selection, options={}) {
-        const { transitionEnter=true, transitionUpdate=true } = options;
+        const { transitionEnter=true, transitionUpdate=true, updateShouldRaiseTitledItems } = options;
         updateDimns();
         selection.each(function (itemsData, i) {
             update.call(this, itemsData);
@@ -118,8 +116,10 @@ export default function pentagonComponent() {
                     .each(function(d,i){
                         //why are these 5 entering every time item is clicked????
                         const sectionG = d3.select(this);
+                        if(d.title){ d3.select(this).raise(); }
+
                         sectionG.append("rect").attr("class", "section-underlay")
-                            .attr("opacity", 0.5)
+                            .attr("opacity", 0)
                             .attr("rx", 3) //@todo - store in constants and use in cardsComponent too
                             .attr("ry", 3)
 
@@ -175,12 +175,8 @@ export default function pentagonComponent() {
                     .style("pointer-events", withSections && editable ? null : "none")
                     .each(function(d,i){
                         const { deckId, cardNr, itemNr, title, section } = d;
-                        //if a status menu is showing, we only raise that item
-                        //otherwise, we ensure any items with titles are above those without
-                        if(isNumber(statusMenuItemNr)){
-                            if(statusMenuItemNr === itemNr){ d3.select(this).raise(); }
-                        }
-                        else if(title){ d3.select(this).raise(); }
+                        if(updateShouldRaiseTitledItems && title){ d3.select(this).raise(); }
+
                         //for now, we fake a video attachment using a special item name
                         const includesVideo = title.includes("Video") || title.includes("video");
                         const attachments = includesVideo ? [{ key:"att-1", type: "video" }] : [];
@@ -201,12 +197,13 @@ export default function pentagonComponent() {
                         const sectionG = d3.select(this)
                             .on("click", onClickSection);
 
+                        const shouldShowUnderlay = underlay && statusMenuItemNr === itemNr;
                         sectionG.select("rect.section-underlay")
-                            .call(fadeInOut, statusMenuItemNr === itemNr, { opacity:0.8 })
+                            .call(fadeInOut, shouldShowUnderlay, { opacity:shouldShowUnderlay ? 0.8 : 0 })
                             //@todo - adjust polygon so its always centred exactly, or find the offset rather than hardcode it to 1.5
-                            .attr("transform", `translate(${underlayDimnsAndPos.offsetX},${underlayDimnsAndPos.offsetY - 1.5})`)
-                            .attr("width", underlayDimnsAndPos?.width || 0)
-                            .attr("height", underlayDimnsAndPos?.height || 0)
+                            .attr("transform", `translate(${underlay?.offsetX},${underlay?.offsetY - 1.5})`)
+                            .attr("width", underlay?.width || 0)
+                            .attr("height", underlay?.height || 0)
                             .on("click", onUnclickSection)
 
                         //startLine
@@ -645,9 +642,9 @@ export default function pentagonComponent() {
         r2 = value;
         return pentagon;
     };
-    pentagon.underlayDimnsAndPos = function (value) {
-        if (!arguments.length) { return underlayDimnsAndPos; }
-        underlayDimnsAndPos = value;
+    pentagon.underlay = function (value) {
+        if (!arguments.length) { return underlay; }
+        underlay = value;
         return pentagon;
     };
     pentagon.withSections = function (value) {

@@ -83,6 +83,8 @@ export default function cardItemsComponent() {
     let onSetOuterRadius = function(){};
     let onSelectItem = function(){};
     let onUpdateItemStatus = function(){};
+    let setForm = function(){};
+
     let onDragStart = function(){};
     let onDrag = function(){};
     let onDragEnd = function(){};
@@ -102,7 +104,6 @@ export default function cardItemsComponent() {
     */
 
     function cardItems(selection, options={}) {
-        const { transitionEnter=true, transitionUpdate=true } = options;
 
         updateDimns();
 
@@ -112,7 +113,7 @@ export default function cardItemsComponent() {
                 init.call(this);
             }
             //update
-            update.call(this, data);
+            update.call(this, data, options);
         })
 
         function init(data){
@@ -122,8 +123,10 @@ export default function cardItemsComponent() {
                 .attr("stroke", "none");
         }
 
-        function update(data){
+        function update(data, options){
+            const { transitionEnter=true, transitionUpdate=true, updateShouldRaiseTitledItems=true } = options;
             //console.log("items", clickedItemNr)
+            console.log("items", updateShouldRaiseTitledItems)
             const { } = data;
             const containerG = d3.select(this);
             const contentsG = containerG.select("g.card-items-contents")
@@ -153,7 +156,7 @@ export default function cardItemsComponent() {
                             .call(pentagon
                                 .r1(innerRadius)
                                 .r2(outerRadius)
-                                .underlayDimnsAndPos({
+                                .underlay({
                                     width:width,
                                     height:height + headerHeight,
                                     offsetX: -width/2,
@@ -171,16 +174,15 @@ export default function cardItemsComponent() {
                                     handleClickItem.call(this, e, d)
                                 })
                                 .onUnclickSection(function(e){
-                                    //console.log("this", this)
                                     e.stopPropagation();
                                     clickedItemNr = null;
-                                    update.call(containerG.node(), data);
-                                    //setForm(null)
+                                    update.call(containerG.node(), data, { ...options, updateShouldRaiseTitledItems:false });
                                 })
                                 .onLongpressStart(longpressStart)
                                 .onLongpressEnd(longpressEnd)
                                 .onDrag(onDrag)
-                                .onDragEnd(onDragEnd));
+                                .onDragEnd(onDragEnd)
+                                , { updateShouldRaiseTitledItems });
                                     
                     })
 
@@ -190,7 +192,6 @@ export default function cardItemsComponent() {
 
             function handleClickItem(e, d){
                 const { title, itemNr } = d;
-                //console.log("handleClickItem", clickedItemNr)
                 //undefined items just open to edit mode on first click
                 if(!title){
                     clickedItemNr = null;
@@ -203,9 +204,11 @@ export default function cardItemsComponent() {
                     onSelectItem.call(this, d);
                     return;
                 }
-
+                //show the item status menu
+                d3.select(this).raise();
+                setForm(null)
                 clickedItemNr = itemNr;
-                update.call(containerG.node(), data);
+                update.call(containerG.node(), data, { ...options, updateShouldRaiseTitledItems:false });
 
             }
 
@@ -366,7 +369,6 @@ export default function cardItemsComponent() {
     cardItems.clickedItemNr = function (value) {
         if (!arguments.length) { return clickedItemNr; }
         clickedItemNr = value;
-        console.log("set c to", value)
         return cardItems;
     };
     cardItems.editable = function (value) {
@@ -387,6 +389,11 @@ export default function cardItemsComponent() {
     cardItems.onUpdateItemStatus = function (value) {
         if (!arguments.length) { return onUpdateItemStatus; }
         onUpdateItemStatus = value;
+        return cardItems;
+    };
+    cardItems.setForm = function (value) {
+        if (!arguments.length) { return setForm; }
+        setForm = value;
         return cardItems;
     };
     cardItems.onDragStart = function (value) {

@@ -5,24 +5,6 @@ import { getTransformationFromTrans } from './helpers';
 const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
 const AUTO_SCROLL_DURATION = TRANSITIONS.KPIS.AUTO_SCROLL.DURATION;
 
-export function fadeInOut(selection, shouldDisplay, options={}){
-    const { transitionIn, transitionOut, transition } = options;
-    selection.each(function(){
-        const sel = d3.select(this);
-        const displayValue = sel.attr("display");
-        const isFadingIn = sel.attr("class").includes("fading-in");
-        const isFadingOut = sel.attr("class").includes("fading-in");
-        if(shouldDisplay && displayValue === "none" && !isFadingIn){
-            const transitionToUse = transitionIn || transition;
-            sel.call(fadeIn, { ...options, transition:transitionToUse });
-        }else if(!shouldDisplay && displayValue !== "none" && !isFadingOut){
-            const transitionToUse = transitionOut || transition;
-            sel.call(fadeOut, { ...options, transition:transitionToUse });
-        }
-    })
-}
-
-
 const classMatches = (selection, classNameToTest) => {
     const classStr = selection.attr("class");
     if(!classStr){ return false; }
@@ -139,19 +121,42 @@ export function show(selection, options={}){
 
 }
 
+export function fadeInOut(selection, shouldDisplay, options={}){
+    const { transitionIn, transitionOut, transition } = options;
+    //console.log("fadeInOut trans", transition)
+    selection.each(function(){
+        if(shouldDisplay){
+            //console.log("call fadeIn")
+            const transitionToUse = transitionIn || transition;
+            d3.select(this).call(fadeIn, { ...options, transition:transitionToUse });
+        }else{
+            //console.log("call fadeOut")
+            const transitionToUse = transitionOut || transition;
+            d3.select(this).call(fadeOut, { ...options, transition:transitionToUse });
+        }
+    })
+}
 
 export function fadeIn(selection, options={}){
     const { transition, cb=()=>{}, display=null, opacity=1 } = options;
     selection.each(function(){
         //will be multiple exits because of the delay in removing
-        if(!d3.select(this).attr("class").includes("fading-in")){
-            const currDisplayValue = d3.select(this).attr("display");
+        const sel = d3.select(this);
+        const isFadingIn = sel.attr("class").includes("fading-in");
+        const currOpacity = sel.attr("opacity") ? +sel.attr("opacity") : null;
+        const currDisplay = sel.attr("display");
+        const somethingMustChange = currOpacity !== opacity || currDisplay !== display;
+        //console.log("fadeIn?", currOpacity, opacity, currOpacity !== opacity)
+
+        if(!isFadingIn && somethingMustChange){
+            //console.log("fadeIn this", this)
+            //console.log("fadeIn trans", transition)
             d3.select(this)
                 .attr("opacity", d3.select(this).attr("opacity") || 0)
                 //adjust display if required or if new value passed in
-                .attr("display", currDisplayValue === "none" || display ? display : currDisplayValue)
+                .attr("display", currDisplay !== display ? display : currDisplay)
                 .classed("fading-in", true)
-                .transition()
+                .transition("fade-in")
                     .delay(transition?.delay || 0)
                     .duration(transition?.duration || CONTENT_FADE_DURATION)
                     .attr("opacity", opacity)
@@ -167,7 +172,13 @@ export function fadeOut(selection, options={}){
     const { transition, cb=()=>{}, shouldRemove, display="none", opacity=0 } = options;
     selection.each(function(){
         //will be multiple exits because of the delay in removing
-        if(!d3.select(this).attr("class").includes("fading-out")){
+        const sel = d3.select(this);
+        const isFadingOut = sel.attr("class").includes("fading-out");
+        const currOpacity = sel.attr("opacity") ? +sel.attr("opacity") : null;
+        const currDisplay = sel.attr("display");
+        const somethingMustChange = currOpacity !== opacity || currDisplay !== display;
+       
+        if(!isFadingOut && somethingMustChange){
             d3.select(this)
                 .attr("opacity", d3.select(this).attr("opacity") || 1)
                 .classed("fading-out", true)

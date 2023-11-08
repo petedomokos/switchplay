@@ -752,10 +752,10 @@ export default function deckComponent() {
                         .x(cardX)
                         .y(cardY)
                         .onSelectItem(onSelectItem)
-                        .onClickCardDate((cardD,i) => {
+                        .onClickCardDate(function(cardD,i){
                             setForm({
                                 formType: "card-date",
-                                value:cardD
+                                value:cardD,
                             })
                         })
                         .onClickCardTitle((cardD, i, cardDimns) => {
@@ -795,7 +795,8 @@ export default function deckComponent() {
                             }*/
                             //console.log("putdown!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", d)
                             updateFrontCardNr(d.cardNr + 1);
-                        }))
+                        })
+                        .setForm(setForm))
 
 
                 //controls
