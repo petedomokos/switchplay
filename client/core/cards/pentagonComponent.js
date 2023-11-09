@@ -128,12 +128,13 @@ export default function pentagonComponent() {
                             .attr("ry", 3)
 
                         sectionG.append("path").attr("class", "section-bg").attr("fill", "transparent");
-                        sectionG.append("line").attr("class", "start show-with-section visible");
-                        sectionG.append("line").attr("class", "finish show-with-section visible")
+                        sectionG.append("line").attr("class", "start show-with-section inner visible"); 
+                        //added inner here and above - now change stroke of it so its normal always
+                        sectionG.append("line").attr("class", "finish show-with-section inner visible")
                             //.attr("opacity", 1)
                             //.attr("display", "none");
 
-                        sectionG.append("line").attr("class", "inner show-with-section visible");
+                        sectionG.append("line").attr("class", "inner show-with-section inner visible");
                         sectionG.append("line").attr("class", "outer visible");
                         //sectionG.append("line").attr("class", "outer-line-hitbox")
                             //.style("stroke", "transparent");
@@ -285,12 +286,19 @@ export default function pentagonComponent() {
                             });
 
                         //all lines
-                        sectionG.selectAll("line.visible")
+                        sectionG.selectAll("line.visible.outer")
                             .transition("trans-stroke")
                             .delay(sizeIsIncreasing ? 300 : 0)
                             .duration(TRANSITIONS.MED)
                                 .attr("stroke", styles._itemStroke(itemD,i))
                                 .attr("stroke-width", styles._polygonLineStrokeWidth(itemD,i))
+
+                        sectionG.selectAll("line.visible.inner")
+                            .transition("trans-stroke")
+                                //.delay(sizeIsIncreasing ? 300 : 0)
+                                //.duration(TRANSITIONS.MED)
+                                    .attr("stroke", grey10(9))
+                                    .attr("stroke-width", 0.03)
 
                         sectionG.selectAll(".show-with-section")
                             .transition("outer-trans")
@@ -584,7 +592,7 @@ export default function pentagonComponent() {
                                     statusMenuG.select("text").attr("class", "status-menu-title")
                                         .attr("x", statusMenuWidth/2)
                                         .attr("y", statusMenuMargin.top + statusMenuTitleHeight/2)
-                                        .text("STATUS");
+                                        .text("ITEM STATUS");
 
                                     const optionsG = statusMenuG.select("g.options")
                                         .attr("transform", `translate(${statusMenuMargin.left}, ${statusMenuMargin.top + statusMenuTitleHeight})`)

@@ -801,10 +801,12 @@ export default function cardsComponent() {
     };
     cards.deckIsSelected = function (value) {
         if (!arguments.length) { return deckIsSelected; }
+        if(value !== deckIsSelected){
+            Object.values(itemsComponents).forEach(itemsComponent => {
+                itemsComponent.clickedItemNr(null);
+            })
+        }
         deckIsSelected = value;
-        Object.values(itemsComponents).forEach(itemsComponent => {
-            itemsComponent.clickedItemNr(null);
-        })
         return cards;
     };
     cards.form = function (value) {

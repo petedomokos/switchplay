@@ -183,6 +183,7 @@ export default function cardItemsComponent() {
                                     update.call(containerG.node(), data, { ...options, updateShouldRaiseTitledItems:false });
                                 })
                                 .onClickStatusOption(function(itemD, optD){ 
+                                    console.log("onUpdteStatus...................")
                                     onUpdateItemStatus(itemD.itemNr, optD.status)
                                 })
                                 .onLongpressStart(longpressStart)
@@ -381,6 +382,7 @@ export default function cardItemsComponent() {
     };
     cardItems.clickedItemNr = function (value) {
         if (!arguments.length) { return clickedItemNr; }
+        console.log("setting clicked item nr...", value)
         clickedItemNr = value;
         return cardItems;
     };
