@@ -1027,14 +1027,14 @@ export default function deckComponent() {
 
                 const inSectionOrPurposeView = selectedSection?.key || content === "purpose";
                 let bottomRightBtnData = !deckIsSelected ? [] : (inSectionOrPurposeView ? [closeBtnDatum] : [flipBtnDatum]);
-                const bottomRightBtnHeight = 20;
-                const bottomRightBtnMarginHoz = bottomRightBtnHeight * 0.1;
-                const bottomRightBtnMarginVert = bottomRightBtnHeight * 0.1
+                const bottomRightBtnHeight = 22;
+                const bottomRightBtnMarginHoz = bottomRightBtnHeight * 0.25;
+                const bottomRightBtnMarginVert = bottomRightBtnHeight * 0.25;
                 const bottomRightBtnWidth = bottomRightBtnHeight;
-                const extraShiftDownForSelectedCard = isNumber(selectedCardNr) ? bottomRightBtnMarginVert : 0;
+                const extraShiftDownForSelectedCard = isNumber(selectedCardNr) ? bottomRightBtnMarginVert * 0.5 : 0;
                 //assumme all are square
                 //note: 0.8 is a bodge coz iconsseems to be bigger than they state
-                const botRightBtnScale = d => (0.8 * bottomRightBtnHeight)/d.icon.height;
+                const botRightBtnScale = d => (0.8 * bottomRightBtnContentsHeight)/d.icon.height;
 
                 const bottomRightBtnContentsWidth = bottomRightBtnWidth - 2 * bottomRightBtnMarginHoz;
                 const bottomRightBtnContentsHeight = bottomRightBtnHeight - 2 * bottomRightBtnMarginVert;
@@ -1046,16 +1046,24 @@ export default function deckComponent() {
                         .call(fadeIn)
                         .each(function(d){
                             const btnG = d3.select(this);
-                            btnG.append("path");
-
+                            if(d.key === "close"){
+                                btnG.append("path");
+                            }else{
+                                //flip button
+                                btnG.append("path").attr("class", "path-0").style("fill-rule", "nonzero");
+                                btnG.append("path").attr("class", "path-1").style("fill-rule", "nonzero");
+                                btnG.append("line")
+                            }
+                            
                             btnG.append("rect").attr("class", "btn-hitbox")
-                                .attr("fill", "transparent");
+                                .attr("fill", "transparent")
+                                //.attr("stroke", "blue");
                         })
                         .attr("transform", `translate(
                             ${contentsWidth - bottomRightBtnWidth + bottomRightBtnMarginHoz},
                             ${contentsHeight - bottomRightBtnHeight + bottomRightBtnMarginVert + extraShiftDownForSelectedCard})`)
                         .merge(bottomRightBtnG)
-                        .each(function(d){
+                        .each(function(d,i){
                             const btnG = d3.select(this);
 
                             btnG.transition("deck-btn-position")
@@ -1064,10 +1072,32 @@ export default function deckComponent() {
                                     ${contentsWidth - bottomRightBtnWidth + bottomRightBtnMarginHoz},
                                     ${contentsHeight - bottomRightBtnHeight + bottomRightBtnMarginVert + extraShiftDownForSelectedCard})`)
 
-                            btnG.select("path")
-                                .attr("transform", `scale(${botRightBtnScale(d)})`)
-                                .attr("d", d.icon.d)
-                                .attr("fill", d.fill)
+                            if(d.key === "close"){
+                                btnG.select("path")
+                                    .attr("transform", `scale(${botRightBtnScale(d)})`)
+                                    .attr("d", d.icon.d)
+                                    .attr("fill", d.fill)
+                            }else{
+                                //flip button
+                                btnG.select("path.path-0")
+                                    .attr("transform", `scale(${botRightBtnScale(d)}) translate(-1,-1)`)
+                                    .attr("d", d.icon.paths[0].d)
+                                    .attr("fill", d.fill)
+
+                                btnG.select("path.path-1")
+                                    .attr("transform", `scale(${botRightBtnScale(d)}) translate(-1,-1)`)
+                                    .attr("d", d.icon.paths[1].d)
+                                    .attr("fill", d.fill)
+
+                                btnG.select("line")
+                                    .attr("transform", `scale(${botRightBtnScale(d)}) translate(0.5,0.6)`)
+                                    .attr("x1", d.icon.lines[0].x1)
+                                    .attr("y1", d.icon.lines[0].y1)
+                                    .attr("x2", d.icon.lines[0].x2)
+                                    .attr("y2", d.icon.lines[0].y2)
+                                    .attr("stroke-width", 0.2)
+                                    .attr("stroke", d.fill)
+                            }
                     
                             btnG.select("rect.btn-hitbox")
                                 .attr("width", bottomRightBtnContentsWidth)
