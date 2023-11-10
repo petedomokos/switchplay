@@ -800,41 +800,6 @@ export default function deckComponent() {
 
 
                 //controls
-                const controlsData = !sections || cardsAreFlipped ? [] : [
-                    { key:"section-view" }
-                ];
-
-                const btnWidth = 10;
-                const btnHeight = 18;
-                const btnMargin = { left: 1, right: 1, top:5, bottom:5 }
-                const btnContentsWidth = btnWidth - btnMargin.left - btnMargin.right;
-                const btnContentsHeight = btnHeight - btnMargin.top - btnMargin.bottom;
-
-                const controlsMarginVert = 0;
-                const controlsContentsWidth = btnWidth;
-                const controlsWidth = controlsContentsWidth;
-                const controlsContentsHeight = controlsData.length * btnHeight;
-                const controlsHeight = controlsContentsHeight + 2 * controlsMarginVert;
-                
-                const spaceAvailableOnLeftOfCards = (width - heldCardWidth)/2;
-                const controlsOuterMarginLeft = (spaceAvailableOnLeftOfCards - controlsWidth)/2;
-                const controlsOuterMarginBottom = controlsOuterMarginLeft;
-
-                const xToCentre = -controlsOuterMarginLeft + (width - btnWidth)/2;//+ deckToCentrePos.x   // -controlsOuterMarginLeft + (width - btnWidth)/2;
-                const cardItemsAreaHeight = heldCardHeight - cardHeaderHeight;
-                const yToCentre = controlsOuterMarginBottom + controlsMarginVert - placedCardsAreaHeight - cardItemsAreaHeight/2 + btnHeight/2 + 1;
-
-                controlsG.call(fadeInOut, content === "cards" && deckIsSelected && !isNumber(selectedCardNr) && !selectedSection?.key)
-                controlsG
-                    .attr("transform", `translate(${controlsOuterMarginLeft},${height - controlsOuterMarginBottom - controlsHeight})`)
-
-
-                controlsG.select("rect.controls-bg")
-                    .attr("width", controlsWidth)
-                    .attr("height", controlsHeight)
-                    .attr("rx", 1.5)
-                    .attr("ry", 1.5)
-
                 let potentialSelectedSectionNr;
                 const highlightSection = nr => {
                     const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${nr}`);
@@ -917,6 +882,41 @@ export default function deckComponent() {
                             update(_deckData)
                         }
                     })
+
+                    const controlsData = !sections || cardsAreFlipped ? [] : [
+                        { key:"section-view", icon:icons.drill }
+                    ];
+    
+                    const btnWidth = 10;
+                    const btnHeight = 18;
+                    const btnMargin = { left: 1, right: 1, top:5, bottom:5 }
+                    const btnContentsWidth = btnWidth - btnMargin.left - btnMargin.right;
+                    const btnContentsHeight = btnHeight - btnMargin.top - btnMargin.bottom;
+    
+                    const controlsMarginVert = 0;
+                    const controlsContentsWidth = btnWidth;
+                    const controlsWidth = controlsContentsWidth;
+                    const controlsContentsHeight = controlsData.length * btnHeight;
+                    const controlsHeight = controlsContentsHeight + 2 * controlsMarginVert;
+                    
+                    const spaceAvailableOnLeftOfCards = (width - heldCardWidth)/2;
+                    const controlsOuterMarginLeft = (spaceAvailableOnLeftOfCards - controlsWidth)/2;
+                    const controlsOuterMarginBottom = controlsOuterMarginLeft;
+    
+                    const xToCentre = -controlsOuterMarginLeft + (width - btnWidth)/2;//+ deckToCentrePos.x   // -controlsOuterMarginLeft + (width - btnWidth)/2;
+                    const cardItemsAreaHeight = heldCardHeight - cardHeaderHeight;
+                    const yToCentre = controlsOuterMarginBottom + controlsMarginVert - placedCardsAreaHeight - cardItemsAreaHeight/2 + btnHeight/2 + 1;
+    
+                    controlsG.call(fadeInOut, content === "cards" && deckIsSelected && !isNumber(selectedCardNr) && !selectedSection?.key)
+                    controlsG
+                        .attr("transform", `translate(${controlsOuterMarginLeft},${height - controlsOuterMarginBottom - controlsHeight})`)
+    
+    
+                    controlsG.select("rect.controls-bg")
+                        .attr("width", controlsWidth)
+                        .attr("height", controlsHeight)
+                        .attr("rx", 1.5)
+                        .attr("ry", 1.5)
                 
                 const btnY = (d,i) => controlsMarginVert + i * btnHeight;
                 const btnScaleWhenDragged = 1.8;
@@ -982,12 +982,12 @@ export default function deckComponent() {
 
                                 //icon
                                 const iconG = btnContentsG.select("g.icon")
-                                .attr("transform", `translate(0.6,0.6) scale(0.12)`);
+                                .attr("transform", `translate(-0.2,0) scale(0.26)`);
 
                                 iconG.select("path.path1")
-                                    .attr("d", magIconPath1D)
+                                    .attr("d", d.icon.paths[0].d)
                                 iconG.select("path.path2")
-                                    .attr("d", magIconPath2D)
+                                    .attr("d", d.icon.paths[1].d)
                             }else{
                                 //bg
                                 btnContentsG.select("rect.btn-bg")
