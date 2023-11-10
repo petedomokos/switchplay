@@ -1,10 +1,11 @@
 import * as d3 from 'd3';
-import { COLOURS, DIMNS, grey10, TRANSITIONS } from "./constants";
+import { COLOURS, DIMNS, grey10, TRANSITIONS, STATUS_OPTIONS } from "./constants";
 import pentagonComponent from './pentagonComponent';
 import textComponent from './textComponent';
 import dragEnhancements from '../journey/enhancedDragHandler';
+import statusMenuComponent from './statusMenuComponent';
 import { isNumber } from '../../data/dataHelpers';
-import { fadeIn, remove } from '../journey/domHelpers';
+import { fadeIn, remove, fadeInOut } from '../journey/domHelpers';
 
 /*
 
@@ -82,6 +83,7 @@ export default function cardItemsComponent() {
 
     //API CALLBACKS
     let onSetOuterRadius = function(){};
+    let onClickItem = function(){};
     let onSelectItem = function(){};
     let onUpdateItemStatus = function(){};
     let setForm = function(){};
@@ -137,8 +139,8 @@ export default function cardItemsComponent() {
                 .attr("width", contentsWidth)
                 .attr("height", contentsHeight)
 
-            const statusMenuDimns = cardIsSelected ? { optionWidth: 12, optionHeight: 9, titleHeight: 5 } :
-                { optionWidth:20, itemHeight: 10, optionHeight:7, instructionsHeight:4 }
+            const statusMenuDimns = cardIsSelected ? { optionWidth: 12, optionHeight: 9, titleHeight: 5, instructionsHeight:3 } :
+                { optionWidth:20, optionHeight: 10, titleHeight:7, instructionsHeight:4 }
 
             const polygonCentreG = contentsG.selectAll("g.polygon-centre").data(contentsHeight < 40 ? [] : [1]);
             polygonCentreG.enter()
@@ -171,16 +173,8 @@ export default function cardItemsComponent() {
                                 .statusMenuDimns(statusMenuDimns)
                                 .editable(editable)
                                 .styles(styles)
-                                .onClickSection(function(e,d){
-                                    e.stopPropagation();
-                                    if(!editable){ return; }
-                                    handleClickItem.call(this, e, d)
-                                })
-                                .onUnclickSection(function(e){
-                                    e.stopPropagation();
-                                    clickedItemNr = null;
-                                    update.call(containerG.node(), data, { ...options, updateShouldRaiseTitledItems:false });
-                                })
+                                .onClickSection(onClickSection)
+                                .onUnclickSection(onUnclickSection)
                                 .onClickStatusOption(function(itemD){ 
                                     const { itemNr, status } = itemD;
                                     const newStatus = status === 0 ? 1 : (status === 1 ? 2 : 0)
@@ -197,10 +191,22 @@ export default function cardItemsComponent() {
 
             polygonCentreG.exit().call(remove, { transition:{ duration:TRANSITIONS.FAST }});
 
-            const cardBgRect = d3.select(this.parentNode.parentNode).select("rect.card-front-bg")
+            const cardBgRect = d3.select(this.parentNode.parentNode).select("rect.card-front-bg");
+
+            function onClickSection(e, itemD){
+                e.stopPropagation();
+                if(!editable){ return; }
+                handleClickItem.call(this, e, itemD)
+            }
+
+            function onUnclickSection(e){
+                e.stopPropagation();
+                clickedItemNr = null;
+                update.call(containerG.node(), data, { ...options, updateShouldRaiseTitledItems:false });
+            }
 
             function handleClickItem(e, d){
-                const { title, itemNr } = d;
+                const { title, cardNr, itemNr } = d;
                 //undefined items just open to edit mode on first click
                 if(!title){
                     clickedItemNr = null;
@@ -217,8 +223,9 @@ export default function cardItemsComponent() {
                 d3.select(this).raise();
                 setForm(null)
                 clickedItemNr = itemNr;
-                update.call(containerG.node(), data, { ...options, updateShouldRaiseTitledItems:false });
-
+                //update.call(containerG.node(), data, { ...options, updateShouldRaiseTitledItems:false });
+                //pass it up to trigger the updte at next level in case we are in section view
+                onClickItem(d);
             }
 
             function longpressStart(e,d){
@@ -286,14 +293,39 @@ export default function cardItemsComponent() {
                             .append("g")
                                 .attr("class", "item")
                                 .each(function(){ 
-                                    d3.select(this).append("rect").attr("fill", "transparent") 
+                                    const itemG = d3.select(this);
+                                    itemG.append("rect").attr("class", "item-hitbox").attr("fill", "transparent");
+                                    itemG.append("g").attr("class", "list-item-status-menu-container")
                                 })
                                 .merge(itemG)
                                 .attr("transform", (d,i) => `translate(0, ${i * listItemHeight})`)
-                                .each(function(){
-                                    d3.select(this).select("rect")
+                                .each(function(itemD){
+                                    const { cardNr, itemNr, status } = itemD; 
+
+                                    const itemG = d3.select(this);
+
+                                    itemG.select("rect.item-hitbox")
                                         .attr("width", listItemWidth)
                                         .attr("height", listItemHeight)
+
+                                    //status - renders iff optionsData non-null
+                                    const statusOptionsData = selectedSectionKey && editable && clickedItemNr === itemNr ? STATUS_OPTIONS : null;
+                                    const gapBetweenItemAndMenu = 5;
+                                    //containerG is positioned in hoz middle of menu, and vertically at the bottom because its expands out and up
+                                    itemG.select("g.list-item-status-menu-container")
+                                        .attr("transform", `translate(${listItemWidth/2}, ${-gapBetweenItemAndMenu})`)
+                                        .datum({ status, optionsData:statusOptionsData })
+                                        .call(statusMenuComponent()
+                                            .optionWidth(statusMenuDimns?.optionWidth)
+                                            .optionHeight(statusMenuDimns?.optionHeight)
+                                            .titleHeight(statusMenuDimns?.titleHeight)
+                                            .instructionsHeight(statusMenuDimns?.instructionsHeight)
+                                            .onClick(function(e){
+                                                e.stopPropagation();
+                                                const newStatus = status === 0 ? 1 : (status === 1 ? 2 : 0)
+                                                onUpdateItemStatus(itemNr, newStatus)
+                                            })); 
+
                                 })
                                 .call(itemTitle
                                     .width(listItemWidth)
@@ -309,12 +341,7 @@ export default function cardItemsComponent() {
                                         fontSize:3
                                     }))
                                 )
-                                .on("click", function(e,d){
-                                    console.log("item list click")
-                                    e.stopPropagation();
-                                    if(!editable){ return; }
-                                    handleClickItem.call(this, e, d)
-                                })
+                                .on("click", onClickSection)
                                 .call(itemDrag)
 
                         
@@ -395,6 +422,11 @@ export default function cardItemsComponent() {
     cardItems.onSetOuterRadius = function (value) {
         if (!arguments.length) { return onSetOuterRadius; }
         onSetOuterRadius = value;
+        return cardItems;
+    };
+    cardItems.onClickItem = function (value) {
+        if (!arguments.length) { return onClickItem; }
+        onClickItem = value;
         return cardItems;
     };
     cardItems.onSelectItem = function (value) {

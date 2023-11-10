@@ -221,8 +221,15 @@ export default function cardsComponent() {
                         mediaComponents[cardNr] = mediaComponent();
                         kpisComponents[cardNr] = kpisComponent();
 
+                        const cardG = d3.select(this);
+                        cardG.append("rect").attr("class", "card-underlay")
+                            .attr("opacity", 0)
+                            .attr("width", 4000)
+                            .attr("height", 4000);
+
+
                         //FRONT
-                        const contentsG = d3.select(this).append("g").attr("class", "contents card-contents");
+                        const contentsG = cardG.append("g").attr("class", "contents card-contents");
 
                         //bgs for front and back
                         contentsG
@@ -235,7 +242,7 @@ export default function cardsComponent() {
                                 //for placed cards, we dont want the dimns to be changed when in section view
                                 .attr("width", getCardContentsWidth(cardD))
                                 .attr("height", getCardContentsHeight(cardD))
-                                .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL : getCardFill(cardD))
+                                .attr("fill", selectedSectionKey ? getCardFill({ heldPos: 0 }) : getCardFill(cardD))
                                 .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData, 1) : getCardStroke(cardD))
                                 .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth() : STYLES.CARD.STROKE_WIDTH)
                                 .on("click", e => {
@@ -306,8 +313,28 @@ export default function cardsComponent() {
                     .each(function(cardD,i){
                         const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile, deckListPos } = cardD;
                         const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
+                        const items = itemsComponents[cardNr];
+
                         const cardG = d3.select(this)
                             .call(fadeInOut, itemsData.length !== 0 && (!isNumber(selectedCardNr) || selectedCardNr === cardNr));
+
+                        //if the card has a clicked item and we are in section view, we show the underlay
+                        const shouldShowUnderlay = selectedSectionKey && isNumber(items.clickedItemNr());
+                        cardG.select("rect.card-underlay")
+                            .call(fadeInOut, shouldShowUnderlay, { opacity:shouldShowUnderlay ? 0.8 : 0 })
+                            .attr("transform", `translate(${-2000},${-2000})`)
+                            .on("click", function(e){
+                                //unclick item code
+                                e.stopPropagation();
+                                //must lower card back to its correct pos in deck
+                                containerG.selectAll("g.card").each(function(d,i){
+                                    if(d.isHeld && d.cardNr < cardNr){
+                                        d3.select(this).raise();
+                                    }
+                                })
+                                items.clickedItemNr(null);
+                                containerG.call(cards);
+                            })
 
                         const contentsG = cardG.select("g.card-contents")
                             .attr("transform", `translate(${margin.left},${margin.top})`)
@@ -317,7 +344,7 @@ export default function cardsComponent() {
                             .transition("card-front-bg-appearance")
                             .delay(200)
                             .duration(400)
-                                .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL : getCardFill(cardD))
+                                .attr("fill", selectedSectionKey ? getCardFill({ heldPos: 0 }) : getCardFill(cardD))
                                 .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData, 1) : getCardStroke(cardD))
                                 .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth(itemsData) : STYLES.CARD.STROKE_WIDTH)
 
@@ -351,24 +378,15 @@ export default function cardsComponent() {
                         //const headerHeight;
                         const cardTitleIsBeingEdited = form?.formType !== "card-title" && form?.value?.cardNr === cardD.cardNr;
                         //component colours
-                        //in section view, these are constants for all cards. Else they are functions of each card
-                        const dateColour = selectedSectionKey ? 
-                            COLOURS.CARD.SECTION_VIEW_HEADER.DATE : COLOURS.CARD.HEADER(cardD).DATE;
+                        //in section view, heldPos for all cads is overwritten to be 0
+                        const _cardD = { ...cardD, heldPos: selectedSectionKey ? 0 : cardD.heldPos }
+                        const dateColour = COLOURS.CARD.HEADER(_cardD).DATE;
+                        const dateCountWordsColour = COLOURS.CARD.HEADER(_cardD).DATE_COUNT_WORDS;
+                        const titleColour = COLOURS.CARD.HEADER(_cardD).TITLE;
 
-                        const dateCountWordsColour = selectedSectionKey ? 
-                            COLOURS.CARD.SECTION_VIEW_HEADER.DATE_COUNT_WORDS : COLOURS.CARD.HEADER(cardD).DATE_COUNT_WORDS;
-
-                        const titleColour = selectedSectionKey ? 
-                            COLOURS.CARD.SECTION_VIEW_HEADER.TITLE : COLOURS.CARD.HEADER(cardD).TITLE;
-
-                        const backDateColour = selectedSectionKey ? 
-                            COLOURS.BACK_OF_CARD.SECTION_VIEW_HEADER.DATE : COLOURS.BACK_OF_CARD.HEADER(cardD).DATE;
-
-                        const backDateCountWordsColour = selectedSectionKey ? 
-                            COLOURS.BACK_OF_CARD.SECTION_VIEW_HEADER.DATE_COUNT_WORDS : COLOURS.BACK_OF_CARD.HEADER(cardD).DATE_COUNT_WORDS;
-
-                        const backTitleColour = selectedSectionKey ? 
-                            COLOURS.BACK_OF_CARD.SECTION_VIEW_HEADER.TITLE : COLOURS.BACK_OF_CARD.HEADER(cardD).TITLE;
+                        const backDateColour = COLOURS.BACK_OF_CARD.HEADER(cardD).DATE;
+                        const backDateCountWordsColour = COLOURS.BACK_OF_CARD.HEADER(cardD).DATE_COUNT_WORDS;
+                        const backTitleColour = COLOURS.BACK_OF_CARD.HEADER(cardD).TITLE;
 
                         //Components
                         const frontHeader = frontHeaderComponents[cardNr]
@@ -429,7 +447,7 @@ export default function cardsComponent() {
                         //helper
                         //note - deckIsSelected && form is handled in Decks - it turns the entire container pointer-events on/off
                         const cardIsEditable = deckIsSelected && (!!selectedSectionKey || ((isHeld && isFront) || isSelected));
-                        const items = itemsComponents[cardNr]
+                        items
                             .styles({ 
                                 getItemStrokeWidth:itemD => getMainItemStrokeWidth(cardD, itemD),
                                 getItemStroke:(itemD, linePartNr) => getProgressStatusColour(cardD, itemD, linePartNr)
@@ -443,6 +461,10 @@ export default function cardsComponent() {
                             .selectedItemNr(selectedItemNr)
                             .editable(cardIsEditable)
                             .onSetOuterRadius(r => { itemsOuterRadius = r })
+                            .onClickItem(() => {
+                                cardG.raise();
+                                containerG.call(cards) 
+                            })
                             .onSelectItem(onSelectItem)
                             .onUpdateItemStatus(function(itemNr, newStatus){
                                 onUpdateItemStatus(cardNr, itemNr, newStatus);

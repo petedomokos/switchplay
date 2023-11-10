@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { DIMNS, FONTSIZES, STYLES, grey10, OVERLAY, COLOURS, TRANSITIONS } from "./constants";
+import { DIMNS, FONTSIZES, STYLES, grey10, OVERLAY, COLOURS, TRANSITIONS, STATUS_OPTIONS } from "./constants";
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
 import { toRadians, posFromCentre } from '../journey/screenGeometryHelpers';
 import dragEnhancements from '../journey/enhancedDragHandler';
@@ -41,7 +41,7 @@ export default function pentagonComponent() {
     let editable = true;
     let selectedSectionKey;
     let statusMenuItemNr = null;
-    let statusMenuDimns = { optionWidth:12, optionHeight:9, titleHeight: 5 }
+    let statusMenuDimns = { optionWidth:12, optionHeight:9, titleHeight: 5, instructionsHeight: 3 }
 
     let innerVertices;
     let outerVertices;
@@ -560,10 +560,7 @@ export default function pentagonComponent() {
                         sectionIdentifierG.exit().remove();
 
                         //status - renders iff optionsData non-null
-                        const statusOptionsData = statusMenuItemNr === itemNr ? [
-                            { key:"status-1", status:1 },
-                            { key:"status-2", status:2 }
-                        ] : null;
+                        const statusOptionsData = editable && statusMenuItemNr === itemNr ? STATUS_OPTIONS : null;
 
                         const gapBetweenItemAndMenu = 5;
                         //containerG is positioned in hoz middle of menu, and vertically at the bottom because its expands out and up

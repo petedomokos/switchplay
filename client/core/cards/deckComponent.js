@@ -21,6 +21,19 @@ const CONTEXT_MENU_ITEM_WIDTH = 30;
 const CONTEXT_MENU_ITEM_HEIGHT = 50;
 const CONTEXT_MENU_ITEM_GAP = 15;
 
+//helper
+const calcCardHeldPos = cardD => {
+    const { heldPos, isHeld, isSelected, isFront, isNext, isSecondNext, isThirdNext, status } = cardD;
+    if(isNumber(heldPos)){ return heldPos; }
+    if(!isHeld) { return 4; }
+    else if(isFront || isSelected){ return 0; }
+    else if(isNext){ return 1; }
+    else if(isSecondNext){ return 2; }
+    else if(isThirdNext){ return 3; }
+    //isFourthNext or more
+    else { return 4; }
+}
+
 const contextMenuData = [ 
     { key:"delete", url:"/delete.png" }, 
     { key:"archive", url:"/archive.png" },
@@ -460,7 +473,8 @@ export default function deckComponent() {
                             isHeld:cardNr >= frontCardNr,
                             isSelected:selectedCardNr === card.cardNr
                         }
-                    });
+                    })
+                    .map(card => ({ ...card, heldPos:calcCardHeldPos(card) }));
 
                 //bg
                 /*

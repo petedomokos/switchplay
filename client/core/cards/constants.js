@@ -1,6 +1,11 @@
 import * as d3 from 'd3';
 import { GREY_COLOUR_THEME, BLUE_COLOUR_THEME, SATURATED_BLUE_COLOUR_THEME } from './colourThemes';
 
+export const STATUS_OPTIONS = [
+    { key:"status-1", status:1 },
+    { key:"status-2", status:2 }
+]
+
 export const TRANSITIONS = {
     SLOW:800,
     //med:400,

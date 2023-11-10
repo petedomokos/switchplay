@@ -1,3 +1,5 @@
+import { isNumber } from "../../data/dataHelpers";
+
 export const grey3pt5 = "#C8C8C8";
 export const grey4pt5 = "#B0B0B0";
 export const grey5pt5 = "#989898";
@@ -28,17 +30,6 @@ const getTableAndDeckColours = bgColour => {
     return { table: grey10(9), deck:grey10(8.5) }
 }
 
-const calcCardHeldPos = cardD => {
-    const { isHeld, isSelected, isFront, isNext, isSecondNext, isThirdNext, status } = cardD;
-    if(!isHeld) { return 4; }
-    else if(isFront || isSelected){ return 0; }
-    else if(isNext){ return 1; }
-    else if(isSecondNext){ return 2; }
-    else if(isThirdNext){ return 3; }
-    //isFourthNext or more
-    else { return 4; }
-}
-
 //shadow factor, s
 const cardsShadowFactor = 0.9;
 
@@ -67,12 +58,12 @@ export const GREY_COLOUR_THEME = (backgroundColour) => ({
             return grey10(5.5);
         },
         STROKE:cardD => {
-            const heldPos = calcCardHeldPos(cardD);
+            const { heldPos } = cardD;
             return `hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`;
         },
         EXPAND_COLLAPSE_BTN:grey10(5.5),
         HEADER:cardD => {
-            const heldPos = calcCardHeldPos(cardD);
+            const { heldPos } = cardD;
             return {
                 DATE:`hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`,
                 DATE_COUNT_WORDS:`hsla(0, 0%, ${70 * (cardsShadowFactor ** heldPos)}%, 1)`,
@@ -138,18 +129,18 @@ export const BLUE_COLOUR_THEME = (backgroundColour) => ({
     },
     CARD:{
         FILL:(cardD, deckIsSelected) => {
-            const heldPos = calcCardHeldPos(cardD);
+            const { heldPos } = cardD;
             // lightness, l
             const l = 62 * (deckIsSelected ? 1 : 0.6);
             return `hsla(211, 96%, ${l * (cardsShadowFactor ** heldPos)}%, 1)`;
         },
         STROKE:cardD => {
-            const heldPos = calcCardHeldPos(cardD);
+            const { heldPos } = cardD;
             return `hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`;
         },
         EXPAND_COLLAPSE_BTN:grey10(5.5),
         HEADER:cardD => {
-            const heldPos = calcCardHeldPos(cardD);
+            const { heldPos } = cardD;
             return {
                 DATE:`hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`,
                 DATE_COUNT_WORDS:`hsla(0, 0%, ${70 * (cardsShadowFactor ** heldPos)}%, 1)`,
@@ -226,18 +217,18 @@ export const SATURATED_BLUE_COLOUR_THEME = (bgColour) => ({
     },
     CARD:{
         FILL:(cardD, deckIsSelected) => {
-            const heldPos = calcCardHeldPos(cardD);
+            const { heldPos } = cardD;
             // lightness, l
             const l = 62 * (deckIsSelected ? 1 : 0.6);
             return `hsla(211, 35%, ${l * (cardsShadowFactor ** heldPos)}%, 1)`; //was 96% saturation in nrmal blue colour scheme
         },
         STROKE:cardD => {
-            const heldPos = calcCardHeldPos(cardD);
+            const { heldPos } = cardD;
             return `hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`;
         },
         EXPAND_COLLAPSE_BTN:grey10(4),
         HEADER:cardD => {
-            const heldPos = calcCardHeldPos(cardD);
+            const { heldPos } = cardD;
             return {
                 DATE:`hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`,
                 DATE_COUNT_WORDS:`hsla(0, 0%, ${70 * (cardsShadowFactor ** heldPos)}%, 1)`,
