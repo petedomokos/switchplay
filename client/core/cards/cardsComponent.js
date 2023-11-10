@@ -329,7 +329,8 @@ export default function cardsComponent() {
                                 //must lower card back to its correct pos in deck
                                 containerG.selectAll("g.card").each(function(d,i){
                                     if(d.isHeld && d.cardNr < cardNr){
-                                        d3.select(this).raise();
+                                        //timeout so it only raises after overlay fades out
+                                        setTimeout(() => { d3.select(this).raise(); }, TRANSITIONS.MED)
                                     }
                                 })
                                 items.clickedItemNr(null);

@@ -1,9 +1,9 @@
 import * as d3 from "d3";
-import { TRANSITIONS } from "./constants";
+import { TRANSITIONS } from "../cards/constants";
 import { getTransformationFromTrans } from './helpers';
 
-const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
-const AUTO_SCROLL_DURATION = TRANSITIONS.KPIS.AUTO_SCROLL.DURATION;
+//const CONTENT_FADE_DURATION = TRANSITIONS.KPI.FADE.DURATION;
+//const AUTO_SCROLL_DURATION = TRANSITIONS.KPIS.AUTO_SCROLL.DURATION;
 
 const classMatches = (selection, classNameToTest) => {
     const classStr = selection.attr("class");
@@ -158,7 +158,7 @@ export function fadeIn(selection, options={}){
                 .classed("fading-in", true)
                 .transition("fade-in")
                     .delay(transition?.delay || 0)
-                    .duration(transition?.duration || CONTENT_FADE_DURATION)
+                    .duration(transition?.duration || TRANSITIONS.MED) //WAS CONTENT_FADE_DURATION FOR KPIS
                     .attr("opacity", opacity)
                     .on("end", function() { 
                         d3.select(this).classed("fading-in", false); 
@@ -184,7 +184,8 @@ export function fadeOut(selection, options={}){
                 .classed("fading-out", true)
                 .transition("fade-out")
                     .delay(transition?.delay || 0)
-                    .duration(transition?.duration || CONTENT_FADE_DURATION)
+                    //.duration(transition?.duration || CONTENT_FADE_DURATION) - OLD, FOR KPIS
+                    .duration(transition?.duration || TRANSITIONS.MED)
                     .attr("opacity", opacity)
                     .on("end", function() { 
                         if(shouldRemove){ 
