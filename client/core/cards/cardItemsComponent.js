@@ -137,8 +137,8 @@ export default function cardItemsComponent() {
                 .attr("width", contentsWidth)
                 .attr("height", contentsHeight)
 
-            const statusMenuDimns = cardIsSelected ? { itemWidth: 12, itemHeight: 9, titleHeight: 5 } :
-                { itemWidth:20, itemHeight: 10, titleHeight:7, instructionsHeight:4 }
+            const statusMenuDimns = cardIsSelected ? { optionWidth: 12, optionHeight: 9, titleHeight: 5 } :
+                { optionWidth:20, itemHeight: 10, optionHeight:7, instructionsHeight:4 }
 
             const polygonCentreG = contentsG.selectAll("g.polygon-centre").data(contentsHeight < 40 ? [] : [1]);
             polygonCentreG.enter()

@@ -4,6 +4,7 @@ import { trophy } from "../../../assets/icons/milestoneIcons.js"
 import { toRadians, posFromCentre } from '../journey/screenGeometryHelpers';
 import dragEnhancements from '../journey/enhancedDragHandler';
 import { TextBox } from "d3plus-text";
+import statusMenuComponent from './statusMenuComponent';
 import { grey } from '@material-ui/core/colors';
 import { isNumber } from '../../data/dataHelpers';
 import { fadeInOut, fadeIn, remove } from '../journey/domHelpers';
@@ -40,7 +41,7 @@ export default function pentagonComponent() {
     let editable = true;
     let selectedSectionKey;
     let statusMenuItemNr = null;
-    let statusMenuDimns = { itemWidth:12, itemHeight:9, titleHeight: 5 }
+    let statusMenuDimns = { optionWidth:12, optionHeight:9, titleHeight: 5 }
 
     let innerVertices;
     let outerVertices;
@@ -558,135 +559,26 @@ export default function pentagonComponent() {
 
                         sectionIdentifierG.exit().remove();
 
-
-                        //status
-                        const statusOptionsData = [
+                        //status - renders iff optionsData non-null
+                        const statusOptionsData = statusMenuItemNr === itemNr ? [
                             { key:"status-1", status:1 },
                             { key:"status-2", status:2 }
-                        ];
+                        ] : null;
 
-                        const nrOptions = statusOptionsData.length;
-                        const statusMenuTitleHeight = statusMenuDimns.titleHeight;
-                        const statusMenuInstructionsHeight = statusMenuDimns.instructionsHeight
-                        const statusMenuMargin = { left: 1, right: 1, top: 0, bottom: 2 }
-                        const statusItemWidth = statusMenuDimns.itemWidth;
-                        const statusItemHeight = statusMenuDimns.itemHeight;
-                        const statusItemMarginHoz = 1.5; //2 * 1.5 = 3 ensures square area for radio button
-                        const statusItemMarginVert = statusItemHeight * 0.15;
-                        const statusItemContentsWidth = statusItemWidth - 2 * statusItemMarginHoz;
-                        const statusItemContentsHeight = statusItemHeight - 2 * statusItemMarginVert;
-
-                        const statusMenuWidth = nrOptions * statusItemWidth + statusMenuMargin.left + statusMenuMargin.right;
-                        const statusMenuHeight = statusMenuTitleHeight + statusMenuInstructionsHeight + statusItemHeight + statusMenuMargin.top + statusMenuMargin.bottom;
                         const gapBetweenItemAndMenu = 5;
-
-                        const btnStrokeWidth = 1;
-                        const btnRadius = statusItemContentsWidth/2 - btnStrokeWidth;
-
-                        const statusMenuContainerG = sectionContentsG.select("g.status-menu-container");
-                        const statusMenuG = statusMenuContainerG.selectAll("g.status-menu")
-                            .data(statusMenuItemNr === itemNr ? [1] : []);
-
-                        statusMenuG.enter()
-                            .append("g")
-                                .attr("class", "status-menu")
-                                .call(fadeIn)
-                                .each(function(){
-                                    const statusMenuG = d3.select(this);
-                                    statusMenuG.append("rect").attr("class", "status-menu-bg")
-                                        .attr("rx", 1.5)
-                                        .attr("ry", 1.5)
-                                        .attr("fill", "black")
-                                        .attr("opacity", 1);
-
-                                    statusMenuG
-                                        .append("text")
-                                            .attr("class", "status-menu-title")
-                                            .attr("text-anchor", "middle")
-                                            .attr("dominant-baseline", "central")
-                                            .attr("stroke", grey10(3))
-                                            .attr("fill", grey10(3))
-                                            .attr("stroke-width", 0.03)
-                                            .attr("font-size", 2.5)
-                                            .attr("font-family", "helvetica")
-                                            .attr("font-style", "normal")
-
-                                    statusMenuG
-                                        .append("text")
-                                            .attr("class", "status-menu-instructions")
-                                            .attr("text-anchor", "middle")
-                                            .attr("dominant-baseline", "central")
-                                            .attr("stroke", grey10(3))
-                                            .attr("fill", grey10(3))
-                                            .attr("stroke-width", 0.03)
-                                            .attr("font-size", 2)
-                                            .attr("font-family", "helvetica")
-                                            .attr("font-style", "normal")
-                                        
-                                    statusMenuG.append("g").attr("class", "options");
-                                })
-                                .merge(statusMenuG)
-                                .attr("transform", `translate(${(itemAreaWidth - statusMenuWidth)/2},${-statusMenuHeight - gapBetweenItemAndMenu})`)
-                                .each(function(){
-                                    const statusMenuG = d3.select(this);
-                                    statusMenuG.select("rect.status-menu-bg")
-                                        .attr("width", statusMenuWidth)
-                                        .attr("height", statusMenuHeight);
-
-                                    statusMenuG.select("text.status-menu-title").attr("class", "status-menu-title")
-                                        .attr("x", statusMenuWidth/2)
-                                        .attr("y", statusMenuMargin.top + statusMenuTitleHeight/2)
-                                        .text("ITEM STATUS");
-
-                                    statusMenuG.select("text.status-menu-instructions").attr("class", "status-menu-instructions")
-                                        .attr("x", statusMenuWidth/2)
-                                        .attr("y", statusMenuMargin.top + statusMenuTitleHeight + statusMenuInstructionsHeight/2)
-                                        .text("Click to change");
-
-                                    const optionsG = statusMenuG.select("g.options")
-                                        .attr("transform", `translate(${statusMenuMargin.left}, ${statusMenuMargin.top + statusMenuTitleHeight + statusMenuInstructionsHeight})`)
-                                    
-                                    const optionG = optionsG.selectAll("g.option").data(statusOptionsData, d => d.key)
-                                    optionG.enter()
-                                        .append("g")
-                                            .attr("class", "option")
-                                            .each(function(optD, i){
-                                                const optionG = d3.select(this);
-                                                optionG.append("rect")
-                                                    .attr("rx", 1.5)
-                                                    .attr("ry", 1.5)
-                                                    .attr("stroke", grey10(3))
-                                                    .attr("stroke-width", 1)
-                                                    .attr("fill", status >= i + 1 ? GOLD : NOT_STARTED_FILL)
-                                                    //.attr("opacity", 0.75)
-                                            })
-                                            .merge(optionG)
-                                            .attr("transform", (d,i) => `translate(${statusItemMarginHoz + i * statusItemWidth}, ${statusItemMarginVert})`)
-                                            .each(function(optD,i){
-                                                const optionG = d3.select(this);
-
-                                                optionG.select("rect")
-                                                    .attr("width", statusItemContentsWidth)
-                                                    .attr("height", statusItemContentsHeight)
-                                                
-                                                console.log("updatemenu----------status, i+1", status, i+1)
-                                                optionG.select("rect")
-                                                    .transition()
-                                                    .duration(TRANSITIONS.VERY_FAST)
-                                                    .attr("fill", status >= i + 1 ? GOLD : NOT_STARTED_FILL)
-
-                                            })
-
-                                    optionG.exit().remove();
-                                })
-                                .on("click", function(e){ 
+                        //containerG is positioned in hoz middle of menu, and vertically at the bottom because its expands out and up
+                        sectionContentsG.select("g.status-menu-container")
+                            .attr("transform", `translate(${itemAreaWidth/2}, ${-gapBetweenItemAndMenu})`)
+                            .datum({ status, optionsData:statusOptionsData })
+                            .call(statusMenuComponent()
+                                .optionWidth(statusMenuDimns?.optionWidth)
+                                .optionHeight(statusMenuDimns?.optionHeight)
+                                .titleHeight(statusMenuDimns?.titleHeight)
+                                .instructionsHeight(statusMenuDimns?.instructionsHeight)
+                                .onClick(function(e){
                                     e.stopPropagation();
                                     onClickStatusOption.call(this, itemD);
-                                })
-
-                        statusMenuG.exit().call(remove)
-
-                           
+                                }));     
                     })
 
             sectionG.exit().remove();

@@ -216,7 +216,7 @@ export const SATURATED_BLUE_COLOUR_THEME = (bgColour) => ({
     GOLD:"#FFE10A",// brighter #ffd700,   darker #ccad00
     SILVER:grey10(2),
     NOT_STARTED_FILL:grey10(6),
-    SECTION_VIEW_NOT_STARTED_FILL:"blue",//grey10(5),
+    SECTION_VIEW_NOT_STARTED_FILL:grey10(5),
     DECK:{
         STROKE:getTableAndDeckColours(bgColour).deck,
         HEADER:{
