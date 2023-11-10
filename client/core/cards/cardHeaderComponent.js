@@ -100,7 +100,8 @@ export default function cardHeaderComponent() {
             fill:grey10(5),
             strokeWidth:0.03
         },
-        getStatusFill:itemD => "grey"
+        getStatusItemStroke:itemD => "grey",
+        getStatusItemStrokeWidth:() => 0.5
     }
 
     let withTitle = true;
@@ -255,27 +256,9 @@ export default function cardHeaderComponent() {
                                             .r2(d3.min([progressSummaryContentsWidth * 0.5, progressSummaryContentsHeight * 0.5]))
                                             .withSectionLabels(false)
                                             .styles({
-                                                _polygonLineStrokeWidth:(itemD) => {
-                                                    const { status, title } = itemD;
-                                                    if(!title){ return 0.1; }
-                                                    return status === 2 ? 1.3 : 1;// (status === 1 ? 1 : 0.5)
-                                                },
-                                                _itemStroke:styles.getStatusFill,
+                                                getItemStrokeWidth:styles.getStatusItemStrokeWidth,
+                                                getItemStroke:styles.getStatusItemStroke,
                                             }))
-
-                                    /*
-                                    //@todo - change to trophy when completed all 5
-                                    contentsG.select("path") 
-                                        .transition("transA")
-                                        .delay(300)
-                                        .duration(200)
-                                            .attr("transform", styles.trophyTranslate);
-
-                                    contentsG.select("path") 
-                                        .transition("transB")
-                                            .delay(300)
-                                            .duration(200)
-                                                .attr("fill", styles.statusFill)*/
 
                                     //hitbox
                                     d3.select(this).select("rect.hitbox")

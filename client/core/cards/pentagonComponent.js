@@ -68,8 +68,8 @@ export default function pentagonComponent() {
     }
 
     let styles = {
-        _polygonLineStrokeWidth:() => 0.1,
-        _itemStroke:() => "grey",
+        getItemStrokeWidth:(itemD, linePartNr) => 0.1,
+        getItemStroke:(itemD, linePartNr) => "grey",
         itemTextFill:COLOURS.CARD.ITEM_TEXT,
         itemAttachmentFill:COLOURS.CARD.ITEM_ATTACHMENT
     }
@@ -128,14 +128,15 @@ export default function pentagonComponent() {
                             .attr("ry", 3)
 
                         sectionG.append("path").attr("class", "section-bg").attr("fill", "transparent");
-                        sectionG.append("line").attr("class", "start show-with-section inner visible"); 
+                        sectionG.append("line").attr("class", "start edge-inside show-with-section visible"); 
                         //added inner here and above - now change stroke of it so its normal always
-                        sectionG.append("line").attr("class", "finish show-with-section inner visible")
+                        sectionG.append("line").attr("class", "finish edge-inside show-with-section visible")
                             //.attr("opacity", 1)
                             //.attr("display", "none");
 
-                        sectionG.append("line").attr("class", "inner show-with-section inner visible");
-                        sectionG.append("line").attr("class", "outer visible");
+                        sectionG.append("line").attr("class", "inner edge-inside show-with-section visible");
+                        sectionG.append("line").attr("class", "outer edge-outside visible part1");
+                        sectionG.append("line").attr("class", "outer edge-outside visible part2");
                         //sectionG.append("line").attr("class", "outer-line-hitbox")
                             //.style("stroke", "transparent");
 
@@ -253,14 +254,36 @@ export default function pentagonComponent() {
                                 .attr("x2", dx)
                                 .attr("y2", dy)
 
-                        //outer line
-                        const outerLine = sectionG.select("line.outer");
-                        outerLine
-                            .transition("outer-trans")
+                        //outer lines
+                        /*
+                        const outerLinePart1 = sectionG.select("line.outer.part1");
+                        outerLinePart1
+                            .transition("outer-trans-1")
                             .delay(sizeIsIncreasing ? 300 : 0)
                             .duration(TRANSITIONS.MED)
                                 .attr("x1", bx)
                                 .attr("y1", by)
+                                .attr("x2", cx)
+                                .attr("y2", cy)
+                        */
+                        const midpoint = { x: bx + (cx - bx)/2, y: by + (cy - by)/2 };
+                        const outerLinePart1 = sectionG.select("line.outer.part1");
+                        outerLinePart1
+                            .transition("outer-trans-pos-1")
+                            .delay(sizeIsIncreasing ? 300 : 0)
+                            .duration(TRANSITIONS.MED)
+                                .attr("x1", bx)
+                                .attr("y1", by)
+                                .attr("x2", midpoint.x)
+                                .attr("y2", midpoint.y)
+                            
+                        const outerLinePart2 = sectionG.select("line.outer.part2");
+                        outerLinePart2
+                            .transition("outer-trans-pos-2")
+                            .delay(sizeIsIncreasing ? 300 : 0)
+                            .duration(TRANSITIONS.MED)
+                                .attr("x1", midpoint.x)
+                                .attr("y1", midpoint.y)
                                 .attr("x2", cx)
                                 .attr("y2", cy)
 
@@ -286,19 +309,27 @@ export default function pentagonComponent() {
                             });
 
                         //all lines
-                        sectionG.selectAll("line.visible.outer")
-                            .transition("trans-stroke")
+                        sectionG.selectAll("line.visible.outer.part1")
+                            .transition("outer-trans-stroke-1")
                             .delay(sizeIsIncreasing ? 300 : 0)
                             .duration(TRANSITIONS.MED)
-                                .attr("stroke", styles._itemStroke(itemD,i))
-                                .attr("stroke-width", styles._polygonLineStrokeWidth(itemD,i))
+                                //.attr("stroke", styles.getItemStroke(itemD,i, 1))
+                                .attr("stroke", styles.getItemStroke(itemD,1))
+                                .attr("stroke-width", styles.getItemStrokeWidth(itemD));
 
-                        sectionG.selectAll("line.visible.inner")
+                        sectionG.selectAll("line.visible.outer.part2")
+                            .transition("outer-trans-stroke-2")
+                            .delay(sizeIsIncreasing ? 300 : 0)
+                            .duration(TRANSITIONS.MED)
+                                .attr("stroke", styles.getItemStroke(itemD,2))
+                                .attr("stroke-width", styles.getItemStrokeWidth(itemD));
+
+                        sectionG.selectAll("line.edge-inside")
                             .transition("trans-stroke")
-                                //.delay(sizeIsIncreasing ? 300 : 0)
-                                //.duration(TRANSITIONS.MED)
-                                    .attr("stroke", grey10(9))
-                                    .attr("stroke-width", 0.03)
+                                .delay(sizeIsIncreasing ? 300 : 0)
+                                .duration(TRANSITIONS.MED)
+                                    .attr("stroke", statusMenuItemNr === itemNr ? grey10(1) : grey10(9))
+                                    .attr("stroke-width", statusMenuItemNr === itemNr ? 0.1 : 0.015)
 
                         sectionG.selectAll(".show-with-section")
                             .transition("outer-trans")
@@ -530,22 +561,23 @@ export default function pentagonComponent() {
 
                         //status
                         const statusOptionsData = [
-                            { key:"status-0", status:0, colour:NOT_STARTED_FILL },
-                            { key:"status-1", status:1, colour:SILVER },
-                            { key:"status-2", status:2, colour:GOLD }
+                            { key:"status-1", status:1 },
+                            { key:"status-2", status:2 }
                         ];
 
                         const nrOptions = statusOptionsData.length;
                         const statusMenuTitleHeight = statusMenuDimns.titleHeight;
+                        const statusMenuInstructionsHeight = statusMenuDimns.instructionsHeight
                         const statusMenuMargin = { left: 1, right: 1, top: 0, bottom: 2 }
                         const statusItemWidth = statusMenuDimns.itemWidth;
                         const statusItemHeight = statusMenuDimns.itemHeight;
                         const statusItemMarginHoz = 1.5; //2 * 1.5 = 3 ensures square area for radio button
+                        const statusItemMarginVert = statusItemHeight * 0.15;
                         const statusItemContentsWidth = statusItemWidth - 2 * statusItemMarginHoz;
-                        const statusItemContentsHeight = statusItemHeight;
+                        const statusItemContentsHeight = statusItemHeight - 2 * statusItemMarginVert;
 
                         const statusMenuWidth = nrOptions * statusItemWidth + statusMenuMargin.left + statusMenuMargin.right;
-                        const statusMenuHeight = statusMenuTitleHeight + statusItemHeight + statusMenuMargin.top + statusMenuMargin.bottom;
+                        const statusMenuHeight = statusMenuTitleHeight + statusMenuInstructionsHeight + statusItemHeight + statusMenuMargin.top + statusMenuMargin.bottom;
                         const gapBetweenItemAndMenu = 5;
 
                         const btnStrokeWidth = 1;
@@ -578,6 +610,18 @@ export default function pentagonComponent() {
                                             .attr("font-size", 2.5)
                                             .attr("font-family", "helvetica")
                                             .attr("font-style", "normal")
+
+                                    statusMenuG
+                                        .append("text")
+                                            .attr("class", "status-menu-instructions")
+                                            .attr("text-anchor", "middle")
+                                            .attr("dominant-baseline", "central")
+                                            .attr("stroke", grey10(3))
+                                            .attr("fill", grey10(3))
+                                            .attr("stroke-width", 0.03)
+                                            .attr("font-size", 2)
+                                            .attr("font-family", "helvetica")
+                                            .attr("font-style", "normal")
                                         
                                     statusMenuG.append("g").attr("class", "options");
                                 })
@@ -589,13 +633,18 @@ export default function pentagonComponent() {
                                         .attr("width", statusMenuWidth)
                                         .attr("height", statusMenuHeight);
 
-                                    statusMenuG.select("text").attr("class", "status-menu-title")
+                                    statusMenuG.select("text.status-menu-title").attr("class", "status-menu-title")
                                         .attr("x", statusMenuWidth/2)
                                         .attr("y", statusMenuMargin.top + statusMenuTitleHeight/2)
                                         .text("ITEM STATUS");
 
+                                    statusMenuG.select("text.status-menu-instructions").attr("class", "status-menu-instructions")
+                                        .attr("x", statusMenuWidth/2)
+                                        .attr("y", statusMenuMargin.top + statusMenuTitleHeight + statusMenuInstructionsHeight/2)
+                                        .text("Click to change");
+
                                     const optionsG = statusMenuG.select("g.options")
-                                        .attr("transform", `translate(${statusMenuMargin.left}, ${statusMenuMargin.top + statusMenuTitleHeight})`)
+                                        .attr("transform", `translate(${statusMenuMargin.left}, ${statusMenuMargin.top + statusMenuTitleHeight + statusMenuInstructionsHeight})`)
                                     
                                     const optionG = optionsG.selectAll("g.option").data(statusOptionsData, d => d.key)
                                     optionG.enter()
@@ -603,49 +652,36 @@ export default function pentagonComponent() {
                                             .attr("class", "option")
                                             .each(function(optD, i){
                                                 const optionG = d3.select(this);
-                                                optionG.append("circle").attr("class", "outer")
-                                                    .attr("fill", "none")
-                                                    .attr("stroke", optD.colour)
-                                                    .attr("stroke-width", 1)
-                                                    .attr("opacity", 0.75)
-
-                                                optionG.append("circle").attr("class", "inner")
-                                                    .attr("fill", grey10(6))
-                                                    .attr("opacity", status === i ? 1 : 0)
-
                                                 optionG.append("rect")
-                                                    .attr("fill", "none")
-                                                    //.attr("stroke", "white")
-                                                    //.attr("stroke-width", 0.05)
+                                                    .attr("rx", 1.5)
+                                                    .attr("ry", 1.5)
+                                                    .attr("stroke", grey10(3))
+                                                    .attr("stroke-width", 1)
+                                                    .attr("fill", status >= i + 1 ? GOLD : NOT_STARTED_FILL)
+                                                    //.attr("opacity", 0.75)
                                             })
                                             .merge(optionG)
-                                            .attr("transform", (d,i) => `translate(${statusItemMarginHoz + i * statusItemWidth})`)
+                                            .attr("transform", (d,i) => `translate(${statusItemMarginHoz + i * statusItemWidth}, ${statusItemMarginVert})`)
                                             .each(function(optD,i){
                                                 const optionG = d3.select(this);
-
-                                                optionG.selectAll("circle")
-                                                    .attr("cx", statusItemContentsWidth/2)
-                                                    .attr("cy", statusItemContentsHeight/2)
-                                                
-                                                optionG.select("circle.outer").attr("r", btnRadius)
-                                                optionG.select("circle.inner").attr("r", btnRadius * 0.8)
-
-                                                optionG.select("circle.inner")
-                                                    .transition()
-                                                    .duration(TRANSITIONS.MED)
-                                                        .attr("opacity", status === i ? 1 : 0)
 
                                                 optionG.select("rect")
                                                     .attr("width", statusItemContentsWidth)
                                                     .attr("height", statusItemContentsHeight)
+                                                
+                                                console.log("updatemenu----------status, i+1", status, i+1)
+                                                optionG.select("rect")
+                                                    .transition()
+                                                    .duration(TRANSITIONS.VERY_FAST)
+                                                    .attr("fill", status >= i + 1 ? GOLD : NOT_STARTED_FILL)
 
-                                            })
-                                            .on("click", function(e, optD){ 
-                                                e.stopPropagation();
-                                                if(optD.status !== status){ onClickStatusOption.call(this, itemD, optD); }
                                             })
 
                                     optionG.exit().remove();
+                                })
+                                .on("click", function(e){ 
+                                    e.stopPropagation();
+                                    onClickStatusOption.call(this, itemD);
                                 })
 
                         statusMenuG.exit().call(remove)

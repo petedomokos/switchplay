@@ -160,6 +160,13 @@ export default function cardsComponent() {
                 }
                 return status === 2 ? 3 : (status === 1 ? 2 : 0.2);
             }
+
+            const getHeaderStatusItemStrokeWidth = itemD => {
+                const { status, title } = itemD;
+                if(!title){ return 0.1; }
+                //return status === 2 ? 1.3 : 1;// (status === 1 ? 1 : 0.5)
+                return 0.7
+            }
             const getSectionViewCardStrokeWidth = itemsData => {
                 //can assume 1 item per card per section for now
                 const itemD = itemsData ? itemsData[0] : null;
@@ -167,22 +174,28 @@ export default function cardsComponent() {
             }
 
             //status fills
-            const getProgressStatusColour = (cardD, itemD) => { 
+
+            //@todo - reduce staturation as cardNr goes out (actually need to use the heldCardPos, eg from isNext, is SecondNext etc
+            //to help with this, replace isNext etc with heldCardPos property on each card)
+            const getProgressStatusColour = (cardD, itemD, linePartNr=1) => { 
+                //console.log("getItemColor", cardD.cardNr, itemD.itemNr, linePartNr)
                 //const { isSelected, isFront, isNext, isSecondNext, info } = cardD;
                 const { status, title, isSectionView } = itemD;
-                if(!title){ return GOLD; }
-                if(status === 2){ return GOLD; }
-                if(status === 1){ return SILVER; }
-                return isSectionView ? SECTION_VIEW_NOT_STARTED_FILL : NOT_STARTED_FILL;
+
+                const NOT_STARTED_COLOUR = isSectionView ? SECTION_VIEW_NOT_STARTED_FILL : NOT_STARTED_FILL;
+
+                if(linePartNr === 1){ return status >= 1 ? GOLD : NOT_STARTED_COLOUR; }
+                if(linePartNr === 2){ return status === 2 ? GOLD : NOT_STARTED_COLOUR; }
             };
 
             //in section view, we use the card storke to show status compleitn of seciton item
             //@todo later - in future, this may be more than one item so we will need to use item bg stroke instead
-            const getSectionViewCardStroke = itemsData => {
+            const getSectionViewCardStroke = (itemsData, linePartNr) => {
                 //can assume 1 item per card per section for now
                 const itemD = itemsData[0];
                 if(itemD){
-                    return getProgressStatusColour({}, { ...itemD, isSectionView:true });
+                    //cardNr is irrelevant for sections as there is no shadow effect so just use 1
+                    return getProgressStatusColour({ cardNr: 1 }, { ...itemD, isSectionView:true }, linePartNr);
                 }
                 return SECTION_VIEW_NOT_STARTED_FILL;
             }
@@ -198,6 +211,7 @@ export default function cardsComponent() {
                     .attr("opacity", 1)
                     .each(function(cardD,i){
                         const { cardNr, isHeld, isSelected, profile } = cardD;
+                        const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
 
                         //front components
                         frontHeaderComponents[cardNr] = cardHeaderComponent();
@@ -222,7 +236,7 @@ export default function cardsComponent() {
                                 .attr("width", getCardContentsWidth(cardD))
                                 .attr("height", getCardContentsHeight(cardD))
                                 .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL : getCardFill(cardD))
-                                .attr("stroke", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_STROKE : getCardStroke(cardD))
+                                .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData, 1) : getCardStroke(cardD))
                                 .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth() : STYLES.CARD.STROKE_WIDTH)
                                 .on("click", e => {
                                     console.log("card bg click")
@@ -304,7 +318,7 @@ export default function cardsComponent() {
                             .delay(200)
                             .duration(400)
                                 .attr("fill", selectedSectionKey ? COLOURS.CARD.SECTION_VIEW_FILL : getCardFill(cardD))
-                                .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData) : getCardStroke(cardD))
+                                .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData, 1) : getCardStroke(cardD))
                                 .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth(itemsData) : STYLES.CARD.STROKE_WIDTH)
 
                         contentsG.select("rect.card-front-bg")
@@ -363,7 +377,8 @@ export default function cardsComponent() {
                             .withTitle(!cardTitleIsBeingEdited)
                             .styles({
                                 //need to decide whether to do stroke from here or just inside cardHeader
-                                getStatusFill:itemD => getProgressStatusColour(cardD, itemD),
+                                getStatusItemStroke:(itemD,linePartNr) => getProgressStatusColour(cardD, itemD, linePartNr),
+                                getStatusItemStrokeWidth:getHeaderStatusItemStrokeWidth,
                                 trophyTranslate:isHeld || isSelected ? 
                                     "translate(-3,3) scale(0.25)" : "translate(-45,3) scale(0.6)",
                                 date:{ 
@@ -416,8 +431,8 @@ export default function cardsComponent() {
                         const cardIsEditable = deckIsSelected && (!!selectedSectionKey || ((isHeld && isFront) || isSelected));
                         const items = itemsComponents[cardNr]
                             .styles({ 
-                                _polygonLineStrokeWidth:itemD => getMainItemStrokeWidth(cardD, itemD),
-                                _itemStroke:itemD => getProgressStatusColour(cardD, itemD)
+                                getItemStrokeWidth:itemD => getMainItemStrokeWidth(cardD, itemD),
+                                getItemStroke:(itemD, linePartNr) => getProgressStatusColour(cardD, itemD, linePartNr)
                             })
                             .width(contentsWidth)
                             .height(itemsAreaHeight)
@@ -519,7 +534,6 @@ export default function cardsComponent() {
                             .height(headerHeight)
                             .withTitle(form?.formType !== "card-title")
                             .styles({
-                                getStatusFill:(itemD) => getProgressStatusColour(cardD, itemD),
                                 trophyTranslate:isHeld || isSelected ? 
                                     "translate(-3,3) scale(0.25)" : "translate(-45,3) scale(0.6)",
                                 date:{ 

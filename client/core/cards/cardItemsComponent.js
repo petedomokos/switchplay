@@ -65,10 +65,9 @@ export default function cardItemsComponent() {
     }
 
     let styles = {
-        _polygonLineStrokeWidth: () => 2,
-        _itemStroke:() => "white"
+        getItemStrokeWidth: () => 2,
+        getItemStroke:() => "white"
     }
-    let getItemStroke = () => "grey"
 
     let withSections = true;
     let withText = true;
@@ -139,7 +138,7 @@ export default function cardItemsComponent() {
                 .attr("height", contentsHeight)
 
             const statusMenuDimns = cardIsSelected ? { itemWidth: 12, itemHeight: 9, titleHeight: 5 } :
-                { itemWidth:20, itemHeight: 17, titleHeight:7 }
+                { itemWidth:20, itemHeight: 10, titleHeight:7, instructionsHeight:4 }
 
             const polygonCentreG = contentsG.selectAll("g.polygon-centre").data(contentsHeight < 40 ? [] : [1]);
             polygonCentreG.enter()
@@ -160,11 +159,11 @@ export default function cardItemsComponent() {
                                 .r1(innerRadius)
                                 .r2(outerRadius)
                                 .underlay({
-                                    width:width,
-                                    height:height + headerHeight,
-                                    offsetX: -width/2,
+                                    width:4000,//width,
+                                    height:4000, //height + headerHeight,
+                                    offsetX:-4000/2,// -width/2,
                                     //@todo: offset wont be accurat if pentagon is centred in cardItems -> But it should be centred
-                                    offsetY: -height/2 - headerHeight
+                                    offsetY:-4000/2,// -height/2 - headerHeight
                                 })
                                 .withSections(withSections)
                                 .withText(withText && !isNumber(selectedItemNr))
@@ -182,9 +181,10 @@ export default function cardItemsComponent() {
                                     clickedItemNr = null;
                                     update.call(containerG.node(), data, { ...options, updateShouldRaiseTitledItems:false });
                                 })
-                                .onClickStatusOption(function(itemD, optD){ 
-                                    console.log("onUpdteStatus...................")
-                                    onUpdateItemStatus(itemD.itemNr, optD.status)
+                                .onClickStatusOption(function(itemD){ 
+                                    const { itemNr, status } = itemD;
+                                    const newStatus = status === 0 ? 1 : (status === 1 ? 2 : 0)
+                                    onUpdateItemStatus(itemNr, newStatus)
                                 })
                                 .onLongpressStart(longpressStart)
                                 .onLongpressEnd(longpressEnd)
@@ -223,6 +223,7 @@ export default function cardItemsComponent() {
 
             function longpressStart(e,d){
                 console.log("lpstart")
+                return;
                 if(!editable || !d.title){ return; }
                 d3.select(this).raise();
                 const changeStatus = (prevStatus) => {
@@ -231,13 +232,13 @@ export default function cardItemsComponent() {
                     //update stroke
                     if(selectedSectionKey){
                         //update card stroke
-                        cardBgRect.attr("stroke", styles._itemStroke({ ...newD, isSectionView:true }))
+                        cardBgRect.attr("stroke", styles.getItemStroke({ ...newD, isSectionView:true }))
 
                     }else{
                         //update polygon section stroke
                         d3.select(this).selectAll("line.visible")
-                            .attr("stroke-width", styles._polygonLineStrokeWidth(newD))
-                            .attr("stroke", styles._itemStroke(newD))
+                            .attr("stroke-width", styles.getItemStrokeWidth(newD))
+                            .attr("stroke", styles.getItemStroke(newD))
                     }
                 }
                 changeStatus(d.status);
@@ -247,6 +248,7 @@ export default function cardItemsComponent() {
             }
 
             function longpressEnd(e,d){
+                return;
                 if(!editable || !d.title){ return; }
                 statusTimer.stop();
                 onUpdateItemStatus(d.itemNr, newStatus);
@@ -382,7 +384,6 @@ export default function cardItemsComponent() {
     };
     cardItems.clickedItemNr = function (value) {
         if (!arguments.length) { return clickedItemNr; }
-        console.log("setting clicked item nr...", value)
         clickedItemNr = value;
         return cardItems;
     };
