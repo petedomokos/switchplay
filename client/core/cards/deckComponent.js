@@ -291,7 +291,6 @@ export default function deckComponent() {
         // expression elements
         selection.each(function (deckData) {
             updateDimns(deckData);
-            if(deckIsSelected)
             id = deckData.id;
             containerG = d3.select(this);
 
@@ -554,6 +553,7 @@ export default function deckComponent() {
 
                 //issue - cloneG is a child of container, which moves, making the clone move too????
                 startLongpress = function(e,d){
+                    console.log("startlp..................")
                     //d3.selectAll("g.deck").filter(d => d.id !== id).attr("pointer-events", "none");
 
                     //create a clone 
