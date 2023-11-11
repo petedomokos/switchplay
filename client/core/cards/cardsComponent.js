@@ -170,6 +170,11 @@ export default function cardsComponent() {
             const getSectionViewCardStrokeWidth = itemsData => {
                 //can assume 1 item per card per section for now
                 const itemD = itemsData ? itemsData[0] : null;
+
+                if(itemD?.title){
+                    const { status } = itemD;
+                    return status === 2 ? STYLES.CARD.STROKE_WIDTH * 3 : STYLES.CARD.STROKE_WIDTH;
+                }
                 return itemD?.title ? STYLES.CARD.STROKE_WIDTH : 0.15
             }
 
@@ -226,6 +231,9 @@ export default function cardsComponent() {
                             .attr("opacity", 0)
                             .attr("width", 4000)
                             .attr("height", 4000);
+
+                            //next - last step of status is to spplit the bg rect into two halves , a
+                            //left an right, and status 1 has only teh left in gold, status two has both
 
 
                         //FRONT
