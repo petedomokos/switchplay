@@ -685,8 +685,8 @@ export default function deckComponent() {
                         .withTitle(!deckTitleIsBeingEdited)
                         .withSubtitle(!deckSubtitleIsBeingEdited)
                         .withSpaceForSubtitle(!!subtitle) //keep the space for subtitle, and just remove whilst being edited
-                        .maxTitleFont(deckIsSelected ? 7 : 14)
-                        .maxTitleChars(deckIsSelected ? 18 : 10)
+                        .maxTitleFont(deckIsSelected ? 5 : 14)
+                        .maxTitleChars(deckIsSelected ? 22 : 10)
                         .onClickTitle(function(e){
                             e.stopPropagation();
                             setForm({ formType: "deck-title", deckId:id }) 
