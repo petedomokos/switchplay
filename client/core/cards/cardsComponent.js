@@ -78,6 +78,8 @@ export default function cardsComponent() {
     let y = (d,i) => 0;
 
     //state
+    let groupingTagKey;
+    let timeExtent = "single-deck";
     let deckIsSelected;
     let format = "actual";
     let cardsAreFlipped = false;
@@ -216,7 +218,7 @@ export default function cardsComponent() {
                     .attr("opacity", 1)
                     .each(function(cardD,i){
                         const { cardNr, isHeld, isSelected, profile } = cardD;
-                        const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
+                        const itemsData = timeExtent !== "single-deck" ? [] : (selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items);
 
                         //front components
                         frontHeaderComponents[cardNr] = cardHeaderComponent();
@@ -254,7 +256,7 @@ export default function cardsComponent() {
                                 .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData, 1) : getCardStroke(cardD))
                                 .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth() : STYLES.CARD.STROKE_WIDTH)
                                 .on("click", e => {
-                                    console.log("card bg click")
+                                    //console.log("card bg click")
                                     onClickCard.call(this, e, cardD)
                                     e.stopPropagation();
                                 })
@@ -319,7 +321,7 @@ export default function cardsComponent() {
                         force:true
                     })
                     .each(function(cardD,i){
-                        const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile, deckListPos } = cardD;
+                        const { deckId, cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile, deckListPos } = cardD;
                         const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
                         const items = itemsComponents[cardNr];
 
@@ -402,6 +404,7 @@ export default function cardsComponent() {
                             .width(contentsWidth)
                             .height(headerHeight)
                             .withTitle(!cardTitleIsBeingEdited)
+                            .rightContent(timeExtent === "single-deck" ? "progress-chain" : "progress-trophy")
                             .styles({
                                 //need to decide whether to do stroke from here or just inside cardHeader
                                 getStatusItemStroke:(itemD,linePartNr) => getProgressStatusColour(cardD, itemD, linePartNr),
@@ -442,7 +445,8 @@ export default function cardsComponent() {
                                 onClickCardTitle(cardD, i, dimns);
                             })
                         
-                        const frontHeaderDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr };
+                        const headerId = `deck-${deckId}-card-${cardNr}`
+                        const frontHeaderDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr, id:headerId };
                         frontContentsG.selectAll("g.card-header")
                             //.attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
                             .datum(frontHeaderDatum)
@@ -492,7 +496,7 @@ export default function cardsComponent() {
                             //not sure why we need this when entire containr shold have pointer-events none when no deck selected
                             .attr("pointer-events", deckIsSelected ? null : "none")
                             .attr("transform", `translate(0, ${headerHeight + gapBetweenHeaderAndItems})`)
-                            .call(fadeInOut, isSelected || isFront || !isHeld || selectedSectionKey)
+                            .call(fadeInOut, timeExtent === "single-deck" && (isSelected || isFront || !isHeld || selectedSectionKey))
                             .datum(itemsData)
                             .call(items);
 
@@ -577,7 +581,6 @@ export default function cardsComponent() {
                                 title:{ fill: backTitleColour }
                             })
                             .fontSizes(fontSizes.info)
-                            .rightContent("")
                             .onClick(function(e){
                                 onClickCard(e, cardD); 
                             })
@@ -594,7 +597,7 @@ export default function cardsComponent() {
                                 onClickCardTitle(cardD, i, dimns);
                             })
 
-                        const backHeaderDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr };
+                        const backHeaderDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr, id:headerId };
                         backContentsG.selectAll("g.card-back-header")
                             //.attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
                             .datum(backHeaderDatum)
@@ -842,6 +845,16 @@ export default function cardsComponent() {
     cards.fontSizes = function (values) {
         if (!arguments.length) { return fontSizes; }
         fontSizes = { ...fontSizes, ...values };
+        return cards;
+    };
+    cards.groupingTagKey = function (value) {
+        if (!arguments.length) { return groupingTagKey; }
+        groupingTagKey = value;
+        return cards;
+    };
+    cards.timeExtent = function (value) {
+        if (!arguments.length) { return timeExtent; }
+        timeExtent = value;
         return cards;
     };
     cards.deckIsSelected = function (value) {

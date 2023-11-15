@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { grey10, COLOURS, TRANSITIONS, DIMNS } from "./constants";
 import { updateRectDimns } from '../journey/transitionHelpers';
-import { trophy } from "../../../assets/icons/milestoneIcons.js"
+import trophyComponent from "./trophyComponent.js"
 import { fadeIn, fadeInOut, remove } from '../journey/domHelpers';
 import { truncateIfNecc } from '../journey/helpers';
 const { GOLD } = COLOURS;
@@ -18,8 +18,6 @@ export default function headerComponent() {
     let progressIconWidth;
     let progressIconHeight;
     let progressIconMargin;
-    let progressIconContentsWidth;
-    let progressIconContentsHeight;
 
     let titleWidth;
     let titleHeight;
@@ -38,8 +36,6 @@ export default function headerComponent() {
             left: progressIconWidth * 0.1, right: progressIconWidth * 0.1,
             top:progressIconHeight * 0.2, bottom:progressIconHeight * 0.2
         }
-        progressIconContentsWidth = progressIconWidth - progressIconMargin.left - progressIconMargin.right;
-        progressIconContentsHeight = progressIconHeight - progressIconMargin.top - progressIconMargin.bottom;
 
         subtitleWidth = contentsWidth - progressIconWidth;
         subtitleHeight = withSpaceForSubtitle ? contentsHeight * DIMNS.DECK.HEADER_SUBTITLE_HEIGHT_PROP : 0;
@@ -62,6 +58,8 @@ export default function headerComponent() {
     let withTitle = true;
     let withSubtitle = false;
     let withSpaceForSubtitle = false;
+
+    const trophy = trophyComponent();
 
     let containerG;
     let contentsG;
@@ -120,30 +118,6 @@ export default function headerComponent() {
                 progressIconG = contentsG.append("g")
                     .attr("class", "progress-icon")
                     .attr("transform", `translate(${contentsWidth - progressIconWidth}, 0)`);
-
-                const progressIconContentsG = progressIconG.append("g").attr("class", "progress-icon-contents");
-
-                progressIconContentsG.append("rect").attr("class", "progress-icon-bg")
-                    .attr("stroke", "none")
-                    //.attr("stroke-width", 0.03)
-                    .attr("fill", "none")
-
-                progressIconContentsG
-                    .append("g")
-                        .attr("class", "non-completed-trophy")
-                            .append("path");
-
-                progressIconContentsG
-                    .append("g")
-                        .attr("class", "completed-trophy")
-                            .append("path");
-                
-                progressIconG.append("rect")
-                    .attr("class", "progress-icon-hitbox")
-                    .attr("fill", "transparent")
-                    //.attr("stroke", grey10(6))
-                    .attr("rx", 3)
-                    .attr("ry", 3)
 
             }
 
@@ -243,54 +217,23 @@ export default function headerComponent() {
 
                 subtitleG.exit().call(remove);
 
+
+                
+
                 //progress-icon
                 progressIconG
                     .transition("progress-icon")
                     .duration(TRANSITIONS.MED)
-                        .attr("transform", `translate(${contentsWidth - progressIconWidth}, 0)`)
-                
-                progressIconG.select("rect.progress-icon-hitbox")
-                    .on("click", function(e){ 
-                        e.stopPropagation();
-                        onClickProgressIcon(e, data); 
-                    })
-                    .transition("progress-icon-hitbox")
-                    .duration(TRANSITIONS.MED)
-                        .attr("width", progressIconWidth)
-                        .attr("height", progressIconHeight)
+                        .attr("transform", `translate(${contentsWidth - progressIconWidth}, 0)`);
 
-                const progressIconContentsG = progressIconG.select("g.progress-icon-contents")
-                    .attr("transform", `translate(${progressIconMargin.left}, ${progressIconMargin.top})`);
-
-                progressIconContentsG.select("rect.progress-icon-bg")
-                    .attr("width", progressIconContentsWidth)
-                    .attr("height", progressIconContentsHeight);
-
-                //dimns
-                const actualIconWidth = 85;
-                const iconScale = progressIconContentsWidth/actualIconWidth;
-                const iconX = -2.5
-                const iconY = -4;
-                const completedIconG = progressIconG.select("g.completed-trophy")
-                completedIconG.select("path")
-                    .attr("d", trophy.pathD)
-                    .attr("fill", GOLD)// status === 2 ? GOLD : (status === 1 ? grey10(2) : grey10(6)))
-                    .attr("transform", `translate(${iconX},${iconY}) scale(${iconScale})`);
-
-                const completionPoint = progressIconContentsHeight * (1 - completion);
-                d3.select(`clipPath#deck-trophy-${id}`).select("rect")
-                    .attr("y", completionPoint)
-                    .attr("width", progressIconContentsWidth)
-                    .attr("height", progressIconContentsHeight - completionPoint)
-
-                completedIconG.attr('clip-path', `url(#deck-trophy-${id})`);
-
-                //non-completed icon
-                progressIconContentsG.select("g.non-completed-trophy").select("path")
-                    .attr("d", trophy.pathD)
-                    .attr("fill", grey10(6))
-                    .attr("transform", `translate(${iconX},${iconY}) scale(${iconScale})`);
-
+                progressIconG
+                    .datum({ id, completion })
+                    .call(trophy
+                        .width(progressIconWidth)
+                        .height(progressIconHeight)
+                        .margin(progressIconMargin)
+                        .onClick(onClickProgressIcon))
+                    
             }
 
         })

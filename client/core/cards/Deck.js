@@ -7,7 +7,7 @@ import deckLayout from './deckLayout';
 import deckComponent from "./deckComponent";
 import ItemForm from "./forms/ItemForm";
 import { sortAscending } from '../../util/ArrayHelpers';
-import { initDeck } from '../../data/cards';
+import { initDeck } from '../../data/initDeck';
 //import { createId } from './helpers';
 import { TRANSITIONS } from "./constants"
 import { grey10, COLOURS } from './constants';

@@ -61,10 +61,10 @@ const mapDispatchToProps = dispatch => ({
 		dispatch(createDeck(settings, tableId))
 	},
 	updateDeck(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
-		dispatch(updateDeck(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter));
+		dispatch(updateDeck(deck, false /*shouldPersist*/, shouldUpdateStoreBefore, shouldUpdateStoreAfter));
 	},
 	updateDecks(details, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
-		dispatch(updateDecks(details, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter));
+		dispatch(updateDecks(details, false/*shouldPersist*/, shouldUpdateStoreBefore, shouldUpdateStoreAfter));
 	},
 	deleteDeck(deckId, updatedTable, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
 		dispatch(deleteDeck(deckId, updatedTable, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter));

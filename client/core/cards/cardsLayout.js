@@ -2,12 +2,6 @@ import * as d3 from 'd3';
 import { calcDateCount } from '../../util/TimeHelpers';
 import { isNumber } from '../../data/dataHelpers';
 
-const calcCardStatus = items => {
-    if(items.filter(it => it.status !== 2).length === 0){ return 2; }
-    if(items.filter(it => it.status !== 2).length <= 2) { return 1; }
-    return 0;
-}
-
 export default function cardsLayout(){
     let datasets = [];
     let sections;
@@ -39,8 +33,7 @@ export default function cardsLayout(){
                     ...info,
                     date,
                     dateCount:calcDateCount(now, date),
-                    title,
-                    status:calcCardStatus(items)
+                    title
                 },
             }
         })

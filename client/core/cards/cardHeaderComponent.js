@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { DIMNS, grey10, OVERLAY, COLOURS, TRANSITIONS } from "./constants";
 import { trophy } from "../../../assets/icons/milestoneIcons.js"
+import trophyComponent from './trophyComponent';
 import pentagonComponent from './pentagonComponent';
 import { truncateIfNecc } from '../journey/helpers';
 import { isNumber } from '../../data/dataHelpers';
@@ -107,7 +108,7 @@ export default function cardHeaderComponent() {
     let withTitle = true;
     let editable;
     let selectedSectionKey;
-    let rightContent = "progress";
+    let rightContent = "";
 
     //API CALLBACKS
     let onClick = function(){};
@@ -117,6 +118,7 @@ export default function cardHeaderComponent() {
     let onMouseout = function(){};
 
     const pentagon = pentagonComponent().withSections(false).withText(false).editable(false);
+    const trophy = trophyComponent();
     let dateIntervalTimer;
     let showDateCount = false;
 
@@ -136,6 +138,7 @@ export default function cardHeaderComponent() {
         })
 
         function update(data){
+            //console.log("cardHeader update", data)
             const { id, firstname, surname, age, position, isCurrent, isFuture, settings, personType } = data;
 
             const contentsG = containerG.selectAll("g.info-contents").data([data])
@@ -221,20 +224,7 @@ export default function cardHeaderComponent() {
                                 .attr("class", "progress-summary")
                                 .call(fadeIn)
                                 .each(function(d){
-                                    const contentsG = d3.select(this).append("g").attr("class", "summary-contents");
-
-                                    contentsG.append("g").attr("class", "pentagon")
-                                    /*
-                                    //@todo - info change to trophy when completed all 5
-                                     - pros - it creates a sense of reward
-                                     - cons - it may interfere with pattern-finding potential eg user can 
-                                     quickly look up teh path and see which bits of teh pentagon are ocnsistently
-                                     underachiecved. a trophy breaks the pattern
-                                    contentsG.append("path")
-                                        .attr("d", trophy.pathD)
-                                        .attr("transform", styles.trophyTranslate)
-                                        .attr("fill", styles.statusFill);*/
-
+                                    d3.select(this).append("g").attr("class", "summary-contents");
                                     d3.select(this)
                                         .append("rect")
                                             .attr("class", "hitbox")
@@ -242,25 +232,48 @@ export default function cardHeaderComponent() {
                                             .attr("stroke", "none");  
                                 })
                                 .merge(progressSummaryG)
-                                .attr("display", rightContent === "progress" ? null : "none")
+                                .attr("display", rightContent ? null : "none")
                                 .attr("transform", `translate(${dateWidth + titleWidth},${0})`)
                                 .each(function(d,i){
-                                    const { isFront, isNext, isSecondNext, isSelected, isHeld } = d;
+                                    const { cardNr, isFront, isNext, isSecondNext, isSelected, isHeld, completion, itemsData } = d;
                                     const contentsG = d3.select(this).select("g.summary-contents")
                                         .attr("transform", `translate(${progressSummaryMargin.left},${progressSummaryMargin.top})`);
 
-                                    contentsG.select("g.pentagon")
-                                        .attr("transform", `translate(${progressSummaryContentsWidth/2},${progressSummaryContentsHeight/2})`)
-                                        .datum(d.itemsData)
-                                        .call(pentagon
-                                            .r2(d3.min([progressSummaryContentsWidth * 0.5, progressSummaryContentsHeight * 0.5]))
-                                            .withSectionLabels(false)
-                                            .styles({
-                                                getItemStrokeWidth:styles.getStatusItemStrokeWidth,
-                                                getItemStroke:styles.getStatusItemStroke,
-                                            }))
+                                    //if rightContent is chain, call pentagon, else call trophy
+                                    const pentagonG = contentsG.selectAll("g.pentagon").data(rightContent === "progress-chain" ? [itemsData] : [], d => d);
+                                    pentagonG.enter()
+                                        .append("g")
+                                            .attr("class", "pentagon")
+                                            .merge(pentagonG)
+                                            .attr("transform", `translate(${progressSummaryContentsWidth/2},${progressSummaryContentsHeight/2})`)
+                                            .call(pentagon
+                                                .r2(d3.min([progressSummaryContentsWidth * 0.5, progressSummaryContentsHeight * 0.5]))
+                                                .withSectionLabels(false)
+                                                .styles({
+                                                    getItemStrokeWidth:styles.getStatusItemStrokeWidth,
+                                                    getItemStroke:styles.getStatusItemStroke,
+                                                }))
+
+                                    pentagonG.exit().remove();
+
+                                    const trophyDatum = { id, completion };
+                                    const trophyG = contentsG.selectAll("g.trophy").data(rightContent === "progress-trophy" ? [trophyDatum] : [], d => d);
+                                    trophyG.enter()
+                                        .append("g")
+                                            .attr("class", "trophy")
+                                            .merge(trophyG)
+                                            .attr("transform", `translate(${progressSummaryContentsWidth/2},${progressSummaryContentsHeight/2})`)
+                                            .call(trophy
+                                                .width(progressSummaryContentsWidth)
+                                                .height(progressSummaryContentsHeight)
+                                                .margin({ left:0, right:0, top: 0, bottom: 0 }))
+                                                
+                                    trophyG.exit().remove();
+                                        
 
                                     //hitbox
+                                    //@todo - remove all this and move the logic into a progressIcon component
+                                    //atm, we hide the hitbiox of using trophy, as it has its own hitbox
                                     d3.select(this).select("rect.hitbox")
                                         .attr("width", progressSummaryWidth)
                                         .attr("height", progressSummaryHeight);

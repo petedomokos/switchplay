@@ -4,7 +4,6 @@ import { makeStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
 import ItemForm from "./forms/ItemForm";
 import { sortAscending } from '../../util/ArrayHelpers';
-//import { initDeck } from '../../data/cards';
 //import { createId } from './helpers';
 import IconComponent from './IconComponent';
 import Decks from './Decks';

@@ -1,22 +1,13 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import * as d3 from 'd3';
 import { makeStyles } from '@material-ui/core/styles'
-import Button from '@material-ui/core/Button'
-import ItemForm from "./forms/ItemForm";
-import { sortAscending } from '../../util/ArrayHelpers';
-//import { initDeck } from '../../data/cards';
-import { isNumber } from '../../data/dataHelpers';
-//import { createId } from './helpers';
-import IconComponent from './IconComponent';
-import Dialog from '@material-ui/core/Dialog'
-import DialogActions from '@material-ui/core/DialogActions'
-import DialogContent from '@material-ui/core/DialogContent'
-import DialogContentText from '@material-ui/core/DialogContentText'
-import DialogTitle from '@material-ui/core/DialogTitle'
 import Instructions from "./Instructions"
 import Decks from './Decks';
 import { grey10, TRANSITIONS, COLOURS } from './constants';
 import { withLoader } from '../../util/HOCs';
+import { embellishDecks } from "./embellishDecks"
+import { tableLayout } from "./tableLayout"
+import { getMockDecks } from '../../data/mockDecks';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -62,33 +53,14 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-//helpers
-/*
-const createMockDecks = (userId, nrDecks=1) => d3.range(nrDecks).map((nr,i) =>  
-  ({ 
-      ...initDeck(userId), 
-      id:`temp-${nr}`,
-  })
-)
-*/
-const calcColNr = (i, nrCols) => i % nrCols;
-const calcRowNr = (i, nrCols) => Math.floor(i/nrCols);
-
-const embellishedDecks = (decks, nrCols=DEFAULT_NR_COLS) => decks
-  .map((d,i) => ({
-  ...d, 
-  //@todo - impl layoutFormat grid
-  colNr: /*layoutFormat === "grid" ? d.fixedColNr :*/ calcColNr(i, nrCols),
-  rowNr: /*layoutFormat === "grid" ? d.fixedRowNr :*/ calcRowNr(i, nrCols),
-  listPos:i,
-}))
-
 const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, updateDecks, deleteDeck, hideMenus, showMenus }) => {
   const { tables=[], decks=[] } = user;
   //console.log("CardsTable...jData")
 
   //@todo - move creating flag to asyncProcesses
+  const [groupingTagKey, setGroupingTagKey] = /*useState("");*/ useState("playerId"); //phase
   const [creatingTable, setCreatingTable] = useState(false);
+  const [timeExtent, setTimeExtent] = useState("all-decks") // all-decks or single-deck
   //for now, we just assume its the first table
   useEffect(() => {
     if(user._id && tables.length === 0 && !creatingTable){
@@ -103,7 +75,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   },[user._id, tables.length])
 
   const table = tables[0];
-  const tableDecks = table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
+  const tableDecks = groupingTagKey ? getMockDecks(user) : table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
 
   const width = screen.width || 300;
   const height = screen.height || 600;
@@ -137,8 +109,11 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   const remainingSpace = contentsWidth - nrCols * minDeckWidthWithMargins;
   const deckWidthWithMargins = minDeckWidthWithMargins + (remainingSpace/nrCols);
 
-  const decksData = embellishedDecks(tableDecks, nrCols);
-  const stringifiedData = JSON.stringify(tableDecks);
+  //this adds status and completionProportion to cards and deck based on items statuses
+  const embellishedDecks = embellishDecks(tableDecks, timeExtent, groupingTagKey);
+  const decksData = tableLayout(embellishedDecks, nrCols, timeExtent, groupingTagKey);
+  console.log("decksData..............", decksData)
+  const stringifiedData = JSON.stringify(decksData);
 
   //const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
 
@@ -187,6 +162,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
           <Decks 
             table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
             data={decksData} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
+            groupingTagKey={groupingTagKey} timeExtent={timeExtent}
             journeyData={journeyData} tableMarginTop={tableMarginTop}
             onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={updateDeck}
             updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />

@@ -5,7 +5,7 @@ import { status, parseResponse, logError,
 import auth from '../auth/auth-helper'
 import { signout } from './AuthActions.js';
 import { transformJourneyForClient } from "./JourneyActions"
-import { initDeck } from '../data/cards';
+import { initDeck } from '../data/initDeck';
 
 export const transformTableForClient = serverTable => {
 	//console.log("transformTableForClient", serverTable)
@@ -33,7 +33,7 @@ const hydrateDeckSections = (sections=[]) => d3.range(NR_CARD_ITEMS)
 	}))
 
 export const transformDeckForClient = serverDeck => {
-	const { created, updated, cards, purpose=[], sections, ...clientDeck } = serverDeck;
+	const { created, updated, cards, purpose=[], sections, tags, ...clientDeck } = serverDeck;
 	//ensure prupose has at least two paragraphs
 	const hydratedPurpose = purpose.length === 0 ? ["",""] : purpose.length === 1 ? [purpose[0], ""] : purpose;
 	const hydratedDeckSections = hydrateDeckSections(sections ? JSON.parse(sections) : undefined);
@@ -47,6 +47,7 @@ export const transformDeckForClient = serverDeck => {
 		updated:updated ? new Date(updated) : null,
 		id:serverDeck._id,
 		purpose:hydratedPurpose,
+		tags:tags?.map(tag => JSON.parse(tag)) || [],
 		sections:hydratedDeckSections,
 		cards:parsedCards.map(c => ({
 			...c,
@@ -64,11 +65,12 @@ export const transformDeckForClient = serverDeck => {
 }
 
 export const transformDeckForServer = clientDeck => {
-	const { id, cards, sections, ...serverDeck } = clientDeck;
+	const { id, cards, sections, tags=[], ...serverDeck } = clientDeck;
 	return {
 		...serverDeck,
 		cards:JSON.stringify(cards),
-		sections:JSON.stringify(sections)
+		sections:JSON.stringify(sections),
+		tags:tags.map(tag => JSON.stringify(tag))
 	}
 }
 

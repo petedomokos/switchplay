@@ -7,11 +7,10 @@ import deckLayout from './deckLayout';
 import deckComponent from "./deckComponent";
 import ItemForm from "./forms/ItemForm";
 import { sortAscending } from '../../util/ArrayHelpers';
-import { initDeck } from '../../data/cards';
 //import { createId } from './helpers';
 import { TRANSITIONS } from "./constants"
 import { grey10, COLOURS } from './constants';
-import { trophy } from "../../../assets/icons/milestoneIcons.js"
+import { trophyIcon } from "../../../assets/icons/milestoneIcons.js"
 const { GOLD } = COLOURS;
 
 
@@ -131,7 +130,7 @@ const DeckHeader = ({ user, data, selectedDeckId, scale, datasets, asyncProcesse
         .attr("transform", `translate(${progressIconMargin.left - 3},${progressIconMargin.top - 11})`)
         .each(function(){
           d3.select(this).select("path")
-            .attr("d", trophy.pathD)
+            .attr("d", trophyIcon.pathD)
             .attr("fill", data.status === 2 ? GOLD : (data.status === 1 ? grey10(2) : grey10(6)))
             .transition()
               .duration(TRANSITIONS.MED)

@@ -18,7 +18,7 @@ import { isNumber } from '../../data/dataHelpers';
 import { getPosition } from "../journey/domHelpers";
 import { getTransformationFromTrans } from '../journey/helpers';
 import { maxDimns } from '../../util/geometryHelpers';
-import { initDeck } from '../../data/cards';
+import { initDeck } from '../../data/initDeck';
 //import { createId } from './helpers';
 import { TRANSITIONS, DIMNS } from "./constants"
 import { grey10, COLOURS } from './constants';
@@ -76,7 +76,7 @@ const enhancedZoom = dragEnhancements();
 
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
+const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
   //processed props
   const stringifiedData = JSON.stringify({ data, table });
   //state
@@ -132,29 +132,6 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
   //const selectedDeckDimns = maxDimns(width, height, deckAspectRatio);
   const selectedDeckDimns = maxDimns(width, heightInSelectedDeckMode, deckAspectRatio);
   const zoomScale = selectedDeckDimns.width / deckWidth;
-  
-  /*
-  //ALTERNATIVE WAY TO DO DIMNS THAT KEEPS SAME AR, BUT IT MAKES SELECTED DECK
-  SHIFTED TO RIGHT SLIGHTLY SO STILL NOT CORRECT
-  const deckAspectRatio = 9/16;
-  //margin prop will be the same so we apply ar to margins too
-  const deckHeightWithMargins = deckWidthWithMargins / deckAspectRatio;
-  const width = nrCols * deckWidthWithMargins;
-
-  const deckOuterMargin = {
-    left:deckWidthWithMargins * 0.03,//10, //width * 0.05,
-    right:deckWidthWithMargins * 0.03,//10,//width * 0.05,
-    top:deckHeightWithMargins * 0.03,//15, //height * 0.05,
-    bottom:deckHeightWithMargins * 0.03,//15//height * 0.05
-  }
-
-  const deckWidth = deckWidthWithMargins - deckOuterMargin.left - deckOuterMargin.right;
-  const deckHeight = deckHeightWithMargins - deckOuterMargin.top - deckOuterMargin.bottom;
-  const selectedDeckDimns = maxDimns(width, height, deckAspectRatio);
-  //console.log("selDimns", selectedDeckDimns, deckWidth, deckHeight)
-  const zoomScale = availWidth / deckWidth;
-
-  */
 
   const extraHozShiftToCentreWhenSelected = (width - selectedDeckDimns.width)/2;
 
@@ -601,7 +578,7 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
         //cards:d.cards.map((c,i) => ({ ...c, profile:profilesData[i] }))
         cards:d.cards.map((c,i) => ({ ...c, profile:profilesData[0] }))
       }));
-    //console.log("deckdata", processedDeckData)
+    console.log("deckdata", processedDeckData)
     //just use first deck for now
     d3.select(containerRef.current).datum(processedDeckData)
 
@@ -614,6 +591,8 @@ const Decks = ({ table, data, journeyData, customSelectedDeckId, customSelectedC
       .width(width)
       .height(tableHeight + deckHeightWithMargins)
       .nrCols(nrCols)
+      .groupingTagKey(groupingTagKey)
+      .timeExtent(timeExtent)
       .selectedSection(selectedSection)
       .form(form)
       .x(deckX)
@@ -847,9 +826,6 @@ useEffect(() => {
           <filter id="shine">
             <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
           </filter>
-          {data.map(deck => 
-            <clipPath id={`deck-trophy-${deck.id}`} key={`deck-trophy-${deck.id}`}><rect></rect></clipPath> 
-          )}
         </defs>
       </svg>
       <div className={classes.formUnderlay} onClick={onClickBg}></div>

@@ -224,6 +224,8 @@ export default function deckComponent() {
     let _styles = () => DEFAULT_STYLES;
 
     //settings
+    let groupingTagKey;
+    let timeExtent = "single-deck";
     let deckIsSelected;
     let selectedCardNr;
     let selectedItemNr;
@@ -686,7 +688,7 @@ export default function deckComponent() {
                         .withSubtitle(!deckSubtitleIsBeingEdited)
                         .withSpaceForSubtitle(!!subtitle) //keep the space for subtitle, and just remove whilst being edited
                         .maxTitleFont(deckIsSelected ? 5 : 14)
-                        .maxTitleChars(deckIsSelected ? 22 : 10)
+                        .maxTitleChars(deckIsSelected ? 34 : 10)
                         .onClickTitle(function(e){
                             e.stopPropagation();
                             setForm({ formType: "deck-title", deckId:id }) 
@@ -759,6 +761,8 @@ export default function deckComponent() {
                         .selectedCardHeight(selectedCardHeight)
                         .sectionViewHeldCardWidth(sectionViewHeldCardWidth)
                         .sectionViewHeldCardHeight(sectionViewHeldCardHeight)
+                        .groupingTagKey(groupingTagKey)
+                        .timeExtent(timeExtent)
                         .deckIsSelected(deckIsSelected)
                         .cardsAreFlipped(cardsAreFlipped)
                         .form(form)
@@ -1202,6 +1206,16 @@ export default function deckComponent() {
             _styles = (d,i) => ({ ...DEFAULT_STYLES, ...value });
         }
         
+        return deck;
+    };
+    deck.groupingTagKey = function (value) {
+        if (!arguments.length) { return groupingTagKey; }
+        groupingTagKey = value;
+        return deck;
+    };
+    deck.timeExtent = function (value) {
+        if (!arguments.length) { return timeExtent; }
+        timeExtent = value;
         return deck;
     };
     deck.deckIsSelected = function (value) {
