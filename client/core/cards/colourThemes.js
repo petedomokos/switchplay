@@ -39,6 +39,10 @@ export const GREY_COLOUR_THEME = (backgroundColour) => ({
     SILVER:grey10(2),
     NOT_STARTED_FILL:grey10(6),
     SECTION_VIEW_NOT_STARTED_FILL:grey10(5),
+    FLAG:{
+        MESG:grey10(6),
+        EVENT:grey10(4)
+    },
     DECK:{
         STROKE:getTableAndDeckColours(bgColour).deck,
         HEADER:{
@@ -62,6 +66,7 @@ export const GREY_COLOUR_THEME = (backgroundColour) => ({
             return `hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`;
         },
         EXPAND_COLLAPSE_BTN:grey10(5.5),
+        NOTIFICATION_BTN:grey10(3),
         HEADER:cardD => {
             const { heldPos } = cardD;
             return {
@@ -120,6 +125,10 @@ export const BLUE_COLOUR_THEME = (backgroundColour) => ({
     SILVER:"#C0C0C0",
     NOT_STARTED_FILL:grey10(6),
     SECTION_VIEW_NOT_STARTED_FILL:grey10(5),
+    FLAG:{
+        MESG:grey10(6),
+        EVENT:grey10(4)
+    },
     DECK:{
         STROKE:"hsla(211, 96%, 18%, 1)",
         HEADER:{
@@ -139,6 +148,7 @@ export const BLUE_COLOUR_THEME = (backgroundColour) => ({
             return `hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`;
         },
         EXPAND_COLLAPSE_BTN:grey10(5.5),
+        NOTIFICATION_BTN:grey10(3),
         HEADER:cardD => {
             const { heldPos } = cardD;
             return {
@@ -208,6 +218,10 @@ export const SATURATED_BLUE_COLOUR_THEME = (bgColour) => ({
     SILVER:grey10(2),
     NOT_STARTED_FILL:grey10(6),
     SECTION_VIEW_NOT_STARTED_FILL:grey10(5),
+    FLAG:{
+        MESG:grey10(6),
+        EVENT:grey10(4)
+    },
     DECK:{
         STROKE:getTableAndDeckColours(bgColour).deck,
         HEADER:{
@@ -227,6 +241,7 @@ export const SATURATED_BLUE_COLOUR_THEME = (bgColour) => ({
             return `hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`;
         },
         EXPAND_COLLAPSE_BTN:grey10(4),
+        NOTIFICATION_BTN:grey10(2),
         HEADER:cardD => {
             const { heldPos } = cardD;
             return {
