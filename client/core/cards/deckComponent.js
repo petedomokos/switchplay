@@ -901,7 +901,7 @@ export default function deckComponent() {
                         }
                     })
 
-                    const controlsData = !sections || cardsAreFlipped ? [] : [
+                    const controlsData = !sections || cardsAreFlipped || timeExtent === "all-decks" ? [] : [
                         { key:"section-view", icon:icons.drill }
                     ];
     

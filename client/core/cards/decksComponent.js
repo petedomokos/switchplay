@@ -155,6 +155,24 @@ export default function decksComponent() {
                                                                         .attr("opacity", 1)
                                                             })
 
+                                            
+                                            const flagsG = cardG.select("g.flags-container");             
+                                            if(flagsG.attr("class").includes("is-rendered-but-hidden")){
+                                                //must hide
+                                                flagsG
+                                                    .attr("opacity", 1)
+                                                        .transition("button-out")
+                                                        .duration(fadeDuration)
+                                                            .attr("opacity", 0)
+                                                                .on("end", function(){
+                                                                    d3.select(this)
+                                                                        .transition("button-in")
+                                                                        .delay(flipDuration)
+                                                                        .duration(fadeDuration)
+                                                                            .attr("opacity", 1)
+                                                                })
+                                            }
+
                                             //the card must slide across and back so it remains centred as width reduces and increases again
                                             //we use front with wlog as both are same
                                             const cardWidth = cardG.select("rect.card-front-bg").attr("width")

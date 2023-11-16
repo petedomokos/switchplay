@@ -332,7 +332,7 @@ export default function cardsComponent() {
                         force:true
                     })
                     .each(function(cardD,i){
-                        const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile, deckListPos, flagsData } = cardD;
+                        const { deckId, cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile, deckListPos, flagsData } = cardD;
                         const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
                         const items = itemsComponents[cardNr];
 
@@ -641,6 +641,7 @@ export default function cardsComponent() {
                         const maxFlagWidth = d3.max([mesgWidth, eventWidth]);
 
                         const flagsContainerG = contentsG.select("g.flags-container")
+                            .classed("is-rendered-but-hidden", flagsTurnedOnForCard && !shouldShowFlags)
                             .call(updateTransform, { 
                                 x:() => flagsTurnedOnForCard && shouldShowFlags ? -maxFlagWidth : 0,
                                 y:() => 0,
