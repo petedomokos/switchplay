@@ -90,7 +90,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
   const [longpressedDeckId, setLongpressedDeckId] = useState("");
   const [form, setForm] = useState(null);
 
-
+  const shouldPersistChanges = !data.find(d => d.isMock) && timeExtent !== "deck-of-decks";
   //profiles state
   const [profilesLayout, setProfilesLayout] = useState(() => milestonesLayout());
   const [kpiFormat, setKpiFormat] = useState("actual");
@@ -212,7 +212,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
   const moveDeck = useCallback((origListPos, newListPos) => {
     if(!isNumber(origListPos) || !isNumber(newListPos)){ return; }
     const reorderedIds = moveElementPosition(data.map(d => d.id), origListPos, newListPos);
-    updateTable({ ...table, decks:reorderedIds })
+    updateTable({ ...table, decks:reorderedIds }, shouldPersistChanges)
   }, [stringifiedData]);
 
   const onDeleteDeck = useCallback(id => {
@@ -221,7 +221,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
       decks:table.decks.filter(deckId => deckId !== id),
       archivedDecks:table.archivedDecks.filter(deckId => deckId !== id) 
     };
-    deleteDeck(id, updatedTable);
+    deleteDeck(id, updatedTable, shouldPersistChanges);
   }, [stringifiedData]);
 
   const archiveDeck = useCallback(id => {
@@ -229,7 +229,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
       ...table, 
       decks:table.decks.filter(deckId => deckId !== id),
       archivedDecks:[ ...table.archivedDecks, id]
-    })
+    }, shouldPersistChanges)
   }, [stringifiedData]); 
 
   const onCopyDeck = useCallback(id => {
@@ -444,8 +444,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
   //console.log("Decks", selectedDeckId)
 
   const updateFrontCardNr = useCallback(cardNr => {
-    //bug - selectedDeckId in here is sometime undefined even when its selected
-    //console.log("updateFront", selectedDeckId, cardNr)
+    //console.log("updateFront", cardNr)
     updateDeck({ ...selectedDeck, frontCardNr:cardNr });
     setForm(null);
   }, [stringifiedData, form, selectedDeckId]);
@@ -469,7 +468,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
       //the new key has been applied to cerate updatedSections, so we use it to grab the section
       const updatedSection = updatedSections.find(s => s.key === newKey);
       //then update all decks with that section -> the action will updte the store via the reducer
-      updateDecks({ desc:"section", origSectionKey:form.sectionKey, section: updatedSection })
+      updateDecks({ desc:"section", origSectionKey:form.sectionKey, section: updatedSection }, shouldPersistChanges)
     }else{
       updateDeck({ ...selectedDeck, sections:updatedSections })
     }
@@ -482,7 +481,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
 
     if(applyToAllDecks){
       const updatedSection = updatedSections.find(s => s.key === selectedSection.key);
-      updateDecks({ desc:"section", origSectionKey:form.sectionKey, section: updatedSection })
+      updateDecks({ desc:"section", origSectionKey:form.sectionKey, section: updatedSection }, shouldPersistChanges)
     }else{
       updateDeck({ ...selectedDeck, sections:updatedSections })
     }
@@ -506,7 +505,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
     const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
 
     if(applyToAllDecks){
-      updateDecks({ desc:"card-title", cardNr, title, prevTitle:cardToUpdate.title })
+      updateDecks({ desc:"card-title", cardNr, title, prevTitle:cardToUpdate.title }, shouldPersistChanges)
     }else{
       updateCard({ ...cardToUpdate, title })
     }
@@ -518,7 +517,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
     const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
     if(applyToAllDecks){
       const prevTitle = cardToUpdate.items.find(it => it.itemNr === itemNr).title
-      updateDecks({ desc:"item-title", cardNr, itemNr, title, prevTitle })
+      updateDecks({ desc:"item-title", cardNr, itemNr, title, prevTitle }, shouldPersistChanges)
     }else{
       const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title }));
       updateCard({ ...cardToUpdate, items:updatedItems })

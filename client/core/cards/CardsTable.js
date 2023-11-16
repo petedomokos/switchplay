@@ -7,7 +7,6 @@ import { grey10, TRANSITIONS, COLOURS } from './constants';
 import { withLoader } from '../../util/HOCs';
 import { embellishDecks } from "./embellishDecks"
 import { tableLayout } from "./tableLayout"
-import { getMockDecks } from '../../data/mockDecks';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -56,11 +55,15 @@ const useStyles = makeStyles((theme) => ({
 const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, updateDecks, deleteDeck, hideMenus, showMenus }) => {
   const { tables=[], decks=[] } = user;
   //console.log("CardsTable...jData")
+  const stringifiedUser = JSON.stringify(user);
 
   //@todo - move creating flag to asyncProcesses
   const [groupingTagKey, setGroupingTagKey] = /*useState("");*/ useState("playerId"); //phase
   const [creatingTable, setCreatingTable] = useState(false);
-  const [timeExtent, setTimeExtent] = useState("all-decks") // all-decks or single-deck
+  const [timeExtent, setTimeExtent] = useState("all-decks") // deck-of-decks or single-deck
+  const [decksData, setDecksData] = useState([]);
+  const areDecksOfDecks = groupingTagKey && timeExtent === "deck-of-decks";
+
   //for now, we just assume its the first table
   useEffect(() => {
     if(user._id && tables.length === 0 && !creatingTable){
@@ -75,7 +78,8 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   },[user._id, tables.length])
 
   const table = tables[0];
-  const tableDecks = groupingTagKey ? getMockDecks(user) : table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
+  const tableDecks = groupingTagKey ? decks.filter(d => d.isMock) : 
+    (table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || []);
 
   const width = screen.width || 300;
   const height = screen.height || 600;
@@ -110,10 +114,11 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   const deckWidthWithMargins = minDeckWidthWithMargins + (remainingSpace/nrCols);
 
   //this adds status and completionProportion to cards and deck based on items statuses
-  const embellishedDecks = embellishDecks(tableDecks, timeExtent, groupingTagKey);
-  const decksData = tableLayout(embellishedDecks, nrCols, timeExtent, groupingTagKey);
-  console.log("decksData..............", decksData)
-  const stringifiedData = JSON.stringify(decksData);
+  useEffect(() => {
+    const embellishedDecks = embellishDecks(tableDecks, timeExtent, groupingTagKey);
+    const decksData = tableLayout(embellishedDecks, nrCols, timeExtent, groupingTagKey);
+    setDecksData(decksData);
+  }, [stringifiedUser, groupingTagKey, timeExtent])
 
   //const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
 
@@ -153,6 +158,18 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
     else{ showMenus() }
   }
 
+  const stringifiedData = JSON.stringify(decksData);
+
+  const handleUpdateDeck = useCallback(deck => {
+    if(areDecksOfDecks){
+      //in this case, just update the decksData object here
+      setDecksData(prevState => prevState.map(d => d.id !== deck.id ? d : ({ ...d, ...deck })))
+    }else{
+      //temporarily we stop persistance if grouping, because grouping uses mock data
+      updateDeck(deck, !deck.isMock)
+    }
+  }, [stringifiedData, form, selectedDeckId, areDecksOfDecks]);
+
   return (
     <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
       <div className={classes.contents}>
@@ -164,7 +181,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
             data={decksData} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
             groupingTagKey={groupingTagKey} timeExtent={timeExtent}
             journeyData={journeyData} tableMarginTop={tableMarginTop}
-            onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={updateDeck}
+            onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={handleUpdateDeck}
             updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />
         }
       </div>

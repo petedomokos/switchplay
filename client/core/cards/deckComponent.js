@@ -811,7 +811,7 @@ export default function deckComponent() {
                                     //.attr("pointer-events", null)
                                     .attr("opacity", 1);
                             }*/
-                            //console.log("putdown!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", d)
+                            console.log("putdown!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", d)
                             updateFrontCardNr(d.cardNr + 1);
                         })
                         .setForm(setForm))
@@ -901,7 +901,7 @@ export default function deckComponent() {
                         }
                     })
 
-                    const controlsData = !sections || cardsAreFlipped || timeExtent === "all-decks" ? [] : [
+                    const controlsData = !sections || cardsAreFlipped || timeExtent === "deck-of-decks" ? [] : [
                         { key:"section-view", icon:icons.drill }
                     ];
     

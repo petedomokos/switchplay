@@ -1,11 +1,12 @@
 import C from '../Constants'
-import * as d3 from 'd3';
 import { status, parseResponse, logError, 
 	fetchStart, fetchEnd, fetchThenDispatch} from './CommonActions'
 import auth from '../auth/auth-helper'
 import { signout } from './AuthActions.js';
 import { transformJourneyForClient } from "./JourneyActions"
 import { initDeck } from '../data/initDeck';
+import { hydrateDeckSections } from '../data/sections';
+import { getMockDecks } from '../data/mockDecks';
 
 export const transformTableForClient = serverTable => {
 	//console.log("transformTableForClient", serverTable)
@@ -18,20 +19,6 @@ export const transformTableForClient = serverTable => {
 	}
 }
 
-const createDefaultSection = sectionNr => ({ 
-	key:`section-${sectionNr}`, title:`Section ${sectionNr}`, initials:`S${sectionNr}`, nr:sectionNr
-})
-
-//for each itemNr, if user has defined a section for the item, then use that, else use default
-const NR_CARD_ITEMS = 5;
-const hydrateDeckSections = (sections=[]) => d3.range(NR_CARD_ITEMS)
-	.map(i => /*sections[i] ||*/ createDefaultSection(i+1))
-	.map((s,i) => ({ 
-		...s, 
-		initials:s.initials || s.title.slice(0,2).toUpperCase(), 
-		nr:s.nr || i + 1 //nr always starts from 1, cannot be changed and persisted 
-	}))
-
 export const transformDeckForClient = serverDeck => {
 	const { created, updated, cards, purpose=[], sections, tags, ...clientDeck } = serverDeck;
 	//ensure prupose has at least two paragraphs
@@ -40,7 +27,6 @@ export const transformDeckForClient = serverDeck => {
 	//console.log("hydratedDeckSections", hydratedDeckSections)
 	//legcy - until they are newly saved, we will have some cardNrs that start from 0
 	const parsedCards = JSON.parse(cards);
-	const cardsZeroIndexed = d3.min(parsedCards, d => d.cardNr) === 0;
 	return {
 		...clientDeck,
 		created:new Date(created),
@@ -51,8 +37,6 @@ export const transformDeckForClient = serverDeck => {
 		sections:hydratedDeckSections,
 		cards:parsedCards.map(c => ({
 			...c,
-			//temp adjust new crads back to have a zero index
-			cardNr: cardsZeroIndexed ? c.cardNr : c.cardNr - 1,
 			date:new Date(c.date),
 			items:c.items.map(it => ({ ...it, status:it.status || 0 }))
 		}))
@@ -86,7 +70,7 @@ export const transformUserForClient = serverUser => {
 		photos:hydratedPhotos,
 		journeys:hydratedJourneys,
 		tables:tables.map(t => transformTableForClient(t)),
-		decks:decks.map(s => transformDeckForClient(s)),
+		decks:[...decks.map(s => transformDeckForClient(s)), ...getMockDecks(serverUser)],
 	}
 }
 

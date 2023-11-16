@@ -41,8 +41,8 @@ export const embellishDeck = (deck, timeExtent, groupingTagKey) => {
   //then use that to assign the correct title to deck
   const primaryTitle = tags.find(t => t.key === groupingTagKey)?.title;
   const secondaryTitleKey = groupingTagKey === "playerId" ? "phase" : "playerId";
-  //in all-decks view, the second grouping is not relevant as all are put into a single deck to represent all decks
-  const secondaryTitle = timeExtent === "all-decks" ? "" : tags.find(t => t.key === secondaryTitleKey)?.title;
+  //in deck-of-decks view, the second grouping is not relevant as all are put into a single deck to represent all decks
+  const secondaryTitle = timeExtent === "deck-of-decks" ? "" : tags.find(t => t.key === secondaryTitleKey)?.title;
   const fullTitle = secondaryTitle ? `${primaryTitle} (${secondaryTitle})` : primaryTitle;
 
   return {
