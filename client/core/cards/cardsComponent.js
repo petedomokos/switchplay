@@ -6,7 +6,7 @@ import cardItemsComponent from './cardItemsComponent';
 import flagsComponent from "./flagsComponent";
 import mediaComponent from '../journey/mediaComponent';
 import kpisComponent from '../journey/kpis/kpisComponent';
-import { fadeIn, fadeInOut, remove } from '../journey/domHelpers';
+import { fadeIn, fadeInOut, remove, fadeOut } from '../journey/domHelpers';
 import { updateTransform } from '../journey/transitionHelpers';
 import { icons } from '../../util/icons';
 import { isNumber } from '../../data/dataHelpers';
@@ -64,7 +64,8 @@ export default function cardsComponent() {
 
         //back
         mediaHeight = (contentsHeight - headerHeight) * 0.33;
-        kpisHeight = contentsHeight - headerHeight - mediaHeight;
+        const bottomCtrlsHeight = 4;
+        kpisHeight = contentsHeight - headerHeight - mediaHeight - bottomCtrlsHeight;
     }
 
     let fontSizes = {
@@ -571,7 +572,7 @@ export default function cardsComponent() {
                         botRightBtnG.exit().remove();
 
                         //btm left btn
-                        const flagsTurnedOnForCard = deckIsSelected && !selectedSectionKey && !cardsAreFlipped && isFront && !isSelected;
+                        const flagsTurnedOnForCard = deckIsSelected && !selectedSectionKey && isFront && !isSelected;
                         const notificationBtnDatum = { 
                             key:"notification", 
                             onClick:e => { 
@@ -641,6 +642,17 @@ export default function cardsComponent() {
                                 y:() => 0,
                                 transition:{ duration: 500 }
                             });
+                        //@todo -tidy this below - shoulndt need to hardcode
+                        //we have done this to avoid a transition on enter, which 
+                        //caused main card transition to be jagged
+                        if(flagsTurnedOnForCard){
+                            flagsContainerG.attr("display", null)
+                        }else{
+                            flagsContainerG
+                                .transition()
+                                .delay(500)
+                                .attr("display","none")
+                        }
 
                         const flagsG = flagsContainerG.selectAll("g.flags").data([flagsData]);
 
