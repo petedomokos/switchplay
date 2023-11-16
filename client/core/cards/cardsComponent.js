@@ -332,11 +332,7 @@ export default function cardsComponent() {
                         force:true
                     })
                     .each(function(cardD,i){
-<<<<<<< HEAD
-                        const { deckId, cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile, deckListPos } = cardD;
-=======
                         const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile, deckListPos, flagsData } = cardD;
->>>>>>> master
                         const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
                         const items = itemsComponents[cardNr];
 
