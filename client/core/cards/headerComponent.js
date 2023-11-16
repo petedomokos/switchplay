@@ -232,6 +232,7 @@ export default function headerComponent() {
                         .width(progressIconWidth)
                         .height(progressIconHeight)
                         .margin(progressIconMargin)
+                        .iconTransform({ x:-3, y:-4 })
                         .onClick(onClickProgressIcon))
                     
             }

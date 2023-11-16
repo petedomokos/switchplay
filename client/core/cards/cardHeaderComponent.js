@@ -262,11 +262,12 @@ export default function cardHeaderComponent() {
                                         .append("g")
                                             .attr("class", "trophy")
                                             .merge(trophyG)
-                                            .attr("transform", `translate(${progressSummaryContentsWidth/2},${progressSummaryContentsHeight/2})`)
+                                            //.attr("transform", `translate(${progressSummaryContentsWidth/2},${progressSummaryContentsHeight/2})`)
                                             .call(trophy
                                                 .width(progressSummaryContentsWidth)
                                                 .height(progressSummaryContentsHeight)
-                                                .margin({ left:0, right:0, top: 0, bottom: 0 }))
+                                                .margin({ left:0, right:0, top: 0, bottom: 0 })
+                                                .iconTransform({ x:-1.2, y:-1.2 }))
                                                 
                                     trophyG.exit().remove();
                                         

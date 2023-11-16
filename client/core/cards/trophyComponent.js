@@ -21,6 +21,8 @@ export default function trophyComponent() {
     }
     let _styles = () => DEFAULT_STYLES;
 
+    let iconTransform = { x:0, y:0 }
+
     let onClick = null;
 
     let containerG;
@@ -48,6 +50,9 @@ export default function trophyComponent() {
                     .attr("class", "trophy-contents")
                     .attr("transform", `translate(${margin.left},${margin.top})`);
 
+                contentsG.append("rect").attr("class", "trophy-bg")
+                    .attr("fill", "none")
+
                 contentsG
                     .append("g")
                         .attr("class", "non-completed-trophy")
@@ -61,8 +66,8 @@ export default function trophyComponent() {
                 containerG.append("rect")
                     .attr("class", "trophy-hitbox")
                     .attr("fill", "transparent")
-                    .attr("stroke-width", 0.05)
-                    .attr("stroke", grey10(10))
+                    //.attr("stroke-width", 0.05)
+                    //.attr("stroke", grey10(10))
 
                 //@todo - make the svg available in environment
                 d3.select("svg#decks-svg")
@@ -74,8 +79,7 @@ export default function trophyComponent() {
             function update(data, options={}){
                 //console.log("trophy update", data)
                 const { } = options;
-                const { id, /*completion*/ } = data
-                const completion = 0.5;
+                const { id, completion } = data
 
                 //hitbox
                 containerG
@@ -88,6 +92,10 @@ export default function trophyComponent() {
                             onClick.call(this, e, data); 
                         });
 
+                contentsG.select("rect.trophy-bg")
+                    .attr("width", contentsWidth)
+                    .attr("height", contentsHeight)
+
                 //contents
                 contentsG
                     .transition("trophy-contents")
@@ -97,21 +105,19 @@ export default function trophyComponent() {
                 //dimns
                 const actualIconWidth = 85;
                 const iconScale = contentsWidth/actualIconWidth;
-                const iconX = -2.5
-                const iconY = 0;// -4;
                 const completedIconG = contentsG.select("g.completed-trophy")
                 completedIconG.select("path")
                     .attr("d", trophyIcon.pathD)
                     .attr("fill", GOLD)
-                    .attr("transform", `translate(${iconX},${iconY}) scale(${iconScale})`);
+                    .attr("transform", `translate(${iconTransform.x},${iconTransform.y}) scale(${iconScale})`);
 
-                console.log("id", id)
+                //console.log("id", id)
                 //next - fix completionPoint - look at hitbox, is trophy centred?
                 //need to look at why hitbox is lower - as if the whole containerG is lower - why - fix it!
                 const completionPoint = contentsHeight * (1 - completion);
-                console.log("ch comp", contentsHeight, completionPoint)
+                //console.log("ch comp", contentsHeight, completionPoint)
                 d3.select(`clipPath#trophy-${id}`).select("rect")
-                    .attr("y",0)// id.includes("card") ? 0 : completionPoint)
+                    .attr("y", completionPoint)
                     .attr("width", contentsWidth)
                     .attr("height", contentsHeight - completionPoint)
 
@@ -122,7 +128,7 @@ export default function trophyComponent() {
                 contentsG.select("g.non-completed-trophy").select("path")
                     .attr("d", trophyIcon.pathD)
                     .attr("fill", grey10(6))
-                    .attr("transform", `translate(${iconX},${iconY}) scale(${iconScale})`);
+                    .attr("transform", `translate(${iconTransform.x},${iconTransform.y}) scale(${iconScale})`);
 
             }
 
@@ -145,6 +151,11 @@ export default function trophyComponent() {
     trophy.margin = function (value) {
         if (!arguments.length) { return margin; }
         margin = value;
+        return trophy;
+    };
+    trophy.iconTransform = function (value) {
+        if (!arguments.length) { return iconTransform; }
+        iconTransform = { ...iconTransform, ...value };
         return trophy;
     };
     trophy.styles = function (value) {
