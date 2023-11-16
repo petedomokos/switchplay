@@ -432,7 +432,7 @@ export default function pentagonComponent() {
                             .attr("display", withText ? null : "none")
                             .transition(`text-${key}`)
                             .duration(TRANSITIONS.FAST)
-                                .style("opacity", withText ? 1 : 0)
+                                .style("opacity", withText ? (itemIsDefined ? 1 : 0.5) : 0)
                        
                         if(withText){
                             //we put a fake delay on rendering so it doesnt clash with zooming transitions,
@@ -448,7 +448,6 @@ export default function pentagonComponent() {
                                         .style("fill", styles.itemTextFill)
                                         .style("stroke", styles.itemTextFill)
                                         .style("stroke-width", 0.01)
-                                        .style("opacity", itemIsDefined ? 1 : 0.5);          
 
                                 //attachments
                                 //first we need to know how many lines of text there are so we can shoft attachments up if necc

@@ -97,6 +97,7 @@ export default function textComponent() {
 
         function update(d, i){
             const { title, attachments } = d;
+            console.log("text", title, d.itemNr)
             const containerG = d3.select(this);
             const styles =  _styles(d,i);
 

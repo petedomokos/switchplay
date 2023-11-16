@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { calcDateCount } from '../../util/TimeHelpers';
 import { isNumber } from '../../data/dataHelpers';
+import { mockCardFlags } from './mockCardFlags';
 
 export default function cardsLayout(){
     let datasets = [];
@@ -18,8 +19,11 @@ export default function cardsLayout(){
 
         const _data = cardsData.map((c,i) => {
             const { deckId, cardNr, title="", date, items } = c;
+
+            const mockFlags = mockCardFlags[i] || [];
             return {
                 ...c,
+                flagsData:mockFlags.map((flag,i) => ({ ...flag, key:`deck-${deckId}-card-${cardNr}-flag-${i}` })),
                 items:c.items.map((it,i) => ({ 
                     ...it, 
                     deckId,

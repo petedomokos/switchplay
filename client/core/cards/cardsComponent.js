@@ -3,13 +3,15 @@ import { DIMNS, grey10, COLOURS, TRANSITIONS, STYLES } from "./constants";
 import dragEnhancements from '../journey/enhancedDragHandler';
 import cardHeaderComponent from './cardHeaderComponent';
 import cardItemsComponent from './cardItemsComponent';
+import flagsComponent from "./flagsComponent";
 import mediaComponent from '../journey/mediaComponent';
 import kpisComponent from '../journey/kpis/kpisComponent';
-import { fadeIn, fadeInOut, remove } from '../journey/domHelpers';
+import { fadeIn, fadeInOut, remove, fadeOut } from '../journey/domHelpers';
 import { updateTransform } from '../journey/transitionHelpers';
 import { icons } from '../../util/icons';
 import { isNumber } from '../../data/dataHelpers';
 import { update } from 'lodash';
+import container from '../journey/kpis/kpi/container';
 
 const { GOLD, SILVER, NOT_STARTED_FILL, SECTION_VIEW_NOT_STARTED_FILL } = COLOURS;
 
@@ -62,7 +64,8 @@ export default function cardsComponent() {
 
         //back
         mediaHeight = (contentsHeight - headerHeight) * 0.33;
-        kpisHeight = contentsHeight - headerHeight - mediaHeight;
+        const bottomCtrlsHeight = 4;
+        kpisHeight = contentsHeight - headerHeight - mediaHeight - bottomCtrlsHeight;
     }
 
     let fontSizes = {
@@ -83,6 +86,7 @@ export default function cardsComponent() {
     let deckIsSelected;
     let format = "actual";
     let cardsAreFlipped = false;
+    let shouldShowFlags = false;
     let form;
     let selectedCardNr;
     let selectedItemNr;
@@ -124,6 +128,7 @@ export default function cardsComponent() {
     //components
     let frontHeaderComponents = {};
     let itemsComponents = {};
+    let flagsComponents = {};
     let backHeaderComponents = {};
     let mediaComponents = {};
     let kpisComponents = {};
@@ -223,6 +228,7 @@ export default function cardsComponent() {
                         //front components
                         frontHeaderComponents[cardNr] = cardHeaderComponent();
                         itemsComponents[cardNr] = cardItemsComponent();
+                        flagsComponents[cardNr] = flagsComponent();
                         //back components
                         backHeaderComponents[cardNr] = cardHeaderComponent();
                         mediaComponents[cardNr] = mediaComponent();
@@ -240,6 +246,11 @@ export default function cardsComponent() {
 
                         //FRONT
                         const contentsG = cardG.append("g").attr("class", "contents card-contents");
+
+                        //append flags container under the bg so its hidden until it slides out
+                        contentsG
+                            .append("g")
+                                .attr("class", "flags-container");
 
                         //bgs for front and back
                         contentsG
@@ -321,7 +332,11 @@ export default function cardsComponent() {
                         force:true
                     })
                     .each(function(cardD,i){
+<<<<<<< HEAD
                         const { deckId, cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile, deckListPos } = cardD;
+=======
+                        const { cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile, deckListPos, flagsData } = cardD;
+>>>>>>> master
                         const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
                         const items = itemsComponents[cardNr];
 
@@ -521,19 +536,20 @@ export default function cardsComponent() {
                         }
                         const botRightBtnData = !deckIsSelected || selectedSectionKey || (!isFront && !isSelected) ? 
                             [] : (isSelected ? [collapseBtnDatum] : [expandBtnDatum]);
-                        //console.log("btnRight", botRightBtnData)
-                        const btnHeight = d3.max([1, d3.min([15, 0.12 * normalContentsHeight])]);
+
+                        const btnHeight = d3.max([1.3, d3.min([15, 0.15 * normalContentsHeight])]);
                         const btnWidth = btnHeight;
                         //assumme all are square
                         //note: 0.8 is a bodge coz iconsseems to be bigger than they state
                         const scale = d => (0.8 * btnHeight)/d.icon.height;
-                        const btnMargin = btnHeight * 0.1;
+                        const btnMargin = btnHeight * 0.2;
                         const btnContentsWidth = btnWidth - 2 * btnMargin;
                         const btnContentsHeight = btnHeight - 2 * btnMargin;
                         const botRightBtnG = contentsG.selectAll("g.card-bottom-right-btn").data(botRightBtnData, d => d.key);
                         botRightBtnG.enter()
                             .append("g")
                                 .attr("class", "card-bottom-right-btn")
+                                .call(fadeIn, { transition:{ delay: TRANSITIONS.MED }})
                                 .each(function(d){
                                     const btnG = d3.select(this);
                                     btnG.append("path")
@@ -541,6 +557,8 @@ export default function cardsComponent() {
 
                                     btnG.append("rect").attr("class", "btn-hitbox")
                                         .attr("fill", "transparent")
+                                        //.attr("stroke-width", 0.3)
+                                        //.attr("stroke", "black")
                                 })
                                 .merge(botRightBtnG)
                                 .attr("transform", `translate(${contentsWidth - btnWidth + btnMargin},${contentsHeight - btnHeight + btnMargin})`)
@@ -560,6 +578,110 @@ export default function cardsComponent() {
                                 });
 
                         botRightBtnG.exit().remove();
+
+                        //btm left btn
+                        const flagsTurnedOnForCard = deckIsSelected && !selectedSectionKey && isFront && !isSelected;
+                        const notificationBtnDatum = { 
+                            key:"notification", 
+                            onClick:e => { 
+                                shouldShowFlags = !shouldShowFlags;
+                                containerG.call(cards)  
+                            },
+                            icon:icons.notification,
+                        }
+                       
+                        const botLeftBtnData = flagsTurnedOnForCard ? [notificationBtnDatum] : [];
+                        //console.log("btnLeft", botLeftBtnData)
+                        //assumme all are square
+                        //note: 0.8 is a bodge coz iconsseems to be bigger than they state
+                        const botLeftBtnG = contentsG.selectAll("g.card-bottom-left-btn").data(botLeftBtnData, d => d.key);
+                        botLeftBtnG.enter()
+                            .append("g")
+                                .attr("class", "card-bottom-left-btn")
+                                .call(fadeIn, { transition:{ delay: TRANSITIONS.MED }})
+                                .each(function(d){
+                                    const btnG = d3.select(this);
+                                    btnG.append("path")
+                                        .attr("fill", shouldShowFlags ? grey10(2) : COLOURS.CARD.EXPAND_COLLAPSE_BTN);
+
+                                    btnG.append("rect").attr("class", "btn-hitbox")
+                                        .attr("fill", "transparent")
+                                        //.attr("stroke-width", 0.3)
+                                        //.attr("stroke", "black")
+                                })
+                                .merge(botLeftBtnG)
+                                .attr("transform", `translate(${btnMargin},${contentsHeight - btnHeight + btnMargin})`)
+                                .each(function(d){
+                                    const btnG = d3.select(this);
+                                    btnG.select("path")
+                                        .attr("transform", `scale(${scale(d)}) translate(-2.5,-2.5)`)
+                                        .attr("d", d.icon.d)
+                                            .transition()
+                                            .duration(TRANSITIONS.FAST)
+                                                .attr("fill", COLOURS.CARD.NOTIFICATION_BTN)
+                                                .attr("opacity", shouldShowFlags ? 1 : 0.5);
+
+                            
+                                    btnG.select("rect.btn-hitbox")
+                                        .attr("width", btnContentsWidth)
+                                        .attr("height", btnContentsHeight)
+
+                                })
+                                .on("click", (e,d) => { 
+                                    d.onClick(e, d) 
+                                });
+
+                        botLeftBtnG.exit().remove();
+
+                        //flags
+                        const flags = flagsComponents[cardNr];
+
+                        const flagsMargin = { top: 2, bottom: 2 }
+                        const flagsContentsHeight = contentsHeight - flagsMargin.top - flagsMargin.bottom;
+                        const mesgWidth = 20;
+                        const mesgHeight = 10;
+                        const eventWidth = 20;
+                        const eventHeight = 10;
+                        const maxFlagWidth = d3.max([mesgWidth, eventWidth]);
+
+                        const flagsContainerG = contentsG.select("g.flags-container")
+                            .call(updateTransform, { 
+                                x:() => flagsTurnedOnForCard && shouldShowFlags ? -maxFlagWidth : 0,
+                                y:() => 0,
+                                transition:{ duration: 500 }
+                            });
+                        //@todo -tidy this below - shoulndt need to hardcode
+                        //we have done this to avoid a transition on enter, which 
+                        //caused main card transition to be jagged
+                        if(flagsTurnedOnForCard){
+                            flagsContainerG.attr("display", null)
+                        }else{
+                            flagsContainerG
+                                .transition()
+                                .delay(500)
+                                .attr("display","none")
+                        }
+
+                        const flagsG = flagsContainerG.selectAll("g.flags").data([flagsData]);
+
+                        flagsG.enter()
+                            .append("g")
+                                .attr("class", "flags")
+                                .merge(flagsG)
+                                .attr("transform", `translate(0, ${flagsMargin.top})`)
+                                .call(flags
+                                    .height(flagsContentsHeight)
+                                    .mesgWidth(mesgWidth)
+                                    .mesgHeight(mesgHeight)
+                                    .eventWidth(eventWidth)
+                                    .eventHeight(eventHeight)
+                                    .alignment("right"))
+
+                        flagsG.exit().call(remove);
+
+
+
+
 
 
                         //BACK CONTENTS ---------------------------------------
