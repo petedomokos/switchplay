@@ -4,6 +4,7 @@ import dragEnhancements from '../journey/enhancedDragHandler';
 import cardHeaderComponent from './cardHeaderComponent';
 import cardItemsComponent from './cardItemsComponent';
 import flagsComponent from "./flagsComponent";
+import purposeComponent from './purposeComponent';
 import mediaComponent from '../journey/mediaComponent';
 import kpisComponent from '../journey/kpis/kpisComponent';
 import { fadeIn, fadeInOut, remove, fadeOut } from '../journey/domHelpers';
@@ -49,6 +50,9 @@ export default function cardsComponent() {
     let mediaHeight;
     let kpisHeight;
 
+    let btnWidth;
+    let btnHeight;
+
     function updateDimns(){
         normalContentsWidth = heldCardWidth - margin.left - margin.right;
         normalContentsHeight = heldCardHeight - margin.top - margin.bottom;
@@ -66,6 +70,9 @@ export default function cardsComponent() {
         mediaHeight = (contentsHeight - headerHeight) * 0.33;
         const bottomCtrlsHeight = 4;
         kpisHeight = contentsHeight - headerHeight - mediaHeight - bottomCtrlsHeight;
+
+        btnHeight = d3.max([1.3, d3.min([15, 0.15 * normalContentsHeight])]);
+        btnWidth = btnHeight;
     }
 
     let fontSizes = {
@@ -128,6 +135,7 @@ export default function cardsComponent() {
     //components
     let frontHeaderComponents = {};
     let itemsComponents = {};
+    let purposeComponents = {};
     let flagsComponents = {};
     let backHeaderComponents = {};
     let mediaComponents = {};
@@ -228,6 +236,7 @@ export default function cardsComponent() {
                         //front components
                         frontHeaderComponents[cardNr] = cardHeaderComponent();
                         itemsComponents[cardNr] = cardItemsComponent();
+                        purposeComponents[cardNr] = purposeComponent();
                         flagsComponents[cardNr] = flagsComponent();
                         //back components
                         backHeaderComponents[cardNr] = cardHeaderComponent();
@@ -332,7 +341,7 @@ export default function cardsComponent() {
                         force:true
                     })
                     .each(function(cardD,i){
-                        const { deckId, cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile, deckListPos, flagsData } = cardD;
+                        const { deckId, cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile, deckListPos, purposeData=[], flagsData } = cardD;
                         const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
                         const items = itemsComponents[cardNr];
 
@@ -511,13 +520,23 @@ export default function cardsComponent() {
                             .datum(itemsData)
                             .call(items);
 
-                        //remove items for cards behind
-                        const shouldHideItems = isHeld && !isFront && !isSelected;
-                        /*contentsG.select("g.items-area")
-                            //.attr("pointer-events", shouldHideItems ? "none" : null)
-                            .transition("items-trans")
-                                .duration(100)
-                                .attr("opacity", shouldHideItems ? 0 : 1)*/
+                        //PURPOSE (instead of items when in long-term deck-of-decks view)
+                        const shouldShowPurpose = deckIsSelected && isFront && timeExtent === "deck-of-decks" && !cardsAreFlipped;
+                        const purpose = purposeComponents[cardNr];
+                        const purposeG = frontContentsG.selectAll("g.card-purpose").data(shouldShowPurpose ? [purposeData] : [])
+                        purposeG.enter()
+                            .append("g")
+                                .attr("class", "card-purpose")
+                                .attr("pointer-events", "none")
+                                .call(fadeIn)
+                                .merge(purposeG)
+                                .attr("transform", () => `translate(0, ${headerHeight})`)
+                                .call(purpose
+                                    .width(contentsWidth)
+                                    .height(contentsHeight - headerHeight - btnHeight)
+                                    .styles({ placeholderOpacity: 1 }))
+        
+                        purposeG.exit().call(remove)
 
                         //btm right btn
                         const expandBtnDatum = { 
@@ -533,8 +552,6 @@ export default function cardsComponent() {
                         const botRightBtnData = !deckIsSelected || selectedSectionKey || (!isFront && !isSelected) ? 
                             [] : (isSelected ? [collapseBtnDatum] : [expandBtnDatum]);
 
-                        const btnHeight = d3.max([1.3, d3.min([15, 0.15 * normalContentsHeight])]);
-                        const btnWidth = btnHeight;
                         //assumme all are square
                         //note: 0.8 is a bodge coz iconsseems to be bigger than they state
                         const scale = d => (0.8 * btnHeight)/d.icon.height;

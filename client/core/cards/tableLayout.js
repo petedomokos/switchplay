@@ -77,7 +77,9 @@ const createDeckOfDecks = (group, groupingTagKey) => {
     //cards are the decks themselves
     cards:sortedDecks.map((d,i) => ({
       cardNr:i,
-      ...d,
+      date:d.date,
+      //...d,
+      purpose:d.purpose,
       title:d.tags.find(t => t.key === cardNamingKey)?.title,
       items:d.cards.map(c => ({
         itemNr:c.cardNr,

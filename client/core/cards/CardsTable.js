@@ -58,9 +58,9 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   const stringifiedUser = JSON.stringify(user);
 
   //@todo - move creating flag to asyncProcesses
-  const [groupingTagKey, setGroupingTagKey] = /*useState("");*/ useState("playerId"); //phase
+  const [groupingTagKey, setGroupingTagKey] = useState("");// useState("playerId"); //phase
   const [creatingTable, setCreatingTable] = useState(false);
-  const [timeExtent, setTimeExtent] = useState("all-decks") // deck-of-decks or single-deck
+  const [timeExtent, setTimeExtent] = useState("single-deck")// useState("deck-of-decks") // deck-of-decks or single-deck
   const [decksData, setDecksData] = useState([]);
   const areDecksOfDecks = groupingTagKey && timeExtent === "deck-of-decks";
 

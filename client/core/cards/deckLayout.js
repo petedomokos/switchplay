@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import cardsLayout from "./cardsLayout";
+import { purposeLayout } from './purposeLayout';
 
 const createDefaultSections = cards => cards[0].items.map((it,i) => ({
     key:`section-${i+1}`, title:`Section ${i+1}`, initials:`S${i+1}`
@@ -14,7 +15,7 @@ export default function decksLayout(){
     const _cardsLayout = cardsLayout();
 
     function update(deckData){
-        const { cards, id, listPos } = deckData;
+        const { cards, id, listPos, purpose } = deckData;
         //sections - if withSections, we create default sectins if none exist. if false, there are never sections
         let sections;
         if(withSections === null){ sections = deckData.sections }
@@ -27,6 +28,7 @@ export default function decksLayout(){
 
         return {
             ...deckData,
+            purposeData:purposeLayout(purpose),
             cards:cardsData,
             sections, //may be undefined
         }
