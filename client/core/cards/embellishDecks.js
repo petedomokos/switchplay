@@ -30,7 +30,8 @@ const getTagTitle = tag => {
   return values?.find(v => v.value === tag.value)?.title
 }
 
-export const embellishDeck = (deck, timeExtent, groupingTagKey) => {
+export const embellishDeck = (deck, settings={}) => {
+  const { allPlayerIdsSame, allPlayerIdsUnique, timeExtent, groupingTagKey } = settings;
   const cards = deck.cards.map(c => ({
     ...c,
     status:calcCardStatus(c.items)
@@ -38,18 +39,36 @@ export const embellishDeck = (deck, timeExtent, groupingTagKey) => {
 
   //first, add title to each tag from the tagInfoArray file
   const tags = deck.tags.map(t => ({ ...t, title:getTagTitle(t) }));
-  //then use that to assign the correct title to deck
-  const primaryTitle = tags.find(t => t.key === groupingTagKey)?.title;
-  const secondaryTitleKey = groupingTagKey === "playerId" ? "phase" : "playerId";
-  //in deck-of-decks view, the second grouping is not relevant as all are put into a single deck to represent all decks
-  const secondaryTitle = timeExtent === "deck-of-decks" ? "" : tags.find(t => t.key === secondaryTitleKey)?.title;
-  const fullTitle = secondaryTitle ? `${primaryTitle} (${secondaryTitle})` : primaryTitle;
+  const playerTag = tags.find(t => t.key === "playerId");
+  const phaseTag = tags.find(t => t.key === "phase");
+  const playerName = playerTag?.title
+  const phaseTitle = phaseTag?.title;
+
+  const getTitle = () => {
+    //Both could be undefined
+    
+    if(allPlayerIdsSame){
+      //we dont display player name
+      return phaseTitle || deck.title || deck.id;
+    }
+    return playerName && phaseTitle ? `${playerName} (${phaseTitle})` : 
+      playerName || phaseTitle || deck.title || deck.id;
+  }
+
+  const getPhotoURL = () => {
+    if(allPlayerIdsSame){
+      //we dont display player name
+      return deck.photoURL || phaseTag?.value || ""
+    }
+    return deck.photoURL || playerTag?.value || ""; 
+    //this will correspond to playerids in db, later we will wire it up 
+    //rather than hardcode them in tagInfoArray
+  }
 
   return {
     ...deck,
-    title:fullTitle,
-    primaryTitle,
-    secondaryTitle,
+    title:getTitle(),
+    photoURL:getPhotoURL(),
     date:d3.max(cards, d => d.date),
     cards,
     tags,

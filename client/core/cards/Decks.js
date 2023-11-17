@@ -77,6 +77,8 @@ const enhancedZoom = dragEnhancements();
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
 const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
+  //console.log("Decks table", table)
+  //console.log("Decks data", data)
   //processed props
   const stringifiedData = JSON.stringify({ data, table });
   //state
@@ -90,16 +92,13 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
   const [longpressedDeckId, setLongpressedDeckId] = useState("");
   const [form, setForm] = useState(null);
 
-  const shouldPersistChanges = !data.find(d => d.isMock) && timeExtent !== "deck-of-decks";
+  const shouldPersistChanges = !table?.isMock && !data?.find(d => d.isMock);
   //profiles state
   const [profilesLayout, setProfilesLayout] = useState(() => milestonesLayout());
   const [kpiFormat, setKpiFormat] = useState("actual");
 
   //processed state
   const selectedDeck = data.find(deck => deck.id === selectedDeckId);
-  const selectedCard = selectedDeck?.cards.find(c => c.cardNr === selectedCardNr);
-  //console.log("selectedDeck", selectedDeck?.frontCardNr)
-  //console.log("selectedSection", selectedSection)
   //refs
   const zoomRef = useRef(null);
   const containerRef = useRef(null);

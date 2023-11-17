@@ -6,11 +6,13 @@ import Decks from './Decks';
 import { grey10, TRANSITIONS, COLOURS } from './constants';
 import { withLoader } from '../../util/HOCs';
 import { embellishDecks } from "./embellishDecks"
+import TableHeader from './TableHeader';
 import { tableLayout } from "./tableLayout"
+import { onlyUnique } from "../../util/ArrayHelpers"
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    position:"absolute",
+    position: "absolute",
     left:props => props.left,
     top:props => props.top,
     width:props => props.width,
@@ -54,15 +56,29 @@ const useStyles = makeStyles((theme) => ({
 
 const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, updateDecks, deleteDeck, hideMenus, showMenus }) => {
   const { tables=[], decks=[] } = user;
-  //console.log("CardsTable...jData")
   const stringifiedUser = JSON.stringify(user);
 
   //@todo - move creating flag to asyncProcesses
-  const [groupingTagKey, setGroupingTagKey] = /*useState("");*/ useState("playerId"); //phase
+
+  const [timeExtent, setTimeExtent] = useState("single-deck")//*/ useState("deck-of-decks")
+  //data will be grouped by playerId if at least one deck has a playerid tag, otherwise it is not grouped
+  const decksWithPlayerTag = decks.filter(d => !!d.tags?.find(t => t.key === "playerId"))
+  const playerTags = decks.map(d => d.tags?.find(t => t.key === "playerId")?.value)
+  const allPlayerIdsSame = playerTags.filter(onlyUnique).length === 1;
+  const allPlayerIdsUnique = playerTags.filter(onlyUnique).length === decks.length;
+
+  let groupingTagKey;
+  if(timeExtent === "deck-of-decks"){
+    groupingTagKey = "playerId";
+  }else if(decksWithPlayerTag.length === 0 || allPlayerIdsSame){
+    groupingTagKey = ""
+  }else{
+    groupingTagKey = "playerId"
+  }
+
   const [creatingTable, setCreatingTable] = useState(false);
-  const [timeExtent, setTimeExtent] = useState("single-deck")// useState("deck-of-decks") // deck-of-decks or single-deck
+  
   const [decksData, setDecksData] = useState([]);
-  const areDecksOfDecks = groupingTagKey && timeExtent === "deck-of-decks";
 
   //for now, we just assume its the first table
   useEffect(() => {
@@ -78,8 +94,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   },[user._id, tables.length])
 
   const table = tables[0];
-  const tableDecks = groupingTagKey ? decks.filter(d => d.isMock) : 
-    (table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || []);
+  const tableDecks = table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
 
   const width = screen.width || 300;
   const height = screen.height || 600;
@@ -94,9 +109,9 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   //we follow d3 margin convention here (eg html padding)
   //NOTE: WIDTH < HEIGHT TEMP FIXES A BUG WITH CARDTITLEFORM POSITIONING ON LARGER SCREENS
   //IT DOESNT FIX THE ISSUE FULLY ON SS WHEN IN LANDSCAPE ORIENTATION
-  const multiDeckMarginTop = 35;
+  const tableHeaderHeight = 35;
   const selectedDeckMarginTop = 0;
-  const tableMarginTop = selectedDeckId && width < height ? selectedDeckMarginTop : multiDeckMarginTop;
+  const tableMarginTop = selectedDeckId && width < height ? selectedDeckMarginTop : tableHeaderHeight;
   const tableMarginBottom = width < height ? 0 : 35;
   const margin = { 
     left:0,//width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
@@ -115,8 +130,9 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
 
   //this adds status and completionProportion to cards and deck based on items statuses
   useEffect(() => {
-    const embellishedDecks = embellishDecks(tableDecks, timeExtent, groupingTagKey);
-    const decksData = tableLayout(embellishedDecks, nrCols, timeExtent, groupingTagKey);
+    const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeExtent, groupingTagKey }
+    const embellishedDecks = embellishDecks(tableDecks, settings);
+    const decksData = tableLayout(embellishedDecks, nrCols, settings);
     setDecksData(decksData);
   }, [stringifiedUser, groupingTagKey, timeExtent])
 
@@ -161,17 +177,17 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   const stringifiedData = JSON.stringify(decksData);
 
   const handleUpdateDeck = useCallback(deck => {
-    if(areDecksOfDecks){
+    if(timeExtent === "deck-of-decks"){
       //in this case, just update the decksData object here
       setDecksData(prevState => prevState.map(d => d.id !== deck.id ? d : ({ ...d, ...deck })))
     }else{
-      //temporarily we stop persistance if grouping, because grouping uses mock data
-      updateDeck(deck, !deck.isMock)
+      updateDeck(deck)
     }
-  }, [stringifiedData, form, selectedDeckId, areDecksOfDecks]);
+  }, [stringifiedData, form, selectedDeckId, timeExtent]);
 
   return (
     <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
+      <TableHeader dimns={{ height:tableHeaderHeight }}/>
       <div className={classes.contents}>
         {shouldDisplayInstructions ?  
           <Instructions />
@@ -185,6 +201,9 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
             updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />
         }
       </div>
+      <div style={{
+        position:"absolute", left:"0px", top:"0px", background:"blue", width:"100px", height:"100px"
+      }}>test</div>
     </div>
   )
 }

@@ -45,6 +45,7 @@ const groupDecks = (decks, groupingTagKey) => {
       return {
         id, 
         title,
+        //we remove the secondary (eg "phase" tag) as they are used to create each card instead
         tags:[{ key:groupingTagKey, value }],
         decks: sortedDecks
       }
@@ -92,8 +93,9 @@ const createDeckOfDecks = (group, groupingTagKey) => {
 
 const formatDecks = (decks, timeExtent, groupingTagKey) => {
   if(!groupingTagKey){ return decks; }
+  const decksWithTag = decks.filter(d => !!d.tags?.find(t => t.key === groupingTagKey))
   //group decks by tags
-  const groupedDecks = groupDecks(decks, groupingTagKey);
+  const groupedDecks = groupDecks(decksWithTag, groupingTagKey);
   return groupedDecks.map(group => timeExtent === "single-deck" ? 
     getCurrentDeck(group.decks) 
     : 
@@ -102,7 +104,8 @@ const formatDecks = (decks, timeExtent, groupingTagKey) => {
 
 
 
-export const tableLayout = (decks, nrCols=3, timeExtent="single-deck", groupingTagKey) => {
+export const tableLayout = (decks, nrCols=3, settings={}) => {
+  const { allPlayerIdsSame, allPlayerIdsUnique, timeExtent, groupingTagKey } = settings;
   const formattedDecks = formatDecks(decks, timeExtent, groupingTagKey);
   //add table positions
   return formattedDecks.map((d,i) => ({

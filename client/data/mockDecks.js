@@ -8,9 +8,38 @@ const cardTitles = ["Week 1", "Week 2", "Week 3", "Week 4"];
 const sections = hydrateDeckSections();
 const initPurpose = ["",""];
 
+const initTable = { 
+    admin:[], archivedDecks:[], created:new Date(), decks:[], isArchived:false, layoutFormat:"list", tags:[], isMock:true
+}
+
+export const getMockTables = user => {
+    if(user?.username === "footballer"){ 
+        return [{
+            ...initTable,
+            id:"mock-table",
+            owner:user._id,
+            decks: mockFootballDecks.map(d => d.id)
+        }]
+    }
+    if(user?.username === "athlete"){ 
+            return [{
+            ...initTable,
+            id:"mock-table",
+            owner:user._id,
+            decks: mockAthleteDecks.map(d => d.id)
+        }]
+    }
+    return [];
+}
+
 export const getMockDecks = user => {
-    if(user?.userName?.includes("football")){ mockFootballDecks; }
-    return mockAthleteDecks.map(d => ({ ...d, isMock:true, sections, purpose:d.purpose || initPurpose, frontCardNr:0 }));
+    if(user?.username === "footballer"){ 
+        return mockFootballDecks; 
+    }
+    if(user?.username === "athlete"){ 
+        return mockAthleteDecks.map(d => ({ ...d, isMock:true, sections, purpose:d.purpose || initPurpose, frontCardNr:0 }));
+    }
+    return [];
 }
 
 const mockFootballDecks = [];

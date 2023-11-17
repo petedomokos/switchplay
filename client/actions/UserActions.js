@@ -6,7 +6,7 @@ import { signout } from './AuthActions.js';
 import { transformJourneyForClient } from "./JourneyActions"
 import { initDeck } from '../data/initDeck';
 import { hydrateDeckSections } from '../data/sections';
-import { getMockDecks } from '../data/mockDecks';
+import { getMockTables, getMockDecks } from '../data/mockDecks';
 
 export const transformTableForClient = serverTable => {
 	//console.log("transformTableForClient", serverTable)
@@ -61,7 +61,7 @@ export const transformDeckForServer = clientDeck => {
 
 export const transformUserForClient = serverUser => {
 	//console.log("transformUserForClient", serverUser)
-	const { journeys=[], photos=[], decks=[], tables=[] } = serverUser;
+	const { journeys=[], photos=[], decks=[], tables=[], username } = serverUser;
 	const hydratedPhotos = photos.map(p => ({ ...p, added: new Date(p.added) }))
 	//@todo - check will we ever use this for updating journeys? I dont think we need it 
 	const hydratedJourneys = journeys.map(j => transformJourneyForClient(j))
@@ -69,8 +69,8 @@ export const transformUserForClient = serverUser => {
 		...serverUser,
 		photos:hydratedPhotos,
 		journeys:hydratedJourneys,
-		tables:tables.map(t => transformTableForClient(t)),
-		decks:[...decks.map(s => transformDeckForClient(s)), ...getMockDecks(serverUser)],
+		tables:username === "athlete" || username === "footballer" ? getMockTables(serverUser) : tables.map(t => transformTableForClient(t)),
+		decks:username === "athlete" || username === "footballer" ? getMockDecks(serverUser) : [...decks.map(s => transformDeckForClient(s))],
 	}
 }
 
@@ -192,7 +192,7 @@ export const updateTable = (table, shouldPersist=true, shouldUpdateStore=true) =
 	//update in store
 	dispatch({ type:C.UPDATE_TABLE, table });
 
-	if(!shouldPersist){ return; }
+	if(!shouldPersist || table.isMock){ return; }
 
 	const jwt = auth.isAuthenticated();
 	if(!jwt.user) { return; }
@@ -235,7 +235,7 @@ export const updateDeck = (deck, shouldPersist=true) => dispatch => {
 	//update in store
 	dispatch({ type:C.UPDATE_DECK, deck });
 
-	if(!shouldPersist){ return; }
+	if(!shouldPersist || deck.isMock){ return; }
 
 	const jwt = auth.isAuthenticated();
 	if(!jwt.user) {
