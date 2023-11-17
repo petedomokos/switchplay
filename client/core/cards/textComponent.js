@@ -126,7 +126,7 @@ export default function textComponent() {
             //text
             const textData = [{
                 "width": contentsWidth,
-                "height": textAreaMaxHeight,
+                "height": 40,// textAreaMaxHeight,
                 "text": text(d,i) || placeholder(d,i)
             }];
 
@@ -151,14 +151,13 @@ export default function textComponent() {
 
             //afer, we can then turn it off for cardHeader too, and then juts have the g.card itself have a click handler that
             //simply resets clickedItemNr to null, so first click outside of status will simply remove the status menu.
-
-            
                 .style("pointer-events", "none")
                 .style("fill", placeholderUsed ? styles.placeholderFill : styles.fill)
                 .style("stroke", placeholderUsed ? styles.placeholderStroke : styles.stroke)
                 .style("stroke-width", placeholderUsed ? styles.placeholderStrokeWidth : styles.strokeWidth)
                 .style("opacity", placeholderUsed ? styles.placeholderOpacity : styles.opacity)
-                .style("font-style", styles.fontStyle)        
+                .style("font-style", styles.fontStyle)     
+
 
             //@todo - attachments
             //first we need to know how many lines of text there are so we can shoft attachments up if necc

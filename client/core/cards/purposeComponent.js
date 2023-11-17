@@ -32,6 +32,8 @@ export default function purposeComponent() {
 
        
     let DEFAULT_STYLES = {
+        fill:"white",
+        placeholderFill:"white",
         placeholderOpacity:0.5
         
     }
@@ -105,7 +107,7 @@ export default function purposeComponent() {
                     return "";
                 }
 
-                const paraFontSize = paragraphHeight/8;
+                const paraFontSize = d3.max([paragraphHeight/8, 3]);
 
                 const paragraphG = contentsG.selectAll("g.paragraph").data(data);
                 paragraphG.enter()
@@ -140,14 +142,14 @@ export default function purposeComponent() {
                                         opacity:1,
                                         fontFamily: "Avant Garde",
                                         fontStyle:"italic",
-                                        stroke:grey10(2),
+                                        stroke:styles.fill,
                                         strokeWidth:0.05,
-                                        fill:grey10(3),
-                                        fontMin:4,
-                                        fontMax:10,
+                                        fill:styles.fill,
+                                        fontMin:paraFontSize * 0.8,
+                                        fontMax:paraFontSize * 1.2,
                                         fontSize:paraFontSize,
-                                        placeholderFill:grey10(5),
-                                        placeholderStroke:grey10(5),
+                                        placeholderFill:styles.placeholderFill,
+                                        placeholderStroke:styles.placeholderFill,
                                         placeholderOpacity:styles.placeholderOpacity
                                     }))
                                 )

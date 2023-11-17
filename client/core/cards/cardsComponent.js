@@ -534,7 +534,7 @@ export default function cardsComponent() {
                                 .call(purpose
                                     .width(contentsWidth)
                                     .height(contentsHeight - headerHeight - btnHeight)
-                                    .styles({ placeholderOpacity: 1 }))
+                                    .styles({ fill:"#0047AB", placeholderFill:"#0047AB" }))
         
                         purposeG.exit().call(remove)
 

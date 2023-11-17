@@ -6,11 +6,11 @@ const seasonStartDate = new Date();// new Date("2024-03-01");
 const cardTitles = ["Week 1", "Week 2", "Week 3", "Week 4"];
 
 const sections = hydrateDeckSections();
-const purpose = ["",""];
+const initPurpose = ["",""];
 
 export const getMockDecks = user => {
     if(user?.userName?.includes("football")){ mockFootballDecks; }
-    return mockAthleteDecks.map(d => ({ ...d, isMock:true, sections, purpose, frontCardNr:0 }));
+    return mockAthleteDecks.map(d => ({ ...d, isMock:true, sections, purpose:d.purpose || initPurpose, frontCardNr:0 }));
 }
 
 const mockFootballDecks = [];
@@ -20,6 +20,10 @@ const mockAthleteDecks = [
         id:"athleteDeck0",
         tags:[{ key:"playerId", value:"reneeRegis" }, { key:"phase", value:"general1" }],
         cards:createInitCards({ startDate:seasonStartDate, nrCards:4, weeksPerCard:1, cardTitles }),
+        purpose:[
+            "I will get back to the base line expected fitness standards so I am ready to progress", 
+            "I will do this by following a stricter diet plan, increasing total distance each week, and adding swimming sessions"
+        ]
     },
     {
         id:"athleteDeck1",
