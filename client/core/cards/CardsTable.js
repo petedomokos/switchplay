@@ -14,7 +14,7 @@ const { burgerBarWidth } = DIMNS;
 
 const timeframeOptions = {
   longTerm:{ key:"longTerm", label:"Long Term" },
-  singleDeck:{ key:"singleDeck", label:"Single Deck" }
+  singleDeck:{ key:"singleDeck", label:"Next Steps" }
 } 
 
 const useStyles = makeStyles((theme) => ({
@@ -85,8 +85,6 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
 
   const [timeframe, setTimeframe] = useState(timeframeOptions.singleDeck);
   const timeExtent = timeframe.key === "longTerm" ? "longTerm" : "singleDeck";
-  console.log("timeExtent", timeExtent)
-
 
   let groupingTagKey;
   if(timeExtent === "longTerm"){
@@ -223,13 +221,11 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
     }
   }, [stringifiedData, form, selectedDeckId, timeExtent]);
 
-  console.log("render")
-
   return (
     <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
       <div className={classes.tableContents}>
         <TableHeader dimns={{ 
-            paddingLeft:burgerBarWidth,
+            padding: { left:burgerBarWidth + 7.5, right:7.5, top:tableHeaderHeight * 0.1, bottom:tableHeaderHeight * 0.1 },
             width:width, 
             height:tableHeaderHeight 
           }}
