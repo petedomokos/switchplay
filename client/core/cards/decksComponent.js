@@ -23,7 +23,7 @@ export default function decksComponent() {
     let _styles = () => DEFAULT_STYLES;
 
     let groupingTagKey;
-    let timeExtent = "single-deck";
+    let timeExtent = "singleDeck";
     let selectedDeckId = "";
     let longpressedDeckId = "";
     let displayFormat = "list";
@@ -256,7 +256,7 @@ export default function decksComponent() {
                 const deckWidth = _deckWidth();
                 const deckHeight = _deckHeight();
 
-                const newDeckIconData = selectedDeckId ? [] : [{
+                const newDeckIconData = selectedDeckId || groupingTagKey ? [] : [{
                     colNr: decksData.length % nrCols,
                     rowNr: Math.floor(decksData.length / nrCols),
                     withText:decksData.length === 0

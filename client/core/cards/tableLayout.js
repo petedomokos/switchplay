@@ -36,7 +36,8 @@ if timeExtent is decks,
 const groupDecks = (decks, groupingTagKey) => {
   const tags = tagInfoArray.find(info => info.key === groupingTagKey)?.values || [];
   //remove decks that do not have a value specified for this key
-  const filteredDecks = decks.filter(d => !!d.tags.find(t => t.key === groupingTagKey))
+  const filteredDecks = decks.filter(d => !!d.tags.find(t => t.key === groupingTagKey));
+  if(filteredDecks.length === 0){ return []; }
   const sortedDecks = sortAscending(filteredDecks, d => d.date);
   
   return tags.map(tag => {
@@ -96,7 +97,7 @@ const formatDecks = (decks, timeExtent, groupingTagKey) => {
   const decksWithTag = decks.filter(d => !!d.tags?.find(t => t.key === groupingTagKey))
   //group decks by tags
   const groupedDecks = groupDecks(decksWithTag, groupingTagKey);
-  return groupedDecks.map(group => timeExtent === "single-deck" ? 
+  return groupedDecks.map(group => timeExtent === "singleDeck" ? 
     getCurrentDeck(group.decks) 
     : 
     embellishDeck(createDeckOfDecks(group, groupingTagKey), timeExtent, groupingTagKey));

@@ -24,7 +24,7 @@ export default function cardsLayout(){
             const mockFlags = mockCardFlags[i] || [];
             return {
                 ...c,
-                purposeData:purposeLayout(purpose), //is defined when its a deck-of-decks
+                purposeData:purposeLayout(purpose), //is defined when its a longTerm
                 flagsData:mockFlags.map((flag,i) => ({ ...flag, key:`deck-${deckId}-card-${cardNr}-flag-${i}` })),
                 items:c.items.map((it,i) => ({ 
                     ...it, 

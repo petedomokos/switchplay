@@ -3,12 +3,19 @@ import * as d3 from 'd3';
 import { makeStyles } from '@material-ui/core/styles'
 import Instructions from "./Instructions"
 import Decks from './Decks';
-import { grey10, TRANSITIONS, COLOURS } from './constants';
+import { grey10, TRANSITIONS, COLOURS, DIMNS } from './constants';
 import { withLoader } from '../../util/HOCs';
 import { embellishDecks } from "./embellishDecks"
 import TableHeader from './TableHeader';
 import { tableLayout } from "./tableLayout"
 import { onlyUnique } from "../../util/ArrayHelpers"
+
+const { burgerBarWidth } = DIMNS;
+
+const timeframeOptions = {
+  longTerm:{ key:"longTerm", label:"Long Term" },
+  singleDeck:{ key:"singleDeck", label:"Single Deck" }
+} 
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,13 +33,17 @@ const useStyles = makeStyles((theme) => ({
     //border:"solid",
     //borderWidth:"thin",
   },
-  contents:{
+  tableContents:{
     position:"absolute",
-    left:props => props.contents.left,
-    top:props => props.contents.top,
+    left:props => props.tableContents.left,
+    top:props => props.tableContents.top,
     transition: `top ${TRANSITIONS.MED}ms`,
-    //width:props => props.contents.width,
-    //height:props => props.contents.height,
+  },
+  decksContents:{
+    position:"absolute",
+    left:props => props.decksContents.left,
+    top:props => props.decksContents.top,
+    transition: `top ${TRANSITIONS.MED}ms`,
   },
   hideInstructions:{
     margin:"25px 5px",
@@ -60,25 +71,47 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
 
   //@todo - move creating flag to asyncProcesses
 
-  const [timeExtent, setTimeExtent] = useState("single-deck")//*/ useState("deck-of-decks")
+  //helper consts
   //data will be grouped by playerId if at least one deck has a playerid tag, otherwise it is not grouped
   const decksWithPlayerTag = decks.filter(d => !!d.tags?.find(t => t.key === "playerId"))
-  const playerTags = decks.map(d => d.tags?.find(t => t.key === "playerId")?.value)
+  const playerTags = decks
+    .filter(d => !!d.tags?.find(t => t.key === "playerId"))
+    .map(d => d.tags.find(t => t.key === "playerId").value)
+
   const allPlayerIdsSame = playerTags.filter(onlyUnique).length === 1;
   const allPlayerIdsUnique = playerTags.filter(onlyUnique).length === decks.length;
+  //atm, longTermView is only available when playerIds are tagged and not all the same
+  const longTermViewPossible = playerTags.length !== 0; 
+
+  const [timeframe, setTimeframe] = useState(timeframeOptions.singleDeck);
+  const timeExtent = timeframe.key === "longTerm" ? "longTerm" : "singleDeck";
+  console.log("timeExtent", timeExtent)
+
 
   let groupingTagKey;
-  if(timeExtent === "deck-of-decks"){
+  if(timeExtent === "longTerm"){
     groupingTagKey = "playerId";
   }else if(decksWithPlayerTag.length === 0 || allPlayerIdsSame){
+    //we never group decks if all decks refer to same player, unless user wants the long-term view
     groupingTagKey = ""
   }else{
     groupingTagKey = "playerId"
   }
+  //next - fix bug when clicking longterm view when no tags for players eg user pd
+  //and decide what to do - do we just remove teh option ?
+  //add icons (longterm = telescope, singleDeck = 'now' icon)
 
   const [creatingTable, setCreatingTable] = useState(false);
   
   const [decksData, setDecksData] = useState([]);
+
+  const toggleTimeframe = () => {
+    if(!longTermViewPossible && timeframe.key === "singleDeck"){ 
+      alert("For Long Term View, decks should have a playerId tagged.");
+      return;
+    }
+    setTimeframe(prevState => prevState.key === "singleDeck" ? timeframeOptions.longTerm : timeframeOptions.singleDeck)
+  }
 
   //for now, we just assume its the first table
   useEffect(() => {
@@ -109,10 +142,10 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   //we follow d3 margin convention here (eg html padding)
   //NOTE: WIDTH < HEIGHT TEMP FIXES A BUG WITH CARDTITLEFORM POSITIONING ON LARGER SCREENS
   //IT DOESNT FIX THE ISSUE FULLY ON SS WHEN IN LANDSCAPE ORIENTATION
-  const tableHeaderHeight = 35;
+  const tableHeaderHeight = 60;
   const selectedDeckMarginTop = 0;
   const tableMarginTop = selectedDeckId && width < height ? selectedDeckMarginTop : tableHeaderHeight;
-  const tableMarginBottom = width < height ? 0 : 35;
+  const tableMarginBottom = width < height ? 0 : tableHeaderHeight;
   const margin = { 
     left:0,//width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
     right:0,//width * 0.1,// selectedDeckId ? 0 : width * 0.05, 
@@ -144,9 +177,14 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
     width: containerWidth,
     height: containerHeight,
     //padding:`${margin.top}px ${margin.right}px  ${margin.bottom}px  ${margin.left}px`,
-    contents:{
-      left: containerWidth/2 + margin.left + (screen.width - width)/2,
-      top: containerHeight/2 + margin.top,
+    tableContents:{
+      left: containerWidth/2,
+      top: containerHeight/2,
+    },
+    decksContents:{
+      left: margin.left + (screen.width - width)/2,
+      top: margin.top,
+      overflow:"hidden"
     },
     form:{ 
       display: form ? null : "none",
@@ -177,7 +215,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   const stringifiedData = JSON.stringify(decksData);
 
   const handleUpdateDeck = useCallback(deck => {
-    if(timeExtent === "deck-of-decks"){
+    if(timeExtent === "longTerm"){
       //in this case, just update the decksData object here
       setDecksData(prevState => prevState.map(d => d.id !== deck.id ? d : ({ ...d, ...deck })))
     }else{
@@ -185,25 +223,34 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
     }
   }, [stringifiedData, form, selectedDeckId, timeExtent]);
 
+  console.log("render")
+
   return (
     <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
-      <TableHeader dimns={{ height:tableHeaderHeight }}/>
-      <div className={classes.contents}>
-        {shouldDisplayInstructions ?  
-          <Instructions />
-          :
-          <Decks 
-            table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
-            data={decksData} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
-            groupingTagKey={groupingTagKey} timeExtent={timeExtent}
-            journeyData={journeyData} tableMarginTop={tableMarginTop}
-            onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={handleUpdateDeck}
-            updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />
-        }
+      <div className={classes.tableContents}>
+        <TableHeader dimns={{ 
+            paddingLeft:burgerBarWidth,
+            width:width, 
+            height:tableHeaderHeight 
+          }}
+          table={table}
+          timeframe={timeframe}
+          toggleTimeframe={toggleTimeframe}
+        />
+        <div className={classes.decksContents}>
+          {shouldDisplayInstructions ?  
+            <Instructions />
+            :
+            <Decks 
+              table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
+              data={decksData} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
+              groupingTagKey={groupingTagKey} timeExtent={timeExtent}
+              journeyData={journeyData} tableMarginTop={tableMarginTop}
+              onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={handleUpdateDeck}
+              updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />
+          }
+        </div>
       </div>
-      <div style={{
-        position:"absolute", left:"0px", top:"0px", background:"blue", width:"100px", height:"100px"
-      }}>test</div>
     </div>
   )
 }

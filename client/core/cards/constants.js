@@ -83,7 +83,7 @@ export const STYLES = {
 }
 
 export const DIMNS = {
-    burgerBarWidth:45,
+    burgerBarWidth:50,
     DECK:{
         HEADER_HEIGHT:25,
         HEADER_SUBTITLE_HEIGHT_PROP:0.3,

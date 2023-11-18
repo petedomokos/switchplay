@@ -224,7 +224,7 @@ export default function deckComponent() {
 
     //settings
     let groupingTagKey;
-    let timeExtent = "single-deck";
+    let timeExtent = "singleDeck";
     let deckIsSelected;
     let selectedCardNr;
     let selectedItemNr;
@@ -826,7 +826,7 @@ export default function deckComponent() {
                         }
                     })
 
-                    const controlsData = !sections || cardsAreFlipped || timeExtent === "deck-of-decks" ? [] : [
+                    const controlsData = !sections || cardsAreFlipped || timeExtent === "longTerm" ? [] : [
                         { key:"section-view", icon:icons.drill }
                     ];
     

@@ -77,8 +77,8 @@ const enhancedZoom = dragEnhancements();
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
 const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
-  //console.log("Decks table", table)
-  //console.log("Decks data", data)
+  console.log("Decks table", table)
+  console.log("Decks data", data)
   //processed props
   const stringifiedData = JSON.stringify({ data, table });
   //state

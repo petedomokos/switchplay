@@ -89,7 +89,7 @@ export default function cardsComponent() {
 
     //state
     let groupingTagKey;
-    let timeExtent = "single-deck";
+    let timeExtent = "singleDeck";
     let deckIsSelected;
     let format = "actual";
     let cardsAreFlipped = false;
@@ -231,7 +231,7 @@ export default function cardsComponent() {
                     .attr("opacity", 1)
                     .each(function(cardD,i){
                         const { cardNr, isHeld, isSelected, profile } = cardD;
-                        const itemsData = timeExtent !== "single-deck" ? [] : (selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items);
+                        const itemsData = timeExtent !== "singleDeck" ? [] : (selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items);
 
                         //front components
                         frontHeaderComponents[cardNr] = cardHeaderComponent();
@@ -424,7 +424,7 @@ export default function cardsComponent() {
                             .width(contentsWidth)
                             .height(headerHeight)
                             .withTitle(!cardTitleIsBeingEdited)
-                            .rightContent(timeExtent === "single-deck" ? "progress-chain" : "progress-trophy")
+                            .rightContent(timeExtent === "singleDeck" ? "progress-chain" : "progress-trophy")
                             .styles({
                                 //need to decide whether to do stroke from here or just inside cardHeader
                                 getStatusItemStroke:(itemD,linePartNr) => getProgressStatusColour(cardD, itemD, linePartNr),
@@ -516,12 +516,12 @@ export default function cardsComponent() {
                             //not sure why we need this when entire containr shold have pointer-events none when no deck selected
                             .attr("pointer-events", deckIsSelected ? null : "none")
                             .attr("transform", `translate(0, ${headerHeight + gapBetweenHeaderAndItems})`)
-                            .call(fadeInOut, timeExtent === "single-deck" && (isSelected || isFront || !isHeld || selectedSectionKey))
+                            .call(fadeInOut, timeExtent === "singleDeck" && (isSelected || isFront || !isHeld || selectedSectionKey))
                             .datum(itemsData)
                             .call(items);
 
-                        //PURPOSE (instead of items when in long-term deck-of-decks view)
-                        const shouldShowPurpose = deckIsSelected && isFront && timeExtent === "deck-of-decks" && !cardsAreFlipped;
+                        //PURPOSE (instead of items when in long-term longTerm view)
+                        const shouldShowPurpose = deckIsSelected && isFront && timeExtent === "longTerm" && !cardsAreFlipped;
                         const purpose = purposeComponents[cardNr];
                         const purposeG = frontContentsG.selectAll("g.card-purpose").data(shouldShowPurpose ? [purposeData] : [])
                         purposeG.enter()
