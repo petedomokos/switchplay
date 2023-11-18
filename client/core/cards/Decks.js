@@ -576,7 +576,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
         //cards:d.cards.map((c,i) => ({ ...c, profile:profilesData[i] }))
         cards:d.cards.map((c,i) => ({ ...c, profile:profilesData[0] }))
       }));
-    console.log("deckdata", processedDeckData)
+    //console.log("deckdata", processedDeckData)
     //just use first deck for now
     d3.select(containerRef.current).datum(processedDeckData)
 

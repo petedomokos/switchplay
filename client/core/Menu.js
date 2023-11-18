@@ -63,25 +63,32 @@ const Menu = withRouter(({ history, isHidden, signingOut, screenSize, onSignout 
   const classes = useStyles(styleProps) 
   const user = auth.isAuthenticated() ? auth.isAuthenticated().user : null;
   const [isOpen, setIsOpen] = useState(false)
-   //@todo - remove burger bars, replace with my own so i can take control and make it close 
-  //when  menu item is clicked. 
+
+  const handleStateChange = state => {
+    setIsOpen(state.isOpen);
+  }
 
   //control the burger bar in a useEffect
   useEffect(() => { 
     d3.select(".bm-burger-button").call(isHidden ? hide : show)
   }, [isHidden])
 
+  const menuWidth = 150;
+
   return (
     <>
       {["s", "m", "l", "xl"].includes(screenSize)  ?
         <>
-          {/**<MenuIcon onClick = {() => setIsOpen(true)}
-            style={{ position:"absolute", left:200, top:100, zIndex:1000}}/>*/}
-          <ElasticMenu width={150} isOpen={isOpen}>
-            <div style={{display:"flex", flexDirection:"column"}}  
-                onClick={() => { setIsOpen(false)} }>
-              <MenuItems user={user} history={history} signingOut={signingOut} 
-                                  screenSize={screenSize} onSignout={onSignout} classes={classes}/>
+          <ElasticMenu width={menuWidth} 
+            isOpen={isOpen}
+            onStateChange={(state) => handleStateChange(state)}
+          >
+            <div style={{ display:"flex", flexDirection:"column" }}  
+                onClick={() => { setIsOpen(false)} }
+            >
+              <MenuItems 
+                user={user} history={history} signingOut={signingOut} 
+                screenSize={screenSize} onSignout={onSignout} classes={classes}/>
             </div>
           </ElasticMenu>
         </>
@@ -121,18 +128,12 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
               style={getDynamicStyles(history, "/datasets/new")}>Dataset+
             </Button>
         </Link>
-        <Link to="/visuals">
+        {/**<Link to="/visuals">
             <Button 
               className={classes.menuBtn}
               style={getDynamicStyles(history, "/visuals")}>Visuals
             </Button>
-        </Link>
-        <Link to="/cards">
-            <Button 
-              className={classes.menuBtn}
-              style={getDynamicStyles(history, "/cards")}>Cards
-            </Button>
-        </Link>
+        </Link>*/}
         {user && <Link to="/import">
             <Button 
               className={classes.menuBtn}

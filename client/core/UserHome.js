@@ -80,7 +80,7 @@ const UserHome = ({screen, user, loading, loadingError}) => {
         <>
           <div className={classes.fullScreen}>
             <Switch>
-              <Route path="/cards" component={CardsTableContainer}/>
+              <Route path="/" component={CardsTableContainer}/>
               {/**<Route path="/" component={JourneyContainer} />*/}
             </Switch>
           </div>

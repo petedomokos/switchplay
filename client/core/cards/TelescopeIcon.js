@@ -14,9 +14,9 @@ export default function TelescopeIcon({ width, height, transformOrigin, fill }) 
 
   return (
     <svg viewBox="0,0,256,256" width={`${width}px`} height={`${height}px`} transformOrigin={transformOrigin} >
-        <g fill={fill} fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" 
-           stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" 
-           text-anchor="none" style={{ mixBlendMode: "normal" }}>
+        <g fill={fill} fillRule="nonzero" stroke="none" strokeWidth="1" strokeLinecap="butt" strokeLinejoin="miter" strokeMiterlimit="10" 
+           strokeDasharray="" strokeDashoffset="0" fontFamily="none" fontWeight="none" fontSize="none" 
+           textAnchor="none" style={{ mixBlendMode: "normal" }}>
             <g transform="scale(5.12,5.12)">
                 <path d={pathD}></path>
             </g>

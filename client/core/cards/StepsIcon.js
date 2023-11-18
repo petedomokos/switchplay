@@ -16,9 +16,9 @@ export default function StepsIcon({ width, height, transformOrigin, fill }) {
   return (
     <svg viewBox="0,0,256,256" width={`${width * 1.2}px`} height={`${height * 1.2}px`} 
         transform={`translate(${-width * 0.1}, ${-height * 0.1})`} transformOrigin={transformOrigin}>
-        <g fill={fill} fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" 
-           stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" 
-           font-size="none" text-anchor="none" style={{ mixBlendMode: "normal" }}>
+        <g fill={fill} fillRule="nonzero" stroke="none" strokeWidth="1" strokeLinecap="butt" strokeLinejoin="miter" 
+           strokeMiterlimit="10" strokeDasharray="" strokeDashoffset="0" fontFamily="none" fontWeight="none" 
+           fontSize="none" textAnchor="none" style={{ mixBlendMode: "normal" }}>
             <g transform="scale(5.33333,5.33333)">
                 <path d={pathD}>
                 </path>
