@@ -69,6 +69,7 @@ const createDeckOfDecks = (group, groupingTagKey) => {
   const { id, title, tags, decks } = group;
   const cardNamingKey = groupingTagKey === "playerId" ? "phase" : "playerId";
   const sortedDecks = sortAscending(decks, d => d.date);
+  //console.log("sortedDecks", sortedDecks)
   return {
     //add in deck stuff here
     id,
@@ -88,7 +89,7 @@ const createDeckOfDecks = (group, groupingTagKey) => {
         title:c.title,
         status:c.status //this is already calculated in the embellishDecks call in CardTable
       }))
-    })).slice(0,5)
+    }))
   }
 }
 

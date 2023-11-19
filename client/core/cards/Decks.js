@@ -570,13 +570,13 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
     decksLayout.withSections(true);
     const decksToDisplay = selectedDeckId ? [selectedDeck] : data;
     const processedDeckData = decksToDisplay
-      .map(deckData => decksLayout(deckData))
       .map(d => ({
         ...d,
         //cards:d.cards.map((c,i) => ({ ...c, profile:profilesData[i] }))
         cards:d.cards.map((c,i) => ({ ...c, profile:profilesData[0] }))
-      }));
-    //console.log("deckdata", processedDeckData)
+      }))
+      .map(deckData => decksLayout(deckData));
+
     //just use first deck for now
     d3.select(containerRef.current).datum(processedDeckData)
 

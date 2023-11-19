@@ -1,11 +1,16 @@
 import * as d3 from 'd3';
 import { getTransformationFromTrans } from './helpers';
 import { TRANSITIONS } from "../cards/constants"
+import { isNumber } from '../../data/dataHelpers';
 
 export function updateTransform(selection, options={}){
-    //console.log("updateTransform-----------------------", selection.node())
     const { x = d => d.x, y = d => d.y, k= () => 1, transition, cb = () => {}, name="", force } = options;
     selection.each(function(d, i){
+        //if(isNumber(d.cardNr)){
+            /*console.log("updateTransform---------", d, this)
+            console.log("x", x(d,i))
+            console.log("y", y(d,i))*/
+        //}
         const _name = typeof name === "function" ? name(d,i) : name;
         const { translateX, translateY } = getTransformationFromTrans(d3.select(this).attr("transform"));
         if(Math.abs(translateX - x(d, i)) < 0.001 && Math.abs(translateY - y(d, i)) < 0.001){

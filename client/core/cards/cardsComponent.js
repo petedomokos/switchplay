@@ -11,8 +11,6 @@ import { fadeIn, fadeInOut, remove, fadeOut } from '../journey/domHelpers';
 import { updateTransform } from '../journey/transitionHelpers';
 import { icons } from '../../util/icons';
 import { isNumber } from '../../data/dataHelpers';
-import { update } from 'lodash';
-import container from '../journey/kpis/kpi/container';
 
 const { GOLD, SILVER, NOT_STARTED_FILL, SECTION_VIEW_NOT_STARTED_FILL } = COLOURS;
 
@@ -107,6 +105,10 @@ export default function cardsComponent() {
         } 
     };
 
+    //card swiping state
+    let swipeTriggered = false;
+    let deltaY = 0;
+
     //API CALLBACKS
     let onClickCard = function(){};
     let onClickCardDate = function(){};
@@ -158,6 +160,10 @@ export default function cardsComponent() {
             const getBackOfCardStroke = d => COLOURS.BACK_OF_CARD.STROKE(d);
             const getBackOfCardStrokeWidth = d => 0.5;
 
+            const getCardStrokeWidth = cardD => {
+                return STYLES.CARD.STROKE_WIDTH * (cardD.isPlaced && cardD.isHidden ? 3 : 1)
+            }
+
             //stroke-widths
             const getMainItemStrokeWidth = (cardD, itemD) => {
                 const { status, isSectionView, title } = itemD;
@@ -182,7 +188,7 @@ export default function cardsComponent() {
                 //return status === 2 ? 1.3 : 1;// (status === 1 ? 1 : 0.5)
                 return 0.7
             }
-            const getSectionViewCardStrokeWidth = itemsData => {
+            const getSectionViewCardStrokeWidth = (itemsData, cardD) => {
                 //can assume 1 item per card per section for now
                 const itemD = itemsData ? itemsData[0] : null;
 
@@ -222,6 +228,7 @@ export default function cardsComponent() {
 
             //bgdrag
             containerG.call(drag);
+            //console.log("data", data)
 
             const cardG = containerG.selectAll("g.card").data(data, d => d.cardNr);
             cardG.enter()
@@ -272,9 +279,9 @@ export default function cardsComponent() {
                                 //for placed cards, we dont want the dimns to be changed when in section view
                                 .attr("width", getCardContentsWidth(cardD))
                                 .attr("height", getCardContentsHeight(cardD))
-                                .attr("fill", selectedSectionKey ? getCardFill({ heldPos: 0 }) : getCardFill(cardD))
+                                .attr("fill", selectedSectionKey ? getCardFill({ pos: 0 }) : getCardFill(cardD))
                                 .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData, 1) : getCardStroke(cardD))
-                                .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth() : STYLES.CARD.STROKE_WIDTH)
+                                .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth() : getCardStrokeWidth(cardD))
                                 .on("click", e => {
                                     //console.log("card bg click")
                                     onClickCard.call(this, e, cardD)
@@ -328,7 +335,7 @@ export default function cardsComponent() {
                         y,
                         k:d => d.isSelected ? (selectedCardHeight/heldCardHeight) : (d.isHeld ? 1 : placedCardHeight/heldCardHeight),  
                         transition:transformTransition.enter,
-                        name:d => `card-pos-${d.id}`,
+                        name:d => `card-pos-${d.pos}`,
                         force:true
                     })
                     .merge(cardG)
@@ -337,16 +344,21 @@ export default function cardsComponent() {
                         y, 
                         k:d => d.isSelected ? (selectedCardHeight/heldCardHeight) : (d.isHeld ? 1 : placedCardHeight/heldCardHeight),
                         transition:transformTransition.update,
-                        name:(d,i) => `card-pos-${i}-${d.id}`,
+                        name:(d,i) => `card-pos-${i}-${d.pos}`,
                         force:true
                     })
                     .each(function(cardD,i){
-                        const { deckId, cardNr, isHeld, isFront, isNext, isSecondNext, isSelected, info, status, profile, deckListPos, purposeData=[], flagsData } = cardD;
+                        const { deckId, cardNr, pos, slotPos, isHeld, isFront, hasBeenPickedUp, isNext, isSecondNext, isSelected, info, status, profile, deckListPos, purposeData=[], flagsData } = cardD;
                         const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
                         const items = itemsComponents[cardNr];
 
                         const cardG = d3.select(this)
                             .call(fadeInOut, itemsData.length !== 0 && (!isNumber(selectedCardNr) || selectedCardNr === cardNr));
+
+                        //if there are hidden placedcrads, we need to lower them -> will be lowered in the right order coz
+                        //the rendering is done in reverse order
+                        if(slotPos < 0){ cardG.lower(); }
+                        if(hasBeenPickedUp){ cardG.raise(); }
 
                         //if the card has a clicked item and we are in section view, we show the underlay
                         const shouldShowUnderlay = selectedSectionKey && isNumber(items.clickedItemNr());
@@ -354,6 +366,7 @@ export default function cardsComponent() {
                             .call(fadeInOut, shouldShowUnderlay, { opacity:shouldShowUnderlay ? 0.8 : 0 })
                             .attr("transform", `translate(${-2000},${-2000})`)
                             .on("click", function(e){
+                                console.log("click card underlay")
                                 //unclick item code
                                 e.stopPropagation();
                                 //must lower card back to its correct pos in deck
@@ -375,9 +388,9 @@ export default function cardsComponent() {
                             .transition("card-front-bg-appearance")
                             .delay(200)
                             .duration(400)
-                                .attr("fill", selectedSectionKey ? getCardFill({ heldPos: 0 }) : getCardFill(cardD))
+                                .attr("fill", selectedSectionKey ? getCardFill({ pos: 0 }) : getCardFill(cardD))
                                 .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData, 1) : getCardStroke(cardD))
-                                .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth(itemsData) : STYLES.CARD.STROKE_WIDTH)
+                                .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth(itemsData) : getCardStrokeWidth(cardD))
 
                         contentsG.select("rect.card-front-bg")
                             .transition("card-front-bg-dimns")
@@ -409,8 +422,8 @@ export default function cardsComponent() {
                         //const headerHeight;
                         const cardTitleIsBeingEdited = form?.formType !== "card-title" && form?.value?.cardNr === cardD.cardNr;
                         //component colours
-                        //in section view, heldPos for all cads is overwritten to be 0
-                        const _cardD = { ...cardD, heldPos: selectedSectionKey ? 0 : cardD.heldPos }
+                        //in section view, pos for all cads is overwritten to be 0
+                        const _cardD = { ...cardD, pos: selectedSectionKey ? 0 : cardD.pos }
                         const dateColour = COLOURS.CARD.HEADER(_cardD).DATE;
                         const dateCountWordsColour = COLOURS.CARD.HEADER(_cardD).DATE_COUNT_WORDS;
                         const titleColour = COLOURS.CARD.HEADER(_cardD).TITLE;
@@ -826,18 +839,19 @@ export default function cardsComponent() {
                         kpisG.exit().call(remove);
                     })
                     .call(drag)
-                    .on("click", (e, cardD) => { 
+                    .on("click", function(e, cardD){ 
                         e.stopPropagation(); 
-                        if(!cardD.isHeld){ onPickUp(cardD); }
+                        if(!cardD.isHeld){ 
+                            console.log("calling pickup from click...")
+                            onPickUp.call(this, cardD); 
+                        }
                     })
   
             //EXIT
             cardG.exit().call(remove);
 
-            let swipeTriggered = false;
-            let deltaY = 0;
             function dragged(e , d){
-                //console.log("drg", deltaY, e.dy, d.isSelected, swipeTriggered)
+                //console.log("drg", swipeTriggered)
                 if(d.isSelected){ return; }
                 if(swipeTriggered){ return; }
                 //bug next - this is 0 when swiping down on items 4/5 -> need to look at teh drag handler inside cardItems, why dy is 0
@@ -850,6 +864,7 @@ export default function cardsComponent() {
                 const frontCard = data.find(c => c.isFront);
 
                 let cardD;
+                //CASE 1: THE BG IS DRAGGED, NOT A CARD
                 if(Array.isArray(d)){
                     //the bg has been dragged, so apply it to the correct card
                     if(swipeDirection === "down"){
@@ -864,27 +879,40 @@ export default function cardsComponent() {
                 }
 
 
+                //CASE 2 - A PLACED CARD IS DRAGGED UP
                 if(swipeDirection === "up" && !cardD.isHeld){ 
-                    onPickUp(cardD);
                     swipeTriggered = true;
+                    //const cardNode = containerG.select(`g.card-${cardD.cardNr}`).node();
+                    console.log("calling pickup1......")
+                    //onPickUp.call(cardNode, cardD);
+                    onPickUp(cardD)
+                    
                 }
+                //CASE 3 - A HELD CARD IS DRAGGED UP -> pick up the next card
                 if(swipeDirection === "up" && cardD.isHeld){
+                    swipeTriggered = true;
                     const nr = d3.max([0, frontCard.cardNr - 1]);
                     const cardD = data.find(c => c.cardNr === nr);
-                    onPickUp(cardD);
-                    swipeTriggered = true;
+                    //const cardNode = containerG.select(`g.card-${cardD.cardNr}`).node();
+                    console.log("calling pickup2.........")
+                    //onPickUp.call(cardNode, cardD);
+                    onPickUp(cardD)
                 }
                 if(swipeDirection === "down" && cardD.isHeld){
-                    onPutDown(cardD);
                     swipeTriggered = true;
+                    //const cardNode = containerG.select(`g.card-${cardD.cardNr}`).node();
+                    //console.log("calling putdown1.......", cardNode)
+                    onPutDown(cardD);
                 }
                 if(swipeDirection === "down" && !cardD.isHeld){
-                    onPutDown(frontCard);
                     swipeTriggered = true;
+                    //const cardNode = containerG.select(`g.card-${cardD.cardNr}`).node();
+                    //console.log("calling putdown2.....", cardNode)
+                    onPutDown(frontCard);
                 }
                 //cleanup here because dragEnd seems to not be called sometimes - an update cuts off the drag handling
                 //@todo - fix the issue above properly
-                cleanUp();
+                //cleanUp();
             }
 
             function dragEnd(e, d){
@@ -893,6 +921,7 @@ export default function cardsComponent() {
                 cleanUp();
             }
             function cleanUp(e,d){
+                console.log("cleanup----------------")
                 swipeTriggered = false;
                 deltaY = 0;
             }

@@ -62,17 +62,17 @@ export const GREY_COLOUR_THEME = (backgroundColour) => ({
             return grey10(5.5);
         },
         STROKE:cardD => {
-            const { heldPos } = cardD;
-            return `hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`;
+            const { pos } = cardD;
+            return `hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`;
         },
         EXPAND_COLLAPSE_BTN:grey10(5.5),
         NOTIFICATION_BTN:grey10(3),
         HEADER:cardD => {
-            const { heldPos } = cardD;
+            const { pos } = cardD;
             return {
-                DATE:`hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`,
-                DATE_COUNT_WORDS:`hsla(0, 0%, ${70 * (cardsShadowFactor ** heldPos)}%, 1)`,
-                TITLE: `hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`
+                DATE:`hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`,
+                DATE_COUNT_WORDS:`hsla(0, 0%, ${70 * (cardsShadowFactor ** pos)}%, 1)`,
+                TITLE: `hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`
             }
         },
         SECTION_VIEW_HEADER:{
@@ -138,23 +138,23 @@ export const BLUE_COLOUR_THEME = (backgroundColour) => ({
     },
     CARD:{
         FILL:(cardD, deckIsSelected) => {
-            const { heldPos } = cardD;
+            const { pos } = cardD;
             // lightness, l
             const l = 62 * (deckIsSelected ? 1 : 0.6);
-            return `hsla(211, 96%, ${l * (cardsShadowFactor ** heldPos)}%, 1)`;
+            return `hsla(211, 96%, ${l * (cardsShadowFactor ** pos)}%, 1)`;
         },
         STROKE:cardD => {
-            const { heldPos } = cardD;
-            return `hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`;
+            const { pos } = cardD;
+            return `hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`;
         },
         EXPAND_COLLAPSE_BTN:grey10(5.5),
         NOTIFICATION_BTN:grey10(3),
         HEADER:cardD => {
-            const { heldPos } = cardD;
+            const { pos } = cardD;
             return {
-                DATE:`hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`,
-                DATE_COUNT_WORDS:`hsla(0, 0%, ${70 * (cardsShadowFactor ** heldPos)}%, 1)`,
-                TITLE: `hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`
+                DATE:`hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`,
+                DATE_COUNT_WORDS:`hsla(0, 0%, ${70 * (cardsShadowFactor ** pos)}%, 1)`,
+                TITLE: `hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`
             }
         },
         SECTION_VIEW_HEADER:{
@@ -231,23 +231,29 @@ export const SATURATED_BLUE_COLOUR_THEME = (bgColour) => ({
     },
     CARD:{
         FILL:(cardD, deckIsSelected) => {
-            const { heldPos } = cardD;
+            const { pos, isHeld } = cardD;
             // lightness, l
             const l = 62 * (deckIsSelected ? 1 : 0.6);
-            return `hsla(211, 35%, ${l * (cardsShadowFactor ** heldPos)}%, 1)`; //was 96% saturation in nrmal blue colour scheme
+            if(!isHeld){
+                return `hsla(211, 35%, ${l * (cardsShadowFactor ** 5)}%, 1)`
+            }
+            return `hsla(211, 35%, ${l * (cardsShadowFactor ** pos)}%, 1)`; //was 96% saturation in nrmal blue colour scheme
         },
         STROKE:cardD => {
-            const { heldPos } = cardD;
-            return `hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`;
+            const { pos, isHeld } = cardD;
+            if(!isHeld){
+                return `hsla(211, 35%, ${80 * (cardsShadowFactor ** 5)}%, 1)`
+            }
+            return `hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`;
         },
         EXPAND_COLLAPSE_BTN:grey10(4),
         NOTIFICATION_BTN:grey10(2),
         HEADER:cardD => {
-            const { heldPos } = cardD;
+            const { pos } = cardD;
             return {
-                DATE:`hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`,
-                DATE_COUNT_WORDS:`hsla(0, 0%, ${70 * (cardsShadowFactor ** heldPos)}%, 1)`,
-                TITLE: `hsla(0, 0%, ${80 * (cardsShadowFactor ** heldPos)}%, 1)`
+                DATE:`hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`,
+                DATE_COUNT_WORDS:`hsla(0, 0%, ${70 * (cardsShadowFactor ** pos)}%, 1)`,
+                TITLE: `hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`
             }
         },
         SECTION_VIEW_HEADER:{

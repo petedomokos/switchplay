@@ -20,19 +20,6 @@ const CONTEXT_MENU_ITEM_WIDTH = 30;
 const CONTEXT_MENU_ITEM_HEIGHT = 50;
 const CONTEXT_MENU_ITEM_GAP = 15;
 
-//helper
-const calcCardHeldPos = cardD => {
-    const { heldPos, isHeld, isSelected, isFront, isNext, isSecondNext, isThirdNext, status } = cardD;
-    if(isNumber(heldPos)){ return heldPos; }
-    if(!isHeld) { return 4; }
-    else if(isFront || isSelected){ return 0; }
-    else if(isNext){ return 1; }
-    else if(isSecondNext){ return 2; }
-    else if(isThirdNext){ return 3; }
-    //isFourthNext or more
-    else { return 4; }
-}
-
 const contextMenuData = [ 
     { key:"delete", url:"/delete.png" }, 
     { key:"archive", url:"/archive.png" },
@@ -92,6 +79,7 @@ export default function deckComponent() {
     let cardY;
 
     function updateDimns(data){
+        const { frontCardNr } = data;
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
@@ -106,16 +94,27 @@ export default function deckComponent() {
 
         cardHeaderHeight = contentsHeight * INFO_HEIGHT_PROPORTION_OF_CARDS_AREA;
         const minInc = cardHeaderHeight * 0.9;
-        const visibleVertCardInc = i => {
-            const incA = minInc * 0.6;// 16;
-            const incB = minInc * 0.4;// 10;
-            const incC = minInc * 0.1;// 4;
-            const incD = 0;
-            if(i === 0) { return 0; }
-            if(i === 1) { return minInc + incA }
-            if(i === 2) { return (minInc * 2) + incA + incB; }
-            if(i === 3) { return (minInc * 3) + incA + incB + incC; }
-            if(i === 4) { return (minInc * 4) + incA + incB + incC + incD; }
+        const nrHeldCards = data.cards.length - frontCardNr;
+        const visibleVertCardInc = pos => {
+            const incA = minInc * 0.4;// 16;
+            const incB = minInc * 0.32;// 10;
+            const incC = minInc * 0.24;// 4;
+            const incD = minInc * 0.16;
+            const incE = minInc * 0.1;
+            if(pos === 0) { return 0; }
+            if(pos === 1) { return minInc + incA }
+            if(pos === 2) { return (minInc * 2) + incA + incB; }
+            if(pos === 3) { return (minInc * 3) + incA + incB + incC; }
+            const pos4 = (minInc * 4) + incA + incB + incC + incD; 
+            if(pos === 4) { return pos4; }
+
+            const nrHiddenHeldCards = nrHeldCards - 5;
+            const posAmongstHiddenCards = pos - 4;
+            const remainingSpace = incE;
+            if(pos > 4){ 
+                return pos4 + remainingSpace * (posAmongstHiddenCards/nrHiddenHeldCards) 
+            }
+
         };
 
         //@todo - change the way horiz is done so its the other way round like vert
@@ -123,12 +122,24 @@ export default function deckComponent() {
         const maxHorizSpaceForIncs = 20;
         const horizSpaceForVisibleIncs = d3.min([cardsAreaWidth * 0.25, maxHorizSpaceForIncs]); 
         const horizSpaceForNonVisibleIncs = horizSpaceForVisibleIncs * 0.4;
-        const visibleHorizCardInc = i => {
-            if(i === 0) { return 0; }
-            if(i === 1) { return horizSpaceForVisibleIncs * 0.1; }
-            if(i === 2) { return horizSpaceForVisibleIncs * (0.1 + 0.13); }
-            if(i === 3) { return horizSpaceForVisibleIncs * (0.1 + 0.13 + 0.3); }
-            if(i === 4) { return horizSpaceForVisibleIncs * (0.1 + 0.13 + 0.3 + 0.47); }
+
+        const visibleHorizCardInc = pos => {
+            if(pos === 0) { return 0; }
+            if(pos === 1) { return horizSpaceForVisibleIncs * 0.07; }
+            if(pos === 2) { return horizSpaceForVisibleIncs * (0.07 + 0.12); }
+            if(pos === 3) { return horizSpaceForVisibleIncs * (0.07 + 0.12 + 0.22); }
+            const pos4 = horizSpaceForVisibleIncs * (0.07 + 0.12 + 0.22 + 0.3)
+            if(pos === 4) { 
+                return pos4; 
+            }
+            const remainingProp = 1 - (0.07 + 0.12 + 0.22 + 0.3)
+            const remainingSpace = remainingProp * horizSpaceForNonVisibleIncs;
+            const nrHiddenHeldCards = nrHeldCards - 5;
+            const posAmongstHiddenCards = pos - 4;
+
+            if(pos > 4){ 
+                return pos4 + remainingSpace * (posAmongstHiddenCards/nrHiddenHeldCards) 
+            }
         };
 
         //when deck is reduced in size, the cards behind are not visible exceot a tiny bit
@@ -176,8 +187,18 @@ export default function deckComponent() {
         selectedCardWidth = selectedCardDimns.width;
         selectedCardHeight = selectedCardDimns.height;
 
+        const nrPlacedCards = data.cards.filter(d => d.cardNr < frontCardNr).length;
+        const nrVisiblePlacedCards = d3.min([nrPlacedCards, 5]);
+        const nrHiddenPlacedCards = nrPlacedCards - nrVisiblePlacedCards;
         //cardX and Y
+        //erro now on pick up card, it goes to 0,0 so either cardX or cardY is NaN
         cardX = (d,i) => {
+            //if(d.hasBeenPickedUp){
+                //console.log("cardX---------------",d)
+            //}
+            if(d.pos < 0){
+                //console.log("cardNr pos", d.cardNr, d.pos)
+            }
             if(selectedSection?.key && d.isHeld){
                 const gapForHorizIncs = contentsWidth - sectionViewHeldCardWidth;
                 const horizInc = gapForHorizIncs / 4;
@@ -188,12 +209,26 @@ export default function deckComponent() {
                 return (cardsAreaWidth - selectedCardWidth)/2;
             }
             if(d.isHeld){
-                return extraMarginLeftForCards + horizCardInc(d.handPos);
+                if(d.hasBeenPickedUp){ console.log("isHeld") }
+                return extraMarginLeftForCards + horizCardInc(d.pos);
             }
-            return extraMarginLeftForCards + d.cardNr * (placedCardWidth + placedCardHorizGap);
+
+            const slot0 = extraMarginLeftForCards;
+            if(d.slotPos >= 0){
+                return slot0 + d.slotPos * (placedCardWidth + placedCardHorizGap);
+            }
+            const spaceForHidden = placedCardWidth * 0.4;
+            const hiddenPos = Math.abs(d.pos) - 5;
+            const inc = (hiddenPos/nrHiddenPlacedCards) * spaceForHidden;
+            return slot0 - inc;
         }
 
         cardY = (d,i) => {
+            if(d.hasBeenPickedUp){
+                //this shows true for cardNr 1 instead of 0...maybe cardsLayout isnt updated?
+                //console.log("cardY",d)
+            }
+            //next - fix this and cardX
             if(selectedSection?.key && d.isHeld){
                 return i * sectionViewHeldCardHeight;
             }
@@ -207,14 +242,12 @@ export default function deckComponent() {
                 //in multideck view, not all the incr space is taken up
                 const totalVertIncs = vertSpaceForIncs;// deckIsSelected ? vertSpaceForIncs : vertCardInc(4);
                 const extraMarginTop = (heldCardsAreaHeight - heldCardHeight - totalVertIncs)/2;
-                //return extraMarginTop + totalVertIncs - vertCardInc(d.handPos) 
-                return extraMarginTop + totalVertIncs - vertCardInc(d.handPos) 
+                //return extraMarginTop + totalVertIncs - vertCardInc(d.pos) 
+                return extraMarginTop + totalVertIncs - vertCardInc(d.pos) 
                     // - (deckIsSelected ? 0 : vertShiftUpForMultiview)
             }
 
-            //extra shift up in multiview to create a pseudo margin between decks
-            const vertShiftUpForMultiview = heldCardsAreaHeight * 0.15; 
-            return heldCardsAreaHeight + placedCardMarginVert //- (deckIsSelected ? 0 : vertShiftUpForMultiview);
+            return heldCardsAreaHeight + placedCardMarginVert;
         }
     }
     let DEFAULT_STYLES = {
@@ -287,6 +320,7 @@ export default function deckComponent() {
     const purpose = purposeComponent();
 
     function deck(selection, options={}) {
+        //console.log("deck--------------------------------------------")
         const { transitionEnter=true, transitionUpdate=true } = options;
 
         // expression elements
@@ -346,6 +380,11 @@ export default function deckComponent() {
             function update(_deckData, options={}){
                 const { } = options;
                 const { id, frontCardNr, listPos, colNr, rowNr, purposeData, sections } = _deckData;
+                //console.log("deckdata", _deckData)
+                const cardsData = _deckData.cardsData.map(c => ({ 
+                    ...c,
+                    isSelected:selectedCardNr === c.cardNr 
+                }))
 
                 cardsAreaG.call(fadeInOut, content === "cards" /*{ transition:{ duration: 1000 } }*/);
 
@@ -385,36 +424,7 @@ export default function deckComponent() {
 
                 purposeG.exit().call(remove)
 
-                //dimns for specific chart
-                const cardsData = _deckData.cards
-                    .map((card,i) => { 
-                        const { cardNr } = card;
-                        return {
-                            ...card,
-                            handPos:cardNr - frontCardNr,
-                            isFront:cardNr === frontCardNr,
-                            isNext:cardNr - 1 === frontCardNr,
-                            isSecondNext:cardNr - 2 === frontCardNr,
-                            isThirdNext:cardNr - 3 === frontCardNr,
-                            isHeld:cardNr >= frontCardNr,
-                            isSelected:selectedCardNr === card.cardNr
-                        }
-                    })
-                    .map(card => ({ ...card, heldPos:calcCardHeldPos(card) }));
-
-                //bg
-                /*
-                containerG.select("rect.deck-bg")
-                    .attr("display", isNumber(selectedCardNr) ? null : "none")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .on("click", e => {
-                        console.log("deck-bg click")
-                        //deselectCard();
-                        onSetSelectedCardNr("")
-                        e.stopPropagation();
-                        setForm(null);
-                    })*/
+                //console.log("cardsData", cardsData)
 
                 //contextMenu
                 //note - hoz and vert margins are not the same proportion of total
@@ -480,7 +490,7 @@ export default function deckComponent() {
 
                 //issue - cloneG is a child of container, which moves, making the clone move too????
                 startLongpress = function(e,d){
-                    console.log("startlp..................")
+                    //console.log("startlp..................")
                     //d3.selectAll("g.deck").filter(d => d.id !== id).attr("pointer-events", "none");
 
                     //create a clone 
@@ -725,10 +735,12 @@ export default function deckComponent() {
                             }
                         })
                         .onPickUp(function(d){
-                            //console.log("pickup!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", d)
+                            console.log("onPickUp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                            //d3.select(this).raise();
                             updateFrontCardNr(d.cardNr)
                         })
                         .onPutDown(function(d){
+                            //console.log("onPutDown", d)
                             /*if(d.isSelected){
                                 selectedCardNr = null;
                                 //show other deck as we need to deselect the card too

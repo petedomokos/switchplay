@@ -345,7 +345,7 @@ export default function decksComponent() {
                 d3.select("g.zoom")
                     .style("display", selectedDeckId ? "none" : null)
                     .on("click", (e) => { 
-                        console.log("zoom click")
+                        //console.log("zoom click")
                         e.stopPropagation();
                         //case 1: another deck or space is clicked during lp 
                         //(if the longpressedDeck  is clicked, it is handled by onClickBG in Decks because we cant prevent it propagating up)
@@ -355,7 +355,7 @@ export default function decksComponent() {
                          }
                         //@todo - use getDeck instead based on getCell -> if Math.abs(x - cellX(colNr)) < margin etc 
                         const cell = getCell([e.clientX, e.clientY], true);
-                        console.log('cell', cell)
+                        //console.log('cell', cell)
                         if(cell?.deckId){
                             onSelectDeck(cell.deckId);
                         }

@@ -13,7 +13,7 @@ export default function TelescopeIcon({ width, height, transformOrigin, fill }) 
   const classes = useStyles(styleProps);
 
   return (
-    <svg viewBox="0,0,256,256" width={`${width}px`} height={`${height}px`} transformOrigin={transformOrigin} >
+    <svg viewBox="0,0,256,256" width={`${width}px`} height={`${height}px`} transformorigin={transformOrigin} >
         <g fill={fill} fillRule="nonzero" stroke="none" strokeWidth="1" strokeLinecap="butt" strokeLinejoin="miter" strokeMiterlimit="10" 
            strokeDasharray="" strokeDashoffset="0" fontFamily="none" fontWeight="none" fontSize="none" 
            textAnchor="none" style={{ mixBlendMode: "normal" }}>
