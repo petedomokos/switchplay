@@ -193,12 +193,6 @@ export default function deckComponent() {
         //cardX and Y
         //erro now on pick up card, it goes to 0,0 so either cardX or cardY is NaN
         cardX = (d,i) => {
-            //if(d.hasBeenPickedUp){
-                //console.log("cardX---------------",d)
-            //}
-            if(d.pos < 0){
-                //console.log("cardNr pos", d.cardNr, d.pos)
-            }
             if(selectedSection?.key && d.isHeld){
                 const gapForHorizIncs = contentsWidth - sectionViewHeldCardWidth;
                 const horizInc = gapForHorizIncs / 4;
@@ -209,7 +203,6 @@ export default function deckComponent() {
                 return (cardsAreaWidth - selectedCardWidth)/2;
             }
             if(d.isHeld){
-                if(d.hasBeenPickedUp){ console.log("isHeld") }
                 return extraMarginLeftForCards + horizCardInc(d.pos);
             }
 
@@ -224,11 +217,6 @@ export default function deckComponent() {
         }
 
         cardY = (d,i) => {
-            if(d.hasBeenPickedUp){
-                //this shows true for cardNr 1 instead of 0...maybe cardsLayout isnt updated?
-                //console.log("cardY",d)
-            }
-            //next - fix this and cardX
             if(selectedSection?.key && d.isHeld){
                 return i * sectionViewHeldCardHeight;
             }
@@ -294,6 +282,8 @@ export default function deckComponent() {
     let setForm = function(){};
     let updateItemStatus = function(){};
     let updateFrontCardNr = function(){};
+    let onAddCard = function(){};
+    let onDeleteCard = function(){};
 
     let deckIsLongpressed = false;
     let wasDragged = false;
@@ -311,6 +301,8 @@ export default function deckComponent() {
     let cardsAreaG;
     let contextMenuG;
     let controlsG;
+
+    const itemAreaDrag = d3.drag();
 
     //components
     const header = headerComponent();
@@ -362,6 +354,8 @@ export default function deckComponent() {
                     .append("g")
                     .attr("class", "cards-area");
 
+                cardsAreaG.append("rect").attr("class", "cards-area-bg");
+
                 containerG
                     .append("rect")
                         .attr("class", "deck-overlay")
@@ -388,10 +382,7 @@ export default function deckComponent() {
 
                 cardsAreaG.call(fadeInOut, content === "cards" /*{ transition:{ duration: 1000 } }*/);
 
-
                 //PURPOSE
-               
-
                 const getPurposeFormDimns = (i, dimns) => {
                     const { paragraphHeight, paragraphMargin, paragraphContentsWidth, paragraphContentsHeight,
                         purposeMargin, paraFontSize } = dimns;
@@ -687,6 +678,8 @@ export default function deckComponent() {
                     .attr("transform", `translate(0, ${headerHeight})`)
                     .datum(cardsData)
                     .call(cards
+                        .width(cardsAreaWidth)
+                        .height(cardsAreaHeight)
                         .heldCardWidth(heldCardWidth)
                         .heldCardHeight(heldCardHeight)
                         .headerHeight(cardHeaderHeight)
@@ -734,21 +727,12 @@ export default function deckComponent() {
                                 onSetSelectedCardNr(d.cardNr)
                             }
                         })
+                        .onAddCard(cardNr => { onAddCard(id, cardNr || frontCardNr) })
+                        .onDeleteCard(cardNr => { onDeleteCard(id, cardNr) })
                         .onPickUp(function(d){
-                            console.log("onPickUp!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                            //d3.select(this).raise();
                             updateFrontCardNr(d.cardNr)
                         })
                         .onPutDown(function(d){
-                            //console.log("onPutDown", d)
-                            /*if(d.isSelected){
-                                selectedCardNr = null;
-                                //show other deck as we need to deselect the card too
-                                containerG.selectAll("g.card").filter(dat => dat.cardNr !== d.cardNr)
-                                    //.attr("pointer-events", null)
-                                    .attr("opacity", 1);
-                            }*/
-                            //console.log("putdown!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", d)
                             updateFrontCardNr(d.cardNr + 1);
                         })
                         .setForm(setForm))
@@ -1272,6 +1256,16 @@ export default function deckComponent() {
     deck.onSetSelectedCardNr = function (value) {
         if (!arguments.length) { return onSetSelectedCardNr; }
         onSetSelectedCardNr = value;
+        return deck;
+    };
+    deck.onAddCard = function (value) {
+        if (!arguments.length) { return onAddCard; }
+        onAddCard = value;
+        return deck;
+    };
+    deck.onDeleteCard = function (value) {
+        if (!arguments.length) { return onDeleteCard; }
+        onDeleteCard = value;
         return deck;
     };
     deck.onSelectItem = function (value) {

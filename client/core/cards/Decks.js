@@ -25,6 +25,8 @@ import { grey10, COLOURS } from './constants';
 const { GOLD } = COLOURS;
 import dragEnhancements from '../journey/enhancedDragHandler';
 import { toCamelCase } from '../../data/measures';
+import { createInitCard } from '../../data/initDeck';
+import { addWeeks } from '../../util/TimeHelpers';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -78,7 +80,7 @@ const enhancedZoom = dragEnhancements();
 //without it, each deckHeight is slighlty wrong
 const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
   //console.log("Decks table", table)
-  //console.log("Decks data", data)
+  console.log("Decks data", data)
   //processed props
   const stringifiedData = JSON.stringify({ data, table });
   //state
@@ -99,6 +101,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
 
   //processed state
   const selectedDeck = data.find(deck => deck.id === selectedDeckId);
+  console.log("selectedDeckId cards", selectedDeckId, selectedDeck?.cards)
   //refs
   const zoomRef = useRef(null);
   const containerRef = useRef(null);
@@ -530,6 +533,29 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
     updateCard({ ...cardToUpdate, items:updatedItems })
   }, [stringifiedData, form, selectedDeckId]);
 
+  //@todo - impl adding card in between, but for now, we can only add at end so cardNr not needed
+  const addCard = useCallback((deckId/*, cardNr*/) => {
+    console.log("add card", deckId, /*cardNr,*/ selectedDeck)
+    setForm(null);
+    const currentCards = selectedDeck.cards;
+    const cardNr = currentCards.length;
+    const prevDate = currentCards[currentCards.length-1].date;
+    const date = addWeeks(1, prevDate);
+    const cards = [...currentCards, createInitCard(cardNr, { date })]
+    console.log("newCards", cards)
+    updateDeck({ ...selectedDeck, cards })
+  }, [stringifiedData, form, selectedDeckId]);
+
+  const deleteCard = useCallback((deckId, cardNr) => {
+    console.log("del card", deckId, cardNr)
+    //next -> check adding a card works
+    //then add id to cards, and make cardNrs dynamic, which also means frontCardNr must update,
+    //or must become a cardid whihc is then converted into a cardNr dynamically in layout
+    //!!!todo - must adjust all card numbers if a card is deleted -> also need a cardId
+    //as the unique id then
+    setForm(null);
+  }, [stringifiedData, form, selectedDeckId]);
+
 
   useEffect(() => {
     decks.selectedSection(selectedSection);
@@ -611,6 +637,8 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
       .onDeleteDeck(onDeleteDeck)
       .onArchiveDeck(archiveDeck)
       .onCopyDeck(onCopyDeck)
+      .onAddCard(addCard)
+      .onDeleteCard(deleteCard)
       .zoom(zoom)
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)

@@ -4,17 +4,19 @@ import { addDays, addWeeks } from "../util/TimeHelpers"
 const items = [
     { itemNr:1, status:0 }, { itemNr:2, status:0 }, { itemNr:3, status:0 }, { itemNr:4, status:0 }, { itemNr:5, status:0 },
 ]
-export const createInitCards = (options={}) => {
-    const { startDate = new Date(), nrCards=5, weeksPerCard=1, cardTitles=[] } = options;
 
-    const NR_CARDS = 5
-    return d3.range(NR_CARDS).map(i => ({
-    //return d3.range(nrCards).map(i => ({
-        cardNr:i,
-        title:cardTitles[i] || `Level ${i + 1}`,
-        date:addWeeks(weeksPerCard * (i + 1), startDate),
+export const createInitCard = (cardNr, options={}) => {
+    const { date, startDate = new Date(), weeksPerCard=1, cardTitles=[] } = options;
+    return {
+        cardNr,
+        title:cardTitles[cardNr] || `Level ${cardNr + 1}`,
+        date:date || addWeeks(weeksPerCard * (cardNr + 1), startDate),
         items
-    }))
+    }
+}
+export const createInitCards = (options={}) => {
+    const { nrCards=5 } = options;
+    return d3.range(nrCards).map(i => createInitCard(i, options));
 }
 
 export const initDeck = (userId, settings={}) => {    

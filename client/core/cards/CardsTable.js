@@ -68,9 +68,8 @@ const useStyles = makeStyles((theme) => ({
 const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, updateDecks, deleteDeck, hideMenus, showMenus }) => {
   const { tables=[], decks=[] } = user;
   const stringifiedUser = JSON.stringify(user);
-
+  console.log("CardsTable", user)
   //@todo - move creating flag to asyncProcesses
-
   //helper consts
   //data will be grouped by playerId if at least one deck has a playerid tag, otherwise it is not grouped
   const decksWithPlayerTag = decks.filter(d => !!d.tags?.find(t => t.key === "playerId"))

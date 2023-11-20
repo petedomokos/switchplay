@@ -17,6 +17,8 @@ const { GOLD, SILVER, NOT_STARTED_FILL, SECTION_VIEW_NOT_STARTED_FILL } = COLOUR
 export default function cardsComponent() {
     //API SETTINGS
     // dimensions
+    let width = 1400;
+    let height = 1000;
     let heldCardWidth = 300;
     let heldCardHeight = 600;
     let margin = { left:3, right: 3, top:2.5, bottom:2.5 }
@@ -115,6 +117,8 @@ export default function cardsComponent() {
     let onClickCardTitle = function(){};
     let onSelectItem = function(){};
     let onUpdateItemStatus = function(){};
+    let onAddCard = function(){};
+    let onDeleteCard = function(){};
     let onPickUp = function(){};
     let onPutDown = function(){};
     let onClickInfo = function(){};
@@ -147,11 +151,58 @@ export default function cardsComponent() {
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
         updateDimns();
         selection.each(function (data) {
-            containerG = d3.select(this);
 
             drag
                 .on("drag", dragged)
                 .on("end", dragEnd)
+
+            containerG = d3.select(this).call(drag);
+
+            const shouldShowBg = deckIsSelected && data.filter(c => c.isHeld).length === 0;
+            const cardsBackgroundG = containerG.selectAll("g.cards-background").data(shouldShowBg ? [1] : []);
+            cardsBackgroundG.enter()
+                .insert("g", ":first-child")
+                    .attr("class", "cards-background")
+                    .call(fadeIn)
+                    .each(function(){
+                        const g = d3.select(this);
+                        g.append("rect").attr("class", "cards-bg")
+                            .attr("fill", "transparent");
+
+                        const newCardButtonG = g.append("g").attr("class", "new-card-btn");
+                        newCardButtonG.append("path")
+                            //.attr("transform-origin", "center")
+                            .attr("transform", "translate(-28.85,-29) scale(2.4)")
+                            .attr("fill", "none")
+                            .attr("stroke", grey10(4))
+                            .attr("stroke-width", 1.5)
+                            .attr("stroke-linecap", "round")
+                            .attr("d", "M15 12L12 12M12 12L9 12M12 12L12 9M12 12L12 15")
+        
+                        newCardButtonG.append("circle")
+                            .attr("r", 18)
+                            .attr("fill", "none")
+                            .attr("stroke", grey10(4))
+                            .attr("stroke-width", 1.5)
+
+                    })
+                    .merge(cardsBackgroundG)
+                    .each(function(){
+                        const g = d3.select(this);
+                        g.select("g.new-card-btn")
+                            .attr("transform", `translate(${width/2}, ${height/2}) scale(0.4)`)
+                            .on("click", e => {
+                                e.stopPropagation()
+                                onAddCard();
+                            });
+
+                        g.select("rect.cards-bg")
+                            .attr("width", width)
+                            .attr("height", height);
+
+                    })
+
+            cardsBackgroundG.exit().call(remove);
 
             //card fill and stroke
             const getCardFill = d => COLOURS.CARD.FILL(d, deckIsSelected);
@@ -226,10 +277,6 @@ export default function cardsComponent() {
                 return SECTION_VIEW_NOT_STARTED_FILL;
             }
 
-            //bgdrag
-            containerG.call(drag);
-            //console.log("data", data)
-
             const cardG = containerG.selectAll("g.card").data(data, d => d.cardNr);
             cardG.enter()
                 //.insert("g", ":first-child")
@@ -237,8 +284,8 @@ export default function cardsComponent() {
                     .attr("class", d => `card card-${d.cardNr}`)
                     .attr("opacity", 1)
                     .each(function(cardD,i){
-                        const { cardNr, isHeld, isSelected, profile } = cardD;
-                        const itemsData = timeExtent !== "singleDeck" ? [] : (selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items);
+                        const { cardNr, pos, isHeld, isHidden, isSelected, profile } = cardD;
+                        const itemsData = timeExtent !== "singleDeck" || isHidden ? [] : (selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items);
 
                         //front components
                         frontHeaderComponents[cardNr] = cardHeaderComponent();
@@ -348,7 +395,7 @@ export default function cardsComponent() {
                         force:true
                     })
                     .each(function(cardD,i){
-                        const { deckId, cardNr, pos, slotPos, isHeld, isFront, hasBeenPickedUp, isNext, isSecondNext, isSelected, info, status, profile, deckListPos, purposeData=[], flagsData } = cardD;
+                        const { deckId, cardNr, pos, isHidden, slotPos, isHeld, isFront, hasBeenPickedUp, isNext, isSecondNext, isSelected, info, status, profile, deckListPos, purposeData=[], flagsData } = cardD;
                         const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
                         const items = itemsComponents[cardNr];
 
@@ -366,7 +413,7 @@ export default function cardsComponent() {
                             .call(fadeInOut, shouldShowUnderlay, { opacity:shouldShowUnderlay ? 0.8 : 0 })
                             .attr("transform", `translate(${-2000},${-2000})`)
                             .on("click", function(e){
-                                console.log("click card underlay")
+                                //console.log("click card underlay")
                                 //unclick item code
                                 e.stopPropagation();
                                 //must lower card back to its correct pos in deck
@@ -529,7 +576,7 @@ export default function cardsComponent() {
                             //not sure why we need this when entire containr shold have pointer-events none when no deck selected
                             .attr("pointer-events", deckIsSelected ? null : "none")
                             .attr("transform", `translate(0, ${headerHeight + gapBetweenHeaderAndItems})`)
-                            .call(fadeInOut, timeExtent === "singleDeck" && (isSelected || isFront || !isHeld || selectedSectionKey))
+                            .call(fadeInOut, !isHidden && timeExtent === "singleDeck" && (isSelected || isFront || !isHeld || selectedSectionKey))
                             .datum(itemsData)
                             .call(items);
 
@@ -842,7 +889,7 @@ export default function cardsComponent() {
                     .on("click", function(e, cardD){ 
                         e.stopPropagation(); 
                         if(!cardD.isHeld){ 
-                            console.log("calling pickup from click...")
+                            //console.log("calling pickup from click...")
                             onPickUp.call(this, cardD); 
                         }
                     })
@@ -851,7 +898,7 @@ export default function cardsComponent() {
             cardG.exit().call(remove);
 
             function dragged(e , d){
-                //console.log("drg", swipeTriggered)
+                //console.log("drg")
                 if(d.isSelected){ return; }
                 if(swipeTriggered){ return; }
                 //bug next - this is 0 when swiping down on items 4/5 -> need to look at teh drag handler inside cardItems, why dy is 0
@@ -870,7 +917,7 @@ export default function cardsComponent() {
                     if(swipeDirection === "down"){
                         cardD = frontCard;
                     }else{
-                        const nr = d3.max([0, frontCard.cardNr - 1]);
+                        const nr = frontCard ? d3.max([0, frontCard.cardNr - 1]) : data.length - 1;
                         cardD = data.find(c => c.cardNr === nr);
                     } 
                 }else{
@@ -883,7 +930,7 @@ export default function cardsComponent() {
                 if(swipeDirection === "up" && !cardD.isHeld){ 
                     swipeTriggered = true;
                     //const cardNode = containerG.select(`g.card-${cardD.cardNr}`).node();
-                    console.log("calling pickup1......")
+                    //console.log("calling pickup1......")
                     //onPickUp.call(cardNode, cardD);
                     onPickUp(cardD)
                     
@@ -894,7 +941,7 @@ export default function cardsComponent() {
                     const nr = d3.max([0, frontCard.cardNr - 1]);
                     const cardD = data.find(c => c.cardNr === nr);
                     //const cardNode = containerG.select(`g.card-${cardD.cardNr}`).node();
-                    console.log("calling pickup2.........")
+                    //console.log("calling pickup2.........")
                     //onPickUp.call(cardNode, cardD);
                     onPickUp(cardD)
                 }
@@ -921,7 +968,7 @@ export default function cardsComponent() {
                 cleanUp();
             }
             function cleanUp(e,d){
-                console.log("cleanup----------------")
+                //console.log("cleanup----------------")
                 swipeTriggered = false;
                 deltaY = 0;
             }
@@ -932,6 +979,16 @@ export default function cardsComponent() {
     }
     
     //api
+    cards.width = function (value) {
+        if (!arguments.length) { return width; }
+        width = value;
+        return cards;
+    };
+    cards.height = function (value) {
+        if (!arguments.length) { return height; }
+        height = value;
+        return cards;
+    };
     cards.heldCardWidth = function (value) {
         if (!arguments.length) { return heldCardWidth; }
         heldCardWidth = value;
@@ -1132,6 +1189,16 @@ export default function cardsComponent() {
     cards.onUpdateItemStatus = function (value) {
         if (!arguments.length) { return onUpdateItemStatus; }
         onUpdateItemStatus = value;
+        return cards;
+    };
+    cards.onAddCard = function (value) {
+        if (!arguments.length) { return onAddCard; }
+        onAddCard = value;
+        return cards;
+    };
+    cards.onDeleteCard = function (value) {
+        if (!arguments.length) { return onDeleteCard; }
+        onDeleteCard = value;
         return cards;
     };
     cards.onPickUp = function (value) {
