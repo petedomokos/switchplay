@@ -645,11 +645,12 @@ export default function cardsComponent() {
                             })
                             .setForm(setForm)
 
+                        const shouldShowItems = !isHidden && timeExtent === "singleDeck" && (isSelected || isFront || (isHeld && selectedSectionKey && deckIsSelected))
                         frontContentsG.select("g.items-area")
                             //not sure why we need this when entire containr shold have pointer-events none when no deck selected
                             .attr("pointer-events", deckIsSelected ? null : "none")
                             .attr("transform", `translate(0, ${headerHeight + gapBetweenHeaderAndItems})`)
-                            .call(fadeInOut, !isHidden && timeExtent === "singleDeck" && (isSelected || isFront || !isHeld || selectedSectionKey))
+                            .call(fadeInOut, shouldShowItems)
                             .datum(itemsData)
                             .call(items);
 

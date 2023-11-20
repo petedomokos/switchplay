@@ -177,28 +177,38 @@ export default function deckComponent() {
 
         //section view changes
         //note - for now, its 1 item per card per section
+        //@todo - put this space for teh hidden cards into the heldCardsAreaHeight instead,
+        //and merge the way it is used with normal card view
+        const nrHiddenPlacedCards = data.cardsData.filter(d => d.isPlaced && d.isHidden).length;
+        const nrHiddenHeldCards = data.cardsData.filter(d => d.isHeld && d.isHidden).length;
+
+        const sectionViewMarginHoz = heldCardWidth * 0.05;
+        const sectionViewHorizSpaceForHiddenCards = d3.min([nrHiddenHeldCards * heldCardWidth * 0.02, heldCardWidth * 0.06]);
+        const sectionViewVertSpaceForHiddenCards = d3.min([nrHiddenHeldCards * heldCardsAreaHeight * 0.0133, heldCardWidth * 0.04])
+        const sectionViewHeldCardsAreaHeight = heldCardsAreaHeight - sectionViewVertSpaceForHiddenCards;
         sectionViewHeldCardWidth = heldCardWidth;
-        sectionViewHeldCardHeight = heldCardsAreaHeight / data.cards.length;
+        sectionViewHeldCardHeight = sectionViewHeldCardsAreaHeight / 5; //we show 5 on screen
 
         //selected card dimns
         const selectedCardDimns = maxDimns(cardsAreaWidth, cardsAreaHeight, cardAspectRatio)
         selectedCardWidth = selectedCardDimns.width;
         selectedCardHeight = selectedCardDimns.height;
 
-        //console.log("datacards", data.cardsData)
-        const nrPlacedCards = data.cardsData.filter(d => d.cardNr < frontCardNr).length;
-        const nrVisiblePlacedCards = d3.min([nrPlacedCards, 5]);
-        const nrHiddenPlacedCards = nrPlacedCards - nrVisiblePlacedCards;
-        //console.log("nrPlaced nrVisPlaced", nrPlacedCards, nrVisiblePlacedCards)
         //cardX and Y
         //erro now on pick up card, it goes to 0,0 so either cardX or cardY is NaN
         cardX = (d,i) => {
             //console.log("cardX",d.pos,  d)
             if(selectedSection?.key && d.isHeld){
-                const gapForHorizIncs = contentsWidth - sectionViewHeldCardWidth;
+                const gapForHorizIncs = contentsWidth - sectionViewHeldCardWidth - 2 * sectionViewMarginHoz - sectionViewHorizSpaceForHiddenCards;
                 const horizInc = gapForHorizIncs / 4;
-                //console.log("returning", (4 - i) * horizInc)
-                return (4 - i) * horizInc;
+                if(d.isHidden){ 
+                    const hiddenHeldPos = d.pos - 4; //hiddenHeldPos starts from 1, not 0
+                    const hiddenHeldProportion = hiddenHeldPos/nrHiddenHeldCards;
+                    const inc = hiddenHeldProportion * sectionViewHorizSpaceForHiddenCards;
+                    const pos4 = sectionViewMarginHoz + (4 * horizInc);
+                    return pos4 + inc;
+                }
+                return sectionViewMarginHoz + d.pos * horizInc;
             }
             if(d.isSelected){
                 //keep it centred
@@ -224,7 +234,12 @@ export default function deckComponent() {
         cardY = (d,i) => {
             //console.log("cardY", d)
             if(selectedSection?.key && d.isHeld){
-                return i * sectionViewHeldCardHeight;
+                if(d.isHidden){ 
+                    const hiddenHeldPos = d.pos - 4; //hiddenHeldPos starts from 1, not 0
+                    const hiddenHeldProportion = hiddenHeldPos/nrHiddenHeldCards;
+                    return (1 - hiddenHeldProportion) * sectionViewVertSpaceForHiddenCards;
+                }
+                return sectionViewVertSpaceForHiddenCards + (4 - d.pos) * sectionViewHeldCardHeight;
             }
             if(d.isSelected){
                 return (cardsAreaHeight - selectedCardHeight)/2;
@@ -380,7 +395,7 @@ export default function deckComponent() {
             function update(_deckData, options={}){
                 const { } = options;
                 const { id, frontCardNr, startDate, listPos, colNr, rowNr, purposeData, sections } = _deckData;
-                console.log("deckdata", _deckData)
+
                 const cardsData = _deckData.cardsData.map(c => ({ 
                     ...c,
                     isSelected:selectedCardNr === c.cardNr 

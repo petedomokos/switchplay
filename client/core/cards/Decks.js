@@ -558,7 +558,9 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
   }, [stringifiedData, form, selectedDeckId]);
 
   const addCard = useCallback((deckId, cardNr) => {
-    console.log("add card", deckId, cardNr, selectedDeck)
+    //bug - when frontCardId is none, it stays as none, when it should be the id of the new card
+    //also finally need to do section view when more than 5 held cards
+    //console.log("add card", deckId, cardNr, selectedDeck)
     setForm(null);
     const currentCards = selectedDeck.cards;
     const prevDate = currentCards[currentCards.length-1].date;
@@ -568,9 +570,10 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
     //because react state and db dont care about cards order
     //cardNr is simply used to produce an init title and to determin pos in the deck
     //we can assume its the last one for now
-    const cards = [...currentCards, createInitCard({ date, cardNr })]
+    const newCard = createInitCard({ date, cardNr });
+    const cards = [...currentCards, newCard]
     console.log("newCards", cards)
-    updateDeck({ ...selectedDeck, cards })
+    updateDeck({ ...selectedDeck, cards, frontCardId:newCard.id })
   }, [stringifiedData, form, selectedDeckId]);
 
   const deleteCard = useCallback((deckId, cardId, newFrontCardId) => {

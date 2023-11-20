@@ -120,13 +120,14 @@ export default function textComponent() {
             //bg
             const contentsG = d3.select(this).select("g.contents")
                 .attr("transform", `translate(${margin.left},${margin.top})`);
+
             contentsG.select("rect")
                 .attr("width", contentsWidth)
                 .attr("height", contentsHeight)
             //text
             const textData = [{
                 "width": contentsWidth,
-                "height": 40,// textAreaMaxHeight,
+                "height": textAreaMaxHeight,
                 "text": text(d,i) || placeholder(d,i)
             }];
 
