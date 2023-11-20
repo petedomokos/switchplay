@@ -43,6 +43,7 @@ export default function cardsLayout(){
                     ...it, 
                     deckId,
                     cardNr, 
+                    cardId:c.id,
                     //sectioning defaults to by itemNr
                     section:getSection(it, i),
                     title:it.title || "" ,

@@ -276,7 +276,7 @@ export default function cardsComponent() {
 
                 if(itemD?.title){
                     const { status } = itemD;
-                    return status === 2 ? STYLES.CARD.STROKE_WIDTH * 3 : STYLES.CARD.STROKE_WIDTH;
+                    return status === 2 ? STYLES.CARD.STROKE_WIDTH : STYLES.CARD.STROKE_WIDTH * 0.75;
                 }
                 return itemD?.title ? STYLES.CARD.STROKE_WIDTH : 0.15
             }
@@ -511,6 +511,7 @@ export default function cardsComponent() {
                                 .attr("fill", selectedSectionKey ? getCardFill({ pos: 0 }) : getCardFill(cardD))
                                 .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData, 1) : getCardStroke(cardD))
                                 .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth(itemsData) : getCardStrokeWidth(cardD))
+                                .attr("stroke-dasharray", selectedSectionKey && itemsData[0] && itemsData[0].status === 1 ? "3 4" : null)
 
                         contentsG.select("rect.card-front-bg")
                             .transition("card-front-bg-dimns")

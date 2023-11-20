@@ -538,8 +538,10 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
 
   const updateItemTitle = useCallback((title, applyToAllDecks) => {
     //console.log("updateItemTitle", applyToAllDecks)
-    const { id, itemNr } = form.value;
-    const cardToUpdate = selectedDeck.cards.find(c => c.id === id);
+    const { cardId, itemNr } = form.value;
+    const cardToUpdate = selectedDeck.cards.find(c => c.id === cardId);
+    console.log("form", form)
+    console.log("seldeck", selectedDeck)
     if(applyToAllDecks){
       //@todo - update code 
       //const prevTitle = cardToUpdate.items.find(it => it.itemNr === itemNr).title
