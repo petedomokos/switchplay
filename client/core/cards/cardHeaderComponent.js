@@ -256,6 +256,7 @@ export default function cardHeaderComponent() {
 
                                     pentagonG.exit().remove();
 
+                                    return;
                                     const trophyDatum = { id, completion };
                                     const trophyG = contentsG.selectAll("g.trophy").data(rightContent === "progress-trophy" ? [trophyDatum] : [], d => d);
                                     trophyG.enter()

@@ -32,10 +32,10 @@ const getCurrentDeck = decks => {
   return d3.least(decks.filter(d => d.date > now), d => d.date)
 }
 
-const getFrontCardNr = decks => {
+const getFrontCardId = decks => {
   const now = new Date();
-  const indexedDecks = decks.map((d,i) => ({ ...d, index:i }));
-  return d3.least(indexedDecks.filter(d => d.date > now), d => d.date)?.index || 0
+  //const indexedDecks = decks.map((d,i) => ({ ...d, index:i }));
+  return d3.least(indexedDecks.filter(d => d.date > now), d => d.date)?.id;
 }
 
 const createDeckOfDecks = (group, groupingTagKey) => {
@@ -48,7 +48,7 @@ const createDeckOfDecks = (group, groupingTagKey) => {
     id,
     title,
     tags,
-    frontCardNr: getFrontCardNr(decks), //need the nr not the deck!
+    frontCardId: getFrontCardId(sortedDecks), //need the nr not the deck!
     //need photoLink...
     //cards are the decks themselves
     cards:sortedDecks.map((d,i) => ({

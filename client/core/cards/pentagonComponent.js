@@ -207,7 +207,7 @@ export default function pentagonComponent() {
                         sectionG.select("rect.section-underlay")
                             .call(fadeInOut, shouldShowUnderlay, { opacity:shouldShowUnderlay ? 0.8 : 0 })
                             //@todo - adjust polygon so its always centred exactly, or find the offset rather than hardcode it to 1.5
-                            .attr("transform", `translate(${underlay?.offsetX},${underlay?.offsetY - 1.5})`)
+                            .attr("transform", `translate(${underlay?.offsetX || 0},${underlay?.offsetY - 1.5 || 0})`)
                             .attr("width", underlay?.width || 0)
                             .attr("height", underlay?.height || 0)
                             .on("click", onUnclickSection)

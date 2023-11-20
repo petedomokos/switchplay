@@ -136,13 +136,13 @@ export default function dragEnhancements() {
                     isClick = withClick && !wasMoved && !isLongpress && !isMultitouch;
 
                     if (isLongpress) {
-                        console.log("isLp...")
+                        //console.log("isLp...")
                         if(onLongpressEnd) { onLongpressEnd.call(this, e, d);}
                         reset();
                         break;
                     }
                     if (isClick) {
-                        console.log("isClick...")
+                        //console.log("isClick...")
                         const time = e.sourceEvent.timeStamp;
                         //console.log("time", time)
                         const diff = prevTime ? time - prevTime : null;

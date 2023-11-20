@@ -13,7 +13,7 @@ export default function cardsLayout(){
 
     let prevData = [];
 
-    function update(cardsData){
+    function update(cards){
         //console.log("cardsLayout frontCardNr", frontCardNr)
         const now = new Date();
 
@@ -22,11 +22,12 @@ export default function cardsLayout(){
             return sections[i]
         }
 
-        const _data = cardsData.map((c,i) => {
+        const _data = cards.map((c,i) => {
             const { deckId, cardNr, title="", date, items, purpose } = c;
             const pos = cardNr - frontCardNr;
 
             const mockFlags = mockCardFlags[i] || [];
+
             return {
                 ...c,
                 pos,
@@ -59,7 +60,7 @@ export default function cardsLayout(){
         .map(c => { 
             //console.log("cardNr isHeldxxxxx", c.cardNr, c.isHeld)
             //console.log("wasPlaced?", prevData?.find(card => card.cardNr === c.cardNr)?.isPlaced)
-            const nrPlacedCards = cardsData.filter(card => card.cardNr < frontCardNr).length;
+            const nrPlacedCards = cards.filter(card => card.cardNr < frontCardNr).length;
             const nrVisiblePlacedCards = d3.min([nrPlacedCards, 5]);
             const slotPos = nrVisiblePlacedCards + c.pos;
             return {

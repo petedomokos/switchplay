@@ -1,3 +1,4 @@
+import * as d3 from 'd3';
 import C from '../Constants'
 import { status, parseResponse, logError, 
 	fetchStart, fetchEnd, fetchThenDispatch} from './CommonActions'
@@ -7,6 +8,8 @@ import { transformJourneyForClient } from "./JourneyActions"
 import { initDeck } from '../data/initDeck';
 import { hydrateDeckSections } from '../data/sections';
 import { getMockTables, getMockDecks } from '../data/mockDecks';
+import uuid from 'react-uuid';
+import { addWeeks } from '../util/TimeHelpers';
 
 export const transformTableForClient = serverTable => {
 	//console.log("transformTableForClient", serverTable)
@@ -20,38 +23,48 @@ export const transformTableForClient = serverTable => {
 }
 
 export const transformDeckForClient = serverDeck => {
-	const { created, updated, cards, purpose=[], sections, tags, ...clientDeck } = serverDeck;
+	const { created, updated, cards, purpose=[], sections, tags, frontCardId, ...clientDeck } = serverDeck;
 	//ensure prupose has at least two paragraphs
 	const hydratedPurpose = purpose.length === 0 ? ["",""] : purpose.length === 1 ? [purpose[0], ""] : purpose;
 	const hydratedDeckSections = hydrateDeckSections(sections ? JSON.parse(sections) : undefined);
 	//console.log("hydratedDeckSections", hydratedDeckSections)
 	//legcy - until they are newly saved, we will have some cardNrs that start from 0
-	const parsedCards = JSON.parse(cards);
+	const parsedCards = JSON.parse(cards).map(c => ({
+		...c,
+		startDate:null, //legacy - can remove later
+		cardNr:null,
+		id:c.id || uuid(), //legacy - add uuid - can remove this func call later
+		date:new Date(c.date),
+		items:c.items.map(it => ({ ...it, status:it.status || 0, id:it.id || uuid() })) //legacy uuii()
+	}))
+
+	const now = new Date();
+	const earliestCardDate = d3.min(parsedCards, c => c.date);
+
+	//legacy code to ensure all decks have startDate - can remove after next update into db
+	const startDate = serverDeck.startDate && new Date(serverDeck.startDate) < earliestCardDate ? new Date(serverDeck.startDate) : 
+		(earliestCardDate < now ? addWeeks(-1, earliestCardDate) : addWeeks(-1, now))
+
 	return {
 		...clientDeck,
+		startDate,
+		frontCardId, //shouldnt be needed beyond this point?
 		created:new Date(created),
 		updated:updated ? new Date(updated) : null,
 		id:serverDeck._id,
 		purpose:hydratedPurpose,
 		tags:tags?.map(tag => JSON.parse(tag)) || [],
 		sections:hydratedDeckSections,
-		cards:parsedCards.map(c => ({
-			...c,
-			date:new Date(c.date),
-			items:c.items.map(it => ({ ...it, status:it.status || 0 }))
-		}))
-		/*cards:JSON.parse(cards).map(c => ({
-			...c,
-			date:new Date(c.date),
-			items:c.items.map(it => ({ ...it, status:it.status || 0 }))
-		}))*/
+		cards:parsedCards
 	}
 }
 
 export const transformDeckForServer = clientDeck => {
 	const { id, cards, sections, tags=[], ...serverDeck } = clientDeck;
+	console.log("transDFS.....clientDeck", clientDeck)
 	return {
 		...serverDeck,
+		//frontCardId is either a specific card, none (all cards placed) or current, which defaults to current card,
 		cards:JSON.stringify(cards),
 		sections:JSON.stringify(sections),
 		tags:tags.map(tag => JSON.stringify(tag))
@@ -231,7 +244,7 @@ export const createDeck = (settings, tableId) => dispatch => {
 }
 
 export const updateDeck = (deck, shouldPersist=true) => dispatch => {
-	//console.log("updateDeck", shouldPersist, deck)
+	console.log("updateDeck", shouldPersist, deck)
 	//update in store
 	dispatch({ type:C.UPDATE_DECK, deck });
 

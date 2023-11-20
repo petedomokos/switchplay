@@ -22,10 +22,10 @@ export default function contextMenuComponent() {
         height = contentsHeight + menuMargin.top + menuMargin.bottom;
     }
 
-    let DEFAULT_STYLES = {
-        contextMenu:{ info:{ date:{ fontSize:9 } } },
+    let styles = {
+        bgFill:grey10(10),
+        bgOpacity:0.6
     }
-    let _styles = () => DEFAULT_STYLES;
 
     let onClick = function(){};
 
@@ -53,8 +53,8 @@ export default function contextMenuComponent() {
                         .attr("class", "context-menu-bg")
                         .attr("width", width)
                         .attr("height", height)
-                        .attr("opacity", 0.6)
-                        .attr("fill", grey10(10))
+                        .attr("opacity", styles.bgOpacity)
+                        .attr("fill", styles.bgFill)
                         .attr("rx", 1.5)
                         .attr("ry", 1.5)
 
@@ -92,11 +92,15 @@ export default function contextMenuComponent() {
 
                             itemContentsG.append("rect")
                                 .attr("stroke", "none")
-                                .attr("fill", "transparent")
+                                .attr("fill", "transparent");
 
                             //append img
                             let x, y, k;
-                            if(d.key === "copy"){
+                            if(d.key === "delete-card"){
+                                x = -2;
+                                y = 1;
+                                k = 0.15
+                            } else if(d.key === "copy"){
                                 x = -3;
                                 y = 6;
                                 k = 0.5;
@@ -155,12 +159,8 @@ export default function contextMenuComponent() {
         return contextMenu;
     };
     contextMenu.styles = function (value) {
-        if (!arguments.length) { return _styles; }
-        if(typeof value === "function"){
-            _styles = (d,i) => ({ ...DEFAULT_STYLES, ...value(d,i) });
-        }else{
-            _styles = (d,i) => ({ ...DEFAULT_STYLES, ...value });
-        }
+        if (!arguments.length) { return styles; }
+        styles = { ...styles, ...value };
         return contextMenu;
     };
     contextMenu.onClick = function (value) {

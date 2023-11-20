@@ -27,6 +27,7 @@ import dragEnhancements from '../journey/enhancedDragHandler';
 import { toCamelCase } from '../../data/measures';
 import { createInitCard } from '../../data/initDeck';
 import { addWeeks } from '../../util/TimeHelpers';
+import uuid from 'react-uuid';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -80,7 +81,7 @@ const enhancedZoom = dragEnhancements();
 //without it, each deckHeight is slighlty wrong
 const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
   //console.log("Decks table", table)
-  console.log("Decks data", data)
+  //console.log("Decks data", data)
   //processed props
   const stringifiedData = JSON.stringify({ data, table });
   //state
@@ -101,7 +102,6 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
 
   //processed state
   const selectedDeck = data.find(deck => deck.id === selectedDeckId);
-  console.log("selectedDeckId cards", selectedDeckId, selectedDeck?.cards)
   //refs
   const zoomRef = useRef(null);
   const containerRef = useRef(null);
@@ -239,7 +239,21 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
     const newDeck = { 
       ...deckToCopy,
       title:deckToCopy.title ? `${deckToCopy.title} (Copy)` : `${deckToCopy.id} (Copy)`,
-      created: new Date() 
+      created: new Date(),
+      baseId:id,
+      shouldInheritBaseUpdates:true,
+      cards:deckToCopy.cards.map(c => ({
+        ...c,
+        id:uuid(),
+        baseId:c.id,
+        shouldInheritBaseUpdates:true,
+        items:c.items.map(it => ({
+          ...it,
+          id:uuid(),
+          baseId:it.id,
+          shouldInheritBaseUpdates:true
+        }))
+      }))
     };
     delete newDeck.id;
     delete newDeck._id;
@@ -362,12 +376,12 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
     }
     if(formType === "card-title"){
 
-      const { cardNr } = form.value;
+      const { id } = form.value;
   
       //select the correct deck and card
       const cardG = d3.select(containerRef.current)
         .selectAll("g.deck").filter(deckD => deckD.id === selectedDeckId)
-        .selectAll("g.card").filter(cardD => cardD.cardNr === cardNr);
+        .selectAll("g.card").filter(cardD => cardD.id === id);
 
       //we need all transforms form the deck onwards (because deck is in top-left of screen)
       //we also need to break it up at the card, because a scale is applied to the card if it is selected
@@ -385,7 +399,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
         //left:formDimns.left * zoomScale,
         //top:formDimns.top * zoomScale * 0.95,
         left:(deckToCardPos.x * zoomScale) + (cardToTitlePos.x * zoomScale * cardScale),
-        //must get lower prop to cardnr
+        //must get lower prop to cardId
         top:(deckToCardPos.y * zoomScale) + (cardToTitlePos.y * zoomScale * cardScale),
         fontSize:12 * cardScale
       }
@@ -395,7 +409,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
       //select the correct deck and card
       const cardG = d3.select(containerRef.current)
         .selectAll("g.deck").filter(deckD => deckD.id === selectedDeckId)
-        .selectAll("g.card").filter(cardD => cardD.cardNr === form.value.cardNr);
+        .selectAll("g.card").filter(cardD => cardD.id === form.value.id);
 
       const deckToCardContentsPos = getPosition(cardG.select("g.front-contents"), "deck")
       const cardScale = getTransformationFromTrans(cardG.attr("transform")).scaleX;
@@ -418,8 +432,8 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
     }
   }, [form, selectedDeckId, stringifiedData]);
 
-  const getCardTitle = useCallback((cardNr) => {
-    return selectedDeck?.cards.find(c => c.cardNr === cardNr)?.title
+  const getCardTitle = useCallback((cardId) => {
+    return selectedDeck?.cards.find(c => c.id === cardId)?.title
   }, [selectedDeckId]);
 
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
@@ -445,9 +459,9 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
 
   //console.log("Decks", selectedDeckId)
 
-  const updateFrontCardNr = useCallback(cardNr => {
-    //console.log("updateFront", cardNr)
-    updateDeck({ ...selectedDeck, frontCardNr:cardNr });
+  const updateFrontCardNr = useCallback(frontCardId => {
+    console.log("updateFront", frontCardId)
+    updateDeck({ ...selectedDeck, frontCardId });
     setForm(null);
   }, [stringifiedData, form, selectedDeckId]);
 
@@ -467,10 +481,14 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
     setSelectedSection(prevState => ({ ...prevState, key:newKey, title }))
 
     if(applyToAllDecks){
+      //@todo - update code so it uses cardId, and also applies it to any cards that have 
+      //baseId the same as this id..so when creating a copy of a deck, the new deck should have baseid = deckid of the
+      //original, and each card should also have a baseId which is teh baseId of the correpsonidng card in teh original
+      //maybe just call it originalDeckId and originalCardId
       //the new key has been applied to cerate updatedSections, so we use it to grab the section
-      const updatedSection = updatedSections.find(s => s.key === newKey);
+      //const updatedSection = updatedSections.find(s => s.key === newKey);
       //then update all decks with that section -> the action will updte the store via the reducer
-      updateDecks({ desc:"section", origSectionKey:form.sectionKey, section: updatedSection }, shouldPersistChanges)
+      //updateDecks({ desc:"section", origSectionKey:form.sectionKey, section: updatedSection }, shouldPersistChanges)
     }else{
       updateDeck({ ...selectedDeck, sections:updatedSections })
     }
@@ -482,8 +500,12 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
     setSelectedSection(prevState => ({ ...prevState, initials }))
 
     if(applyToAllDecks){
-      const updatedSection = updatedSections.find(s => s.key === selectedSection.key);
-      updateDecks({ desc:"section", origSectionKey:form.sectionKey, section: updatedSection }, shouldPersistChanges)
+      //@todo - update code so it uses cardId, and also applies it to any cards that have 
+      //baseId the same as this id..so when creating a copy of a deck, the new deck should have baseid = deckid of the
+      //original, and each card should also have a baseId which is teh baseId of the correpsonidng card in teh original
+      //maybe just call it originalDeckId and originalCardId
+      //const updatedSection = updatedSections.find(s => s.key === selectedSection.key);
+      //updateDecks({ desc:"section", origSectionKey:form.sectionKey, section: updatedSection }, shouldPersistChanges)
     }else{
       updateDeck({ ...selectedDeck, sections:updatedSections })
     }
@@ -495,19 +517,20 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
   }, [stringifiedData, form, selectedDeckId, selectedCardNr]);
 
   const updateCard = useCallback((updatedCard) => {
-    const updatedCards = selectedDeck.cards.map(c => c.cardNr !== updatedCard.cardNr ? c : updatedCard);
+    const updatedCards = selectedDeck.cards.map(c => c.id !== updatedCard.id ? c : updatedCard);
     updateDeck({ ...selectedDeck, cards:updatedCards })
   }, [stringifiedData, selectedDeckId]);
 
 
   const updateCardTitle = useCallback((title, applyToAllDecks) => {
     //console.log("updateCardTitle",title, applyToAllDecks)
-    const { cardNr } = form.value;
+    const { id } = form.value;
     //we need the card from state, not the d3 datum
-    const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
+    const cardToUpdate = selectedDeck.cards.find(c => c.id === id);
 
     if(applyToAllDecks){
-      updateDecks({ desc:"card-title", cardNr, title, prevTitle:cardToUpdate.title }, shouldPersistChanges)
+      //@todo - update code 
+      //updateDecks({ desc:"card-title", cardNr, title, prevTitle:cardToUpdate.title }, shouldPersistChanges)
     }else{
       updateCard({ ...cardToUpdate, title })
     }
@@ -515,44 +538,53 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
 
   const updateItemTitle = useCallback((title, applyToAllDecks) => {
     //console.log("updateItemTitle", applyToAllDecks)
-    const { cardNr, itemNr } = form.value;
-    const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
+    const { id, itemNr } = form.value;
+    const cardToUpdate = selectedDeck.cards.find(c => c.id === id);
     if(applyToAllDecks){
-      const prevTitle = cardToUpdate.items.find(it => it.itemNr === itemNr).title
-      updateDecks({ desc:"item-title", cardNr, itemNr, title, prevTitle }, shouldPersistChanges)
+      //@todo - update code 
+      //const prevTitle = cardToUpdate.items.find(it => it.itemNr === itemNr).title
+      //updateDecks({ desc:"item-title", cardNr, itemNr, title, prevTitle }, shouldPersistChanges)
     }else{
       const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title }));
       updateCard({ ...cardToUpdate, items:updatedItems })
     }
   }, [stringifiedData, form, selectedDeckId]);
 
-  const updateItemStatus = useCallback((cardNr, itemNr, status) => {
+  const updateItemStatus = useCallback((cardId, itemNr, status) => {
     setForm(null);
-    const cardToUpdate = selectedDeck.cards.find(c => c.cardNr === cardNr);
+    const cardToUpdate = selectedDeck.cards.find(c => c.id === cardId);
     const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, status }));
     updateCard({ ...cardToUpdate, items:updatedItems })
   }, [stringifiedData, form, selectedDeckId]);
 
-  //@todo - impl adding card in between, but for now, we can only add at end so cardNr not needed
-  const addCard = useCallback((deckId/*, cardNr*/) => {
-    console.log("add card", deckId, /*cardNr,*/ selectedDeck)
+  const addCard = useCallback((deckId, cardNr) => {
+    console.log("add card", deckId, cardNr, selectedDeck)
     setForm(null);
     const currentCards = selectedDeck.cards;
-    const cardNr = currentCards.length;
     const prevDate = currentCards[currentCards.length-1].date;
     const date = addWeeks(1, prevDate);
-    const cards = [...currentCards, createInitCard(cardNr, { date })]
+    //@todo - impl adding card in between, but for now, we can only add at end so cardNr not needed
+    //for this, we cant rely on cards order, instead we must calc the date here or in decksComponent
+    //because react state and db dont care about cards order
+    //cardNr is simply used to produce an init title and to determin pos in the deck
+    //we can assume its the last one for now
+    const cards = [...currentCards, createInitCard({ date, cardNr })]
     console.log("newCards", cards)
     updateDeck({ ...selectedDeck, cards })
   }, [stringifiedData, form, selectedDeckId]);
 
-  const deleteCard = useCallback((deckId, cardNr) => {
-    console.log("del card", deckId, cardNr)
-    //next -> check adding a card works
-    //then add id to cards, and make cardNrs dynamic, which also means frontCardNr must update,
-    //or must become a cardid whihc is then converted into a cardNr dynamically in layout
-    //!!!todo - must adjust all card numbers if a card is deleted -> also need a cardId
-    //as the unique id then
+  const deleteCard = useCallback((deckId, cardId, newFrontCardId) => {
+    console.log("deldeckid card", deckId, cardId)
+    console.log("newFrontCardId?", newFrontCardId)
+    console.log("currentCards", selectedDeck.cards)
+    const cards = selectedDeck.cards.filter(c => c.id !== cardId);
+    console.log("cards", cards)
+    updateDeck({ 
+      ...selectedDeck, 
+      cards, 
+      frontCardId:newFrontCardId || selectedDeck.frontCardId
+    })
+    
     setForm(null);
   }, [stringifiedData, form, selectedDeckId]);
 
@@ -809,21 +841,14 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
     const newStartDate = new Date(newStartDateValue);
     newStartDate.setUTCHours(12);
     if(newStartDate && newDate < newStartDate){
-      alert("The start date must be earlier than the target date.")
+      alert("The start date must be earlier than all target card dates.")
       return;
     }
-    const card = selectedDeck.cards.find(c => c.cardNr === form.value.cardNr)
-    if(newStartDate){
-      updateCard({ ...card, date:newDate, startDate:newStartDate })
-    }else{
-      updateCard({ ...card, date:newDate })
-    }
-    
-    setForm(null);
 
-    //@Todo - adjust the card order if required - remove cardNr from persistance (add it in hydrate func), just rearrange array order and persist it like that
-    //see MilestoneDate Component for code
-    //cardNr can be added in hydration
+    const cards = selectedDeck.cards.map(c => c.id !== form.value.id ? c : ({ ...c, date: newDate }))
+    const startDate = newStartDate || selectedDeck.startDate
+    updateDeck({ ...selectedDeck, startDate, cards })
+    setForm(null);
 }, [form, selectedDeckId]);
 
 //keypresses
@@ -857,7 +882,7 @@ useEffect(() => {
       <div className={classes.formUnderlay} onClick={onClickBg}></div>
       <div className={classes.formContainer} ref={formRef}>
         {form?.formType === "item" && 
-          <ItemForm item={form.value} cardTitle={getCardTitle(form.value.cardNr)} 
+          <ItemForm item={form.value} cardTitle={getCardTitle(form.value.id)} 
             dimns={getFormDimnsAndPos()} fontSize={form.height * 0.5} save={updateItemTitle} close={() => onSelectItem()} />
           }
         {form?.formType === "deck-title" && 
@@ -881,7 +906,7 @@ useEffect(() => {
           />
         }
         {form?.formType === "card-date" && 
-          <CardDateForm dimns={getFormDimnsAndPos()} date={form.value.date} startDate={form.value.startDate} 
+          <CardDateForm dimns={getFormDimnsAndPos()} date={form.value.date} startDate={form.startDate} 
               handleDateChange={handleDateChange} handleCancelForm={handleCancelForm} handleSave={handleSaveDate}
               hasChanged={form.hasChanged}
             

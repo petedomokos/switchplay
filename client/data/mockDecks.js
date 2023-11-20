@@ -34,10 +34,22 @@ export const getMockTables = user => {
 
 export const getMockDecks = user => {
     if(user?.username === "footballer"){ 
-        return mockFootballDecks; 
+        return mockFootballDecks.map(d => ({ 
+            ...d, 
+            isMock:true, 
+            sections, 
+            purpose:d.purpose || initPurpose,
+            frontCardId:d.cards.find(c => c.cardNr === 0).id, 
+        })); 
     }
     if(user?.username === "athlete"){ 
-        return mockAthleteDecks.map(d => ({ ...d, isMock:true, sections, purpose:d.purpose || initPurpose, frontCardNr:0 }));
+        return mockAthleteDecks.map(d => ({ 
+            ...d, 
+            isMock:true, 
+            sections, 
+            purpose:d.purpose || initPurpose,
+            frontCardId:d.cards.find(c => c.cardNr === 0).id, 
+        }));
     }
     return [];
 }

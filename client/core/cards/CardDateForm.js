@@ -25,6 +25,7 @@ const useStyles = makeStyles(theme => ({
     justifyContent:"space-between",
     //alignItems:"center",
     background:"white",
+    pointerEvents:"all",
   },
   content:{
     padding:"0px",

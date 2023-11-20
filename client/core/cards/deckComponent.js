@@ -14,11 +14,9 @@ import { icons } from '../../util/icons';
 import { fadeIn, remove, getPosition, fadeInOut } from '../journey/domHelpers';
 import purposeComponent from './purposeComponent';
 
-const magIconPath1D = "M39.94,44.142c-3.387,2.507 7.145,-8.263 4.148,-4.169c0.075,-0.006 -0.064,0.221 -0.53,0.79c0,0 8.004,7.95 11.933,11.996c1.364,1.475 -1.097,4.419 -2.769,2.882c-3.558,-3.452 -11.977,-12.031 -11.99,-12.045l-0.792,0.546Z"
-const magIconPath2D = "M28.179,48.162c5.15,-0.05 10.248,-2.183 13.914,-5.806c4.354,-4.303 6.596,-10.669 5.814,-16.747c-1.34,-10.415 -9.902,-17.483 -19.856,-17.483c-7.563,0 -14.913,4.731 -18.137,11.591c-2.468,5.252 -2.473,11.593 0,16.854c3.201,6.812 10.431,11.518 18.008,11.591c0.086,0 0.172,0 0.257,0Zm-0.236,-3.337c-7.691,-0.074 -14.867,-6.022 -16.294,-13.648c-1.006,-5.376 0.893,-11.194 4.849,-15.012c4.618,-4.459 11.877,-5.952 17.913,-3.425c5.4,2.261 9.442,7.511 10.187,13.295c0.638,4.958 -1.141,10.154 -4.637,13.733c-3.067,3.14 -7.368,5.014 -11.803,5.057c-0.072,0 -0.143,0 -0.215,0Z"
-const CONTEXT_MENU_ITEM_WIDTH = 30;
-const CONTEXT_MENU_ITEM_HEIGHT = 50;
-const CONTEXT_MENU_ITEM_GAP = 15;
+const CONTEXT_MENU_ITEM_WIDTH = DIMNS.CONTEXT_MENU.ITEM_WIDTH;
+const CONTEXT_MENU_ITEM_HEIGHT = DIMNS.CONTEXT_MENU.ITEM_HEIGHT;
+const CONTEXT_MENU_ITEM_GAP = DIMNS.CONTEXT_MENU.ITEM_GAP;
 
 const contextMenuData = [ 
     { key:"delete", url:"/delete.png" }, 
@@ -187,27 +185,34 @@ export default function deckComponent() {
         selectedCardWidth = selectedCardDimns.width;
         selectedCardHeight = selectedCardDimns.height;
 
-        const nrPlacedCards = data.cards.filter(d => d.cardNr < frontCardNr).length;
+        //console.log("datacards", data.cardsData)
+        const nrPlacedCards = data.cardsData.filter(d => d.cardNr < frontCardNr).length;
         const nrVisiblePlacedCards = d3.min([nrPlacedCards, 5]);
         const nrHiddenPlacedCards = nrPlacedCards - nrVisiblePlacedCards;
+        //console.log("nrPlaced nrVisPlaced", nrPlacedCards, nrVisiblePlacedCards)
         //cardX and Y
         //erro now on pick up card, it goes to 0,0 so either cardX or cardY is NaN
         cardX = (d,i) => {
+            //console.log("cardX",d.pos,  d)
             if(selectedSection?.key && d.isHeld){
                 const gapForHorizIncs = contentsWidth - sectionViewHeldCardWidth;
                 const horizInc = gapForHorizIncs / 4;
+                //console.log("returning", (4 - i) * horizInc)
                 return (4 - i) * horizInc;
             }
             if(d.isSelected){
                 //keep it centred
+                //console.log("returning", (cardsAreaWidth - selectedCardWidth)/2)
                 return (cardsAreaWidth - selectedCardWidth)/2;
             }
             if(d.isHeld){
+                //console.log("returning", extraMarginLeftForCards + horizCardInc(d.pos))
                 return extraMarginLeftForCards + horizCardInc(d.pos);
             }
 
             const slot0 = extraMarginLeftForCards;
             if(d.slotPos >= 0){
+                //console.log("returning", slot0 + d.slotPos * (placedCardWidth + placedCardHorizGap))
                 return slot0 + d.slotPos * (placedCardWidth + placedCardHorizGap);
             }
             const spaceForHidden = placedCardWidth * 0.4;
@@ -217,6 +222,7 @@ export default function deckComponent() {
         }
 
         cardY = (d,i) => {
+            //console.log("cardY", d)
             if(selectedSection?.key && d.isHeld){
                 return i * sectionViewHeldCardHeight;
             }
@@ -373,8 +379,8 @@ export default function deckComponent() {
 
             function update(_deckData, options={}){
                 const { } = options;
-                const { id, frontCardNr, listPos, colNr, rowNr, purposeData, sections } = _deckData;
-                //console.log("deckdata", _deckData)
+                const { id, frontCardNr, startDate, listPos, colNr, rowNr, purposeData, sections } = _deckData;
+                console.log("deckdata", _deckData)
                 const cardsData = _deckData.cardsData.map(c => ({ 
                     ...c,
                     isSelected:selectedCardNr === c.cardNr 
@@ -429,7 +435,6 @@ export default function deckComponent() {
                 const contextMenuWidth = nrItems * CONTEXT_MENU_ITEM_WIDTH + (nrItems - 1) * CONTEXT_MENU_ITEM_GAP + menuMargin.left + menuMargin.right;
                 const contextMenuHeight = CONTEXT_MENU_ITEM_HEIGHT + menuMargin.top + menuMargin.bottom;
     
-                
                 const gapBetweenDeckAndMenu = rowNr === 0 ? -10 : 10;
                 contextMenuG
                     .attr("transform", `translate(${(width - contextMenuWidth)/2},${-contextMenuHeight - gapBetweenDeckAndMenu})`)
@@ -702,6 +707,7 @@ export default function deckComponent() {
                             setForm({
                                 formType: "card-date",
                                 value:cardD,
+                                startDate:cardD.cardNr === 0 ? startDate : null
                             })
                         })
                         .onClickCardTitle((cardD, i, cardDimns) => {
@@ -728,12 +734,26 @@ export default function deckComponent() {
                             }
                         })
                         .onAddCard(cardNr => { onAddCard(id, cardNr || frontCardNr) })
-                        .onDeleteCard(cardNr => { onDeleteCard(id, cardNr) })
+                        .onDeleteCard(cardD => { 
+                            const { cardNr } = cardD;
+                            const cardId = cardD.id;
+                            const getNextCardId = () => {
+                                const nextCard = cardsData.find(c => c.cardNr === cardNr + 1);
+                                console.log("nextCard", nextCard)
+                                return nextCard?.id || "none"; //defaults to all cards placed
+                            }
+                            if(frontCardNr === cardD.cardNr){ 
+                                onDeleteCard(id, cardId, getNextCardId());
+                            }else{
+                                onDeleteCard(id, cardId);
+                            }
+                        })
                         .onPickUp(function(d){
-                            updateFrontCardNr(d.cardNr)
+                            updateFrontCardNr(d.id)
                         })
                         .onPutDown(function(d){
-                            updateFrontCardNr(d.cardNr + 1);
+                            const newFrontCard = cardsData.find(c => c.cardNr === d.cardNr + 1);
+                            updateFrontCardNr(newFrontCard?.id || "none");
                         })
                         .setForm(setForm))
 

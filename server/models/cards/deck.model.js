@@ -2,14 +2,17 @@ import mongoose from 'mongoose'
 
 //const DeckSchema = new mongoose.Schema({
 export default new mongoose.Schema({
+  baseId:String,
+  shouldInheritBaseUpdates:Boolean,
   title:String,
+  startDate:{ type: Date, default: Date.now },
   owner:{type:mongoose.Schema.ObjectId, ref:'User'},
   admin:[{type:mongoose.Schema.ObjectId, ref:'User'}],
   player:{type:mongoose.Schema.ObjectId, ref:'User'},
   purpose:[String],
   cards:String,
   sections:String,
-  frontCardNr:{ type: Number, default: 0 },
+  frontCardId:String,
   isArchived:{ type: Boolean, default: false },
   colour:String,
   tags:[String],

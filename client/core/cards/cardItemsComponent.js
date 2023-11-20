@@ -130,6 +130,7 @@ export default function cardItemsComponent() {
             const { transitionEnter=true, transitionUpdate=true, updateShouldRaiseTitledItems=true } = options;
             const { } = data;
             const containerG = d3.select(this);
+
             const contentsG = containerG.select("g.card-items-contents")
                 .attr("transform", `translate(
                     ${margin.left + extraHorizMargin/2},

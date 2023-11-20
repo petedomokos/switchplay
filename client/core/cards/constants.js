@@ -88,5 +88,16 @@ export const DIMNS = {
         HEADER_HEIGHT:25,
         HEADER_SUBTITLE_HEIGHT_PROP:0.3,
         PROGRESS_ICON_WIDTH:20
+    },
+    CONTEXT_MENU:{
+        ITEM_WIDTH:30,
+        ITEM_HEIGHT:50,
+        ITEM_GAP:15
+    },
+    //cards are scaled up so must be smaller about 3 times
+    CARD_CONTEXT_MENU:{
+        ITEM_WIDTH:8,
+        ITEM_HEIGHT:13.333,
+        ITEM_GAP:4
     }
 }

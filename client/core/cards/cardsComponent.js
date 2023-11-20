@@ -7,12 +7,21 @@ import flagsComponent from "./flagsComponent";
 import purposeComponent from './purposeComponent';
 import mediaComponent from '../journey/mediaComponent';
 import kpisComponent from '../journey/kpis/kpisComponent';
+import contextMenuComponent from "./contextMenuComponent";
 import { fadeIn, fadeInOut, remove, fadeOut } from '../journey/domHelpers';
 import { updateTransform } from '../journey/transitionHelpers';
 import { icons } from '../../util/icons';
 import { isNumber } from '../../data/dataHelpers';
 
 const { GOLD, SILVER, NOT_STARTED_FILL, SECTION_VIEW_NOT_STARTED_FILL } = COLOURS;
+
+const CONTEXT_MENU_ITEM_WIDTH = DIMNS.CARD_CONTEXT_MENU.ITEM_WIDTH;
+const CONTEXT_MENU_ITEM_HEIGHT = DIMNS.CARD_CONTEXT_MENU.ITEM_HEIGHT;
+const CONTEXT_MENU_ITEM_GAP = DIMNS.CARD_CONTEXT_MENU.ITEM_GAP;
+
+const contextMenuData = [ 
+    { key:"delete-card", url:"/delete.png" }
+]
 
 export default function cardsComponent() {
     //API SETTINGS
@@ -134,7 +143,9 @@ export default function cardsComponent() {
     let onMouseover = function(){};
     let onMouseout = function(){};
 
+    let longpressedCardId;
     let drag = d3.drag();
+    const enhancedDrag = dragEnhancements();
 
     //dom
     let containerG;
@@ -143,6 +154,7 @@ export default function cardsComponent() {
     let itemsComponents = {};
     let purposeComponents = {};
     let flagsComponents = {};
+    let contextMenuComponents = {};
     let backHeaderComponents = {};
     let mediaComponents = {};
     let kpisComponents = {};
@@ -151,12 +163,31 @@ export default function cardsComponent() {
         const { transitionEnter=true, transitionUpdate=true, log=false } = options;
         updateDimns();
         selection.each(function (data) {
+            containerG = d3.select(this)
 
-            drag
-                .on("drag", dragged)
-                .on("end", dragEnd)
+            //drag overlay
+            enhancedDrag
+                .dragThreshold(100)
+                .onLongpressStart(function(e, d){
+                    if(!d.isHeld || d.isHidden){ return; }
+                    //onSetLongpressed(true); 
+                    longpressedCardId = d.id;
+                    containerG.call(cards);
 
-            containerG = d3.select(this).call(drag);
+                })
+                //.onLongpressDragged(longpressDragged)
+                .onLongpressEnd(function(){
+                    //console.log("lpend")
+                    //onSetLongpressed(false);
+                });
+
+            const drag = d3.drag()
+                .on("start", enhancedDrag())
+                .on("drag", enhancedDrag(dragged))
+                .on("end", enhancedDrag(dragEnd))
+
+            containerG.call(drag);
+
 
             const shouldShowBg = deckIsSelected && data.filter(c => c.isHeld).length === 0;
             const cardsBackgroundG = containerG.selectAll("g.cards-background").data(shouldShowBg ? [1] : []);
@@ -277,25 +308,26 @@ export default function cardsComponent() {
                 return SECTION_VIEW_NOT_STARTED_FILL;
             }
 
-            const cardG = containerG.selectAll("g.card").data(data, d => d.cardNr);
+            const cardG = containerG.selectAll("g.card").data(data, d => d.id);
             cardG.enter()
                 //.insert("g", ":first-child")
                 .append("g")
-                    .attr("class", d => `card card-${d.cardNr}`)
+                    .attr("class", d => `card card-${d.id}`)
                     .attr("opacity", 1)
                     .each(function(cardD,i){
-                        const { cardNr, pos, isHeld, isHidden, isSelected, profile } = cardD;
+                        const { id, cardNr, pos, isHeld, isHidden, isSelected, profile } = cardD;
                         const itemsData = timeExtent !== "singleDeck" || isHidden ? [] : (selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items);
 
                         //front components
-                        frontHeaderComponents[cardNr] = cardHeaderComponent();
-                        itemsComponents[cardNr] = cardItemsComponent();
-                        purposeComponents[cardNr] = purposeComponent();
-                        flagsComponents[cardNr] = flagsComponent();
+                        frontHeaderComponents[id] = cardHeaderComponent();
+                        itemsComponents[id] = cardItemsComponent();
+                        purposeComponents[id] = purposeComponent();
+                        flagsComponents[id] = flagsComponent();
+                        contextMenuComponents[id] = contextMenuComponent();
                         //back components
-                        backHeaderComponents[cardNr] = cardHeaderComponent();
-                        mediaComponents[cardNr] = mediaComponent();
-                        kpisComponents[cardNr] = kpisComponent();
+                        backHeaderComponents[id] = cardHeaderComponent();
+                        mediaComponents[id] = mediaComponent();
+                        kpisComponents[id] = kpisComponent();
 
                         const cardG = d3.select(this);
                         cardG.append("rect").attr("class", "card-underlay")
@@ -394,21 +426,23 @@ export default function cardsComponent() {
                         name:(d,i) => `card-pos-${i}-${d.pos}`,
                         force:true
                     })
+                    .sort((a,b) => d3.descending(a.cardNr, b.cardNr))
                     .each(function(cardD,i){
-                        const { deckId, cardNr, pos, isHidden, slotPos, isHeld, isFront, hasBeenPickedUp, isNext, isSecondNext, isSelected, info, status, profile, deckListPos, purposeData=[], flagsData } = cardD;
+                        const { deckId, cardNr, id, pos, isHidden, slotPos, isHeld, isFront, hasBeenPickedUp, isNext, isSecondNext, isSelected, info, status, profile, deckListPos, purposeData=[], flagsData } = cardD;
                         const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
-                        const items = itemsComponents[cardNr];
+                        const items = itemsComponents[id];
 
+                        const cardIsLongpressed = longpressedCardId === id;
+                        const anotherCardIsLongpressed = longpressedCardId && longpressedCardId !== id;
                         const cardG = d3.select(this)
-                            .call(fadeInOut, itemsData.length !== 0 && (!isNumber(selectedCardNr) || selectedCardNr === cardNr));
+                            .call(fadeInOut, !anotherCardIsLongpressed && itemsData.length !== 0 && (!isNumber(selectedCardNr) || selectedCardNr === cardNr));
 
                         //if there are hidden placedcrads, we need to lower them -> will be lowered in the right order coz
                         //the rendering is done in reverse order
                         if(slotPos < 0){ cardG.lower(); }
-                        if(hasBeenPickedUp){ cardG.raise(); }
 
-                        //if the card has a clicked item and we are in section view, we show the underlay
-                        const shouldShowUnderlay = selectedSectionKey && isNumber(items.clickedItemNr());
+                        //if the card has a clicked item and we are in section view, we show the underlay, or if card longpressed
+                        const shouldShowUnderlay = (selectedSectionKey && isNumber(items.clickedItemNr())) || cardIsLongpressed;
                         cardG.select("rect.card-underlay")
                             .call(fadeInOut, shouldShowUnderlay, { opacity:shouldShowUnderlay ? 0.8 : 0 })
                             .attr("transform", `translate(${-2000},${-2000})`)
@@ -416,6 +450,13 @@ export default function cardsComponent() {
                                 //console.log("click card underlay")
                                 //unclick item code
                                 e.stopPropagation();
+                                if(longpressedCardId){
+                                    longpressedCardId = null;
+                                    containerG.call(cards);
+                                    return;
+                                }
+                                //@todo - consider why do we need to raise the card when item clicked, why not just make other cards 
+                                //fade out like i do for longpressed card
                                 //must lower card back to its correct pos in deck
                                 containerG.selectAll("g.card").each(function(d,i){
                                     if(d.isHeld && d.cardNr < cardNr){
@@ -429,6 +470,38 @@ export default function cardsComponent() {
 
                         const contentsG = cardG.select("g.card-contents")
                             .attr("transform", `translate(${margin.left},${margin.top})`)
+                        
+                        //context-menu
+                        const menuMargin = {
+                            left: CONTEXT_MENU_ITEM_WIDTH * 0.4, right:CONTEXT_MENU_ITEM_WIDTH * 0.4,
+                            top:CONTEXT_MENU_ITEM_HEIGHT * 0.1, bottom: CONTEXT_MENU_ITEM_HEIGHT * 0.1
+                        }
+            
+                        const nrItems = contextMenuData.length;
+                        const contextMenuWidth = nrItems * CONTEXT_MENU_ITEM_WIDTH + (nrItems - 1) * CONTEXT_MENU_ITEM_GAP + menuMargin.left + menuMargin.right;
+                        const contextMenuHeight = CONTEXT_MENU_ITEM_HEIGHT + menuMargin.top + menuMargin.bottom;
+                        const gapBetweenDeckAndMenu = 2;
+
+                        const contextMenuG = contentsG.selectAll("g.card-context-menu").data(cardIsLongpressed ? [contextMenuData] : []);
+                        contextMenuG.enter()
+                            .append("g")
+                                .attr("class", "card-context-menu")
+                                .call(fadeIn)
+                                .merge(contextMenuG)
+                                .attr("transform", `translate(${(contentsWidth - contextMenuWidth)/2},${-contextMenuHeight - gapBetweenDeckAndMenu})`)
+                                .call(contextMenuComponents[id]
+                                    .itemWidth(CONTEXT_MENU_ITEM_WIDTH)
+                                    .itemHeight(CONTEXT_MENU_ITEM_HEIGHT)
+                                    .itemGap(CONTEXT_MENU_ITEM_GAP)
+                                    .menuMargin(menuMargin)
+                                    .styles({ bgFill: grey10(9)})
+                                    .onClick((e,d) => {
+                                        e.stopPropagation();
+                                        if(d.key === "delete-card"){ onDeleteCard(cardD); }
+                                        longpressedCardId = null;
+                                    }))
+
+                        contextMenuG.exit().call(remove);
 
                         //bgs for front and back
                         contentsG.select("rect.card-front-bg")
@@ -480,7 +553,7 @@ export default function cardsComponent() {
                         const backTitleColour = COLOURS.BACK_OF_CARD.HEADER(cardD).TITLE;
 
                         //Components
-                        const frontHeader = frontHeaderComponents[cardNr]
+                        const frontHeader = frontHeaderComponents[id]
                             .width(contentsWidth)
                             .height(headerHeight)
                             .withTitle(!cardTitleIsBeingEdited)
@@ -560,7 +633,7 @@ export default function cardsComponent() {
                             })
                             .onSelectItem(onSelectItem)
                             .onUpdateItemStatus(function(itemNr, newStatus){
-                                onUpdateItemStatus(cardNr, itemNr, newStatus);
+                                onUpdateItemStatus(id, itemNr, newStatus);
                             })
                             .onDrag(e => { 
                                 //console.log("drag from items")
@@ -582,7 +655,7 @@ export default function cardsComponent() {
 
                         //PURPOSE (instead of items when in long-term longTerm view)
                         const shouldShowPurpose = deckIsSelected && isFront && timeExtent === "longTerm" && !cardsAreFlipped;
-                        const purpose = purposeComponents[cardNr];
+                        const purpose = purposeComponents[id];
                         const purposeG = frontContentsG.selectAll("g.card-purpose").data(shouldShowPurpose ? [purposeData] : [])
                         purposeG.enter()
                             .append("g")
@@ -707,7 +780,7 @@ export default function cardsComponent() {
                         botLeftBtnG.exit().remove();
 
                         //flags
-                        const flags = flagsComponents[cardNr];
+                        const flags = flagsComponents[id];
 
                         const flagsMargin = { top: 2, bottom: 2 }
                         const flagsContentsHeight = contentsHeight - flagsMargin.top - flagsMargin.bottom;
@@ -760,7 +833,7 @@ export default function cardsComponent() {
 
                         //BACK CONTENTS ---------------------------------------
                         //header
-                        const backHeader = backHeaderComponents[cardNr]
+                        const backHeader = backHeaderComponents[id]
                             .width(contentsWidth)
                             .height(headerHeight)
                             .withTitle(form?.formType !== "card-title")
@@ -804,7 +877,7 @@ export default function cardsComponent() {
                                     .attr("opacity", (isHeld || isSelected) ? 1 : 0);
 
                         //media
-                        const media = mediaComponents[cardNr]
+                        const media = mediaComponents[id]
                             .width(contentsWidth * 0.92)
                             .height(mediaHeight)
 
@@ -843,7 +916,7 @@ export default function cardsComponent() {
 
                         //kpis
                         //const textInfoHeight = 20;
-                        const kpis = kpisComponents[cardNr]
+                        const kpis = kpisComponents[id]
                             .width(contentsWidth)
                             .height(kpisHeight)
                             //.expandedHeight(contentsHeight - textInfoHeight)
