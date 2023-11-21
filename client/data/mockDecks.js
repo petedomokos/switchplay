@@ -1,8 +1,10 @@
 import { createInitCards } from "./initDeck";
 import { addWeeks } from "../util/TimeHelpers"
 import { hydrateDeckSections } from './sections';
+import { tagInfoArray } from "./tagInfoArray";
 
 const seasonStartDate = new Date();// new Date("2024-03-01");
+const footballSeasonStartDate = new Date("2024/06/01");
 const cardTitles = ["Week 1", "Week 2", "Week 3", "Week 4"];
 
 const sections = hydrateDeckSections();
@@ -13,7 +15,7 @@ const initTable = {
 }
 
 export const getMockTables = user => {
-    if(user?.username === "footballer"){ 
+    if(user?.username === "damian"){ 
         return [{
             ...initTable,
             id:"mock-table",
@@ -33,13 +35,15 @@ export const getMockTables = user => {
 }
 
 export const getMockDecks = user => {
-    if(user?.username === "footballer"){ 
+    if(user?.username === "damian"){ 
+        const cards = createInitCards({ startDate:footballSeasonStartDate, nrCards:5, weeksPerCard:1, cardTitles });
         return mockFootballDecks.map(d => ({ 
             ...d, 
             isMock:true, 
             sections, 
+            cards,
             purpose:d.purpose || initPurpose,
-            frontCardId:d.cards[0].id
+            frontCardId:cards[0].id
         })); 
     }
     if(user?.username === "athlete"){ 
@@ -54,7 +58,16 @@ export const getMockDecks = user => {
     return [];
 }
 
-const mockFootballDecks = [];
+
+const mockFootballDecks = tagInfoArray
+    .find(tagsInfo => tagsInfo.key === "playerId")
+    .values
+    .filter(playerIdTag => playerIdTag.playerType === "footballer")
+    .map((playerIdTag) => ({
+        id:`deck-${playerIdTag.value}`,
+        tags:[{ key:"playerId", value:playerIdTag.value }],
+    }))
+console.log("mockfootydecks", mockFootballDecks)
 
 const mockAthleteDecks = [
     {

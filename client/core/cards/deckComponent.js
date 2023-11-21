@@ -724,24 +724,39 @@ export default function deckComponent() {
                         .attr("class", "deck-photo")
                         .call(fadeIn, { transition:{ delay:TRANSITIONS.MED } })
                         .each(function(){
-                            d3.select(this).append("rect")
+                            const photoG = d3.select(this);
+                            photoG.append("rect")
                                 .attr("fill", grey10(9));
 
-                            d3.select(this).append("image");
+                            photoG.append("image");
+
+                            d3.select("svg#decks-svg").append("clipPath")
+                                .attr('id', `deck-photo-${id}`)
+                                .append("rect")
                         })
                         .merge(photoG)
                         .attr("transform", `translate(${photoX}, ${headerHeight + photoMargin.top})`)
                         .each(function(d){
-                            d3.select(this).select("rect")
+                            const photoG = d3.select(this);
+                            photoG.select("rect")
                                 .attr("width", photoContentsWidth)
                                 .attr("height", photoContentsHeight)
                                 //.attr("opacity", 0.2)
 
-                            d3.select(this).select("image") 
+                                photoG.select("image") 
                                 //.attr("width", width)
                                 .attr("xlink:href", d)
                                 //.attr("transform", 'scale(0.1)')
-                                .attr("transform", `scale(${photoContentsWidth / 260})`) //based on reneeRegis photoSize 260 by 335.48 
+                                .attr("transform", `scale(${photoContentsWidth / 250})`) //based on reneeRegis photoSize 260 by 335.48 
+
+                            d3.select(`clipPath#deck-photo-${id}`)
+                                .select("rect")
+                                    .attr("width", photoContentsWidth)
+                                    .attr("height", photoContentsHeight)
+                                    .attr("rx", 3)
+                                    .attr("ry", 3)
+
+                            photoG.attr('clip-path', `url(#deck-photo-${id})`)
                         })
                 photoG.exit().remove()
 

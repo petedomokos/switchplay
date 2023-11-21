@@ -84,12 +84,12 @@ const wrapPhase = phaseKey => phaseKey ? wrapUrl(phaseKey, "png", "phases") : ""
 
 //photo dimns are based on reneeRegis photoSize 260 by 335.48 
 const getPhotoUrl = (deck, settings) => {
-  //console.log("getURL", deck)
+  console.log("getURL", deck, settings)
   
   const { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTagKey } = settings;
   const playerId = deck.tags.find(t => t.key === "playerId")?.value;
   const phaseKey = deck.tags.find(t => t.key === "phase")?.value;
-  //console.log("playerId phase", playerId, phaseKey)
+  console.log("playerId phase", playerId, phaseKey)
 
   //prioritise playerId over phaseKey
   if(!groupingTagKey){ 
@@ -113,12 +113,15 @@ const getPhotoUrl = (deck, settings) => {
 
 
 export const tableLayout = (decks, nrCols=3, settings={}) => {
+  console.log("tableLayout decks", decks)
+  console.log("settings", settings)
   const { timeframeKey, groupingTagKey } = settings;
   const formattedDecks = formatDecks(decks, timeframeKey, groupingTagKey);
+  console.log("formattedDecks", formattedDecks)
   //add table positions
   return formattedDecks.map((d,i) => ({
       ...d, 
-      photoUrl:getPhotoUrl(d, settings) || wrapPlayer("reneeRegis"),
+      photoUrl:getPhotoUrl(d, settings),
       //@todo - impl layoutFormat grid
       colNr: /*layoutFormat === "grid" ? d.fixedColNr :*/ calcColNr(i, nrCols),
       rowNr: /*layoutFormat === "grid" ? d.fixedRowNr :*/ calcRowNr(i, nrCols),

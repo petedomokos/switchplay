@@ -79,13 +79,12 @@ export const transformUserForClient = serverUser => {
 	const hydratedPhotos = photos.map(p => ({ ...p, added: new Date(p.added) }))
 	//@todo - check will we ever use this for updating journeys? I dont think we need it 
 	const hydratedJourneys = journeys.map(j => transformJourneyForClient(j))
-	console.log("return...")
 	return {
 		...serverUser,
 		photos:hydratedPhotos,
 		journeys:hydratedJourneys,
-		tables:username === "athlete" || username === "footballer" ? getMockTables(serverUser) : tables.map(t => transformTableForClient(t)),
-		decks:username === "athlete" || username === "footballer" ? getMockDecks(serverUser) : [...decks.map(s => transformDeckForClient(s))],
+		tables:username === "athlete" || username === "damian" ? getMockTables(serverUser) : tables.map(t => transformTableForClient(t)),
+		decks:username === "athlete" || username === "damian" ? getMockDecks(serverUser) : [...decks.map(s => transformDeckForClient(s))],
 	}
 }
 
@@ -128,12 +127,12 @@ export const fetchUser = id => dispatch => {
 					//first - 
 					//console.log('signin...transforming user........', data)
 					const _user = transformUserForClient(data)
-					//console.log('DONE: transformed user........', _user)
+					console.log('DONE1: transformed user........', _user)
 					return { type:C.SIGN_IN, user:_user };
 				}
 				//console.log('transforming user........', data)
 				const _user = transformUserForClient(data)
-				//console.log('DONE: transformed user........', _user)
+				console.log('DONE2: transformed user........', _user)
 				return { type:C.LOAD_USER, user:_user };
 
 				//return { type:C.LOAD_USER, user:transformUserForClient(data) };

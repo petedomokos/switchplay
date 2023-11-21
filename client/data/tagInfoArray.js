@@ -16,7 +16,23 @@ export const tagInfoArray = [
     {
         key:"playerId",
         values:[
-            { value:"reneeRegis", title:"Renee Regis" }
+            { value:"reneeRegis", title:"Renee Regis", playerType:"athlete" },
+            { value:"zachAbbott", title:"Zach Abbott", playerType:"footballer", position:"def" },
+            { value:"joshAcheampong", title:"Josh Acheampong", playerType:"footballer", position:"def" },
+            { value:"harrisonMurray-Campbell", title:"Harrison Murray-Campbell", playerType:"footballer", position:"def" },
+            { value:"jaydenMeghoma", title:"Jayden Meghoma", playerType:"footballer", position:"def" },
+            { value:"tristanRowe", title:"Tristan Rowe", playerType:"footballer", position:"def" },
+            { value:"samAmo-Ameyaw", title:"Sam Amo-Ameyaw", playerType:"footballer", position:"mid" },
+            { value:"michealGolding", title:"Micheal Golding", playerType:"footballer", position:"mid" },
+            { value:"finleyMcAllister", title:"Finley McAllister", playerType:"footballer", position:"mid" },
+            { value:"chrisRigg", title:"Chris Rigg", playerType:"footballer", position:"mid" },
+            { value:"jaydenDanns", title:"Jayden Danns", playerType:"footballer", position:"for" },
+            { value:"jimmy-JayMorgan", title:"Jimmy-Jay Morgan", playerType:"footballer", position:"for" },
+            { value:"zakLovelace", title:"Zak Lovelace", playerType:"footballer", position:"for" },
+            { value:"joelNdala", title:"Joel Ndala", playerType:"footballer", position:"for" },
+            { value:"justinOboavwoduo", title:"Justin Oboavwoduo", playerType:"footballer", position:"for" },
+            { value:"archieStevens", title:"Archie Stevens", playerType:"footballer", position:"for" },
+            { value:"tomWatson", title:"Tom Watson", playerType:"footballer", position:"for" },
         ]
         //@todo - acceptable values will be all player/user names in the db
         //and title will default to player name + surname

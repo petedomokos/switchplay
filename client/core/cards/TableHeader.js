@@ -141,5 +141,6 @@ export default function TableHeader({ table, dimns, timeframe, toggleTimeframe }
 }
 
 TableHeader.defaultProps = {
-  dimns:{}
+  dimns:{},
+  table:{}
 }
