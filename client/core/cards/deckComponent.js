@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { grey10, COLOURS, DIMNS, FONTSIZES, STYLES, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIONS } from "./constants";
+import { grey10, COLOURS, DIMNS, FONTSIZES, STYLES, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIONS, DECK_PHOTO_POS } from "./constants";
 import cardsComponent from './cardsComponent';
 import headerComponent from './headerComponent';
 import contextMenuComponent from "./contextMenuComponent";
@@ -39,6 +39,12 @@ export default function deckComponent() {
     let headerWidth;
     let headerHeight;
 
+    let photoWidth;
+    let photoHeight;
+    let photoMargin;
+    let photoContentsWidth;
+    let photoContentsHeight;
+
     let cardsAreaWidth;
     let cardsAreaHeight;
 
@@ -53,8 +59,6 @@ export default function deckComponent() {
 
     let heldCardWidth;
     let heldCardHeight;
-    //const cardAspectRatio = 88/62; - normal deck
-    const cardAspectRatio = (62/88) * 1.1; //wider
 
     let placedCardWidth;
     let placedCardHeight;
@@ -64,6 +68,7 @@ export default function deckComponent() {
     let extraMarginLeftForCards;
 
     //increments
+    let maxHorizSpaceForIncs;
     let vertCardInc;
     let horizCardInc;
 
@@ -77,6 +82,16 @@ export default function deckComponent() {
     let cardY;
 
     function updateDimns(data){
+        //deck photo
+        photoContentsWidth = data.photoUrl ? 20 : 0;
+        photoContentsHeight = photoContentsWidth / DIMNS.CARD.ASPECT_RATIO; //33.548
+        photoMargin = { 
+            left:photoContentsWidth * 0.1, right:photoContentsWidth * 0.1, 
+            top:photoContentsHeight * 0.3, bottom:photoContentsHeight * 0.15
+        }
+        photoWidth = photoContentsWidth + photoMargin.left + photoMargin.right;
+        photoHeight = photoContentsHeight + photoMargin.top + photoMargin.bottom
+
         const { frontCardNr } = data;
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
@@ -117,9 +132,10 @@ export default function deckComponent() {
 
         //@todo - change the way horiz is done so its the other way round like vert
         //so horizSpaceForIncs can be calculated after in same way as vertSpaceForIncs
-        const maxHorizSpaceForIncs = 20;
+        maxHorizSpaceForIncs = 20;
         const horizSpaceForVisibleIncs = d3.min([cardsAreaWidth * 0.25, maxHorizSpaceForIncs]); 
         const horizSpaceForNonVisibleIncs = horizSpaceForVisibleIncs * 0.4;
+        
 
         const visibleHorizCardInc = pos => {
             if(pos === 0) { return 0; }
@@ -158,7 +174,7 @@ export default function deckComponent() {
 
         //need to use visibleVertCardInc to calc the dimns...
         const maxHeldCardHeight = cardsAreaHeight - vertSpaceForIncs - placedCardsAreaHeight;
-        const heldCardDimns = maxDimns(maxHeldCardWidth, maxHeldCardHeight, cardAspectRatio);
+        const heldCardDimns = maxDimns(maxHeldCardWidth, maxHeldCardHeight, DIMNS.CARD.ASPECT_RATIO);
         heldCardWidth = heldCardDimns.width;
         heldCardHeight = heldCardDimns.height;
 
@@ -166,7 +182,7 @@ export default function deckComponent() {
         const maxPlacedCardHeight = placedCardsAreaHeight * 0.8;
         //ensure at least 0.1 for gaps
         const maxPlacedCardWidth = (heldCardWidth * 0.9)/5;
-        const placedCardDimns = maxDimns(maxPlacedCardWidth, maxPlacedCardHeight, cardAspectRatio)
+        const placedCardDimns = maxDimns(maxPlacedCardWidth, maxPlacedCardHeight, DIMNS.CARD.ASPECT_RATIO)
         placedCardWidth = placedCardDimns.width;
         placedCardHeight = placedCardDimns.height;
 
@@ -190,7 +206,7 @@ export default function deckComponent() {
         sectionViewHeldCardHeight = sectionViewHeldCardsAreaHeight / 5; //we show 5 on screen
 
         //selected card dimns
-        const selectedCardDimns = maxDimns(cardsAreaWidth, cardsAreaHeight, cardAspectRatio)
+        const selectedCardDimns = maxDimns(cardsAreaWidth, cardsAreaHeight, DIMNS.CARD.ASPECT_RATIO)
         selectedCardWidth = selectedCardDimns.width;
         selectedCardHeight = selectedCardDimns.height;
 
@@ -217,7 +233,8 @@ export default function deckComponent() {
             }
             if(d.isHeld){
                 //console.log("returning", extraMarginLeftForCards + horizCardInc(d.pos))
-                return extraMarginLeftForCards + horizCardInc(d.pos);
+                const inc = d3.min([maxHorizSpaceForIncs, horizCardInc(d.pos)]);
+                return extraMarginLeftForCards + inc;
             }
 
             const slot0 = extraMarginLeftForCards;
@@ -233,10 +250,12 @@ export default function deckComponent() {
 
         cardY = (d,i) => {
             //console.log("cardY", d)
+            //helpful values for hidden cards
+            const hiddenHeldPos = d.pos - 4; //hiddenHeldPos starts from 1, not 0
+            const hiddenHeldProportion = hiddenHeldPos/nrHiddenHeldCards;
+
             if(selectedSection?.key && d.isHeld){
                 if(d.isHidden){ 
-                    const hiddenHeldPos = d.pos - 4; //hiddenHeldPos starts from 1, not 0
-                    const hiddenHeldProportion = hiddenHeldPos/nrHiddenHeldCards;
                     return (1 - hiddenHeldProportion) * sectionViewVertSpaceForHiddenCards;
                 }
                 return sectionViewVertSpaceForHiddenCards + (4 - d.pos) * sectionViewHeldCardHeight;
@@ -246,14 +265,23 @@ export default function deckComponent() {
             }
             
             if(d.isHeld){
-                //extra shift up in multiview to create a pseudo margin between decks
-                //const vertShiftUpForMultiview = heldCardsAreaHeight * 0.25; 
-                //in multideck view, not all the incr space is taken up
-                const totalVertIncs = vertSpaceForIncs;// deckIsSelected ? vertSpaceForIncs : vertCardInc(4);
-                const extraMarginTop = (heldCardsAreaHeight - heldCardHeight - totalVertIncs)/2;
-                //return extraMarginTop + totalVertIncs - vertCardInc(d.pos) 
-                return extraMarginTop + totalVertIncs - vertCardInc(d.pos) 
+                if(deckIsSelected){
+                    //extra shift up in multiview to create a pseudo margin between decks
+                    //const vertShiftUpForMultiview = heldCardsAreaHeight * 0.25; 
+                    //in multideck view, not all the incr space is taken up
+                    const totalVertIncs = vertSpaceForIncs;// deckIsSelected ? vertSpaceForIncs : vertCardInc(4);
+                    const extraMarginTop = (heldCardsAreaHeight - heldCardHeight - totalVertIncs)/2;
+                    //return extraMarginTop + totalVertIncs - vertCardInc(d.pos) 
+                    return extraMarginTop + totalVertIncs- vertCardInc(d.pos)
                     // - (deckIsSelected ? 0 : vertShiftUpForMultiview)
+                }else{
+                    //multideck view
+                    const totalVertIncs = vertSpaceForIncs - photoHeight;// deckIsSelected ? vertSpaceForIncs : vertCardInc(4);
+                    const extraMarginTop = (heldCardsAreaHeight - heldCardHeight - vertSpaceForIncs)/2;
+                    //return extraMarginTop + totalVertIncs - vertCardInc(d.pos) 
+                    const inc = d3.min([totalVertIncs, vertCardInc(d.pos)])
+                    return extraMarginTop + photoHeight + totalVertIncs - inc;
+                }
             }
 
             return heldCardsAreaHeight + placedCardMarginVert;
@@ -266,7 +294,7 @@ export default function deckComponent() {
 
     //settings
     let groupingTagKey;
-    let timeExtent = "singleDeck";
+    let timeframeKey = "singleDeck";
     let deckIsSelected;
     let selectedCardNr;
     let selectedItemNr;
@@ -393,15 +421,9 @@ export default function deckComponent() {
             }
 
             function update(_deckData, options={}){
+                //console.log("update", _deckData.photoUrl)
                 const { } = options;
-                const { id, frontCardNr, startDate, listPos, colNr, rowNr, purposeData, sections } = _deckData;
-
-                const cardsData = _deckData.cardsData.map(c => ({ 
-                    ...c,
-                    isSelected:selectedCardNr === c.cardNr 
-                }))
-
-                cardsAreaG.call(fadeInOut, content === "cards" /*{ transition:{ duration: 1000 } }*/);
+                const { id, frontCardNr, startDate, listPos, colNr, rowNr, purposeData, sections, photoUrl } = _deckData;
 
                 //PURPOSE
                 const getPurposeFormDimns = (i, dimns) => {
@@ -435,8 +457,6 @@ export default function deckComponent() {
                             }))
 
                 purposeG.exit().call(remove)
-
-                //console.log("cardsData", cardsData)
 
                 //contextMenu
                 //note - hoz and vert margins are not the same proportion of total
@@ -694,6 +714,45 @@ export default function deckComponent() {
                     //onSetSelectedCardNr("");
                 }
 
+                //PHOTO
+                const photoData = deckIsSelected || !photoUrl ? [] : [photoUrl];
+                const photoG = contentsG.selectAll("g.deck-photo").data(photoData)
+                const photoX = selectedSection || DECK_PHOTO_POS === "left" ? 3 + photoMargin.left : (contentsWidth - photoWidth)/2 + photoMargin.left;
+
+                photoG.enter()
+                    .append("g")
+                        .attr("class", "deck-photo")
+                        .call(fadeIn, { transition:{ delay:TRANSITIONS.MED } })
+                        .each(function(){
+                            d3.select(this).append("rect")
+                                .attr("fill", grey10(9));
+
+                            d3.select(this).append("image");
+                        })
+                        .merge(photoG)
+                        .attr("transform", `translate(${photoX}, ${headerHeight + photoMargin.top})`)
+                        .each(function(d){
+                            d3.select(this).select("rect")
+                                .attr("width", photoContentsWidth)
+                                .attr("height", photoContentsHeight)
+                                //.attr("opacity", 0.2)
+
+                            d3.select(this).select("image") 
+                                //.attr("width", width)
+                                .attr("xlink:href", d)
+                                //.attr("transform", 'scale(0.1)')
+                                .attr("transform", `scale(${photoContentsWidth / 260})`) //based on reneeRegis photoSize 260 by 335.48 
+                        })
+                photoG.exit().remove()
+
+                //CARDS
+                const cardsData = _deckData.cardsData.map(c => ({ 
+                    ...c,
+                    isSelected:selectedCardNr === c.cardNr 
+                }))
+
+                cardsAreaG.call(fadeInOut, content === "cards" /*{ transition:{ duration: 1000 } }*/);
+
                 cardsAreaG
                     .attr("transform", `translate(0, ${headerHeight})`)
                     .datum(cardsData)
@@ -710,7 +769,7 @@ export default function deckComponent() {
                         .sectionViewHeldCardWidth(sectionViewHeldCardWidth)
                         .sectionViewHeldCardHeight(sectionViewHeldCardHeight)
                         .groupingTagKey(groupingTagKey)
-                        .timeExtent(timeExtent)
+                        .timeframeKey(timeframeKey)
                         .deckIsSelected(deckIsSelected)
                         .cardsAreFlipped(cardsAreFlipped)
                         .form(form)
@@ -857,7 +916,7 @@ export default function deckComponent() {
                         }
                     })
 
-                    const controlsData = !sections || cardsAreFlipped || timeExtent === "longTerm" ? [] : [
+                    const controlsData = !sections || cardsAreFlipped || timeframeKey === "longTerm" ? [] : [
                         { key:"section-view", icon:icons.drill }
                     ];
     
@@ -1169,9 +1228,9 @@ export default function deckComponent() {
         groupingTagKey = value;
         return deck;
     };
-    deck.timeExtent = function (value) {
-        if (!arguments.length) { return timeExtent; }
-        timeExtent = value;
+    deck.timeframeKey = function (value) {
+        if (!arguments.length) { return timeframeKey; }
+        timeframeKey = value;
         return deck;
     };
     deck.deckIsSelected = function (value) {

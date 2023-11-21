@@ -98,7 +98,7 @@ export default function cardsComponent() {
 
     //state
     let groupingTagKey;
-    let timeExtent = "singleDeck";
+    let timeframeKey = "singleDeck";
     let deckIsSelected;
     let format = "actual";
     let cardsAreFlipped = false;
@@ -316,7 +316,7 @@ export default function cardsComponent() {
                     .attr("opacity", 1)
                     .each(function(cardD,i){
                         const { id, cardNr, pos, isHeld, isHidden, isSelected, profile } = cardD;
-                        const itemsData = timeExtent !== "singleDeck" || isHidden ? [] : (selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items);
+                        const itemsData = timeframeKey !== "singleDeck" || isHidden ? [] : (selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items);
 
                         //front components
                         frontHeaderComponents[id] = cardHeaderComponent();
@@ -558,7 +558,7 @@ export default function cardsComponent() {
                             .width(contentsWidth)
                             .height(headerHeight)
                             .withTitle(!cardTitleIsBeingEdited)
-                            .rightContent(timeExtent === "singleDeck" ? "progress-chain" : "progress-trophy")
+                            .rightContent(timeframeKey === "singleDeck" ? "progress-chain" : "progress-trophy")
                             .styles({
                                 //need to decide whether to do stroke from here or just inside cardHeader
                                 getStatusItemStroke:(itemD,linePartNr) => getProgressStatusColour(cardD, itemD, linePartNr),
@@ -646,7 +646,7 @@ export default function cardsComponent() {
                             })
                             .setForm(setForm)
 
-                        const shouldShowItems = !isHidden && timeExtent === "singleDeck" && (isSelected || isFront || (isHeld && selectedSectionKey && deckIsSelected))
+                        const shouldShowItems = !isHidden && timeframeKey === "singleDeck" && (isSelected || isFront || (isHeld && selectedSectionKey && deckIsSelected))
                         frontContentsG.select("g.items-area")
                             //not sure why we need this when entire containr shold have pointer-events none when no deck selected
                             .attr("pointer-events", deckIsSelected ? null : "none")
@@ -656,7 +656,7 @@ export default function cardsComponent() {
                             .call(items);
 
                         //PURPOSE (instead of items when in long-term longTerm view)
-                        const shouldShowPurpose = deckIsSelected && isFront && timeExtent === "longTerm" && !cardsAreFlipped;
+                        const shouldShowPurpose = deckIsSelected && isFront && timeframeKey === "longTerm" && !cardsAreFlipped;
                         const purpose = purposeComponents[id];
                         const purposeG = frontContentsG.selectAll("g.card-purpose").data(shouldShowPurpose ? [purposeData] : [])
                         purposeG.enter()
@@ -887,12 +887,12 @@ export default function cardsComponent() {
                         const photosData = [
                             { 
                                 key:"profile-1", 
-                                url:`/d${deckListPos}c${0}p1.png`,  //`/d${deckListPos}c${cardNr}p1.png`,
+                                url:`profile-media/d${deckListPos}c${0}p1.png`,  //`/d${deckListPos}c${cardNr}p1.png`,
                                 transform:`scale(0.041)`, isVideo:true 
                             },
                             { 
                                 key:"profile-2", 
-                                url:`/d${deckListPos}c${0}p2.png`, //`/d${deckListPos}c${cardNr}p2.png`,
+                                url:`profile-media/d${deckListPos}c${0}p2.png`, //`/d${deckListPos}c${cardNr}p2.png`,
                                 transform:`scale(0.041)`, isVideo:true 
                             },
                         ]
@@ -1149,9 +1149,9 @@ export default function cardsComponent() {
         groupingTagKey = value;
         return cards;
     };
-    cards.timeExtent = function (value) {
-        if (!arguments.length) { return timeExtent; }
-        timeExtent = value;
+    cards.timeframeKey = function (value) {
+        if (!arguments.length) { return timeframeKey; }
+        timeframeKey = value;
         return cards;
     };
     cards.deckIsSelected = function (value) {

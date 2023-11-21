@@ -83,10 +83,10 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   const longTermViewPossible = playerTags.length !== 0; 
 
   const [timeframe, setTimeframe] = useState(timeframeOptions.singleDeck);
-  const timeExtent = timeframe.key === "longTerm" ? "longTerm" : "singleDeck";
+  const timeframeKey = timeframe.key === "longTerm" ? "longTerm" : "singleDeck";
 
   let groupingTagKey;
-  if(timeExtent === "longTerm"){
+  if(timeframeKey === "longTerm"){
     groupingTagKey = "playerId";
   }else if(decksWithPlayerTag.length === 0 || allPlayerIdsSame){
     //we never group decks if all decks refer to same player, unless user wants the long-term view
@@ -160,11 +160,11 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
 
   //this adds status and completionProportion to cards and deck based on items statuses
   useEffect(() => {
-    const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeExtent, groupingTagKey }
+    const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTagKey }
     const embellishedDecks = embellishDecks(tableDecks, settings);
     const decksData = tableLayout(embellishedDecks, nrCols, settings);
     setDecksData(decksData);
-  }, [stringifiedUser, groupingTagKey, timeExtent])
+  }, [stringifiedUser, groupingTagKey, timeframeKey])
 
   //const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
 
@@ -212,13 +212,13 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   const stringifiedData = JSON.stringify(decksData);
 
   const handleUpdateDeck = useCallback(deck => {
-    if(timeExtent === "longTerm"){
+    if(timeframeKey === "longTerm"){
       //in this case, just update the decksData object here
       setDecksData(prevState => prevState.map(d => d.id !== deck.id ? d : ({ ...d, ...deck })))
     }else{
       updateDeck(deck)
     }
-  }, [stringifiedData, form, selectedDeckId, timeExtent]);
+  }, [stringifiedData, form, selectedDeckId, timeframeKey]);
 
   return (
     <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
@@ -239,7 +239,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
             <Decks 
               table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
               data={decksData/*.slice(0,1)*/} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
-              groupingTagKey={groupingTagKey} timeExtent={timeExtent}
+              groupingTagKey={groupingTagKey} timeframeKey={timeframeKey}
               journeyData={journeyData} tableMarginTop={tableMarginTop}
               onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={handleUpdateDeck}
               updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />

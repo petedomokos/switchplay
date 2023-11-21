@@ -23,6 +23,7 @@ export const transformTableForClient = serverTable => {
 }
 
 export const transformDeckForClient = serverDeck => {
+	//console.log("tDFC.............")
 	const { created, updated, cards, purpose=[], sections, tags, frontCardId, ...clientDeck } = serverDeck;
 	//ensure prupose has at least two paragraphs
 	const hydratedPurpose = purpose.length === 0 ? ["",""] : purpose.length === 1 ? [purpose[0], ""] : purpose;
@@ -61,7 +62,7 @@ export const transformDeckForClient = serverDeck => {
 
 export const transformDeckForServer = clientDeck => {
 	const { id, cards, sections, tags=[], ...serverDeck } = clientDeck;
-	console.log("transDFS.....clientDeck", clientDeck)
+	//console.log("transDFS.....clientDeck", clientDeck)
 	return {
 		...serverDeck,
 		//frontCardId is either a specific card, none (all cards placed) or current, which defaults to current card,
@@ -78,6 +79,7 @@ export const transformUserForClient = serverUser => {
 	const hydratedPhotos = photos.map(p => ({ ...p, added: new Date(p.added) }))
 	//@todo - check will we ever use this for updating journeys? I dont think we need it 
 	const hydratedJourneys = journeys.map(j => transformJourneyForClient(j))
+	console.log("return...")
 	return {
 		...serverUser,
 		photos:hydratedPhotos,

@@ -24,10 +24,17 @@ export default function deckLayout(){
     let info = {};
     let format = "profiles";
     let withSections = null; //true, false or null
+    let timeframeKey = "singleDeck"
+    let groupingTagKey;
 
     const _cardsLayouts = {};
 
     function update(deckData){
+        //next - photoUrl in here - based on playerId or phase or just deck.photoURL depending
+        //on value of timeframeKey/timeframe and of groupingTagKey
+        //add regirenee photo to backend, and get url working
+        //thenadd mockfootball data, with playerId tags so deck photos show for all players
+
         const { cards, id, listPos, purpose, frontCardId } = deckData;
         if(!_cardsLayouts[id]){
             _cardsLayouts[id] = cardsLayout();
@@ -73,6 +80,16 @@ export default function deckLayout(){
     update.info = function (value) {
         if (!arguments.length) { return info; }
         info = value;
+        return update;
+    };
+    update.timeframeKey = function (value) {
+        if (!arguments.length) { return timeframeKey; }
+        timeframeKey = value;
+        return update;
+    };
+    update.groupingTagKey = function (value) {
+        if (!arguments.length) { return groupingTagKey; }
+        groupingTagKey = value;
         return update;
     };
 

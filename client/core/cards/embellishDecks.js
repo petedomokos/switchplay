@@ -31,7 +31,7 @@ const getTagTitle = tag => {
 }
 
 export const embellishDeck = (deck, settings={}) => {
-  const { allPlayerIdsSame, allPlayerIdsUnique, timeExtent, groupingTagKey } = settings;
+  const { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTagKey } = settings;
   const cards = deck.cards.map(c => ({
     ...c,
     status:calcCardStatus(c.items)
@@ -55,20 +55,9 @@ export const embellishDeck = (deck, settings={}) => {
       playerName || phaseTitle || deck.title || deck.id;
   }
 
-  const getPhotoURL = () => {
-    if(allPlayerIdsSame){
-      //we dont display player name
-      return deck.photoURL || phaseTag?.value || ""
-    }
-    return deck.photoURL || playerTag?.value || ""; 
-    //this will correspond to playerids in db, later we will wire it up 
-    //rather than hardcode them in tagInfoArray
-  }
-
   return {
     ...deck,
     title:getTitle(),
-    photoURL:getPhotoURL(),
     date:d3.max(cards, d => d.date),
     cards,
     tags,
@@ -77,4 +66,4 @@ export const embellishDeck = (deck, settings={}) => {
   }
 }
 
-export const embellishDecks = (decks, timeExtent, groupingTagKey) => decks.map(d => embellishDeck(d, timeExtent, groupingTagKey));
+export const embellishDecks = (decks, timeframeKey, groupingTagKey) => decks.map(d => embellishDeck(d, timeframeKey, groupingTagKey));

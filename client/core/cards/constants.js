@@ -82,12 +82,18 @@ export const STYLES = {
     }
 }
 
+export const DECK_PHOTO_POS = "centre";
+
 export const DIMNS = {
     burgerBarWidth:50,
     DECK:{
+        ASPECT_RATIO:9/16,
         HEADER_HEIGHT:25,
         HEADER_SUBTITLE_HEIGHT_PROP:0.3,
         PROGRESS_ICON_WIDTH:20
+    },
+    CARD:{
+        ASPECT_RATIO:(62/88) * 1.1 //for normal -> 88/62;
     },
     CONTEXT_MENU:{
         ITEM_WIDTH:30,

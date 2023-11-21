@@ -20,8 +20,7 @@ import { getTransformationFromTrans } from '../journey/helpers';
 import { maxDimns } from '../../util/geometryHelpers';
 import { initDeck } from '../../data/initDeck';
 //import { createId } from './helpers';
-import { TRANSITIONS, DIMNS } from "./constants"
-import { grey10, COLOURS } from './constants';
+import { grey10, COLOURS, TRANSITIONS, DIMNS } from './constants';
 const { GOLD } = COLOURS;
 import dragEnhancements from '../journey/enhancedDragHandler';
 import { toCamelCase } from '../../data/measures';
@@ -79,7 +78,7 @@ const enhancedZoom = dragEnhancements();
 
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
+const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
   //console.log("Decks table", table)
   //console.log("Decks data", data)
   //processed props
@@ -118,7 +117,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
  
   //dimns
   const width = nrCols * deckWidthWithMargins;
-  const deckAspectRatio = 9/16;
+  const deckAspectRatio = DIMNS.DECK.ASPECT_RATIO;
   const deckOuterMargin = {
     left:10, //width * 0.05,
     right:10,//width * 0.05,
@@ -540,8 +539,6 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
     //console.log("updateItemTitle", applyToAllDecks)
     const { cardId, itemNr } = form.value;
     const cardToUpdate = selectedDeck.cards.find(c => c.id === cardId);
-    console.log("form", form)
-    console.log("seldeck", selectedDeck)
     if(applyToAllDecks){
       //@todo - update code 
       //const prevTitle = cardToUpdate.items.find(it => it.itemNr === itemNr).title
@@ -574,16 +571,11 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
     //we can assume its the last one for now
     const newCard = createInitCard({ date, cardNr });
     const cards = [...currentCards, newCard]
-    console.log("newCards", cards)
     updateDeck({ ...selectedDeck, cards, frontCardId:newCard.id })
   }, [stringifiedData, form, selectedDeckId]);
 
   const deleteCard = useCallback((deckId, cardId, newFrontCardId) => {
-    console.log("deldeckid card", deckId, cardId)
-    console.log("newFrontCardId?", newFrontCardId)
-    console.log("currentCards", selectedDeck.cards)
     const cards = selectedDeck.cards.filter(c => c.id !== cardId);
-    console.log("cards", cards)
     updateDeck({ 
       ...selectedDeck, 
       cards, 
@@ -593,11 +585,16 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
     setForm(null);
   }, [stringifiedData, form, selectedDeckId]);
 
+  useEffect(() => {
+    setSelectedSection(null);
+    setForm(null);
+  }, [timeframeKey, groupingTagKey])
 
   useEffect(() => {
     decks.selectedSection(selectedSection);
   }, [selectedSection])
   //overlay and pointer events none was stopiing zoom working!!
+
   useEffect(() => {
     //if(!longpressedDeckId){
       //d3.select(containerRef.current).attr("pointer-events", "none");
@@ -630,7 +627,11 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
     //console.log("ordered", profilesData)
 
     //decksdata
-    decksLayout.withSections(true);
+    decksLayout
+      .groupingTagKey(groupingTagKey)
+      .timeframeKey(timeframeKey)
+      .withSections(true);
+
     const decksToDisplay = selectedDeckId ? [selectedDeck] : data;
     const processedDeckData = decksToDisplay
       .map(d => ({
@@ -653,7 +654,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeExtent, customSel
       .height(tableHeight + deckHeightWithMargins)
       .nrCols(nrCols)
       .groupingTagKey(groupingTagKey)
-      .timeExtent(timeExtent)
+      .timeframeKey(timeframeKey)
       .selectedSection(selectedSection)
       .form(form)
       .x(deckX)

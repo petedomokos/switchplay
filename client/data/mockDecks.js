@@ -39,7 +39,7 @@ export const getMockDecks = user => {
             isMock:true, 
             sections, 
             purpose:d.purpose || initPurpose,
-            frontCardId:d.cards.find(c => c.cardNr === 0).id, 
+            frontCardId:d.cards[0].id
         })); 
     }
     if(user?.username === "athlete"){ 
@@ -48,7 +48,7 @@ export const getMockDecks = user => {
             isMock:true, 
             sections, 
             purpose:d.purpose || initPurpose,
-            frontCardId:d.cards.find(c => c.cardNr === 0).id, 
+            frontCardId:d.cards[0].id, 
         }));
     }
     return [];

@@ -23,7 +23,7 @@ export default function decksComponent() {
     let _styles = () => DEFAULT_STYLES;
 
     let groupingTagKey;
-    let timeExtent = "singleDeck";
+    let timeframeKey = "singleDeck";
     let selectedDeckId = "";
     let longpressedDeckId = "";
     let displayFormat = "list";
@@ -120,7 +120,7 @@ export default function decksComponent() {
                                 .width(deckWidth)
                                 .height(deckHeight)
                                 .groupingTagKey(groupingTagKey)
-                                .timeExtent(timeExtent)
+                                .timeframeKey(timeframeKey)
                                 .deckIsSelected(selectedDeckId === d.id)
                                 .content(deckContent)
                                 .cardsAreFlipped(cardsAreFlipped)
@@ -434,9 +434,9 @@ export default function decksComponent() {
         groupingTagKey = value;
         return decks;
     };
-    decks.timeExtent = function (value) {
-        if (!arguments.length) { return timeExtent; }
-        timeExtent = value;
+    decks.timeframeKey = function (value) {
+        if (!arguments.length) { return timeframeKey; }
+        timeframeKey = value;
         return decks;
     };
     decks.selectedDeckId = function (value) {
