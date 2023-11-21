@@ -1,4 +1,4 @@
-import { sortAscending } from "../../util/ArrayHelpers";
+import { onlyUnique, sortAscending } from "../../util/ArrayHelpers";
 import { embellishDeck } from "./embellishDecks";
 import * as d3 from 'd3';
 import { tagInfoArray } from "../../data/tagInfoArray";
@@ -6,14 +6,29 @@ import { tagInfoArray } from "../../data/tagInfoArray";
 const calcColNr = (i, nrCols) => i % nrCols;
 const calcRowNr = (i, nrCols) => Math.floor(i/nrCols);
 
-const groupDecks = (decks, groupingTagKey) => {
-  const tags = tagInfoArray.find(info => info.key === groupingTagKey)?.values || [];
+const groupDecks = (decks, groupingTagKey, playerType) => {
+  console.log("groupDecks---------------------------------------")
+  const tags = tagInfoArray
+    .find(info => info.key === groupingTagKey)
+    ?.values
+    ?.filter(t => t.playerType === playerType) 
+    || [];
+
   //remove decks that do not have a value specified for this key
-  const filteredDecks = decks.filter(d => !!d.tags.find(t => t.key === groupingTagKey));
+  const filteredDecks = decks
+  //must group by the value of the tag
+    .filter(d => !!d.tags.find(t => t.key === groupingTagKey)?.value)
+
   if(filteredDecks.length === 0){ return []; }
   const sortedDecks = sortAscending(filteredDecks, d => d.date);
+
+  const tagValuesToGroup = sortedDecks
+    .map(d => d.tags.find(t => t.key === groupingTagKey))
+    .filter(onlyUnique)
   
-  return tags.map(tag => {
+  console.log("tagValuesToGroup", tagValuesToGroup)
+  
+  return tagValuesToGroup.map(tag => {
       const { title, value } = tag;
       const id = `${groupingTagKey}-${value}`;
       return {
@@ -21,7 +36,7 @@ const groupDecks = (decks, groupingTagKey) => {
         title,
         //we remove the secondary (eg "phase" tag) as they are used to create each card instead
         tags:[{ key:groupingTagKey, value }],
-        decks: sortedDecks
+        decks: sortedDecks.filter(d => d.tags.find(t => t.key === groupingTagKey)?.value === value)
       }
   })
 }
@@ -39,10 +54,11 @@ const getFrontCardId = cards => {
 }
 
 const createDeckOfDecks = (group, groupingTagKey) => {
+  console.log("createDofD..........", group, groupingTagKey)
   const { id, title, tags, decks } = group;
   const cardNamingKey = groupingTagKey === "playerId" ? "phase" : "playerId";
   const sortedDecks = sortAscending(decks, d => d.date);
-  //console.log("sortedDecks", sortedDecks)
+  console.log("sortedDecks", sortedDecks)
   return {
     //add in deck stuff here
     id,
@@ -67,11 +83,12 @@ const createDeckOfDecks = (group, groupingTagKey) => {
   }
 }
 
-const formatDecks = (decks, timeframeKey, groupingTagKey) => {
+const formatDecks = (decks, settings={}) => {
+  const { timeframeKey, groupingTagKey, playerType } = settings;
   if(!groupingTagKey){ return decks; }
   const decksWithTag = decks.filter(d => !!d.tags?.find(t => t.key === groupingTagKey))
   //group decks by tags
-  const groupedDecks = groupDecks(decksWithTag, groupingTagKey);
+  const groupedDecks = groupDecks(decksWithTag, groupingTagKey, playerType);
   return groupedDecks.map(group => timeframeKey === "singleDeck" ? 
     getCurrentDeck(group.decks)
     : 
@@ -84,12 +101,9 @@ const wrapPhase = phaseKey => phaseKey ? wrapUrl(phaseKey, "png", "phases") : ""
 
 //photo dimns are based on reneeRegis photoSize 260 by 335.48 
 const getPhotoUrl = (deck, settings) => {
-  console.log("getURL", deck, settings)
-  
   const { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTagKey } = settings;
   const playerId = deck.tags.find(t => t.key === "playerId")?.value;
   const phaseKey = deck.tags.find(t => t.key === "phase")?.value;
-  console.log("playerId phase", playerId, phaseKey)
 
   //prioritise playerId over phaseKey
   if(!groupingTagKey){ 
@@ -113,10 +127,9 @@ const getPhotoUrl = (deck, settings) => {
 
 
 export const tableLayout = (decks, nrCols=3, settings={}) => {
-  console.log("tableLayout decks", decks)
+  console.log("tableLayout decks------------------------------------------------", decks)
   console.log("settings", settings)
-  const { timeframeKey, groupingTagKey } = settings;
-  const formattedDecks = formatDecks(decks, timeframeKey, groupingTagKey);
+  const formattedDecks = formatDecks(decks, settings);
   console.log("formattedDecks", formattedDecks)
   //add table positions
   return formattedDecks.map((d,i) => ({

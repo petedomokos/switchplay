@@ -221,6 +221,7 @@ export default function cardsComponent() {
                     .each(function(){
                         const g = d3.select(this);
                         g.select("g.new-card-btn")
+                            .call(fadeInOut, timeframeKey === "singleDeck", { transitionOut:{ duration: 0 }})
                             .attr("transform", `translate(${width/2}, ${height/2}) scale(0.4)`)
                             .on("click", e => {
                                 e.stopPropagation()
@@ -576,12 +577,14 @@ export default function cardsComponent() {
                             })
                             .fontSizes(fontSizes.info)
                             .onClick(function(e){
+                                e.stopPropagation();
+                                if(timeframeKey !== "singleDeck"){ return; }
                                 //console.log("header click ->")
                                 onClickCard(e, cardD); 
-                                e.stopPropagation();
                             })
                             .onClickDate(function(e){
                                 e.stopPropagation();
+                                if(timeframeKey !== "singleDeck"){ return; }
                                 //@todo - enable date change from section view
                                 if(selectedSectionKey){ return; }
                                 onClickCardDate(cardD, i); 
@@ -589,6 +592,7 @@ export default function cardsComponent() {
                             })
                             .onClickTitle(function(e, headerDimns){
                                 e.stopPropagation();
+                                if(timeframeKey !== "singleDeck"){ return; }
                                 //@todo - enable title change from section view
                                 if(selectedSectionKey){ return; }
                                 const dimns = {
@@ -853,13 +857,18 @@ export default function cardsComponent() {
                             })
                             .fontSizes(fontSizes.info)
                             .onClick(function(e){
+                                e.stopPropagation();
+                                if(timeframeKey !== "singleDeck"){ return; }
                                 onClickCard(e, cardD); 
                             })
                             .onClickDate(function(e){
-                                onClickCardDate(cardD, i); 
                                 e.stopPropagation();
+                                if(timeframeKey !== "singleDeck"){ return; }
+                                onClickCardDate(cardD, i); 
                             })
                             .onClickTitle(function(d, headerDimns){
+                                e.stopPropagation();
+                                if(timeframeKey !== "singleDeck"){ return; }
                                 const dimns = {
                                     ...headerDimns,
                                     left:margin.left + headerDimns.left,

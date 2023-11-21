@@ -67,7 +67,6 @@ const mockFootballDecks = tagInfoArray
         id:`deck-${playerIdTag.value}`,
         tags:[{ key:"playerId", value:playerIdTag.value }],
     }))
-console.log("mockfootydecks", mockFootballDecks)
 
 const mockAthleteDecks = [
     {

@@ -160,7 +160,8 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
 
   //this adds status and completionProportion to cards and deck based on items statuses
   useEffect(() => {
-    const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTagKey }
+    const playerType = user?.username === "athlete" ? "athlete" : "footballer"
+    const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTagKey, playerType }
     const embellishedDecks = embellishDecks(tableDecks, settings);
     const decksData = tableLayout(embellishedDecks, nrCols, settings);
     setDecksData(decksData);
