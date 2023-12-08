@@ -7,7 +7,6 @@ const calcColNr = (i, nrCols) => i % nrCols;
 const calcRowNr = (i, nrCols) => Math.floor(i/nrCols);
 
 const groupDecks = (decks, groupingTagKey, playerType) => {
-  console.log("groupDecks---------------------------------------")
   const tags = tagInfoArray
     .find(info => info.key === groupingTagKey)
     ?.values
@@ -25,8 +24,6 @@ const groupDecks = (decks, groupingTagKey, playerType) => {
   const tagValuesToGroup = sortedDecks
     .map(d => d.tags.find(t => t.key === groupingTagKey))
     .filter(onlyUnique)
-  
-  console.log("tagValuesToGroup", tagValuesToGroup)
   
   return tagValuesToGroup.map(tag => {
       const { title, value } = tag;
@@ -54,11 +51,9 @@ const getFrontCardId = cards => {
 }
 
 const createDeckOfDecks = (group, groupingTagKey) => {
-  console.log("createDofD..........", group, groupingTagKey)
   const { id, title, tags, decks } = group;
   const cardNamingKey = groupingTagKey === "playerId" ? "phase" : "playerId";
   const sortedDecks = sortAscending(decks, d => d.date);
-  console.log("sortedDecks", sortedDecks)
   return {
     //add in deck stuff here
     id,
@@ -107,7 +102,6 @@ const getPhotoUrl = (deck, settings) => {
 
   //prioritise playerId over phaseKey
   if(!groupingTagKey){ 
-    //console.log("not grouped...")
     //playerId may be undefined or may be defined but same for all decks
     if(allPlayerIdsSame){ return wrapPhase(phaseKey) || deck.photoUrl || ""; }
     return wrapPlayer(playerId) || wrapPhase(phaseKey) || deck.photoUrl || ""; 
@@ -127,10 +121,7 @@ const getPhotoUrl = (deck, settings) => {
 
 
 export const tableLayout = (decks, nrCols=3, settings={}) => {
-  console.log("tableLayout decks------------------------------------------------", decks)
-  console.log("settings", settings)
   const formattedDecks = formatDecks(decks, settings);
-  console.log("formattedDecks", formattedDecks)
   //add table positions
   return formattedDecks.map((d,i) => ({
       ...d, 

@@ -11,8 +11,7 @@ export const parseResponse = resp => {
 	return resp.json()
 }
 export const logError = (dispatch, err, path) =>{
-	console.error("There is an action error!!!!!!!", err.error)
-	dispatch({type:C.ERROR, value:err, path:path})
+	dispatch({ type:C.ERROR, value:err, path:path })
 }
 //higher-order actions
 export const fetchStart = path => (
