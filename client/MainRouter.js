@@ -90,12 +90,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
           {jwt ?
             <Route path="/" component={UserHomeContainer} />
             :
-            <>
-              {/**<div>
-                <JourneyContainer />
-              </div>*/}
-              <Route exact path="/" component={NonUserHome}/>
-            </>
+            <Route exact path="/" component={NonUserHome}/>
           }
           {/**
             <PrivateRoute path="/user/edit/:userId" component={EditUserProfileContainer}/>

@@ -7,7 +7,7 @@ const mapStateToProps = (state, ownProps) => {
 	return{
 		isHidden:state.system.menusHidden,
 		signingOut:state.asyncProcesses.signingOut,
-		screenSize:state.system.screen.size
+		screen:state.system.screen
 	}
 }
 const mapDispatchToProps = dispatch => ({

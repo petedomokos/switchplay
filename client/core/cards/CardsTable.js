@@ -29,7 +29,8 @@ const useStyles = makeStyles((theme) => ({
     transition: `all ${TRANSITIONS.MED}ms`,
     //display:"flex",
     //flexDirection:"column",
-    background:COLOURS.CARDS_TABLE
+    background:COLOURS.CARDS_TABLE,
+    overflow:"scroll",
     //border:"solid",
     //borderWidth:"thin",
   },
@@ -225,7 +226,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
     <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
       <div className={classes.tableContents}>
         <TableHeader dimns={{ 
-            padding: { left:burgerBarWidth + 7.5, right:7.5, top:tableHeaderHeight * 0.1, bottom:tableHeaderHeight * 0.1 },
+            padding: { left: 7.5, right:7.5 + burgerBarWidth, top:tableHeaderHeight * 0.1, bottom:tableHeaderHeight * 0.1 },
             width:width, 
             height:tableHeaderHeight 
           }}

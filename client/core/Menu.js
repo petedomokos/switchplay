@@ -25,18 +25,40 @@ const getDynamicStyles = (history, path) => {
 
 const useStyles = makeStyles(theme => ({
   root: {
+    background:"black"
   },
-  items:{
-    //flexDirection:props => ["s", "m"].includes(props.screenSize) ? "column" : "column"
+  elasticMenuWrapper:{
+  },
+  menuItems:{
+    width:props => props.menuWidth,
+    height:props => props.menuHeight,
+    display:"flex",
+    flexDirection:props => props.flexDirection,
+    justifyContent:"space-between",
+  },
+  startItems:{
+    display:"flex",
+    flexDirection:props => props.flexDirection,
+    //border:"solid"
+
+  },
+  endItems:{
+    //border:"solid",
+    display:"flex",
+    flexDirection:props => props.flexDirection,
   },
   logo:{
-    [theme.breakpoints.down('sm')]: {
+    fontSize:"14px",
+    marginTop:props => props.isBurger ? "10px" : "0px",
+    marginLeft:props => props.isBurger ? "0px" : "175px",
+    alignSelf:"center",
+    /*[theme.breakpoints.down('sm')]: {
       fontSize:"12px",
     },
     [theme.breakpoints.up('lg')]: {
-      //fontSize:"16px",
-    },
-
+      fontSize:"10px",
+    },*/
+    //background:"yellow"
   },
   homeIcon:{
     [theme.breakpoints.down('sm')]: {
@@ -47,19 +69,44 @@ const useStyles = makeStyles(theme => ({
     },
 
   },
+  otherStartItems:{
+    display:"flex",
+    flexDirection:props => props.flexDirection,
+    //border:"solid"
+  },
   menuBtn: {
+    margin:props => props.menuBtnMargin,
+    //background:"red",
     [theme.breakpoints.down('md')]: {
-      fontSize:"12px",
+      fontSize:"10px",
     },
     [theme.breakpoints.up('lg')]: {
-      //fontSize:"16px",
+      fontSize:"10px",
     },
-    
+  },
+  standaloneLogo:{
+    //position:"absolute",
+    paddingLeft:"15px",
+    height:"55px",
+    margin:"20px",
+    fontSize:"14px",
+    background:"black",
+    color:"white",
+    display:"flex",
+    alignItems:"center",
+    padding:0,
+    margin:0
   }
 }))
 
-const Menu = withRouter(({ history, isHidden, signingOut, screenSize, onSignout }) => {
-  const styleProps = { };
+const Menu = withRouter(({ history, isHidden, signingOut, screen, onSignout }) => {
+  const isBurger = ["s", "m"].includes(screen.size);
+  const menuWidth = isBurger ? 150 : screen.width;
+  const menuHeight = isBurger ? screen.height * 0.85 : null;
+  const flexDirection = isBurger ? "column" : "row";
+  const justifyContent = isBurger ? "flex-start" : "space-between";
+  const menuBtnMargin = isBurger ? "10px 0" : "0 10px";
+  const styleProps = { flexDirection, justifyContent, menuWidth, menuHeight, menuBtnMargin, isBurger };
   const classes = useStyles(styleProps) 
   const user = auth.isAuthenticated() ? auth.isAuthenticated().user : null;
   const [isOpen, setIsOpen] = useState(false)
@@ -73,29 +120,29 @@ const Menu = withRouter(({ history, isHidden, signingOut, screenSize, onSignout 
     d3.select(".bm-burger-button").call(isHidden ? hide : show)
   }, [isHidden])
 
-  const menuWidth = 150;
-
   return (
     <>
-      {["s", "m", "l", "xl"].includes(screenSize)  ?
+      {isBurger  ?
         <>
+          <Typography variant="h6" color="inherit" className={classes.standaloneLogo}>
+            SWITCHPLAY
+          </Typography>
           <ElasticMenu width={menuWidth} 
             isOpen={isOpen}
             onStateChange={(state) => handleStateChange(state)}
           >
-            <div style={{ display:"flex", flexDirection:"column" }}  
-                onClick={() => { setIsOpen(false)} }
-            >
+            <div onClick={() => { setIsOpen(false)} } className={classes.elasticMenuWrapper} >
               <MenuItems 
+                isBurger={isBurger}
                 user={user} history={history} signingOut={signingOut} 
-                screenSize={screenSize} onSignout={onSignout} classes={classes}/>
+                onSignout={onSignout} classes={classes}/>
             </div>
           </ElasticMenu>
         </>
         :
         <MenuItemsWrapper classes={classes}>
           <MenuItems user={user} history={history} signingOut={signingOut} 
-                      screenSize={screenSize} onSignout={onSignout} classes={classes} />
+              isBurger={isBurger} onSignout={onSignout} classes={classes} />
         </MenuItemsWrapper>
       }
     </>
@@ -109,25 +156,45 @@ const MenuItemsWrapper = ({ children, classes }) =>
       </Toolbar>
   </AppBar>
 
-const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }) =>
-    <>
-       <Typography variant="h6" color="inherit" className={classes.logo}>
-          Switchplay
-        </Typography>
-        <Link to="/">
-          <IconButton 
-              aria-label="Home" 
-              style={getDynamicStyles(history, "/")}>
-              <HomeIcon
-                  className={classes.homeIcon}/>
-          </IconButton>
+const MenuItems = ({ user, history, signingOut, isBurger, onSignout, classes }) =>
+    <div className={classes.menuItems}>
+      <div className={classes.startItems}>
+        {!isBurger && <Typography variant="h6" color="inherit" className={classes.logo}>
+          SWITCHPLAY
+        </Typography>}
+        {!isBurger && <div style={{ width:isBurger ? "100%" : "10px", height:"20px" }}></div>}
+        <div className={classes.otherStartItems}>
+          {/**isBurger && 
+            <Link to="/">
+              <IconButton 
+                  aria-label="Home" 
+                  style={getDynamicStyles(history, "/")}>
+                  <HomeIcon
+                      className={classes.homeIcon}/>
+              </IconButton>
+            </Link>
+          */}
+        </div>
+      </div>
+      <div className={classes.endItems}>
+        <Link to="/about">
+                <Button 
+                  className={classes.menuBtn}
+                  style={getDynamicStyles(history, "/about")}>ABOUT US
+                </Button>
         </Link>
-        <Link to="/datasets/new">
+        <Link to="/contact">
+                <Button 
+                  className={classes.menuBtn}
+                  style={getDynamicStyles(history, "/contact")}>CONTACT
+                </Button>
+        </Link>
+        {user && <Link to="/datasets/new">
             <Button 
               className={classes.menuBtn}
               style={getDynamicStyles(history, "/datasets/new")}>Dataset+
             </Button>
-        </Link>
+        </Link>}
         {/**<Link to="/visuals">
             <Button 
               className={classes.menuBtn}
@@ -141,7 +208,7 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
             </Button>
         </Link>}
         {
-          !user && (<span>
+          !user && (<>
             <Link to="/signup">
               <Button
                 className={classes.menuBtn}
@@ -154,28 +221,8 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
               style={getDynamicStyles(history, "/signin")}>Sign In
             </Button>
           </Link>
-          </span>)
+          </>)
         }
-        {/**
-          user && (<span>
-            <Link to={"/user/" + auth.isAuthenticated().user._id}>
-              <Button
-                className={classes.menuBtn}
-                style={getDynamicStyles(history, "/user/" + auth.isAuthenticated().user._id)}>My Profile
-              </Button>
-            </Link>
-          </span>)
-          */}
-        {/**
-          user && user.isPlayer && (<span>
-            <Link to={"/user/" + auth.isAuthenticated().user._id+"/dashboard"}>
-              <Button
-                className={classes.menuBtn}
-                style={getDynamicStyles(history, "/user/" + auth.isAuthenticated().user._id+"/dashboard")}>My Dashboard
-              </Button>
-            </Link>
-          </span>)
-          */}
         {
           user && (<span>
             <Button
@@ -185,6 +232,7 @@ const MenuItems = ({ user, history, signingOut, screenSize, onSignout, classes }
             </Button>
           </span>)
         }
-    </>
+      </div>
+    </div>
 
 export default Menu

@@ -1,5 +1,5 @@
 html {
-  overflow: hidden;
+  /*overflow: hidden;*/
   overscroll-behavior: none;
 }
 
@@ -16,7 +16,8 @@ body{
   position: absolute;
   width: 30px;
   height: 30px;
-  left: 10px;
+  right:10px;
+  /*left: 10px;*/
   top: 10px;
   /*display:none;*/
 }
@@ -34,7 +35,10 @@ body{
 Sidebar wrapper styles
 Note: Beware of modifying this element as it can break the animations - you should not need to touch it in most cases
 */
-.bm-menu-wrap {position: fixed;height: 100%;}
+.bm-menu-wrap {
+  position: fixed;
+  height: 100%;
+}
 /* General sidebar styles */
 .bm-menu {
   background: #373a47;
@@ -49,3 +53,38 @@ Note: Beware of modifying this element as it can break the animations - you shou
 .bm-item {display: inline-block;}
 /* Styling of overlay */
 .bm-overlay {background: rgba(0, 0, 0, 0.3);}
+
+
+/* This fires as soon as the element enters the DOM*/
+.list-transition-enter {
+  /*We give the list the initial dimension of the list button*/
+  top: 0;
+  width: 120px;
+  max-height: 40px;
+  color: transparent;
+  background-color: #5a564c;
+}
+/* This is where we can add the transition*/
+.list-transition-enter-active {
+  top: 45px;
+  width: 200px;
+  max-height: 200px;
+  background-color: #9e8949;
+  transition: all 400ms;
+}
+/* This fires as soon as the this.state.showList is false */
+.list-transition-exit {
+  top: 45px;
+  width: 200px;
+  max-height: 200px;
+  background-color: #9e8949;
+}
+/* fires as element leaves the DOM*/
+.list-transition-exit-active {
+  top: 0;
+  width: 120px;
+  max-height: 40px;
+  color: transparent;
+  background-color: #5a564c;
+  transition: all 400ms;
+}
