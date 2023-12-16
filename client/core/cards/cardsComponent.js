@@ -429,7 +429,7 @@ export default function cardsComponent() {
                     })
                     .sort((a,b) => d3.descending(a.cardNr, b.cardNr))
                     .each(function(cardD,i){
-                        const { deckId, cardNr, id, pos, isHidden, slotPos, isHeld, isFront, hasBeenPickedUp, isNext, isSecondNext, isSelected, info, status, profile, deckListPos, purposeData=[], flagsData } = cardD;
+                        const { deckId, cardNr, id, pos, isHidden, slotPos, isHeld, isPlaced, isFront, hasBeenPickedUp, isNext, isSecondNext, isSelected, info, status, profile, deckListPos, purposeData=[], flagsData } = cardD;
                         const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
                         const items = itemsComponents[id];
 
@@ -650,7 +650,7 @@ export default function cardsComponent() {
                             })
                             .setForm(setForm)
 
-                        const shouldShowItems = !isHidden && timeframeKey === "singleDeck" && (isSelected || isFront || (isHeld && selectedSectionKey && deckIsSelected))
+                        const shouldShowItems = !isHidden && timeframeKey === "singleDeck" && (isPlaced || isSelected || isFront || (isHeld && selectedSectionKey && deckIsSelected))
                         frontContentsG.select("g.items-area")
                             //not sure why we need this when entire containr shold have pointer-events none when no deck selected
                             .attr("pointer-events", deckIsSelected ? null : "none")
