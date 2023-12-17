@@ -86,7 +86,7 @@ export default function purposeComponent() {
                 //bgs
                 containerG.select("rect.purpose-bg")
                     .attr("width", width)
-                    .attr("height", height)
+                    .attr("height", height);
 
                 contentsG.attr("transform", `translate(${margin.left},${margin.top})`)
 
@@ -123,10 +123,16 @@ export default function purposeComponent() {
                                 .text(d => d.text);
 
                         })
-                        .merge(paragraphG)
                         .attr("transform", (d,i) => `translate(0, ${i * paragraphHeight})`)
+                        .merge(paragraphG)
                         .each(function(d,i){
+                            d3.select(this)
+                                .transition(`para-${i}`)
+                                .duration(TRANSITIONS.MED)
+                                    .attr("transform", `translate(0, ${i * paragraphHeight})`);
+
                             const paragraphG = d3.select(this);
+
                             paragraphG.select("rect.bg")
                                 .attr("width", paragraphWidth)
                                 .attr("height", paragraphHeight)

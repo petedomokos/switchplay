@@ -164,6 +164,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
     const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTagKey, playerType }
     const embellishedDecks = embellishDecks(tableDecks, settings);
     const decksData = tableLayout(embellishedDecks, nrCols, settings);
+    console.log("decksData", decksData)
     setDecksData(decksData);
   }, [stringifiedUser, groupingTagKey, timeframeKey])
 

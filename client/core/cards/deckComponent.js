@@ -441,16 +441,17 @@ export default function deckComponent() {
                     }
                 }
         
+                const spaceForPhoto = deckIsSelected ? 0 : photoHeight;
                 const purposeG = contentsG.selectAll("g.purpose").data(content === "purpose" ? [purposeData] : [])
                 purposeG.enter()
                     .append("g")
                         .attr("class", "purpose")
                         .call(fadeIn, { transition:{ delay:400 }})
                         .merge(purposeG)
-                        .attr("transform", () => `translate(0, ${headerHeight})`)
+                        .attr("transform", () => `translate(0, ${headerHeight + spaceForPhoto})`)
                         .call(purpose
                             .width(contentsWidth)
-                            .height(contentsHeight - headerHeight)
+                            .height(contentsHeight - headerHeight - spaceForPhoto)
                             .onClick((e, d, dimns) => {
                                 const formDimns = getPurposeFormDimns(d.i, dimns);
                                 setForm({ formType:"purpose", value:d, formDimns } )

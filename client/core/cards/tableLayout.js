@@ -1,4 +1,4 @@
-import { onlyUnique, sortAscending } from "../../util/ArrayHelpers";
+import { filterUniqueByProperty, sortAscending } from "../../util/ArrayHelpers";
 import { embellishDeck } from "./embellishDecks";
 import * as d3 from 'd3';
 import { tagInfoArray } from "../../data/tagInfoArray";
@@ -7,6 +7,7 @@ const calcColNr = (i, nrCols) => i % nrCols;
 const calcRowNr = (i, nrCols) => Math.floor(i/nrCols);
 
 const groupDecks = (decks, groupingTagKey, playerType) => {
+  console.log("groupDecks...........")
   const tags = tagInfoArray
     .find(info => info.key === groupingTagKey)
     ?.values
@@ -21,11 +22,13 @@ const groupDecks = (decks, groupingTagKey, playerType) => {
   if(filteredDecks.length === 0){ return []; }
   const sortedDecks = sortAscending(filteredDecks, d => d.date);
 
-  const tagValuesToGroup = sortedDecks
-    .map(d => d.tags.find(t => t.key === groupingTagKey))
-    .filter(onlyUnique)
+  const tagsToGroup = filterUniqueByProperty(groupingTagKey, sortedDecks
+    .map(d => d.tags.find(t => t.key === groupingTagKey)))
+    //.filter(onlyUnique)
   
-  return tagValuesToGroup.map(tag => {
+  console.log("tagsToGroup", tagsToGroup)
+  
+  return tagsToGroup.map(tag=> {
       const { title, value } = tag;
       const id = `${groupingTagKey}-${value}`;
       return {
@@ -80,10 +83,14 @@ const createDeckOfDecks = (group, groupingTagKey) => {
 
 const formatDecks = (decks, settings={}) => {
   const { timeframeKey, groupingTagKey, playerType } = settings;
+  console.log("formatDecks..... tKey", timeframeKey)
+  console.log("formatDecks..... gkey", groupingTagKey)
   if(!groupingTagKey){ return decks; }
   const decksWithTag = decks.filter(d => !!d.tags?.find(t => t.key === groupingTagKey))
   //group decks by tags
   const groupedDecks = groupDecks(decksWithTag, groupingTagKey, playerType);
+  console.log("groupedDecks", groupedDecks)
+  //error is above line - as all decks are reneeregis, the grouping tag should put them altogether
   return groupedDecks.map(group => timeframeKey === "singleDeck" ? 
     getCurrentDeck(group.decks)
     : 

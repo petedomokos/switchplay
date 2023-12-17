@@ -83,7 +83,8 @@ export const onlyUniqueByProperties = (keys, array) => element => true //todo
 export const filterUniqueByProperty = (key, array) =>{
 	const uniqueValues = array
 		.map(elem => elem[key])
-		.filter(onlyUnique)
+		.filter(onlyUnique);
+		
 	return uniqueValues
 		.map(val => array.find(elem => elem[key] === val))
 }
