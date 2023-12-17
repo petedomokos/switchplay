@@ -25,13 +25,13 @@ export default function deckLayout(){
     let format = "profiles";
     let withSections = null; //true, false or null
     let timeframeKey = "singleDeck"
-    let groupingTagKey;
+    let groupingTag;
 
     const _cardsLayouts = {};
 
     function update(deckData){
         //next - photoUrl in here - based on playerId or phase or just deck.photoURL depending
-        //on value of timeframeKey/timeframe and of groupingTagKey
+        //on value of timeframeKey/timeframe and of groupingTag
         //add regirenee photo to backend, and get url working
         //thenadd mockfootball data, with playerId tags so deck photos show for all players
 
@@ -87,9 +87,9 @@ export default function deckLayout(){
         timeframeKey = value;
         return update;
     };
-    update.groupingTagKey = function (value) {
-        if (!arguments.length) { return groupingTagKey; }
-        groupingTagKey = value;
+    update.groupingTag = function (value) {
+        if (!arguments.length) { return groupingTag; }
+        groupingTag = value;
         return update;
     };
 

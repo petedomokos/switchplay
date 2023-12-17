@@ -97,7 +97,7 @@ export default function cardsComponent() {
     let y = (d,i) => 0;
 
     //state
-    let groupingTagKey;
+    let groupingTag;
     let timeframeKey = "singleDeck";
     let deckIsSelected;
     let format = "actual";
@@ -1153,9 +1153,9 @@ export default function cardsComponent() {
         fontSizes = { ...fontSizes, ...values };
         return cards;
     };
-    cards.groupingTagKey = function (value) {
-        if (!arguments.length) { return groupingTagKey; }
-        groupingTagKey = value;
+    cards.groupingTag = function (value) {
+        if (!arguments.length) { return groupingTag; }
+        groupingTag = value;
         return cards;
     };
     cards.timeframeKey = function (value) {

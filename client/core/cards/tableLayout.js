@@ -1,42 +1,30 @@
-import { filterUniqueByProperty, sortAscending } from "../../util/ArrayHelpers";
+import { onlyUnique, sortAscending } from "../../util/ArrayHelpers";
 import { embellishDeck } from "./embellishDecks";
 import * as d3 from 'd3';
-import { tagInfoArray } from "../../data/tagInfoArray";
 
 const calcColNr = (i, nrCols) => i % nrCols;
 const calcRowNr = (i, nrCols) => Math.floor(i/nrCols);
 
-const groupDecks = (decks, groupingTagKey, playerType) => {
-  console.log("groupDecks...........")
-  const tags = tagInfoArray
-    .find(info => info.key === groupingTagKey)
-    ?.values
-    ?.filter(t => t.playerType === playerType) 
-    || [];
+const groupDecks = (decks, groupingTag) => {
+  console.log("groupDecks...........", decks);
+  const sortedDecks = sortAscending(decks, d => d.date);
 
-  //remove decks that do not have a value specified for this key
-  const filteredDecks = decks
-  //must group by the value of the tag
-    .filter(d => !!d.tags.find(t => t.key === groupingTagKey)?.value)
+  const tagIdsToGroup = sortedDecks
+    .filter(d => !!d[groupingTag])
+    .map(d => d[groupingTag].id)
+    .filter(onlyUnique);
 
-  if(filteredDecks.length === 0){ return []; }
-  const sortedDecks = sortAscending(filteredDecks, d => d.date);
-
-  const tagsToGroup = filterUniqueByProperty(groupingTagKey, sortedDecks
-    .map(d => d.tags.find(t => t.key === groupingTagKey)))
-    //.filter(onlyUnique)
+  console.log("tagIdsToGroup", tagIdsToGroup)
   
-  console.log("tagsToGroup", tagsToGroup)
+  if(tagIdsToGroup.length === 0){ return []; }
   
-  return tagsToGroup.map(tag=> {
-      const { title, value } = tag;
-      const id = `${groupingTagKey}-${value}`;
+  return tagIdsToGroup.map(tagId => {
+      //wlog, we use first deck to get the groupingTag
+      const firstDeckInGroup = sortedDecks.find(d => d[groupingTag].id === tagId);
       return {
-        id, 
-        title,
-        //we remove the secondary (eg "phase" tag) as they are used to create each card instead
-        tags:[{ key:groupingTagKey, value }],
-        decks: sortedDecks.filter(d => d.tags.find(t => t.key === groupingTagKey)?.value === value)
+        id:`${groupingTag}-${tagId}`,
+        groupingTagObj:firstDeckInGroup[groupingTag],
+        decks: sortedDecks.filter(d => d[groupingTag].id === tagId)
       }
   })
 }
@@ -53,17 +41,20 @@ const getFrontCardId = cards => {
   return d3.least(cards.filter(d => d.date > now), d => d.date)?.id;
 }
 
-const createDeckOfDecks = (group, groupingTagKey) => {
-  const { id, title, tags, decks } = group;
-  const cardNamingKey = groupingTagKey === "playerId" ? "phase" : "playerId";
+const createDeckOfDecks = (group, groupingTag) => {
+  console.log("createDoD", group)
+  const { id, groupingTagObj, decks } = group;
+  const cardNamingTag = groupingTag === "player" ? "phase" : "player";
   const sortedDecks = sortAscending(decks, d => d.date);
   return {
     //add in deck stuff here
     id,
-    title,
-    tags,
+    title:groupingTagObj.title,
     frontCardId: getFrontCardId(sortedDecks), //need the nr not the deck!
     isDeckOfDecks:true,
+    //if grouped by player, then deck title is the player. Else its the phase.
+    player:groupingTag === "player" ? groupingTagObj : null,
+    phase:groupingTag === "phase" ? groupingTagObj : null,
     //cards are the decks themselves
     cards:sortedDecks.map((d,i) => ({
       id:d.id,
@@ -71,7 +62,7 @@ const createDeckOfDecks = (group, groupingTagKey) => {
       date:d.date,
       //...d,
       purpose:d.purpose,
-      title:d.tags.find(t => t.key === cardNamingKey)?.title,
+      title:d[cardNamingTag]?.title || "",
       items:d.cards.map(c => ({
         itemNr:c.cardNr,
         title:c.title,
@@ -82,19 +73,18 @@ const createDeckOfDecks = (group, groupingTagKey) => {
 }
 
 const formatDecks = (decks, settings={}) => {
-  const { timeframeKey, groupingTagKey, playerType } = settings;
-  console.log("formatDecks..... tKey", timeframeKey)
-  console.log("formatDecks..... gkey", groupingTagKey)
-  if(!groupingTagKey){ return decks; }
-  const decksWithTag = decks.filter(d => !!d.tags?.find(t => t.key === groupingTagKey))
+  const { timeframeKey, groupingTag, playerType } = settings;
+  //console.log("formatDecks..... tKey", timeframeKey)
+  //console.log("formatDecks..... gkey", groupingTag)
+  if(!groupingTag){ return decks; }
   //group decks by tags
-  const groupedDecks = groupDecks(decksWithTag, groupingTagKey, playerType);
-  console.log("groupedDecks", groupedDecks)
+  const groupedDecks = groupDecks(decks, groupingTag, playerType);
+  //console.log("groupedDecks", groupedDecks)
   //error is above line - as all decks are reneeregis, the grouping tag should put them altogether
   return groupedDecks.map(group => timeframeKey === "singleDeck" ? 
     getCurrentDeck(group.decks)
     : 
-    embellishDeck(createDeckOfDecks(group, groupingTagKey), timeframeKey, groupingTagKey));
+    embellishDeck(createDeckOfDecks(group, groupingTag), timeframeKey, groupingTag));
 }
 
 const wrapUrl = (filename, fileType="png", folder) => folder ? `/${folder}/${filename}.${fileType}` : `/${filename}.${fileType}`;
@@ -103,32 +93,24 @@ const wrapPhase = phaseKey => phaseKey ? wrapUrl(phaseKey, "png", "phases") : ""
 
 //photo dimns are based on reneeRegis photoSize 260 by 335.48 
 const getPhotoUrl = (deck, settings) => {
-  const { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTagKey } = settings;
-  const playerId = deck.tags.find(t => t.key === "playerId")?.value;
-  const phaseKey = deck.tags.find(t => t.key === "phase")?.value;
+  const { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag } = settings;
+  //if deck of decks, we weant it to be of the groupingTagid
+  const playerId = deck.player?.id;
+  const phaseId = deck.phase?.id;
 
   //prioritise playerId over phaseKey
-  if(!groupingTagKey){ 
+  if(!groupingTag){ 
     //playerId may be undefined or may be defined but same for all decks
-    if(allPlayerIdsSame){ return wrapPhase(phaseKey) || deck.photoUrl || ""; }
-    return wrapPlayer(playerId) || wrapPhase(phaseKey) || deck.photoUrl || ""; 
+    if(allPlayerIdsSame){ return wrapPhase(phaseId) || deck.photoUrl || ""; }
+    return wrapPlayer(playerId) || wrapPhase(phaseId) || deck.photoUrl || ""; 
   }
-
-  //decks are grouped, so its either a deck of decks (longTerm) or its a singleDeck eg the current deck
-  if(timeframeKey === "longTerm"){
-    //its a deck of decks, can assume grouped by playerId for now
-    //@todo - impl later the option to group by any tagKey
-    return wrapPlayer(playerId) || "";
-  }
-  //its a singleDeck of a grouped set of decks, so for now can assume each deck is a phase
-  //@todo - impl the option to have different second keys
-  return wrapPhase(phaseKey) || "";
+  //its either grouped by player or phase, and this determines the photo we need
+  return groupingTag === "player" ? wrapPlayer(playerId) : wrapPhase(phaseId);
 }
-
-
 
 export const tableLayout = (decks, nrCols=3, settings={}) => {
   const formattedDecks = formatDecks(decks, settings);
+  console.log("formattedDecks", formattedDecks)
   //add table positions
   return formattedDecks.map((d,i) => ({
       ...d, 

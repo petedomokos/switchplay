@@ -10,6 +10,7 @@ import { hydrateDeckSections } from '../data/sections';
 import { getMockTables, getMockDecks } from '../data/mockDecks';
 import uuid from 'react-uuid';
 import { addWeeks } from '../util/TimeHelpers';
+import { getCustomer } from '../data/Customers';
 
 export const transformTableForClient = serverTable => {
 	//console.log("transformTableForClient", serverTable)
@@ -71,20 +72,24 @@ export const transformDeckForServer = clientDeck => {
 		tags:tags.map(tag => JSON.stringify(tag))
 	}
 }
-
-
+ 
+//getMock functions below
 export const transformUserForClient = serverUser => {
-	//console.log("transformUserForClient", serverUser)
+	console.log("transformUserForClient", serverUser)
 	const { journeys=[], photos=[], decks=[], tables=[], username } = serverUser;
 	const hydratedPhotos = photos.map(p => ({ ...p, added: new Date(p.added) }))
 	//@todo - check will we ever use this for updating journeys? I dont think we need it 
-	const hydratedJourneys = journeys.map(j => transformJourneyForClient(j))
+	const hydratedJourneys = journeys.map(j => transformJourneyForClient(j));
+	const isMock = username === "athlete" || username === "damian" || username.contains("demo");
+	const customer = isMock ? getCustomer(serverUser._id) : serverUser.customer;
 	return {
 		...serverUser,
+		customerInfo:customer.customerInfo,
 		photos:hydratedPhotos,
 		journeys:hydratedJourneys,
-		tables:username === "athlete" || username === "damian" ? getMockTables(serverUser) : tables.map(t => transformTableForClient(t)),
-		decks:username === "athlete" || username === "damian" ? getMockDecks(serverUser) : [...decks.map(s => transformDeckForClient(s))],
+		tables:isMock ? customer.tables : tables.map(t => transformTableForClient(t)),
+		decks:isMock ? customer.decks : [...decks.map(s => transformDeckForClient(s))],
+		isMock
 	}
 }
 

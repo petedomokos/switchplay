@@ -78,7 +78,7 @@ const enhancedZoom = dragEnhancements();
 
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
+const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
   //console.log("Decks table", table)
   //console.log("Decks data", data)
   //processed props
@@ -588,7 +588,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customS
   useEffect(() => {
     setSelectedSection(null);
     setForm(null);
-  }, [timeframeKey, groupingTagKey])
+  }, [timeframeKey, groupingTag])
 
   useEffect(() => {
     decks.selectedSection(selectedSection);
@@ -628,7 +628,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customS
 
     //decksdata
     decksLayout
-      .groupingTagKey(groupingTagKey)
+      .groupingTag(groupingTag)
       .timeframeKey(timeframeKey)
       .withSections(true);
 
@@ -653,7 +653,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customS
       .width(width)
       .height(tableHeight + deckHeightWithMargins)
       .nrCols(nrCols)
-      .groupingTagKey(groupingTagKey)
+      .groupingTag(groupingTag)
       .timeframeKey(timeframeKey)
       .selectedSection(selectedSection)
       .form(form)

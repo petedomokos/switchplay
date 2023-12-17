@@ -293,7 +293,7 @@ export default function deckComponent() {
     let _styles = () => DEFAULT_STYLES;
 
     //settings
-    let groupingTagKey;
+    let groupingTag;
     let timeframeKey = "singleDeck";
     let deckIsSelected;
     let selectedCardNr;
@@ -784,7 +784,7 @@ export default function deckComponent() {
                         .selectedCardHeight(selectedCardHeight)
                         .sectionViewHeldCardWidth(sectionViewHeldCardWidth)
                         .sectionViewHeldCardHeight(sectionViewHeldCardHeight)
-                        .groupingTagKey(groupingTagKey)
+                        .groupingTag(groupingTag)
                         .timeframeKey(timeframeKey)
                         .deckIsSelected(deckIsSelected)
                         .cardsAreFlipped(cardsAreFlipped)
@@ -1239,9 +1239,9 @@ export default function deckComponent() {
         
         return deck;
     };
-    deck.groupingTagKey = function (value) {
-        if (!arguments.length) { return groupingTagKey; }
-        groupingTagKey = value;
+    deck.groupingTag = function (value) {
+        if (!arguments.length) { return groupingTag; }
+        groupingTag = value;
         return deck;
     };
     deck.timeframeKey = function (value) {

@@ -10,7 +10,7 @@ import TableHeader from './TableHeader';
 import { tableLayout } from "./tableLayout"
 import { onlyUnique } from "../../util/ArrayHelpers"
 
-const { burgerBarWidth } = DIMNS;
+const { burgerBarWidth, CUSTOMER_LOGO_WIDTH, CUSTOMER_LOGO_HEIGHT } = DIMNS;
 
 const timeframeOptions = {
   longTerm:{ key:"longTerm", label:"Long Term" },
@@ -66,33 +66,31 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, updateDecks, deleteDeck, hideMenus, showMenus }) => {
-  const { tables=[], decks=[] } = user;
+  const { tables=[], decks=[], customerInfo } = user;
   const stringifiedUser = JSON.stringify(user);
-  //console.log("CardsTable", user)
+  console.log("CardsTable", user)
   //@todo - move creating flag to asyncProcesses
   //helper consts
   //data will be grouped by playerId if at least one deck has a playerid tag, otherwise it is not grouped
-  const decksWithPlayerTag = decks.filter(d => !!d.tags?.find(t => t.key === "playerId"))
-  const playerTags = decks
-    .filter(d => !!d.tags?.find(t => t.key === "playerId"))
-    .map(d => d.tags.find(t => t.key === "playerId").value)
+  const playerIds = decks.map(d => d.player?.id)
 
-  const allPlayerIdsSame = playerTags.filter(onlyUnique).length === 1;
-  const allPlayerIdsUnique = playerTags.filter(onlyUnique).length === decks.length;
+  const allPlayerIdsSame = playerIds.filter(onlyUnique).length === 1;
+  const allPlayerIdsUnique = playerIds.filter(onlyUnique).length === decks.length;
+  const atLeastOnePlayer = playerIds.length !== 0
   //atm, longTermView is only available when playerIds are tagged and not all the same
-  const longTermViewPossible = playerTags.length !== 0; 
+  const longTermViewPossible = atLeastOnePlayer; 
 
   const [timeframe, setTimeframe] = useState(timeframeOptions.singleDeck);
   const timeframeKey = timeframe.key === "longTerm" ? "longTerm" : "singleDeck";
 
-  let groupingTagKey;
+  let groupingTag;
   if(timeframeKey === "longTerm"){
-    groupingTagKey = "playerId";
-  }else if(decksWithPlayerTag.length === 0 || allPlayerIdsSame || allPlayerIdsUnique){
+    groupingTag = "player";
+  }else if(!atLeastOnePlayer || allPlayerIdsSame || allPlayerIdsUnique){
     //we never group decks if all decks refer to same player, unless user wants the long-term view
-    groupingTagKey = ""
+    groupingTag = ""
   }else{
-    groupingTagKey = "playerId"
+    groupingTag = "player"
   }
   //next - fix bug when clicking longterm view when no tags for players eg user pd
   //and decide what to do - do we just remove teh option ?
@@ -123,7 +121,13 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
     }
   },[user._id, tables.length])
 
-  const table = tables[0];
+  const table = { 
+    ...tables[0], 
+    title:tables[0]?.title || customerInfo?.tables[0]?.title || customerInfo?.name || "",
+    photoURL:customerInfo ? `/customers/${customerInfo.key}/logo.png` : "/switchplay/logo.png",
+    logoTransform:customerInfo?.tableLogoTransform
+  };
+  console.log("table", table)
   const tableDecks = table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
 
   const width = screen.width || 300;
@@ -161,12 +165,12 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   //this adds status and completionProportion to cards and deck based on items statuses
   useEffect(() => {
     const playerType = user?.username === "athlete" ? "athlete" : "footballer"
-    const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTagKey, playerType }
+    const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag, playerType }
     const embellishedDecks = embellishDecks(tableDecks, settings);
+    console.log("embellishedDecks", embellishedDecks)
     const decksData = tableLayout(embellishedDecks, nrCols, settings);
-    console.log("decksData", decksData)
     setDecksData(decksData);
-  }, [stringifiedUser, groupingTagKey, timeframeKey])
+  }, [stringifiedUser, groupingTag, timeframeKey])
 
   //const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
 
@@ -226,7 +230,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
     <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
       <div className={classes.tableContents}>
         <TableHeader dimns={{ 
-            padding: { left:burgerBarWidth + 7.5, right:7.5, top:tableHeaderHeight * 0.1, bottom:tableHeaderHeight * 0.1 },
+            padding: { left:10, right:burgerBarWidth + 10, top:tableHeaderHeight * 0.1, bottom:tableHeaderHeight * 0.1 },
             width:width, 
             height:tableHeaderHeight 
           }}
@@ -241,7 +245,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
             <Decks 
               table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
               data={decksData/*.slice(0,1)*/} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
-              groupingTagKey={groupingTagKey} timeframeKey={timeframeKey}
+              groupingTag={groupingTag} timeframeKey={timeframeKey}
               journeyData={journeyData} tableMarginTop={tableMarginTop}
               onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={handleUpdateDeck}
               updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />

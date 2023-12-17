@@ -1,5 +1,4 @@
 import * as d3 from 'd3';
-import { tagInfoArray } from '../../data/tagInfoArray';
 
 export const calcCardStatus = items => {
   if(items.filter(it => it.status !== 2).length === 0){ return 2; }
@@ -25,24 +24,17 @@ const calcDeckCompletion = cards => {
   return completedItems.length / allItems.length;
 }
 
-const getTagTitle = tag => {
-  const values = tagInfoArray.find(tagInfoArray => tagInfoArray.key === tag.key)?.values;
-  return values?.find(v => v.value === tag.value)?.title
-}
-
 export const embellishDeck = (deck, settings={}) => {
-  const { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTagKey } = settings;
+  console.log("embellishDeck", deck)
+  const { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag } = settings;
+  console.log("timeframeKey gTag",timeframeKey, groupingTag)
   const cards = deck.cards.map(c => ({
     ...c,
     status:calcCardStatus(c.items)
   }));
 
-  //first, add title to each tag from the tagInfoArray file
-  const tags = deck.tags.map(t => ({ ...t, title:getTagTitle(t) }));
-  const playerTag = tags.find(t => t.key === "playerId");
-  const phaseTag = tags.find(t => t.key === "phase");
-  const playerName = playerTag?.title
-  const phaseTitle = phaseTag?.title;
+  const playerName = deck.player ? `${deck.player.firstName} ${deck.player.surname}` : "";
+  const phaseTitle = deck.phase?.title || "";
 
   const getTitle = () => {
     //Both could be undefined
@@ -60,10 +52,9 @@ export const embellishDeck = (deck, settings={}) => {
     title:getTitle(),
     date:d3.max(cards, d => d.date),
     cards,
-    tags,
     status:calcDeckStatus(cards),
     completion:calcDeckCompletion(cards)
   }
 }
 
-export const embellishDecks = (decks, timeframeKey, groupingTagKey) => decks.map(d => embellishDeck(d, timeframeKey, groupingTagKey));
+export const embellishDecks = (decks, timeframeKey, groupingTag) => decks.map(d => embellishDeck(d, timeframeKey, groupingTag));
