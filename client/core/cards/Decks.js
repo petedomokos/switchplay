@@ -641,6 +641,8 @@ const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSele
       }))
       .map(deckData => decksLayout(deckData));
 
+    console.log("processedData", processedDeckData)
+
     //just use first deck for now
     d3.select(containerRef.current).datum(processedDeckData)
 

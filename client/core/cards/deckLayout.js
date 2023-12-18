@@ -2,10 +2,7 @@ import * as d3 from 'd3';
 import cardsLayout from "./cardsLayout";
 import { purposeLayout } from './purposeLayout';
 import { sortAscending } from '../../util/ArrayHelpers';
-
-const createDefaultSections = cards => cards[0].items.map((it,i) => ({
-    key:`section-${i+1}`, title:`Section ${i+1}`, initials:`S${i+1}`
-}))
+import { hydrateDeckSections } from "../../data/sections";
 
 const getFrontCardNr = (cards, frontCardId) => {
     if(!frontCardId){ return 0; }
@@ -34,6 +31,7 @@ export default function deckLayout(){
         //on value of timeframeKey/timeframe and of groupingTag
         //add regirenee photo to backend, and get url working
         //thenadd mockfootball data, with playerId tags so deck photos show for all players
+        //console.log("deckData", withSections, deckData)
 
         const { cards, id, listPos, purpose, frontCardId } = deckData;
         if(!_cardsLayouts[id]){
@@ -41,11 +39,7 @@ export default function deckLayout(){
         }
         const _cardsLayout = _cardsLayouts[id];
         //sections - if withSections, we create default sectins if none exist. if false, there are never sections
-        let sections;
-        if(withSections === null){ sections = deckData.sections }
-        else if(withSections === true){ 
-            sections = deckData.sections || createDefaultSections(cards) 
-        }
+        const sections = withSections ? deckData.sections : null;
         //cards
         const numberedCards = sortAscending(cards, d => d.date).map((c,i) => ({ ...c, cardNr:i }));
         const frontCardNr = getFrontCardNr(numberedCards, frontCardId);

@@ -829,7 +829,6 @@ export default function deckComponent() {
                             const cardId = cardD.id;
                             const getNextCardId = () => {
                                 const nextCard = cardsData.find(c => c.cardNr === cardNr + 1);
-                                console.log("nextCard", nextCard)
                                 return nextCard?.id || "none"; //defaults to all cards placed
                             }
                             if(frontCardNr === cardD.cardNr){ 
@@ -904,7 +903,6 @@ export default function deckComponent() {
                         const distFromCentre = Math.sqrt(_x ** 2 + _y ** 2);
                         //console.log("distFromCentre", distFromCentre)
                         const theta = angleFromNorth([[_x, _y]])
-                        //console.log("theta", Math.round(theta))
                         if(distFromCentre > cards.itemsOuterRadius()){ 
                             if(potentialSelectedSectionNr !== ""){ unhighlightSection(potentialSelectedSectionNr); }
                             potentialSelectedSectionNr = ""; 
@@ -924,6 +922,7 @@ export default function deckComponent() {
                         //bug - this doesnt work sometimes
                         if(selectedSection?.nr !== potentialSelectedSectionNr){
                             const section = sections.find(s => s.nr === potentialSelectedSectionNr)
+                            console.log("selecting section", section)
                             onSelectSection(section?.key || "")
                             potentialSelectedSectionNr = "";
                         }else{

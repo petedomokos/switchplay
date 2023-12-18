@@ -260,9 +260,9 @@ export default function cardsComponent() {
                 }
                 //multiple deck view
                 if(isHeld || isSelected){
-                    return status === 2 ? 1.5 : (status === 1 ? 1 : 0.2);
+                    return status === 2 ? 0.8 : (status === 1 ? 0.8 : 0.2);
                 }
-                return status === 2 ? 3 : (status === 1 ? 2 : 0.2);
+                return status === 2 ? 3 : (status === 1 ? 3 : 0.2);
             }
 
             const getHeaderStatusItemStrokeWidth = itemD => {

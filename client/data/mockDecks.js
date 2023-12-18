@@ -135,40 +135,168 @@ const mockAthleteDecks = [
 ]
 
 export const englandPlayers = [
-    { id:"tedCurd", firstName:"Ted", surname:"Curd", pos:"GK" },
-    { id:"zachAbbot", firstName:"Zach", surname:"Abbot", pos:"DEF" },
+    //{ id:"tedCurd", firstName:"Ted", surname:"Curd", pos:"GK" },
+    //{ id:"zachAbbot", firstName:"Zach", surname:"Abbot", pos:"DEF" },
+    { id:"harrisonMurray-Campbell", firstName:"Harrison", surname:"Murray-Campbell", position:"DEF" },
+    { id:"tristanRowe", firstName:"Tristan", surname:"Rowe", position:"DEF" },
     { id:"joshAcheampong", firstName:"Josh", surname:"Acheampong", pos:"DEF" },
-    { id:"joeJohnson", firstName:"Joe", surname:"Johnson", pos:"DEF" },
+    //{ id:"joeJohnson", firstName:"Joe", surname:"Johnson", pos:"DEF" },
     { id:"jaydenMeghoma", firstName:"Jayden", surname:"Meghoma", pos:"DEF" },
-    { id:"samuelAmoAmeyaw", firstName:"Samuel", surname:"Amo-Ameyaw", pos:"MID" },
+    { id:"samAmo-Ameyaw", firstName:"Samuel", surname:"Amo-Ameyaw", pos:"MID" },
     { id:"michaelGolding", firstName:"Michael", surname:"Golding", pos:"MID" },
     { id:"finleyMcAllister", firstName:"Finley", surname:"McAllister", pos:"MID" }, 
     { id:"chrisRigg", firstName:"Chris", surname:"Rigg", pos:"MID" },
-    { id:"jaydenDanns", firstName:"Jayden", surname:"Danns", pos:"F" },
-    { id:"jimmyJayMorgan", firstName:"Jimmy-Jay", surname:"Morgan", pos:"F" },
-    { id:"zakLovelace", firstName:"Zak", surname:"Lovelace", pos:"F" },
-    { id:"joelNDala", firstName:"Joel", surname:"NDala", pos:"F" },
-    { id:"tomWatson", firstName:"Tom", surname:"Watson", pos:"F" },
-    { id:"justinOboavwoduo", firstName:"Justin", surname:"Oboavwoduo", pos:"F" },
-    { id:"archieStevens", firstName:"Archie", surname:"Stevens", pos:"F" },
-    { id:"tomKing", firstName:"Tom", surname:"King", pos:"F" }
+    { id:"jaydenDanns", firstName:"Jayden", surname:"Danns", pos:"FOR" },
+    { id:"jimmy-JayMorgan", firstName:"Jimmy-Jay", surname:"Morgan", pos:"FOR" },
+    { id:"zakLovelace", firstName:"Zak", surname:"Lovelace", pos:"FOR" },
+    { id:"joelNDala", firstName:"Joel", surname:"NDala", pos:"FOR" },
+    { id:"tomWatson", firstName:"Tom", surname:"Watson", pos:"FOR" },
+    { id:"justinOboavwoduo", firstName:"Justin", surname:"Oboavwoduo", pos:"FOR" },
+    { id:"archieStevens", firstName:"Archie", surname:"Stevens", pos:"FOR" },
+    //{ id:"tomKing", firstName:"Tom", surname:"King", pos:"For" }
 ]
 
-const customiseCards = (cards, p, i) => {
-    //@todo - customise statuses
+
+const englandSections = [
+    { nr:1, key:"section1", title: "Psych/Soc", initials: "PSO" },
+    { nr:2, key:"section2", title: "Technical", initials: "TEC" },
+    { nr:3, key:"section3", title: "Physical", initials: "PHY" },
+    { nr:4, key:"section4", title: "Tactical", initials: "TAC" },
+    { nr:5, key:"section5", title: "Review", initials: "REV" }
+]
+
+const englandCards = [
+    {
+        title:"Week 1",
+        items:[
+            { title:"Meet with Steve about staying calm on the ball" },
+            { title:"KPI: 5 successful dribbles" },
+            { title:"KPI: 7 Sprints and 6 high speed runs" },
+            { title:"KPI:In space to receive 30% of attacks" },
+            { title:"Watch video and answer questions" },
+        ]
+    },
+    {
+        title:"Week 2",
+        items:[
+            { title:"Task from Steve and questionnaire" },
+            { title:"KPI: 6 successful dribbles" },
+            { title:"KPI: 8 Sprints and 6 high speed runs" },
+            { title:"KPI: In space to receive 33% of attacks" },
+            { title:"Watch video and answer questions" },
+        ]
+    },
+    {
+        title:"Week 3",
+        items:[
+            { title:"Meet with Steve about staying calm on the ball" },
+            { title:"KPI: 7 successful dribbles" },
+            { title:"KPI: 9 Sprints and 7 high speed runs"  },
+            { title:"KPI: In space to receive 35% of attacks" },
+            { title:"Watch video and answer questions" },
+        ]
+    },
+    {
+        title:"Week 4",
+        items:[
+            { title:"Task from Steve and questionnaire" },
+            { title:"KPI: 8 successful dribbles" },
+            { title:"KPI: 10 Sprints and 8 high speed runs"  },
+            { title:"KPI: In space to receive 37% of attacks" },
+            { title:"Watch video and answer questions" },
+        ]
+    },
+    {
+        title:"Week 5",
+        items:[
+            { title:"Meet with Steve about staying calm on the ball" },
+            { title:"KPI: 9 successful dribbles" },
+            { title:"KPI:11 Sprints and 8 high speed runs"  },
+            { title:"KPI: In space to receive 40% of attacks" },
+            { title:"Watch video and answer questions" },
+        ]
+    },
+    {
+        title:"Week 6",
+        items:[
+            { title:"Task from Steve and questionnaire" },
+            { title:"KPI: 9 successful dribbles" },
+            { title:"KPI: 11 Sprints and 8 high speed runs"  },
+            { title:"KPI: In space to receive 40% of attacks" },
+            { title:"Watch video and answer questions" },
+        ]
+    },
+]
+
+const playerItemStatuses = [
+    //each row is one player for 6 cards, 5 items om each card
+    //note -  weeks 4 + are 0 as they are in future 
+    [[2,2,2,0,2], [2,2,2,0,2], [2,2,1,1,2], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[2,2,2,2,2], [2,2,1,2,2], [2,2,2,2,1], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[0,1,0,0,2], [0,1,0,0,2], [2,0,0,0,2], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[2,2,2,2,1], [2,2,2,2,2], [1,2,2,2,2], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[2,2,2,1,2], [1,2,2,0,2], [2,2,1,1,2], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[1,1,1,1,2], [2,1,2,0,1], [2,2,1,2,1], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[2,2,2,2,2], [0,1,2,2,0], [0,2,2,2,1], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[2,2,2,2,2], [2,2,2,2,2], [2,2,2,2,2], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[2,2,1,2,1], [2,2,1,1,2], [2,2,1,1,2], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]], 
+    [[2,2,1,2,2], [2,2,0,2,2], [2,2,2,2,2], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]], 
+    [[0,1,0,0,0], [2,1,0,0,1], [2,1,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[2,2,2,2,2], [1,2,2,1,2], [2,2,2,2,2], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[2,1,2,1,1], [2,1,2,2,2], [2,2,2,2,1], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]], 
+    [[2,2,2,0,2], [2,2,2,0,2], [2,2,2,1,2], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[0,0,0,0,1], [0,0,0,0,1], [0,0,0,0,2], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    //15 up to here
+    [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+    [[0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0], [0,0,0,0,0]],
+]
+
+const customiseCardsForActivity = (cards, activityType) => {
+    //customise card titles, and item titles/contents for 3 items on each card, leaving 2 as per player
+    if(activityType === "football"){
+        return cards.map((c,i) => {
+            const { title, items } = englandCards[i];
+            return { 
+                ...c, 
+                title, 
+                items:c.items.map((it,j) => ({ ...it, ...items[j] })) 
+            }  
+        });
+    }
     return cards;
 }
-const customiseFrontCardId = (p,i) => 0;
+
+const customiseCardsForPlayer = (cards, player, i) => {
+    //customise item statuses, and also add 2 individual items per player
+    return cards.map((c,j) => ({
+        ...c,
+        items:c.items.map((it,k) => ({ ...it, status:playerItemStatuses[i][j][k] }))
+    }))
+}
+
+const customiseFrontCardId = (cards, p,i) => cards[2].id;
 
 export const getEnglandPlayersWithDecks = () => {
-    const initCards = createInitCards({ startDate:footballSeasonStartDate, nrCards:5, weeksPerCard:1, cardTitles });
     //helper
     const getDecksForPlayer = (p,i) => {
         //for now, only 1 deck per player, with generic content but custom statuses
+        const initCards = createInitCards({ startDate:footballSeasonStartDate, nrCards:5, weeksPerCard:1, cardTitles });
+        const cards = customiseCardsForPlayer(customiseCardsForActivity(initCards, "football"), p, i);
         return [{
             id:`deck-${p.id}`,
-            cards:customiseCards(initCards, p, i),
-            frontCardId:customiseFrontCardId(p,i),
+            sections:englandSections,
+            cards,
+            frontCardId:customiseFrontCardId(cards, p,i),
             player:p,
         }]
     }

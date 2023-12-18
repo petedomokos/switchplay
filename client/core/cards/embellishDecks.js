@@ -25,9 +25,9 @@ const calcDeckCompletion = cards => {
 }
 
 export const embellishDeck = (deck, settings={}) => {
-  console.log("embellishDeck", deck)
+  //console.log("embellishDeck", deck)
   const { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag } = settings;
-  console.log("timeframeKey gTag",timeframeKey, groupingTag)
+  //console.log("timeframeKey gTag",timeframeKey, groupingTag)
   const cards = deck.cards.map(c => ({
     ...c,
     status:calcCardStatus(c.items)

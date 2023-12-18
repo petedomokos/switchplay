@@ -80,15 +80,15 @@ export const transformUserForClient = serverUser => {
 	const hydratedPhotos = photos.map(p => ({ ...p, added: new Date(p.added) }))
 	//@todo - check will we ever use this for updating journeys? I dont think we need it 
 	const hydratedJourneys = journeys.map(j => transformJourneyForClient(j));
-	const isMock = username === "athlete" || username === "damian" || username.contains("demo");
+	const isMock = username === "athlete" || username === "damian" || username.includes("demo");
 	const customer = isMock ? getCustomer(serverUser._id) : serverUser.customer;
 	return {
 		...serverUser,
-		customerInfo:customer.customerInfo,
+		customerInfo:customer?.customerInfo,
 		photos:hydratedPhotos,
 		journeys:hydratedJourneys,
-		tables:isMock ? customer.tables : tables.map(t => transformTableForClient(t)),
-		decks:isMock ? customer.decks : [...decks.map(s => transformDeckForClient(s))],
+		tables:isMock ? customer?.tables : tables.map(t => transformTableForClient(t)),
+		decks:isMock ? customer?.decks : [...decks.map(s => transformDeckForClient(s))],
 		isMock
 	}
 }
@@ -207,7 +207,7 @@ export const createTable = (settings={}) => dispatch => {
 }
 
 export const updateTable = (table, shouldPersist=true, shouldUpdateStore=true) => dispatch => {
-	console.log("updateTable", table)
+	//console.log("updateTable", table)
 	//update in store
 	dispatch({ type:C.UPDATE_TABLE, table });
 

@@ -80,9 +80,15 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   //atm, longTermView is only available when playerIds are tagged and not all the same
   const longTermViewPossible = atLeastOnePlayer; 
 
+  //State
   const [timeframe, setTimeframe] = useState(timeframeOptions.singleDeck);
-  const timeframeKey = timeframe.key === "longTerm" ? "longTerm" : "singleDeck";
+  const [creatingTable, setCreatingTable] = useState(false);
+  const [decksData, setDecksData] = useState([]);
+  const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
+  const [shouldDisplayInstructions, setShouldDisplayInstructions] = useState(false);
+  const [form, setForm] = useState(null);
 
+  const timeframeKey = timeframe.key === "longTerm" ? "longTerm" : "singleDeck";
   let groupingTag;
   if(timeframeKey === "longTerm"){
     groupingTag = "player";
@@ -92,13 +98,6 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   }else{
     groupingTag = "player"
   }
-  //next - fix bug when clicking longterm view when no tags for players eg user pd
-  //and decide what to do - do we just remove teh option ?
-  //add icons (longterm = telescope, singleDeck = 'now' icon)
-
-  const [creatingTable, setCreatingTable] = useState(false);
-  
-  const [decksData, setDecksData] = useState([]);
 
   const toggleTimeframe = () => {
     if(!longTermViewPossible && timeframe.key === "singleDeck"){ 
@@ -111,6 +110,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   //for now, we just assume its the first table
   useEffect(() => {
     if(user._id && tables.length === 0 && !creatingTable){
+      console.log("creatingTable.........................................")
       setCreatingTable(true);
       createTable();
       return;
@@ -121,11 +121,13 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
     }
   },[user._id, tables.length])
 
+  if(tables.length === 0){ return null; }
+
   const table = { 
     ...tables[0], 
     title:tables[0]?.title || customerInfo?.tables[0]?.title || customerInfo?.name || "",
     photoURL:customerInfo ? `/customers/${customerInfo.key}/logo.png` : "/switchplay/logo.png",
-    logoTransform:customerInfo?.tableLogoTransform
+    logoTransform:customerInfo ? customerInfo.tableLogoTransform : "translate(-70px,-70px) scale(0.2)"
   };
   console.log("table", table)
   const tableDecks = table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
@@ -135,10 +137,6 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
 
   const containerWidth = 100000;
   const containerHeight = 100000;
-
-  const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
-  const [shouldDisplayInstructions, setShouldDisplayInstructions] = useState(false);
-  const [form, setForm] = useState(null);
 
   //we follow d3 margin convention here (eg html padding)
   //NOTE: WIDTH < HEIGHT TEMP FIXES A BUG WITH CARDTITLEFORM POSITIONING ON LARGER SCREENS
@@ -167,7 +165,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
     const playerType = user?.username === "athlete" ? "athlete" : "footballer"
     const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag, playerType }
     const embellishedDecks = embellishDecks(tableDecks, settings);
-    console.log("embellishedDecks", embellishedDecks)
+    //console.log("embellishedDecks", embellishedDecks)
     const decksData = tableLayout(embellishedDecks, nrCols, settings);
     setDecksData(decksData);
   }, [stringifiedUser, groupingTag, timeframeKey])
