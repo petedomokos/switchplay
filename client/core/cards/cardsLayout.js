@@ -18,6 +18,7 @@ export default function cardsLayout(){
 
     function update(cards){
 
+        //error in deck of decks - sections is not defined here
         const getSection = (it,i) => {
             if(it.sectionKey){ return sections.find(s => s.key === it.sectionKey) }
             return sections[i]

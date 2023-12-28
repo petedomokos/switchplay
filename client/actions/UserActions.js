@@ -43,7 +43,8 @@ export const transformDeckForClient = serverDeck => {
 		cardNr:null,
 		id:c.id || uuid(), //legacy - add uuid - can remove this func call later
 		date:new Date(c.date),
-		items:c.items.map(it => ({ ...it, status:it.status || 0, id:it.id || uuid() })) //legacy uuii()
+		items:c.items.map(it => ({ ...it, status:it.status || 0, id:it.id || uuid() })), //legacy uuii()
+		kpis:c.kpis || []
 	}))
 
 	const sortedCards = sortAscending(parsedCards, d => d.date).map((c,i) => ({ ...c, cardNr:i }))

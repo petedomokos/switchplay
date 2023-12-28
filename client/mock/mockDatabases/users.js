@@ -67,13 +67,17 @@ export const getMockUser = username => {
         }
     }
     if(username === "rregisdemo"){
+        const group = groups.teamReneeRegis.main;
+        const decks = getMockAthleteDecks(group);
+        const tables = [{ _id:"rrdemo-table", ...generalTableProperties, decks: decks.map(d => d._id) }];
+
         return {
             ...generalUserProperties,
             ...user,
             customer:customers.find(c => c._id === "teamReneeRegis"),
-            tables:[],
-            decks:getMockAthleteDecks(),
-            groupsMemberOf:groups.teamReneeRegis.main,
+            tables,
+            decks,
+            groupsMemberOf:[group],
         }
     }
     return null;

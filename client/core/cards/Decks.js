@@ -618,6 +618,7 @@ const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSele
       .timeframeKey(timeframeKey)
       .withSections(true);
 
+    console.log("processingDecksData", data)
     const processedDecksData = data
       .map((deck, i) => ({ ...deck, cards:addKpiValuesToCards(deck, datasets, i) }))
       .map(deckData => _deckLayout(deckData));

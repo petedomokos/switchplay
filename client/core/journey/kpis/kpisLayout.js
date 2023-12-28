@@ -12,7 +12,6 @@ export default function kpisLayout(){
     let milestoneId = "";
 
     function update(data){
-        //const data = _data.slice(0,1);
         //console.log("kpisLayout data", data)
         //flag
         const nrDatasetKpis = data.filter(kpi => kpi.datasetKey).length;

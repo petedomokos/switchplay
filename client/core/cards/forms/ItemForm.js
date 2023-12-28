@@ -104,7 +104,7 @@ export function splitMultilineString(str){
 }
 
 export default function ItemForm({ cardTitle, item, dimns, fontSize, save, close }) {
-  const { title, section } = item;
+  const { title, section, attachments } = item;
 
   const [value, setValue] = useState(item)
   const [editing, setEditing] = useState(false);
@@ -137,9 +137,6 @@ export default function ItemForm({ cardTitle, item, dimns, fontSize, save, close
 
   //this is a fix to esure autoFocus is triggered
   useEffect(() => { d3.timeout(() => { setEditing(true) }, 1) }, [])
-
-  const includesVideo = title.includes("Video") || title.includes("Video");
-  const attachments = includesVideo ? [{ key:"att-1", type: "video", link: "https://www.youtube.com/watch?v=6L89Uexdbwg" }] : [];
 
   return (
     <div className={classes.root} onClick={e => { e.stopPropagation() }}>

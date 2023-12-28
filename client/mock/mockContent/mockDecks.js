@@ -8,24 +8,24 @@ const cardTitles = ["Week 1", "Week 2", "Week 3", "Week 4"];
 
 const initPurpose = ["",""];
 
-const initTable = { 
-    admin:[], archivedDecks:[], created:now.getTime(), decks:[], isArchived:false, layoutFormat:"list", tags:[], isMock:true
-}
-
-export const getMockAthleteDecks = () => {
+export const getMockAthleteDecks = group => {
     return mockAthleteDecks.map(d => ({ 
         ...d, 
         isMock:true, 
-        sections, 
+        sections:JSON.stringify([]), 
+        cards:JSON.stringify(d.cards),
         purpose:d.purpose || initPurpose,
         frontCardId:d.cards[0].id, 
+        //mock athlete group only has one player
+        player:group.players[0],
+        hasPhoto:false
     }));
 }
 
 const mockAthlete = { id:"reneeRegis", firstName:"Renee", surname:"Regis" }
 const mockAthleteDecks = [
     {
-        id:"athleteDeck0",
+        _id:"athleteDeck0",
         phase:{ id:"general1", title:"General Cycle 1" },
         player:mockAthlete,
         cards:createMockCards({ startDate:seasonStartDate, nrCards:4, weeksPerCard:1, cardTitles }),
@@ -35,49 +35,49 @@ const mockAthleteDecks = [
         ]
     },
     {
-        id:"athleteDeck1",
+        _id:"athleteDeck1",
         phase:{ id:"general2", title:"General Cycle 2" },
         player:mockAthlete,
         cards:createMockCards({ startDate:addWeeks(4, seasonStartDate), nrCards:4, weeksPerCard:1, cardTitles }),
     },
     {
-        id:"athleteDeck2",
+        _id:"athleteDeck2",
         phase:{ id:"general3", title:"General Cycle 3" },
         player:mockAthlete,
         cards:createMockCards({ startDate:addWeeks(8, seasonStartDate), nrCards:4, weeksPerCard:1, cardTitles }),
     },
     {
-        id:"athleteDeck3",
+        _id:"athleteDeck3",
         phase:{ id:"specific1-1", title:"Specific 1 Cycle 1" },
         player:mockAthlete,
         cards:createMockCards({ startDate:addWeeks(12, seasonStartDate), nrCards:4, weeksPerCard:1, cardTitles }),
     },
     {
-        id:"athleteDeck4",
+        _id:"athleteDeck4",
         phase:{ id:"specific1-2", title:"Specific 1 Cycle 2" },
         player:mockAthlete,
         cards:createMockCards({ startDate:addWeeks(16, seasonStartDate), nrCards:4, weeksPerCard:1, cardTitles }),
     },
     {
-        id:"athleteDeck5",
+        _id:"athleteDeck5",
         phase:{ id:"specific2-1", title:"Specific 2 Cycle 1" },
         player:mockAthlete,
         cards:createMockCards({ startDate:addWeeks(20, seasonStartDate), nrCards:4, weeksPerCard:1, cardTitles }),
     },
     {
-        id:"athleteDeck6",
+        _id:"athleteDeck6",
         phase:{ id:"specific2-2", title:"Specific 2 Cycle 2" },
         player:mockAthlete,
         cards:createMockCards({ startDate:addWeeks(24, seasonStartDate), nrCards:4, weeksPerCard:1, cardTitles }),
     },
     {
-        id:"athleteDeck7",
+        _id:"athleteDeck7",
         phase:{ id:"competition1", title:"Competition Cycle 1" },
         player:mockAthlete,
         cards:createMockCards({ startDate:addWeeks(28, seasonStartDate), nrCards:4, weeksPerCard:1, cardTitles }),
     },
     {
-        id:"athleteDeck8",
+        _id:"athleteDeck8",
         phase:{ id:"competition2", title:"Competition Cycle 2" },
         player:mockAthlete,
         cards:createMockCards({ startDate:addWeeks(32, seasonStartDate), nrCards:4, weeksPerCard:1, cardTitles }),
@@ -100,7 +100,7 @@ const englandCards = [
             { title:"KPI: 5 successful dribbles" },
             { title:"KPI: 7 Sprints and 6 high speed runs" },
             { title:"KPI:In space to receive 30% of attacks" },
-            { title:"Watch video and answer questions" },
+            { title:"Watch video and answer questions", attachments: [{ key:"att-1", type: "video", link: "https://www.youtube.com/watch?v=6L89Uexdbwg" }] },
         ]
     },
     {
@@ -110,7 +110,7 @@ const englandCards = [
             { title:"KPI: 6 successful dribbles" },
             { title:"KPI: 8 Sprints and 6 high speed runs" },
             { title:"KPI: In space to receive 33% of attacks" },
-            { title:"Watch video and answer questions" },
+            { title:"Watch video and answer questions", attachments: [{ key:"att-1", type: "video", link: "https://www.youtube.com/watch?v=6L89Uexdbwg" }] },
         ]
     },
     {
@@ -120,7 +120,7 @@ const englandCards = [
             { title:"KPI: 7 successful dribbles" },
             { title:"KPI: 9 Sprints and 7 high speed runs"  },
             { title:"KPI: In space to receive 35% of attacks" },
-            { title:"Watch video and answer questions" },
+            { title:"Watch video and answer questions", attachments: [{ key:"att-1", type: "video", link: "https://www.youtube.com/watch?v=6L89Uexdbwg" }] },
         ]
     },
     {
@@ -130,7 +130,7 @@ const englandCards = [
             { title:"KPI: 8 successful dribbles" },
             { title:"KPI: 10 Sprints and 8 high speed runs"  },
             { title:"KPI: In space to receive 37% of attacks" },
-            { title:"Watch video and answer questions" },
+            { title:"Watch video and answer questions", attachments: [{ key:"att-1", type: "video", link: "https://www.youtube.com/watch?v=6L89Uexdbwg" }] },
         ]
     },
     {
@@ -140,7 +140,7 @@ const englandCards = [
             { title:"KPI: 9 successful dribbles" },
             { title:"KPI:11 Sprints and 8 high speed runs"  },
             { title:"KPI: In space to receive 40% of attacks" },
-            { title:"Watch video and answer questions" },
+            { title:"Watch video and answer questions", attachments: [{ key:"att-1", type: "video", link: "https://www.youtube.com/watch?v=6L89Uexdbwg" }] },
         ]
     },
     {
@@ -150,7 +150,7 @@ const englandCards = [
             { title:"KPI: 9 successful dribbles" },
             { title:"KPI: 11 Sprints and 8 high speed runs"  },
             { title:"KPI: In space to receive 40% of attacks" },
-            { title:"Watch video and answer questions" },
+            { title:"Watch video and answer questions", attachments: [{ key:"att-1", type: "video", link: "https://www.youtube.com/watch?v=6L89Uexdbwg" }] },
         ]
     },
 ]
@@ -222,11 +222,13 @@ export const getPlayerDecks = group => {
         //for now, only 1 deck per player, with generic content but custom statuses
         const initCards = createMockCards({ startDate:footballSeasonStartDate, nrCards:5, weeksPerCard:1, cardTitles });
         const cards = customiseCardsForPlayer(customiseCardsForActivity(initCards, "football"), p, i);
+
+        //[{ key:"att-1", type: "video", link: "https://www.youtube.com/watch?v=6L89Uexdbwg" }]
         return {
             _id:`deck-${p._id}`,
             sections:JSON.stringify(englandSections),
             cards:JSON.stringify(cards),
-            frontCardId:`${customiseFrontCardId(cards, p,i)}`,
+            frontCardId:customiseFrontCardId(cards, p,i),
             kpis:[ ...group.kpis, ...getPlayerKpis(p) ]
                 .map(kpi => ({ 
                     ...kpi, 
@@ -234,7 +236,8 @@ export const getPlayerDecks = group => {
                         obj.datasetKey === kpi.datasetKey && obj.measureKey === kpi.measureKey)?.value
                 })),
             player:p,
-            settings:group.deckSettings
+            settings:group.deckSettings,
+            hasPhoto:true
         }
     }
 

@@ -5,6 +5,7 @@ import { convertToPC, round, roundDown, roundUp, getRangeFormat, dateIsInRange, 
 import { linearProjValue } from "../journey/helpers";
 import { isNumber, calcPCIntervalsFromValue } from '../../data/dataHelpers';
 import { calcExpected, getStatValue } from "./kpiValuesHelpers"
+import { DECK_SETTINGS } from './constants';
 
 //next - make these work for what we need so far, using the existing code in helpers file if poss
 const calcBestPossibleValue = kpi => kpi.order === "highest is best" ? kpi.max : kpi.min;
@@ -13,9 +14,8 @@ const calcWorstPossibleValue = kpi => kpi.order === "highest is best" ? kpi.min 
 //export function hydrateJourneyData(data, user, datasets){
 export const addKpiValuesToCards = (deck, datasets=[], deckIndex) => {
     const { player, kpis=[], cards=[], settings=[] } = deck
-    //console.log("addKpiValuesToCards deck:", deck)
-    //console.log("datasets", datasets)
-    if(cards.length === 0 || kpis.length === 0){ return cards; }
+    const settingsWithDefaults = [...DECK_SETTINGS, ...settings]
+    if(cards.length === 0){ return cards; }
 
     const orderedCards = sortAscending(cards, d => d.date);
     const deckStartDate = deck.startDate || orderedCards[0].date;
@@ -65,7 +65,7 @@ export const addKpiValuesToCards = (deck, datasets=[], deckIndex) => {
 
     const cardOptions = {
         now: new Date(),
-        rangeFormat: getRangeFormat(settings.cardDateGranularity),
+        rangeFormat: getRangeFormat(settingsWithDefaults.cardDateGranularity),
         deckStartDate,
         deckEndDate,
         getValue,
@@ -77,7 +77,7 @@ export const addKpiValuesToCards = (deck, datasets=[], deckIndex) => {
         //base case
         if(!next){ return addedSoFar; }
         const prevCardDate = addedSoFar[addedSoFar.length - 1]?.date;
-        const nextAdded = addValuesToCard(next, kpisWithDeckValues, settings, { ...cardOptions, prevCardDate });
+        const nextAdded = addValuesToCard(next, kpisWithDeckValues, settingsWithDefaults, { ...cardOptions, prevCardDate });
         //recursive call
         return addValuesToNextCard(remaining.slice(1, remaining.length), [ ...addedSoFar, nextAdded])
     }

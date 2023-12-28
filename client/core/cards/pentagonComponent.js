@@ -304,7 +304,6 @@ export default function pentagonComponent() {
                         sectionG.select("path.section-hitbox")
                             .attr("d", `M${ax},${ay} L${bx},${by} L${cx},${cy} L${dx},${dy}`)
                             .on("click", function(e,d){ 
-                                console.log("sect click")
                                 e.stopPropagation();
                                 onClickSection.call(this.parentNode, e, d); 
                             });

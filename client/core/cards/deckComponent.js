@@ -421,7 +421,6 @@ export default function deckComponent() {
             }
 
             function update(_deckData, options={}){
-                //console.log("update", _deckData.photoUrl)
                 const { } = options;
                 const { id, frontCardNr, startDate, listPos, colNr, rowNr, purposeData, sections, photoUrl } = _deckData;
 

@@ -55,6 +55,9 @@ const createDeckOfDecks = (group, groupingTag) => {
     //if grouped by player, then deck title is the player. Else its the phase.
     player:groupingTag === "player" ? groupingTagObj : null,
     phase:groupingTag === "phase" ? groupingTagObj : null,
+    hasPhoto:true,
+    sections:[],
+    kpis:[],
     //cards are the decks themselves
     cards:sortedDecks.map((d,i) => ({
       id:d.id,
@@ -67,7 +70,7 @@ const createDeckOfDecks = (group, groupingTag) => {
         itemNr:c.cardNr,
         title:c.title,
         status:c.status //this is already calculated in the embellishDecks call in CardTable
-      }))
+      })),
     }))
   }
 }
@@ -93,6 +96,7 @@ const wrapPhase = phaseKey => phaseKey ? wrapUrl(phaseKey, "png", "phases") : ""
 
 //photo dimns are based on reneeRegis photoSize 260 by 335.48 
 const getPhotoUrl = (deck, settings) => {
+  if(!deck.hasPhoto){ return false; }
   const { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag } = settings;
   //if deck of decks, we weant it to be of the groupingTagid
   const playerId = deck.player?.id;
