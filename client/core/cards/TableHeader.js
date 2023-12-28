@@ -95,6 +95,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 export default function TableHeader({ table, dimns, timeframe, nrTimeframeOptions, toggleTimeframe }) {
+    console.log("T", table)
     const { width, height, padding } = dimns;
     const contentsWidth = width - padding.left - padding.right;
     const contentsHeight = height - padding.top - padding.bottom;

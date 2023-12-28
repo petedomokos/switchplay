@@ -1,5 +1,12 @@
 export const customers = [
     {
+        _id:"ipswich",
+        name:"Ipswich Town FC",
+        settings:[],
+        tableLogoTransform:`translate(-578px, -730px) scale(0.026)`,
+        //logo dimns - 1280 * 720
+    },
+    {
         _id:"england",
         name:"England",
         settings:[],

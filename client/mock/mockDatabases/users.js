@@ -20,6 +20,12 @@ const generalTableProperties = {
 //then populate these properties in the saqem way in teh getMockUser function
 const users = [
     {
+        _id:"db",
+        username:"dbdemo",
+        firstName:"Damian",
+        surname:"Briggs",
+    },
+    {
         _id:"rg",
         username:"rgdemo",
         firstName:"Ryan",
@@ -30,7 +36,8 @@ const users = [
         username:"rrdemo",
         firstName:"Renee",
         surname:"Regis",
-    }
+    },
+
 ]
 
 export const userIdIsMock = userId => {
@@ -44,6 +51,28 @@ export const getMockUserById = id => {
 
 export const getMockUser = username => {
     const user = users.find(u => u.username === username);
+    if(username === "dbdemo"){
+        const decks = getPlayerDecks(groups.england.u18Men).map(d => ({
+            ...d,
+            kpis:d.kpis.map(kpi => ({ ...kpi, key:`${kpi.datasetKey}-${kpi.measureKey}`}))
+        }));
+        //console.log("decks........", decks)
+        const tables = [{ _id:"rgdemo-table", ...generalTableProperties, decks: decks.map(d => d._id) }];
+        //const tables = decks.map(d => d.id);
+        return {
+            ...generalUserProperties,
+            ...user,
+            //note - customer has been populated with info, but not players, as the players are populated in groups instead
+            customer:customers.find(c => c._id === "ipswich"),
+            //tables and decks are created on client, based on the players in the group
+            tables,
+            decks,
+            //note - groups has been populated with players, as would be the case on server
+            groupsMemberOf:[groups.england.u18Men],
+            datasetsMemberOf:englandDatasets,
+            loadedDatasets:englandDatasets
+        }
+    }
     if(username === "rgdemo"){
         const decks = getPlayerDecks(groups.england.u18Men).map(d => ({
             ...d,
