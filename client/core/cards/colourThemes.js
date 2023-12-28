@@ -62,7 +62,8 @@ export const GREY_COLOUR_THEME = (backgroundColour) => ({
             return grey10(5.5);
         },
         STROKE:cardD => {
-            const { pos } = cardD;
+            const { pos, cardNr, isCurrent } = cardD;
+            if(isCurrent) { return "white" }
             return `hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`;
         },
         EXPAND_COLLAPSE_BTN:grey10(5.5),
@@ -90,7 +91,10 @@ export const GREY_COLOUR_THEME = (backgroundColour) => ({
     },
     BACK_OF_CARD:{
         FILL:cardD => { return grey10(9.75); },
-        STROKE:cardD => { return grey10(5.5); },
+        STROKE:cardD => { 
+            if(cardD.isCurrent){ return grey10(4); }
+            return grey10(5.5); 
+        },
         HEADER:cardD => {
             return {
                 DATE:grey10(7),
@@ -144,7 +148,8 @@ export const BLUE_COLOUR_THEME = (backgroundColour) => ({
             return `hsla(211, 96%, ${l * (cardsShadowFactor ** pos)}%, 1)`;
         },
         STROKE:cardD => {
-            const { pos } = cardD;
+            const { pos, cardNr, isCurrent } = cardD;
+            if(isCurrent) { return "white" }
             return `hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`;
         },
         EXPAND_COLLAPSE_BTN:grey10(5.5),
@@ -172,7 +177,10 @@ export const BLUE_COLOUR_THEME = (backgroundColour) => ({
     },
     BACK_OF_CARD:{
         FILL:cardD => { return grey10(9.75); },
-        STROKE:cardD => { return grey10(5.5); },
+        STROKE:cardD => { 
+            if(cardD.isCurrent){ return grey10(4); }
+            return grey10(5.5); 
+        },
         HEADER:cardD => {
             return {
                 DATE:grey10(4),
@@ -240,7 +248,8 @@ export const SATURATED_BLUE_COLOUR_THEME = (bgColour) => ({
             return `hsla(211, 35%, ${l * (cardsShadowFactor ** pos)}%, 1)`; //was 96% saturation in nrmal blue colour scheme
         },
         STROKE:cardD => {
-            const { pos, isHeld } = cardD;
+            const { pos, cardNr, isHeld, isCurrent } = cardD;
+            if(isCurrent) { return "white" }
             if(!isHeld){
                 return `hsla(211, 35%, ${80 * (cardsShadowFactor ** 5)}%, 1)`
             }
@@ -271,7 +280,10 @@ export const SATURATED_BLUE_COLOUR_THEME = (bgColour) => ({
     },
     BACK_OF_CARD:{
         FILL:cardD => { return grey10(9.75); },
-        STROKE:cardD => { return grey10(5.5); },
+        STROKE:cardD => { 
+            if(cardD.isCurrent){ return grey10(4); }
+            return grey10(5.5); 
+        },
         HEADER:cardD => {
             return {
                 DATE:grey10(4),

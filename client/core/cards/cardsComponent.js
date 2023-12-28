@@ -241,10 +241,12 @@ export default function cardsComponent() {
             const getCardStroke = d => COLOURS.CARD.STROKE(d);
             const getBackOfCardFill = d => COLOURS.BACK_OF_CARD.FILL(d);
             const getBackOfCardStroke = d => COLOURS.BACK_OF_CARD.STROKE(d);
-            const getBackOfCardStrokeWidth = d => 0.5;
+            const getBackOfCardStrokeWidth = d => d.isCurrent ? (d.isPlaced ? 2 : 0.75) : 0.5;
 
             const getCardStrokeWidth = cardD => {
-                return STYLES.CARD.STROKE_WIDTH * (cardD.isPlaced && cardD.isHidden ? 3 : 1)
+                const { isPlaced, isHidden, isCurrent } = cardD;
+                const currentMultiplier = isPlaced ? (cardsAreFlipped ? 5 : 3) : 1.25;
+                return STYLES.CARD.STROKE_WIDTH * (isPlaced && isHidden ? 3 : 1) * (isCurrent ? currentMultiplier : 1)
             }
 
             //stroke-widths

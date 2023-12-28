@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { GREY_COLOUR_THEME, BLUE_COLOUR_THEME, SATURATED_BLUE_COLOUR_THEME } from './colourThemes';
 
+export const NOW = new Date("2024/07/12");
 
 export const DECK_SETTINGS = [
     {

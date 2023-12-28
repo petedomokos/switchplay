@@ -4,6 +4,7 @@ import { isNumber } from '../../data/dataHelpers';
 import { mockCardFlags } from './mockCardFlags';
 import { purposeLayout } from './purposeLayout';
 import kpisLayout from "../journey/kpis/kpisLayout";
+import { NOW } from "./constants"
 
 export default function cardsLayout(){
     let sections;
@@ -16,8 +17,6 @@ export default function cardsLayout(){
     const _kpisLayout = kpisLayout();
 
     function update(cards){
-        //console.log("cardsLayout........", cards)
-        const now = new Date();
 
         const getSection = (it,i) => {
             if(it.sectionKey){ return sections.find(s => s.key === it.sectionKey) }
@@ -55,7 +54,7 @@ export default function cardsLayout(){
                 info:{ 
                     ...info,
                     date,
-                    dateCount:calcDateCount(now, date),
+                    dateCount:calcDateCount(NOW, date),
                     title
                 },
                 kpis:_kpisLayout(kpis)
@@ -63,8 +62,6 @@ export default function cardsLayout(){
             }
         })
         .map(c => { 
-            //console.log("cardNr isHeldxxxxx", c.cardNr, c.isHeld)
-            //console.log("wasPlaced?", prevData?.find(card => card.cardNr === c.cardNr)?.isPlaced)
             const nrPlacedCards = cards.filter(card => card.cardNr < frontCardNr).length;
             const nrVisiblePlacedCards = d3.min([nrPlacedCards, 5]);
             const slotPos = nrVisiblePlacedCards + c.pos;

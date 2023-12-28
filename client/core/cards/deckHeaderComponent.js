@@ -72,7 +72,6 @@ export default function deckHeaderComponent() {
         updateDimns();
         // expression elements
         selection.each(function (data) {
-            console.log("header", data)
             containerG = d3.select(this);
 
             if(containerG.select("g").empty()){
