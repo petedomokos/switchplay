@@ -91,7 +91,6 @@ export default function mediaComponent() {
         })
 
         function update(data){
-            //console.log("data", withTextInfo, data)
             const { id, firstname, surname, age, position, isCurrent, isFuture, settings, personType } = data;
             //photosdata can be passed in, or otherwise it constructs the data from the photos array
             const photosData = data.photosData || (isCurrent ? data.photos["profile"] : data.photos[currentPage.key]);

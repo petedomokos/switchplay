@@ -73,12 +73,12 @@ const createDeckOfDecks = (group, groupingTag) => {
 }
 
 const formatDecks = (decks, settings={}) => {
-  const { timeframeKey, groupingTag, playerType } = settings;
+  const { timeframeKey, groupingTag } = settings;
   //console.log("formatDecks..... tKey", timeframeKey)
   //console.log("formatDecks..... gkey", groupingTag)
   if(!groupingTag){ return decks; }
   //group decks by tags
-  const groupedDecks = groupDecks(decks, groupingTag, playerType);
+  const groupedDecks = groupDecks(decks, groupingTag);
   //console.log("groupedDecks", groupedDecks)
   //error is above line - as all decks are reneeregis, the grouping tag should put them altogether
   return groupedDecks.map(group => timeframeKey === "singleDeck" ? 

@@ -1,7 +1,6 @@
 import { createInitCards } from "./initDeck";
 import { addWeeks } from "../util/TimeHelpers"
 import { hydrateDeckSections } from './sections';
-import { tagInfoArray } from "./tagInfoArray";
 
 const seasonStartDate = new Date();// new Date("2024-03-01");
 const footballSeasonStartDate = new Date("2024/06/01");
@@ -11,7 +10,8 @@ const sections = hydrateDeckSections();
 const initPurpose = ["",""];
 
 const initTable = { 
-    admin:[], archivedDecks:[], created:new Date(), decks:[], isArchived:false, layoutFormat:"list", tags:[], isMock:true
+    admin:[], archivedDecks:[], created:new Date(), decks:[], isArchived:false, 
+    layoutFormat:"list", tags:[], isMock:true
 }
 
 export const getMockTables = user => {
@@ -302,6 +302,27 @@ export const getEnglandPlayersWithDecks = () => {
     }
 
     return englandPlayers.map((p,i) => ({
+        ...p,
+        decks:getDecksForPlayer(p,i)
+    }))
+}
+
+export const getPlayerDecks = players => {
+    //helper
+    const getDecksForPlayer = (p,i) => {
+        //for now, only 1 deck per player, with generic content but custom statuses
+        const initCards = createInitCards({ startDate:footballSeasonStartDate, nrCards:5, weeksPerCard:1, cardTitles });
+        const cards = customiseCardsForPlayer(customiseCardsForActivity(initCards, "football"), p, i);
+        return [{
+            id:`deck-${p.id}`,
+            sections:englandSections,
+            cards,
+            frontCardId:customiseFrontCardId(cards, p,i),
+            player:p,
+        }]
+    }
+
+    return players.map((p,i) => ({
         ...p,
         decks:getDecksForPlayer(p,i)
     }))

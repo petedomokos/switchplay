@@ -61,7 +61,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 export default withRouter(function Signin({ onSignin, serverErrorMesg, location, history }) {
-  console.log("Signin", auth.isAuthenticated())
+  //console.log("Signin", auth.isAuthenticated())
   const classes = useStyles()
   const [values, setValues] = useState({
       emailOrUsername: '',
@@ -89,7 +89,6 @@ export default withRouter(function Signin({ onSignin, serverErrorMesg, location,
     setValues({ ...values, [name]: event.target.value })
   }
 
-  console.log("serverErrmesg", serverErrorMesg)
   const serverErrorUserMesg = serverErrorMesg === "Unauthorized" ? "Could not sign you in. Please check your username/email and password." : "";
 
   return (

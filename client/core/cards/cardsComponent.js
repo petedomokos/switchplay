@@ -316,7 +316,7 @@ export default function cardsComponent() {
                     .attr("class", d => `card card-${d.id}`)
                     .attr("opacity", 1)
                     .each(function(cardD,i){
-                        const { id, cardNr, pos, isHeld, isHidden, isSelected, profile } = cardD;
+                        const { id, cardNr, pos, isHeld, isHidden, isSelected } = cardD;
                         const itemsData = timeframeKey !== "singleDeck" || isHidden ? [] : (selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items);
 
                         //front components
@@ -429,7 +429,7 @@ export default function cardsComponent() {
                     })
                     .sort((a,b) => d3.descending(a.cardNr, b.cardNr))
                     .each(function(cardD,i){
-                        const { deckId, cardNr, id, pos, isHidden, slotPos, isHeld, isPlaced, isFront, hasBeenPickedUp, isNext, isSecondNext, isSelected, info, status, profile, deckListPos, purposeData=[], flagsData } = cardD;
+                        const { deckId, cardNr, id, pos, isHidden, slotPos, isHeld, isPlaced, isFront, hasBeenPickedUp, isNext, isSecondNext, isSelected, info, status, deckListPos, purposeData=[], flagsData } = cardD;
                         const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
                         const items = itemsComponents[id];
 
@@ -914,7 +914,7 @@ export default function cardsComponent() {
                                 //.call(fadeIn, { transition:{ delay: 500, duration:500 }})
                                 .merge(mediaG)
                                 .attr("transform", `translate(0.5,${headerHeight})`)
-                                .datum({ ...profile.info, photosData })
+                                .datum({ id:`deck-${deckId}-card-${id}`, photosData })
                                 .call(media)
                                 .call(fadeInOut, isFront, { 
                                     transitionIn:{ delay: 0, duration:200 },
@@ -928,6 +928,7 @@ export default function cardsComponent() {
                         //kpis
                         //const textInfoHeight = 20;
                         const kpis = kpisComponents[id]
+                            .milestoneId(`deck-${deckId}-card-${id}`)
                             .width(contentsWidth)
                             .height(kpisHeight)
                             //.expandedHeight(contentsHeight - textInfoHeight)
@@ -956,7 +957,6 @@ export default function cardsComponent() {
                             .profileIsSelected(false)
 
                         const shouldShowKpis = /*deckIsSelected &&*/ isFront && cardsAreFlipped && !selectedSectionKey;
-
                         const kpisG = backContentsG.selectAll("g.kpis").data(shouldShowKpis ? [1] : []);
                         kpisG.enter()
                             .append("g")
@@ -964,7 +964,7 @@ export default function cardsComponent() {
                                 .call(fadeIn)
                                 .merge(kpisG)
                                 .attr("transform", `translate(0, ${headerHeight + mediaHeight})`)
-                                .datum(profile.kpis)
+                                .datum(cardD.kpis)
                                 .call(kpis);
 
                         kpisG.exit().call(remove);

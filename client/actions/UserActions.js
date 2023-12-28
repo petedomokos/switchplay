@@ -7,13 +7,19 @@ import { signout } from './AuthActions.js';
 import { transformJourneyForClient } from "./JourneyActions"
 import { initDeck } from '../data/initDeck';
 import { hydrateDeckSections } from '../data/sections';
-import { getMockTables, getMockDecks } from '../data/mockDecks';
+import { getMockTables, getMockDecks } from '../data/OldMockDecks';
 import uuid from 'react-uuid';
 import { addWeeks } from '../util/TimeHelpers';
-import { getCustomer } from '../data/Customers';
+import { getCustomer } from '../data/OldCustomers';
+import { userIdIsMock, getMockUserById } from '../mock/mockDatabases/users';
+import { sortAscending } from '../util/ArrayHelpers';
 
+export const transformGroupForClient = group => ({
+	...group,
+	kpis:group.kpis.map(kpi => ({ ...kpi, key:`${kpi.datasetKey}-${kpi.measureKey}`}))
+})
 export const transformTableForClient = serverTable => {
-	//console.log("transformTableForClient", serverTable)
+	console.log("transformTableForClient", serverTable)
 	const { created, updated, ...clientTable } = serverTable;
 	return {
 		...clientTable,
@@ -24,8 +30,8 @@ export const transformTableForClient = serverTable => {
 }
 
 export const transformDeckForClient = serverDeck => {
-	//console.log("tDFC.............")
-	const { created, updated, cards, purpose=[], sections, tags, frontCardId, ...clientDeck } = serverDeck;
+	//console.log("tDFC.............", serverDeck)
+	const { created, updated, cards, purpose=[], sections, tags, frontCardId, player, ...clientDeck } = serverDeck;
 	//ensure prupose has at least two paragraphs
 	const hydratedPurpose = purpose.length === 0 ? ["",""] : purpose.length === 1 ? [purpose[0], ""] : purpose;
 	const hydratedDeckSections = hydrateDeckSections(sections ? JSON.parse(sections) : undefined);
@@ -40,12 +46,15 @@ export const transformDeckForClient = serverDeck => {
 		items:c.items.map(it => ({ ...it, status:it.status || 0, id:it.id || uuid() })) //legacy uuii()
 	}))
 
+	const sortedCards = sortAscending(parsedCards, d => d.date).map((c,i) => ({ ...c, cardNr:i }))
+
 	const now = new Date();
-	const earliestCardDate = d3.min(parsedCards, c => c.date);
+	const earliestCardDate = sortedCards[0]?.date; //d3.min(parsedCards, c => c.date);
 
 	//legacy code to ensure all decks have startDate - can remove after next update into db
-	const startDate = serverDeck.startDate && new Date(serverDeck.startDate) < earliestCardDate ? new Date(serverDeck.startDate) : 
-		(earliestCardDate < now ? addWeeks(-1, earliestCardDate) : addWeeks(-1, now))
+	const customStartDate = serverDeck.customStartDate ? new Date(serverDeck.customStartDate) : null;
+	const startDate = customStartDate && customStartDate < earliestCardDate ? 
+		customStartDate : addWeeks(-1, (earliestCardDate || now))
 
 	return {
 		...clientDeck,
@@ -57,7 +66,8 @@ export const transformDeckForClient = serverDeck => {
 		purpose:hydratedPurpose,
 		tags:tags?.map(tag => JSON.parse(tag)) || [],
 		sections:hydratedDeckSections,
-		cards:parsedCards
+		cards:sortedCards,
+		player:player ? { ...player, id:player._id } : null
 	}
 }
 
@@ -76,20 +86,17 @@ export const transformDeckForServer = clientDeck => {
 //getMock functions below
 export const transformUserForClient = serverUser => {
 	console.log("transformUserForClient", serverUser)
-	const { journeys=[], photos=[], decks=[], tables=[], username } = serverUser;
+	const { journeys=[], photos=[], decks=[], tables=[], groups=[] } = serverUser;
 	const hydratedPhotos = photos.map(p => ({ ...p, added: new Date(p.added) }))
 	//@todo - check will we ever use this for updating journeys? I dont think we need it 
 	const hydratedJourneys = journeys.map(j => transformJourneyForClient(j));
-	const isMock = username === "athlete" || username === "damian" || username.includes("demo");
-	const customer = isMock ? getCustomer(serverUser._id) : serverUser.customer;
 	return {
 		...serverUser,
-		customerInfo:customer?.customerInfo,
 		photos:hydratedPhotos,
 		journeys:hydratedJourneys,
-		tables:isMock ? customer?.tables : tables.map(t => transformTableForClient(t)),
-		decks:isMock ? customer?.decks : [...decks.map(s => transformDeckForClient(s))],
-		isMock
+		tables:tables.map(t => transformTableForClient(t)),
+		decks:decks.map(s => transformDeckForClient(s)),
+		groups:groups.map(g => tranformGroupForClient(g))
 	}
 }
 
@@ -117,30 +124,26 @@ export const createUser = user => dispatch => {
 
 //to fetch a user in full
 export const fetchUser = id => dispatch => {
+	//mock users
+	const mockUser = getMockUserById(id);
+	console.log("fetchUser...mockUser?", mockUser)
+	if(mockUser){
+		dispatch({ type:C.SIGN_IN, user:transformUserForClient(mockUser) });
+		return;
+	}
+	//normal users
 	fetchThenDispatch(dispatch, 
 		'loading.user',
 		{
 			url: '/api/users/'+id,
 			requireAuth:true,
 			nextAction: data => {
-				//console.log("load user returned", data._id)
 				const jwt = auth.isAuthenticated();
-				//console.log("jwt user", jwt.user?._id)
 				//may be reloading the signed in user
-				if(jwt.user._id === data._id){
-					//need to replicate this logic on the signin page too somehow, or point it to here
-					//first - 
-					//console.log('signin...transforming user........', data)
-					const _user = transformUserForClient(data)
-					console.log('DONE1: transformed user........', _user)
-					return { type:C.SIGN_IN, user:_user };
-				}
-				//console.log('transforming user........', data)
-				const _user = transformUserForClient(data)
-				console.log('DONE2: transformed user........', _user)
-				return { type:C.LOAD_USER, user:_user };
-
-				//return { type:C.LOAD_USER, user:transformUserForClient(data) };
+				return {
+					type:jwt.user._id === data._id ? C.SIGN_IN : C.LOAD_USER, 
+					user:transformUserForClient(data) 
+				};
 			}
 		}) 
 }
@@ -160,6 +163,7 @@ export const fetchUsers = () => dispatch => {
 }
 
 export const updateUser = (id, formData, history) => dispatch => {
+	console.log("updateUser......................", id, userIdIsMock(id))
 	//setTimeout(() => {
 		fetchThenDispatch(dispatch, 
 			'updating.user',
@@ -188,7 +192,10 @@ export const updateUser = (id, formData, history) => dispatch => {
 }
 
 export const createTable = (settings={}) => dispatch => {
+	console.log("createTable...........")
 	const jwt = auth.isAuthenticated();
+	if(!jwt.user || jwt.user.isMock) { return; }
+	
 	const table = { owner: jwt.user._id, ...settings };
 
 	fetchThenDispatch(dispatch, 
@@ -207,14 +214,14 @@ export const createTable = (settings={}) => dispatch => {
 }
 
 export const updateTable = (table, shouldPersist=true, shouldUpdateStore=true) => dispatch => {
-	//console.log("updateTable", table)
+	console.log("updateTable................", table)
 	//update in store
 	dispatch({ type:C.UPDATE_TABLE, table });
 
 	if(!shouldPersist || table.isMock){ return; }
 
 	const jwt = auth.isAuthenticated();
-	if(!jwt.user) { return; }
+	if(!jwt.user || jwt.user.isMock) { return; }
 
 	fetchThenDispatch(dispatch, 
 		'updating.user',
@@ -229,6 +236,7 @@ export const updateTable = (table, shouldPersist=true, shouldUpdateStore=true) =
 
 export const createDeck = (settings, tableId) => dispatch => {
 	const jwt = auth.isAuthenticated();
+	if(jwt?.user.isMock){ return; }
 	//@todo - move this to server
 
 	const deck = settings?.copy || initDeck(jwt.user._id, settings);
@@ -250,17 +258,14 @@ export const createDeck = (settings, tableId) => dispatch => {
 }
 
 export const updateDeck = (deck, shouldPersist=true) => dispatch => {
-	//console.log("updateDeck", shouldPersist, deck)
+	console.log("updateDeck", shouldPersist, deck)
 	//update in store
 	dispatch({ type:C.UPDATE_DECK, deck });
 
 	if(!shouldPersist || deck.isMock){ return; }
 
 	const jwt = auth.isAuthenticated();
-	if(!jwt.user) {
-		//console.log("no user signed in");
-		return;
-	}
+	if(!jwt.user || jwt?.user.isMock) { return;}
 
 	const serverDeck = transformDeckForServer(deck);
 	fetchThenDispatch(dispatch, 
@@ -283,10 +288,7 @@ export const updateDecks = (details, shouldPersist=true) => dispatch => {
 	if(!shouldPersist){ return; }
 
 	const jwt = auth.isAuthenticated();
-	if(!jwt.user) {
-		//console.log("no user signed in");
-		return;
-	}
+	if(!jwt.user || jwt.user.isMock) { return; }
 
 	fetchThenDispatch(dispatch, 
 		'updating.user',
@@ -306,7 +308,7 @@ export const deleteDeck = (deckId, table, shouldPersist=true) => dispatch => {
 	if(!shouldPersist){ return; }
 
 	const jwt = auth.isAuthenticated();
-	if(!jwt.user) { return; }
+	if(!jwt.user || jwt.user.isMock) { return; }
 
 	//work out why thus isnt callintg remove
 	//then put updateTble back in too, and see if they both work

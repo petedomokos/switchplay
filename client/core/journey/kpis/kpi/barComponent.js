@@ -45,6 +45,7 @@ export default function barComponent() {
         return data.forEach((d,i) => {
             const { barData } = d;
             const { sectionsData, stepsData } = barData;
+            //console.log("barData", barData)
 
             const width = _width(d,i)
             const height = _height(d,i);
@@ -217,6 +218,7 @@ export default function barComponent() {
                         .attr("class", "bar-section")
                         .call(fadeIn)
                             .each(function(d,j){
+                                //console.log("sectionD enter", d)
                                 const sectionWidth = scale(bound(d.endValue)) - scale.range()[0];
                                 //append rect
                                 d3.select(this)

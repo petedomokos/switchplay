@@ -17,7 +17,6 @@ const getFrontCardNr = (cards, frontCardId) => {
 }
 
 export default function deckLayout(){
-    let datasets = [];
     let info = {};
     let format = "profiles";
     let withSections = null; //true, false or null
@@ -27,11 +26,7 @@ export default function deckLayout(){
     const _cardsLayouts = {};
 
     function update(deckData){
-        //next - photoUrl in here - based on playerId or phase or just deck.photoURL depending
-        //on value of timeframeKey/timeframe and of groupingTag
-        //add regirenee photo to backend, and get url working
-        //thenadd mockfootball data, with playerId tags so deck photos show for all players
-        //console.log("deckData", withSections, deckData)
+        //console.log("deckLayout...............................................................", deckData)
 
         const { cards, id, listPos, purpose, frontCardId } = deckData;
         if(!_cardsLayouts[id]){
@@ -40,12 +35,15 @@ export default function deckLayout(){
         const _cardsLayout = _cardsLayouts[id];
         //sections - if withSections, we create default sectins if none exist. if false, there are never sections
         const sections = withSections ? deckData.sections : null;
-        //cards
-        const numberedCards = sortAscending(cards, d => d.date).map((c,i) => ({ ...c, cardNr:i }));
-        const frontCardNr = getFrontCardNr(numberedCards, frontCardId);
-        
-        _cardsLayout.sections(sections).frontCardNr(frontCardNr);
-        const cardsData = _cardsLayout(numberedCards.map(c => ({ ...c, deckId:id, deckListPos:listPos })));
+        //cards - numbered when loaded into client
+        //const numberedCards = sortAscending(cards, d => d.date).map((c,i) => ({ ...c, cardNr:i }));
+        const frontCardNr = getFrontCardNr(cards, frontCardId);
+
+        _cardsLayout
+            .sections(sections)
+            .frontCardNr(frontCardNr);
+
+        const cardsData = _cardsLayout(cards.map(c => ({ ...c, deckId:id, deckListPos:listPos })));
 
         return {
             ...deckData,
@@ -64,11 +62,6 @@ export default function deckLayout(){
     update.withSections = function (value) {
         if (!arguments.length) { return withSections; }
         withSections = value;
-        return update;
-    };
-    update.datasets = function (value) {
-        if (!arguments.length) { return datasets; }
-        datasets = value;
         return update;
     };
     update.info = function (value) {

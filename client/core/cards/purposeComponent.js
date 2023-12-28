@@ -1,19 +1,7 @@
 import * as d3 from 'd3';
 import { grey10, COLOURS, DIMNS, FONTSIZES, STYLES, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIONS } from "./constants";
-import cardsComponent from './cardsComponent';
-import headerComponent from './headerComponent';
-import contextMenuComponent from "./contextMenuComponent";
 import textComponent from './textComponent';
-import dragEnhancements from '../journey/enhancedDragHandler';
-import { updateRectDimns } from '../journey/transitionHelpers';
-import { getTransformationFromTrans } from '../journey/helpers';
-import { isNumber } from '../../data/dataHelpers';
-import { maxDimns } from "../../util/geometryHelpers";
-import { angleFromNorth } from '../journey/screenGeometryHelpers';
-import { icons } from '../../util/icons';
 import { fadeIn, remove, getPosition, fadeInOut } from '../journey/domHelpers';
-import { TextBox } from 'd3plus-text';
-import { ContactSupportOutlined, ControlPointRounded } from '@material-ui/icons';
 
 export default function purposeComponent() {
     //API SETTINGS

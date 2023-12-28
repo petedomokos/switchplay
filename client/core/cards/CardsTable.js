@@ -66,14 +66,14 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, updateDecks, deleteDeck, hideMenus, showMenus }) => {
-  const { tables=[], decks=[], customerInfo } = user;
-  const stringifiedUser = JSON.stringify(user);
+  const { tables=[], decks=[], customer } = user;
+  const stringifiedDecks = JSON.stringify(decks);
   console.log("CardsTable", user)
-  //@todo - move creating flag to asyncProcesses
-  //helper consts
-  //data will be grouped by playerId if at least one deck has a playerid tag, otherwise it is not grouped
-  const playerIds = decks.map(d => d.player?.id)
-
+  //console.log("datasets", datasets)
+  // @todo - move creating flag to asyncProcesses
+  // helper consts
+  // data will be grouped by playerId if at least one deck has a playerid tag, otherwise it is not grouped
+  const playerIds = decks.map(d => d.player?._id)
   const allPlayerIdsSame = playerIds.filter(onlyUnique).length === 1;
   const allPlayerIdsUnique = playerIds.filter(onlyUnique).length === decks.length;
   const atLeastOnePlayer = playerIds.length !== 0
@@ -110,7 +110,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   //for now, we just assume its the first table
   useEffect(() => {
     if(user._id && tables.length === 0 && !creatingTable){
-      console.log("creatingTable.........................................")
+      //console.log("creatingTable.........................................")
       setCreatingTable(true);
       createTable();
       return;
@@ -125,12 +125,13 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
 
   const table = { 
     ...tables[0], 
-    title:tables[0]?.title || customerInfo?.tables[0]?.title || customerInfo?.name || "",
-    photoURL:customerInfo ? `/customers/${customerInfo.key}/logo.png` : "/switchplay/logo.png",
-    logoTransform:customerInfo ? customerInfo.tableLogoTransform : "translate(-70px,-70px) scale(0.2)"
+    title:tables[0]?.title || customer?.name || "",
+    photoURL:customer ? `/customers/${customer._id}/logo.png` : "/switchplay/logo.png",
+    logoTransform:customer ? customer.tableLogoTransform : "translate(-70px,-70px) scale(0.2)"
   };
-  console.log("table", table)
+  //console.log("table", table)
   const tableDecks = table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
+  const stringifiedTableAndDecks = JSON.stringify({ table, tableDecks });
 
   const width = screen.width || 300;
   const height = screen.height || 600;
@@ -162,13 +163,13 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
 
   //this adds status and completionProportion to cards and deck based on items statuses
   useEffect(() => {
-    const playerType = user?.username === "athlete" ? "athlete" : "footballer"
-    const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag, playerType }
+    //console.log("UPDATE TABLE LAYOUT-------")
+    const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag }
     const embellishedDecks = embellishDecks(tableDecks, settings);
     //console.log("embellishedDecks", embellishedDecks)
     const decksData = tableLayout(embellishedDecks, nrCols, settings);
     setDecksData(decksData);
-  }, [stringifiedUser, groupingTag, timeframeKey])
+  }, [allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag, stringifiedTableAndDecks])
 
   //const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
 
@@ -227,7 +228,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   return (
     <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
       <div className={classes.tableContents}>
-        <TableHeader dimns={{ 
+        {!selectedDeckId && <TableHeader dimns={{ 
             padding: { left:10, right:burgerBarWidth + 10, top:tableHeaderHeight * 0.1, bottom:tableHeaderHeight * 0.1 },
             width:width, 
             height:tableHeaderHeight 
@@ -235,13 +236,14 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
           table={table}
           timeframe={timeframe}
           toggleTimeframe={toggleTimeframe}
-        />
+        />}
         <div className={classes.decksContents}>
           {shouldDisplayInstructions ?  
             <Instructions />
             :
             <Decks 
               table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
+              datasets={datasets}
               data={decksData/*.slice(0,1)*/} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
               groupingTag={groupingTag} timeframeKey={timeframeKey}
               journeyData={journeyData} tableMarginTop={tableMarginTop}

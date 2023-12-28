@@ -22,8 +22,8 @@ export const round = (value, accuracy=0, showTrailingZeros=true) => {
 //@todo - edge case, where target is lower than start, eg player has been injured
 //do we deal with that edge case here, or in another way? probably another way.
 export const convertToPC = (startValue, targetValue) => (value, options={}) => {
-    const { dps=0, min=0, max=100, defaultToZero=true } = options;
-    if(typeof startValue !== "number" || typeof targetValue !== "number" || typeof value !== "number"){
+    const { dps=0, min=0, max=100, defaultToZero=false } = options;
+    if(!isNumber(startValue) || !isNumber(targetValue) || !isNumber(value)){
         return defaultToZero ? 0 : null;
     }
     const actualChange = value - startValue;
@@ -36,12 +36,8 @@ export const convertToPC = (startValue, targetValue) => (value, options={}) => {
 }
 
 export const getValueForStat = (statKey, accuracy, showTrailingZeros=true) => datapoint => {
-    const value = Number(datapoint
-        ?.values
-        ?.find(v => v.key === statKey)
-        ?.value);
-        
-    return round(value, accuracy, showTrailingZeros)
+    const valueStr = datapoint?.values?.find(v => v.key === statKey)?.value; 
+    return round(Number(valueStr), accuracy, showTrailingZeros)
 }
 
 export const getGreatestValueForStat = statKey => datapoints => {
@@ -108,7 +104,8 @@ const datesAreOnSameDay = (date1, date2) =>
 
 export const dateIsInRange = (date, range, options={}) => {
     const { includeStartDay = true, includeEndDay = true } = options;
-    if(!date || !range || !range[1]) { return false; }
+    if(!date) { return false; }
+    if(!range || !range[1]){ return true; }
 
     const isBelowUpperBound = date <= range[1];
     const isAboveLowerBound = date >= range[0];

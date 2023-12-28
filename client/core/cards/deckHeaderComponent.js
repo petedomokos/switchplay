@@ -6,7 +6,7 @@ import { fadeIn, fadeInOut, remove } from '../journey/domHelpers';
 import { truncateIfNecc } from '../journey/helpers';
 const { GOLD } = COLOURS;
 
-export default function headerComponent() {
+export default function deckHeaderComponent() {
     //API SETTINGS
     // dimensions
     let width = 300;
@@ -72,7 +72,7 @@ export default function headerComponent() {
         updateDimns();
         // expression elements
         selection.each(function (data) {
-            //console.log("header", data.completion)
+            console.log("header", data)
             containerG = d3.select(this);
 
             if(containerG.select("g").empty()){

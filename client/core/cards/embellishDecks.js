@@ -25,7 +25,7 @@ const calcDeckCompletion = cards => {
 }
 
 export const embellishDeck = (deck, settings={}) => {
-  //console.log("embellishDeck", deck)
+  console.log("embellishDeck", deck)
   const { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag } = settings;
   //console.log("timeframeKey gTag",timeframeKey, groupingTag)
   const cards = deck.cards.map(c => ({
@@ -36,7 +36,11 @@ export const embellishDeck = (deck, settings={}) => {
   const playerName = deck.player ? `${deck.player.firstName} ${deck.player.surname}` : "";
   const phaseTitle = deck.phase?.title || "";
 
+  console.log("playerName allidssame", playerName, allPlayerIdsSame)
+
+
   const getTitle = () => {
+    console.log("getTitle", playerName)
     //Both could be undefined
     
     if(allPlayerIdsSame){
@@ -46,6 +50,9 @@ export const embellishDeck = (deck, settings={}) => {
     return playerName && phaseTitle ? `${playerName} (${phaseTitle})` : 
       playerName || phaseTitle || deck.title || deck.id;
   }
+
+  const tit = getTitle();
+  console.log("tit", tit)
 
   return {
     ...deck,

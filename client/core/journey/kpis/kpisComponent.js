@@ -190,13 +190,13 @@ export default function kpisComponent() {
     let listClipPathId;
 
     function kpis(selection, options={}) {
-        //console.log("kpis update..............")
+        //console.log("kpis update..............", selection.node())
         const { transitionEnter=true, transitionUpdate=true, log } = options;
 
         // expression elements
-        selection.each(function (data,i) {
-            prevData = data;
-            const { kpisData, milestoneId } = data;
+        selection.each(function (kpisData,i) {
+            //console.log("kpisData", kpisData)
+            prevData = kpisData;
             const nrDefenceKpis = kpisData.filter(kpi => kpi.orientationFocus === "defence").length;
             //const attackKpisData = kpisData.filter(kpi => kpi.orientationFocus === "attack")
             //next - go down this file implementing two nest lists instead, 
@@ -208,7 +208,7 @@ export default function kpisComponent() {
                 displayFormat = "steps";
             }
 
-            listClipPathId = `kpis-list-clip-${data.milestoneId}`;
+            listClipPathId = `kpis-list-clip-${milestoneId}`;
 
             //we dont want lack of a target or numbers to affect positioning of some progressBars differently, so we will work out the 
             //nr of end tooltips and of numbers here and pass it through as a setting
@@ -218,7 +218,7 @@ export default function kpisComponent() {
 
             const getNrEndTooltips = (status, displayFormat) => {
                 if(!withTooltips){ return 0; }
-                if(data.milestoneId === "current") { return 0; }
+                if(milestoneId === "current") { return 0; }
                 const nrPerKpi = kpisData.map(kpiD => kpiD.tooltipsData
                     .filter(d => d.shouldDisplay(status, null, displayFormat))
                     .filter(t => t.tooltipType === "comparison")
@@ -229,17 +229,17 @@ export default function kpisComponent() {
 
             const getNrNumbers = (status, displayFormat) => {
                 if(!withNumbers){ return 0; }
-                const nrPerKpi = kpisData.map(kpiD => kpiD.numbersData
-                    .filter(d => d.shouldDisplay("closed", null, displayFormat))
-                    .length
-                )
-                return d3.max(nrPerKpi)
+                const nrsPerKpi = kpisData
+                    .filter(kpiD => !!kpiD.numbersData)
+                    .map(kpiD => kpiD.numbersData.filter(d => d.shouldDisplay("closed", null, displayFormat)).length);
+                    
+                return d3.max(nrsPerKpi)
             }
 
             const nrOfCtrlsButtons = ctrlsData?.length;
-            const nrTooltipRowsAbove = kpisData[0] ? d3.max(kpisData[0].tooltipsData, d => d.rowNr) : 0;
+            const nrTooltipRowsAbove = kpisData[0]?.tooltipsData ? d3.max(kpisData[0].tooltipsData, d => d.rowNr) : 0;
             //console.log("rowsAb", nrTooltipRowsAbove)
-            const nrTooltipRowsBelow = kpisData[0] ? Math.abs(d3.max(kpisData[0].tooltipsData.filter(t => t.rowNr < 0), d => d.rowNr)) : 0;
+            const nrTooltipRowsBelow = kpisData[0].tooltipsData ? Math.abs(d3.max(kpisData[0].tooltipsData.filter(t => t.rowNr < 0), d => d.rowNr)) : 0;
             //console.log("rowsbe", nrTooltipRowsBelow)
             const nrTooltipRows = nrTooltipRowsAbove + nrTooltipRowsBelow || 0;
             updateDimns(nrOfCtrlsButtons, nrTooltipRows, kpisData);
@@ -271,6 +271,7 @@ export default function kpisComponent() {
                         .onClick((e, d) => {
                             //false flag ensures scroll stays where it is
                             updateSelected("", data, false, true);
+                            //WARNING - NEXT LINE MAY ERROR AS NO MILESTONE ID
                             onUpdateSelected(d.milestoneId, null, true, true);
                         }));
             closeBtnG.exit().call(remove);*/
@@ -312,7 +313,7 @@ export default function kpisComponent() {
                                 .attr("class", "kpis-list-contents")
 
                         //init zoom
-                        const y = calculateListY(selected, data.kpisData, kpiHeight, 1);
+                        const y = calculateListY(selected, kpisData, kpiHeight, 1);
                         const transformState = d3.zoomTransform(listG.node());
                         const newTransformState = transformState.translate(0, y);
                         listG.call(zoom.transform, newTransformState)
@@ -476,6 +477,7 @@ export default function kpisComponent() {
                                             margins:{ kpi:margin },
                                             heightsBelow:{ kpisCtrlsHeight:ctrlsHeight }
                                         }
+                                        //WARNING - MAY ERROR as no milestoneid
                                         onUpdateSelected(d.milestoneId, d.key, true, true, dimns);
                                     }
                                 })
@@ -680,7 +682,7 @@ export default function kpisComponent() {
             //console.log("update scroll-------")
             //@todo - for KpiView, we want to show one before because they are connected
             const nrToShowBefore = 0;
-            const y = calculateListY(selected, data.kpisData, kpiHeight, nrToShowBefore);
+            const y = calculateListY(selected, kpisData, kpiHeight, nrToShowBefore);
             //console.log("zoom", zoom)
             containerG.select("g.kpis-list")
                .transition()
@@ -790,6 +792,11 @@ export default function kpisComponent() {
     
     
     //api
+    kpis.milestoneId = function (value) {
+        if (!arguments.length) { return milestoneId; }
+        milestoneId = value;
+        return kpis;
+    };
     kpis.width = function (value) {
         if (!arguments.length) { return width; }
         width = value;

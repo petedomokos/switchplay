@@ -26,6 +26,7 @@ import dragEnhancements from '../journey/enhancedDragHandler';
 import { toCamelCase } from '../../data/measures';
 import { createInitCard } from '../../data/initDeck';
 import { addWeeks } from '../../util/TimeHelpers';
+import { addKpiValuesToCards } from './kpiValuesForCards';
 import uuid from 'react-uuid';
 
 const useStyles = makeStyles((theme) => ({
@@ -82,9 +83,9 @@ const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSele
   //console.log("Decks table", table)
   //console.log("Decks data", data)
   //processed props
-  const stringifiedData = JSON.stringify({ data, table });
+  const stringifiedData = JSON.stringify({ data, table, datasets });
   //state
-  const [decksLayout, setLayout] = useState(() => deckLayout());
+  const [_deckLayout, setLayout] = useState(() => deckLayout());
   const [decks, setDecks] = useState(() => decksComponent());
   const [zoom, setZoom] = useState(() => d3.zoom());
   const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
@@ -96,12 +97,12 @@ const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSele
 
   const shouldPersistChanges = !table?.isMock && !data?.find(d => d.isMock);
   //profiles state
-  const [profilesLayout, setProfilesLayout] = useState(() => milestonesLayout());
   const [kpiFormat, setKpiFormat] = useState("actual");
 
   //processed state
   const selectedDeck = data.find(deck => deck.id === selectedDeckId);
   //refs
+  const processedDecksDataRef = useRef([]);
   const zoomRef = useRef(null);
   const containerRef = useRef(null);
   const formRef = useRef(null);
@@ -611,41 +612,22 @@ const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSele
     decks.selectedItemNr(selectedItemNr);
   }, [selectedItemNr])
 
-  //overlay and pointer events none was stopiing zoom working!!
   useEffect(() => {
-    //journeyData
-    profilesLayout
-      .format(kpiFormat)
-      .datasets(datasets)
-      .info(journeyData.player)
-      //.getURL(getURLForUser(user._id));
-
-    //profiles go before contracts of same date
-    const orderedProfiles = sortAscending(journeyData.profiles, d => d.date)
-      .filter(d => !d.isCurrent);
-    const profilesData = profilesLayout(orderedProfiles)
-    //console.log("ordered", profilesData)
-
-    //decksdata
-    decksLayout
+    _deckLayout
       .groupingTag(groupingTag)
       .timeframeKey(timeframeKey)
       .withSections(true);
 
-    const decksToDisplay = selectedDeckId ? [selectedDeck] : data;
-    const processedDeckData = decksToDisplay
-      .map(d => ({
-        ...d,
-        //cards:d.cards.map((c,i) => ({ ...c, profile:profilesData[i] }))
-        cards:d.cards.map((c,i) => ({ ...c, profile:profilesData[0] }))
-      }))
-      .map(deckData => decksLayout(deckData));
+    const processedDecksData = data
+      .map((deck, i) => ({ ...deck, cards:addKpiValuesToCards(deck, datasets, i) }))
+      .map(deckData => _deckLayout(deckData));
 
-    console.log("processedData", processedDeckData)
+    processedDecksDataRef.current = processedDecksData;
+  }, [stringifiedData])
 
-    //just use first deck for now
-    d3.select(containerRef.current).datum(processedDeckData)
-
+  useEffect(() => {
+    const decksDataToRender = selectedDeckId ? [processedDecksDataRef.current.find(d => d.id === selectedDeckId)] : processedDecksDataRef.current
+    d3.select(containerRef.current).datum(decksDataToRender)
   }, [stringifiedData, selectedDeckId])
 
   useEffect(() => { decks.selectedDeckId(selectedDeckId) }, [selectedDeckId])

@@ -3,9 +3,9 @@ import { calcDateCount } from '../../util/TimeHelpers';
 import { isNumber } from '../../data/dataHelpers';
 import { mockCardFlags } from './mockCardFlags';
 import { purposeLayout } from './purposeLayout';
+import kpisLayout from "../journey/kpis/kpisLayout";
 
 export default function cardsLayout(){
-    let datasets = [];
     let sections;
     let info = {};
     let format = "profiles";
@@ -13,8 +13,10 @@ export default function cardsLayout(){
 
     let prevData = [];
 
+    const _kpisLayout = kpisLayout();
+
     function update(cards){
-        //console.log("cardsLayout frontCardNr", frontCardNr)
+        //console.log("cardsLayout........", cards)
         const now = new Date();
 
         const getSection = (it,i) => {
@@ -23,7 +25,8 @@ export default function cardsLayout(){
         }
 
         const _data = cards.map((c,i) => {
-            const { deckId, cardNr, title="", date, items, purpose } = c;
+            const { deckId, cardNr, title="", date, items, purpose, kpis } = c;
+            //console.log("card....", c)
             const pos = cardNr - frontCardNr;
 
             const mockFlags = mockCardFlags[i] || [];
@@ -55,6 +58,7 @@ export default function cardsLayout(){
                     dateCount:calcDateCount(now, date),
                     title
                 },
+                kpis:_kpisLayout(kpis)
     
             }
         })
@@ -96,11 +100,6 @@ export default function cardsLayout(){
     update.sections = function (value) {
         if (!arguments.length) { return sections; }
         sections = value;
-        return update;
-    };
-    update.datasets = function (value) {
-        if (!arguments.length) { return datasets; }
-        datasets = value;
         return update;
     };
     update.info = function (value) {

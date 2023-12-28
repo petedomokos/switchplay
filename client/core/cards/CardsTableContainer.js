@@ -9,10 +9,11 @@ import { hideMenus, showMenus } from "../../actions/CommonActions"
 const mapStateToProps = (state, ownProps) => {
 	//console.log("CardsTableContainer...user", state.user)
 	const { asyncProcesses, user, system } = state;
-	const { _id, username, firstname, surname, photo, photos, journeys=[], homeJourney, loadedDatasets, datasetsMemberOf } = state.user;
+	const { _id, username, firstname, surname, photo, photos, journeys=[], homeJourney, loadedDatasets, datasetsMemberOf } = user;
 
-	const journeyId = state.system.activeJourney || homeJourney;
-	const journeyData = journeys.find(j => j._id === journeyId) || journeys[0] || createEmptyJourney(state.user);
+	const journeyId = system.activeJourney || homeJourney;
+	const journeyData = journeys.find(j => j._id === journeyId) || journeys[0] || createEmptyJourney(user);
+	//console.log("journeyData", journeyData)
 
 	const datasets = loadedDatasets;
 	const fullyLoadedDatasets = datasets
@@ -23,14 +24,14 @@ const mapStateToProps = (state, ownProps) => {
 	//console.log("fullyLD", fullyLoadedDatasets)
 	const allDatasetsFullyLoaded = datasets.length === fullyLoadedDatasets.length;
 
-	const hydratedJourneyData = hydrateJourneyData(journeyData, user, fullyLoadedDatasets);
+	const hydratedJourneyData = user.isMock ? [] : hydrateJourneyData(journeyData, user, fullyLoadedDatasets);
 
 	return{
 		user,
 		journeyData:hydratedJourneyData,
 		//data:user.milestonesData,
 		customActiveDeck: system.activeDeck,
-		datasets:[],
+		datasets:fullyLoadedDatasets,
 		extraLoadArg: { playerId: _id, datasets:datasets },
 		allDatasetsFullyLoaded,
 		loading:state.asyncProcesses.loading.datasets,

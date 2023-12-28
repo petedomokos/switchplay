@@ -3,7 +3,6 @@ import * as d3 from 'd3';
 import { makeStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
 //import {  } from './constants';
-import deckLayout from './deckLayout';
 import deckComponent from "./deckComponent";
 import ItemForm from "./forms/ItemForm";
 import { sortAscending } from '../../util/ArrayHelpers';

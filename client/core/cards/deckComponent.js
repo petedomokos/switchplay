@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { grey10, COLOURS, DIMNS, FONTSIZES, STYLES, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIONS, DECK_PHOTO_POS } from "./constants";
 import cardsComponent from './cardsComponent';
-import headerComponent from './headerComponent';
+import deckHeaderComponent from './deckHeaderComponent';
 import contextMenuComponent from "./contextMenuComponent";
 import textComponent from './textComponent';
 import dragEnhancements from '../journey/enhancedDragHandler';
@@ -83,7 +83,7 @@ export default function deckComponent() {
 
     function updateDimns(data){
         //deck photo
-        photoContentsWidth = data.photoUrl ? 20 : 0;
+        photoContentsWidth = data.photoUrl ? 30 : 0;
         photoContentsHeight = photoContentsWidth / DIMNS.CARD.ASPECT_RATIO; //33.548
         photoMargin = { 
             left:photoContentsWidth * 0.1, right:photoContentsWidth * 0.1, 
@@ -354,7 +354,7 @@ export default function deckComponent() {
     const itemAreaDrag = d3.drag();
 
     //components
-    const header = headerComponent();
+    const header = deckHeaderComponent();
     const cards = cardsComponent();
     const contextMenu = contextMenuComponent();
     const enhancedDrag = dragEnhancements();
