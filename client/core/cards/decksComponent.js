@@ -340,7 +340,7 @@ export default function decksComponent() {
                             wordsG.select("text")
                                 .attr("x", wordsWidth/2)
                                 .attr("y", wordsHeight/2)
-                                .text("Add a deck")
+                                .text("Start my journey")
                         })
                         .on("click", onCreateDeck)
                 

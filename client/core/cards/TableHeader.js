@@ -94,8 +94,7 @@ const useStyles = makeStyles(theme => ({
 
 }))
 
-export default function TableHeader({ table, dimns, timeframe, toggleTimeframe }) {
-    //console.log("T", table)
+export default function TableHeader({ table, dimns, timeframe, nrTimeframeOptions, toggleTimeframe }) {
     const { width, height, padding } = dimns;
     const contentsWidth = width - padding.left - padding.right;
     const contentsHeight = height - padding.top - padding.bottom;
@@ -136,13 +135,15 @@ export default function TableHeader({ table, dimns, timeframe, toggleTimeframe }
                 <img className={classes.customerLogo} src={table.photoURL} alt="customer logo"/>
             </div>
             <div className={classes.title}>{table.title || "Enter Table Title..."}</div>
-            <div className={classes.timeframe}>
-                <div className={classes.timeframeToggleArea}>
-                    <div className={classes.deckIcon} onClick={toggleTimeframe}><StepsIcon width={iconWidth} height={iconHeight} fill={deckIconFill}/></div>
-                    <div className={classes.longTermIcon} onClick={toggleTimeframe}><TelescopeIcon width={iconWidth} height={iconHeight} fill={longTermIconFill}/></div>       
+            {nrTimeframeOptions === 2 && 
+                <div className={classes.timeframe}>
+                    <div className={classes.timeframeToggleArea}>
+                        <div className={classes.deckIcon} onClick={toggleTimeframe}><StepsIcon width={iconWidth} height={iconHeight} fill={deckIconFill}/></div>
+                        <div className={classes.longTermIcon} onClick={toggleTimeframe}><TelescopeIcon width={iconWidth} height={iconHeight} fill={longTermIconFill}/></div>       
+                    </div>
+                    <div className={classes.timeframeDescArea}>{timeframe.label}</div>
                 </div>
-                <div className={classes.timeframeDescArea}>{timeframe.label}</div>
-            </div>
+            }
             {/**<form className={classes.form}>
             </form>*/}
         </div>
@@ -151,5 +152,6 @@ export default function TableHeader({ table, dimns, timeframe, toggleTimeframe }
 
 TableHeader.defaultProps = {
   dimns:{},
-  table:{}
+  table:{},
+  nrTimeframeOptions:[]
 }

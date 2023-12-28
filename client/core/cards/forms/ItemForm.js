@@ -104,7 +104,7 @@ export function splitMultilineString(str){
 }
 
 export default function ItemForm({ cardTitle, item, dimns, fontSize, save, close }) {
-  const { title, section, attachments } = item;
+  const { title, section, attachments=[] } = item;
 
   const [value, setValue] = useState(item)
   const [editing, setEditing] = useState(false);

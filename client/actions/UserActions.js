@@ -7,10 +7,8 @@ import { signout } from './AuthActions.js';
 import { transformJourneyForClient } from "./JourneyActions"
 import { initDeck } from '../data/initDeck';
 import { hydrateDeckSections } from '../data/sections';
-import { getMockTables, getMockDecks } from '../data/OldMockDecks';
 import uuid from 'react-uuid';
 import { addWeeks } from '../util/TimeHelpers';
-import { getCustomer } from '../data/OldCustomers';
 import { userIdIsMock, getMockUserById } from '../mock/mockDatabases/users';
 import { sortAscending } from '../util/ArrayHelpers';
 
@@ -19,7 +17,7 @@ export const transformGroupForClient = group => ({
 	kpis:group.kpis.map(kpi => ({ ...kpi, key:`${kpi.datasetKey}-${kpi.measureKey}`}))
 })
 export const transformTableForClient = serverTable => {
-	console.log("transformTableForClient", serverTable)
+	//console.log("transformTableForClient", serverTable)
 	const { created, updated, ...clientTable } = serverTable;
 	return {
 		...clientTable,
@@ -86,7 +84,7 @@ export const transformDeckForServer = clientDeck => {
  
 //getMock functions below
 export const transformUserForClient = serverUser => {
-	console.log("transformUserForClient", serverUser)
+	//console.log("transformUserForClient", serverUser)
 	const { journeys=[], photos=[], decks=[], tables=[], groups=[] } = serverUser;
 	const hydratedPhotos = photos.map(p => ({ ...p, added: new Date(p.added) }))
 	//@todo - check will we ever use this for updating journeys? I dont think we need it 

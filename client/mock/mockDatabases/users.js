@@ -27,7 +27,7 @@ const users = [
     },
     {
         _id:"rregis",
-        username:"rregisdemo",
+        username:"rrdemo",
         firstName:"Renee",
         surname:"Regis",
     }
@@ -66,7 +66,7 @@ export const getMockUser = username => {
             loadedDatasets:englandDatasets
         }
     }
-    if(username === "rregisdemo"){
+    if(username === "rrdemo"){
         const group = groups.teamReneeRegis.main;
         const decks = getMockAthleteDecks(group);
         const tables = [{ _id:"rrdemo-table", ...generalTableProperties, decks: decks.map(d => d._id) }];

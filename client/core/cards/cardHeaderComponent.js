@@ -197,7 +197,7 @@ export default function cardHeaderComponent() {
                                         .attr("stroke-width", styles.title.strokeWidth)
                                         .attr("fill", styles.title.fill)
                                         //.text(d.title || d.id)
-                                        .text(truncateIfNecc(d.title, 17) || `Card ${d.cardNr + 1}`)
+                                        .text(truncateIfNecc(d.title || "Enter Title...", 17) || `Card ${d.cardNr + 1}`)
 
                                     //hitbox
                                     contentsG.select("rect.hitbox")

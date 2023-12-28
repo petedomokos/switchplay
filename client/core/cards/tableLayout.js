@@ -13,8 +13,6 @@ const groupDecks = (decks, groupingTag) => {
     .filter(d => !!d[groupingTag])
     .map(d => d[groupingTag].id)
     .filter(onlyUnique);
-
-  console.log("tagIdsToGroup", tagIdsToGroup)
   
   if(tagIdsToGroup.length === 0){ return []; }
   
@@ -42,7 +40,6 @@ const getFrontCardId = cards => {
 }
 
 const createDeckOfDecks = (group, groupingTag) => {
-  console.log("createDoD", group)
   const { id, groupingTagObj, decks } = group;
   const cardNamingTag = groupingTag === "player" ? "phase" : "player";
   const sortedDecks = sortAscending(decks, d => d.date);

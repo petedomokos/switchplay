@@ -47,10 +47,10 @@ export const embellishDeck = (deck, settings={}) => {
     //Both could be undefined
     if(allPlayerIdsSame){
       //we dont display player name
-      return phaseTitle || deck.title || deck.id;
+      return phaseTitle || deck.title;
     }
     return playerName && phaseTitle ? `${playerName} (${phaseTitle})` : 
-      playerName || phaseTitle || deck.title || deck.id;
+      playerName || phaseTitle || deck.title;
   }
 
   return {

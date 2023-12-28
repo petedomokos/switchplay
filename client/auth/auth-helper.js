@@ -16,6 +16,7 @@ const auth = {
     cb()
   },
   clearJWT() {
+    console.log("clear jwt...")
     if (typeof window !== "undefined")
       sessionStorage.removeItem('jwt')
   }

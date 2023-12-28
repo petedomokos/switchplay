@@ -121,7 +121,6 @@ export default function deckHeaderComponent() {
             }
 
             function update(data, options={}){
-                //console.log("update")
                 const { } = options;
                 const { id, title, subtitle, status, completion } = data
 
@@ -151,7 +150,7 @@ export default function deckHeaderComponent() {
                     .attr("stroke", grey10(2))
                     .attr("fill", grey10(2))
                     .attr("stroke-width", 0.1)
-                    .text(truncateIfNecc(title, maxTitleChars) || "Enter Title...")
+                    .text(truncateIfNecc(title || id, maxTitleChars) || "Enter Title...")
                     
                 
                 titleG.select("rect.title-hitbox")
@@ -163,7 +162,6 @@ export default function deckHeaderComponent() {
                 titleG
                     .attr("display", withTitle ? null : "none")
                     .on("click", function(e){ 
-                        console.log("title click")
                         onClickTitle.call(this, e, data);
                         e.stopPropagation(); 
                     })

@@ -77,8 +77,6 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   const allPlayerIdsSame = playerIds.filter(onlyUnique).length === 1;
   const allPlayerIdsUnique = playerIds.filter(onlyUnique).length === decks.length;
   const atLeastOnePlayer = playerIds.length !== 0
-  //atm, longTermView is only available when playerIds are tagged and not all the same
-  const longTermViewPossible = atLeastOnePlayer; 
 
   //State
   const [timeframe, setTimeframe] = useState(timeframeOptions.singleDeck);
@@ -100,10 +98,6 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   }
 
   const toggleTimeframe = () => {
-    if(!longTermViewPossible && timeframe.key === "singleDeck"){ 
-      alert("For Long Term View, decks should have a playerId tagged.");
-      return;
-    }
     setTimeframe(prevState => prevState.key === "singleDeck" ? timeframeOptions.longTerm : timeframeOptions.singleDeck)
   }
 
@@ -235,6 +229,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
           }}
           table={table}
           timeframe={timeframe}
+          nrTimeframeOptions={atLeastOnePlayer ? 2 : 1}
           toggleTimeframe={toggleTimeframe}
         />}
         <div className={classes.decksContents}>
