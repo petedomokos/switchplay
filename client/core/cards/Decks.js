@@ -77,6 +77,18 @@ const useStyles = makeStyles((theme) => ({
 
 const enhancedZoom = dragEnhancements();
 
+/*const getFrontCardNr = (cards, frontCardId) => {
+  if(!frontCardId){ return 0; }
+  if(frontCardId === "current"){ 
+      const now = new Date();
+      return d3.least(cards.filter(c => c.date > now)).cardNr;
+  }
+  //all cards placed
+  if(frontCardId === "none"){ return cards.length; }
+  //custom card
+  return cards.find(c => c.id === frontCardId).cardNr;
+}*/
+
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
 const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
@@ -95,6 +107,7 @@ const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSele
 
   //update flags
   //processed props
+  const frontCardIds = JSON.stringify(data.map(d => d.frontCardId))
   const stringifiedData = JSON.stringify({ data, table, datasets });
   const stringifiedTable = JSON.stringify(table);
   const stringifiedDatasets = JSON.stringify(datasets);
@@ -110,7 +123,7 @@ const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSele
   //processed state
   const selectedDeck = data.find(deck => deck.id === selectedDeckId);
   //refs
-  const processedDecksDataRef = useRef([]);
+  const cardsWithKpisRef = useRef([]);
   const zoomRef = useRef(null);
   const containerRef = useRef(null);
   const formRef = useRef(null);
@@ -621,23 +634,31 @@ const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSele
   }, [selectedItemNr])
 
   useEffect(() => {
+
+    console.log("kpiValues...")
+
+    const cardsWithKpiValues = data
+      .map((deck, i) => ({ deckId:deck.id, cards:addKpiValuesToCards(deck, datasets, i) }));
+
+    cardsWithKpisRef.current = cardsWithKpiValues;
+  }, [stringifiedCards, stringifiedDatasets])
+
+  useEffect(() => {
+    console.log("layout and binding...")
+    const decksToRender = selectedDeckId ? [data.find(d => d.id === selectedDeckId)] : data;
+    const decksWithCardKpis = decksToRender.map(d => ({ 
+      ...d, 
+      cards:cardsWithKpisRef.current.find(obj => obj.deckId === d.id).cards
+    }))
+    
     _deckLayout
       .groupingTag(groupingTag)
       .timeframeKey(timeframeKey)
       .withSections(true);
 
-    console.log("deck layout")
+    const decksData = decksWithCardKpis.map(deck => _deckLayout(deck)) 
+    d3.select(containerRef.current).datum(decksData)
 
-    const processedDecksData = data
-      .map((deck, i) => ({ ...deck, cards:addKpiValuesToCards(deck, datasets, i) }))
-      .map(deckData => _deckLayout(deckData));
-
-    processedDecksDataRef.current = processedDecksData;
-  }, [stringifiedData])
-
-  useEffect(() => {
-    const decksDataToRender = selectedDeckId ? [processedDecksDataRef.current.find(d => d.id === selectedDeckId)] : processedDecksDataRef.current
-    d3.select(containerRef.current).datum(decksDataToRender)
   }, [stringifiedData, selectedDeckId])
 
   useEffect(() => { decks.selectedDeckId(selectedDeckId) }, [selectedDeckId])

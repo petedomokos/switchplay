@@ -176,6 +176,68 @@ export const groups = {
                     _id:"archieStevens", firstName:"Archie", surname:"Stevens", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
+                { 
+                    _id:"zakLovelace2", firstName:"Zak", surname:"Lovelace", pos:"FOR",
+                    kpiStartValues:defaultStartValues
+                },
+                { 
+                    _id:"joelNDala2", firstName:"Joel", surname:"NDala", pos:"FOR",
+                    kpiStartValues:defaultStartValues
+                },
+                { 
+                    _id:"tomWatson2", firstName:"Tom", surname:"Watson", pos:"FOR",
+                    kpiStartValues:defaultStartValues
+                },
+                { 
+                    _id:"justinOboavwoduo2", firstName:"Justin", surname:"Oboavwoduo", pos:"FOR",
+                    kpiStartValues:defaultStartValues
+                },
+                { 
+                    _id:"archieStevens2", firstName:"Archie", surname:"Stevens", pos:"FOR",
+                    kpiStartValues:defaultStartValues
+                },
+                { 
+                    _id:"zakLovelace3", firstName:"Zak", surname:"Lovelace", pos:"FOR",
+                    kpiStartValues:defaultStartValues
+                },
+                { 
+                    _id:"joelNDala3", firstName:"Joel", surname:"NDala", pos:"FOR",
+                    kpiStartValues:defaultStartValues
+                },
+                { 
+                    _id:"tomWatson3", firstName:"Tom", surname:"Watson", pos:"FOR",
+                    kpiStartValues:defaultStartValues
+                },
+                { 
+                    _id:"justinOboavwoduo3", firstName:"Justin", surname:"Oboavwoduo", pos:"FOR",
+                    kpiStartValues:defaultStartValues
+                },
+                { 
+                    _id:"archieStevens3", firstName:"Archie", surname:"Stevens", pos:"FOR",
+                    kpiStartValues:defaultStartValues
+                },
+                { 
+                    _id:"zakLovelace4", firstName:"Zak", surname:"Lovelace", pos:"FOR",
+                    kpiStartValues:defaultStartValues
+                },
+                { 
+                    _id:"joelNDala4", firstName:"Joel", surname:"NDala", pos:"FOR",
+                    kpiStartValues:defaultStartValues
+                },
+                { 
+                    _id:"tomWatson4", firstName:"Tom", surname:"Watson", pos:"FOR",
+                    kpiStartValues:defaultStartValues
+                },
+                /*
+                { 
+                    _id:"justinOboavwoduo4", firstName:"Justin", surname:"Oboavwoduo", pos:"FOR",
+                    kpiStartValues:defaultStartValues
+                },
+                { 
+                    _id:"archieStevens4", firstName:"Archie", surname:"Stevens", pos:"FOR",
+                    kpiStartValues:defaultStartValues
+                },
+                */
             ]
         },
     },
