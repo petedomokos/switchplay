@@ -328,8 +328,8 @@ export default function pentagonComponent() {
                             .transition("trans-stroke")
                                 .delay(sizeIsIncreasing ? 300 : 0)
                                 .duration(TRANSITIONS.MED)
-                                    .attr("stroke", statusMenuItemNr === itemNr ? grey10(1) : grey10(9))
-                                    .attr("stroke-width", statusMenuItemNr === itemNr ? 0.1 : 0.015)
+                                    .attr("stroke", statusMenuItemNr === itemNr ? grey10(1) : NOT_STARTED_FILL)
+                                    .attr("stroke-width", statusMenuItemNr === itemNr ? 0.15 : 0.15)
 
                         sectionG.selectAll(".show-with-section")
                             .transition("outer-trans")

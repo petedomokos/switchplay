@@ -340,9 +340,11 @@ export default function kpisComponent() {
                         const contentsG = d3.select(this);
 
                         //temp - grabbed from, progressbarcomponent
-                        const isMobile = listWidth < 45; //listWidth is 43.78 on mobile, 47.91 on laptop 
-                        const numbersWidth = isMobile ? 17.513 : 19.163 
-                        const numberWidth = isMobile ? 8.757 : 9.582;
+                        //const isMobile = listWidth < 45; //listWidth is 43.78 on mobile, 47.91 on laptop 
+                        //const numbersWidth = isMobile ? 17.513 : 19.163 
+                        //const numberWidth = isMobile ? 8.757 : 9.2;//9.582;
+                        const numbersWidth = listWidth/2.4;// listWidth/2.5;
+                        const numberWidth = listWidth/5;
 
                         //number labels
                         //@todo - move these labels to numberComponent, and use a withLabel setting to oly show it for 1st kpi
@@ -357,6 +359,7 @@ export default function kpisComponent() {
                                         .attr("text-anchor", "middle");
                                 })
                                 .merge(labelG)
+                                //.attr("transform", (d,i) => `translate(${listWidth - numbersWidth + (i+1) * numberWidth},0)`)
                                 .attr("transform", (d,i) => `translate(${listWidth - numbersWidth + (i+1) * numberWidth},0)`)
                                 .each(function(d){
                                     d3.select(this).select("text")
@@ -479,7 +482,7 @@ export default function kpisComponent() {
                                     const height = d3.min([kpiContentsHeight * 0.5, 14]);
                                     //console.log("kpih kpich texth",kpiHeight, kpiContentsHeight, height)
                                     const margin = { top: height * 0.1, bottom: height * 0.4 };
-                                    const fontSize = status(d) === "open" || status(d) === "opening" ? height * 0.8 : height * 0.5;
+                                    const fontSize = 7;// status(d) === "open" || status(d) === "opening" ? height * 0.8 : height * 1.5;
                                     return { width, height, margin, fontSize }
                                 })
                                 .styles((d,i) => ({

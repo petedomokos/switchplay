@@ -6,7 +6,6 @@ import Button from '@material-ui/core/Button'
 import DeckHeader from './DeckHeader';
 import deckLayout from './deckLayout';
 import decksComponent from "./decksComponent";
-import milestonesLayout from "../journey/milestonesLayout";
 import ItemForm from "./forms/ItemForm";
 import DeckTitleForm from './forms/DeckTitleForm';
 import SectionTitleForm from './forms/SectionTitleForm';
@@ -91,9 +90,8 @@ const enhancedZoom = dragEnhancements();
 
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
+const Decks = ({ table, data, groupingTag, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
   //console.log("Decks table", table)
-  //console.log("Decks data", data)
   //state
   const [_deckLayout, setLayout] = useState(() => deckLayout());
   const [decks, setDecks] = useState(() => decksComponent());
@@ -481,7 +479,6 @@ const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSele
   //console.log("Decks", selectedDeckId)
 
   const updateFrontCardNr = useCallback(frontCardId => {
-    console.log("updateFront", frontCardId)
     updateDeck({ ...selectedDeck, frontCardId });
     setForm(null);
   }, [stringifiedData, form, selectedDeckId]);
@@ -633,18 +630,16 @@ const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSele
     decks.selectedItemNr(selectedItemNr);
   }, [selectedItemNr])
 
+  //kpi values
   useEffect(() => {
-
-    console.log("kpiValues...")
-
     const cardsWithKpiValues = data
       .map((deck, i) => ({ deckId:deck.id, cards:addKpiValuesToCards(deck, datasets, i) }));
 
     cardsWithKpisRef.current = cardsWithKpiValues;
   }, [stringifiedCards, stringifiedDatasets])
 
+  //layout and bind
   useEffect(() => {
-    console.log("layout and binding...")
     const decksToRender = selectedDeckId ? [data.find(d => d.id === selectedDeckId)] : data;
     const decksWithCardKpis = decksToRender.map(d => ({ 
       ...d, 
@@ -744,12 +739,9 @@ const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSele
 
         const { sourceEvent } = e;
         const clientY = isNumber(sourceEvent.clientY) ? sourceEvent.clientY : sourceEvent.touches[0].clientY;
-        // console.log("x y", clientX, clientY)
         if(clientY < deckHeight/4){
-          console.log("near to border!!")
           //scroll up if poss
         }else if(height - clientY < deckHeight/4){
-          console.log("near bottom border")
           //scroll down if poss
         }
         const pseudoE = { dx: e.transform.x - zoomTransformPrev.x, dy:e.transform.y - zoomTransformPrev.y }
@@ -758,10 +750,8 @@ const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSele
         e.sourceEvent.stopPropagation();
       })
       .onLongpressEnd(function(e){
-        //console.log("lpend", wasDragged)
         if(wasDragged){ 
           wasDragged = false;
-          //console.log("setting lpId to nullxxxxxxxx")
           setLongpressedDeckId(""); 
         }
        
@@ -809,7 +799,6 @@ const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSele
     function zoomEnd(e){
       e.sourceEvent?.stopPropagation();
       if(zoomTransformLpStartRef.current){
-        //console.log("do nothing")
         //do nothing as this is a just reset
         zoomTransformLpStartRef.current = null;
         return;

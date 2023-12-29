@@ -65,10 +65,10 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, updateDecks, deleteDeck, hideMenus, showMenus }) => {
+const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, updateDecks, deleteDeck, hideMenus, showMenus }) => {
   const { tables=[], decks=[], customer } = user;
   const stringifiedDecks = JSON.stringify(decks);
-  console.log("CardsTable", user)
+  //console.log("CardsTable", user)
   //console.log("datasets", datasets)
   // @todo - move creating flag to asyncProcesses
   // helper consts
@@ -104,7 +104,6 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
   //for now, we just assume its the first table
   useEffect(() => {
     if(user._id && tables.length === 0 && !creatingTable){
-      //console.log("creatingTable.........................................")
       setCreatingTable(true);
       createTable();
       return;
@@ -123,7 +122,6 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
     photoURL:customer ? `/customers/${customer._id}/logo.png` : "/switchplay/logo.png",
     logoTransform:customer ? customer.tableLogoTransform : "translate(-70px,-70px) scale(0.2)"
   };
-  //console.log("table", table)
   const tableDecks = table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
   const stringifiedTableAndDecks = JSON.stringify({ table, tableDecks });
 
@@ -157,10 +155,8 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
 
   //this adds status and completionProportion to cards and deck based on items statuses
   useEffect(() => {
-    //console.log("UPDATE TABLE LAYOUT-------")
     const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag }
     const embellishedDecks = embellishDecks(tableDecks, settings);
-    //console.log("embellishedDecks", embellishedDecks)
     const decksData = tableLayout(embellishedDecks, nrCols, settings);
     setDecksData(decksData);
   }, [allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag, stringifiedTableAndDecks])
@@ -241,7 +237,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
               datasets={datasets}
               data={decksData/*.slice(0,1)*/} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
               groupingTag={groupingTag} timeframeKey={timeframeKey}
-              journeyData={journeyData} tableMarginTop={tableMarginTop}
+              tableMarginTop={tableMarginTop}
               onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={handleUpdateDeck}
               updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />
           }

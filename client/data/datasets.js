@@ -3,15 +3,12 @@ import { getDerivedMeasures, hydrateMeasure } from './measures';
 import { mean, median, percentage, sum, difference } from "./Calculations"
 
 export function hydrateDatasets(datasets){
-    console.log("hydrateDatasets-----------------------------------", datasets)
     return datasets.map(dset => hydrateDataset(dset))
 }
 //may be shallow or deep
 export function hydrateDataset(dataset){
-    //console.log("hydrateDset", dataset._id, dataset.datapoints)
     //error - datapoints should be an array of objects, not an array of arrays eeg [[]]
     const isDeep = !!dataset.datapoints;
-    //console.log("isDeep?", isDeep)
     //key - legacy - some dsets have no key
     const key = dataset.key || toCamelCase(dataset.name);
     //owner - legacy - some dsets dont have owner
@@ -19,14 +16,9 @@ export function hydrateDataset(dataset){
 
     //we dont bother with some properties if its a shallow version eg no datapoints or measures
     const startDate = isDeep ? getStartDate(dataset) : null;
-    //console.log("getting derived...")
     const derivedMeasures = isDeep ? getDerivedMeasures(key) : null;
-    //console.log("derived", derivedMeasures)
-    //console.log("getting raw.....")
     const rawMeasures = dataset.measures?.map(m => hydrateMeasure(m));
-    //console.log("raw", rawMeasures)
     const datapoints = isDeep ? hydrateDatapoints(dataset.datapoints, rawMeasures, derivedMeasures, dataset.key) : null;
-    //console.log("ds", datapoints)
     return {
         ...dataset,
         key,

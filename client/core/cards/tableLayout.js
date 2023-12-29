@@ -6,7 +6,6 @@ const calcColNr = (i, nrCols) => i % nrCols;
 const calcRowNr = (i, nrCols) => Math.floor(i/nrCols);
 
 const groupDecks = (decks, groupingTag) => {
-  console.log("groupDecks...........", decks);
   const sortedDecks = sortAscending(decks, d => d.date);
 
   const tagIdsToGroup = sortedDecks
@@ -74,12 +73,9 @@ const createDeckOfDecks = (group, groupingTag) => {
 
 const formatDecks = (decks, settings={}) => {
   const { timeframeKey, groupingTag } = settings;
-  //console.log("formatDecks..... tKey", timeframeKey)
-  //console.log("formatDecks..... gkey", groupingTag)
   if(!groupingTag){ return decks; }
   //group decks by tags
   const groupedDecks = groupDecks(decks, groupingTag);
-  //console.log("groupedDecks", groupedDecks)
   //error is above line - as all decks are reneeregis, the grouping tag should put them altogether
   return groupedDecks.map(group => timeframeKey === "singleDeck" ? 
     getCurrentDeck(group.decks)
@@ -111,7 +107,6 @@ const getPhotoUrl = (deck, settings) => {
 
 export const tableLayout = (decks, nrCols=3, settings={}) => {
   const formattedDecks = formatDecks(decks, settings);
-  console.log("formattedDecks", formattedDecks)
   //add table positions
   return formattedDecks.map((d,i) => ({
       ...d, 

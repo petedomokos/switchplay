@@ -217,7 +217,9 @@ export default function kpiComponent() {
                         dominantBaseline:"hanging",//central",
                         fontFamily:"helvetica, sans-serifa",
                         fill:grey10(5),
-                        stroke:grey10(5)
+                        stroke:grey10(5),
+                        fontSize:9
+                        //fontSize:titleDimns(d,i).fontSize
                     },
                     secondaryTitle:{
 

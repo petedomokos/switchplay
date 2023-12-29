@@ -125,7 +125,6 @@ export const createUser = user => dispatch => {
 export const fetchUser = id => dispatch => {
 	//mock users
 	const mockUser = getMockUserById(id);
-	console.log("fetchUser...mockUser?", mockUser)
 	if(mockUser){
 		dispatch({ type:C.SIGN_IN, user:transformUserForClient(mockUser) });
 		return;
@@ -162,7 +161,6 @@ export const fetchUsers = () => dispatch => {
 }
 
 export const updateUser = (id, formData, history) => dispatch => {
-	console.log("updateUser......................", id, userIdIsMock(id))
 	//setTimeout(() => {
 		fetchThenDispatch(dispatch, 
 			'updating.user',
@@ -191,7 +189,6 @@ export const updateUser = (id, formData, history) => dispatch => {
 }
 
 export const createTable = (settings={}) => dispatch => {
-	console.log("createTable...........")
 	const jwt = auth.isAuthenticated();
 	if(!jwt.user || jwt.user.isMock) { return; }
 	
@@ -205,7 +202,6 @@ export const createTable = (settings={}) => dispatch => {
 			body:JSON.stringify(table),
 			requireAuth:true,
 			nextAction: data => {
-				console.log("response data", data)
 				return { type:C.CREATE_TABLE, table:data }
 			}
 		}
@@ -213,7 +209,6 @@ export const createTable = (settings={}) => dispatch => {
 }
 
 export const updateTable = (table, shouldPersist=true, shouldUpdateStore=true) => dispatch => {
-	console.log("updateTable................", table)
 	//update in store
 	dispatch({ type:C.UPDATE_TABLE, table });
 
@@ -249,7 +244,6 @@ export const createDeck = (settings, tableId) => dispatch => {
 			body:JSON.stringify(requestBody),
 			requireAuth:true,
 			nextAction: data => {
-				console.log("response data", data)
 				return { type:C.CREATE_DECK, deck: transformDeckForClient(data), tableId }
 			}
 		}
@@ -257,7 +251,6 @@ export const createDeck = (settings, tableId) => dispatch => {
 }
 
 export const updateDeck = (deck, shouldPersist=true) => dispatch => {
-	console.log("updateDeck", shouldPersist, deck)
 	//update in store
 	dispatch({ type:C.UPDATE_DECK, deck });
 
@@ -279,7 +272,6 @@ export const updateDeck = (deck, shouldPersist=true) => dispatch => {
 }
 
 export const updateDecks = (details, shouldPersist=true) => dispatch => {
-	console.log("updateDecks", details)
 	const { desc } = details;
 	//update in store
 	dispatch({ type:C.UPDATE_DECKS, details });

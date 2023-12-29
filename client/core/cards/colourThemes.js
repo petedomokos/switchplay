@@ -222,9 +222,9 @@ $medium-slate-blue: hsla(235, 89%, 70%, 1);
 
 export const SATURATED_BLUE_COLOUR_THEME = (bgColour) => ({
     CARDS_TABLE:getTableAndDeckColours(bgColour).table,
-    GOLD:"#FFE10A",// brighter #ffd700,   darker #ccad00
+    GOLD:"#FFD700",//"#FFE10A",// brighter #ffd700,   darker #ccad00  //#FFD700
     SILVER:grey10(2),
-    NOT_STARTED_FILL:grey10(6),
+    NOT_STARTED_FILL:grey10(3),
     SECTION_VIEW_NOT_STARTED_FILL:grey10(5),
     FLAG:{
         MESG:grey10(6),
