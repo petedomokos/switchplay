@@ -23,10 +23,11 @@ export default function kpisLayout(){
 
             //console.log("kpi...", kpi)
             const start = values.start?.raw;
-            const current = values.achieved?.raw;
+            const current = values.current?.raw || values.achieved?.raw;
             const target = orientationFocus === "defence" ? minStandard.value : values.target?.raw;
-            const achieved = values.achieved?.raw || current;
+            const achieved = values.current?.raw || values.achieved?.raw;
             const expected = values.expected?.raw;
+            //console.log("current", current)
 
             const isOnTrack = order === "highest is best" ? achieved >= expected : achieved <= expected;
             const isBetterThanExpected = isOnTrack && achieved !== expected;
@@ -90,6 +91,7 @@ export default function kpisLayout(){
                 isMaintenanceTarget
             }
 
+
             const expectedBarDatum = {
                 key:"expected",
                 label: "Expected",
@@ -97,7 +99,7 @@ export default function kpisLayout(){
                 isAchieved:order === "highest is best" ? expected <= current : expected >= current,
                 startValue:barStart,
                 endValue:expected,
-                fill:isNumber(current) ? colours.redZone : "none",
+                fill:isNumber(current) && !isOnTrack ? colours.redZone : "none",
                 opacity: 0.7,
                 format,
             }

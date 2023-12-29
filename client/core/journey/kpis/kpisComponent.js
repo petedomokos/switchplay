@@ -345,6 +345,7 @@ export default function kpisComponent() {
                         const numberWidth = isMobile ? 8.757 : 9.582;
 
                         //number labels
+                        //@todo - move these labels to numberComponent, and use a withLabel setting to oly show it for 1st kpi
                         const labelsData = kpisData[0]?.numbersData || [];
                         const labelG = contentsG.select("g.number-labels").selectAll("g.number-label").data(labelsData);
                         labelG.enter()

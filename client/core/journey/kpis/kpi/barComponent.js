@@ -215,7 +215,7 @@ export default function barComponent() {
                 const barSectionG = barContentsG.selectAll("g.bar-section").data(sectionsData, d => d.key);
                 barSectionG.enter()
                     .append("g")
-                        .attr("class", "bar-section")
+                        .attr("class", d => `bar-section ${d.key}-bar-section`)
                         .call(fadeIn)
                             .each(function(d,j){
                                 //console.log("sectionD enter", d)

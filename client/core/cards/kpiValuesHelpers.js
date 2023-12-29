@@ -61,7 +61,7 @@ export function calcStepsValues(startDate, date, steps=[]){
 */
 
 export function calcExpected(startDate, startValue, targetDate, targetValue, expectedDate, options={}){
-    const { accuracyPowerOften=0, showTrailingZeros=true } = options;
+    const { accuracyPowerOften=0, showTrailingZeros=true, mustChange, order="highest is best" } = options;
     const startDateMS = startDate.getTime();
     const targetDateMS = targetDate.getTime();
     const expectedDateMS = expectedDate.getTime();
@@ -69,9 +69,12 @@ export function calcExpected(startDate, startValue, targetDate, targetValue, exp
     if(!isNumber(startValue) || !isNumber(targetValue)){ 
         return { raw:null, completion }; 
     }
-    const rawUnrounded = linearProjValue(startDateMS, startValue, targetDateMS, targetValue, expectedDateMS, accuracyPowerOften);
+    const _raw = linearProjValue(startDateMS, startValue, targetDateMS, targetValue, expectedDateMS, accuracyPowerOften);
+    //temp fix it so expected is never rounded down to same as start
+    //@todo - scrap this, or adjust to handle order too
+    const raw = mustChange && _raw === startValue ? (order === "highest is best" ? _raw + 1 : _raw - 1) : _raw;
     return { 
-        raw: round(rawUnrounded, accuracyPowerOften, showTrailingZeros), 
+        raw,//: Math.round(rawUnrounded, accuracyPowerOften, showTrailingZeros), 
         completion
     }
 }
@@ -97,35 +100,12 @@ export function getValueForSession(stat, datapoints, sessionDate, start, target)
 }
 */
 
-const getMockRaw = (kpiKey, startValue, targetValue, deckIndex, cardNr) => {
-    //console.log("getRaw", deckIndex, cardNr)
-    if(kpiKey === "dribbles-successfulDribbles"){
-        return Math.round(startValue + (targetValue - startValue) * 0.66)
-    }
-
-    if(kpiKey === "matchRuns-sprints"){
-        return Math.round(startValue + (targetValue - startValue) * 0.7)
-    }
-
-    if(kpiKey === "matchRuns-highSpeedRuns"){
-        return Math.round(startValue + (targetValue - startValue) * 0.22)
-    }
-
-    if(kpiKey === "passes-successPC"){
-        return Math.round(startValue + (targetValue - startValue) * 0.6)
-    }
-
-    if(kpiKey === "passes-total"){
-        return Math.round(startValue + (targetValue - startValue) * 0.25)
-    }
-}
-
 export function getStatValue(stat, datapoints, options={}){
     const { dateRange, dataMethod, completionCalcInfo:{ startValue, targetValue }, deckIndex, cardNr } = options;
     //console.log("getStatValue......", stat.key, datapoints)
     if(!datapoints || datapoints.length === 0){
-        const raw = null; //getMockRaw(stat.key, startValue, targetValue, deckIndex, cardNr)
-        const completion = null; //convertToPC(startValue, targetValue)(raw);
+        const raw = null;
+        const completion = null;
         return { raw, completion }
     }
     //null case 1: dataset unavailable
@@ -148,6 +128,7 @@ export function getStatValue(stat, datapoints, options={}){
     const getOverallValue = values => {
         if(dataMethod === "best"){ return getBest(values); }
         if(dataMethod === "latest") { return d3.greatest(dateValueObjs, d => d.date).value }
+        //if(dataMethod === "mean"){ return Math.round(d3.mean(values)); }
         if(dataMethod === "mean"){ return d3.mean(values); }
         return null;
     }

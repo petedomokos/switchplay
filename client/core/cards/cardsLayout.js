@@ -26,7 +26,7 @@ export default function cardsLayout(){
 
         const _data = cards.map((c,i) => {
             const { deckId, cardNr, title="", date, items, purpose, kpis } = c;
-            //console.log("card....", c)
+            //console.log("cardsLayout....", c.cardNr, c.title)
             const pos = cardNr - frontCardNr;
 
             const mockFlags = mockCardFlags[i] || [];

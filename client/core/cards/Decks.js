@@ -82,8 +82,6 @@ const enhancedZoom = dragEnhancements();
 const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
   //console.log("Decks table", table)
   //console.log("Decks data", data)
-  //processed props
-  const stringifiedData = JSON.stringify({ data, table, datasets });
   //state
   const [_deckLayout, setLayout] = useState(() => deckLayout());
   const [decks, setDecks] = useState(() => decksComponent());
@@ -94,6 +92,16 @@ const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSele
   const [selectedItemNr, setSelectedItemNr] = useState(customSelectedItemNr);
   const [longpressedDeckId, setLongpressedDeckId] = useState("");
   const [form, setForm] = useState(null);
+
+  //update flags
+  //processed props
+  const stringifiedData = JSON.stringify({ data, table, datasets });
+  const stringifiedTable = JSON.stringify(table);
+  const stringifiedDatasets = JSON.stringify(datasets);
+  const stringifiedCards = JSON.stringify(data.map(d => d.cards));
+  const stringifiedDeckInfo = JSON.stringify(data.map(d => ({ 
+    id:d.id, title: d.title, frontcardNr:d.frontCardNr, sections:d.sections, purpose:d.purpose
+  })))
 
   const shouldPersistChanges = !table?.isMock && !data?.find(d => d.isMock);
   //profiles state
@@ -617,6 +625,8 @@ const Decks = ({ table, data, journeyData, groupingTag, timeframeKey, customSele
       .groupingTag(groupingTag)
       .timeframeKey(timeframeKey)
       .withSections(true);
+
+    console.log("deck layout")
 
     const processedDecksData = data
       .map((deck, i) => ({ ...deck, cards:addKpiValuesToCards(deck, datasets, i) }))
