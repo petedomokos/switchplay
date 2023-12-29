@@ -69,6 +69,7 @@ export const groups = {
                         { datasetKey:"passes", measureKey:"total", value:12 },
                     ] 
                 },
+                /*
                 { 
                     _id:"tristanRowe", firstName:"Tristan", surname:"Rowe", position:"DEF",
                     kpiStartValues:[
@@ -210,6 +211,7 @@ export const groups = {
                         { datasetKey:"passes", measureKey:"total", value:12 },
                     ] 
                 },
+                */
             ]
         },
     },

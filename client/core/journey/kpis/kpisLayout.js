@@ -25,8 +25,11 @@ export default function kpisLayout(){
             const start = values.start?.raw;
             const current = values.achieved?.raw;
             const target = orientationFocus === "defence" ? minStandard.value : values.target?.raw;
-            const achieved = values.achieved?.raw;
+            const achieved = values.achieved?.raw || current;
             const expected = values.expected?.raw;
+
+            const isOnTrack = order === "highest is best" ? achieved >= expected : achieved <= expected;
+            const isBetterThanExpected = isOnTrack && achieved !== expected;
             //console.log("s c t a e", start, current, target, achieved, expected)
             //bars
             const currentColour = grey10(2);// "#696969";
@@ -94,7 +97,7 @@ export default function kpisLayout(){
                 isAchieved:order === "highest is best" ? expected <= current : expected >= current,
                 startValue:barStart,
                 endValue:expected,
-                fill:colours.redZone,
+                fill:isNumber(current) ? colours.redZone : "none",
                 opacity: 0.7,
                 format,
             }
@@ -441,8 +444,20 @@ export default function kpisLayout(){
                 fill:getFill("number"),
                 format
             }
-            
-            const numbersData = [currentNumberDatum]; //dont amend the current value like we did for bar
+
+            const expectedNumberDatum = {
+                milestoneId,
+                progressBarType:"dataset",
+                key:"expected",
+                shouldDisplay:(status, editing, displayFormat) => /*editing?.desc !== "target" &&*/ displayFormat !== "steps",
+                label: "Expected",
+                value: expected,
+                //fill:colours.current,
+                fill:isBetterThanExpected ? "#90EE90" : (isOnTrack || !isNumber(achieved) ? grey10(5): colours.redZone), //red or green depending on 
+                format
+            }
+
+            const numbersData = [currentNumberDatum, expectedNumberDatum]; //dont amend the current value like we did for bar
 
             /*
             if(stepsBarData){

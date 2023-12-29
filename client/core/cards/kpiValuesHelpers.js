@@ -1,9 +1,11 @@
+import * as d3 from 'd3';
 import { linearProjValue } from "../journey/helpers";
 import { isNumber } from '../../data/dataHelpers';
 import { addDays, addYears, addMonths, addWeeks, calcDateCount, calcAge } from '../../util/TimeHelpers';
 import { sortAscending } from '../../util/ArrayHelpers';
 import { convertToPC, round, roundDown, roundUp, getRangeFormat, dateIsInRange, getValueForStat, getGreatestValueForStat } from "../../data/dataHelpers";
 //helper
+/*
 export const requiredValueIsAchieved = (value, required, options={}) => {
     const { order="highest is best", log, useSteps } = options;
     if(log){ 
@@ -52,10 +54,11 @@ export function calcStepsValues(startDate, date, steps=[]){
         completion: nrSteps === 0 ? 0 : Math.round((nrCompletedSteps/nrSteps) * 100) 
     } 
     //@todo - impl showTrailingZeros in round function so we can set it to false
-    const _expected = calcExpected(start, { ...target, date }, new Date(), { accuracy:2, /*showTrailingZeros:false*/ });
+    const _expected = calcExpected(start, { ...target, date }, new Date(), { accuracy:2, showTrailingZeros:false });
     const expected = { ..._expected, actualSteps:Math.floor(_expected.actual) }
     return { start, current, target, expected }
 }
+*/
 
 export function calcExpected(startDate, startValue, targetDate, targetValue, expectedDate, options={}){
     const { accuracyPowerOften=0, showTrailingZeros=true } = options;
@@ -72,6 +75,7 @@ export function calcExpected(startDate, startValue, targetDate, targetValue, exp
         completion
     }
 }
+/*
 export function isSameDay(d1, d2){
     return  d1.getUTCDate() === d2.getUTCDate() && 
             d1.getUTCMonth() === d2.getUTCMonth() && 
@@ -91,6 +95,7 @@ export function getValueForSession(stat, datapoints, sessionDate, start, target)
     const completion = start && target ? convertToPC(start.actual, target.actual)(actual) : null;
     return { actual , completion };
 }
+*/
 
 const getMockRaw = (kpiKey, startValue, targetValue, deckIndex, cardNr) => {
     //console.log("getRaw", deckIndex, cardNr)
@@ -117,25 +122,17 @@ const getMockRaw = (kpiKey, startValue, targetValue, deckIndex, cardNr) => {
 
 export function getStatValue(stat, datapoints, options={}){
     const { dateRange, dataMethod, completionCalcInfo:{ startValue, targetValue }, deckIndex, cardNr } = options;
-    //console.log("getStatValue......", stat.key)
-    const raw = getMockRaw(stat.key, startValue, targetValue, deckIndex, cardNr)
-    //console.log("raw", raw)
-    const completion = convertToPC(startValue, targetValue)(raw);
-    //console.log("completion", completion)
-    return { raw, completion }
-    /*console.log("calcValue......", stat.key)
-    console.log("datapoints", datapoints)
-    console.log("dateRange", dateRange)
-    console.log("options", options)*/
+    //console.log("getStatValue......", stat.key, datapoints)
+    if(!datapoints || datapoints.length === 0){
+        const raw = null; //getMockRaw(stat.key, startValue, targetValue, deckIndex, cardNr)
+        const completion = null; //convertToPC(startValue, targetValue)(raw);
+        return { raw, completion }
+    }
     //null case 1: dataset unavailable
-    /*
     if(!stat){ return { raw:null, completion:null } }
     //helper
     const getValue = getValueForStat(stat.key, stat.accuracy);
     const dateValueObjs = datapoints
-        //if no date range, we want to include all as it will be the current card
-        .filter(d => dateIsInRange(d.date, dateRange))
-        .filter(d => !d.isTarget)
         .map(d => ({ date: d.date, value: getValue(d) }))
         .filter(d => isNumber(d.value));
 
@@ -156,12 +153,12 @@ export function getStatValue(stat, datapoints, options={}){
     }
 
     const raw = getOverallValue(values);
-    console.log("raw", raw)
+    //console.log("raw", raw)
     const completion = convertToPC(startValue, targetValue)(raw);
+    //console.log("completion", completion)
     return { raw, completion }
-    */
 }
-
+/*
 export function createTargetFromDefault(datasetKey, statKey, date, defaultTargets){
     const defaultTarget = findDefaultTarget(defaultTargets, datasetKey, statKey, date);
     return defaultTarget?.value || null;
@@ -182,3 +179,4 @@ export const goBackByExpiryDurationFromDate = (duration, units) => date => {
     if(units === 'weeks'){ return addWeeks(-duration, date); }
     return date;
 }
+*/

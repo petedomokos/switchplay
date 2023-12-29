@@ -7,7 +7,7 @@ import { fetchMultipleFullDatasets } from '../../actions/DatasetActions'
 import { hideMenus, showMenus } from "../../actions/CommonActions"
 
 const mapStateToProps = (state, ownProps) => {
-	//console.log("CardsTableContainer...user", state.user)
+	console.log("CardsTableContainer...user", state.user)
 	const { asyncProcesses, user, system } = state;
 	const { _id, username, firstname, surname, photo, photos, journeys=[], homeJourney, loadedDatasets, datasetsMemberOf } = user;
 
@@ -18,10 +18,8 @@ const mapStateToProps = (state, ownProps) => {
 	const datasets = loadedDatasets;
 	const fullyLoadedDatasets = datasets
 		.filter(dset => dset.datapoints)
-		.map(dset => ({
-			...dset, datapoints:dset.datapoints.filter(d => d.player._id === journeyData.playerId)
-		}))
-	//console.log("fullyLD", fullyLoadedDatasets)
+		
+	console.log("fullyLD", fullyLoadedDatasets)
 	const allDatasetsFullyLoaded = datasets.length === fullyLoadedDatasets.length;
 
 	const hydratedJourneyData = user.isMock ? [] : hydrateJourneyData(journeyData, user, fullyLoadedDatasets);

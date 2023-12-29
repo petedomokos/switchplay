@@ -277,6 +277,8 @@ export default function cardsComponent() {
                 //can assume 1 item per card per section for now
                 const itemD = itemsData ? itemsData[0] : null;
 
+                if(cardD.isPlaced){ return STYLES.CARD.STROKE_WIDTH * 5; }
+
                 if(itemD?.title){
                     const { status } = itemD;
                     return status === 2 ? STYLES.CARD.STROKE_WIDTH : STYLES.CARD.STROKE_WIDTH * 0.75;
@@ -363,7 +365,7 @@ export default function cardsComponent() {
                                 .attr("height", getCardContentsHeight(cardD))
                                 .attr("fill", selectedSectionKey ? getCardFill({ pos: 0 }) : getCardFill(cardD))
                                 .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData, 1) : getCardStroke(cardD))
-                                .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth() : getCardStrokeWidth(cardD))
+                                .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth(null, cardD) : getCardStrokeWidth(cardD))
                                 .on("click", e => {
                                     //console.log("card bg click")
                                     onClickCard.call(this, e, cardD)
@@ -513,7 +515,7 @@ export default function cardsComponent() {
                             .duration(400)
                                 .attr("fill", selectedSectionKey ? getCardFill({ pos: 0 }) : getCardFill(cardD))
                                 .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData, 1) : getCardStroke(cardD))
-                                .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth(itemsData) : getCardStrokeWidth(cardD))
+                                .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth(itemsData, cardD) : getCardStrokeWidth(cardD))
                                 .attr("stroke-dasharray", selectedSectionKey && itemsData[0] && itemsData[0].status === 1 ? "3 4" : null)
 
                         contentsG.select("rect.card-front-bg")
@@ -958,7 +960,7 @@ export default function cardsComponent() {
                             .scrollable(false)
                             .profileIsSelected(false)
 
-                        const shouldShowKpis = /*deckIsSelected &&*/ isFront && cardsAreFlipped && !selectedSectionKey;
+                        const shouldShowKpis = /*deckIsSelected &&*/ cardsAreFlipped && !selectedSectionKey && (isFront || isPlaced);
                         const kpisG = backContentsG.selectAll("g.kpis").data(shouldShowKpis ? [1] : []);
                         kpisG.enter()
                             .append("g")

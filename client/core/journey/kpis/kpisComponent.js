@@ -290,6 +290,8 @@ export default function kpisComponent() {
                                 .attr("height", contentsHeight)
                                 .attr("fill", "transparent")
                                 .attr("stroke", "none");
+
+                        contentsG.append("g").attr("class", "number-labels");
                                 
                         const listG = contentsG.append("g").attr("class", "kpis-list");
                         listG
@@ -336,6 +338,34 @@ export default function kpisComponent() {
                     .attr("transform", `translate(${margin.left},${margin.top})`)
                     .each(function(){
                         const contentsG = d3.select(this);
+
+                        //temp - grabbed from, progressbarcomponent
+                        const isMobile = listWidth < 45; //listWidth is 43.78 on mobile, 47.91 on laptop 
+                        const numbersWidth = isMobile ? 17.513 : 19.163 
+                        const numberWidth = isMobile ? 8.757 : 9.582;
+
+                        //number labels
+                        const labelsData = kpisData[0]?.numbersData || [];
+                        const labelG = contentsG.select("g.number-labels").selectAll("g.number-label").data(labelsData);
+                        labelG.enter()
+                            .append("g")
+                                .attr("class", "number-label")
+                                .each(function(d){
+                                    d3.select(this).append("text")
+                                        .attr("dominant-baseline", "hanging")
+                                        .attr("text-anchor", "middle");
+                                })
+                                .merge(labelG)
+                                .attr("transform", (d,i) => `translate(${listWidth - numbersWidth + (i+1) * numberWidth},0)`)
+                                .each(function(d){
+                                    d3.select(this).select("text")
+                                        .attr("fill", grey10(3))
+                                        .attr("font-size", 1.35)
+                                        .text(d.label)
+                                })
+
+                        labelG.exit().remove();
+
                         //kpi list
                         //scroll
                         //todo - 1. put clipPath in place

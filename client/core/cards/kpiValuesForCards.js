@@ -13,6 +13,8 @@ const calcWorstPossibleValue = kpi => kpi.order === "highest is best" ? kpi.min 
 
 //export function hydrateJourneyData(data, user, datasets){
 export const addKpiValuesToCards = (deck, datasets=[], deckIndex) => {
+    //console.log("addKpiValuesToCards...deck", deck)
+    //console.log("dsets", datasets)
     const { player, kpis=[], cards=[], settings=[] } = deck
     const settingsWithDefaults = [...DECK_SETTINGS, ...settings]
     if(cards.length === 0){ return cards; }
@@ -26,7 +28,14 @@ export const addKpiValuesToCards = (deck, datasets=[], deckIndex) => {
     //helper
     const getValue = (kpi, dateRange, dataMethod="mean", options={}) => {
         //console.log("getValue", kpi)
-        const datapoints = datasets.find(dset => dset.key === kpi.datasetKey)?.datapoints;
+        //next - check datasets and points here for harrison...the ones ive created should come up for teh 1st 3 cards, one each
+        //console.log("dset", datasets.find(dset => dset.key === kpi.datasetKey))
+        const datapoints = datasets.find(dset => dset.key === kpi.datasetKey)
+            ?.datapoints
+            .filter(d => d.player === deck.player?._id)
+            .filter(d => !d.isTarget)
+            .filter(d => dateIsInRange(d.date, dateRange));
+
         const _options = {
             ...options,
             dateRange, 
@@ -90,6 +99,8 @@ function addValuesToCard(card, kpis, settings, options){
     const { date } = card;
     const { deckStartDate, deckEndDate, prevCardDate, getValue } = options;
     const cardStartDate = prevCardDate || deckStartDate;
+    //console.log("cardStartDate", cardStartDate)
+    //console.log("date", date)
     const dataMethod = settings.find(s => s.key === "achievedValueDataMethod").value;
     return { 
         ...card, 

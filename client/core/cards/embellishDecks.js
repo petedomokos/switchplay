@@ -35,7 +35,7 @@ export const embellishDeck = (deck, settings={}) => {
     ...c,
     status:calcCardStatus(c.items),
     isCurrent:c.id === currentCardId,
-    isFuture:!!futureCards.find(card => card.id === c.id),
+    isFuture:!!futureCards.find(card => card.id === c.id) && c.id !== currentCardId,
     isPast:!futureCards.find(card => card.id === c.id)
   }));
   //console.log('cards', cards)

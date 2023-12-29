@@ -36,7 +36,7 @@ export const convertToPC = (startValue, targetValue) => (value, options={}) => {
 }
 
 export const getValueForStat = (statKey, accuracy, showTrailingZeros=true) => datapoint => {
-    const valueStr = datapoint?.values?.find(v => v.key === statKey)?.value; 
+    const valueStr = datapoint?.values?.find(v => v.statKey === statKey)?.value; 
     return round(Number(valueStr), accuracy, showTrailingZeros)
 }
 

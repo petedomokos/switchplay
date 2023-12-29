@@ -104,6 +104,11 @@ export default function progressBarComponent() {
                 bottom:numbersMarginVert, 
             };
             const numbersWidth = nrNumbers === 0 ? 0 : numbersContentsWidth + numbersMargin.left + numbersMargin.right;
+            /*console.log("margin", margin)
+          
+            console.log("numberWidth", numberWidth)
+            console.log("numbersWidth", numbersWidth)
+            console.log("numbersMargin", numbersMargin)*/
             //@todo - numberheight mx should be in sync with barheight max
            
             const numbers = {

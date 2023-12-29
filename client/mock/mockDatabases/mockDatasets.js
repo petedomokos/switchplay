@@ -14,7 +14,9 @@ export const englandDatasets = [
             nr:"", side:"", custom:"", unit:"",
         }],
         datapoints:[
-            //{ date:"", sessionId:"", player:"", values:[] }
+            { _id:uuid(), date:"2024/06/28", /*sessionId:"",*/ player:"harrisonMurray-Campbell", values:[{ measureKey:"successfulDribbles", value:"5" }] },
+            { _id:uuid(), date:"2024/07/03", /*sessionId:"",*/ player:"harrisonMurray-Campbell", values:[{ measureKey:"successfulDribbles", value:"7" }] },
+            { _id:uuid(), date:"2024/07/11", /*sessionId:"",*/ player:"harrisonMurray-Campbell", values:[{ measureKey:"successfulDribbles", value:"6" }] },
         ]
     },
     {
@@ -61,9 +63,7 @@ export const englandDatasets = [
                 nr:"", side:"", custom:"", unit:"",
             }
         ],
-        datapoints:[
-            //{ date:"", sessionId:"", player:"", values:[] }
-        ]
+        datapoints:[]
     },
     {
         _id:uuid(),
