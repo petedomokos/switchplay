@@ -121,6 +121,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
     title:tables[0]?.title || customer?.name || "",
     photoURL:customer ? `/customers/${customer._id}/logo.png` : "/switchplay/logo.png",
     logoTransform:customer ? customer.tableLogoTransform : "translate(-70px,-70px) scale(0.2)"
+    //logoTransform:customer ? customer.tableLogoTransform : "translate(-297px,-302px) scale(0.05)"
   };
   const tableDecks = table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
   const stringifiedTableAndDecks = JSON.stringify({ table, tableDecks });

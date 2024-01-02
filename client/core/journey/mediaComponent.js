@@ -106,7 +106,7 @@ export default function mediaComponent() {
                     .attr("stroke","none")// grey10(5))
                     .attr("stroke-width", 0.03)
 
-            const isMobile = photoWidth < 30; 
+            const isMobile = photoWidth < 27.5; 
 
             const photoG = containerG.selectAll("g.photo").data(photosData, d => d.key);
             photoG.enter()

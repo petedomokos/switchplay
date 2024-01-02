@@ -225,6 +225,11 @@ const customiseFrontCardId = (cards, p,i) => cards[2].id;
 //@todo - add personal kpis here
 const getPlayerKpis = p => [];
 
+const playerPurpose = [
+    "I will become a much more effective attacking player, contributing to chances and goals in every game", 
+    "I will do this by making better dribbling choices, and also working on my fitness so I can do more sprints"
+]
+
 export const getPlayerDecks = group => {
     //helper
     const getDeckForPlayer = (p,i) => {
@@ -245,6 +250,7 @@ export const getPlayerDecks = group => {
                         obj.datasetKey === kpi.datasetKey && obj.measureKey === kpi.measureKey)?.value
                 })),
             player:p,
+            purpose:playerPurpose,
             settings:group.deckSettings,
             hasPhoto:true
         }

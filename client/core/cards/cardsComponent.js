@@ -664,7 +664,7 @@ export default function cardsComponent() {
                             .call(items);
 
                         //PURPOSE (instead of items when in long-term longTerm view)
-                        const shouldShowPurpose = deckIsSelected && isFront && timeframeKey === "longTerm" && !cardsAreFlipped;
+                        const shouldShowPurpose = isFront && timeframeKey === "longTerm" && !cardsAreFlipped;
                         const purpose = purposeComponents[id];
                         const purposeG = frontContentsG.selectAll("g.card-purpose").data(shouldShowPurpose ? [purposeData] : [])
                         purposeG.enter()
