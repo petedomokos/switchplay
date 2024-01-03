@@ -256,25 +256,6 @@ export default function cardHeaderComponent() {
 
                                     pentagonG.exit().remove();
 
-                                    return;
-                                    const trophyDatum = { id, completion };
-                                    const trophyG = contentsG.selectAll("g.trophy").data(rightContent === "progress-trophy" ? [trophyDatum] : [], d => d);
-                                    trophyG.enter()
-                                        .append("g")
-                                            .attr("class", "trophy")
-                                            .merge(trophyG)
-                                            //.attr("transform", `translate(${progressSummaryContentsWidth/2},${progressSummaryContentsHeight/2})`)
-                                            .call(trophy
-                                                .width(progressSummaryContentsWidth)
-                                                .height(progressSummaryContentsHeight)
-                                                .margin({ left:0, right:0, top: 0, bottom: 0 })
-                                                .iconTransform({ x:-1.2, y:-1.2 }))
-                                                
-                                    trophyG.exit().remove();
-                                        
-
-                                    //hitbox
-                                    //@todo - remove all this and move the logic into a progressIcon component
                                     //atm, we hide the hitbiox of using trophy, as it has its own hitbox
                                     d3.select(this).select("rect.hitbox")
                                         .attr("width", progressSummaryWidth)
