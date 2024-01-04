@@ -82,6 +82,7 @@ export const GREY_COLOUR_THEME = (backgroundColour) => ({
             TITLE:grey10(6)
         },
         SECTION_ID:grey10(6),
+        ITEM_FILL:grey10(2),
         ITEM_TEXT:grey10(7),
         ITEM_ATTACHMENT:grey10(6),
         //section-view has same colours for each card
@@ -168,6 +169,7 @@ export const BLUE_COLOUR_THEME = (backgroundColour) => ({
             TITLE:grey10(6)
         },
         SECTION_ID:grey10(4),
+        ITEM_FILL:grey10(2),
         ITEM_TEXT:grey10(2),
         ITEM_ATTACHMENT:grey10(3),
         //section-view has same colours for each card
@@ -271,6 +273,7 @@ export const SATURATED_BLUE_COLOUR_THEME = (bgColour) => ({
             TITLE:grey10(6)
         },
         SECTION_ID:grey10(4),
+        ITEM_FILL:grey10(2),
         ITEM_TEXT:grey10(2),
         ITEM_ATTACHMENT:grey10(3),
         //section-view has same colours for each card

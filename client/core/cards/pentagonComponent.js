@@ -10,7 +10,7 @@ import { isNumber } from '../../data/dataHelpers';
 import { fadeInOut, fadeIn, remove } from '../journey/domHelpers';
 import { icons } from '../../util/icons';
 
-const { GOLD, SILVER, NOT_STARTED_FILL } = COLOURS;
+const { GOLD, SILVER, NOT_STARTED_FILL, CARD:{ ITEM_FILL } } = COLOURS;
 const NR_SECTIONS = 5;
 
 const videoIconD = "M85.527,80.647c2.748,0,4.973-2.225,4.973-4.974V24.327c0-2.749-2.225-4.974-4.973-4.974H14.474c-2.748,0-4.974,2.225-4.974,4.974v51.346c0,2.749,2.225,4.974,4.974,4.974H85.527z M80.553,70.699H19.446V29.301h61.107V70.699z"
@@ -71,8 +71,8 @@ export default function pentagonComponent() {
     let styles = {
         getItemStrokeWidth:(itemD, linePartNr) => 0.1,
         getItemStroke:(itemD, linePartNr) => "grey",
-        itemTextFill:COLOURS.CARD.ITEM_TEXT,
-        itemAttachmentFill:COLOURS.CARD.ITEM_ATTACHMENT
+        itemTextFill:grey10(7),//COLOURS.CARD.ITEM_TEXT,
+        itemAttachmentFill:grey10(6)//COLOURS.CARD.ITEM_ATTACHMENT
     }
 
     //API CALLBACKS
@@ -128,7 +128,10 @@ export default function pentagonComponent() {
                             .attr("rx", 3) //@todo - store in constants and use in cardsComponent too
                             .attr("ry", 3)
 
-                        sectionG.append("path").attr("class", "section-bg").attr("fill", "transparent");
+                        sectionG.append("path").attr("class", "section-bg")
+                            //.attr("fill", "transparent")
+                            .attr("opacity", withText ? 1 : 0); //use opacity coz fill transition dosnt seem to work
+
                         sectionG.append("line").attr("class", "start edge-inside show-with-section visible"); 
                         //added inner here and above - now change stroke of it so its normal always
                         sectionG.append("line").attr("class", "finish edge-inside show-with-section visible")
@@ -145,11 +148,9 @@ export default function pentagonComponent() {
 
                         const sectionContentsG = sectionG.append("g").attr("class", "section-contents show-with-section");
                         const itemContentsG = sectionContentsG.append("g").attr("class", "item-contents")
-                            .style("opacity", withText ? 1 : 0)
 
                         //we always want status to appear on top of item title text, so append separate container
                         sectionContentsG.append("g").attr("class", "status-menu-container");
-                            
                         sectionG.append("path").attr("class", "section-hitbox")
                             .attr("fill", "transparent")
 
@@ -299,7 +300,13 @@ export default function pentagonComponent() {
                             .attr("display", editable ? null : "none")*/
 
                         sectionG.select("path.section-bg")
-                            .attr("d", `M${ax},${ay} L${bx},${by} L${cx},${cy} L${dx},${dy}`);
+                            .attr("d", `M${ax},${ay} L${bx},${by} L${cx},${cy} L${dx},${dy}`)
+                            .attr("fill", withText ? ITEM_FILL : "none")
+                                .transition("section-bg-opacity") //use opacity coz fill transitoin not working
+                                //.delay(isAppearing ? 0 : 200)
+                                    .duration(TRANSITIONS.MED)
+                                    .attr("opacity", withText ? 1 : 0)
+                                
 
                         sectionG.select("path.section-hitbox")
                             .attr("d", `M${ax},${ay} L${bx},${by} L${cx},${cy} L${dx},${dy}`)
@@ -404,7 +411,8 @@ export default function pentagonComponent() {
 
                         //contents
                         const sectionContentsG = sectionG.select("g.section-contents");
-                        const itemContentsG = sectionContentsG.select("g.item-contents");
+                        const itemContentsG = sectionContentsG.select("g.item-contents")
+
                         sectionContentsG
                             .transition()
                             //.delay(sizeIsIncreasing ? 300 : 0)
@@ -415,7 +423,7 @@ export default function pentagonComponent() {
                         //bg
                         itemContentsG.select("rect")
                             .attr("width", itemAreaWidth)
-                            .attr("height", itemAreaHeight)
+                            .attr("height", itemAreaHeight);
 
                         //item text and attachments
                         //text
@@ -434,6 +442,7 @@ export default function pentagonComponent() {
                                 .style("opacity", withText ? (itemIsDefined ? 1 : 0.5) : 0)
                        
                         if(withText){
+
                             //we put a fake delay on rendering so it doesnt clash with zooming transitions,
                             //as for some reason it stops the zooming happening smoothly
                             setTimeout(() => {
@@ -443,10 +452,10 @@ export default function pentagonComponent() {
                                         .maxLines(maxNrLines)
                                         .render();
 
-                                    itemTitleG.selectAll("text")
-                                        .style("fill", styles.itemTextFill)
-                                        .style("stroke", styles.itemTextFill)
-                                        .style("stroke-width", 0.01)
+                                itemTitleG.selectAll("text")
+                                    .style("fill", styles.itemTextFill)
+                                    .style("stroke", styles.itemTextFill)
+                                    .style("stroke-width", 0.01)
 
                                 //attachments
                                 //first we need to know how many lines of text there are so we can shoft attachments up if necc

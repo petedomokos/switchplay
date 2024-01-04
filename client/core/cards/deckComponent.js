@@ -14,9 +14,13 @@ import { icons } from '../../util/icons';
 import { fadeIn, remove, getPosition, fadeInOut } from '../journey/domHelpers';
 import purposeComponent from './purposeComponent';
 
+const { CARD:{ ITEM_FILL } } = COLOURS;
+
 const CONTEXT_MENU_ITEM_WIDTH = DIMNS.CONTEXT_MENU.ITEM_WIDTH;
 const CONTEXT_MENU_ITEM_HEIGHT = DIMNS.CONTEXT_MENU.ITEM_HEIGHT;
 const CONTEXT_MENU_ITEM_GAP = DIMNS.CONTEXT_MENU.ITEM_GAP;
+
+
 
 const contextMenuData = [ 
     { key:"delete", url:"/delete.png" }, 
@@ -853,7 +857,7 @@ export default function deckComponent() {
                     sectionG.select("path.section-bg")
                         .transition("highlight")
                         .duration(TRANSITIONS.VERY_FAST)
-                            .attr("fill", grey10(2))
+                            .attr("fill", grey10(7))
 
                     sectionG.selectAll("text.section-identifier")
                         .attr("transform", "scale(1)")
@@ -871,7 +875,7 @@ export default function deckComponent() {
                     sectionG.select("path.section-bg")
                         .transition("unhighlight")
                         .duration(TRANSITIONS.VERY_FAST)
-                            .attr("fill", "transparent")
+                            .attr("fill", ITEM_FILL)
 
                     sectionG.selectAll("text.section-identifier")
                         .transition("highlight")

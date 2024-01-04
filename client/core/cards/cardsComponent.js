@@ -631,7 +631,7 @@ export default function cardsComponent() {
                             .height(itemsAreaHeight)
                             .headerHeight(headerHeight)
                             .withSections(cardIsEditable)
-                            .withText(d => cardIsEditable)
+                            .withText(cardIsEditable)
                             .cardIsSelected(selectedCardNr === cardNr)
                             .selectedItemNr(selectedItemNr)
                             .editable(cardIsEditable)
