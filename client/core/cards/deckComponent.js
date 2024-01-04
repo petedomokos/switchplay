@@ -851,6 +851,34 @@ export default function deckComponent() {
 
 
                 //controls
+                const controlsData = !sections || cardsAreFlipped || timeframeKey === "longTerm" ? [] : [
+                    { i:0, key:"section-view", icon:icons.drill }
+                ];
+
+                const btnWidth = 10;
+                const btnHeight = 18;
+                const btnMargin = { left: 1, right: 1, top:5, bottom:5 }
+                const btnContentsWidth = btnWidth - btnMargin.left - btnMargin.right;
+                const btnContentsHeight = btnHeight - btnMargin.top - btnMargin.bottom;
+
+                const controlsMarginVert = 0;
+                const controlsContentsWidth = btnWidth;
+                const controlsWidth = controlsContentsWidth;
+                const controlsContentsHeight = controlsData.length * btnHeight;
+                const controlsHeight = controlsContentsHeight + 2 * controlsMarginVert;
+                
+                const spaceAvailableOnLeftOfCards = (width - heldCardWidth)/2;
+                const controlsOuterMarginLeft = (spaceAvailableOnLeftOfCards - controlsWidth)/2;
+                const controlsOuterMarginBottom = controlsOuterMarginLeft;
+
+                const xToCentre = -controlsOuterMarginLeft + (width - btnWidth)/2;//+ deckToCentrePos.x   // -controlsOuterMarginLeft + (width - btnWidth)/2;
+                const cardItemsAreaHeight = heldCardHeight - cardHeaderHeight;
+                const yToCentre = controlsOuterMarginBottom + controlsMarginVert - placedCardsAreaHeight - cardItemsAreaHeight/2 + btnHeight/2 + 1;
+
+                const btnY = (d,i) => controlsMarginVert + i * btnHeight;
+                const btnScaleWhenDragged = 1.8;
+
+                //highlighting 
                 let potentialSelectedSectionNr;
                 const highlightSection = nr => {
                     const highlightColour = grey10(7);
@@ -910,7 +938,7 @@ export default function deckComponent() {
                 btnDrag
                     .on("start", function(e,d){
                     })
-                    .on("drag", function(e, d, i){
+                    .on("drag", function(e, d){
                         const btnG = d3.select(this);
                         const { translateX, translateY } = getTransformationFromTrans(btnG.attr("transform"));
                         const newX = translateX + e.dx;
@@ -942,56 +970,36 @@ export default function deckComponent() {
                             potentialSelectedSectionNr = newPotentialSelectedSectionNr;
                         }
                     })
-                    .on("end", function(e,d){
+                    .on("end", function(e, d){
+                        const cleanup = () => {
+                            //get i from the datum
+                            const { i } = d; 
+                            controlsG.selectAll("g.deck-control-btn")
+                                .transition()
+                                .duration(TRANSITIONS.FAST)
+                                    .attr("transform", `translate(0, ${btnY(d, i)})`)
+                        }
+                        if(!selectedSection && !potentialSelectedSectionNr){  cleanup(); }
                         //bug - this doesnt work sometimes
                         if(selectedSection?.nr !== potentialSelectedSectionNr){
                             const section = sections.find(s => s.nr === potentialSelectedSectionNr)
-                            console.log("selecting section", section)
                             onSelectSection(section?.key || "")
                             potentialSelectedSectionNr = "";
                         }else{
-                            //call update here to clean up
-                            update(_deckData)
+                            cleanup();
                         }
                     })
+    
+                controlsG.call(fadeInOut, content === "cards" && deckIsSelected && !isNumber(selectedCardNr) && !selectedSection?.key)
+                controlsG
+                    .attr("transform", `translate(${controlsOuterMarginLeft},${height - controlsOuterMarginBottom - controlsHeight})`)
 
-                    const controlsData = !sections || cardsAreFlipped || timeframeKey === "longTerm" ? [] : [
-                        { key:"section-view", icon:icons.drill }
-                    ];
-    
-                    const btnWidth = 10;
-                    const btnHeight = 18;
-                    const btnMargin = { left: 1, right: 1, top:5, bottom:5 }
-                    const btnContentsWidth = btnWidth - btnMargin.left - btnMargin.right;
-                    const btnContentsHeight = btnHeight - btnMargin.top - btnMargin.bottom;
-    
-                    const controlsMarginVert = 0;
-                    const controlsContentsWidth = btnWidth;
-                    const controlsWidth = controlsContentsWidth;
-                    const controlsContentsHeight = controlsData.length * btnHeight;
-                    const controlsHeight = controlsContentsHeight + 2 * controlsMarginVert;
-                    
-                    const spaceAvailableOnLeftOfCards = (width - heldCardWidth)/2;
-                    const controlsOuterMarginLeft = (spaceAvailableOnLeftOfCards - controlsWidth)/2;
-                    const controlsOuterMarginBottom = controlsOuterMarginLeft;
-    
-                    const xToCentre = -controlsOuterMarginLeft + (width - btnWidth)/2;//+ deckToCentrePos.x   // -controlsOuterMarginLeft + (width - btnWidth)/2;
-                    const cardItemsAreaHeight = heldCardHeight - cardHeaderHeight;
-                    const yToCentre = controlsOuterMarginBottom + controlsMarginVert - placedCardsAreaHeight - cardItemsAreaHeight/2 + btnHeight/2 + 1;
-    
-                    controlsG.call(fadeInOut, content === "cards" && deckIsSelected && !isNumber(selectedCardNr) && !selectedSection?.key)
-                    controlsG
-                        .attr("transform", `translate(${controlsOuterMarginLeft},${height - controlsOuterMarginBottom - controlsHeight})`)
-    
-    
-                    controlsG.select("rect.controls-bg")
-                        .attr("width", controlsWidth)
-                        .attr("height", controlsHeight)
-                        .attr("rx", 1.5)
-                        .attr("ry", 1.5)
-                
-                const btnY = (d,i) => controlsMarginVert + i * btnHeight;
-                const btnScaleWhenDragged = 1.8;
+
+                controlsG.select("rect.controls-bg")
+                    .attr("width", controlsWidth)
+                    .attr("height", controlsHeight)
+                    .attr("rx", 1.5)
+                    .attr("ry", 1.5)
             
                 const btnG = controlsG.selectAll("g.deck-control-btn").data(controlsData, d => d.key);
                 btnG.enter()

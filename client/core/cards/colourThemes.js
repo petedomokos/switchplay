@@ -168,7 +168,7 @@ export const BLUE_COLOUR_THEME = (backgroundColour) => ({
             DATE_COUNT_WORDS:grey10(5),
             TITLE:grey10(6)
         },
-        SECTION_ID:grey10(4),
+        SECTION_ID:grey10(3),
         ITEM_FILL:grey10(2),
         ITEM_TEXT:grey10(2),
         ITEM_ATTACHMENT:grey10(3),
@@ -272,7 +272,7 @@ export const SATURATED_BLUE_COLOUR_THEME = (bgColour) => ({
             DATE_COUNT_WORDS:grey10(5),
             TITLE:grey10(6)
         },
-        SECTION_ID:grey10(4),
+        SECTION_ID:grey10(3),
         ITEM_FILL:grey10(2),
         ITEM_TEXT:grey10(2),
         ITEM_ATTACHMENT:grey10(3),
