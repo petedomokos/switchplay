@@ -130,7 +130,7 @@ export default function pentagonComponent() {
 
                         sectionG.append("path").attr("class", "section-bg")
                             //.attr("fill", "transparent")
-                            .attr("opacity", withText ? 1 : 0); //use opacity coz fill transition dosnt seem to work
+                            //.attr("opacity", withText ? 1 : 0); //use opacity coz fill transition dosnt seem to work
 
                         sectionG.append("line").attr("class", "start edge-inside show-with-section visible"); 
                         //added inner here and above - now change stroke of it so its normal always
@@ -301,7 +301,8 @@ export default function pentagonComponent() {
 
                         sectionG.select("path.section-bg")
                             .attr("d", `M${ax},${ay} L${bx},${by} L${cx},${cy} L${dx},${dy}`)
-                            .attr("fill", withText ? ITEM_FILL : "none")
+                            .attr("fill", ITEM_FILL)
+                            //.attr("fill", withText ? ITEM_FILL : "none")
                                 .transition("section-bg-opacity") //use opacity coz fill transitoin not working
                                 //.delay(isAppearing ? 0 : 200)
                                     .duration(TRANSITIONS.MED)

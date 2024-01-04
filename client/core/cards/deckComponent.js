@@ -853,17 +853,29 @@ export default function deckComponent() {
                 //controls
                 let potentialSelectedSectionNr;
                 const highlightSection = nr => {
-                    const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${nr}`);
+                    const highlightColour = grey10(7);
+                    //top-right header pentagon
+                    const headerPentagonSectionG = containerG.selectAll("g.card-header").select("g.pentagon").select(`g.section-${nr}`);
+                    headerPentagonSectionG.select("path.section-bg")
+                        .transition("highlight-header-section")
+                        .duration(TRANSITIONS.VERY_FAST)
+                            .attr("opacity", 1)
+                            .attr("fill", highlightColour)
+
+                    //items-area stuff
+                    const sectionG = containerG.selectAll("g.card").select("g.items-area").select(`g.section-${nr}`);
+
                     sectionG.select("path.section-bg")
                         .transition("highlight")
                         .duration(TRANSITIONS.VERY_FAST)
-                            .attr("fill", grey10(7))
+                            .attr("opacity", 1)
+                            .attr("fill", highlightColour)
 
                     sectionG.selectAll("text.section-identifier")
                         .attr("transform", "scale(1)")
                             .transition("highlight")
                             .duration(TRANSITIONS.VERY_FAST)
-                                .attr("fill", grey10(2))
+                                .attr("fill", highlightColour)
                                 .attr("font-size", FONTSIZES.SECTION_ID * 1.2)
                                 .attr("opacity", 1)
 
@@ -871,10 +883,20 @@ export default function deckComponent() {
                 }
 
                 const unhighlightSection = nr => {
-                    const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${nr}`);
+                     //top-right header pentagon
+                     const headerPentagonSectionG = containerG.selectAll("g.card-header").select("g.pentagon").select(`g.section-${nr}`);
+                     headerPentagonSectionG.select("path.section-bg")
+                         .transition("unhighlight-header-section")
+                         .duration(TRANSITIONS.VERY_FAST)
+                             .attr("opacity", 0)
+                             .attr("fill", 'blue')
+
+                    //items-area stuff
+                    const sectionG = containerG.selectAll("g.card").select("g.items-area").select(`g.section-${nr}`);
                     sectionG.select("path.section-bg")
                         .transition("unhighlight")
                         .duration(TRANSITIONS.VERY_FAST)
+                            .attr("opacity", 1)
                             .attr("fill", ITEM_FILL)
 
                     sectionG.selectAll("text.section-identifier")
@@ -883,7 +905,6 @@ export default function deckComponent() {
                             .attr("fill", COLOURS.CARD.SECTION_ID)
                             .attr("font-size", FONTSIZES.SECTION_ID)
                             .attr("opacity", STYLES.SECTION_ID_OPACITY)
-
                 }
 
                 btnDrag
