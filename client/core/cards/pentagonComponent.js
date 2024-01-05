@@ -171,7 +171,8 @@ export default function pentagonComponent() {
                             .fontSize(2)
                             .fontMin(1)
                             .fontMax(12)
-                            .verticalAlign("middle")
+                            .textAnchor("middle")
+                            //.verticalAlign("middle") - use this if titles are all/often 1 or 2 lines only
                             .overflow("visible");
 
                     })
@@ -479,7 +480,7 @@ export default function pentagonComponent() {
                                     }
                                 }
 
-                                const attachmentsG = sectionContentsG.selectAll("g.item-attachments").data(hasAttachments ? [1] : []);
+                                const attachmentsG = sectionContentsG.selectAll("g.item-attachments").data(hasAttachments ? [] : []);
                                 attachmentsG.enter()
                                     .append("g")
                                         .attr("class", "item-attachments")
