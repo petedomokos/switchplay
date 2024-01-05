@@ -98,8 +98,10 @@ const getPhotoUrl = (deck, settings) => {
   //prioritise playerId over phaseKey
   if(!groupingTag){ 
     //playerId may be undefined or may be defined but same for all decks
-    if(allPlayerIdsSame){ return wrapPhase(phaseId) || deck.photoUrl || ""; }
-    return wrapPlayer(playerId) || wrapPhase(phaseId) || deck.photoUrl || ""; 
+    //@todo - change this to check if customer group pnly has one player or something like that
+    //if(allPlayerIdsSame){ return wrapPhase(phaseId) || deck.photoURL || ""; }
+    
+    return wrapPlayer(playerId) || wrapPhase(phaseId) || deck.photoURL || ""; 
   }
   //its either grouped by player or phase, and this determines the photo we need
   return groupingTag === "player" ? wrapPlayer(playerId) : wrapPhase(phaseId);
@@ -110,7 +112,7 @@ export const tableLayout = (decks, nrCols=3, settings={}) => {
   //add table positions
   return formattedDecks.map((d,i) => ({
       ...d, 
-      photoUrl:getPhotoUrl(d, settings),
+      photoURL:getPhotoUrl(d, settings),
       //@todo - impl layoutFormat grid
       colNr: /*layoutFormat === "grid" ? d.fixedColNr :*/ calcColNr(i, nrCols),
       rowNr: /*layoutFormat === "grid" ? d.fixedRowNr :*/ calcRowNr(i, nrCols),

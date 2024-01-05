@@ -52,10 +52,11 @@ export default function cardItemsComponent() {
         itemWidth = contentsWidth/4.5;
         itemHeight = itemWidth;
         const longestItemLength = d3.max([itemWidth, itemHeight]);
-        innerRadius = 0;// (actualContentsLength/2 - longestItemLength/2) * (withSections ? 0.5 : 1);
+        //innerRadius = 0;// (actualContentsLength/2 - longestItemLength/2) * (withSections ? 0.5 : 1);
         //radius is slightly linger than half contentsWidt, because the total length is nerve quite 2 * radius
         //due to angles
         outerRadius = contentsWidth * 0.53;
+        innerRadius = outerRadius * 0.15;
         onSetOuterRadius(outerRadius)
         //we need to shift down by theis extra 0.03 of contentsWidth to centre it. 
         extraShiftDownForAngleDiscrepancy = contentsWidth * 0.03;
@@ -72,6 +73,7 @@ export default function cardItemsComponent() {
 
     let withSections = true;
     let withText = true;
+    let middleInfo = null;
     let editable = true;
     let newStatus;
     let statusTimer;
@@ -170,6 +172,7 @@ export default function cardItemsComponent() {
                                 })
                                 .withSections(withSections)
                                 .withText(withText && !isNumber(selectedItemNr))
+                                .middleInfo(middleInfo)
                                 .statusMenuItemNr(clickedItemNr)
                                 .statusMenuDimns(statusMenuDimns)
                                 .editable(editable)
@@ -391,6 +394,11 @@ export default function cardItemsComponent() {
     cardItems.withText = function (value) {
         if (!arguments.length) { return withText; }
         withText = value;
+        return cardItems;
+    };
+    cardItems.middleInfo = function (value) {
+        if (!arguments.length) { return middleInfo; }
+        middleInfo = value;
         return cardItems;
     };
     cardItems.cardIsSelected = function (value) {

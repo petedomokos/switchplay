@@ -884,6 +884,9 @@ useEffect(() => {
         <g ref={zoomRef} className="zoom"><rect width={width} height={height} fill="transparent" /></g>
         <g ref={containerRef} className="decks" pointerEvents={selectedDeckId && !form ? "all" : "none"} />
         <defs>
+          <clipPath id="card-photo">
+            <circle></circle>
+          </clipPath>
           <filter id="shine">
             <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
           </filter>

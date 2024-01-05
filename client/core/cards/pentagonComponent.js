@@ -38,6 +38,8 @@ export default function pentagonComponent() {
     let withSections = true;
     let withSectionLabels = true;
     let withText = true;
+    let middleInfo = null;
+    let middleStrokeWidth = 1;
     let editable = true;
     let selectedSectionKey;
     let statusMenuItemNr = null;
@@ -98,6 +100,9 @@ export default function pentagonComponent() {
         })
 
         function update(itemsData){
+            //middle photo clipPath
+            d3.select("svg#decks-svg").select("defs").select("clipPath#card-photo").select("circle")
+                .attr("r", r1)
             //drag
             enhancedDrag
                 .dragThreshold(100)
@@ -386,24 +391,24 @@ export default function pentagonComponent() {
 
                         const xShift = () => {
                             //top 2
-                            if(i === 0){ return itemAreaWidth * 0 }
-                            if(i === 4){ return -itemAreaWidth * 0 }
+                            if(i === 0){ return -itemAreaWidth * 0.1 }
+                            if(i === 4){ return itemAreaWidth * 0.1 }
                             //middle 2
-                            if(i === 1) { return 0; }
-                            if(i === 3) { return 0; }
+                            if(i === 1) { return -itemAreaWidth * 0.1; }
+                            if(i === 3) { return itemAreaWidth * 0.15; }
                             //bottom 1
                             if(i === 2) { return 0; }
 
                         }
                         const yShift = () => {
                             //top 2
-                            if(i === 0){ return 0 }
-                            if(i === 4){ return 0 }
+                            if(i === 0){ return textAreaMaxHeight * 0.15; }
+                            if(i === 4){ return textAreaMaxHeight * 0.2; }
                             //middle 2
                             if(i === 1) { return -textAreaMaxHeight * 0.12; }
                             if(i === 3) { return -textAreaMaxHeight * 0.12; }
                             //bottom 1
-                            if(i === 2) { return textAreaMaxHeight * 0.2; }
+                            if(i === 2) { return 0; }
 
                         }
 
@@ -424,7 +429,8 @@ export default function pentagonComponent() {
                         //bg
                         itemContentsG.select("rect")
                             .attr("width", itemAreaWidth)
-                            .attr("height", itemAreaHeight);
+                            .attr("height", itemAreaHeight)
+                            //.attr("fill", "red");
 
                         //item text and attachments
                         //text
@@ -588,6 +594,44 @@ export default function pentagonComponent() {
 
             sectionG.exit().remove();
 
+            //middle
+            const photoContentsWidth = middleInfo?.photoURL ? 30 : 0;
+            const photoContentsHeight = photoContentsWidth / DIMNS.CARD.ASPECT_RATIO; //33.548
+            const middleData = middleInfo ? [{ url:middleInfo?.photoURL }] : [];
+            const middleG = containerG.selectAll("g.pentagon-middle").data(middleData);
+            middleG.enter()
+                .append("g")
+                    .attr("class", "pentagon-middle")
+                    .call(fadeIn)
+                    .each(function(){
+                        const middleG = d3.select(this);
+                        middleG
+                            .append("circle")
+                                .attr("class", "border")
+                                .attr("fill", "black")
+
+                        middleG.append("image");
+
+                    })
+                    .merge(middleG)
+                    .each(function(d){
+                        const middleG = d3.select(this);
+                        middleG.attr('clip-path', `url(#card-photo)`)
+                        middleG.select("circle.border")
+                            .attr("r", r1)
+                            .attr("stroke", "blue")
+                            .attr("stroke-width", middleStrokeWidth)
+                            .attr("fill", "transparent")
+
+                        middleG.select("image")
+                            .attr("xlink:href", d.url)
+                            .attr("transform", `translate(${-r1},${-r1}) scale(${photoContentsWidth / 1000})`) //based on reneeRegis photoSize 260 by 335.48 
+
+                    })
+                    .raise();
+
+            middleG.exit().call(remove);
+
         }
 
         return selection;
@@ -623,6 +667,11 @@ export default function pentagonComponent() {
     pentagon.withText = function (value) {
         if (!arguments.length) { return withText; }
         withText = value;
+        return pentagon;
+    };
+    pentagon.middleInfo = function (value) {
+        if (!arguments.length) { return middleInfo; }
+        middleInfo = value;
         return pentagon;
     };
     pentagon.editable = function (value) {

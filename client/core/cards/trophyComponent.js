@@ -70,7 +70,7 @@ export default function trophyComponent() {
                     //.attr("stroke", grey10(10))
 
                 //@todo - make the svg available in environment
-                d3.select("svg#decks-svg")
+                d3.select("svg#decks-svg").select("defs")
                     .append("clipPath")
                         .attr("id", `trophy-${data.id}`)
                             .append("rect")

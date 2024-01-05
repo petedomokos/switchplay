@@ -433,7 +433,7 @@ export default function cardsComponent() {
                     })
                     .sort((a,b) => d3.descending(a.cardNr, b.cardNr))
                     .each(function(cardD,i){
-                        const { deckId, cardNr, id, pos, isHidden, slotPos, isHeld, isPlaced, isFront, hasBeenPickedUp, isNext, isSecondNext, isSelected, info, status, deckListPos, purposeData=[], flagsData } = cardD;
+                        const { deckId, cardNr, id, pos, isHidden, slotPos, isHeld, isPlaced, isFront, hasBeenPickedUp, isNext, isSecondNext, isSelected, info, status, deckListPos, purposeData=[], flagsData, photoURL } = cardD;
                         const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
                         const items = itemsComponents[id];
 
@@ -632,6 +632,7 @@ export default function cardsComponent() {
                             .headerHeight(headerHeight)
                             .withSections(cardIsEditable)
                             .withText(cardIsEditable)
+                            .middleInfo(cardIsEditable ? { photoURL } : null)
                             .cardIsSelected(selectedCardNr === cardNr)
                             .selectedItemNr(selectedItemNr)
                             .editable(cardIsEditable)

@@ -87,7 +87,7 @@ export default function deckComponent() {
 
     function updateDimns(data){
         //deck photo
-        photoContentsWidth = data.photoUrl ? 30 : 0;
+        photoContentsWidth = data.photoURL ? 30 : 0;
         photoContentsHeight = photoContentsWidth / DIMNS.CARD.ASPECT_RATIO; //33.548
         photoMargin = { 
             left:photoContentsWidth * 0.1, right:photoContentsWidth * 0.1, 
@@ -426,7 +426,7 @@ export default function deckComponent() {
 
             function update(_deckData, options={}){
                 const { } = options;
-                const { id, frontCardNr, startDate, listPos, colNr, rowNr, purposeData, sections, photoUrl } = _deckData;
+                const { id, frontCardNr, startDate, listPos, colNr, rowNr, purposeData, sections, photoURL } = _deckData;
 
                 //PURPOSE
                 const getPurposeFormDimns = (i, dimns) => {
@@ -719,7 +719,7 @@ export default function deckComponent() {
                 }
 
                 //PHOTO
-                const photoData = deckIsSelected || !photoUrl ? [] : [photoUrl];
+                const photoData = deckIsSelected || !photoURL ? [] : [photoURL];
                 const photoG = contentsG.selectAll("g.deck-photo").data(photoData)
                 const photoX = selectedSection || DECK_PHOTO_POS === "left" ? 3 + photoMargin.left : (contentsWidth - photoWidth)/2 + photoMargin.left;
 
@@ -734,7 +734,7 @@ export default function deckComponent() {
 
                             photoG.append("image");
 
-                            d3.select("svg#decks-svg").append("clipPath")
+                            d3.select("svg#decks-svg").select("defs").append("clipPath")
                                 .attr('id', `deck-photo-${id}`)
                                 .append("rect")
                         })
@@ -767,7 +767,8 @@ export default function deckComponent() {
                 //CARDS
                 const cardsData = _deckData.cardsData.map(c => ({ 
                     ...c,
-                    isSelected:selectedCardNr === c.cardNr 
+                    isSelected:selectedCardNr === c.cardNr,
+                    photoURL
                 }))
 
                 cardsAreaG.call(fadeInOut, content === "cards" /*{ transition:{ duration: 1000 } }*/);
