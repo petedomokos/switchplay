@@ -444,7 +444,6 @@ export default function pentagonComponent() {
                         //show or hide text based on deck status
                         const itemTitleG = itemContentsG.select("g.item-title");
                         itemTitleG.selectAll("text")
-                            .attr("display", withText ? null : "none")
                             .transition(`text-${key}`)
                             .duration(TRANSITIONS.FAST)
                                 .style("opacity", withText ? (itemIsDefined ? 1 : 0.5) : 0)

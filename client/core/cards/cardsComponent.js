@@ -353,6 +353,26 @@ export default function cardsComponent() {
                                 .attr("class", "flags-container");
 
                         //bgs for front and back
+                        //add linear gradient for this card
+                        const grad = d3.select("svg#decks-svg").select("defs").append("linearGradient")
+                            .attr("id", `card-front-grad-${id}`)
+                            .attr("x1", "0%")
+                            .attr("y1", "0%")
+                            .attr("x2", "100%")
+                            .attr("y2", "100%");
+                        
+                        grad.append("stop")
+                            .attr("class", "stop1")
+                            .attr("offset", "0%")
+                            .style("stop-color", getCardFill(cardD)[0])
+                            .style("stop-opacity", 1);
+                        
+                        grad.append("stop")
+                            .attr("class", "stop2")
+                            .attr("offset", "100%")
+                            .style("stop-color", getCardFill(cardD)[1])
+                            .style("stop-opacity", 1);
+
                         contentsG
                             .append("rect")
                                 .attr("class", "card-bg card-front-bg")
@@ -363,11 +383,12 @@ export default function cardsComponent() {
                                 //for placed cards, we dont want the dimns to be changed when in section view
                                 .attr("width", getCardContentsWidth(cardD))
                                 .attr("height", getCardContentsHeight(cardD))
-                                .attr("fill", selectedSectionKey ? getCardFill({ pos: 0 }) : getCardFill(cardD))
+                                .attr("fill", `url(#card-front-grad-${id})`)
+                                //.attr("fill", selectedSectionKey ? getCardFill({ pos: 0 }) : 
+                                    //(pos < 0 || pos > 4 ? getCardFill(cardD) : `url(#card-front-grad-${pos})`))
                                 .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData, 1) : getCardStroke(cardD))
                                 .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth(null, cardD) : getCardStrokeWidth(cardD))
                                 .on("click", e => {
-                                    //console.log("card bg click")
                                     onClickCard.call(this, e, cardD)
                                     e.stopPropagation();
                                 })
@@ -509,11 +530,24 @@ export default function cardsComponent() {
                         contextMenuG.exit().call(remove);
 
                         //bgs for front and back
+                        const grad = d3.select("svg#decks-svg").select("defs").select(`linearGradient#card-front-grad-${id}`)
+                        grad.select("stop.stop1")
+                            .transition("stop1")
+                            .duration(400)
+                                .style("stop-color", getCardFill(cardD)[0]);
+
+                        grad.select("stop.stop2")
+                            .transition("stop2")
+                            .duration(400)
+                                .style("stop-color", getCardFill(cardD)[1]);
+
                         contentsG.select("rect.card-front-bg")
                             .transition("card-front-bg-appearance")
                             .delay(200)
                             .duration(400)
-                                .attr("fill", selectedSectionKey ? getCardFill({ pos: 0 }) : getCardFill(cardD))
+                                //.attr("fill", url)
+                                //.attr("fill", selectedSectionKey ? getCardFill({ pos: 0 }) : 
+                                    //( pos < 0 || pos > 4 ? getCardFill(cardD) : `url(#card-front-grad-${pos})`))
                                 .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData, 1) : getCardStroke(cardD))
                                 .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth(itemsData, cardD) : getCardStrokeWidth(cardD))
                                 .attr("stroke-dasharray", selectedSectionKey && itemsData[0] && itemsData[0].status === 1 ? "3 4" : null)

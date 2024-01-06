@@ -1,4 +1,5 @@
 import { isNumber } from "../../data/dataHelpers";
+import * as d3 from 'd3';
 
 export const grey3pt5 = "#C8C8C8";
 export const grey4pt5 = "#B0B0B0";
@@ -31,7 +32,7 @@ const getTableAndDeckColours = bgColour => {
 }
 
 //shadow factor, s
-const cardsShadowFactor = 0.9;
+const cardsShadowFraction = 0.9;
 
 export const GREY_COLOUR_THEME = (backgroundColour) => ({
     CARDS_TABLE:getTableAndDeckColours(bgColour).table,
@@ -64,16 +65,16 @@ export const GREY_COLOUR_THEME = (backgroundColour) => ({
         STROKE:cardD => {
             const { pos, cardNr, isCurrent } = cardD;
             if(isCurrent) { return "white" }
-            return `hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`;
+            return `hsla(0, 0%, ${80 * (cardsShadowFraction ** pos)}%, 1)`;
         },
         EXPAND_COLLAPSE_BTN:grey10(5.5),
         NOTIFICATION_BTN:grey10(3),
         HEADER:cardD => {
             const { pos } = cardD;
             return {
-                DATE:`hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`,
-                DATE_COUNT_WORDS:`hsla(0, 0%, ${70 * (cardsShadowFactor ** pos)}%, 1)`,
-                TITLE: `hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`
+                DATE:`hsla(0, 0%, ${80 * (cardsShadowFraction ** pos)}%, 1)`,
+                DATE_COUNT_WORDS:`hsla(0, 0%, ${70 * (cardsShadowFraction ** pos)}%, 1)`,
+                TITLE: `hsla(0, 0%, ${80 * (cardsShadowFraction ** pos)}%, 1)`
             }
         },
         SECTION_VIEW_HEADER:{
@@ -146,21 +147,21 @@ export const BLUE_COLOUR_THEME = (backgroundColour) => ({
             const { pos } = cardD;
             // lightness, l
             const l = 62 * (deckIsSelected ? 1 : 0.6);
-            return `hsla(211, 96%, ${l * (cardsShadowFactor ** pos)}%, 1)`;
+            return `hsla(211, 96%, ${l * (cardsShadowFraction ** pos)}%, 1)`;
         },
         STROKE:cardD => {
             const { pos, cardNr, isCurrent } = cardD;
             if(isCurrent) { return "white" }
-            return `hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`;
+            return `hsla(0, 0%, ${80 * (cardsShadowFraction ** pos)}%, 1)`;
         },
         EXPAND_COLLAPSE_BTN:grey10(5.5),
         NOTIFICATION_BTN:grey10(3),
         HEADER:cardD => {
             const { pos } = cardD;
             return {
-                DATE:`hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`,
-                DATE_COUNT_WORDS:`hsla(0, 0%, ${70 * (cardsShadowFactor ** pos)}%, 1)`,
-                TITLE: `hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`
+                DATE:`hsla(0, 0%, ${80 * (cardsShadowFraction ** pos)}%, 1)`,
+                DATE_COUNT_WORDS:`hsla(0, 0%, ${70 * (cardsShadowFraction ** pos)}%, 1)`,
+                TITLE: `hsla(0, 0%, ${80 * (cardsShadowFraction ** pos)}%, 1)`
             }
         },
         SECTION_VIEW_HEADER:{
@@ -243,28 +244,43 @@ export const SATURATED_BLUE_COLOUR_THEME = (bgColour) => ({
         FILL:(cardD, deckIsSelected) => {
             const { pos, isHeld } = cardD;
             // lightness, l
-            const l = 62 * (deckIsSelected ? 1 : 0.6);
+            //changed from 62
+            const l = 75 * (deckIsSelected ? 1 : 0.6);
             if(!isHeld){
-                return `hsla(211, 35%, ${l * (cardsShadowFactor ** 5)}%, 1)`
+                const constantFill = `hsla(211, 35%, ${l * (cardsShadowFraction ** 5)}%, 1)`;
+                return [constantFill, constantFill];
             }
-            return `hsla(211, 35%, ${l * (cardsShadowFactor ** pos)}%, 1)`; //was 96% saturation in nrmal blue colour scheme
+            const maxLightness = d3.max([30, l * (cardsShadowFraction ** pos)]);
+            const minLightness = maxLightness * 0.5;
+            /*if(pos === 0){
+                console.log("fill", pos, deckIsSelected)
+                console.log("max min", maxLightness, minLightness)
+            }*/
+            const delta = maxLightness - minLightness;
+            const nrStops = 1;
+            const deltaPerStop = delta/nrStops;
+            const lightToDarkGradientPoint = (i) => `hsla(211, 35%, ${maxLightness - i * deltaPerStop}%, 1)`
+            //const lightToDarkGradientPoint = (i) => i === 0 ? `hsla(211, 35%, ${85}%, 1)` : `hsla(211, 35%, ${45}%, 1)`
+            const res = [lightToDarkGradientPoint(0), lightToDarkGradientPoint(1)] //was 96% saturation in nrmal blue colour scheme
+            //console.log('res', res)
+            return res;
         },
         STROKE:cardD => {
             const { pos, cardNr, isHeld, isCurrent } = cardD;
             if(isCurrent) { return "white" }
             if(!isHeld){
-                return `hsla(211, 35%, ${80 * (cardsShadowFactor ** 5)}%, 1)`
+                return `hsla(211, 35%, ${80 * (cardsShadowFraction ** 5)}%, 1)`
             }
-            return `hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`;
+            return `hsla(0, 0%, ${d3.max([30, 80 * (cardsShadowFraction ** pos)])}%, 1)`;
         },
         EXPAND_COLLAPSE_BTN:grey10(4),
         NOTIFICATION_BTN:grey10(2),
         HEADER:cardD => {
             const { pos } = cardD;
             return {
-                DATE:`hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`,
-                DATE_COUNT_WORDS:`hsla(0, 0%, ${70 * (cardsShadowFactor ** pos)}%, 1)`,
-                TITLE: `hsla(0, 0%, ${80 * (cardsShadowFactor ** pos)}%, 1)`
+                DATE:`hsla(0, 0%, ${40 * (cardsShadowFraction ** pos)}%, 1)`,
+                DATE_COUNT_WORDS:`hsla(0, 0%, ${40 * (cardsShadowFraction ** pos)}%, 1)`,
+                TITLE: `hsla(0, 0%, ${40 * (cardsShadowFraction ** pos)}%, 1)`
             }
         },
         SECTION_VIEW_HEADER:{

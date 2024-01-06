@@ -77,6 +77,7 @@ export const groups = {
                         { datasetKey:"passes", measureKey:"successPC", value:50 },
                     ] 
                 },
+                /*
                 { 
                     _id:"tristanRowe", firstName:"Tristan", surname:"Rowe", position:"DEF",
                     kpiStartValues:defaultStartValues
@@ -228,6 +229,7 @@ export const groups = {
                     _id:"tomWatson4", firstName:"Tom", surname:"Watson", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
+                */
                 /*
                 { 
                     _id:"justinOboavwoduo4", firstName:"Justin", surname:"Oboavwoduo", pos:"FOR",
