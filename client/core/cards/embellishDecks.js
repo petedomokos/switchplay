@@ -45,10 +45,11 @@ export const embellishDeck = (deck, settings={}) => {
 
   const getTitle = () => {
     //Both could be undefined
-    if(allPlayerIdsSame){
+     //@todo - change this to check if customer group only has one player or something like that (see also deck name)
+    /*if(allPlayerIdsSame){
       //we dont display player name
       return phaseTitle || deck.title;
-    }
+    }*/
     return playerName && phaseTitle ? `${playerName} (${phaseTitle})` : 
       playerName || phaseTitle || deck.title;
   }

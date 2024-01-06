@@ -98,7 +98,7 @@ const getPhotoUrl = (deck, settings) => {
   //prioritise playerId over phaseKey
   if(!groupingTag){ 
     //playerId may be undefined or may be defined but same for all decks
-    //@todo - change this to check if customer group pnly has one player or something like that
+    //@todo - change this to check if customer group only has one player or something like that (see also deck name)
     //if(allPlayerIdsSame){ return wrapPhase(phaseId) || deck.photoURL || ""; }
     
     return wrapPlayer(playerId) || wrapPhase(phaseId) || deck.photoURL || ""; 
