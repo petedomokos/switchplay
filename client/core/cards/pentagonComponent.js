@@ -625,7 +625,8 @@ export default function pentagonComponent() {
 
                         middleG.select("image")
                             .attr("xlink:href", d.url)
-                            .attr("transform", `translate(${-r1},${-r1}) scale(${photoContentsWidth / 1000})`) //based on reneeRegis photoSize 260 by 335.48 
+                            .attr("transform", `translate(${-r1 * 0.9},${-r1}) scale(${photoContentsWidth / 900})`)
+                            //for mobile....attr("transform", `translate(${-r1},${-r1}) scale(${photoContentsWidth / 1000})`) //based on reneeRegis photoSize 260 by 335.48 
 
                     })
                     .raise();
