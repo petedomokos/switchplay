@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import {Route, Switch} from 'react-router-dom'
+import { makeStyles } from '@material-ui/core/styles'
 import NonUserHome from './core/NonUserHome'
 import UserHomeContainer from './core/containers/UserHomeContainer'
 //import UsersContainer from './user/containers/UsersContainer'
@@ -21,10 +22,17 @@ import ImportDataContainer from './data/ImportDataContainer'
 import VisualsContainer from './visuals/VisualsContainer'
 import './assets/styles/main.css'
 
+
+const useStyles = makeStyles(theme => ({
+  app: {
+  }
+}))
+
 const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
   //console.log("MainRouter", userId)
   //load user if page is refreshed. MainRouter is under the store so can 
-  //trigger re-render once loade
+  //trigger re-render once loaded
+  const classes = useStyles() 
   const jwt = auth.isAuthenticated();
 
   //480 - portrait phone, 768 - tablets,992 - laptop, 1200 - desktop or large laptop
@@ -78,7 +86,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
   
  //took exact away from UserHome path
   return (
-    <div>
+    <div className={classes.app}>
       <MenuContainer />
       <Route path="/signup" component={CreateUserContainer}/>
       <Route path="/signin" component={SigninContainer}/>
@@ -104,6 +112,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
           {/**userId && <Route path="/group/:groupId" component={GroupContainer}/>*/}
           {/**userId && <Route path="/dataset/:datasetId" component={DatasetContainer}/>*/}
       </Switch>
+      <div style={{ width:"100%", height:"80px", background:"aqua" }}>Footer</div>
     </div>
     )
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { CSSTransition } from "react-transition-group";
 import * as d3 from 'd3';
 import { makeStyles } from '@material-ui/core/styles'
@@ -11,15 +11,42 @@ import heroImage from '../assets/images/hero-image.png'
 import peterDomokos from '../assets/images/peter-domokos.png'
 import { grey10 } from "./cards/constants"
 import WelcomeMessage from './WelcomeMessage';
+import missingLinkVizComponent from './missingLinkVizComponent';
 
-const heroStatement = [
+/*const heroStatement = [
   "Brings together all information and data",
   "into a coherent whole",
   "with the player and their journey",
   "at the heart of it all."
+]*/
+const heroStatementHeading = "THE MISSING LINK"
+const heroStatement = [
+  "A human-friendy, inspiring app",
+  "for all your player development",
+  "data and info"
+  //"player development data, info & admin meaningful"
 ]
 
 const keypoints = [
+  {
+    id:"0",
+    title:"Player-centred",
+    //desc:"Football academies are complex inter-disciplinary environments. Information can easily get siloed, and key messages and goals can get lost amidst the noise."
+    //desc:"The current tools available were designed for businesses with different priorities to football academies. They focus on productivity and efficiency, but at academies, the goal is player development. It is a human process and a learning process.",
+  },
+  {
+    id:"1",
+    title:"Easy to use",
+    //desc:"jhd djkh jdkh dh dkh dskjhds h dskh dkshds  spiral curriculum, "
+  },
+  {
+    id:"2",
+    title:"Promotes MDT Collaboration",
+    //desc:"Today’s young players are different. They tend to be more introverted, and spend a lot of time on their phones. This creates an opportunity that clubs are missing out on. For players, the app can be a mobile phone reinforcement of what has been agreed in meetings and informal reviews, and can engage and inform them regularly about their targets and KPIs.  It can support and enhance the face-to-face communication that is key to the relationships between coaches and players. For some players, it can help them to communicate with staff about their progress, especially when they are new to the club and relationships are still being formed."
+  },
+]
+
+const secondaryPoints = [
   {
     id:"0",
     title:"Supports inter-disciplinary communication",
@@ -33,7 +60,7 @@ const keypoints = [
   },
   {
     id:"2",
-    title:"Engages players and encourages accountability",
+    title:"Engages players by gamification, and encourages accountability",
     desc:"Today’s young players are different. They tend to be more introverted, and spend a lot of time on their phones. This creates an opportunity that clubs are missing out on. For players, the app can be a mobile phone reinforcement of what has been agreed in meetings and informal reviews, and can engage and inform them regularly about their targets and KPIs.  It can support and enhance the face-to-face communication that is key to the relationships between coaches and players. For some players, it can help them to communicate with staff about their progress, especially when they are new to the club and relationships are still being formed."
   },
   {
@@ -44,24 +71,161 @@ const keypoints = [
 ]
  
 const useStyles = makeStyles(theme => ({
-  root: {
+  homeRoot: {
     display:"flex",
     flexDirection:"column",
     alignItems:"center",
     overflow:"scroll",
-    background:"black",
-    //border:"solid",
-    //borderColor:"yellow",
-    padding:"0 200px"
+    background:grey10(9),//"black",
+    padding:"5px 2.5%",
+    width:"100%",
   },
   screen:{
     width:"100%",
     //border:"solid",
     borderColor:"pink",
-    height:props => props.screen.height,
+    //height:props => props.screen.height,
     display:"flex",
     flexDirection:"column",
+    alignItems:"center",
     zIndex:1
+  },
+  topRow:{
+    width:"100%",
+    height:"500px",
+    display:"flex",
+    justifyContent:"center",
+    border:"solid",
+    borderColor:"white"
+  },
+  topLeft:{
+    width:"40%",
+    height:"400px",
+    border:"solid",
+    borderColor:"red",
+  },
+  heroStatement:{
+    //marginTop:"20px",
+    //marginBottom:"20px",
+    width:"100%",
+    height:"200px",
+    alignSelf:"flex-start",
+    display:"flex",
+    flexDirection:"column",
+    justifyContent:"space-around",
+    alignItems:"flex-start",
+    border:"solid",
+    borderColor:"yellow",
+    zIndex:1
+  },
+  missingLinkVizCont:{
+    width:"40%",
+    height:"300px",
+    border:"solid",
+    borderColor:"yellow",
+  },
+  heroStatementHeading:{
+    fontSize:"36px",
+    marginBottom:"15px",
+    color:grey10(1),
+    fontFamily: "Helvetica, Sans-Serif"
+  },
+  heroStatementText:{
+    fontSize:"30px",
+    //fontStyle: "italic",
+    color:grey10(2),
+    fontFamily: "Helvetica, Sans-Serif"
+  },
+  layersDiagram:{
+    width:"800px",
+  },
+  topLayer:{
+    width:"100%",
+    height:"120px",
+    display:"flex",
+    justifyContent:"space-around",
+    alignItems:"center",
+    background:"#90EE90",
+  },
+  bottomLayer:{
+    width:"100%",
+    height:"120px",
+    display:"flex",
+    justifyContent:"space-around",
+    alignItems:"center",
+    background:"#90EE90",
+  },
+  missingLayer:{
+    width:"100%",
+    height:"150px",
+    display:"flex",
+    justifyContent:"space-around",
+    alignItems:"center",
+    background:"aqua",
+    fontSize:"24px"
+  },
+  savingsLayer:{
+    width:"100%",
+    height:"0px",
+    marginBottom:"0px",
+    display:"flex",
+    justifyContent:"space-around",
+    alignItems:"center",
+    background:"aqua"
+  },
+  coachSaving:{
+    marginTop:"-40px",
+    marginLeft:"170px",
+    fontSize:"14px"
+  },
+  playerSaving:{
+    marginTop:"-40px",
+    //marginLeft:"50px",
+    fontSize:"14px"
+  },
+  analystSaving:{
+    marginTop:"-40px",
+    marginRight:"170px",
+    fontSize:"14px"
+  },
+  layerItem:{
+    fontSize:"18px"
+  },
+  keypoints:{
+    width:"80%",
+    display:"flex",
+    justifyContent:"space-around",
+    flexWrap:"wrap",
+    border:"solid",
+    borderColor:"red"
+  },
+  keypoint:{
+    width:"30%",
+    minWidth:"170px",
+    maxWidth:"250px",
+    height:"300px",
+    margin:"10px",
+    display:"flex",
+    flexDirection:"column",
+    alignItems:"center",
+    border:"solid",
+    borderColor:"yellow"
+  },
+  keypointTitle:{
+    color:grey10(3),
+    width:"100%",
+    height:"50px",
+    display:"flex",
+    flexDirection:"column",
+    justifyContent:"center",
+    alignItems:"center",
+    border:"solid"
+  },
+  keypointImage:{
+    width:"100%",
+    height:"calc(100% - 50px)",
+    background:"grey",
+    border:"solid"
   },
   screenTop:{
     width:"100%", //needs to be responsive so reduces if narrower screen
@@ -150,25 +314,6 @@ const useStyles = makeStyles(theme => ({
     height:"80px",
     background:"black"
   },
-  heroStatement:{
-    marginTop:"20px",
-    marginBottom:"20px",
-    width:"100%",
-    height:"100px",
-    alignSelf:"flex-start",
-    display:"flex",
-    flexDirection:"column",
-    justifyContent:"space-around",
-    alignItems:"flex-start",
-    //border:"solid",
-    borderColor:"yellow",
-    zIndex:1
-  },
-  heroStatementText:{
-    fontSize:"14px",
-    //fontStyle: "italic",
-    color:grey10(2),
-  },
   callsToAction:{
     alignSelf:"flex-start"
   },
@@ -206,6 +351,19 @@ export default function NonUserHome({}){
 
   const [nrKeypointTicksShown, setNrKeypointTicksShown] = useState(0);
   const [nrKeypointTextsShown, setNrKeypointTextsShown ] = useState(0);
+  const [missingLinkViz, setMissingLinkVizComponent] = useState(() => missingLinkVizComponent());
+
+  const missingLinkVizRef = useRef(null);
+
+  const missingLinkVizWidth = 450;
+  const missingLinkVizHeight = 300;
+
+  useEffect(() => {
+    d3.select(missingLinkVizRef.current).datum({})
+      .call(missingLinkViz
+        .width(missingLinkVizWidth)
+        .height(missingLinkVizHeight))
+  }, [])
 
   /*
   useEffect(() => {
@@ -225,47 +383,60 @@ export default function NonUserHome({}){
   }, [])
   */
 
-  next- refactor structure so entire right side is one div, with all 4 keypoints
+  //next- refactor structure so entire right side is one div, with all 4 keypoints
   //move the welcome message and sign up form to bottom left again
   return (
-      <div className={classes.root}>
+      <div className={classes.homeRoot}>
         <div className={classes.screen}>
           <div style={{ width:"100%", height:"40px" }}></div>
-          <div className={classes.screenTop}>
-            <div className={classes.screenTopLeft}>
-              <Strapline style={{ root: { alignSelf:"flex-start" } }} />
-              <div style={{ width:"100%", height:"20px" }}></div>
+          <div className={classes.topRow}>
+            <div className={classes.topleft}>
               <div className={classes.heroStatement}>
+                <div className={classes.heroStatementHeading}>{heroStatementHeading}</div>
                 {heroStatement.map(line => 
                   <Typography className={classes.heroStatementText} type="body1" component="p">
                   {line}
                   </Typography>
                 )}
               </div>
-              <div style={{ width:"100%", height:"20px" }}></div>
-              {/**<div className={classes.callsToAction}>
-                <CSSTransition
-                  in={true}
-                  timeout={200}
-                  classNames="demo-button-transition"
-                  unmountOnExit
-                  appear
-                  onEntered={() => {}}
-                  onExit={() => {}}
-                >
-                  <Button color="primary" variant="contained" onClick={() => {}} className={classes.demoBtn}>Demo</Button>
-                </CSSTransition>
-              </div>*/}
             </div>
-            <div className={classes.screenTopRight}>
-                <div className={classes.welcome}>
-                  <WelcomeMessage/>
-                  {/**<div className={classes.welcomePhoto}></div>*/}
-                </div>
-                
+            <div className={classes.missingLinkVizCont}>
+              <svg className={classes.svg} id={`missing-link-viz-svg`} ref={missingLinkVizRef}>
+                <defs>
+                </defs>
+              </svg>
             </div>
           </div>
-          <div style={{ width:"100%", height:"40px" }}></div>
+          
+          <div style={{ width:"100%", height:"300px" }}></div>
+          <div className={classes.keypoints}>
+            {keypoints.map(k => 
+              <div className={classes.keypoint}>
+                <div className={classes.keypointTitle}>{k.title}</div>
+                <div className={classes.keypointImage}></div>
+              </div>)}
+          </div>
+          {/**<div className={classes.callsToAction}>
+            <CSSTransition
+              in={true}
+              timeout={200}
+              classNames="demo-button-transition"
+              unmountOnExit
+              appear
+              onEntered={() => {}}
+              onExit={() => {}}
+            >
+              <Button color="primary" variant="contained" onClick={() => {}} className={classes.demoBtn}>Demo</Button>
+            </CSSTransition>
+          </div>*/}
+          {/**<div className={classes.screenTopRight}>
+              <div className={classes.welcome}>
+                <WelcomeMessage/>
+                <div className={classes.welcomePhoto}></div>
+              </div>
+              
+          </div>*/}
+          {/**<div style={{ width:"100%", height:"40px" }}></div>
           <div className={classes.screenBottom}>
             <div className={classes.screenBottomLeft}>
               <div className={classes.keypointContainer}>
@@ -283,16 +454,13 @@ export default function NonUserHome({}){
                 <Keypoint keypoint={keypoints[3]}/>
               </div>
             </div>
-          </div>
-          <div style={{ width:"100%", height:"40px" }}></div>
-          <div className={classes.bottomBorder}></div>
+          </div>*/}
         </div>
         <div style={{ width:"100%", height:"100px" }}></div>
-        <div className={classes.scrollSection1}>
+        {/**<div className={classes.scrollSection1}>
           <div className={classes.backgroundImage}></div>
-        </div>
+        </div>*/}
         <div style={{ width:"100%", height:"100px" }}></div>
-        <div style={{ width:"100%", height:"80px", background:"aqua" }}>Footer</div>
       </div>
   )
 }

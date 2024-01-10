@@ -12,8 +12,6 @@ import {Link, withRouter} from 'react-router-dom'
 import { slide as ElasticMenu } from 'react-burger-menu'
 import { show, hide } from './journey/domHelpers';
 
-const MENU_HEIGHT = 70;
-
 const activeStyles = { color: "#ff4081" }
 const inactiveStyles = { color: "#ffffff" };
 const getDynamicStyles = (history, path) => {
@@ -27,56 +25,43 @@ const getDynamicStyles = (history, path) => {
 
 const useStyles = makeStyles(theme => ({
   menuRoot: {
-    background:"black",
-    width:"95%",
-    height:MENU_HEIGHT,
-    padding:"5px 2.5%"
+    paddingLeft:0,
+    paddingRight:0,
+    background:"black"
   },
   menuItems:{
-    width:"100%",
-    height:"100%",
+    border:"solid",
+    borderColor:"white"
+  },
+  elasticMenuWrapper:{
+  },
+  menuItems:{
+    width:"100%",//props => props.menuWidth,
+    height:props => props.menuHeight,
     display:"flex",
+    flexDirection:props => props.flexDirection,
     justifyContent:"space-between",
-    alignItems:"center"
+    border:"solid",
+    borderColor:"red"
   },
   startItems:{
     display:"flex",
-    //flexDirection:props => props.flexDirection,
+    flexDirection:props => props.flexDirection,
+    border:"solid",
+    borderColor:"yellow"
+
   },
   endItems:{
+    border:"solid",
+    borderColor:"blue",
     display:"flex",
-    //flexDirection:props => props.flexDirection,
-  },
-  menuItem:{
-    width:"150px",
-    height:"20px",
-    display:"flex",
-    alignItems:"center",
-    justifyContent:"center",
-    fontSize:"14px",
-    //border:"solid",
-    //borderColor:"red",
-    color:"white"
-  },
-  logoWrapper:{
-    width:"150px",
-    height:"50px",
-    display:"flex",
-    flexDirection:"column",
-    justifyContent:"center",
-    alignItems:"center",
-    //border:"solid",
-    //borderColor:"red",
+    flexDirection:props => props.flexDirection,
   },
   logo:{
-    width:"150px",
-    //height:"20px",
-    fontSize:"18px",
-    //border:"solid",
-    //borderColor:"yellow",
-    color:"white"
-    //marginTop:props => props.isBurger ? "10px" : "0px",
-    //marginLeft:props => props.isBurger ? "0px" : "175px",
+    fontSize:"14px",
+    marginTop:props => props.isBurger ? "10px" : "0px",
+    marginLeft:props => props.isBurger ? "0px" : "175px",
+    alignSelf:"center",
     /*[theme.breakpoints.down('sm')]: {
       fontSize:"12px",
     },
@@ -84,14 +69,6 @@ const useStyles = makeStyles(theme => ({
       fontSize:"10px",
     },*/
     //background:"yellow"
-  },
-  strapline:{
-    width:"150px",
-    //height:"20px",
-    fontSize:"12px",
-    //border:"solid",
-    //borderColor:"blue",
-    color:"white"
   },
   homeIcon:{
     [theme.breakpoints.down('sm')]: {
@@ -133,8 +110,13 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const Menu = withRouter(({ history, isHidden, signingOut, screen, onSignout }) => {
-  const isBurger = false;// ["s", "m"].includes(screen.size);
-  const styleProps = { };
+  const isBurger = ["s", "m"].includes(screen.size);
+  const menuWidth = isBurger ? 150 : screen.width;
+  const menuHeight = isBurger ? screen.height * 0.85 : null;
+  const flexDirection = isBurger ? "column" : "row";
+  const justifyContent = isBurger ? "flex-start" : "space-between";
+  const menuBtnMargin = isBurger ? "10px 0" : "0 10px";
+  const styleProps = { flexDirection, justifyContent, menuWidth, menuHeight, menuBtnMargin, isBurger };
   const classes = useStyles(styleProps) 
   const user = auth.isAuthenticated() ? auth.isAuthenticated().user : null;
   const [isOpen, setIsOpen] = useState(false)
@@ -143,15 +125,34 @@ const Menu = withRouter(({ history, isHidden, signingOut, screen, onSignout }) =
     setIsOpen(state.isOpen);
   }
 
+  //control the burger bar in a useEffect
+  useEffect(() => { 
+    d3.select(".bm-burger-button").call(isHidden ? hide : show)
+  }, [isHidden])
+
   return (
     <>
       {isBurger  ?
         <>
+          <Typography variant="h6" color="inherit" className={classes.standaloneLogo}>
+            SWITCHPLAY
+          </Typography>
+          <ElasticMenu width={menuWidth} 
+            isOpen={isOpen}
+            onStateChange={(state) => handleStateChange(state)}
+          >
+            <div onClick={() => { setIsOpen(false)} } className={classes.elasticMenuWrapper} >
+              <MenuItems 
+                isBurger={isBurger}
+                user={user} history={history} signingOut={signingOut} 
+                onSignout={onSignout} classes={classes}/>
+            </div>
+          </ElasticMenu>
         </>
         :
         <MenuItemsWrapper classes={classes}>
           <MenuItems user={user} history={history} signingOut={signingOut} 
-            onSignout={onSignout} classes={classes} />
+              isBurger={isBurger} onSignout={onSignout} classes={classes} />
         </MenuItemsWrapper>
       }
     </>
@@ -159,51 +160,13 @@ const Menu = withRouter(({ history, isHidden, signingOut, screen, onSignout }) =
 })
 
 const MenuItemsWrapper = ({ children, classes }) =>
-  <div className={classes.menuRoot}>
-      <div className={classes.menuItems}>
-          {children}
-      </div>
-  </div>
-
-{/**const MenuItemsWrapper = ({ children, classes }) =>
   <AppBar position="static" className={classes.menuRoot}>
       <Toolbar className={classes.menuItems}>
           {children}
       </Toolbar>
-</AppBar>*/}
+  </AppBar>
 
-const MenuItems = ({ classes }) => {
-  return (
-    <>
-      <div className={classes.startItems}>
-        <Logo classes={classes} withStrapline={true} />
-      </div>
-      <div className={classes.endItems}>
-        <div className={classes.menuItem}>About us</div>
-        <div className={classes.menuItem}>Contact us</div>
-        <div className={classes.menuItem}>Sign in</div>
-      </div>
-    </>
-  )
-}
-
-const Logo = ({ withStrapline, classes }) => {
-  return (
-    <div className={classes.logoWrapper}>
-      <div className={classes.logo}>
-        SWITCHPLAY
-      </div>
-      <div style={{ height:"3px" }}></div>
-      {withStrapline && 
-        <div className={classes.strapline}>
-          The Player Development App
-        </div>
-      }
-    </div>
-  )
-}
-
-const MenuItemsOld = ({ user, history, signingOut, isBurger, onSignout, classes }) =>
+const MenuItems = ({ user, history, signingOut, isBurger, onSignout, classes }) =>
     <div className={classes.menuItems}>
       <div className={classes.startItems}>
         {!isBurger && <Typography variant="h6" color="inherit" className={classes.logo}>

@@ -6,15 +6,15 @@ import { grey10 } from "./cards/constants"
 const useStyles = makeStyles(theme => ({
     strapline: {
         zIndex:1,
-        //alignSelf:"flex-start",
+        alignSelf:"flex-start",
         //padding:`${theme.spacing(2)}px ${theme.spacing(2)}px ${theme.spacing(2)}px`,
         display:"flex",
         flexDirection:"column",
         justifyContent:"center",
-        alignItems:"flex-start",    
+        alignItems:"flex-start",  
         width:"100%",
         height:"60px",
-        //border:"solid",
+        border:"solid",
         borderColor:"yellow",
         color: theme.palette.openTitle,
         [theme.breakpoints.down('md')]: {
@@ -23,7 +23,7 @@ const useStyles = makeStyles(theme => ({
         },
     },
     straplinePart1:{
-        fontSize:"28px",
+        fontSize:"14px",
         //alignSelf:"flex-start",
         color:grey10(4)
         //border:"solid"
@@ -51,10 +51,7 @@ export default function Strapline({style}){
   return (
       <div className={classes.strapline} style={style.root || {}}>
           <Typography className={classes.straplinePart1} type="body1" component="p">
-          The project management tool
-          </Typography>
-          <Typography className={classes.straplinePart2} type="body1" component="p">
-          for football academies
+          The Player Development App
           </Typography>
         {/**<div className={classes.strapline}>
           <Typography className={classes.straplinePart1} type="body1" component="p">
