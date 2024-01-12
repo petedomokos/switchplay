@@ -11,7 +11,7 @@ import heroImage from '../assets/images/hero-image.png'
 import peterDomokos from '../assets/images/peter-domokos.png'
 import { grey10 } from "./cards/constants"
 import WelcomeMessage from './WelcomeMessage';
-import missingLinkVizComponent from './missingLinkVizComponent';
+import storyAnimationComponent from './storyAnimationComponent';
 
 /*const heroStatement = [
   "Brings together all information and data",
@@ -19,11 +19,10 @@ import missingLinkVizComponent from './missingLinkVizComponent';
   "with the player and their journey",
   "at the heart of it all."
 ]*/
-const heroStatementHeading = "THE MISSING LINK"
+const heroStatementHeading = "The Missing Link"
 const heroStatement = [
-  "A human-friendy, inspiring app",
-  "for all your player development",
-  "data and info"
+  "A user-friendly and inspiring app, centred around the player,",
+  "to turn your player development workflow and processes into a joy",
   //"player development data, info & admin meaningful"
 ]
 
@@ -76,9 +75,11 @@ const useStyles = makeStyles(theme => ({
     flexDirection:"column",
     alignItems:"center",
     overflow:"scroll",
-    background:grey10(9),//"black",
+    background:grey10(9.5),//"black",
     padding:"5px 2.5%",
-    width:"100%",
+    width:"95%",
+    //border:"solid",
+    borderColor:"red"
   },
   screen:{
     width:"100%",
@@ -90,51 +91,41 @@ const useStyles = makeStyles(theme => ({
     alignItems:"center",
     zIndex:1
   },
-  topRow:{
+  storyAnimationCont:{
     width:"100%",
-    height:"500px",
+    height:"300px",
+    //border:"solid",
+    //borderColor:"yellow",
     display:"flex",
-    justifyContent:"center",
-    border:"solid",
-    borderColor:"white"
-  },
-  topLeft:{
-    width:"40%",
-    height:"400px",
-    border:"solid",
-    borderColor:"red",
+    justifyContent:"center"
   },
   heroStatement:{
-    //marginTop:"20px",
-    //marginBottom:"20px",
+    marginTop:"40px",
+    marginBottom:"15px",
     width:"100%",
-    height:"200px",
-    alignSelf:"flex-start",
+    height:"90px",
     display:"flex",
     flexDirection:"column",
     justifyContent:"space-around",
-    alignItems:"flex-start",
-    border:"solid",
-    borderColor:"yellow",
+    alignItems:"center",
+    //border:"solid",
+    //borderColor:"yellow",
     zIndex:1
   },
-  missingLinkVizCont:{
-    width:"40%",
-    height:"300px",
-    border:"solid",
-    borderColor:"yellow",
-  },
   heroStatementHeading:{
-    fontSize:"36px",
-    marginBottom:"15px",
+    fontSize:"24px",
+    marginBottom:"10px",
     color:grey10(1),
     fontFamily: "Helvetica, Sans-Serif"
   },
   heroStatementText:{
-    fontSize:"30px",
+    fontSize:"18px",
     //fontStyle: "italic",
     color:grey10(2),
     fontFamily: "Helvetica, Sans-Serif"
+  },
+  callToAction:{
+
   },
   layersDiagram:{
     width:"800px",
@@ -341,9 +332,9 @@ add a background image - pass in the window dimns so it can takeup full dimns ->
 
 */
 
-export default function NonUserHome({}){
+export default function NonUserHome({ screen }){
    //todo  -do this screen size properly -> may need a container to get it from store
-  const screen = { width: window.innerWidth, height:window.innerHeight }
+  //const screen = { width: window.innerWidth, height:window.innerHeight }
   const styleProps = {
     screen
   };
@@ -351,19 +342,28 @@ export default function NonUserHome({}){
 
   const [nrKeypointTicksShown, setNrKeypointTicksShown] = useState(0);
   const [nrKeypointTextsShown, setNrKeypointTextsShown ] = useState(0);
-  const [missingLinkViz, setMissingLinkVizComponent] = useState(() => missingLinkVizComponent());
+  const [storyAnimation, setStoryAnimationComponent] = useState(() => storyAnimationComponent());
+  const [sceneNr, setSceneNr] = useState(1)
 
-  const missingLinkVizRef = useRef(null);
-
-  const missingLinkVizWidth = 450;
-  const missingLinkVizHeight = 300;
+  const storyAnimationRef = useRef(null);
+  
 
   useEffect(() => {
-    d3.select(missingLinkVizRef.current).datum({})
-      .call(missingLinkViz
-        .width(missingLinkVizWidth)
-        .height(missingLinkVizHeight))
-  }, [])
+    const storyAnimationWidth = sceneNr >= 9 ? 600 : 800;// d3.min([screen.width * 0.8, d3.max([screen.width * 0.5, 600]) ]);
+    const storyAnimationHeight = storyAnimationWidth * 0.6;
+    d3.select(storyAnimationRef.current)
+      .on("click", () => { 
+        setSceneNr(prevState => (prevState % 10) + 1)
+      })
+      //.attr("width", storyAnimationWidth) done in the component itself
+      //.attr("height", storyAnimationHeight)
+      .datum({})
+      .call(storyAnimation
+        .width(storyAnimationWidth)
+        .height(storyAnimationHeight)
+        .sceneNr(sceneNr))
+        
+  }, [screen, sceneNr])
 
   /*
   useEffect(() => {
@@ -389,32 +389,38 @@ export default function NonUserHome({}){
       <div className={classes.homeRoot}>
         <div className={classes.screen}>
           <div style={{ width:"100%", height:"40px" }}></div>
-          <div className={classes.topRow}>
-            <div className={classes.topleft}>
-              <div className={classes.heroStatement}>
-                <div className={classes.heroStatementHeading}>{heroStatementHeading}</div>
-                {heroStatement.map(line => 
-                  <Typography className={classes.heroStatementText} type="body1" component="p">
-                  {line}
-                  </Typography>
-                )}
-              </div>
-            </div>
-            <div className={classes.missingLinkVizCont}>
-              <svg className={classes.svg} id={`missing-link-viz-svg`} ref={missingLinkVizRef}>
+            <div className={classes.storyAnimationCont}>
+              <svg className={classes.svg} id={`missing-link-viz-svg`} ref={storyAnimationRef}>
                 <defs>
                 </defs>
               </svg>
             </div>
-          </div>
+            <div style={{ width:"100%", height:"40px" }}></div>
+
+            {sceneNr === 10 && 
+              <>
+                <div className={classes.heroStatement}>
+                  <div className={classes.heroStatementHeading}>{heroStatementHeading}</div>
+                  {heroStatement.map(line => 
+                    <Typography className={classes.heroStatementText} type="body1" component="p">
+                    {line}
+                    </Typography>
+                  )}
+                </div>
+                <div className={classes.callToAction}>
+                  <Button color="primary" variant="contained" className={classes.registerBtn}>Register Your Interest</Button>
+                </div>
+              </>
+            }
           
           <div style={{ width:"100%", height:"300px" }}></div>
-          <div className={classes.keypoints}>
+          <div className={classes.keypoints} >
             {keypoints.map(k => 
               <div className={classes.keypoint}>
                 <div className={classes.keypointTitle}>{k.title}</div>
                 <div className={classes.keypointImage}></div>
-              </div>)}
+              </div>
+            )}
           </div>
           {/**<div className={classes.callsToAction}>
             <CSSTransition

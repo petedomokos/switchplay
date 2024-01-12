@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {Route, Switch} from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles'
-import NonUserHome from './core/NonUserHome'
+import NonUserHomeContainer from './core/containers/NonUserHomeContainer'
 import UserHomeContainer from './core/containers/UserHomeContainer'
 //import UsersContainer from './user/containers/UsersContainer'
 import SigninContainer from './auth/containers/SigninContainer'
@@ -98,7 +98,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
           {jwt ?
             <Route path="/" component={UserHomeContainer} />
             :
-            <Route exact path="/" component={NonUserHome}/>
+            <Route exact path="/" component={NonUserHomeContainer}/>
           }
           {/**
             <PrivateRoute path="/user/edit/:userId" component={EditUserProfileContainer}/>
