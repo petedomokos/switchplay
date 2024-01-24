@@ -25,6 +25,8 @@ export default function milestonesLayout(){
             const { id, date, media, dateCount, playerAge, dataType, isPast, isCurrent, isFuture, settings, specificDate, profileProgressInfo, goalPhotoLabel, profilePhotoLabel } = m;
             //add any profile properties onto kpis if required
             const kpis = m.kpis?.slice(0,5)
+            //error these dont exists here
+            console.log("m.kpis", m.kpis)
 
             if(dataType === "profile"){
                 myKpisLayout

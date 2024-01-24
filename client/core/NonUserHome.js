@@ -12,6 +12,23 @@ import peterDomokos from '../assets/images/peter-domokos.png'
 import { grey10 } from "./cards/constants"
 import WelcomeMessage from './WelcomeMessage';
 import storyAnimationComponent from './storyAnimationComponent';
+import { sceneElements } from './sceneElements';
+import { FormatQuoteSharp } from '@material-ui/icons';
+import Banner from '../templates/AgencyModern/Banner';
+
+const quotes = {
+  player:"I get to see all my progress, messages, videos and what Im working on in one place, all mapped out",
+  coach:"We need everyone pushing in the same direction",
+  analyst:"I'm so busy because everything has to go through me because there is no centralised app. I have no time to provide insights and to follow up to make sure people have understood what I've said.",
+  manager:"Our communication is good, but things can sometimes get siloed. Switchplay can support our face-to-face communication."
+}
+
+const urls = {
+  player:"website/players.png",
+  coach:"website/players.png",
+  analyst:"website/players.png",
+  manager:"website/players.png"
+}
 
 /*const heroStatement = [
   "Brings together all information and data",
@@ -19,28 +36,48 @@ import storyAnimationComponent from './storyAnimationComponent';
   "with the player and their journey",
   "at the heart of it all."
 ]*/
-const heroStatementHeading = "The Missing Link"
-const heroStatement = [
-  "A user-friendly and inspiring app, centred around the player,",
-  "to turn your player development workflow and processes into a joy",
-  //"player development data, info & admin meaningful"
-]
+const heroStatementHeading = "The development tool that puts people first"
+const heroStatement = nrLines => {
+  if(nrLines === 3){
+    return [
+      "Great football development is about people & relationships, learning & growth, consistent communication",
+      "centred around your players",
+      "bringing together all the parts into one",
+    ]
+  }
+  if(nrLines === 2){
+    return [
+      "Great football development is about people, relationships, growth, communication & details.",
+      "Switchplay helps you to embed these in your own way to achieve your vision.",
+      //"player development data, info & admin meaningful"
+    ]
+  }
+  return ["Great football development is about people, relationships, growth, communication & details. Switchplay helps you to embed these in your way to achieve your vision."]
+}
+  
+
 
 const keypoints = [
   {
     id:"0",
     title:"Player-centred",
-    //desc:"Football academies are complex inter-disciplinary environments. Information can easily get siloed, and key messages and goals can get lost amidst the noise."
+    desc:"Football academies are complex environments. key messages and goals can get lost amidst the noise. jnjkd x h khxc xc"
     //desc:"The current tools available were designed for businesses with different priorities to football academies. They focus on productivity and efficiency, but at academies, the goal is player development. It is a human process and a learning process.",
   },
   {
     id:"1",
-    title:"Easy to use",
-    //desc:"jhd djkh jdkh dh dkh dskjhds h dskh dkshds  spiral curriculum, "
+    title:"Saves you time",
+    desc:"jhd djkh jdkh dh dkh dskjhds h dskh dkshds  spiral curriculum,  spiral curriculum, dkh dh dkh dskjhds h dskh dkshds  spiral curriculum,"
+  },
+  {
+    id:"1",
+    title:"Supports new insights",
+    desc:"jhd djkh jdkh dh dkh dskjhds h dskh dkshds  spiral curriculum h dskh dkshds  spiral curriculum, dkh dh dkh dskjhds h dskh dkshds  spiral curriculum,"
   },
   {
     id:"2",
-    title:"Promotes MDT Collaboration",
+    title:"Improves Communication",
+    desc:"Today’s young players are different. They tend to be more introverted, and are often on their phones. This creates an opportunity that clubs are missing out on"
     //desc:"Today’s young players are different. They tend to be more introverted, and spend a lot of time on their phones. This creates an opportunity that clubs are missing out on. For players, the app can be a mobile phone reinforcement of what has been agreed in meetings and informal reviews, and can engage and inform them regularly about their targets and KPIs.  It can support and enhance the face-to-face communication that is key to the relationships between coaches and players. For some players, it can help them to communicate with staff about their progress, especially when they are new to the club and relationships are still being formed."
   },
 ]
@@ -79,12 +116,12 @@ const useStyles = makeStyles(theme => ({
     padding:"5px 2.5%",
     width:"95%",
     //border:"solid",
-    borderColor:"red"
+    //borderColor:"red"
   },
   screen:{
     width:"100%",
     //border:"solid",
-    borderColor:"pink",
+    //borderColor:"pink",
     //height:props => props.screen.height,
     display:"flex",
     flexDirection:"column",
@@ -93,39 +130,80 @@ const useStyles = makeStyles(theme => ({
   },
   storyAnimationCont:{
     width:"100%",
-    height:"300px",
+    height:props => `${props.storyContainerHeight}px`,
     //border:"solid",
     //borderColor:"yellow",
     display:"flex",
-    justifyContent:"center"
+    justifyContent:"center",
+    alignItems:"center"
   },
   heroStatement:{
-    marginTop:"40px",
-    marginBottom:"15px",
-    width:"100%",
-    height:"90px",
+    //padding:props => props.heroStatement.padding,
+    width:props => props.heroStatement.width,
+    height:"160px",
     display:"flex",
     flexDirection:"column",
-    justifyContent:"space-around",
+    //justifyContent:"space-around",
     alignItems:"center",
     //border:"solid",
-    //borderColor:"yellow",
+    //borderColor:"red",
     zIndex:1
   },
   heroStatementHeading:{
-    fontSize:"24px",
+    fontSize:"64px",
     marginBottom:"10px",
     color:grey10(1),
     fontFamily: "Helvetica, Sans-Serif"
   },
   heroStatementText:{
-    fontSize:"18px",
+    //border:"solid",
+    //borderColor:"yellow",
+    fontSize:props => `${props.heroStatement.fontSize}px`,
     //fontStyle: "italic",
     color:grey10(2),
     fontFamily: "Helvetica, Sans-Serif"
   },
   callToAction:{
+    color:"white"
 
+  },
+  userExampleSection:{
+    width:"80%",
+    display:"flex",
+    justifyContent:"center",
+    alignItems:"center",
+    flexWrap:"wrap",
+    //border:"solid"
+    //border:"solid",
+    //borderColor:"red"
+  },
+  userPhoto:{
+    width:"40%",
+    minWidth:"270px",
+    //border:"solid",
+    //borderColor:"yellow"
+  },
+  userPhotoImg:{
+    width:"100%",
+    height:"100%",
+    objectFit:"contain",
+    //border:"solid",
+    //borderColor:"blue"
+  },
+  userQuote:{
+    padding:"0px 20px",
+    width:"40%",
+    minWidth:"270px",
+    maxWidth:"40%",
+    height:"140px",
+    display:"flex",
+    flexDirection:"column",
+    justifyContent:"center",
+    color:grey10(3),
+    fontSize:"20px",
+    fontStyle:"italic",
+    //border:"solid",
+    //borderColor:"yellow"
   },
   layersDiagram:{
     width:"800px",
@@ -184,39 +262,54 @@ const useStyles = makeStyles(theme => ({
   },
   keypoints:{
     width:"80%",
+    maxWidth:"800px",
     display:"flex",
     justifyContent:"space-around",
     flexWrap:"wrap",
-    border:"solid",
-    borderColor:"red"
+    //border:"solid",
+    //borderColor:"red"
   },
   keypoint:{
-    width:"30%",
-    minWidth:"170px",
-    maxWidth:"250px",
-    height:"300px",
+    width:"40%",
+    minWidth:"250px",
+    maxWidth:"350px",
+    height:"200px",
     margin:"10px",
     display:"flex",
     flexDirection:"column",
     alignItems:"center",
-    border:"solid",
-    borderColor:"yellow"
+    //border:"solid",
+    //borderColor:"yellow"
   },
   keypointTitle:{
+    fontSize:"20px",
+    margin:"20px 5px",
     color:grey10(3),
-    width:"100%",
+    /*width:"100%",
     height:"50px",
     display:"flex",
     flexDirection:"column",
     justifyContent:"center",
-    alignItems:"center",
-    border:"solid"
+    alignItems:"center",*/
+    //border:"solid"
+  },
+  keypointDesc:{
+    fontSize:"16px",
+    color:grey10(4),
+    /*width:"100%",
+    height:"50px",
+    display:"flex",
+    flexDirection:"column",
+    justifyContent:"center",
+    alignItems:"center",*/
+    //border:"solid"
+
   },
   keypointImage:{
     width:"100%",
     height:"calc(100% - 50px)",
     background:"grey",
-    border:"solid"
+    //border:"solid"
   },
   screenTop:{
     width:"100%", //needs to be responsive so reduces if narrower screen
@@ -224,14 +317,14 @@ const useStyles = makeStyles(theme => ({
     display:"flex",
     justifyContent:"space-between",
     //border:"solid",
-    borderColor:"red"
+    //borderColor:"red"
   },
   screenTopLeft:{
     width:"500px",
     height:"100%",
     overflow:"visible",
     //border:"solid",
-    borderColor:"white"
+    //borderColor:"white"
 
   },
   screenTopRight:{
@@ -240,7 +333,7 @@ const useStyles = makeStyles(theme => ({
     display:"flex",
     //justifyContent:"center",
     //border:"solid",
-    borderColor:"white"
+    //borderColor:"white"
 
   },
   screenBottom:{
@@ -250,25 +343,25 @@ const useStyles = makeStyles(theme => ({
     display:"flex",
     justifyContent:"space-between",
     //border:"solid",
-    borderColor:"red"
+    //borderColor:"red"
   },
   screenBottomLeft:{
     width:"50%",
     height:"100%",
     //border:"solid",
-    borderColor:"white",
+    //borderColor:"white",
   },
   screenBottomRight:{
     width:"50%",
     height:"100%",
     //border:"solid",
-    borderColor:"white",
+    //borderColor:"white",
   },
   keypointContainer:{
     width:"100%",
     height:"50%",
     //border:"solid",
-    borderColor:"blue"
+    //borderColor:"blue"
   },
   welcome:{
     marginLeft:"-60px",
@@ -280,7 +373,7 @@ const useStyles = makeStyles(theme => ({
     width:"180px",
     height:"120px",
     //border:"solid",
-    borderColor:"yellow",
+    //borderColor:"yellow",
     backgroundImage: `url(${peterDomokos})`,
     backgroundSize: "contain",
   },
@@ -294,7 +387,7 @@ const useStyles = makeStyles(theme => ({
     backgroundSize: "contain",
     //backgroundSize: "cover",
     //border:"solid",
-    borderColor:"yellow",
+    //borderColor:"yellow",
     //zIndex:0
   },
   bottomBorder:{
@@ -333,37 +426,84 @@ add a background image - pass in the window dimns so it can takeup full dimns ->
 */
 
 export default function NonUserHome({ screen }){
-   //todo  -do this screen size properly -> may need a container to get it from store
+  //todo  -do this screen size properly -> may need a container to get it from store
   //const screen = { width: window.innerWidth, height:window.innerHeight }
+  //console.log("screen", screen)
+  const storyContainerHeight = screen.isSmall ? 300 : 300;
   const styleProps = {
-    screen
+    screen,
+    storyContainerHeight,
+    heroStatement:{
+      fontSize:screen.isSmall ? 14 : 18,
+      width:"90%" 
+    }
   };
   const classes = useStyles(styleProps)
 
   const [nrKeypointTicksShown, setNrKeypointTicksShown] = useState(0);
   const [nrKeypointTextsShown, setNrKeypointTextsShown ] = useState(0);
   const [storyAnimation, setStoryAnimationComponent] = useState(() => storyAnimationComponent());
-  const [sceneNr, setSceneNr] = useState(1)
+  const [sceneState,setSceneState] = useState({ sceneNr: 1, frameNr: 1});
+  const { sceneNr, frameNr } = sceneState;
 
   const storyAnimationRef = useRef(null);
+
+  const nrScenes = Object.keys(sceneElements).length;
+
+  const updateSceneState = () => {
+    if(sceneElements[sceneNr][frameNr + 1]){
+      //move frame on
+      setSceneState(prevState => ({ ...prevState, frameNr:frameNr + 1 }));
+    }else{
+      //move scene on
+      setSceneState(prevState => ({ sceneNr:(prevState.sceneNr % nrScenes) + 1, frameNr:1 }))
+    }
+  }
   
 
   useEffect(() => {
-    const storyAnimationWidth = sceneNr >= 9 ? 600 : 800;// d3.min([screen.width * 0.8, d3.max([screen.width * 0.5, 600]) ]);
-    const storyAnimationHeight = storyAnimationWidth * 0.6;
+    //@todo - make width and height adhere to both their mins and maxes ie use a maximiseDimns function
+    const potentialStoryAnimationWidth = d3.min([screen.width * 0.9, d3.max([600, screen.width * 0.7]) ]);// sceneNr >= 8 ? 600 : 800;// d3.min([screen.width * 0.8, d3.max([screen.width * 0.5, 600]) ]);
+    //const potentialStoryAnimationHeight = potentialStoryAnimationWidth * 0.6;
+    const actualHeight = storyContainerHeight;// d3.min([storyContainerHeight, potentialStoryAnimationHeight]);
+    const actualWidth = d3.min([potentialStoryAnimationWidth, actualHeight * 1.33]);
+
+    const scene = sceneElements[sceneNr];
+    const { key, title, lineStyles, lines, heroX, heroY, characterX, characterY } = scene;
+    const sceneMetadata = {
+      key,
+      title,
+      lineStyles,
+      lines,
+      heroX, heroY, characterX, characterY,
+      nrHeroes:d3.max(Object.values(scene), d => d.heroes?.length) || 0,
+      nrCharacters:d3.max(Object.values(scene), d => d.characters?.length) || 0,
+      nrWaves:d3.max(Object.values(scene), d => d.waves?.length) || 0
+    }
     d3.select(storyAnimationRef.current)
-      .on("click", () => { 
-        setSceneNr(prevState => (prevState % 10) + 1)
-      })
+      //.on("click", updateSceneState)
       //.attr("width", storyAnimationWidth) done in the component itself
       //.attr("height", storyAnimationHeight)
-      .datum({})
+      .datum({ ...sceneElements[sceneNr][frameNr], sceneMetadata })
       .call(storyAnimation
-        .width(storyAnimationWidth)
-        .height(storyAnimationHeight)
-        .sceneNr(sceneNr))
+        .width(actualWidth)
+        .height(actualHeight)
+        .sceneNr(sceneNr)
+        .frameNr(frameNr))
         
-  }, [screen, sceneNr])
+  }, [screen, sceneNr, frameNr])
+
+  useEffect(() => {
+    const t = d3.interval((elapsed) => {
+      //updateSceneState();
+    }, 3000);
+
+    return () => {
+      console.log("stop----------------")
+      t.stop()
+    }
+
+  },[])
 
   /*
   useEffect(() => {
@@ -385,42 +525,101 @@ export default function NonUserHome({ screen }){
 
   //next- refactor structure so entire right side is one div, with all 4 keypoints
   //move the welcome message and sign up form to bottom left again
+
+  const heroStatementNrLines = 2;// screen.isSmall ? 3 : 2;
   return (
       <div className={classes.homeRoot}>
-        <div className={classes.screen}>
-          <div style={{ width:"100%", height:"40px" }}></div>
-            <div className={classes.storyAnimationCont}>
-              <svg className={classes.svg} id={`missing-link-viz-svg`} ref={storyAnimationRef}>
-                <defs>
-                </defs>
-              </svg>
-            </div>
-            <div style={{ width:"100%", height:"40px" }}></div>
+        <div className={classes.screen} onClick={updateSceneState} >
+          <Banner />
+          <div style={{ width:"100%", height:`${screen.isSmall ? 30 : 50}px` }}></div>
+          <div className={classes.heroStatement}>
+              <div className={classes.heroStatementHeading}>{heroStatementHeading}</div>
+              {heroStatement(heroStatementNrLines).map(line => 
+                <Typography className={classes.heroStatementText} type="body1" component="p">
+                {line}
+                </Typography>
+              )}
+          </div>
+          <div style={{ width:"100%", height:"20px" }}></div>
 
-            {sceneNr === 10 && 
-              <>
-                <div className={classes.heroStatement}>
-                  <div className={classes.heroStatementHeading}>{heroStatementHeading}</div>
-                  {heroStatement.map(line => 
-                    <Typography className={classes.heroStatementText} type="body1" component="p">
-                    {line}
-                    </Typography>
-                  )}
-                </div>
-                <div className={classes.callToAction}>
-                  <Button color="primary" variant="contained" className={classes.registerBtn}>Register Your Interest</Button>
-                </div>
-              </>
-            }
+          <div className={classes.storyAnimationCont}>
+            <svg className={classes.svg} id={`missing-link-viz-svg`} ref={storyAnimationRef}>
+              <defs>
+                <clipPath id="hero-clip"><circle/></clipPath>
+                <clipPath id="player-clip"><circle/></clipPath>
+              </defs>
+            </svg>
+          </div>
+          <div style={{ width:"100%", height:"30px" }}></div>
+
+          {/**<CSSTransition
+            in={sceneNr === 2}
+            timeout={500}
+            classNames="hero-statement-transition"
+            unmountOnExit
+            appear
+            onEntered={() => {}}
+            onExit={() => {}}
+          >
+              <div className={classes.heroStatement}>
+                <div className={classes.heroStatementHeading}>{heroStatementHeading}</div>
+                {heroStatement.map(line => 
+                  <Typography className={classes.heroStatementText} type="body1" component="p">
+                  {line}
+                  </Typography>
+                )}
+              </div>
+          </CSSTransition>*/}
+          <CSSTransition
+            in={true}
+            timeout={500}
+            classNames="hero-statement-transition"
+            unmountOnExit
+            appear
+            onEntered={() => {}}
+            onExit={() => {}}
+          >
+              <div className={classes.callToAction}>
+                <Button color="primary" variant="contained" className={classes.registerBtn}>Request Demo</Button>
+              </div>
+          </CSSTransition>
+          <div style={{ width:"100%", height:"200px" }}></div>
+          <div className={classes.userExampleSection}>
+            <div className={classes.userPhoto}>
+              <img className={classes.userPhotoImg} src={urls.player}></img>
+            </div>
+            <div className={classes.userQuote}>{quotes.player}</div>
+          </div>
           
-          <div style={{ width:"100%", height:"300px" }}></div>
+          <div style={{ width:"100%", height:"100px" }}></div>
           <div className={classes.keypoints} >
             {keypoints.map(k => 
               <div className={classes.keypoint}>
                 <div className={classes.keypointTitle}>{k.title}</div>
-                <div className={classes.keypointImage}></div>
+                <div className={classes.keypointDesc}>{k.desc}</div>
               </div>
             )}
+          </div>
+          <div style={{ width:"100%", height:"100px" }}></div>
+          <div className={classes.userExampleSection}>
+            <div className={classes.userPhoto}>
+              <img className={classes.userPhotoImg} src={urls.coach}></img>
+            </div>
+            <div className={classes.userQuote}>{quotes.coach}</div>
+          </div>
+          <div style={{ width:"100%", height:"200px" }}></div>
+          <div className={classes.userExampleSection}>
+            <div className={classes.userPhoto}>
+              <img className={classes.userPhotoImg} src={urls.analyst}></img>
+            </div>
+            <div className={classes.userQuote}>{quotes.analyst}</div>
+          </div>
+          <div style={{ width:"100%", height:"200px" }}></div>
+          <div className={classes.userExampleSection}>
+            <div className={classes.userPhoto}>
+              <img className={classes.userPhotoImg} src={urls.manager}></img>
+            </div>
+            <div className={classes.userQuote}>{quotes.manager}</div>
           </div>
           {/**<div className={classes.callsToAction}>
             <CSSTransition

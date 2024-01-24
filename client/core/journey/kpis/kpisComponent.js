@@ -190,13 +190,14 @@ export default function kpisComponent() {
     let listClipPathId;
 
     function kpis(selection, options={}) {
-        //console.log("kpis update..............")
+        console.log("kpis update..............")
         const { transitionEnter=true, transitionUpdate=true, log } = options;
 
         // expression elements
         selection.each(function (data,i) {
             prevData = data;
             const { kpisData, milestoneId } = data;
+            console.log("mId kpisData",milestoneId, kpisData)
             const nrDefenceKpis = kpisData.filter(kpi => kpi.orientationFocus === "defence").length;
             //const attackKpisData = kpisData.filter(kpi => kpi.orientationFocus === "attack")
             //next - go down this file implementing two nest lists instead, 

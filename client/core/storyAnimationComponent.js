@@ -1,42 +1,46 @@
 import * as d3 from 'd3';
 import { grey10 } from "./cards/constants"
-/*
-import { updateTransform } from '../journey/transitionHelpers';
-import deckComponent from './deckComponent';
-import { getTransformationFromTrans } from '../journey/helpers';
-import { fadeIn, remove } from '../journey/domHelpers';*/
 
-//const transformTransition = { update: { duration: TRANSITIONS.MED } };
+import { updateTransform, updateRectDimns } from './journey/transitionHelpers';
+/*import deckComponent from './deckComponent';
+import { getTransformationFromTrans } from '../journey/helpers';*/
+import { fadeIn, remove } from './journey/domHelpers';
 
+const nillOpp = () => 0;
+//todo - make a random point generator for x and y deltas
+const squiggleD = `M 0 0, 5 5, -3 9, -7 14, 9 17, -5 22, 5 28`;
 
-const peopleData = [
-    { key:"coach", label:"Coach" },
-    { key:"analyst", label:"Analyst" },
-    { key:"player", label:"Player" },
-    { key:"manager", label:"Manager" }
+const heroes = [
+    { key:"coach", label:"Coach", imgTransform:{ x: 20, y: 5, k:0.22 }, imgTransformSmall:{ x: 18, y: 8, k:0.1 } },
+    { key:"analyst", label:"Analyst", imgTransform:{ x: 25, y: 5, k:0.2 }, imgTransformSmall:{ x: 20, y: 7, k:0.1 } },
+    { key:"player", label:"Player", imgTransform:{ x: -7, y: -25, k:0.43 }, imgTransformSmall:{ x: 20, y: 5, k:0.1 } },
+    { key:"manager", label:"Manager", imgTransform:{ x: 20, y: 5, k:0.22 }, imgTransformSmall:{ x: 20, y: 10, k:0.1 } },
+    { key:"parent", label:"Parent", imgTransform:{ x: 20, y: 5, k:0.2 }, imgTransformSmall:{ x: 20, y: 5, k:0.1 } },
 ]
 
-const charactersData = [
-    { key:"kitman", label:"Kitman Labs & IDPs", type:"villain" },
-    { key:"data", label:"Data", type:"villain" },
-    { key:"goals", label:"Goals", type:"neutral" },
-    { key:"reviews", label:"Reviews", type:"neutral" },
-    { key:"reports", label:"Reports", type:"neutral" },
-    { key:"comms", label:"Communication", type:"neutral" }
+const characters = [
+    { key:"kitman", label:"IT Systems" }, //need IDP admin in here too
+    { key:"data", label:"Data" },
+    { key:"goals", label:"Goals" },
+    { key:"reviews", label:"Reviews" },
+    { key:"reports", label:"Reports" },
+    { key:"comms", label:"Communication" }
 ]
 
-/*const middleData = [
-    { key:"easy", label:"Easy To Use", linkToMultiplier:0.5 },
-    { key:"time-saving", label:"Time-Saving", linkToMultiplier:1.5 },
-    { key:"engaging", label:"Engaging", linkToMultiplier:2.5 },
-    { key:"purposeful", label:"Impactful", linkToMultiplier:3.5 }
-]*/
-
-const middleData = [
+const waves = [
     { key:"smooth", label:"Smooth" },
     { key:"impactful", label:"Impactful" },
     { key:"consistent", label:"Consistent" },
 ]
+
+const bubbleLines = {
+    coach: ["We need everyone pulling", "in the same direction"],
+    analyst: ["I'm so busy because everything goes through me,", "I dont have time to do my actual job!"],
+    player: ["It would be great to see my progress", "on my phone, all mapped out"],
+    manager: ["Our face to face communication is good,", "but things can sometimes get siloed"],
+    kitman: ["My names Killman Tabs, I'm software.", "I love menus, lists and tabs.", "I hate users!"],
+    data: ["My names Dangerpoint, I'm data.", "I'm meant to serve people", "but sometimes I act like I'm the master!"]
+}
 
 export default function storyAnimationComponent() {
     //API SETTINGS
@@ -51,47 +55,54 @@ export default function storyAnimationComponent() {
     let sceneTitleHeight;
     let storyContentsHeight;
 
-    let peopleWidth;
+    let heroesWidth;
 
-    let middleWidth;
-    let middleMargin;
-    let middleContentsWidth;
-    let middleContentsHeight;
-    let middleTitleHeight;
-    let middleItemsHeight;
+    let wavesWidth;
+    let wavesMargin;
+    let wavesContentsWidth;
+    let wavesContentsHeight;
+    let wavesHeight;
 
     let charactersWidth;
-    let charactersHeight;
 
-    /*let peopleX;
-    let peopleY;
-    let middleX;
-    let middleY;
-    let charactersX;
-    let charactersY;*/
+    let logoRectWidth;
+    let logoRectHeight;
+
+    let fontSizes = {};
 
     function updateDimns(){
         margin = { left: width * 0.1, right:width * 0.1, top: height * 0.1, bottom: height * 0.1 }
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
-        sceneTitleHeight = sceneNr >= 9 ? 0 : d3.max([20, Math.round(contentsHeight * 0.15)]);
+        sceneTitleHeight = 0;// sceneNr >= 9 ? 0 : d3.max([20, Math.round(contentsHeight * 0.15)]);
         storyContentsHeight = contentsHeight - sceneTitleHeight;
 
-        peopleWidth = contentsWidth * 0.2;
-        charactersWidth = contentsWidth * 0.2;
-        middleWidth = contentsWidth - peopleWidth - charactersWidth;
-
-
-        middleMargin = { 
-            left: contentsWidth * 0.1, right: contentsWidth * 0.1, top: storyContentsHeight * 0.1, bottom:storyContentsHeight * 0.1
+        heroesWidth = d3.max([55, contentsWidth * 0.2]);
+        charactersWidth = d3.max([70, contentsWidth * 0.2]);
+        wavesWidth = contentsWidth - heroesWidth - charactersWidth;
+        wavesHeight = storyContentsHeight;
+        wavesMargin = { 
+            left: d3.max([35, contentsWidth * 0.1]), 
+            right: d3.max([35, contentsWidth * 0.1]), 
+            top: storyContentsHeight * 0.1, 
+            bottom:storyContentsHeight * 0.1
         }
 
-        middleContentsWidth = middleWidth - middleMargin.left - middleMargin.right;
-        middleContentsHeight = storyContentsHeight - middleMargin.top - middleMargin.bottom;
+        wavesContentsWidth = wavesWidth - wavesMargin.left - wavesMargin.right;
+        wavesContentsHeight = wavesHeight - wavesMargin.top - wavesMargin.bottom;
 
-        middleTitleHeight = 0;// 50;
-        middleItemsHeight = Math.round(middleContentsHeight - middleTitleHeight);
+        logoRectWidth = d3.max([75, contentsHeight/3.5]);
+        logoRectHeight = logoRectWidth * 1.5;
+
+        fontSizes = {
+            hero:d3.max([9, contentsHeight/27.5]),
+            character:d3.max([9, contentsHeight/27.5]),
+            logo:logoRectWidth * 0.12,
+            wave:d3.max([10, contentsHeight/20]),
+            bubble:d3.max([10, contentsHeight/25]),
+        }
+
     }
 
     let DEFAULT_STYLES = {
@@ -101,33 +112,18 @@ export default function storyAnimationComponent() {
 
     //state
     let sceneNr = 0;
+    let frameNr = 0;
     /*
     next
-    - sort scene 6 positinong of middle waves (also change name to waves)
-     - Merge the "The Scene" scene with teh heroes scene, ie when person is introduced, thats when they say something
-
-
-     - add fade outs and ins, using d3 enter-update pattern (maybe change the display functions to a boolean flag func -> shouldDisplay) and then
-     obviusly remove the display line, and instead we filter the data arrays so the ones to fade out go into exit group, and those to fade in go itno enter group
-     (note - these transitoins will often be within a scene too, so need to think how to do that
-        -> could use a seoarate subscene variable, or just have more scenes so scene 2 becomes scenes 2 to 5, adding a person each time)
-        -> soln -> have a sceneTitle function which maps sceneNr to a value, so eg scenes 2-5 all map to "heroes" ie the heroes scene, prev called scene 2
-        so then when applyig values that relate to that scene name, then we can use the key instead of having to check numbers
-
-
-
-     - add speech bubbles to each person that speaks, along with funcs for speechBubbleDisplay, location and path of the bubble
+     - add speech bubbleLines to each hero that speaks, along with funcs for speechBubbleDisplay, location and path of the bubble
      - add a d3 timeout to update scene and trigger an update (should move the functions out of the update) and check it all works
-    
-     
-     - add transitions to position functions too, but if dislpay is changing to none, then dont transition the pos (ie we dont want one to start transitioning as it is fading out too)
-     
      
      - create a general function to split a single text line into parts os we can style 1 word or phrase, then 
      apply it to teh word enhance in scene 9 and the word heroes and secret weapon in 8
+
      -adjust styles and sizes and positions of everything
      - find photos and icons online and add them in
-     - add music nd sound effects
+     - add music and sound effects
      - add some other visual effects
 
     */
@@ -136,28 +132,45 @@ export default function storyAnimationComponent() {
         const { } = options;
 
         updateDimns();
+
+        //transitions into and out of this scene
+        const duration = 500;
+        const transitionIn = { delay:duration + 50, duration }
+        //scene 1 must remove any stuff from the final scene (which may ) quicker
+        const transitionOut = { duration:sceneNr === 1 ? 200 : duration }
+
         // expression elements
-        selection.each(function (data) {
-            console.log("w h", width, height)
+        selection.each(function (frameData) {
+            //console.log("sceneNr", sceneNr, frameNr)
+            //console.log("frameData", frameData)
             const containerG = d3.select(this);
 
             if(containerG.select("g.story-animation-contents").empty()){
-                init.call(this, data);
+                init.call(this, frameData);
             }
 
-            update.call(this, data);
+            update.call(this, frameData);
 
             function init(){
-                const containerElement = d3.select(this);
+                const containerElement = d3.select(this)
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr("transform", "scale(1.3)");
+
                 containerElement.append("rect")
                     .attr("class", "story-animation-bg")
-                    .attr("stroke", grey10(5))
+                    .attr("width", width)
+                    .attr("height", height)
+                    //.attr("stroke", grey10(5))
+                    //.attr("stroke-width", 0.3)
                     .attr("fill", "none");
 
                 const contentsG = containerElement.append("g")
-                    .attr("class", "story-animation-contents");
+                    .attr("class", "story-animation-contents")
+                    .attr("transform", `translate(${margin.left},${margin.top})`);
 
-                const storyContentsG = contentsG.append("g").attr("class", "story-contents");
+                const storyContentsG = contentsG.append("g").attr("class", "story-contents")
+                    .attr("transform", `translate(0,${sceneTitleHeight})`);
                 
                 contentsG
                     .append("rect")
@@ -170,9 +183,9 @@ export default function storyAnimationComponent() {
                         //.attr("stroke", "yellow")
                         .attr("fill", "none")
 
-                storyContentsG.append("g").attr("class", "people")
+                storyContentsG.append("g").attr("class", "heroes")
                     .append("rect")
-                        .attr("class", "people-bg")
+                        .attr("class", "heroes-bg")
                         .attr("fill", "none")
                         //.attr("stroke", "white");
 
@@ -182,261 +195,127 @@ export default function storyAnimationComponent() {
                         .attr("fill", "none")
                         //.attr("stroke", "white");
 
-                //middle 
-                const middleG = storyContentsG.append("g").attr("class", "middle");
-                const middleContentsG = middleG.append("g").attr("class", "middle-contents");
-                middleContentsG
+                //waves 
+                const wavesG = storyContentsG.append("g").attr("class", "waves")
+                    .attr("transform", `translate(${heroesWidth}, 0)`);
+                const wavesContentsG = wavesG.append("g").attr("class", "waves-contents")
+                    .attr("transform", `translate(${wavesMargin.left}, ${wavesMargin.top})`);
+                wavesContentsG
                     .append("rect")
-                        .attr("class", "middle-bg")
+                        .attr("class", "waves-contents-bg")
                         .attr("fill", "none")
                         //.attr("stroke", "white")
                         //.attr("rx", 10)
                         //.attr("ry", 10);
 
-                //title
-                middleContentsG
-                    .append("text")
-                        .attr("class", "middle-title")
-                            .attr("text-anchor", "middle")
-                            .attr("dominant-baseline", "hanging")
-                            .attr("stroke", "white")
-                            .attr("stroke-width", 1)
-                            .attr("font-size", 16)
-                            .attr("fill", "white");
-                //items
-                middleContentsG
-                    .append("g")
-                        .attr("class", "middle-items")
-
             }
 
 
-            function update(data, options={}){
-                const containerElement = d3.select(this)
-                    .attr("width", width)
-                    .attr("height", height)
-                
-                containerElement.select("rect.story-animation-bg")
-                    .attr("width", width)
-                    .attr("height", height)
+            function update(frameData, options={}){
+                //Data
+                const { sceneMetadata, otherElements=[] } = frameData;
+                const { key, title, lineStyles, lines, nrHeroes, nrCharacters, nrWaves } = sceneMetadata;
+                const heroX = frameData.heroX || sceneMetadata.heroX || nillOpp;
+                const heroY = frameData.heroY || sceneMetadata.heroY || nillOpp;
+                const characterX = frameData.characterX || sceneMetadata.characterX || nillOpp;
+                const characterY = frameData.characterY || sceneMetadata.characterY || nillOpp;
 
-                const contentsG = containerElement.select("g.story-animation-contents")
-                    .attr("transform", `translate(${margin.left},${margin.top})`);
+                //dimns based on number of items
+                const heroWidth = heroesWidth * 1.5;
+                const heroHeight = sceneNr === 1 ? heroWidth : storyContentsHeight/nrHeroes;
+                const heroMarginVert = heroHeight * 0.05;
+                const gapBetweenHeroAndName = heroHeight * 0.05;
+                const heroContentsHeight = heroHeight - 2 * heroMarginVert - gapBetweenHeroAndName;;
+                const heroNameHeight = d3.max([heroContentsHeight * 0.2, 12]);
+                const heroRadius = (heroContentsHeight - heroNameHeight)/2;
 
-                const storyContentsG = contentsG.select("g.story-contents")
-                    .attr("transform", `translate(0,${sceneTitleHeight})`);
+                const playerWidth = heroWidth * 1.3;
+                const playerHeight = heroHeight * 1.3;
+                const playerRadius = playerHeight/2;
 
-                contentsG.select("rect.contents-bg")
-                    .attr("width", contentsWidth)
-                    .attr("height", contentsHeight)
+                //characters data
+                const characterWidth = charactersWidth;
+                const vertGapBetweenCharacters = (storyContentsHeight/nrCharacters) * 0.2;
+                const nrCharacterGaps = nrCharacters - 1;
+                const vertSpaceForCharacters = storyContentsHeight - (vertGapBetweenCharacters * nrCharacterGaps);
+                const characterHeight = vertSpaceForCharacters/nrCharacters;
 
-                storyContentsG.select("rect.story-contents-bg")
-                    .attr("width", contentsWidth)
-                    .attr("height", storyContentsHeight)
+                //waves data   
+                const waveWidth = wavesContentsWidth;
+                const waveHeight = wavesContentsHeight/nrWaves;
+                const waveAmplitude = d3.max([20, waveWidth * 0.2]);// d3.min([waveWidth * 0.3, waveHeight]);
 
-                const middleG = storyContentsG.select("g.middle")
-                    .attr("transform", `translate(${peopleWidth}, 0)`)
-
-                //middle
-                const middleContentsG = middleG.select("g.middle-contents")
-                    .attr("transform", `translate(${middleMargin.left}, ${middleMargin.top})`)
-
-                middleContentsG.select("rect.middle-bg")
-                    .attr("width", middleContentsWidth)
-                    .attr("height", middleContentsHeight)
-
-                //people data
-                const personWidth = peopleWidth;
-                const personHeight = storyContentsHeight/peopleData.length;
-                const personRadius = d3.min([personWidth, personHeight * 0.6])/2;
+                const heroesData = frameData.heroes?.map(i => heroes[i]) || [];
+                const charactersData = frameData.characters?.map(i => characters[i]) || [];
+                const wavesData = frameData.waves?.map(i => waves[i]) || [];
 
                 const sceneTitlesGeneralInfo = {
                     case:"upper", fontFamily:"helvetica", fontSize:36, strokeWidth:3, stroke:grey10(2), fill:grey10(2),
                     textAnchor:"middle", dominantBaseline:"hanging", x:contentsWidth * 0.5, y:0,
                 }
-                const sceneTitlesCustomInfo = {
-                    1:{ 
-                        title: "Let us tell you a story...", x:0, y:0,
-                        case:"lower", fontFamily:"helvetica", fontSize:30, strokeWidth:2, stroke:"blue", fill:"blue",
-                        textAnchor:"start", dominantBaseline:"hanging"
-                    },
-                    2:{ 
-                        title: "THE HEROES"
-                    },
-                    3:{ 
-                        title: "THE VILLAINS"
-                    },
-                    4:{ 
-                        title: "OTHER CHARACTERS"
-                    },
-                    5:{ 
-                        title: "THE QUEST"
-                    }
-                }
-                const sceneTitleData = sceneTitlesCustomInfo[sceneNr] ? [ { ...sceneTitlesGeneralInfo, ...sceneTitlesCustomInfo[sceneNr] }] : [];
+                const sceneTitleData = title ? [ { ...sceneTitlesGeneralInfo, key, title }] : [];
 
-                const sceneLinesGeneralInfo = {
-                    6:{ 
-                        getX: i => contentsWidth * 0, getY: i => 50 + i * 58,
-                        case:"upper", fontFamily:"helvetica", fontSize:42, strokeWidth:3, stroke:grey10(2), fill:grey10(2),
-                        textAnchor:"start", dominantBaseline:"central"
-                    },
-                    7:{ 
-                        getX: i => contentsWidth * 0, getY: i => 50 + i * 55 + (i > 1 ? 30 : 0) + (i > 2 ? 30 : 0),
-                        case:"upper", fontFamily:"helvetica", fontSize:38, strokeWidth:2, stroke:grey10(2), fill:grey10(2),
-                        textAnchor:"start", dominantBaseline:"central"
-                    },
-                    8:{ 
-                        fontFamily:"helvetica", getX:() => contentsWidth * 0.5, getY: i => contentsHeight * 0.9 + i * 25,
-                        fontSize:16, strokeWidth:0.8, stroke:"red", fill:"red",
-                        textAnchor:"middle", dominantBaseline:"central"
-                    }
-                    /*8:{ 
-                        fontFamily:"helvetica", getX:() => contentsWidth * 0.08, getY: i => contentsHeight + i * 15,
-                        fontSize:10, strokeWidth:0.8, stroke:"red", fill:"red",
-                        textAnchor:"start", dominantBaseline:"central"
-                    }*/
+                const sceneLines = lines?.map(line => ({ ...lineStyles, ...line })) || [];
+                const frameLinesData = frameData.lines?.map(i => sceneLines[i]) || [];
+
+                const dimns = {
+                    contentsWidth, contentsHeight, storyContentsHeight, sceneTitleHeight,
+                    heroWidth, heroHeight, characterWidth, characterHeight, waveWidth, waveHeight, waveAmplitude,
+                    playerWidth, playerHeight,
+                    vertGapBetweenCharacters
                 }
 
-                const sceneLinesCustomInfo = {
-                    6:[
-                        { text:"SO" },
-                        { text:"HOW DID" },
-                        { text:"THEY" },
-                        { text:"DO IT?" }
-                    ],
-                    7:[
-                        { text:"ASK THEM, BECAUSE" },
-                        { text:"THEY ARE THE HEROES" }, 
-                        { text:"BUT" },
-                        { text:"THEY DID HAVE A" },
-                        { text:"SECRET WEAPON" }
-                    ],
-                    8:[
-                        { 
-                            text:"USER WARNING: SWITCHPLAY CANNOT REPLACE YOUR FACE-TO-FACE COMMUNICATION", 
-                        }, 
-                        //{ text:"YOUR FACE-TO-FACE COMMUNICATION!"}, 
-                        { 
-                            text:"(but it does enhance it)", stroke:grey10(4), fill:grey10(4),
-                        }
-                    ]
-                }
 
-                const getSceneLinesData = () => sceneLinesCustomInfo[sceneNr]?.map(line => ({ ...sceneLinesGeneralInfo[sceneNr], ...line }))
-                const sceneLinesData = getSceneLinesData() || [];
+                //RENDER
+                //Main gs and bgs
+                const containerElement = d3.select(this)
+                    .call(updateRectDimns, { 
+                        width: () => width, 
+                        height:() => height,
+                        transition:transitionIn
+                    })
+            
+                containerElement.select("rect.story-animation-bg")
+                    .call(updateRectDimns, { 
+                        width: () => width, 
+                        height:() => height,
+                        transition:transitionIn
+                    })
 
-                const personX = (d, i) => {
-                    switch(sceneNr) {
-                        default:
-                          return 0;
-                    }
-                }
-                const personY = (d, i) => {
-                    switch(sceneNr) {
-                        case 2:{
-                            return i * personHeight;
-                        }
-                        case 5:
-                        case 9:
-                        case 10:{
-                            return i * personHeight;
-                        }
-                        default:
-                          return 0;
-                    }
-                }
-                const personDisplay = (d, i) => {
-                    switch(sceneNr) {
-                        case 2:
-                        case 5: 
-                        case 9:
-                        case 10:{
-                            return null;
-                        }
-                        default:
-                          return "none";
-                    }
-                }
+                const contentsG = containerElement.select("g.story-animation-contents")
+                    .call(updateTransform, { x:() => margin.left, y:() => margin.top, transition:transitionIn })
+                    //.attr("transform", `translate(${margin.left},${margin.top})`);
 
-                //characters data
-                const nrCharacters = charactersData.length;
-                const characterWidth = charactersWidth;
-                const vertGapBetweenCharacters = (storyContentsHeight/nrCharacters) * 0.2;
-                const nrCharacterGaps = nrCharacters - 1;
-                const vertSpaceForCharacters = storyContentsHeight - (vertGapBetweenCharacters * nrCharacterGaps);
-                const characterHeight = vertSpaceForCharacters/charactersData.length;
+                const storyContentsG = contentsG.select("g.story-contents")
+                    .call(updateTransform, { x:() => 0, y:() => sceneTitleHeight, transition:transitionIn })
+                    //.attr("transform", `translate(0,${sceneTitleHeight})`);
 
-                const characterX = (d, i) => {
-                    switch(sceneNr) {
-                        default:
-                            return contentsWidth - characterWidth;
-                    }
-                }
-                const characterY = (d, i) => {
-                    switch(sceneNr) {
-                        case 3:{
-                            return i * (characterHeight + vertGapBetweenCharacters);
-                        }
-                        case 4:{
-                            return i * (characterHeight + vertGapBetweenCharacters);
-                        }
-                        case 5:
-                        case 9:
-                        case 10:{
-                            return i * (characterHeight + vertGapBetweenCharacters);
-                        }
-                        default:
-                            return 0;
-                    }
-                }
-                const characterDisplay = (d, i) => {
-                    switch(sceneNr) {
-                        case 5:
-                        case 9:
-                        case 10:{
-                            return null;
-                        }
-                        case 3:{
-                            return d.key === "kitman" || d.key ==="data" ? null : "none";
-                        }
-                        case 4 :{
-                            return d.key === "goals" || d.key ==="reviews" || d.key === "reports" || d.key === "communication" ? null : "none";
-                        }
-                        default:
-                            return "none";
-                    }
-                }
+                /*contentsG.select("rect.contents-bg")
+                    .attr("width", contentsWidth)
+                    .attr("height", contentsHeight)*/
 
-                //middle data
-                const middleItemsG = middleContentsG.select("g.middle-items")
-                    .attr("transform", `translate(0, ${middleTitleHeight})`);
-                        
-                const middleItemWidth = middleContentsWidth;
-                const middleItemHeight = middleItemsHeight/middleData.length;
+                /*storyContentsG.select("rect.story-contents-bg")
+                    .attr("width", contentsWidth)
+                    .attr("height", storyContentsHeight)*/
 
-                const middleDisplay = (d, i) => {
-                    switch(sceneNr) {
-                        case 5:
-                        case 9:
-                        case 10:{
-                            return null;
-                        }
-                        default:{
-                            return "none";
-                        }
-                    }
-                }
+                const wavesG = storyContentsG.select("g.waves")
+                    .call(updateTransform, { x:() => heroesWidth, y:() => 0, transition:transitionIn })
+                    //.attr("transform", `translate(${heroesWidth}, 0)`)
 
-                //scene 9 switchplay logo in ipad
-                //next - finich this and add speech bubbles to people,
-                //and deccie how to handle scene 10 - fitting in space - > maybe move teh herostatement into the story scene underneath the rest?
-                //and move the rest up for scene 10 as compared to scene 6
-                //and could even put in the call to action inside the scene too
-                const switchplayLogoG = contentsG.selectAll("g.switchplay-logo").data(sceneNr === 8 ? [1] : [])
+                const wavesContentsG = wavesG.select("g.waves-contents")
+                    .call(updateTransform, { x:() => wavesMargin.left, y:() => wavesMargin.top, transition:transitionIn })
+                    //.attr("transform", `translate(${wavesMargin.left}, ${wavesMargin.top})`)
+
+                /*wavesContentsG.select("rect.waves-contents-bg")
+                    .attr("width", wavesContentsWidth)
+                    .attr("height", wavesContentsHeight)*/
+
+                const logoDatum = otherElements.find(el => el.key === "logo");
+                const switchplayLogoG = contentsG.selectAll("g.switchplay-logo").data(logoDatum ? [logoDatum] : [])
                 switchplayLogoG.enter()
                     .append("g")
                         .attr("class", "switchplay-logo")
+                        .call(fadeIn, { transition: transitionIn })
                         .each(function(){
                             d3.select(this).append("rect")
                                 .attr("rx", 15)
@@ -448,30 +327,71 @@ export default function storyAnimationComponent() {
                                 .attr("text-anchor", "middle")
                                 .attr("dominant-baseline", "central")
                                 .attr("font-family", "helvetica")
-                                .attr("font-size", 14)
-                                .attr("stroke-width", 1)
-                                .attr("stroke", grey10(2))
-                                .attr("fill", grey10(2))
+                                .attr("font-size", fontSizes.logo)
+                                .attr("stroke-width", 0.5)
+                                .attr("stroke", grey10(1))
+                                .attr("fill", grey10(1))
                                 .text("SWITCHPLAY")
                         })
                         .merge(switchplayLogoG)
                         .each(function(){
                             d3.select(this).select("rect")
-                                .attr("x", -60)
-                                .attr("y", -92.5)
-                                .attr("width", 120)
-                                .attr("height", 185)
+                                .attr("x", -logoRectWidth/2)
+                                .attr("y", -logoRectHeight/2)
+                                .attr("width", logoRectWidth)
+                                .attr("height", logoRectHeight)
                         })
                         .attr("transform", d => `translate(${contentsWidth/2},${contentsHeight/2})`)
 
-                switchplayLogoG.exit().remove();
+                switchplayLogoG.exit().call(remove, { transition:transitionOut });
+
+                /*const communicationDatum = otherElements.find(el => el.key === "communication");
+                const communicationG = contentsG.selectAll("g.communication").data(communicationDatum ? [communicationDatum] : [])
+                communicationG .enter()
+                    .append("g")
+                        .attr("class", "communication")
+                        .call(fadeIn, { transition: transitionIn })
+                        .each(function(){
+                            d3.select(this).append("line")
+                                .attr("stroke", grey10(5))
+                            
+                            d3.select(this).append("text")
+                                .attr("text-anchor", "middle")
+                                .attr("dominant-baseline", "central")
+                                .attr("font-family", "helvetica")
+                                .attr("font-size", 20)
+                                .attr("stroke-width", 1)
+                                .attr("stroke", grey10(1))
+                                .attr("fill", grey10(1))
+                                .text("COMMUNICATION")
+                        })
+                        .merge(communicationG )
+                        .each(function(d){
+                            d3.select(this).select("line")
+                                .attr("display", d.withLine ? null : "none")
+                                .attr("x1", 20)
+                                .attr("y1", 0)
+                                .attr("x2", contentsWidth - 20)
+                                .attr("y2", 0)
+                                .attr("stroke", grey10(5))
+                                .attr("stroke-width", 0.5)
+
+                            d3.select(this).select("text")
+                                .attr("x", contentsWidth/2)
+                                .attr("y", contentsHeight * 0.1)
+                        })
+                        .attr("transform", d => `translate(${0},${contentsHeight * 0.8})`)
+
+                communicationG.exit().call(remove, { transition:transitionOut });*/
+
 
 
                 //scene title
-                const sceneTitleG = contentsG.selectAll("text.scene-title").data(sceneTitleData)
+                /*const sceneTitleG = contentsG.selectAll("text.scene-title").data(sceneTitleData, d => d.key)
                 sceneTitleG.enter()
                     .append("text")
                         .attr("class", "scene-title")
+                        .call(fadeIn, { transition: transitionIn })
                         .merge(sceneTitleG)
                         .attr("transform", d => `translate(${d.x},${d.y})`)
                         .attr("text-anchor", d => d.textAnchor)
@@ -483,16 +403,18 @@ export default function storyAnimationComponent() {
                         .attr("fill", d => d.fill)
                         .text(d => d.title)
 
-                sceneTitleG.exit().remove();
+                sceneTitleG.exit().call(remove, { transition:transitionOut });*/
 
                 //paragraph
-                const sceneLineG = contentsG.selectAll("text.scene-line").data(sceneLinesData)
+                /*
+                const sceneLineG = contentsG.selectAll("text.scene-line").data(frameLinesData, d => d.text) //note - could cause issue of two lines have saem text different i
                 sceneLineG.enter()
                     .append("text")
                         .attr("class", "scene-line")
+                        .call(fadeIn, { transition: transitionIn })
                         .merge(sceneLineG)
-                        .attr("x", (d,i) => d.getX(i))
-                        .attr("y", (d,i) => d.getY(i))
+                        .attr("x", (d,i) => d.getX(i, dimns))
+                        .attr("y", (d,i) => d.getY(i, dimns))
                         .attr("text-anchor", d => d.textAnchor)
                         .attr("dominant-baseline", d => d.dominantBaseline)
                         .attr("font-family", d => d.fontFamily)
@@ -502,66 +424,181 @@ export default function storyAnimationComponent() {
                         .attr("fill", d => d.fill)
                         .text(d => d.text)
 
-                sceneLineG.exit().remove();
+                sceneLineG.exit().call(remove, { transition:transitionOut });*/
 
 
+                //heroes
+                d3.select(`clipPath#hero-clip`)
+                    .select("circle")
+                            .transition("hero-clip")
+                            .duration(transitionIn.duration)
+                            .delay(transitionIn.delay)
+                                .attr("r", heroRadius)
+                d3.select(`clipPath#player-clip`)
+                    .select("circle")
+                            .transition("player-clip")
+                            .duration(transitionIn.duration)
+                            .delay(transitionIn.delay)
+                                .attr("r", sceneNr === 1 ? playerRadius : heroRadius)
 
-
-
-                //people
-                const personG = storyContentsG.selectAll("g.person").data(peopleData);
-                personG.enter()
+                const imgWidth = sceneNr === 1 ? 95 : 95 * 0.65;
+                const imgHeight = sceneNr === 1 ? 70 : 70 * 0.65;
+                const createTransform = obj => `translate(${(obj?.x || 0) - imgWidth/2},${(obj?.y || 0) - imgHeight/2}) scale(${obj?.k || 1})`
+               
+                const heroG = storyContentsG.selectAll("g.hero").data(heroesData, d => d.key);
+                heroG.enter()
                     .append("g")
-                        .attr("class", "person")
+                        .attr("class", "hero")
+                        .call(fadeIn, { transition: transitionIn })
                         .each(function(d){
-                            const personG = d3.select(this);
-                            personG.append("circle")
-                                .attr("fill", "none")
-                                .attr("stroke", "grey")
-                                .attr("stroke-width", 0.5)
+                            const heroG = d3.select(this);
+                            const heroImageG = heroG.append("g")
+                                .attr("class", "image")
+                                .attr('clip-path', d.key === "player" && sceneNr === 1 ? `url(#player-clip)` : `url(#hero-clip)`)
+                                .attr("transform", d.key === "player" && sceneNr === 1 ? 
+                                    `translate(${playerWidth/2},${heroMarginVert + playerRadius})` : 
+                                    `translate(${heroWidth/2},${heroMarginVert + heroRadius})`)
 
-                            personG.append("text").attr("class", "person-title")
+                            heroImageG.append("circle")
+                                .attr("fill", "none")
+                                .attr("stroke", grey10(3))
+                                .attr("stroke-width",2)// 0.5)
+                                .attr("r", d.key === "player" && sceneNr === 1 ? playerRadius : heroRadius)
+
+                            heroG.append("text").attr("class", "hero-title")
+                                .attr("display", d.key === "player" && sceneNr === 1 ? "none" : null)
                                 .attr("text-anchor", "middle")
                                 .attr("dominant-baseline", "central")
                                 .attr("stroke", "white")
                                 .attr("stroke-width", 0.2)
-                                .attr("font-size", 10)
-                                .attr("fill", "white");
+                                .attr("font-size", fontSizes.hero * (sceneNr === 1 ? 1.2 : 0.8))
+                                .attr("fill", "white")
+                                .attr("x", heroWidth/2)
+                                .attr("y", heroHeight - heroMarginVert - heroNameHeight/2)
+                                .attr("opacity", sceneNr === 1 ? 1 : 0.6)
+                                .text(d.label);
 
-                            personG.append("rect").attr("class", "person-hitbox")
+                            heroImageG.append("image")
+                                .attr("transform", sceneNr >= 2 ? createTransform(d.imgTransformSmall) : createTransform(d.imgTransform))
+
+                            heroG.append("rect").attr("class", "hero-hitbox")
                                 .attr("fill", "transparent")
-                                //.attr("stroke", "aqua");
+                                //.attr("stroke", "aqua")
+                                .attr("width", d.key === "player" && sceneNr === 1 ? playerWidth : heroWidth)
+                                .attr("height", d.key === "player" && sceneNr === 1 ? playerHeight : heroHeight)
 
                         })
-                        .merge(personG)
-                        .attr("display", (d,i) => personDisplay(d,i))
-                        .attr("transform", (d,i) => `translate(${personX(d,i)}, ${personY(d,i)})`)
+                        .attr("transform", (d,i) => `translate(${heroX(d,i,dimns)}, ${heroY(d,i,dimns)})`)
+                        .merge(heroG)
+                        .call(updateTransform, { 
+                            x:(d, i) => heroX(d, i, dimns), 
+                            y:(d, i) => {
+                                if(d.key === "player" && sceneNr === 1){ heroY(d, i, dimns); }
+                                return heroY(d, i, dimns) + (sceneNr >= 2 ? (gapBetweenHeroAndName +heroNameHeight)/2 : 0)
+                            },
+                            transition:transitionIn 
+                        })
+                        //.attr("transform", (d,i) => `translate(${heroX(d,i)}, ${heroY(d,i)})`)
                         .each(function(d,i){
-                            const personG = d3.select(this);
-
-                            personG.select("circle")
-                                .attr("cx", personWidth/2)
-                                .attr("cy", personHeight/2)
-                                .attr("r", personRadius)
-
-                            personG.select("text.person-title")
-                                .attr("x", personWidth/2)
-                                .attr("y", personHeight/2)
-                                .text(d.label)
+                            const heroG = d3.select(this);
+                            const heroImageG = heroG.select("g.image")
                             
-                            personG.select("rect.person-hitbox")
-                                .attr("width", personWidth)
-                                .attr("height", personHeight)
+                            heroImageG
+                                .transition("image-g-pos")
+                                .duration(transitionIn.duration)
+                                .delay(transitionIn.delay)
+                                .attr("transform", d.key === "player" && sceneNr === 1 ? 
+                                    `translate(${playerWidth/2},${heroMarginVert + playerHeight/2})` : 
+                                    `translate(${heroWidth/2},${heroMarginVert + heroRadius})`)
+
+                            heroImageG.select("circle")
+                                .transition("pers-circ-pos")
+                                .duration(transitionIn.duration)
+                                .delay(transitionIn.delay)
+                                    .attr("r", d.key === "player" && sceneNr === 1 ? playerRadius : heroRadius);
+
+                            heroG.select("text.hero-title")
+                                .transition("pers-text-pos")
+                                .duration(transitionIn.duration)
+                                .delay(transitionIn.delay)
+                                    .attr("x", heroWidth/2)
+                                    .attr("y", heroHeight - heroMarginVert - heroNameHeight/2)
+                                    .attr("opacity", sceneNr === 1 ? 1 : 0)
+                                    .attr("font-size", fontSizes.hero * (sceneNr === 1 ? 1.2 : 0.8))
+                                    .text(d.label)
+
+                            heroG.select("image")
+                                .attr("xlink:href", `/website/${d.key}.png`)
+                                    .transition()
+                                    .duration(transitionIn.duration)
+                                    .delay(transitionIn.delay)
+                                        .attr("transform", sceneNr >= 2 ? createTransform(d.imgTransformSmall) : createTransform(d.imgTransform))
+                                
+
+                            
+                            heroG.select("rect.hero-hitbox")
+                                .call(updateRectDimns, { 
+                                    width:() => d.key === "player" && sceneNr === 1 ? playerWidth : heroWidth, 
+                                    height:() => d.key === "player" && sceneNr === 1 ? playerHeight : heroHeight, 
+                                    transition:transitionIn,
+                                    name:"pers-hitbox-size"
+                                })
+
+                            //speech bubble
+                            const bubbleWidth = 300;
+                            const bubbleHeight = 50;
+                            const bubbleData = frameData.heroBubbles?.includes(i) && bubbleLines[d.key] ? [1] : [];
+                            const bubbleG = heroG.selectAll("g.bubble").data(bubbleData);
+                            bubbleG.enter()
+                                .append("g")
+                                    .attr("class", "bubble")
+                                    .each(function(){
+                                        const bubbleG = d3.select(this);
+                                        bubbleG.append("rect")
+                                            .attr("rx", 25)
+                                            .attr("ry", 25)
+                                            .attr("fill", grey10(3));
+
+                                        bubbleG.append("text").attr("class", "line1")
+                                        bubbleG.append("text").attr("class", "line2")
+                                        bubbleG.selectAll("text")
+                                            .attr("text-anchor", "middle")
+                                            .attr("font-size", fontSizes.bubble)
+                                            .attr("stroke-width", 0.8)
+                                            .attr("stroke", grey10(8))
+                                            .attr("fill", grey10(8));
+                                    })
+                                    .merge(bubbleG)
+                                    .attr("transform", `translate(${heroWidth * 0.8},${(heroHeight - bubbleHeight)/2 + 20})`)
+                                    .each(function(){
+                                        const bubbleG = d3.select(this);
+                                        bubbleG.select("rect")
+                                            .attr("width", bubbleWidth)
+                                            .attr("height", bubbleHeight);
+
+                                        bubbleG.select("text.line1")
+                                            .attr("x", bubbleWidth/2)
+                                            .attr("y", 20)
+                                            .text(bubbleLines[d.key][0]);
+                                        
+                                        bubbleG.select("text.line2")
+                                            .attr("x", bubbleWidth/2)
+                                            .attr("y", 37.5)
+                                            .text(bubbleLines[d.key][1]);
+                                    })
+
+                            bubbleG.exit().remove();
 
                         });
 
-                personG.exit().remove();
+                heroG.exit().call(remove, { transition:transitionOut });
         
                 //characters
-                const characterG = storyContentsG.selectAll("g.character").data(charactersData);
+                const characterG = storyContentsG.selectAll("g.character").data(charactersData, d => d.key);
                 characterG.enter()
                     .append("g")
                         .attr("class", "character")
+                        .call(fadeIn, { transition: transitionIn })
                         .each(function(d){
                             const characterG = d3.select(this);
                             characterG.append("text").attr("class", "character-title")
@@ -569,77 +606,170 @@ export default function storyAnimationComponent() {
                                 .attr("dominant-baseline", "central")
                                 .attr("stroke", "white")
                                 .attr("stroke-width", 0.5)
-                                .attr("font-size", 10)
-                                .attr("fill", "white");
+                                .attr("font-size", fontSizes.character)
+                                .attr("fill", "white")
+                                .attr("x", characterWidth/2)
+                                .attr("y", characterHeight/2)
+                                .text(d.label);
 
-                            characterG.append("image")
                             characterG.append("rect").attr("class", "character-hitbox")
                                 .attr("fill", "transparent")
                                 .attr("rx", 15)
                                 .attr("ry", 15)
                                 .attr("stroke", "aqua")
                                 //.attr("stroke", d.type === "villain" ? "red" : "aqua");
+                                .attr("width", characterWidth)
+                                .attr("height", characterHeight)
 
                         })
+                        .attr("transform", (d,i) => `translate(${characterX(d,i,dimns)}, ${characterY(d,i,dimns)})`)
                         .merge(characterG)
-                        .attr("display", (d,i) => characterDisplay(d,i))
-                        .attr("transform", (d,i) => `translate(${characterX(d,i)}, ${characterY(d,i)})`)
+                        .call(updateTransform, { x:(d, i) => characterX(d, i, dimns), y:(d, i) => characterY(d, i, dimns), transition:transitionIn })
+                        //.attr("transform", (d,i) => `translate(${characterX(d,i)}, ${characterY(d,i)})`)
                         .each(function(d,i){
                             const characterG = d3.select(this);
 
                             characterG.select("text.character-title")
-                                .attr("x", characterWidth/2)
-                                .attr("y", characterHeight/2)
-                                .text(d.label)
-
-                            characterG.select("image")
-                                .attr("xmiddle:href", d.url)
-                                //.attr("transform", `scale(${photoContentsWidth / 250})`)
+                                .transition("char-text-pos")
+                                .duration(transitionIn.duration)
+                                .delay(transitionIn.delay)
+                                    .attr("x", characterWidth/2)
+                                    .attr("y", characterHeight/2)
+                                    .text(d.label)
                             
                             characterG.select("rect.character-hitbox")
-                                .attr("width", characterWidth)
-                                .attr("height", characterHeight)
+                                .call(updateRectDimns, { 
+                                    width:() => characterWidth, 
+                                    height:() => characterHeight, 
+                                    transition:transitionIn,
+                                    name:"char-hitbox-size"
+                                })
+
+                            //speech bubble
+                            const bubbleWidth = 300;
+                            const bubbleHeight = 65;
+                            const bubbleData = frameData.characterBubbles?.includes(i) && bubbleLines[d.key] ? [1] : [];
+                            const bubbleG = characterG.selectAll("g.bubble").data(bubbleData);
+                            bubbleG.enter()
+                                .append("g")
+                                    .attr("class", "bubble")
+                                    .each(function(){
+                                        const bubbleG = d3.select(this);
+                                        bubbleG.append("rect")
+                                            .attr("rx", 25)
+                                            .attr("ry", 25)
+                                            .attr("fill", grey10(3));
+
+                                        bubbleG.append("text").attr("class", "line1")
+                                        bubbleG.append("text").attr("class", "line2")
+                                        bubbleG.append("text").attr("class", "line3")
+                                        bubbleG.selectAll("text")
+                                            .attr("text-anchor", "middle")
+                                            .attr("font-size", fontSizes.bubble)
+                                            .attr("stroke-width", 0.8)
+                                            .attr("stroke", grey10(8))
+                                            .attr("fill", grey10(8));
+                                    })
+                                    .merge(bubbleG)
+                                    .attr("transform", `translate(${-300},${(characterHeight - bubbleHeight)/2 + 20})`)
+                                    .each(function(){
+                                        const bubbleG = d3.select(this);
+                                        bubbleG.select("rect")
+                                            .attr("width", bubbleWidth)
+                                            .attr("height", bubbleHeight);
+
+                                        bubbleG.select("text.line1")
+                                            .attr("x", bubbleWidth/2)
+                                            .attr("y", 20)
+                                            .text(bubbleLines[d.key][0]);
+                                        
+                                        bubbleG.select("text.line2")
+                                            .attr("x", bubbleWidth/2)
+                                            .attr("y", 37.5)
+                                            .text(bubbleLines[d.key][1]);
+
+                                        bubbleG.select("text.line3")
+                                            .attr("x", bubbleWidth/2)
+                                            .attr("y", 55)
+                                            .text(bubbleLines[d.key][2]);
+                                    })
+
+                            bubbleG.exit().remove();
+  
 
                         });
+                
+                characterG.exit().call(remove, { transition:transitionOut });
 
                 //middle
-                const middleItemG = middleItemsG.selectAll("g.middle-item").data(middleData);
-                middleItemG.enter()
+                let waveInterval;
+                const waveG = wavesContentsG.selectAll("g.wave").data(wavesData);
+                waveG.enter()
                     .append("g")
-                        .attr("class", "middle-item")
-                        .each(function(d){
-                            const middleItemG = d3.select(this);
-                            middleItemG.append("text").attr("class", "middle-item-title")
+                        .attr("class", "wave")
+                        .call(fadeIn, { transition: transitionIn })
+                        .each(function(d,i){
+                            const waveG = d3.select(this);
+                            waveG.append("text").attr("class", "wave-title")
                                 .attr("text-anchor", "middle")
                                 .attr("dominant-baseline", "central")
                                 .attr("stroke", "white")
                                 .attr("stroke-width", 0.5)
-                                .attr("font-size", 14)
+                                .attr("font-size", fontSizes.wave)
                                 .attr("fill", "white");
 
-                            middleItemG.append("path")
+                            waveG.append("path")
                                 .attr("stroke", grey10(3))
                                 .attr("stroke-width", 1)
                                 .attr("fill", "none");
 
-                            middleItemG.append("rect").attr("class", "middle-item-hitbox")
+                            waveG.append("rect").attr("class", "wave-hitbox")
                                 .attr("fill", "transparent")
                                 //.attr("stroke", "aqua");
 
-                        })
-                        .merge(middleItemG)
-                        .attr("display", (d,i) => middleDisplay(d,i))
-                        .attr("transform", (d,i) => `translate(0, ${i * middleItemHeight})`)
-                        .each(function(d,i){
-                            const middleItemG = d3.select(this);
+                            let count = -1;
+                            //let subcount = 1;
+                            waveInterval = d3.interval(() => {
+                                if(count === 3){ waveInterval.stop(); }
+                                count += 1; 
+                                /*if(subcount === 2){
+                                    subcount = 1; 
+                                    count += 1; 
+                                }
+                                else{ 
+                                    subcount += 1; 
+                                }*/
+                                
 
-                            middleItemG.select("text.middle-item-title")
-                                .attr("x", middleItemWidth/2)
-                                .attr("y", middleItemHeight * 0)
+                                waveG.select("text")
+                                    .transition("pers-text-pos")
+                                    .duration(500)
+                                        .attr("font-size", fontSizes.wave * (count === i ? 1.1 : 1))
+                                        .attr("stroke-width", count === i ? 0.8 : 0.4)
+                                        .attr("stroke", count === i ? grey10(1) : grey10(3));
+                                
+                                waveG.select("path")
+                                    .transition("pers-text-pos")
+                                    .duration(500)
+                                        //.attr("transform", `scale(${count === i && subcount === 2 ? 1.2 : 1})`)
+                                        .attr("stroke-width", count === i ? 3 : 1)
+                                        .attr("stroke", count === i ? grey10(1) : grey10(3));
+                            }, 500)
+
+                        })
+                        .attr("transform", (d,i) => `translate(0, ${i * waveHeight})`)
+                        .merge(waveG)
+                        .call(updateTransform, { x:() => 0, y:(d, i) => i * waveHeight, transition:transitionIn })
+                        //.attr("transform", (d,i) => `translate(0, ${i * waveHeight})`)
+                        .each(function(d,i){
+                            const waveG = d3.select(this);
+
+                            waveG.select("text.wave-title")
+                                .attr("x", waveWidth/2)
+                                .attr("y", waveHeight * 0)
                                 .text(d.label)
 
-                            const amplitude = Math.round(middleItemHeight/2);
-                            const wavelength = Math.round(middleContentsWidth);
+                            const wavelength = Math.round(waveWidth);
                    
                             const halfWavelength = Math.round(wavelength/2);
                             const quarterWavelength = Math.round(wavelength/4);
@@ -650,25 +780,25 @@ export default function storyAnimationComponent() {
                             const pt3X = halfWavelength + quarterWavelength - deltaX;
                             const pt4X = halfWavelength + quarterWavelength + deltaX;
 
-                            const pt1Y = - amplitude + deltaY;
+                            const pt1Y = - waveAmplitude + deltaY;
                             const pt2Y = pt1Y;
-                            const pt3Y = amplitude - deltaY;
+                            const pt3Y = waveAmplitude - deltaY;
                             const pt4Y = pt3Y;
 
                             const pathD = `M 0 0 C ${pt1X} ${pt1Y}, ${pt2X} ${pt2Y}, ${halfWavelength} 0 C ${pt3X} ${pt3Y}, ${pt4X} ${pt4Y}, ${wavelength} 0`
 
-                            middleItemG.select("path")
+                            waveG.select("path")
                                 .attr("d", pathD)
                                 //.attr("d", `M0,0 C 40 -45, 60 -45, 100 0 C 140 45, 160 45, 200 0`)
-                                .attr("transform", `translate(0, ${middleItemHeight/2})`)
+                                .attr("transform", `translate(0, ${waveHeight/2})`)
                             
-                            middleItemG.select("rect.middle-item-hitbox")
-                                .attr("width", middleItemWidth)
-                                .attr("height", middleItemHeight)
+                            waveG.select("rect.wave-hitbox")
+                                .attr("width", waveWidth)
+                                .attr("height", waveHeight)
 
                         });
 
-                middleItemG.exit().remove();
+                waveG.exit().call(remove, { transition:transitionOut });
 
             }
 
@@ -691,6 +821,11 @@ export default function storyAnimationComponent() {
     storyAnimation.sceneNr = function (value) {
         if (!arguments.length) { return sceneNr; }
         sceneNr = value;
+        return storyAnimation;
+    };
+    storyAnimation.frameNr = function (value) {
+        if (!arguments.length) { return frameNr; }
+        frameNr = value;
         return storyAnimation;
     };
 

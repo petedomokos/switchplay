@@ -56,7 +56,8 @@ const useStyles = makeStyles(theme => ({
     fontSize:"14px",
     //border:"solid",
     //borderColor:"red",
-    color:"white"
+    color:"white",
+    fontFamily:"helvetica",
   },
   logoWrapper:{
     width:"150px",
@@ -74,7 +75,8 @@ const useStyles = makeStyles(theme => ({
     fontSize:"18px",
     //border:"solid",
     //borderColor:"yellow",
-    color:"white"
+    color:"white",
+    fontFamily:"helvetica",
     //marginTop:props => props.isBurger ? "10px" : "0px",
     //marginLeft:props => props.isBurger ? "0px" : "175px",
     /*[theme.breakpoints.down('sm')]: {
@@ -88,10 +90,11 @@ const useStyles = makeStyles(theme => ({
   strapline:{
     width:"150px",
     //height:"20px",
-    fontSize:"12px",
+    fontSize:"10px",
     //border:"solid",
     //borderColor:"blue",
-    color:"white"
+    color:"white",
+    fontFamily:"helvetica",
   },
   homeIcon:{
     [theme.breakpoints.down('sm')]: {

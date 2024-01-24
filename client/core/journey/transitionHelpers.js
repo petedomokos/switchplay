@@ -52,8 +52,8 @@ export function updateRectDimns(selection, options={}){
             d3.select(this)
                 .transition(_name)
                 //.ease(d3.easeLinear)
-                //.duration(200)
-                .duration(TRANSITIONS.MED)
+                .delay(typeof transition.delay === "function" ? transition.delay(d,i) : (transition.delay || null))
+                .duration(typeof transition.duration === "function" ? transition.duration(d,i) : (transition.duration || TRANSITIONS.MED))
                     .attr("width", width(d))
                     .attr("height", height(d))
                     .on("end", cb);

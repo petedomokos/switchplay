@@ -54,6 +54,28 @@ Note: Beware of modifying this element as it can break the animations - you shou
 /* Styling of overlay */
 .bm-overlay {background: rgba(0, 0, 0, 0.3);}
 
+/* This fires as soon as the element enters the DOM*/
+.hero-statement-transition-enter {
+  /*We give the list the initial dimension of the list button*/
+  opacity:0;
+  transition: all 1000ms ease-in 2000ms;
+}
+/* This is where we can add the transition*/
+.hero-statement-transition-enter-active {
+  opacity:1;
+  transition: all 1000ms ease-in 2000ms;
+}
+/* This fires as soon as the this.state.showList is false */
+.hero-statement-transition-exit {
+  opacity:1;
+  transition: all 1000ms ease-in 2000ms;
+}
+/* fires as element leaves the DOM*/
+.hero-statement-transition-exit-active {
+  opacity:0;
+  transition: all 1000ms ease-in 2000ms;
+}
+
 
 /* This fires as soon as the element enters the DOM*/
 .list-transition-enter {
