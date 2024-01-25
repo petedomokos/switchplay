@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { rgba } from 'polished';
 import { themeGet } from '@styled-system/theme-get';
 
-import bannerBg from 'common/assets/image/agencyModern/banner2.png';
+import bannerBg from '../../../common/assets/image/agencyModern/banner2.png';
 
 const BannerWrapper = styled.div`
   background-image: url(${bannerBg?.src});

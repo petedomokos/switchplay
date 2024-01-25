@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Text from 'common/components/Text';
-import Link from 'common/components/Link';
-import Image from 'common/components/Image';
+import Text from '../../../components/Text';
+import Link from '../../../components/Link';
+import Image from '../../../components/Image';
 
 const Logo = ({ logoWrapperStyle, logoStyle, titleStyle, withAnchor, anchorProps, logoSrc, title, ...props }) => (
   <Link {...props} {...logoWrapperStyle}>

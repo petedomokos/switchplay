@@ -13,8 +13,7 @@ import { grey10 } from "./cards/constants"
 import WelcomeMessage from './WelcomeMessage';
 import storyAnimationComponent from './storyAnimationComponent';
 import { sceneElements } from './sceneElements';
-import { FormatQuoteSharp } from '@material-ui/icons';
-import Banner from '../templates/AgencyModern/Banner';
+import HomePage from './HomePage';
 
 const quotes = {
   player:"I get to see all my progress, messages, videos and what Im working on in one place, all mapped out",
@@ -530,15 +529,15 @@ export default function NonUserHome({ screen }){
   return (
       <div className={classes.homeRoot}>
         <div className={classes.screen} onClick={updateSceneState} >
-          <Banner />
+          <HomePage/>
           <div style={{ width:"100%", height:`${screen.isSmall ? 30 : 50}px` }}></div>
           <div className={classes.heroStatement}>
               <div className={classes.heroStatementHeading}>{heroStatementHeading}</div>
-              {heroStatement(heroStatementNrLines).map(line => 
+              {/**heroStatement(heroStatementNrLines).map(line => 
                 <Typography className={classes.heroStatementText} type="body1" component="p">
                 {line}
                 </Typography>
-              )}
+              )*/}
           </div>
           <div style={{ width:"100%", height:"20px" }}></div>
 
@@ -594,7 +593,7 @@ export default function NonUserHome({ screen }){
           <div style={{ width:"100%", height:"100px" }}></div>
           <div className={classes.keypoints} >
             {keypoints.map(k => 
-              <div className={classes.keypoint}>
+              <div className={classes.keypoint} key={k.title || k.desc}>
                 <div className={classes.keypointTitle}>{k.title}</div>
                 <div className={classes.keypointDesc}>{k.desc}</div>
               </div>
