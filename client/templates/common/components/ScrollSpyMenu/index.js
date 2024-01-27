@@ -2,29 +2,33 @@ import React, { useContext } from "react";
 import PropTypes from "prop-types";
 import Scrollspy from "react-scrollspy";
 import AnchorLink from "react-anchor-link-smooth-scroll";
+import {Link, withRouter} from 'react-router-dom'
+import Button from '@material-ui/core/Button'
 
 import { DrawerContext } from "../../contexts/DrawerContext";
 import NextImage from "../NextImage";
 
-const RenderLinkWithIcon = ({ menu }) => {
+const RenderLinkWithIcon = ({ item }) => {
+	console.log("RenderLinkWithIcon", item)
 	return (
 		<div className="icon-login">
-			{menu.icon ? (
-				<NextImage className="icon" src={menu.icon} alt={menu.label} />
+			{item.icon ? (
+				<NextImage className="icon" src={item.icon} alt={item.label} />
 			) : (
 				""
 			)}
 			<a
-				className={menu.icon ? "icon-label" : "no-icon-label"}
-				href={menu.path}
+				className={item.icon ? "icon-label" : "no-icon-label"}
+				href={item.path}
 			>
-				{menu.label}
+				{item.label}
 			</a>
 		</div>
 	);
 };
 
 const ScrollSpyMenu = ({ className, menuItems, drawerClose, ...props }) => {
+	console.log("Menu", menuItems)
 	const { dispatch } = useContext(DrawerContext);
 	// empty array for scrollspy items
 	const scrollItems = [];
@@ -56,27 +60,34 @@ const ScrollSpyMenu = ({ className, menuItems, drawerClose, ...props }) => {
 			drawerClose={drawerClose}
 			{...props}
 		>
-			{menuItems.map((menu, index) => (
+			{menuItems.map((item, index) => (
 				<li key={`menu-item-${index}`}>
-					{menu.staticLink ? (
-						<RenderLinkWithIcon menu={menu} />
-					) : (
-						<>
-							{drawerClose ? (
-								<AnchorLink
-									href={menu.path}
-									offset={menu.offset}
-									onClick={toggleDrawer}
-								>
-									{menu.label}
-								</AnchorLink>
-							) : (
-								<AnchorLink href={menu.path} offset={menu.offset}>
-									{menu.label}
-								</AnchorLink>
-							)}
-						</>
-					)}
+					{item.isPage ?
+						<Link to={item.path}>
+							{item.label}
+						</Link>
+					 	:
+						item.staticLink ? (
+							<RenderLinkWithIcon item={item} />
+						) : (
+							<>
+								{drawerClose ? (
+									<AnchorLink
+										href={item.path}
+										offset={item.offset}
+										onClick={toggleDrawer}
+									>
+										{item.label}
+									</AnchorLink>
+								) : (
+									<AnchorLink href={item.path} offset={item.offset}>
+										{item.label}
+									</AnchorLink>
+								)}
+							</>
+						)
+					}
+					
 				</li>
 			))}
 		</Scrollspy>

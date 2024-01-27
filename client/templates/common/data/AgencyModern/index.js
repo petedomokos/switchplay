@@ -40,19 +40,22 @@ const data = {
   ],
   rightMenuItems: [
     {
-      label: 'About us',
-      path: '#home',
+      label: 'About Us',
+      path: '/about',
       offset: '70',
+      isPage:true
     },
     {
       label: 'Get Demo',
-      path: '#home',
+      path: '/demo',
       offset: '70',
+      isPage:true
     },
     {
       label: 'Login',
-      path: '#home',
+      path: '/signin',
       offset: '70',
+      isPage:true
     },
   ],
   mobileMenuItems: [
