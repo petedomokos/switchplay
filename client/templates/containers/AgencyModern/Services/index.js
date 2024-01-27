@@ -16,8 +16,8 @@ const Services = () => {
       <Container>
         
           <SectionHeader>
-            <Heading content="Get your players thinking & acting like pros" />
-            <Text content="Build an incredible workplace and grow your business with all-in-one platform with amazing contents." />
+            <Heading content="Get more of your players thinking like pros" />
+            <Text content="Think of the most proactive player in your squad. Now imagine that the rest became like that. Thats what Switchplay can help you do. " />
           </SectionHeader>
        
         <ServiceWrapper>

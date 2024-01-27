@@ -41,7 +41,7 @@ export const sceneElements = {
             characters:[0,1,2,3,4,5], 
         },
     },
-    3:{
+    /*3:{
         key:"waves",
         heroX:(d,i,dimns) => 0,
         heroY:(d,i,dimns) => i * dimns.heroHeight,
@@ -52,5 +52,5 @@ export const sceneElements = {
             heroes:[0,1,2,3,4],
             characters:[0,1,2,3,4,5], 
         },
-    }
+    }*/
 }

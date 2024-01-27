@@ -17,7 +17,6 @@ import SectionWrapper, {
 } from './workHard.style';
 import data from '../../../common/data/AgencyModern';
 import illustration from '../../../common/assets/image/agencyModern/work-hard-illustration.png';
-import checkIcon from '../../../common/assets/image/agencyModern/tick-circle.png';
 
 const WorkHard = () => {
   return (
@@ -27,7 +26,7 @@ const WorkHard = () => {
           <Content>
             <Heading
               as="h2"
-              content="Coaches section....then analyst sectin belowDon’t work hard, be smart &amp; work smartly. Take relax sit"
+              content="Make  be smart &amp; work smartly. Take relax sit"
             />
             <Text content="Get your tests delivered at let home collect sample from the victory of the managments that supplies best design system guidelines ever." />
             <ListGroup>
@@ -38,7 +37,7 @@ const WorkHard = () => {
                   text={item.title}
                   icon={
                     <img
-                      src={checkIcon?.src}
+                      src={"website/icons/tick-circle.png"}
                       alt="tick icon"
                       className="check-icon"
                     />

@@ -4,7 +4,7 @@ import { themeGet } from '@styled-system/theme-get';
 const SectionWrapper = styled.section`
   padding: 100px 0 75px;
   @media only screen and (max-width: 1440px) {
-    padding: 70px 0 30px;
+    padding: 100px 0 0;
   }
   @media only screen and (max-width: 768px) {
     padding: 50px 0 0;
@@ -13,7 +13,7 @@ const SectionWrapper = styled.section`
 
 export const Section = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 
   @media only screen and (max-width: 768px) {
     flex-direction: column;

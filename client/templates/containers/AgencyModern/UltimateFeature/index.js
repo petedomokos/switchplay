@@ -14,16 +14,20 @@ import SectionWrapper, {
   FeatureWrapper,
 } from './ultimateFeature.style';
 import data from '../../../common/data/AgencyModern';
+import WorkflowAnimation from "../../../../core/WorkflowAnimation";
 
-const UltimateFeature = () => {
+const UltimateFeature = ({ animationDimns }) => {
   return (
     <SectionWrapper id="features">
       <Container>
         <SectionTitle>
-          <Heading content="Ultimate features you must appreciate" />
-          <Text content="Focus only on the meaning, we take care of the design. As soon as the meeting end you can export in one click into your preferred." />
+          <Heading content="Make your data &amp; information flow smoother" />
+          <Text content="Switchplay is one view for all sources of info, centred around the player" />
         </SectionTitle>
-
+        <div style={{ margin:`50px 0px 0px calc(50% - ${animationDimns.width/2}px)`, 
+                      width:`${animationDimns.width}px`, height:`${animationDimns.height}px` }} >
+          <WorkflowAnimation dimns={animationDimns} />
+        </div>
         <FeatureWrapper>
           {data.features.map((feature, index) => (
             <FeatureBlock

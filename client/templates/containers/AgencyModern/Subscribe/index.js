@@ -13,11 +13,11 @@ import SectionWrapper, {
   SubscriptionForm,
 } from './subscribe.style';
 
-import bg1 from '../../../common/assets/image/agencyModern/cta/1.png';
-import bg2 from '../../../common/assets/image/agencyModern/cta/2.png';
-import bg3 from '../../../common/assets/image/agencyModern/cta/3.png';
-import bg4 from '../../../common/assets/image/agencyModern/cta/4.png';
-import bg5 from '../../../common/assets/image/agencyModern/cta/5.png';
+const bg1 = { src:"website/bgs/cta/1.png" }
+const bg2 = { src:"website/bgs/cta/2.png" }
+const bg3 = { src:"website/bgs/cta/3.png" }
+const bg4 = { src:"website/bgs/cta/4.png" }
+const bg5 = { src:"website/bgs/cta/5.png" }
 
 const Subscribe = () => {
   return (
@@ -25,7 +25,7 @@ const Subscribe = () => {
       <Container>
         <FooterInner>
           <Content>
-            <Heading as="h3" content="Like our service? Subscribe us" />
+            <Heading as="h3" content="Interested? Subscribe to us." />
             <Text content="We have more than thousand of creative entrepreneurs and stat joining our business" />
           </Content>
           <SubscriptionForm>

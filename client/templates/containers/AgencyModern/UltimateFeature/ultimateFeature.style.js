@@ -8,7 +8,7 @@ const SectionWrapper = styled.section`
 
 export const SectionTitle = styled.div`
   text-align: center;
-  max-width: 500px;
+  max-width: 800px;
   width: 100%;
   margin: 0 auto;
   h2 {

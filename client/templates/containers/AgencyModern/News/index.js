@@ -16,10 +16,10 @@ const News = () => {
     <SectionWrapper id="news">
       <Container>
         <SectionHeading>
-          <Heading as="h2" content="Popular blog post we update everyday" />
-          <Text content="Focus only on the meaning, we take care of the design. As soon as the meeting end you can export in one click." />
+          <Heading as="h2" content="Start to tell data stories to your players" />
+          <Text content="Do you think of yourself as a storyteller? The true power of data comes when it is weaved into players' journeys." />
         </SectionHeading>
-        <NewsWrapper>
+        {/**<NewsWrapper>
           {data.posts.map((post) => (
             <BlogPost
               key={`news-${post.id}`}
@@ -33,7 +33,7 @@ const News = () => {
               }
             />
           ))}
-        </NewsWrapper>
+        </NewsWrapper>*/}
       </Container>
     </SectionWrapper>
   );

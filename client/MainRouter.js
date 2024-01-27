@@ -87,7 +87,6 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
  //took exact away from UserHome path
   return (
     <div className={classes.app}>
-      <MenuContainer />
       <Route path="/signup" component={CreateUserContainer}/>
       <Route path="/signin" component={SigninContainer}/>
       <Switch>
@@ -112,7 +111,6 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
           {/**userId && <Route path="/group/:groupId" component={GroupContainer}/>*/}
           {/**userId && <Route path="/dataset/:datasetId" component={DatasetContainer}/>*/}
       </Switch>
-      <div style={{ width:"100%", height:"80px", background:"aqua" }}>Footer</div>
     </div>
     )
 }

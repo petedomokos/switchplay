@@ -71,7 +71,7 @@ export default function storyAnimationComponent() {
     let fontSizes = {};
 
     function updateDimns(){
-        margin = { left: width * 0.1, right:width * 0.1, top: height * 0.1, bottom: height * 0.1 }
+        margin = { left: width * 0, right:width * 0, top: height * 0, bottom: height * 0 }
         contentsWidth = width - margin.left - margin.right;
         contentsHeight = height - margin.top - margin.bottom;
 
@@ -137,7 +137,7 @@ export default function storyAnimationComponent() {
         const duration = 500;
         const transitionIn = { delay:duration + 50, duration }
         //scene 1 must remove any stuff from the final scene (which may ) quicker
-        const transitionOut = { duration:sceneNr === 1 ? 200 : duration }
+        const transitionOut = { duration:1000/*sceneNr === 1 ? 200 : duration*/ }
 
         // expression elements
         selection.each(function (frameData) {
@@ -154,8 +154,7 @@ export default function storyAnimationComponent() {
             function init(){
                 const containerElement = d3.select(this)
                     .attr("width", width)
-                    .attr("height", height)
-                    .attr("transform", "scale(1.3)");
+                    .attr("height", height);
 
                 containerElement.append("rect")
                     .attr("class", "story-animation-bg")
@@ -163,7 +162,7 @@ export default function storyAnimationComponent() {
                     .attr("height", height)
                     //.attr("stroke", grey10(5))
                     //.attr("stroke-width", 0.3)
-                    .attr("fill", "none");
+                    .attr("fill", "transparent");
 
                 const contentsG = containerElement.append("g")
                     .attr("class", "story-animation-contents")
@@ -269,11 +268,11 @@ export default function storyAnimationComponent() {
                 //RENDER
                 //Main gs and bgs
                 const containerElement = d3.select(this)
-                    .call(updateRectDimns, { 
+                    /*.call(updateRectDimns, { 
                         width: () => width, 
                         height:() => height,
                         transition:transitionIn
-                    })
+                    })*/
             
                 containerElement.select("rect.story-animation-bg")
                     .call(updateRectDimns, { 
@@ -461,8 +460,8 @@ export default function storyAnimationComponent() {
 
                             heroImageG.append("circle")
                                 .attr("fill", "none")
-                                .attr("stroke", grey10(3))
-                                .attr("stroke-width",2)// 0.5)
+                                .attr("stroke", grey10(5))
+                                .attr("stroke-width", 1)// 0.5)
                                 .attr("r", d.key === "player" && sceneNr === 1 ? playerRadius : heroRadius)
 
                             heroG.append("text").attr("class", "hero-title")

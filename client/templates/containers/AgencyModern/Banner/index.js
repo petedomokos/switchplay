@@ -26,7 +26,7 @@ const dropbox = "";
 
 const Banner = () => {
   return (
-    <BannerWrapper>
+    <BannerWrapper id="home">
       <Container>
         <BannerContent>
           <Heading
@@ -35,11 +35,11 @@ const Banner = () => {
           />
           <Text
             className="banner-caption"
-            content="Great football development comes down to people, relationships, growth, communication & details."
+            content="Great football development comes down to relationships, growth, learning, communication & details."
           />
           <Text
             className="banner-caption"
-            content="Switchplay helps you to embed these in your own way to achieve your vision."
+            content="Switchplay helps you to embed these at your academy in your own way to achieve your vision."
           />
           <Subscribe>
             <Input

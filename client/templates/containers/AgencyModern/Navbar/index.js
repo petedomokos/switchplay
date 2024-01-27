@@ -23,6 +23,8 @@ const Navbar = () => {
     scrollItems.push(item.path.slice(1));
   });
 
+  console.log("data", data)
+
   const handleMobileMenu = () => {
     setMobileMenu(!mobileMenu);
   };
@@ -36,7 +38,7 @@ const Navbar = () => {
       <Container>
         <Logo
           href="/agencymodern"
-          logoSrc={LogoImage}
+          logoSrc={{ src: "/website/logo.png" }}
           title="Crypto Modern"
           className="main-logo"
         />
