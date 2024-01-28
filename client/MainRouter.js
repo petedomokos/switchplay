@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import {Route, Switch} from 'react-router-dom'
+import React, { Fragment, useEffect, useState } from 'react'
+import {Route, Switch, withRouter } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles'
 import NonUserHomeContainer from './core/containers/NonUserHomeContainer'
 import UserHomeContainer from './core/containers/UserHomeContainer'
@@ -22,14 +22,41 @@ import ImportDataContainer from './data/ImportDataContainer'
 import VisualsContainer from './visuals/VisualsContainer'
 import './assets/styles/main.css'
 
+import Sticky from 'react-stickynode';
+import { ThemeProvider } from 'styled-components';
+import { theme } from './templates/common/theme/agencyModern';
+import { DrawerProvider } from './templates/common/contexts/DrawerContext';
+import Navbar from './templates/containers/AgencyModern/Navbar';
+import data from './templates/common/data/AgencyModern';
+import ResetCSS from './templates/common/assets/css/style';
+import {
+  GlobalStyle,
+  ContentWrapper,
+} from './templates/containers/AgencyModern/agencyModern.style';
+
+//@todo - trigger an auto scroll to the right id, after page has loaded. 
+//It can be a prop for HomePage, and done in a useEffect with an empty deparray so it only does it on first render
+const navBarDataForOtherPages = {
+  ...data,
+  leftMenuItems:data.leftMenuItems.map(it => ({ ...it, isPage:true, path:"/" }))
+  /*
+  //if we just want home link
+  leftMenuItems:[{
+    ...data.leftMenuItems.find(it => it.path === "#home"),
+    isPage:true, 
+    path:"/" 
+  }]
+  */
+}
 
 const useStyles = makeStyles(theme => ({
-  app: {
+  app:{
+    width:"100%",
+    background:"#FF825C"
   }
 }))
 
-const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
-  //console.log("MainRouter", userId)
+const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, history }) => {
   //load user if page is refreshed. MainRouter is under the store so can 
   //trigger re-render once loaded
   const classes = useStyles() 
@@ -52,9 +79,6 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
       isLarge:["l", "xl"].includes(size),
       isSmall:["s", "xs"].includes(size),
     }
-    //console.log("window.innerWidth", window.innerWidth)
-    //console.log("window.screen", window.screen)
-    //console.log("isLarge?", screen.isLarge)
     window._screen = screen;
     //note - we still save in store, as ReactNative wont hve window
     return screen;
@@ -84,35 +108,37 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen }) => {
     }
   });
   
- //took exact away from UserHome path
   return (
     <div className={classes.app}>
-      <Route path="/signup" component={CreateUserContainer}/>
-      <Route path="/signin" component={SigninContainer}/>
-      <Switch>
-          <Route path="/profile" component={Profile}/>
-          <Route path="/visuals" component={VisualsContainer} />
-          <PrivateRoute path="/import" component={ImportDataContainer} />
-          <PrivateRoute path="/datasets/new" component={CreateDatasetContainer}/>
-          {jwt ?
-            <Route path="/" component={UserHomeContainer} />
-            :
-            <Route exact path="/" component={NonUserHomeContainer}/>
-          }
-          {/**
-            <PrivateRoute path="/user/edit/:userId" component={EditUserProfileContainer}/>
-            <PrivateRoute path="/dataset/edit/:datasetId" component={EditDatasetProfileContainer}/>
-            <PrivateRoute path="/users/new" component={CreateUserContainer}/>
-            <PrivateRoute path="/groups/new" component={CreateGroupContainer}/>
-            <PrivateRoute path="/datasets/new" component={CreateDatasetContainer}/>
-            <PrivateRoute path="/datapoints/new" component={CreateDatapointContainer}/>
-          */}
-          {/**userId && <Route path="/user/:userId" component={UserContainer}/>*/}
-          {/**userId && <Route path="/group/:groupId" component={GroupContainer}/>*/}
-          {/**userId && <Route path="/dataset/:datasetId" component={DatasetContainer}/>*/}
-      </Switch>
+      <ThemeProvider theme={theme}>
+        <Fragment>
+          <ResetCSS />
+          <GlobalStyle />
+          <ContentWrapper>
+            <Sticky top={0} innerZ={9999} activeClass="sticky-nav-active">
+              <DrawerProvider>
+                <Route path="/:any"><Navbar data={navBarDataForOtherPages} history={history} /></Route>
+                <Route exact path="/"><Navbar data={data} history={history} /></Route>
+              </DrawerProvider>
+            </Sticky>
+            <Switch>
+              <Route path="/signup" component={CreateUserContainer}/>
+              <Route path="/signin" component={SigninContainer}/>
+              <Route path="/profile" component={Profile}/>
+              <Route path="/visuals" component={VisualsContainer} />
+              <PrivateRoute path="/import" component={ImportDataContainer} />
+              <PrivateRoute path="/datasets/new" component={CreateDatasetContainer}/>
+              {jwt ?
+                <Route path="/" component={UserHomeContainer} />
+                :
+                <Route exact path="/" component={NonUserHomeContainer}/>
+              }
+            </Switch>
+          </ContentWrapper>
+        </Fragment>
+      </ThemeProvider>
     </div>
-    )
+  )
 }
 
-export default MainRouter
+export default withRouter(MainRouter)

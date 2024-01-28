@@ -1,15 +1,15 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import PropTypes from "prop-types";
 import Scrollspy from "react-scrollspy";
 import AnchorLink from "react-anchor-link-smooth-scroll";
 import {Link, withRouter} from 'react-router-dom'
 import Button from '@material-ui/core/Button'
+import * as d3 from 'd3';
 
 import { DrawerContext } from "../../contexts/DrawerContext";
 import NextImage from "../NextImage";
 
 const RenderLinkWithIcon = ({ item }) => {
-	console.log("RenderLinkWithIcon", item)
 	return (
 		<div className="icon-login">
 			{item.icon ? (
@@ -27,9 +27,10 @@ const RenderLinkWithIcon = ({ item }) => {
 	);
 };
 
-const ScrollSpyMenu = ({ className, menuItems, drawerClose, ...props }) => {
-	console.log("Menu", menuItems)
+const ScrollSpyMenu = ({ className, menuItems, drawerClose, history, ...props }) => {
 	const { dispatch } = useContext(DrawerContext);
+	//@todo - move into the context
+	const [page, setPage] = useState("");
 	// empty array for scrollspy items
 	const scrollItems = [];
 
@@ -53,6 +54,7 @@ const ScrollSpyMenu = ({ className, menuItems, drawerClose, ...props }) => {
 		});
 	};
 
+	const pathname = history.location.pathname
 	return (
 		<Scrollspy
 			items={scrollItems}
@@ -61,9 +63,18 @@ const ScrollSpyMenu = ({ className, menuItems, drawerClose, ...props }) => {
 			{...props}
 		>
 			{menuItems.map((item, index) => (
-				<li key={`menu-item-${index}`}>
+				<li key={`menu-item-${item.id}`}>
 					{item.isPage ?
-						<Link to={item.path}>
+						<Link to={item.path} 
+							style={{ color: pathname === item.path ? "#FF825C" : "#02073E" }}
+							onClick={() => {
+								if(item.page === "home" && item.id !== "home"){
+									window.manualScrollId = item.id;
+								}else{
+									window.manualScrollId = null;
+								}
+							}}
+							>
 							{item.label}
 						</Link>
 					 	:

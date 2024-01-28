@@ -10,11 +10,11 @@ import Button from '../../../common/components/Button';
 import Container from '../../../common/components/UI/ContainerTwo';
 import NavbarWrapper, { MenuArea, MobileMenu } from './navbar.style';
 import LogoImage from '../../../common/assets/image/agencyModern/logo.png';
-import data from '../../../common/data/AgencyModern';
+//import data from '../../../common/data/AgencyModern';
 //import { Fade } from 'react-awesome-reveal';
 //<Fade triggerOnce></Fade>
 
-const Navbar = () => {
+const Navbar = ({ data, history }) => {
   const [mobileMenu, setMobileMenu] = useState(false);
 
   const scrollItems = [];
@@ -22,8 +22,6 @@ const Navbar = () => {
   data.leftMenuItems.forEach((item) => {
     scrollItems.push(item.path.slice(1));
   });
-
-  console.log("data", data)
 
   const handleMobileMenu = () => {
     setMobileMenu(!mobileMenu);
@@ -49,11 +47,13 @@ const Navbar = () => {
             className="menu-items menu-left"
             menuItems={data.leftMenuItems}
             offset={-84}
+            history={history}
           />
           <ScrollSpyMenu
             className="menu-items menu-right"
             menuItems={data.rightMenuItems}
             offset={-84}
+            history={history}
           />
           {/* end of main menu */}
 
@@ -91,6 +91,7 @@ const Navbar = () => {
             items={scrollItems}
             offset={-84}
             currentClassName="active"
+            history={history}
           >
             {data.mobileMenuItems.map((menu, index) => (
               <li key={`menu_key${index}`}>

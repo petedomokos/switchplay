@@ -28,7 +28,7 @@ export const GlobalStyle = createGlobalStyle`
 `;
 
 export const ContentWrapper = styled.div`
-  overflow: hidden;
+  /*overflow: hidden; removed else menu on other pages is hidden as dimns not set somewhere?*/
   .menuLeft {
     margin-left: 105px;
   }

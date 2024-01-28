@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import NonUserHome  from '../NonUserHome'
+import NonUserHome  from '../NonUserHomeOld'
 
 const mapStateToProps = (state, ownProps) => {
 	return{
