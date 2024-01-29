@@ -16,6 +16,9 @@ import { makeStyles } from '@material-ui/core/styles'
 import auth from './auth-helper'
 
 const useStyles = makeStyles(theme => ({
+  signinRoot:{
+    paddingTop:"100px"
+  },
   card: {
     [theme.breakpoints.down('md')]: {
       width:"90%"
@@ -23,9 +26,8 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.up('lg')]: {
       width:"500px"
     },
-    margin: 'auto',
+    margin: "auto",
     textAlign: 'center',
-    marginTop: theme.spacing(5),
     paddingBottom: theme.spacing(2)
   },
   error: {
@@ -89,10 +91,10 @@ export default withRouter(function Signin({ onSignin, serverErrorMesg, location,
     setValues({ ...values, [name]: event.target.value })
   }
 
-  console.log("serverErrmesg", serverErrorMesg)
   const serverErrorUserMesg = serverErrorMesg === "Unauthorized" ? "Could not sign you in. Please check your username/email and password." : "";
 
   return (
+    <div className={classes.signinRoot}>
       <Card className={classes.card}>
         <CardContent>
           <Typography variant="h6" className={classes.title}>
@@ -139,5 +141,6 @@ export default withRouter(function Signin({ onSignin, serverErrorMesg, location,
           <Button color="primary" variant="contained" onClick={clickSubmit} className={classes.submit}>Submit</Button>
         </CardActions>
       </Card>
-    )
+    </div>
+  )
 })

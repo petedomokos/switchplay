@@ -39,14 +39,13 @@ const staffQuotesData = {
   url:"website/people/players.png",
   quotes:[
     { key:"coachQ", text:"This helps to ensure everyone is pushing in the same direction" },
-    { key:"analystQ", text:"Now that I don't have to do all the manual merging and stuff like that, I've got more time to do my actual job, talking to the guys and heling them to make data-informed decisions." },
+    { key:"analystQ", text:"Now that I don't have to do all the manual merging and stuff like that, I've got more time to do my actual job, talking to the guys and helping them to make data-informed decisions." },
     { key:"managerR", text:"Our face-to-face communication was good, but things sometimes got siloed. I love the oversight I get." }
   ]
 }
 
 const useStyles = makeStyles(theme => ({
   nonUserHomeRoot:{
-    width:"100%",
     background:"#FF825C"
   }
 }))

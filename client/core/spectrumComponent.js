@@ -88,8 +88,8 @@ export default function spectrumComponent() {
                     .attr("class", "spectrum-bg")
                     .attr("width", width)
                     .attr("height", height)
-                    .attr("stroke", grey10(5))
-                    .attr("stroke-width", 1)
+                    //.attr("stroke", grey10(5))
+                    //.attr("stroke-width", 1)
                     .attr("fill", "transparent");
 
                 const contentsG = containerElement.append("g")
@@ -130,10 +130,10 @@ export default function spectrumComponent() {
 
                 fusedG.append("rect")
                     .attr("class", "fused-bg bg")
-                    .attr("fill", "orange")
+                    .attr("fill", "transparent")
 
-                const startContentsG = startG.append("g").attr("class", "start-contents").attr("opacity", 0.7);
-                const endContentsG = endG.append("g").attr("class", "end-contents").attr("opacity", 0.7);
+                const startContentsG = startG.append("g").attr("class", "start-contents").attr("opacity", 0.9);
+                const endContentsG = endG.append("g").attr("class", "end-contents").attr("opacity", 0.9);
                 const fusedContentsG = fusedG.append("g").attr("class", "fused-contents");
 
                 startContentsG.append("rect")
@@ -146,13 +146,13 @@ export default function spectrumComponent() {
                     .attr("class", "end-contents-bg")
                     //.attr("stroke", "black")
                     //.attr("stroke-width", 0.1)
-                    .attr("fill", "none")
+                    .attr("fill", "transparent")
                 
                 fusedContentsG.append("rect")
                     .attr("class", "fused-contents-bg")
-                    .attr("stroke", "black")
-                    .attr("stroke-width", 0.1)
-                    .attr("fill", "none");
+                    //.attr("stroke", "black")
+                    //.attr("stroke-width", 0.1)
+                    .attr("fill", "transparent");
 
                 //images and paths
                 startContentsG.append("path").attr("class", " start-path start-path1")
@@ -165,6 +165,8 @@ export default function spectrumComponent() {
                     .attr("fill", "none");
 
                 endContentsG.append("path").attr("class", "end-path")
+
+                fusedContentsG.append("image")
 
             }
 
@@ -226,7 +228,6 @@ export default function spectrumComponent() {
                 endPointGs.select("rect.bg")
                     .attr("width", endPointWidth)
                     .attr("height", endPointHeight)
-                    .attr("opacity", 0.3)
 
                 const fusedG = contentsG.select("g.fused")
                     .attr("transform", `translate(${(contentsWidth - fusedWidth)/2}, ${(contentsHeight - fusedHeight)})`);
@@ -263,6 +264,11 @@ export default function spectrumComponent() {
                 startContentsG.select("path.start-path1").attr("d", eyePathD1)
                 startContentsG.select("path.start-path2").attr("d", eyePathD2)
                 endContentsG.select("path.end-path").attr("d", dataPathD).attr("transform", dataPathTransform)
+
+                fusedContentsG.select("image")
+                    .attr("xlink:href", "website/icons/confused.png")
+                    .attr("transform", `translate(-33,-8) scale(0.035)`)
+                    .attr("opacity", 0.9)
 
 
 

@@ -17,7 +17,7 @@ const News = () => {
       <Container>
         <SectionHeading>
           <Heading as="h2" content="Start to tell data stories to your players" />
-          <Text content="Do you think of yourself as a storyteller? The true power of data comes when it is weaved into players' journeys." />
+          <Text content="Do you think of yourself as a storyteller? Switchplay brings out the true power of data by enabling you to weave it into players' journeys." />
         </SectionHeading>
         {/**<NewsWrapper>
           {data.posts.map((post) => (

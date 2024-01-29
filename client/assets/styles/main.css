@@ -8,6 +8,8 @@ body{
   padding:0;
   -webkit-user-select: none;
   user-select: none;
+  background:#FF825C;
+  width: 100%;
   /*-webkit-text-size-adjust: none;*/
 }
 /*MAIN-BURGER-MENU------------------------------*/

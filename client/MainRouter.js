@@ -34,34 +34,29 @@ import {
   ContentWrapper,
 } from './templates/containers/AgencyModern/agencyModern.style';
 
-//@todo - trigger an auto scroll to the right id, after page has loaded. 
-//It can be a prop for HomePage, and done in a useEffect with an empty deparray so it only does it on first render
 const navBarDataForOtherPages = {
   ...data,
   leftMenuItems:data.leftMenuItems.map(it => ({ ...it, isPage:true, path:"/" }))
-  /*
-  //if we just want home link
-  leftMenuItems:[{
-    ...data.leftMenuItems.find(it => it.path === "#home"),
-    isPage:true, 
-    path:"/" 
-  }]
-  */
 }
 
 const useStyles = makeStyles(theme => ({
   app:{
     width:"100%",
-    background:"#FF825C"
+    minHeight:"100vh",
+    background:props => props.appBg
   }
 }))
 
+
+//next - replace 2nd slide of animation, and just ut the rhs stuff in and around the chatracters in slide 1
+//so users dont get confused thinking that its actually the view
 const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, history }) => {
   //load user if page is refreshed. MainRouter is under the store so can 
   //trigger re-render once loaded
-  const classes = useStyles() 
+ 
+  const styleProps = { appBg: history.location.pathname === "/" ? "#FF825C" : "#f0ded5" }
+  const classes = useStyles(styleProps);
   const jwt = auth.isAuthenticated();
-
   //480 - portrait phone, 768 - tablets,992 - laptop, 1200 - desktop or large laptop
   const phoneMaxWidth = 480;
   const tabletMaxWidth = 1024; //ipad air

@@ -30,7 +30,7 @@ const Customer = ({ screen }) => {
         .call(spectrum
             .width(spectrumWidth)
             .height(spectrumHeight)
-            .margin({ left: spectrumWidth * 0.05, right:spectrumWidth * 0.25, top: spectrumHeight * 0.25, bottom: spectrumHeight * 0.1 }))
+            .margin({ left: spectrumWidth * 0.1, right:spectrumWidth * 0.25, top: spectrumHeight * 0.25, bottom: spectrumHeight * 0.1 }))
         
 }, [spectrumWidth, spectrumHeight])
 
@@ -49,7 +49,7 @@ const Customer = ({ screen }) => {
               as="h2"
               content="Use data with confidence and purpose"
             />
-            <Text content="Should you trust your 'coaches eye' more than data? These two ways need to join up, and the key is great collaboration between analysts and coaches." />
+            <Text content="Should you trust your 'coaches eye' more than data? Switchplay helps you find the balance through great collaboration between your analysts and coaches." />
             {/**<Link className="explore" href="#">
               Explore more <Icon icon={chevronRight} />
             </Link>*/}

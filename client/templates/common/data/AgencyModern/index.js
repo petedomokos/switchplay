@@ -130,20 +130,26 @@ const data = {
     {
       id: 1,
       icon: serviceIcon1,
+      key:"thinking",
       title: 'Reflective Thinking',
-      description: `?????.`,
+      description: `icon above`,
+      imageTransform:"translate(0px,7px) scale(1.5)"
     },
     {
       id: 2,
       icon: serviceIcon2,
-      title: 'Communicating',
-      description: `A day to day report about your ongoing business for proper understanding.`,
+      key:"communication",
+      title: 'Proactive Communication',
+      description: `icon above`,
+      imageTransform:"scale(1.1)"
     },
     {
       id: 3,
       icon: serviceIcon3,
+      key:"accountability",
       title: 'Being Accountable',
-      description: `Proper Content Management is important to find out the real clients for your agencies.`,
+      description: `icon above`,
+      imageTransform:"scale(1)"
     },
   ],
   accordion: [

@@ -66,7 +66,66 @@ export const SectionHeader = styled.header`
   }
 `;
 
+
 export const ServiceWrapper = styled.div`
+  display: flex;
+  @media only screen and (max-width: 480px) {
+    flex-direction:column;
+  }
+  @media only screen and (min-width: 481px) and (max-width: 768px) {
+    transform:scale(0.5);
+  }
+  justify-content:center;
+  align-items:center;
+    h4 {
+      margin: 0 0 14px;
+      font-family: 'DM Sans';
+      font-weight: 700;
+      font-size: 18px;
+      line-height: 30px;
+      @media only screen and (max-width: 1440px) {
+        margin: 0 0 5px;
+      }
+      @media only screen and (max-width: 1360px) {
+        font-size: 18px;
+      }
+      @media only screen and (max-width: 768px) {
+        text-align: center;
+      }
+      @media only screen and (max-width: 480px) {
+        text-align: center;
+      }
+    }
+
+    p {
+      margin: 0;
+      font-family: 'DM Sans';
+      font-size: 15px;
+      line-height: 30px;
+      color: ${themeGet('colors.text', '#294859')};
+      @media only screen and (max-width: 1440px) {
+        font-size: 16px;
+      }
+      @media only screen and (max-width: 1360px) {
+        font-size: 15px;
+        line-height: 26px;
+      }
+      @media only screen and (max-width: 768px) {
+        text-align: center;
+      }
+      @media only screen and (max-width: 480px) {
+        text-align: center;
+      }
+    }
+  }
+`;
+
+export default SectionWrapper;
+
+/*
+
+export const ServiceWrapper = styled.div`
+  border: solid;
   gap: 40px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -136,5 +195,4 @@ export const ServiceWrapper = styled.div`
     }
   }
 `;
-
-export default SectionWrapper;
+*/
