@@ -5,21 +5,50 @@ import Quote from './Quote';
 
 const useStyles = makeStyles(theme => ({
     peopleWithQuotesRoot: {
-        margin:"50px 0px",
-        width:"100%",
-        height:"300px",
+        //border:"solid",
+        margin:"50px auto",
+        width:"85vw",
+        maxWidth:"85vw",
         display:"flex",
         justifyContent:"center",
-        alignItems:"center"
+        alignItems:"center",
+        flexWrap:"wrap"
     },
     people:{
         width:"40%",
+        minWidth:"300px",
         height:"90%",
         margin:"20px",
-        overflow:"hidden"
+        display:"flex",
+        flexDirection:"column",
+        justifyContent:"center",
+        overflow:"hidden",
     },
     quotes:{
+        //color:"red",
+        [theme.breakpoints.only('sm')]: {
+            display:"none"
+        },
+        //border:"solid",
         width:"40%",
+        minWidth:"260px",
+        height:"90%",
+        margin:"10px",
+        display:"flex",
+        flexDirection:"column",
+        justifyContent:"center",
+    },
+    widerQuotes:{
+        //color:"blue",
+        [theme.breakpoints.down('xs')]: {
+            display:"none"
+        },
+        [theme.breakpoints.up('md')]: {
+            display:"none"
+        },
+        //border:"solid",
+        width:"80%",
+        minWidth:"300px",
         height:"90%",
         margin:"20px",
         display:"flex",
@@ -40,6 +69,11 @@ const PeopleWithQuotes = ({ data }) =>{
                <img src={url} />
            </div>
            <div className={classes.quotes}>
+                {quotes.map((q,i) => 
+                    <Quote data={q} key={`${key}-${i}`} />
+                )}
+           </div>
+           <div className={classes.widerQuotes}>
                 {quotes.map((q,i) => 
                     <Quote data={q} key={`${key}-${i}`} />
                 )}

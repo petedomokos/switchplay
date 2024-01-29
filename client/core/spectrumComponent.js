@@ -56,9 +56,9 @@ export default function spectrumComponent() {
 
     }
 
-    let DEFAULT_STYLES = {
+    let styles = {
+        wvaeColor:"black"
     }
-    let _styles = () => DEFAULT_STYLES;
 
     //state
 
@@ -104,12 +104,13 @@ export default function spectrumComponent() {
 
                 const spectrumLineG = contentsG.append("g").attr("class", "spectrum-line")
 
+                console.log("styles", styles)
                 spectrumLineG.append("path")
                     .attr("class", "spectrum-line")
                     .attr("fill", "none")
                     .attr("stroke-width", 0.7)
                     .attr("stroke-dasharray", 3)
-                    .attr("stroke", "blue");
+                    .attr("stroke", styles.waveColor);
 
                 const startG = spectrumLineG.append("g")
                     .attr("class", "start end-point");
@@ -313,6 +314,11 @@ export default function spectrumComponent() {
     spectrum.margin = function (value) {
         if (!arguments.length) { return margin; }
         margin = { ...margin, ...value };
+        return spectrum;
+    };
+    spectrum.styles = function (value) {
+        if (!arguments.length) { return styles; }
+        styles = { ...styles, ...value };
         return spectrum;
     };
 

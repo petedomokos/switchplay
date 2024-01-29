@@ -16,12 +16,14 @@ import SectionWrapper, {
   Illustration,
 } from './customer.style';
 import illustration from '../../../common/assets/image/agencyModern/customer.png';
+import colors from "../../../common/theme/agencyModern/colors";
 
 const Customer = ({ screen }) => {
+  console.log("Cust", screen)
   const [spectrum, setSpectrum] = useState(() => spectrumComponent());
   const spectrumContainerRef = useRef(null);
 
-  const spectrumWidth = screen.width * 0.4;
+  const spectrumWidth = screen.isSmall ? screen.width * 0.8 : screen.width * 0.4;
   const spectrumHeight = 300;
 
   useEffect(() => {
@@ -30,7 +32,13 @@ const Customer = ({ screen }) => {
         .call(spectrum
             .width(spectrumWidth)
             .height(spectrumHeight)
-            .margin({ left: spectrumWidth * 0.1, right:spectrumWidth * 0.25, top: spectrumHeight * 0.25, bottom: spectrumHeight * 0.1 }))
+            .margin({ 
+              left: spectrumWidth * 0.1, right:spectrumWidth * (screen.isSmall ? 0.1 : 0.25), 
+              top: spectrumHeight * 0.25, bottom: spectrumHeight * 0.1 
+            })
+            .styles({
+              waveColor:colors.linkColor
+            }))
         
 }, [spectrumWidth, spectrumHeight])
 
@@ -38,11 +46,13 @@ const Customer = ({ screen }) => {
     <SectionWrapper id="customer">
       <Container>
         <Section>
-          <div style={{
-            width:`${spectrumWidth}px`, height:`${spectrumHeight}px`, background:"none", padding:"0", display:"flex", alignItems:"center", justifyContent:"center"
-          }}>
-              <svg ref={spectrumContainerRef}></svg>
-          </div>
+          {!screen.isSmall &&
+            <div style={{ margin:"auto", /*border:"solid",*/ width:`${spectrumWidth}px`, height:`${spectrumHeight}px`, 
+                background:"none", padding:"0", display:"flex", alignItems:"center", justifyContent:"center"
+            }}>
+                <svg ref={spectrumContainerRef}></svg>
+            </div>
+          }
           {/**<Illustration><img src="website/logo.png" /></Illustration>*/}
           <Content>
             <Heading
@@ -54,6 +64,13 @@ const Customer = ({ screen }) => {
               Explore more <Icon icon={chevronRight} />
             </Link>*/}
           </Content>
+          {screen.isSmall &&
+            <div style={{ margin:"auto", /*border:"solid",*/ width:`${spectrumWidth}px`, height:`${spectrumHeight}px`, 
+                background:"none", padding:"0", display:"flex", alignItems:"center", justifyContent:"center"
+            }}>
+                <svg ref={spectrumContainerRef}></svg>
+            </div>
+          }
         </Section>
       </Container>
     </SectionWrapper>

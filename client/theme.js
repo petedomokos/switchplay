@@ -21,6 +21,15 @@ const theme = createMuiTheme({
       openTitle: '#3f4771',
       protectedTitle: pink['400'],
       type: 'light'
+    },
+    breakpoints: {
+      values: {
+        xs: 0,
+        sm: 575, //600 - tablet
+        md: 768, //900
+        lg: 990, //1200
+        xl: 1440, //1536
+      },
     }
   })
 

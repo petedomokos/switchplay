@@ -112,3 +112,51 @@ Note: Beware of modifying this element as it can break the animations - you shou
   background-color: #5a564c;
   transition: all 400ms;
 }
+
+
+.xs-down {
+  @media only screen and (min-width: 576px) {
+    display: none;
+  }
+}
+.sm-down {
+  @media only screen and (min-width: 769px) {
+    display: none;
+  }
+}
+.md-down {
+  @media only screen and (min-width: 991px) {
+    display: none;
+  }
+}
+.lg-down {
+  @media only screen and (min-width: 1441px) {
+    display: none;
+  }
+}
+.sm-up {
+  @media only screen and (max-width: 575px) {
+    display: none;
+  }
+}
+.md-up {
+  @media only screen and (max-width: 768px) {
+    display: none;
+  }
+}
+.lg-up {
+  @media only screen and (max-width: 990px) {
+    display: none;
+  }
+}
+.xl-up {
+  @media only screen and (max-width: 1440px) {
+    display: none;
+  }
+}
+.sm-to-md {
+  @media only screen and (min-width: 576px)  and (max-width: 769px){
+    display: none;
+  }
+}
+

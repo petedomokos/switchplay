@@ -73,7 +73,7 @@ export const ServiceWrapper = styled.div`
     flex-direction:column;
   }
   @media only screen and (min-width: 481px) and (max-width: 768px) {
-    transform:scale(0.5);
+    transform:scale(0.6);
   }
   justify-content:center;
   align-items:center;

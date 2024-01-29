@@ -29,7 +29,8 @@ export const Content = styled.div`
     width: 50%;
   }
   @media only screen and (max-width: 768px) {
-    width: 100%;
+    width: 80vw;
+    margin: auto;
   }
   h2 {
     font-weight: 700;

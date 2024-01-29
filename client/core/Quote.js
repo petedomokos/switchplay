@@ -4,10 +4,10 @@ import { makeStyles } from '@material-ui/core/styles'
 const useStyles = makeStyles(theme => ({
     quoteRoot: {
         width:"90%",
-        height:"60px",
-        margin:"10px",
-        background:"white",
-        fontSize:"14px",
+        margin:"15px 10px",
+        background:"transparent",
+        fontSize:"16px",
+        fontStyle:"italic",
         display:"flex",
         justifyContent:"center",
         alignItems:"center",

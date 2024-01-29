@@ -31,7 +31,18 @@ const Banner = () => {
         <BannerContent>
           <Heading
             as="h1"
+            className="md-up"
             content="The development tool that puts people first"
+          />
+          <Heading
+            as="h1"
+            className="sm-down"
+            content="The development tool that"
+          />
+          <Heading
+            as="h1"
+            className="sm-down"
+            content="puts people first"
           />
           <Text
             className="banner-caption"
@@ -51,6 +62,14 @@ const Banner = () => {
             <Button title="Get A Demo" type="submit" />
           </Subscribe>
         </BannerContent>
+        <div className="sm-down" style ={{ width: "90%", height:"380px", /*border:"solid", */
+              display:"flex", alignItems:"flex-start", justifyContent:"center", margin:"auto" }}>
+          <div style={{ /*border:'solid'*/ width: "260px", height: "280px", 
+                  display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden" }}>
+            <img src="website/heroImg.png" 
+              style={{ transform:"translate(0px, 20px) scale(0.9)", transformOrigin: "center" }} />
+          </div>
+        </div>
       </Container>
     </BannerWrapper>
   );
