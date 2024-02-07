@@ -14,6 +14,9 @@ import BannerWrapper, {
   ImageGroup,
 } from './banner.style';
 
+import { grey10 } from "../../../../core/cards/constants"
+import SVGImage from "../../../../core/SVGImage";
+
 //import paypal from '../../../common/assets/image/agencyModern/paypal.png';
 //import google from '../../../common/assets/image/agencyModern/google.png';
 //import dropbox from '../../../common/assets/image/agencyModern/dropbox.png';
@@ -22,14 +25,37 @@ const paypal = "";
 const google = "";
 const dropbox = "";
 
+const compatibleItemSt = { margin:"5px 5px 10px", width:"110px", fontSize:"14px", color:grey10(5) }
 // &amp; 
 
+const mainImgInfo = {
+  url:"website/heroImg.png",
+  imgWidth:900, 
+  imgHeight:900, 
+  imgTransX:0, 
+  imgTransY:0
+}
+
 //old...Great football development comes down to relationships, communication, learning & growth,( & details?)
-const Banner = () => {
+const Banner = ({screen}) => {
+  const { url, imgWidth, imgHeight, imgTransX=0, imgTransY=0 } = mainImgInfo;
+  const requiredImgAspectRatio = 0.7;
+  const requiredImgWidth = screen.width * (screen.orientation === "landscape" ?  0.4 : 0.8);
+  const requiredImgDimns = { width: requiredImgWidth, height: requiredImgWidth * requiredImgAspectRatio };
+  const imgScale = requiredImgWidth / imgWidth;
+  const imgTransform = `translate(${imgTransX},${imgTransY}) scale(${imgScale})`;
+
+  //md-down
+  //next - remove all styleing and start again - it shouldnt be this hard!
+
   return (
     <BannerWrapper id="home">
       <Container>
         <BannerContent>
+          <div className="md-down main-img-small">
+            <SVGImage image={{ url, transform:imgTransform }} dimns={requiredImgDimns}
+                    styles={{ borderColour:"#f0ded5" }} imgKey="main-ss"/>
+          </div>
           <Heading
             as="h1"
             className="md-up"
@@ -37,12 +63,17 @@ const Banner = () => {
           />
           <Heading
             as="h1"
-            className="sm-down"
+            className="sm-down-land"
+            content="The development tool that puts people first"
+          />
+          <Heading
+            as="h1"
+            className="sm-down-port"
             content="The development tool that"
           />
           <Heading
             as="h1"
-            className="sm-down"
+            className="sm-down-port"
             content="puts people first"
           />
           <Text
@@ -59,25 +90,21 @@ const Banner = () => {
             <Button title="Get A Demo" type="submit" />
           </Subscribe>
         </BannerContent>
-        <div className="md-down" style ={{ width: "90%", height:"380px", /*border:"solid",*/ margin:"auto" }}>
-          <div style={{ /*border:'solid'*/ width: "260px", height: "280px", 
-                  display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden", margin:"auto" }}>
-            <img src="website/heroImg.png" 
-              style={{ transform:"translate(0px, 20px) scale(0.9)", transformOrigin: "center" }} />
-          </div>
-        </div>
-        <div style={{ }}>
-          <div style={{ height:"30px", fontSize:"16px" }}>Works well with</div>
-          <div style={{ width:"90%", maxWidth:"900px", margin:"auto", display:"flex", justifyContent:"space-around", flexWrap:"wrap",
-              fontSize:"14px", color:"grey" }}>
-            <span style={{ margin:"5px 5px 10px", minWidth:"90px", textAlign:"center" }}>Kitman Labs</span>
-            <span style={{ margin:"5px 5px 10px", minWidth:"60px", textAlign:"center" }}>Hudl</span>
-            <span style={{ margin:"5px 5px 10px", minWidth:"120px", textAlign:"center" }}>Session Planner</span>
-            <span style={{ margin:"5px 5px 10px", minWidth:"60px", textAlign:"center" }}>Excel</span>
-            <span style={{ margin:"5px 5px 10px", minWidth:"60px", textAlign:"center" }}>Word</span>
-            <span style={{ margin:"5px 5px 10px", minWidth:"60px", textAlign:"center" }}>PDF</span>
-            <span style={{ margin:"5px 5px 10px", minWidth:"60px", textAlign:"center" }}>GDrive</span>
-            <span style={{ margin:"5px 5px 10px", minWidth:"60px", textAlign:"center" }}>Databases</span>
+        <div className="compatible-items-area">
+          <div style={{ height:"30px", fontSize:"16px", color:grey10(8) }}>Works well with</div>
+          <div className="compatible-items-list">
+            <div style={{ display:"flex", justifyContent:"space-around", flexWrap:"wrap" }}>
+              <span style={compatibleItemSt}>Kitman Labs</span>
+              <span style={compatibleItemSt}>Hudl</span>
+              <span style={compatibleItemSt}>Session Planner</span>
+              <span style={compatibleItemSt}>PDF</span>
+            </div>
+            <div style={{ display:"flex", justifyContent:"space-around", flexWrap:"wrap" }}>
+              <span style={compatibleItemSt}>Excel</span>
+              <span style={compatibleItemSt}>Word</span>
+              <span style={compatibleItemSt}>GDrive</span>
+              <span style={compatibleItemSt}>SQL</span>
+            </div>
           </div>
         </div>
       </Container>

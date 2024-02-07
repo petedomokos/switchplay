@@ -124,6 +124,16 @@ Note: Beware of modifying this element as it can break the animations - you shou
     display: none;
   }
 }
+.sm-down-port {
+  @media only screen and ((orientation:landscape ) or (min-width: 769px)) {
+    display: none;
+  }
+}
+.sm-down-land {
+  @media only screen and ((orientation: portrait) or (min-width: 769px)) {
+    display: none;
+  }
+}
 .md-down {
   @media only screen and (min-width: 991px) {
     display: none;

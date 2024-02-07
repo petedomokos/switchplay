@@ -5,6 +5,8 @@ import { themeGet } from '@styled-system/theme-get';
 import bannerBg from '../../../common/assets/image/agencyModern/banner2.png';
 
 const BannerWrapper = styled.div`
+  border: solid;
+  border-color: #f0ded5;
   background-image: url(${bannerBg?.src});
   background-color: #f0ded5;
   background-size: 100%;
@@ -20,43 +22,61 @@ const BannerWrapper = styled.div`
     background-image: none;
     min-height: auto;
   }
+  .compatible-items-area {
+    margin:auto;
+    margin-top:210px;
+    padding-bottom:60px;
+    width: 90%;
+    @media only screen and (max-width: 1400px) {
+      margin-top:230px;
+    }
+    @media only screen and (max-width: 990px) {
+      margin-top:60px;
+    }
+  }
+  .compatible-items-list {
+
+  }
 `;
 
 export const BannerContent = styled.div`  
   max-width: 40%;
   width: 100%;
-  padding-top: 150px;
-  padding-bottom: 160px;
-  padding-left: 5vw;
+  display: flex;
+  flex-direction: column;
+  justify-content:space-around;
+  height:360px;
+  margin-top:calc(60px + (100vh - 60px - 400px)/2);
   @media only screen and (max-width: 1600px) {
     max-width: 40%;
-    padding-top: 150px;
-    padding-bottom: 100px;
     border-color: red;
+    padding-left:2.5vw;
+    padding-right:2.5vw;
   }
   @media only screen and (max-width: 1400px) {
-    padding-top: 150px;
-    padding-bottom: 100px;
     max-width: 46%;
-    padding-left: 5vw;
     border-color: yellow;
   }
   @media only screen and (max-width: 990px) {
     max-width: 100%;
-    padding-left: 0;
+    justify-content:flex-start;
+    height:auto;
+    margin-top:80px;
     border-color: blue;
   }
   @media only screen and (max-width: 768px) {
-    padding-top: 120px;
-    padding-bottom: 90px;
-    padding-left: 0;
+    border-color: pink;
   }
   @media only screen and (max-width: 575px) {
-    padding-top: 120px;
-    padding-bottom: 70px;
-    padding-left: 0;
+    border-color: black;
+  }
+  .main-img-small {
+    margin:auto; 
+    margin-top:0px;
+    margin-bottom:20px; 
   }
   h1 {
+    border-color: red;
     font-size: 54px;
     line-height: 1.6;
     font-weight: 700;
@@ -90,6 +110,10 @@ export const BannerContent = styled.div`
     @media only screen and (max-width: 575px) {
       font-size: 23px;
       margin-bottom: 15px;
+    }
+    @media only screen and (orientation: landscape) and (max-width: 768px) {m
+      font-size: 23px;
+      margin-bottom: 30px;
     }
   }
   .banner-caption {
@@ -166,7 +190,7 @@ export const Subscribe = styled.div`
         border-color: #ff825c;
       }
 
-      @media only screen and (max-width: 1280px) {
+      @media only screen and (max-width: 1440px) {
         min-height: 50px;
       }
     }

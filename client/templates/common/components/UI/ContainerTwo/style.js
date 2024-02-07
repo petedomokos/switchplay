@@ -23,12 +23,12 @@ const ContainerWrapper = styled.div`
     max-width: 850px;
     width: 100%;
   }
-  @media (min-width: 992px) {
+  @media (min-width: 990px) {
     max-width: 970px;
     width: 100%;
   }
 
-  @media (min-width: 1200px) {
+  @media (min-width: 990px) {
     max-width: ${(props) => props.width || '1170px'};
     padding: 0;
   }

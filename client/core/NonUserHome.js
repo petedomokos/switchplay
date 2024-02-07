@@ -151,7 +151,7 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
         {/**<img src="website/heroImg.png" 
         style={{ transform:"translate(0px, 0px) scale(0.65)", transformOrigin: "top left" }} />*/}
       </div>
-      <Banner/> 
+      <Banner screen={screen} /> 
       {/**<div className={classes.heroImageContainer}>
         <img src="website/heroImg.png" 
           style={{ transform:"translate(30px, 0px) scale(0.65)", transformOrigin: "top left" }} />
