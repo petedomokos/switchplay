@@ -11,20 +11,20 @@ const nillOpp = () => 0;
 const squiggleD = `M 0 0, 5 5, -3 9, -7 14, 9 17, -5 22, 5 28`;
 
 const heroes = [
-    { key:"coach", label:"Coach", imgTransform:{ x: 20, y: 5, k:0.22 }, imgTransformSmall:{ x: 18, y: 8, k:0.1 } },
-    { key:"analyst", label:"Analyst", imgTransform:{ x: 25, y: 5, k:0.2 }, imgTransformSmall:{ x: 20, y: 7, k:0.1 } },
-    { key:"player", label:"Player", imgTransform:{ x: -7, y: -25, k:0.43 }, imgTransformSmall:{ x: 20, y: 5, k:0.1 } },
-    { key:"manager", label:"Manager", imgTransform:{ x: 20, y: 5, k:0.22 }, imgTransformSmall:{ x: 20, y: 10, k:0.1 } },
-    { key:"parent", label:"Parent", imgTransform:{ x: 20, y: 5, k:0.2 }, imgTransformSmall:{ x: 20, y: 5, k:0.1 } },
+    { key:"coach", label:"Coach", imgTransform:{ x: -86, y: -20, k:0.21 }, imgTransformSmall:{ x: 18, y: 8, k:0.1 } },
+    { key:"analyst", label:"Analyst", imgTransform:{ x: -17, y: -13, k:0.12 }, imgTransformSmall:{ x: 20, y: 7, k:0.1 } },
+    { key:"player", label:"Player", imgTransform:{ x: -100, y: -57, k:0.3 }, imgTransformSmall:{ x: 20, y: 5, k:0.1 } },
+    { key:"manager", label:"Manager", imgTransform:{ x: -143, y: -40, k:0.3 }, imgTransformSmall:{ x: 20, y: 10, k:0.1 } },
+    { key:"parent", label:"Parent", imgTransform:{ x: -50, y: -33, k:0.32 }, imgTransformSmall:{ x: 20, y: 5, k:0.1 } },
 ]
 
 const characters = [
     { key:"kitman", label:"IT Systems" }, //need IDP admin in here too
     { key:"data", label:"Data" },
+    { key:"video", label:"Video" },
     { key:"goals", label:"Goals" },
     { key:"reviews", label:"Reviews" },
     { key:"reports", label:"Reports" },
-    { key:"comms", label:"Communication" }
 ]
 
 const waves = [

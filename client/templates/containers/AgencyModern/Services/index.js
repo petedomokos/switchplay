@@ -17,7 +17,7 @@ const Services = () => {
         
           <SectionHeader>
             <Heading content="Get more of your players thinking like pros" />
-            <Text content="Think of the most proactive player in your squad. Switchplay engages and inspires all players to become like that player." />
+            <Text content="Think of the most proactive player in your squad. Switchplay engages and inspires all players to become like them." />
           </SectionHeader>
        
         <ServiceWrapper>

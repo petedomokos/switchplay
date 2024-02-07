@@ -24,6 +24,7 @@ const dropbox = "";
 
 // &amp; 
 
+//old...Great football development comes down to relationships, communication, learning & growth,( & details?)
 const Banner = () => {
   return (
     <BannerWrapper id="home">
@@ -46,11 +47,7 @@ const Banner = () => {
           />
           <Text
             className="banner-caption"
-            content="Great football development comes down to relationships, growth, learning, communication & details."
-          />
-          <Text
-            className="banner-caption"
-            content="Switchplay helps you to embed these at your academy in your own way to achieve your vision."
+            content="Get your players thinking and acting like pros. Manage your whole team's communication and information in one place. Use data effectively."
           />
           <Subscribe>
             <Input
@@ -62,12 +59,25 @@ const Banner = () => {
             <Button title="Get A Demo" type="submit" />
           </Subscribe>
         </BannerContent>
-        <div className="sm-down" style ={{ width: "90%", height:"380px", /*border:"solid", */
-              display:"flex", alignItems:"flex-start", justifyContent:"center", margin:"auto" }}>
+        <div className="md-down" style ={{ width: "90%", height:"380px", /*border:"solid",*/ margin:"auto" }}>
           <div style={{ /*border:'solid'*/ width: "260px", height: "280px", 
-                  display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden" }}>
+                  display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden", margin:"auto" }}>
             <img src="website/heroImg.png" 
               style={{ transform:"translate(0px, 20px) scale(0.9)", transformOrigin: "center" }} />
+          </div>
+        </div>
+        <div style={{ }}>
+          <div style={{ height:"30px", fontSize:"16px" }}>Works well with</div>
+          <div style={{ width:"90%", maxWidth:"900px", margin:"auto", display:"flex", justifyContent:"space-around", flexWrap:"wrap",
+              fontSize:"14px", color:"grey" }}>
+            <span style={{ margin:"5px 5px 10px", minWidth:"90px", textAlign:"center" }}>Kitman Labs</span>
+            <span style={{ margin:"5px 5px 10px", minWidth:"60px", textAlign:"center" }}>Hudl</span>
+            <span style={{ margin:"5px 5px 10px", minWidth:"120px", textAlign:"center" }}>Session Planner</span>
+            <span style={{ margin:"5px 5px 10px", minWidth:"60px", textAlign:"center" }}>Excel</span>
+            <span style={{ margin:"5px 5px 10px", minWidth:"60px", textAlign:"center" }}>Word</span>
+            <span style={{ margin:"5px 5px 10px", minWidth:"60px", textAlign:"center" }}>PDF</span>
+            <span style={{ margin:"5px 5px 10px", minWidth:"60px", textAlign:"center" }}>GDrive</span>
+            <span style={{ margin:"5px 5px 10px", minWidth:"60px", textAlign:"center" }}>Databases</span>
           </div>
         </div>
       </Container>

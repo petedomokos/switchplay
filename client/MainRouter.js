@@ -43,8 +43,9 @@ const navBarDataForOtherPages = {
 const useStyles = makeStyles(theme => ({
   app:{
     width:"100%",
+    height:"100vh",
     minHeight:"100vh",
-    background:props => props.appBg
+    background:props => props.appBg,
   }
 }))
 
@@ -66,21 +67,14 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, history }) =>
   const q2 = useMediaQuery('(max-width:768px)');
   const q3 = useMediaQuery('(max-width:990px)');
   const q4 = useMediaQuery('(max-width:1440px)');
-  console.log("q1 2 3 4", q1, q2, q3, q4)
   let size;
-  if(q1){ 
-    console.log("set size to xs")
-    size = "xs"; }
+  if(q1){ size = "xs"; }
   else if(q2){ size = "sm"; }
   else if(q3){ size = "md"; }
   else if(q4){ size = "lg"; }
-  else { 
-    console.log("set size to xl")
-    size = "xl";}
+  else { size = "xl";}
 
   const getScreenInfo = () => {
-    
-    console.log("size", size)
     const orientation = window.innerWidth < window.innerHeight ? "portrait" : "landscape";
     const screen =  { 
       width: window.innerWidth, 
@@ -89,6 +83,8 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, history }) =>
       size,
       isLarge:["lg", "xl"].includes(size),
       isSmall:["sm", "xs"].includes(size),
+      isMediumDown:["md", "sm", "xs"].includes(size),
+      isMediumUp:["md", "lg", "xl"].includes(size)
     }
     window._screen = screen;
     //note - we still save in store, as ReactNative wont hve window

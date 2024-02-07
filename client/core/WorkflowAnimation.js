@@ -58,7 +58,7 @@ const WorkflowAnimation = ({ dimns }) =>{
 
     useEffect(() => {
         const t = d3.interval(() => {
-        updateSceneState();
+        //updateSceneState();
         }, 4000);
 
         return () => {

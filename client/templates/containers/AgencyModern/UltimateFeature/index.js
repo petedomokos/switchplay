@@ -22,7 +22,7 @@ const UltimateFeature = ({ animationDimns }) => {
       <Container>
         <SectionTitle>
           <Heading content="Make your data &amp; information flow smoother" />
-          <Text content="Switchplay is one view for all sources of info, centred around the player" />
+          <Text content="One user-friendly view for all sources of info, centred around the player" />
         </SectionTitle>
         <div style={{ margin:`50px 0px 0px calc(50% - ${animationDimns.width/2}px)`, 
                       width:`${animationDimns.width}px`, height:`${animationDimns.height}px` }} >
@@ -37,9 +37,9 @@ const UltimateFeature = ({ animationDimns }) => {
               description={
                 <React.Fragment>
                   <Text content={feature.desc} />
-                  <Link href="#" className="learn__more">
+                  {/**<Link href="#" className="learn__more">
                     Learn More <Icon icon={chevronRight} />
-                  </Link>
+                  </Link>*/}
                 </React.Fragment>
               }
               className="ultimateFeature"

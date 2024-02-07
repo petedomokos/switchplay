@@ -31,6 +31,7 @@ const Navbar = ({ data, history }) => {
     setMobileMenu(false);
   };
 
+  //<div style={{ background:"red", width:"100%", height:"50px"}}>test</div>
   return (
     <NavbarWrapper className="agencyModern-navbar navbar">
       <Container>

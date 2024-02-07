@@ -15,22 +15,66 @@ export const Section = styled.div`
   display: flex;
   align-items: flex-start;
 
-  @media only screen and (max-width: 768px) {
+  @media only screen and (max-width: 990px) {
     flex-direction: column;
+    align-items: center;
+  }
+  .visual-container {
+    border-color: red;
+    margin: auto;
+    display: flex; 
+    alignItems: center; 
+    justify-content: center;
+  }
+  .img-container {
+    border-color: yellow;
+    width: 70%;
+    height: 75%;
+    display:flex;
+    justify-content:center;
+    align-items:flex-end;
+
+    img {
+      object-fit: contain;
+      width:300px;
+      @media only screen and (min-width: 1024px) and (max-width: 1366px) {
+      }
+      @media only screen and (max-width: 1024px) {
+      }
+    }
+  
+
+  }
+  .left-img-container {
+    margin-right:30%;
+    align-self:flex-start;
+  }
+  .right-img-container {
+    margin-left:30%;
+    align-self:flex-end;
+  }
+  .top-img-container {
+    align-self:center;
+  }
+  .bottom-img-container {
+    align-self:center;
   }
 `;
 
 export const Content = styled.div`
   width: 50%;
+  display: flex;
+  flex-direction: column;
   @media only screen and (min-width: 1024px) and (max-width: 1366px) {
     width: 50%;
   }
   @media only screen and (min-width: 768px) and (max-width: 1024px) {
     width: 50%;
   }
-  @media only screen and (max-width: 768px) {
+  @media only screen and (max-width: 990px) {
     width: 80vw;
     margin: auto;
+    align-items: center;
   }
   h2 {
     font-weight: 700;
@@ -57,6 +101,7 @@ export const Content = styled.div`
     }
     @media only screen and (min-width: 768px) and (max-width: 1024px) {
       line-height: 28px;
+      text-align: center;
     }
     @media only screen and (max-width: 768px) {
       line-height: 32px;

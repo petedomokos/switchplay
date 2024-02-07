@@ -88,7 +88,7 @@ export default function spectrumComponent() {
                     .attr("class", "spectrum-bg")
                     .attr("width", width)
                     .attr("height", height)
-                    //.attr("stroke", grey10(5))
+                    //.attr("stroke", "red")
                     //.attr("stroke-width", 1)
                     .attr("fill", "transparent");
 
@@ -99,12 +99,10 @@ export default function spectrumComponent() {
                 contentsG
                     .append("rect")
                         .attr("class", "spectrum-contents-bg")
-                        //.attr("stroke", "blue")
+                        //.attr("stroke", "yellow")
                         .attr("fill", "none");
 
                 const spectrumLineG = contentsG.append("g").attr("class", "spectrum-line")
-
-                console.log("styles", styles)
                 spectrumLineG.append("path")
                     .attr("class", "spectrum-line")
                     .attr("fill", "none")
@@ -178,7 +176,9 @@ export default function spectrumComponent() {
                 //RENDER
 
                 //Main gs and bgs
-                const containerElement = d3.select(this);
+                const containerElement = d3.select(this)
+                    .attr("width", width)
+                    .attr("height", height);
             
                 containerElement.select("rect.spectrum-bg")
                     .call(updateRectDimns, { 
@@ -260,15 +260,18 @@ export default function spectrumComponent() {
                     .attr("height", fusedContentsHeight)
 
                 //images and paths
-                //start
-                startContentsG.selectAll("path.start-path").attr("transform", "scale(2)")
+                //start and end points
+                const eyeTransform = contentsHeight < 200 ? "translate(0,0) scale(2)" : "translate(0,0) scale(2)"
+                const barsTransform = contentsHeight < 200 ? "translate(-10,25) scale(0.025)" : "translate(-33,-8) scale(0.035)"
+                startContentsG.selectAll("path.start-path").attr("transform", eyeTransform)
                 startContentsG.select("path.start-path1").attr("d", eyePathD1)
                 startContentsG.select("path.start-path2").attr("d", eyePathD2)
                 endContentsG.select("path.end-path").attr("d", dataPathD).attr("transform", dataPathTransform)
 
+                const fusedTransform = contentsHeight < 200 ? "translate(-10,25) scale(0.025)" : "translate(-33,-8) scale(0.035)"
                 fusedContentsG.select("image")
                     .attr("xlink:href", "website/icons/confused.png")
-                    .attr("transform", `translate(-33,-8) scale(0.035)`)
+                    .attr("transform", fusedTransform)
                     .attr("opacity", 0.9)
 
 

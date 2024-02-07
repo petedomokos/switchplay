@@ -18,6 +18,7 @@ const NavbarWrapper = styled.header`
     align-items: center;
   }
   .main-logo {
+    border-color:red;
     margin-right: 50px;
     max-width: 140px;
     img {
@@ -62,6 +63,10 @@ export const MenuArea = styled.nav`
         font-family: DM Sans;
         font-size: 16px;
         font-weight: 400;
+        @media only screen and (max-width: 990px) {
+          font-size: 12px;
+          font-weight: 400;
+        }
         transition: all 0.3s ease;
         &:hover {
           color: ${themeGet('colors.menu', '#FF825C')};

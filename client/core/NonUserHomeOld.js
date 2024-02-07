@@ -34,6 +34,7 @@ const urls = {
   "at the heart of it all."
 ]*/
 const heroStatementHeading = "The development tool that puts people first"
+/*
 const heroStatement = nrLines => {
   if(nrLines === 3){
     return [
@@ -50,6 +51,25 @@ const heroStatement = nrLines => {
     ]
   }
   return ["Great football development is about people, relationships, growth, communication & details. Switchplay helps you to embed these in your way to achieve your vision."]
+}
+*/
+
+const heroStatement = nrLines => {
+  if(nrLines === 3){
+    return [
+      "Great football development is about people & relationships, learning & growth, consistent communication",
+      "centred around your players",
+      "bringing together all the parts into one",
+    ]
+  }
+  if(nrLines === 2){
+    return [
+      "Get your players thinking and acting like pros. ",
+      "Manage all your communication & information with ease. Use data effectively.",
+      //"player development data, info & admin meaningful"
+    ]
+  }
+  return ["Get your players thinking and acting like pros. Manage your communication & information with ease. Use data effectively."]
 }
   
 

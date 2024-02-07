@@ -15,38 +15,46 @@ const BannerWrapper = styled.div`
   @media only screen and (max-width: 1440px) {
     min-height: 100vh;
   }
-  @media only screen and (max-width: 1099px) {
+  @media only screen and (max-width: 990px) {
     background: #f0ded5;
     background-image: none;
     min-height: auto;
   }
 `;
 
-export const BannerContent = styled.div`
+export const BannerContent = styled.div`  
   max-width: 40%;
   width: 100%;
-  padding-top: 170px;
+  padding-top: 150px;
   padding-bottom: 160px;
+  padding-left: 5vw;
   @media only screen and (max-width: 1600px) {
     max-width: 40%;
-    padding-top: 140px;
+    padding-top: 150px;
     padding-bottom: 100px;
+    border-color: red;
   }
   @media only screen and (max-width: 1400px) {
-    padding-top: 120px;
+    padding-top: 150px;
     padding-bottom: 100px;
     max-width: 46%;
+    padding-left: 5vw;
+    border-color: yellow;
   }
-  @media only screen and (max-width: 1099px) {
+  @media only screen and (max-width: 990px) {
     max-width: 100%;
+    padding-left: 0;
+    border-color: blue;
   }
   @media only screen and (max-width: 768px) {
     padding-top: 120px;
     padding-bottom: 90px;
+    padding-left: 0;
   }
-  @media only screen and (max-width: 480px) {
+  @media only screen and (max-width: 575px) {
     padding-top: 120px;
     padding-bottom: 70px;
+    padding-left: 0;
   }
   h1 {
     font-size: 54px;
@@ -63,7 +71,7 @@ export const BannerContent = styled.div`
       margin-bottom: 15px;
       letter-spacing: -1.5px;
     }
-    @media only screen and (max-width: 1024px) {
+    @media only screen and (max-width: 990px) {
       font-size: 28px;
       margin-bottom: 20px;
       text-align: center;
@@ -79,7 +87,7 @@ export const BannerContent = styled.div`
       margin: 0 auto;
       margin-bottom: 20px;
     }
-    @media only screen and (max-width: 480px) {
+    @media only screen and (max-width: 575px) {
       font-size: 23px;
       margin-bottom: 15px;
     }
@@ -94,7 +102,7 @@ export const BannerContent = styled.div`
       font-size: 16px;
       max-width: 85%;
     }
-    @media only screen and (max-width: 1024px) {
+    @media only screen and (max-width: 990px) {
       line-height: 33px;
       text-align: center;
       max-width: 550px;
@@ -107,7 +115,7 @@ export const BannerContent = styled.div`
       margin: 0 auto;
       margin-bottom: 40px;
     }
-    @media only screen and (max-width: 480px) {
+    @media only screen and (max-width: 575px) {
       margin-bottom: 33px;
     }
   }
@@ -120,7 +128,7 @@ export const Subscribe = styled.div`
     margin-top: 40px;
     width: 93%;
   }
-  @media only screen and (max-width: 1024px) {
+  @media only screen and (max-width: 990px) {
     margin: 0 auto;
     margin-top: 40px;
     max-width: 60%;
@@ -131,7 +139,7 @@ export const Subscribe = styled.div`
     max-width: 80%;
   }
 
-  @media only screen and (max-width: 480px) {
+  @media only screen and (max-width: 575px) {
     align-items: center;
     width: 100%;
     flex-direction: column;
@@ -142,7 +150,7 @@ export const Subscribe = styled.div`
   }
   .field-wrapper {
     margin-right: 15px;
-    @media only screen and (max-width: 480px) {
+    @media only screen and (max-width: 575px) {
       margin-right: 0px;
     }
     input {
@@ -174,43 +182,13 @@ export const Subscribe = styled.div`
   }
 `;
 
-export const SponsoredBy = styled.div`
-  display: flex;
-  align-items: center;
-  margin-top: 50px;
-  @media only screen and (max-width: 1440px) {
-    margin-top: 40px;
-    width: 93%;
-  }
-  @media only screen and (max-width: 1024px) {
-    justify-content: center;
-    width: 100%;
-  }
-  @media only screen and (max-width: 480px) {
-    align-items: flex-start;
-    flex-direction: column;
-    margin-top: 30px;
-  }
-
-  .sponsoredBy {
-    color: ${rgba('#566272', 0.6)};
-    font-size: 16px;
-    margin-right: 21px;
-    margin-bottom: 0;
-
-    @media only screen and (max-width: 480px) {
-      margin-bottom: 15px;
-    }
-  }
-`;
-
 export const ImageGroup = styled.div`
   gap: 23px;
   display: grid;
   align-items: center;
   grid-template-columns: repeat(3, auto);
   img {
-    @media only screen and (max-width: 480px) {
+    @media only screen and (max-width: 575px) {
       max-width: 27%;
     }
   }

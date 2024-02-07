@@ -17,58 +17,86 @@ import SectionWrapper, {
 } from './customer.style';
 import illustration from '../../../common/assets/image/agencyModern/customer.png';
 import colors from "../../../common/theme/agencyModern/colors";
+import SVGImage from "../../../../core/SVGImage";
 
-const Customer = ({ screen }) => {
-  console.log("Cust", screen)
+const Customer = ({ data, screen, imgLocation, minHeight }) => {
   const [spectrum, setSpectrum] = useState(() => spectrumComponent());
   const spectrumContainerRef = useRef(null);
 
-  const spectrumWidth = screen.isSmall ? screen.width * 0.8 : screen.width * 0.4;
-  const spectrumHeight = 300;
+  const alignVertically = imgLocation === "bottom" || imgLocation === "top";
+  const spectrumWidth = alignVertically ? d3.min([400, screen.width * 0.8]) : screen.width * 0.4;
+  const spectrumHeight = minHeight || (alignVertically ? 260 : 300);
+
+  const requiredImgAspectRatio = 0.6;
+  //@todo - pass the 70% and 75% trhough to stylesheet as props rather than hardcoding it here and there separately
+  const requiredImgWidth = spectrumWidth * 0.7;
+  const requiredImgDimns = { width: requiredImgWidth, height: requiredImgWidth * requiredImgAspectRatio }
+
+
+  const { key, visual } = data;
+  const { url, imgWidth, imgHeight, imgTransX=0, imgTransY=0 } = visual;
+
+  const imgScale = imgWidth ? requiredImgDimns.width / imgWidth : 1;
+  const transform = `translate(${imgTransX},${imgTransY}) scale(${imgScale})`;
 
   useEffect(() => {
+    if(data.visual?.type !== "d3"){ return; }
     d3.select(spectrumContainerRef.current)
         //.datum({})
         .call(spectrum
             .width(spectrumWidth)
             .height(spectrumHeight)
             .margin({ 
-              left: spectrumWidth * 0.1, right:spectrumWidth * (screen.isSmall ? 0.1 : 0.25), 
-              top: spectrumHeight * 0.25, bottom: spectrumHeight * 0.1 
+              left: alignVertically ? 0.15 * spectrumWidth : (imgLocation === "left" ? 0 : 0.3 * spectrumWidth), 
+              right:alignVertically ? 0.15 * spectrumWidth : (imgLocation === "right" ? 0 : 0.3 * spectrumWidth), 
+              top: alignVertically ? 0.15 * spectrumHeight : 0.3 * spectrumHeight, 
+              bottom: alignVertically ? 0.15 * spectrumHeight : 0, 
             })
             .styles({
               waveColor:colors.linkColor
             }))
         
-}, [spectrumWidth, spectrumHeight])
+  }, [spectrumWidth, spectrumHeight])
 
   return (
     <SectionWrapper id="customer">
       <Container>
         <Section>
-          {!screen.isSmall &&
-            <div style={{ margin:"auto", /*border:"solid",*/ width:`${spectrumWidth}px`, height:`${spectrumHeight}px`, 
-                background:"none", padding:"0", display:"flex", alignItems:"center", justifyContent:"center"
-            }}>
-                <svg ref={spectrumContainerRef}></svg>
+          {(imgLocation === "top" || imgLocation === "left") &&
+            <div className="visual-container" style={{ width:`${spectrumWidth}px`, height:`${spectrumHeight}px` }} >
+                {data.visual?.type === "img" ? 
+                  <div className={`img-container ${imgLocation}-img-container`} >
+                    {/**<img src={data.visual.url} />*/}
+                    <SVGImage image={{ url, transform }} dimns={requiredImgDimns} settings={{ withBorderGradient: false, borderWidth:10 }}
+                        styles={{ borderColour:"#FF825C"}} imgKey={key} />
+                  </div>
+                  :
+                  <svg ref={spectrumContainerRef}></svg>
+                }
             </div>
           }
           {/**<Illustration><img src="website/logo.png" /></Illustration>*/}
           <Content>
             <Heading
               as="h2"
-              content="Use data with confidence and purpose"
+              content={data.heading || ""}
             />
-            <Text content="Should you trust your 'coaches eye' more than data? Switchplay helps you find the balance through great collaboration between your analysts and coaches." />
+            <Text content={data.desc || ""}/>
             {/**<Link className="explore" href="#">
               Explore more <Icon icon={chevronRight} />
             </Link>*/}
           </Content>
-          {screen.isSmall &&
-            <div style={{ margin:"auto", /*border:"solid",*/ width:`${spectrumWidth}px`, height:`${spectrumHeight}px`, 
-                background:"none", padding:"0", display:"flex", alignItems:"center", justifyContent:"center"
-            }}>
-                <svg ref={spectrumContainerRef}></svg>
+          {(imgLocation === "bottom" || imgLocation === "right") &&
+            <div className="visual-container" style={{ width:`${spectrumWidth}px`, height:`${spectrumHeight}px` }} >
+                {data.visual?.type === "img" ? 
+                  <div className={`img-container ${imgLocation}-img-container`} >
+                    {/**<img src={data.visual.url} />*/}
+                    <SVGImage image={{ url, transform }} dimns={requiredImgDimns} settings={{ withBorderGradient: false, borderWidth:0 }}
+                        styles={{ borderColour:"#FF825C"}} imgKey={key} />
+                  </div>
+                  :
+                  <svg ref={spectrumContainerRef}></svg>
+                }
             </div>
           }
         </Section>

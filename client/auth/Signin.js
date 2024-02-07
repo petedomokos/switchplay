@@ -17,7 +17,8 @@ import auth from './auth-helper'
 
 const useStyles = makeStyles(theme => ({
   signinRoot:{
-    paddingTop:"100px"
+    paddingTop:"100px",
+    height:"100vh"
   },
   card: {
     [theme.breakpoints.down('md')]: {
@@ -63,7 +64,6 @@ const useStyles = makeStyles(theme => ({
 }))
 
 export default withRouter(function Signin({ onSignin, serverErrorMesg, location, history }) {
-  console.log("Signin", auth.isAuthenticated())
   const classes = useStyles()
   const [values, setValues] = useState({
       emailOrUsername: '',

@@ -48,7 +48,7 @@ const data = {
   ],
   rightMenuItems: [
     {
-      label: 'About Us',
+      label: 'About',
       id: 'about-us',
       path: '/about',
       page:"about",
@@ -56,7 +56,7 @@ const data = {
       offset: '70',
     },
     {
-      label: 'Get Demo',
+      label: 'Demo',
       id: 'get-demo',
       path: '/get-demo',
       page:"get-demo",
@@ -102,7 +102,7 @@ const data = {
       offset: '70',
     },
     {
-      label: 'About us',
+      label: 'About',
       id: 'about-us',
       path: '/about',
       page:"about",
@@ -110,7 +110,7 @@ const data = {
       offset: '70',
     },
     {
-      label: 'Get Demo',
+      label: 'Demo',
       id: 'get-demo',
       path: '/get-demo',
       page:"get-demo",
