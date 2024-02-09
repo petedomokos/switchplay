@@ -39,7 +39,7 @@ export const ContentWrapper = styled.div`
 
   .sticky-nav-active {
     .agencyModern-navbar {
-      background-color: #fff;
+      background-color: #f0ded5;
       box-shadow: 0px 3px 8px 0px rgba(43, 83, 135, 0.08);
     }
   }

@@ -7,7 +7,6 @@ import SVGImage from './SVGImage';
 
 const useStyles = makeStyles(theme => ({
     peopleWithQuotesRoot: {
-        //border:"solid",
         margin:"50px auto",
         width:props => `${props.width}px`,
         maxWidth:props => `${props.width}px`,
@@ -16,11 +15,12 @@ const useStyles = makeStyles(theme => ({
         width:"100%",
         height:props => `${props.titleHeight}px`,
         margin:"auto",
+        marginBottom:"20px",
         display:"flex",
         justifyContent:"center",
         alignItems:"center",
         //border:"solid",
-        color:theme.palette.blue,
+        color:"black",//theme.palette.blue,
         fontFamily: "Brush Script MT, cursive",
         fontSize:"36px"
     },
@@ -33,6 +33,14 @@ const useStyles = makeStyles(theme => ({
         alignItems:"center",
         flexWrap:"wrap",
         //border:'solid'
+    },
+    peopleContainer:{
+        width:props => `${props.peopleContainerWidth}px`,
+        height:props => `${props.peopleHeight}px`,
+        display:"flex",
+        justifyContent:"center",
+        //border:'solid',
+        borderColor:"white"
     },
     people:{
         width:props => `${props.peopleWidth}px`,
@@ -52,7 +60,7 @@ const useStyles = makeStyles(theme => ({
             display:"none"
         },
         //border:"solid",
-        //borderColor:"blue",
+        borderColor:"blue",
         width:props => `${props.quotesWidth}px`,
         minWidth:props => `${props.quotesWidth}px`,
         height:props => `${props.contentsHeight}px`,
@@ -87,14 +95,15 @@ const PeopleWithQuotes = ({ title, data, dimns, direction }) =>{
     const { width, minHeight } = dimns;
     const contentsWidth = width;
     const titleHeight = 90;
-    const peopleWidth = direction === "column" ? d3.min([500, width * 0.9]) : (width * (width < 500 ? 0.45 : 0.4));
+    const peopleContainerWidth = direction === "column" ? d3.min([500, width * 0.9]) : width * 0.49;
+    const peopleWidth = direction === "column" ? peopleContainerWidth : peopleContainerWidth * 0.8;
     const imgScale = imgWidth ? peopleWidth / imgWidth : 1;
     const transform = `translate(${imgTransX},${imgTransY}) scale(${imgScale})`;
     const requiredAspectRatio = imgWidth && imgHeight ? imgHeight / imgWidth : 0.666;
     const peopleHeight = peopleWidth * requiredAspectRatio;
     const contentsHeight = d3.max([peopleHeight, minHeight]);
 
-    const quotesWidth = direction === "column" ? width * 0.9 : (width * (width < 500 ? 0.45 : 0.4));
+    const quotesWidth = direction === "column" ? width * 0.9 : width * 0.49;
 
     const imgDimns = { width: peopleWidth, height: peopleHeight }
 
@@ -104,6 +113,7 @@ const PeopleWithQuotes = ({ title, data, dimns, direction }) =>{
         contentsWidth,
         titleHeight,
         contentsHeight,
+        peopleContainerWidth,
         peopleWidth,
         peopleHeight,
         quotesWidth
@@ -115,9 +125,11 @@ const PeopleWithQuotes = ({ title, data, dimns, direction }) =>{
         <div className={classes.peopleWithQuotesRoot} >
             {title && <div className={classes.title}>{title}</div>}
             <div className={classes.contents}>
-                <div className={classes.people}>
-                    <SVGImage image={{ url, transform }} dimns={imgDimns} settings={{ withBorderGradient: true, borderWidth:40 }}
-                        styles={{ borderColour:"#FF825C"}} imgKey={key} />
+                <div className={classes.peopleContainer}>
+                    <div className={classes.people}>
+                        <SVGImage image={{ url, transform }} dimns={imgDimns} settings={{ withBorderGradient: true, borderWidth:40 }}
+                            styles={{ borderColour:"#FF825C"}} imgKey={key} />
+                    </div>
                 </div>
                 <div className={classes.quotes}>
                         {quotes.map((q,i) => 

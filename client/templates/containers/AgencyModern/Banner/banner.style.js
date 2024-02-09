@@ -39,6 +39,7 @@ const BannerWrapper = styled.div`
   }
 `;
 
+//margin-top:calc(60px + (100vh - 60px - 400px)/2);
 export const BannerContent = styled.div`  
   max-width: 40%;
   width: 100%;
@@ -46,7 +47,7 @@ export const BannerContent = styled.div`
   flex-direction: column;
   justify-content:space-around;
   height:360px;
-  margin-top:calc(60px + (100vh - 60px - 400px)/2);
+  margin-top:calc(60px + (100vh - 40px - 400px)/2);
   @media only screen and (max-width: 1600px) {
     max-width: 40%;
     border-color: red;

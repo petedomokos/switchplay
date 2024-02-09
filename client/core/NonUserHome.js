@@ -59,13 +59,13 @@ const staffQuotesData = {
 const dataSections = [
   {
     key:"spectrum",
-    heading:"Use data with confidence and purpose",
+    heading:["Use data with confidence", "and purpose"],
     desc:"Should you trust your 'coaches eye' more than data? Switchplay helps you find the balance through great collaboration between analysts and coaches.",
     visual:{ type:"d3" }
   },
   {
     key:"path",
-    heading:"Show your players how their data relates to their path",
+    heading:"Show your players how data relates to their path",
     desc:"Do you think of yourself as a storyteller? Switchplay brings out the true power of data by enabling you to weave it into players' journeys.",
     visual:{ type:"img", url:"website/images/path.png", imgWidth:1600, imgHeight:900, imgTransX:0, imgTransY:0 }
   }
@@ -81,7 +81,7 @@ const useStyles = makeStyles(theme => ({
     borderColor:"white",
     position:"absolute", 
     right:"7.5vw", 
-    top:"60px",//"140px",
+    top:props => `calc(70px + (100vh - 70px - ${props.largeImageDimns.height}px) / 2)`,//"140px",
     width:props => `${props.largeImageDimns.width}px`, 
     height:props => `${props.largeImageDimns.height}px`, 
     overflow:"hidden",
@@ -96,7 +96,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const NonUserHome = ({ screen, initScrollTo }) =>{
-  const largeImageDimns = { width: screen.width * 0.45, height: screen.height * 0.9 }
+  const largeImageDimns = { width: screen.width * 0.45, height: screen.height - 40 - 40 }
   const styleProps = { largeImageDimns }
   const classes = useStyles(styleProps);
   const rootRef = useRef(null);
@@ -114,34 +114,6 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
       window.manualScrollId = null;
     }
   },[]);
-/*
-  NEXT
-   - add the description text for the 3 UltimateFeatures
-   - sort the animation fonts and fontsizes
-   - add the text under the subscribe call to action
-   - add the background images for the subscribe call to action
-   - sort the footer contents and links
-   - finish the about us page text
-   - implement the about us page photo and text so it looks great
-   - implement the contact us page
-   -sort responsiveness issues due to the template codes wierd ise of random breakpoints instead of the 
-   standard ones. eg the top banner text changes at random points, see styles
-  - add nice borders to photos
-  - add blue color (colors.linkColor) to the shutterstick communication and being accountable images
-  - push to heroku
-  - point sp.so.uk to it
-  - get ssl and attach
-  - add a switchplay logo (switch in our blue, play in our orange)
-  - deal with page resizing - eg d3 components dont update, and in fact they disappear sometimes
-  - wire up the email adress calls to action
-  - add the links to linkedin etc
-  - add a 'learn more' link page for the 3 ultimate features, or remove the learn more button
-  - add the React fade component
-
-
-
-
-  */
 
   return (
     <div className={classes.nonUserHomeRoot} ref={rootRef} >
@@ -157,11 +129,13 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
           style={{ transform:"translate(30px, 0px) scale(0.65)", transformOrigin: "top left" }} />
       </div>*/}
       <Services />
+      <div style={{ height:"30px"}}></div>
       <PeopleWithQuotes title="What Players Say" data={playerQuotesData} dimns={{ width: screen.width * 0.9, minHeight: 260 }}
           styles={{ borderColour:"#FF825C" }} direction={screen.isSmall ? "column" : "row"}  />
+      <div style={{ height:"80px"}}></div>
       <UltimateFeature animationDimns={animationDimns} />
       <Customer data={dataSections[0]} screen={screen} imgLocation={screen.isLarge ? "left" : "bottom"}  />
-      <Customer data={dataSections[1]} screen={screen} imgLocation={screen.isLarge ? "right" : "bottom"} minHeight={350} />
+      <Customer data={dataSections[1]} screen={screen} imgLocation={screen.isLarge ? "right" : "bottom"} />
       <PeopleWithQuotes title="What Staff Say" data={staffQuotesData}  
           dimns={{ width: screen.width * 0.9, minHeight: 360 }} direction={screen.isSmall ? "column" : "row"} />
       <Subscribe />

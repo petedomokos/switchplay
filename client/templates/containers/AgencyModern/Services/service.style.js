@@ -27,7 +27,7 @@ export const SectionHeader = styled.header`
   }
 
   h2 {
-    font-size: 26px;
+    font-size: 36px;
     font-weight: 700;
     line-height: 1.9;
     margin-bottom: 7px;
@@ -47,6 +47,7 @@ export const SectionHeader = styled.header`
   }
 
   p {
+    padding-top:10px;
     font-family: 'DM Sans';
     font-weight: 400;
     font-size: 15px;

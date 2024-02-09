@@ -3,7 +3,7 @@ import { themeGet } from '@styled-system/theme-get';
 
 const SectionWrapper = styled.section`
   background-color: #283742;
-  padding: 70px 0;
+  padding: 70px 0 150px;
 `;
 
 export const SectionTitle = styled.div`
@@ -13,7 +13,7 @@ export const SectionTitle = styled.div`
   margin: 0 auto;
   h2 {
     font-weight: 700;
-    font-size: 26px;
+    font-size: 36px;
     line-height: 1.9;
     letter-spacing: -0.5px;
     margin-bottom: 12px;
@@ -28,6 +28,7 @@ export const SectionTitle = styled.div`
     }
   }
   p {
+    padding-top:10px;
     font-size: 15px;
     line-height: 2.1;
     color: #ffffff;

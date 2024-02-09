@@ -3,7 +3,7 @@ import { createGlobalStyle } from 'styled-components';
 const ResetCSS = createGlobalStyle`
   ::selection {
     background: #333333;
-    color: #ffffff;
+    color: blue;
   }
 
   html {

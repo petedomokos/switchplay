@@ -33,14 +33,14 @@ const Customer = ({ data, screen, imgLocation, minHeight }) => {
   const requiredImgDimns = { width: requiredImgWidth, height: requiredImgWidth * requiredImgAspectRatio }
 
 
-  const { key, visual } = data;
+  const { key, visual, heading, desc } = data;
   const { url, imgWidth, imgHeight, imgTransX=0, imgTransY=0 } = visual;
 
   const imgScale = imgWidth ? requiredImgDimns.width / imgWidth : 1;
   const transform = `translate(${imgTransX},${imgTransY}) scale(${imgScale})`;
 
   useEffect(() => {
-    if(data.visual?.type !== "d3"){ return; }
+    if(visual?.type !== "d3"){ return; }
     d3.select(spectrumContainerRef.current)
         //.datum({})
         .call(spectrum
@@ -49,8 +49,8 @@ const Customer = ({ data, screen, imgLocation, minHeight }) => {
             .margin({ 
               left: alignVertically ? 0.15 * spectrumWidth : (imgLocation === "left" ? 0 : 0.3 * spectrumWidth), 
               right:alignVertically ? 0.15 * spectrumWidth : (imgLocation === "right" ? 0 : 0.3 * spectrumWidth), 
-              top: alignVertically ? 0.15 * spectrumHeight : 0.3 * spectrumHeight, 
-              bottom: alignVertically ? 0.15 * spectrumHeight : 0, 
+              top: alignVertically ? 0.15 * spectrumHeight : 0, 
+              bottom: alignVertically ? 0.15 * spectrumHeight : 0.3 * spectrumHeight, 
             })
             .styles({
               waveColor:colors.linkColor
@@ -58,13 +58,15 @@ const Customer = ({ data, screen, imgLocation, minHeight }) => {
         
   }, [spectrumWidth, spectrumHeight])
 
+  const singleLineHeading = typeof heading === "string" ? heading : heading.join(" ");
+
   return (
     <SectionWrapper id="customer">
       <Container>
         <Section>
           {(imgLocation === "top" || imgLocation === "left") &&
             <div className="visual-container" style={{ width:`${spectrumWidth}px`, height:`${spectrumHeight}px` }} >
-                {data.visual?.type === "img" ? 
+                {visual?.type === "img" ? 
                   <div className={`img-container ${imgLocation}-img-container`} >
                     {/**<img src={data.visual.url} />*/}
                     <SVGImage image={{ url, transform }} dimns={requiredImgDimns} settings={{ withBorderGradient: false, borderWidth:10 }}
@@ -77,18 +79,34 @@ const Customer = ({ data, screen, imgLocation, minHeight }) => {
           }
           {/**<Illustration><img src="website/logo.png" /></Illustration>*/}
           <Content>
-            <Heading
-              as="h2"
-              content={data.heading || ""}
-            />
-            <Text content={data.desc || ""}/>
+            <div className={typeof heading === "string" ? "" : "md-down"}>
+              <Heading
+                as="h2"
+                content={singleLineHeading || ""}
+              />
+            </div>
+            <div className={typeof heading === "string" ? "" : "lg-up"}>
+              {typeof heading !== "string" && 
+                <>
+                  <Heading
+                    as="h3"
+                    content={heading[0] || ""}
+                  />
+                  <Heading
+                    as="h3"
+                    content={heading[1] || ""}
+                  />
+                </>
+              }
+            </div>
+            <Text content={desc || ""}/>
             {/**<Link className="explore" href="#">
               Explore more <Icon icon={chevronRight} />
             </Link>*/}
           </Content>
           {(imgLocation === "bottom" || imgLocation === "right") &&
             <div className="visual-container" style={{ width:`${spectrumWidth}px`, height:`${spectrumHeight}px` }} >
-                {data.visual?.type === "img" ? 
+                {visual?.type === "img" ? 
                   <div className={`img-container ${imgLocation}-img-container`} >
                     {/**<img src={data.visual.url} />*/}
                     <SVGImage image={{ url, transform }} dimns={requiredImgDimns} settings={{ withBorderGradient: false, borderWidth:0 }}

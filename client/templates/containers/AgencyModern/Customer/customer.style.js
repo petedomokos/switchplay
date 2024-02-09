@@ -2,6 +2,8 @@ import styled from 'styled-components';
 import { themeGet } from '@styled-system/theme-get';
 
 const SectionWrapper = styled.section`
+  margin-left:7.5vw;
+  margin-right: 7.5vw;
   padding: 100px 0 75px;
   @media only screen and (max-width: 1440px) {
     padding: 100px 0 0;
@@ -22,17 +24,19 @@ export const Section = styled.div`
   .visual-container {
     border-color: red;
     margin: auto;
+    padding-top:5px;
     display: flex; 
-    alignItems: center; 
+    alignItems: flex-start; 
     justify-content: center;
   }
   .img-container {
     border-color: yellow;
     width: 70%;
     height: 75%;
+    padding-top:5px;
     display:flex;
     justify-content:center;
-    align-items:flex-end;
+    align-items:flex-start;
 
     img {
       object-fit: contain;
@@ -47,11 +51,9 @@ export const Section = styled.div`
   }
   .left-img-container {
     margin-right:30%;
-    align-self:flex-start;
   }
   .right-img-container {
     margin-left:30%;
-    align-self:flex-end;
   }
   .top-img-container {
     align-self:center;
@@ -77,23 +79,49 @@ export const Content = styled.div`
     align-items: center;
   }
   h2 {
+    display:flex;
+    flex-direction:column;
+    border-color: pink;
     font-weight: 700;
-    font-size: 36px;
+    font-size: 40px;
     line-height: 1.66;
     letter-spacing: -1px;
     @media only screen and (min-width: 1024px) and (max-width: 1440px) {
-      font-size: 30px;
+      font-size: 36px;
       line-height: 1.5;
     }
     @media only screen and (min-width: 768px) and (max-width: 1024px) {
-      font-size: 24px;
+      font-size: 30px;
     }
     @media only screen and (max-width: 768px) {
-      font-size: 24px;
+      font-size: 30px;
+      text-align: center;
+    }
+  }
+  h3 {
+    display:flex;
+    flex-direction:column;
+    border-color: pink;
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 1;
+    letter-spacing: -1px;
+    @media only screen and (min-width: 1024px) and (max-width: 1440px) {
+      font-size: 36px;
+      line-height: 1;
+    }
+    @media only screen and (min-width: 768px) and (max-width: 1024px) {
+      font-size: 30px;
+    }
+    @media only screen and (max-width: 768px) {
+      font-size: 30px;
       text-align: center;
     }
   }
   p {
+    padding-top:10px;
+    display:flex;
+    flex-direction:column;
     font-size: 15px;
     line-height: 42px;
     @media only screen and (min-width: 1024px) and (max-width: 1366px) {

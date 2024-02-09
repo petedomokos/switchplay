@@ -40,7 +40,7 @@ export default function spectrumComponent() {
 
         endPointWidth = 80;
         endPointHeight = 80;
-        endPointMargin = { left: 15, right: 15, top: 15, bottom: 15 };
+        endPointMargin = { left: 15, right: 15, top: 0, bottom: 30 };
         endPointContentsWidth = endPointWidth - endPointMargin.left - endPointMargin.right;
         endPointContentsHeight = endPointHeight - endPointMargin.top - endPointMargin.bottom;
 
@@ -88,8 +88,8 @@ export default function spectrumComponent() {
                     .attr("class", "spectrum-bg")
                     .attr("width", width)
                     .attr("height", height)
-                    //.attr("stroke", "red")
-                    //.attr("stroke-width", 1)
+                    .attr("stroke", "none")
+                    .attr("stroke-width", 1)
                     .attr("fill", "transparent");
 
                 const contentsG = containerElement.append("g")
@@ -262,7 +262,7 @@ export default function spectrumComponent() {
                 //images and paths
                 //start and end points
                 const eyeTransform = contentsHeight < 200 ? "translate(0,0) scale(2)" : "translate(0,0) scale(2)"
-                const barsTransform = contentsHeight < 200 ? "translate(-10,25) scale(0.025)" : "translate(-33,-8) scale(0.035)"
+                const barsTransform = contentsHeight < 200 ? "translate(-10,20) scale(0.025)" : "translate(-33,-8) scale(0.035)"
                 startContentsG.selectAll("path.start-path").attr("transform", eyeTransform)
                 startContentsG.select("path.start-path1").attr("d", eyePathD1)
                 startContentsG.select("path.start-path2").attr("d", eyePathD2)
