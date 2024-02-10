@@ -81,7 +81,7 @@ const enhancedZoom = dragEnhancements();
 const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
   //console.log("Decks table", table)
   //console.log("Decks data", data)
-  console.log("journeyData", journeyData)
+  //console.log("journeyData", journeyData)
   //processed props
   const stringifiedData = JSON.stringify({ data, table });
   //state
@@ -625,7 +625,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customS
     const orderedProfiles = sortAscending(journeyData.profiles, d => d.date)
       .filter(d => !d.isCurrent);
     const profilesData = profilesLayout(orderedProfiles)
-    console.log("profilesData", profilesData)
+    //console.log("profilesData", profilesData)
 
     //decksdata
     decksLayout
@@ -682,11 +682,11 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customS
       .updateItemStatus(updateItemStatus)
       .updateFrontCardNr(updateFrontCardNr)
       .setForm(setForm)
-  }, [stringifiedData, width, height, selectedSection, form?.formType, selectedDeckId])
+  }, [stringifiedData, /*width, height,*/ selectedSection, form?.formType, selectedDeckId])
 
   useEffect(() => {
     d3.select(containerRef.current).call(decks); 
-  }, [stringifiedData, width, height, selectedDeckId, selectedCardNr, selectedItemNr,  selectedSection, form?.formType])
+  }, [stringifiedData, /*width, height,*/ selectedDeckId, selectedCardNr, selectedItemNr,  selectedSection, form?.formType])
 
   //zoom
   useEffect(() => {

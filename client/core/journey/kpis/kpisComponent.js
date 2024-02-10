@@ -190,7 +190,7 @@ export default function kpisComponent() {
     let listClipPathId;
 
     function kpis(selection, options={}) {
-        console.log("kpis update..............")
+        //console.log("kpis update..............")
         const { transitionEnter=true, transitionUpdate=true, log } = options;
 
         // expression elements

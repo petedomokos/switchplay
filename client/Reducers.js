@@ -658,9 +658,9 @@ export const dialogs = (state={}, act) =>{
 export const system = (state={}, act) => {
 	const { type, screen } = act
 	switch(type){
-		case C.SIGN_OUT:{
+		/*case C.SIGN_OUT:{
 			return InitialState.system;
-		}
+		}*/
 		case C.UPDATE_SCREEN:{
 			return {
 				...state,

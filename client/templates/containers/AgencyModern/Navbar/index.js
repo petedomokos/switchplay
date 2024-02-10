@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ScrollSpyMenu from '../../../common/components/ScrollSpyMenu';
+import { NormalItem } from '../../../common/components/ScrollSpyMenu';
 import Scrollspy from 'react-scrollspy';
 import AnchorLink from 'react-anchor-link-smooth-scroll';
 import { Icon } from 'react-icons-kit';
@@ -25,14 +26,17 @@ const Navbar = ({ data, history, user }) => {
   });
 
   const handleMobileMenu = () => {
-    console.log("handleMobilemenu")
     setMobileMenu(!mobileMenu);
   };
 
   const handleHandleMenuClose = () => {
-    console.log("handleMobilemenuClose")
     setMobileMenu(false);
   };
+
+  //if user logs out, must close mobile menu
+  useEffect(() => {
+    setMobileMenu(false);
+  }, [user])
 
   //<div style={{ background:"red", width:"100%", height:"50px"}}>test</div>
   return (
@@ -101,15 +105,20 @@ const Navbar = ({ data, history, user }) => {
             currentClassName="active"
             history={history}
           >
-            {data.mobileMenuItems.map((menu, index) => (
+
+            {data.mobileMenuItems.map((item, index) => (
               <li key={`menu_key${index}`}>
-                <AnchorLink
-                  href={menu.path}
-                  offset={menu.offset}
-                  onClick={handleHandleMenuClose}
-                >
-                  {menu.label}
-                </AnchorLink>
+                {item.itemType === "click-button" || item.itemType === "page-link" ?
+                  <NormalItem item={item} history={history} />
+                  :
+                  <AnchorLink
+                    href={item.path}
+                    offset={item.offset}
+                    onClick={handleHandleMenuClose}
+                  >
+                    {item.label}
+                  </AnchorLink>
+                }
               </li>
             ))}
           </Scrollspy>

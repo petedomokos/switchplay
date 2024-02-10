@@ -138,10 +138,7 @@ export const MenuArea = styled.nav`
 
 export const MobileMenu = styled.div`
   display: none;
-  &.for-signed-in-user {
-    display: flex;
-    margin-top:-20px;
-  }
+  
   @media only screen and (max-width: 991px) {
     display: flex;
   }
@@ -156,6 +153,11 @@ export const MobileMenu = styled.div`
   background-color: ${themeGet('colors.white', '#ffffff')};
   transition: all 0.3s ease;
   color: ${themeGet('colors.secondary', '#000')};
+  &.for-signed-in-user {
+    display: flex;
+    margin-top:-20px;
+    padding: 27px 0 40px 30px;
+  }
   &.active {
     opacity: 1;
     visibility: visible;
@@ -181,7 +183,6 @@ export const MobileMenu = styled.div`
       }
       &:hover {
         a {
-          padding: 13px 15px;
           color: ${themeGet('colors.primary')};
         }
       }

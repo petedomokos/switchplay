@@ -48,12 +48,12 @@ const PageLinkItem = ({ item, pathname }) =>
 
 const ClickButtonItem = ({ item, history }) =>
 	<div
-		style={{ cursor: "pointer" }}
+		style={{ cursor: "pointer", marginTop:"10px", marginBottom:"10px" }}
 		className={"click-button-menu-item"}
 		onClick={() => item.onClick(history)}>{item.label}
 	</div>
 
-const NormalItem = ({ item, history }) => {
+export const NormalItem = ({ item, history }) => {
 	return (
 		<>
 			{item.itemType === "page-link" ? 

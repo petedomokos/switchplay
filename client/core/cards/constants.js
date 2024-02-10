@@ -96,7 +96,7 @@ export const STYLES = {
 export const DECK_PHOTO_POS = "centre";
 
 export const DIMNS = {
-    burgerBarWidth:50,
+    burgerBarWidth:45,
     DECK:{
         ASPECT_RATIO:9/16,
         HEADER_HEIGHT:25,

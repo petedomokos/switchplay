@@ -23,7 +23,8 @@ const data = {
       path: '#home',
       page:"home",
       offset: '70',
-      itemType:"anchor-link"
+      itemType:"anchor-link",
+      whenToShow:["visitor"]
     },
     {
       label: 'Your Players',
@@ -31,7 +32,8 @@ const data = {
       path: '#services',
       page:"home",
       offset: '70',
-      itemType:"anchor-link"
+      itemType:"anchor-link",
+      whenToShow:["visitor"]
     },
     {
       label: 'Your Workflow',
@@ -39,7 +41,8 @@ const data = {
       path: '#features',
       page:"home",
       offset: '70',
-      itemType:"anchor-link"
+      itemType:"anchor-link",
+      whenToShow:["visitor"]
     },
     {
       label: 'Data',
@@ -47,7 +50,8 @@ const data = {
       path: '#customer',
       page:"home",
       offset: '70',
-      itemType:"anchor-link"
+      itemType:"anchor-link",
+      whenToShow:["visitor"]
     },
   ],
   rightMenuItems: [
@@ -57,7 +61,8 @@ const data = {
       path: '/about',
       page:"about",
       offset: '70',
-      itemType:"page-link"
+      itemType:"page-link",
+      whenToShow:["visitor"]
     },
     {
       label: 'Demo',
@@ -65,7 +70,8 @@ const data = {
       path: '/get-demo',
       page:"get-demo",
       offset: '70',
-      itemType:"page-link"
+      itemType:"page-link",
+      whenToShow:["visitor"]
     },
     {
       label: 'Login',
@@ -73,7 +79,8 @@ const data = {
       path: '/signin',
       page:"login",
       offset: '70',
-      itemType:"page-link"
+      itemType:"page-link",
+      whenToShow:["visitor"]
     },
     {
       label: 'Logout',
@@ -81,7 +88,8 @@ const data = {
       path: '/signout',
       page:"login",
       offset: '70',
-      itemType:"click-button"
+      itemType:"click-button",
+      whenToShow:["all-users"]
     },
   ],
   mobileMenuItems: [
@@ -91,7 +99,8 @@ const data = {
       path: '#home',
       page:"home",
       offset: '70',
-      itemType:"anchor-link"
+      itemType:"anchor-link",
+      whenToShow:["visitor"]
     },
     {
       label: 'Your Players',
@@ -99,7 +108,8 @@ const data = {
       path: '#services',
       page:"home",
       offset: '70',
-      itemType:"anchor-link"
+      itemType:"anchor-link",
+      whenToShow:["visitor"]
     },
     {
       label: 'Your Workflow',
@@ -107,7 +117,8 @@ const data = {
       path: '#features',
       page:"home",
       offset: '70',
-      itemType:"anchor-link"
+      itemType:"anchor-link",
+      whenToShow:["visitor"]
     },
     {
       label: 'Data',
@@ -115,7 +126,8 @@ const data = {
       path: '#customer',
       page:"home",
       offset: '70',
-      itemType:"anchor-link"
+      itemType:"anchor-link",
+      whenToShow:["visitor"]
     },
     {
       label: 'About',
@@ -124,7 +136,8 @@ const data = {
       page:"about",
       isPage:true,
       offset: '70',
-      itemType:"page-link"
+      itemType:"page-link",
+      whenToShow:["visitor"]
     },
     {
       label: 'Demo',
@@ -133,7 +146,8 @@ const data = {
       page:"get-demo",
       isPage:true,
       offset: '70',
-      itemType:"page-link"
+      itemType:"page-link",
+      whenToShow:["visitor"]
     },
     {
       label: 'Login',
@@ -142,14 +156,16 @@ const data = {
       page:"login",
       isPage:true,
       offset: '70',
-      itemType:"page-link"
+      itemType:"page-link",
+      whenToShow:["visitor"]
     },
     {
       label: 'Logout',
       id:"logout",
       path: '/signout',
       offset: '70',
-      itemType:"click-button"
+      itemType:"click-button",
+      whenToShow:["all-users"]
     },
   ],
   services: [

@@ -38,10 +38,13 @@ import {
 const customiseItemsForUser = (items, user, onSignout) => {
   if(user){ 
     return items
-      .filter(it => it.id !== "login")
-      .map(it => it.id !== "logout" ? it : ({ ...it, onClick: history => onSignout(history) }))
+      .filter(it => it.whenToShow.includes("all-users")) //later - allow specif customerId items
+      .map(it => it.id !== "logout" ? it : ({ 
+        ...it, 
+        onClick: history => onSignout(history)
+      }))
   }
-  return items.filter(it => it.id !== "logout")
+  return items.filter(it => it.whenToShow.includes("visitor"))
 }
 const getNavBarItemsFromOtherPages = (user, onSignout) => {
   return {
@@ -70,12 +73,9 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-
-//next - replace 2nd slide of animation, and just ut the rhs stuff in and around the chatracters in slide 1
-//so users dont get confused thinking that its actually the view
 const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, onSignout, history }) => {
-  //load user if page is refreshed. MainRouter is under the store so can 
-  //trigger re-render once loaded
+  console.log("userid", userId)
+  //BUG - onSignout leads to the Homepage re-rendering with store.screen reset to init ie 0,0
  
   const styleProps = { appBg: history.location.pathname === "/" ? "#FF825C" : "#f0ded5" }
   const classes = useStyles(styleProps);
