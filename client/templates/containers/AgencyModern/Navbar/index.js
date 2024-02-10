@@ -14,7 +14,8 @@ import LogoImage from '../../../common/assets/image/agencyModern/logo.png';
 //import { Fade } from 'react-awesome-reveal';
 //<Fade triggerOnce></Fade>
 
-const Navbar = ({ data, history }) => {
+
+const Navbar = ({ data, history, user }) => {
   const [mobileMenu, setMobileMenu] = useState(false);
 
   const scrollItems = [];
@@ -24,42 +25,47 @@ const Navbar = ({ data, history }) => {
   });
 
   const handleMobileMenu = () => {
+    console.log("handleMobilemenu")
     setMobileMenu(!mobileMenu);
   };
 
   const handleHandleMenuClose = () => {
+    console.log("handleMobilemenuClose")
     setMobileMenu(false);
   };
 
   //<div style={{ background:"red", width:"100%", height:"50px"}}>test</div>
   return (
-    <NavbarWrapper className="agencyModern-navbar navbar">
-      <Container>
-        <Logo
-          href="/agencymodern"
-          logoSrc={{ src: "/website/logo.png" }}
-          title="Crypto Modern"
-          className="main-logo"
-        />
+    <NavbarWrapper className={`agencyModern-navbar navbar ${user ? "for-signed-in-user" : ""}`}>
+      <Container className={`${user ? "for-signed-in-user" : ""}`}>
+        {!user && 
+          <Logo
+            href="/agencymodern"
+            logoSrc={{ src: "/website/logo.png" }}
+            title="Crypto Modern"
+            className="main-logo"
+          />
+        }
         {/* end of logo */}
-
-        <MenuArea>
-          <ScrollSpyMenu
-            className="menu-items menu-left"
-            menuItems={data.leftMenuItems}
-            offset={-84}
-            history={history}
-          />
-          <ScrollSpyMenu
-            className="menu-items menu-right"
-            menuItems={data.rightMenuItems}
-            offset={-84}
-            history={history}
-          />
+        <MenuArea className={`${user ? "for-signed-in-user" : ""}`}>
+          <div className={`main-menu-area ${user ? "for-signed-in-user" : ""}`}>
+            <ScrollSpyMenu
+              className="menu-items menu-left"
+              menuItems={data.leftMenuItems}
+              offset={-84}
+              history={history}
+            />
+            <ScrollSpyMenu
+              className="menu-items menu-right"
+              menuItems={data.rightMenuItems}
+              offset={-84}
+              history={history}
+            />
+          </div>
           {/* end of main menu */}
 
           <Button
-            className="menubar"
+            className={`menubar ${user ? "for-signed-in-user" : ""}`}
             icon={
               mobileMenu ? (
                 <Icon
@@ -85,7 +91,8 @@ const Navbar = ({ data, history }) => {
       </Container>
 
       {/* start mobile menu */}
-      <MobileMenu className={`mobile-menu ${mobileMenu ? 'active' : ''}`}>
+      {/*note - mobile-menu classname does nothing*/}
+      <MobileMenu className={`mobile-menu ${mobileMenu ? 'active' : ''} ${user ? "for-signed-in-user" : ""}`}>
         <Container>
           <Scrollspy
             className="menu"

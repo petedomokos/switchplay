@@ -15,6 +15,9 @@ const NavbarWrapper = styled.header`
   @media only screen and (max-width: 768px) {
     padding: 20px 0px 21px;
   }
+  &.for-signed-in-user {
+    padding: 5px 0 5px 0px;
+  }
   > div.container {
     width: 100%;
     display: flex;
@@ -31,6 +34,10 @@ const NavbarWrapper = styled.header`
   }
 `;
 
+//menubar class needs to also set display to block (from none) if user is signed in
+//simplest way is change the name of class, and put teh display:none into that clasname which only 
+//applies to it when user is not signed in
+//do teh oppoiste for theh non-burger menu too
 export const MenuArea = styled.nav`
   display: flex;
   align-items: center;
@@ -41,10 +48,35 @@ export const MenuArea = styled.nav`
   @media only screen and (max-width: 1024px) {
     justify-content: flex-end;
   }
+  &.for-signed-in-user {
+    justify-content: flex-end;
+  }
   @media only screen and (max-width: 768px) {
     .menubar {
       display: block;
     }
+  }
+  .menubar.for-signed-in-user {
+    display: block;
+  }
+
+  .main-menu-area {
+    display: flex;
+    &.for-signed-in-user{
+      display:none;
+    }
+    align-items: center;
+    width: 100%;
+    .menu-right {
+      margin-left: auto;
+    }
+    &.active {
+      .menu-items {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+    margin-left:50px;
   }
   .menu-items {
     display: flex;
@@ -106,71 +138,75 @@ export const MenuArea = styled.nav`
 
 export const MobileMenu = styled.div`
   display: none;
+  &.for-signed-in-user {
+    display: flex;
+    margin-top:-20px;
+  }
   @media only screen and (max-width: 991px) {
     display: flex;
+  }
+  width: 100%;
+  height: calc(100vh - 70px);
+  padding: 27px 0 40px;
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  top: 82px;
+  flex-direction: column;
+  background-color: ${themeGet('colors.white', '#ffffff')};
+  transition: all 0.3s ease;
+  color: ${themeGet('colors.secondary', '#000')};
+  &.active {
+    opacity: 1;
+    visibility: visible;
+    box-shadow: 0 3px 12px
+      ${themeGet('colors.shadow', 'rgba(38, 78, 118, 0.1)')};
+  }
+  .container {
     width: 100%;
-    height: calc(100vh - 70px);
-    padding: 27px 0 40px;
-    opacity: 0;
-    visibility: hidden;
-    position: absolute;
-    top: 82px;
+    height: 100%;
+    display: flex;
     flex-direction: column;
-    background-color: ${themeGet('colors.white', '#ffffff')};
-    transition: all 0.3s ease;
-    color: ${themeGet('colors.secondary', '#000')};
-    &.active {
-      opacity: 1;
-      visibility: visible;
-      box-shadow: 0 3px 12px
-        ${themeGet('colors.shadow', 'rgba(38, 78, 118, 0.1)')};
-    }
-    .container {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    ul {
-      padding-bottom: 20px;
-      li {
+    justify-content: space-between;
+  }
+  ul {
+    padding-bottom: 20px;
+    li {
+      a {
+        display: block;
+        padding: 13px 0;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        color: ${themeGet('colors.textPrimary', '#02073E')};
+      }
+      &:hover {
         a {
-          display: block;
-          padding: 13px 0;
-          border-radius: 5px;
-          transition: all 0.3s ease;
-          color: ${themeGet('colors.textPrimary', '#02073E')};
-        }
-        &:hover {
-          a {
-            padding: 13px 15px;
-            color: ${themeGet('colors.primary')};
-          }
+          padding: 13px 15px;
+          color: ${themeGet('colors.primary')};
         }
       }
     }
-    .reusecore__button {
-      width: 100%;
-      border-radius: 4px;
-      background-image: -moz-linear-gradient(
-        -31deg,
-        rgb(64, 219, 216) 0%,
-        rgb(44, 31, 132) 100%
-      );
-      background-image: -webkit-linear-gradient(
-        -31deg,
-        rgb(64, 219, 216) 0%,
-        rgb(44, 31, 132) 100%
-      );
-      background-image: -ms-linear-gradient(
-        -31deg,
-        rgb(64, 219, 216) 0%,
-        rgb(44, 31, 132) 100%
-      );
-      @media only screen and (max-width: 480px) {
-        margin-top: 20px;
-      }
+  }
+  .reusecore__button {
+    width: 100%;
+    border-radius: 4px;
+    background-image: -moz-linear-gradient(
+      -31deg,
+      rgb(64, 219, 216) 0%,
+      rgb(44, 31, 132) 100%
+    );
+    background-image: -webkit-linear-gradient(
+      -31deg,
+      rgb(64, 219, 216) 0%,
+      rgb(44, 31, 132) 100%
+    );
+    background-image: -ms-linear-gradient(
+      -31deg,
+      rgb(64, 219, 216) 0%,
+      rgb(44, 31, 132) 100%
+    );
+    @media only screen and (max-width: 480px) {
+      margin-top: 20px;
     }
   }
 `;

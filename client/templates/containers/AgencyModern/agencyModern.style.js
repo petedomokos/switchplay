@@ -27,9 +27,12 @@ export const GlobalStyle = createGlobalStyle`
   }
 `;
 
+
+//next - the navbar shouldnt have the margin applied to it as its needed for the menu itself too - move the marign shift up, or use display justify-content flex0end
+//i thought i did this anyway
+
 export const ContentWrapper = styled.div`
   /*overflow: hidden; removed else menu on other pages is hidden as dimns not set somewhere?*/
-  border: solid;
   .menuLeft {
     margin-left: 105px;
   }

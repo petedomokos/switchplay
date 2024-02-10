@@ -32,9 +32,12 @@ const useStyles = makeStyles((theme) => ({
     background:COLOURS.CARDS_TABLE,
     overflow:"scroll",
     //border:"solid",
+    borderColor:"yellow"
     //borderWidth:"thin",
   },
   tableContents:{
+    //border:"solid",
+    borderColor:"yellow",
     position:"absolute",
     left:props => props.tableContents.left,
     top:props => props.tableContents.top,
@@ -226,7 +229,7 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
     <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
       <div className={classes.tableContents}>
         <TableHeader dimns={{ 
-            padding: { left: 7.5, right:7.5 + burgerBarWidth, top:tableHeaderHeight * 0.1, bottom:tableHeaderHeight * 0.1 },
+            padding: { left: 7.5, right:20 + burgerBarWidth + (screen.width * 0.05), top:tableHeaderHeight * 0.1, bottom:tableHeaderHeight * 0.1 },
             width:width, 
             height:tableHeaderHeight 
           }}

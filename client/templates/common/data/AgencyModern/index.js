@@ -23,6 +23,7 @@ const data = {
       path: '#home',
       page:"home",
       offset: '70',
+      itemType:"anchor-link"
     },
     {
       label: 'Your Players',
@@ -30,6 +31,7 @@ const data = {
       path: '#services',
       page:"home",
       offset: '70',
+      itemType:"anchor-link"
     },
     {
       label: 'Your Workflow',
@@ -37,6 +39,7 @@ const data = {
       path: '#features',
       page:"home",
       offset: '70',
+      itemType:"anchor-link"
     },
     {
       label: 'Data',
@@ -44,6 +47,7 @@ const data = {
       path: '#customer',
       page:"home",
       offset: '70',
+      itemType:"anchor-link"
     },
   ],
   rightMenuItems: [
@@ -52,24 +56,32 @@ const data = {
       id: 'about-us',
       path: '/about',
       page:"about",
-      isPage:true,
       offset: '70',
+      itemType:"page-link"
     },
     {
       label: 'Demo',
       id: 'get-demo',
       path: '/get-demo',
       page:"get-demo",
-      isPage:true,
       offset: '70',
+      itemType:"page-link"
     },
     {
       label: 'Login',
       id:"login",
       path: '/signin',
       page:"login",
-      isPage:true,
-      offset: '70'
+      offset: '70',
+      itemType:"page-link"
+    },
+    {
+      label: 'Logout',
+      id:"logout",
+      path: '/signout',
+      page:"login",
+      offset: '70',
+      itemType:"click-button"
     },
   ],
   mobileMenuItems: [
@@ -79,6 +91,7 @@ const data = {
       path: '#home',
       page:"home",
       offset: '70',
+      itemType:"anchor-link"
     },
     {
       label: 'Your Players',
@@ -86,6 +99,7 @@ const data = {
       path: '#services',
       page:"home",
       offset: '70',
+      itemType:"anchor-link"
     },
     {
       label: 'Your Workflow',
@@ -93,6 +107,7 @@ const data = {
       path: '#features',
       page:"home",
       offset: '70',
+      itemType:"anchor-link"
     },
     {
       label: 'Data',
@@ -100,6 +115,7 @@ const data = {
       path: '#customer',
       page:"home",
       offset: '70',
+      itemType:"anchor-link"
     },
     {
       label: 'About',
@@ -108,6 +124,7 @@ const data = {
       page:"about",
       isPage:true,
       offset: '70',
+      itemType:"page-link"
     },
     {
       label: 'Demo',
@@ -116,6 +133,7 @@ const data = {
       page:"get-demo",
       isPage:true,
       offset: '70',
+      itemType:"page-link"
     },
     {
       label: 'Login',
@@ -124,6 +142,14 @@ const data = {
       page:"login",
       isPage:true,
       offset: '70',
+      itemType:"page-link"
+    },
+    {
+      label: 'Logout',
+      id:"logout",
+      path: '/signout',
+      offset: '70',
+      itemType:"click-button"
     },
   ],
   services: [

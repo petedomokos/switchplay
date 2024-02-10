@@ -1,6 +1,7 @@
 import { connect } from 'react-redux'
 import { fetchUser } from './actions/UserActions'
 import { updateScreen } from './actions/CommonActions'
+import { signout } from './actions/AuthActions'
 import MainRouter  from './MainRouter'
 
 const mapStateToProps = (state, ownProps) => {
@@ -16,6 +17,9 @@ const mapDispatchToProps = dispatch => ({
 	},
 	updateScreen(screen){
 		dispatch(updateScreen(screen))
+	},
+	onSignout(history){
+		dispatch(signout(history))
 	}
 })
 

@@ -37,9 +37,9 @@ const useStyles = makeStyles((theme) => ({
     //flexDirection:"column",
     width:props => props.width,
     height:props => props.height,
-   /*border:"solid",
-    borderWidth:"thin",
-    borderColor:"red"*/
+   //border:"solid",
+    //borderWidth:"thin",
+    borderColor:"red"
   },
   keyPhrase:{
     color:grey10(1)

@@ -35,16 +35,37 @@ import {
   ContentWrapper,
 } from './templates/containers/AgencyModern/agencyModern.style';
 
-const navBarDataForOtherPages = {
-  ...data,
-  leftMenuItems:data.leftMenuItems.map(it => ({ ...it, isPage:true, path:"/" }))
+const customiseItemsForUser = (items, user, onSignout) => {
+  if(user){ 
+    return items
+      .filter(it => it.id !== "login")
+      .map(it => it.id !== "logout" ? it : ({ ...it, onClick: history => onSignout(history) }))
+  }
+  return items.filter(it => it.id !== "logout")
+}
+const getNavBarItemsFromOtherPages = (user, onSignout) => {
+  return {
+    ...data,
+    leftMenuItems:data.leftMenuItems.map(it => ({ ...it, itemType:"page-link", path:"/" })),
+    rightMenuItems:customiseItemsForUser(data.rightMenuItems, user, onSignout),
+    mobileMenuItems:customiseItemsForUser(data.mobileMenuItems, user, onSignout)
+  }
+}
+
+const getNavBarItemsFromHomePage = (user, onSignout) => {
+  return {
+    ...data,
+    rightMenuItems:customiseItemsForUser(data.rightMenuItems, user, onSignout),
+    mobileMenuItems:customiseItemsForUser(data.mobileMenuItems, user, onSignout)
+  }
+
 }
 
 const useStyles = makeStyles(theme => ({
   app:{
     width:"100%",
-    height:"100vh",
-    minHeight:"100vh",
+    height:"120vh",
+    minHeight:"120vh",
     background:props => props.appBg,
   }
 }))
@@ -52,13 +73,14 @@ const useStyles = makeStyles(theme => ({
 
 //next - replace 2nd slide of animation, and just ut the rhs stuff in and around the chatracters in slide 1
 //so users dont get confused thinking that its actually the view
-const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, history }) => {
+const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, onSignout, history }) => {
   //load user if page is refreshed. MainRouter is under the store so can 
   //trigger re-render once loaded
  
   const styleProps = { appBg: history.location.pathname === "/" ? "#FF825C" : "#f0ded5" }
   const classes = useStyles(styleProps);
   const jwt = auth.isAuthenticated();
+  const user = jwt?.user;
   //480 - portrait phone, 768 - tablets,992 - laptop, 1200 - desktop or large laptop
   const phoneMaxWidth = 480;
   const tabletMaxWidth = 1024; //ipad air
@@ -124,8 +146,8 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, history }) =>
           <ContentWrapper>
             <Sticky top={0} innerZ={9999} activeClass="sticky-nav-active">
               <DrawerProvider>
-                <Route path="/:any"><Navbar data={navBarDataForOtherPages} history={history} /></Route>
-                <Route exact path="/"><Navbar data={data} history={history} /></Route>
+                <Route path="/:any"><Navbar data={getNavBarItemsFromOtherPages(user, onSignout)} history={history} user={user} /></Route>
+                <Route exact path="/"><Navbar data={getNavBarItemsFromHomePage(user, onSignout)} history={history} user={user} /></Route>
               </DrawerProvider>
             </Sticky>
             <Switch>

@@ -24,13 +24,15 @@ const useStyles = makeStyles(theme => ({
         position:"absolute",
         //left:props => props.left,
         //top:0,
-        width:props => `${props.width - props.padding.left - props.padding.right}px`,
-        height:props => `${props.height - props.padding.top - props.padding.bottom}px`,
+        width:props => `${props.width}px`,
+        height:props => `${props.height}px`,
         padding:props => `${props.padding.top}px ${props.padding.right}px ${props.padding.bottom}px ${props.padding.left}px`,
         display:"flex",
         justifyContent:"space-between",
         pointerEvents:"all",
         background:grey10(8),//"transparent",
+        //border:"solid",
+        borderColor:"pink"
     },
     title:{
         width:props => `${props.width - props.timeframe.width - 10}px`,
@@ -45,7 +47,8 @@ const useStyles = makeStyles(theme => ({
         display:"flex",
         flexDirection:"column",
         justifyContent:"space-between",
-        alignItems:"flex-end"
+        alignItems:"flex-end",
+        //border:"solid"
     },
     timeframeToggleArea:{
         height:props => props.timeframe.toggleArea.height,

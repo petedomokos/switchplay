@@ -18,15 +18,12 @@ import auth from './auth-helper'
 const useStyles = makeStyles(theme => ({
   signinRoot:{
     paddingTop:"100px",
-    height:"100vh"
+    height:"120vh"
   },
   card: {
-    [theme.breakpoints.down('md')]: {
-      width:"90%"
-    },
-    [theme.breakpoints.up('lg')]: {
-      width:"500px"
-    },
+    width:"500px",
+    maxWidth:"90%",
+
     margin: "auto",
     textAlign: 'center',
     paddingBottom: theme.spacing(2)

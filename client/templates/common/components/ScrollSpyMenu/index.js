@@ -8,6 +8,11 @@ import * as d3 from 'd3';
 
 import { DrawerContext } from "../../contexts/DrawerContext";
 import NextImage from "../NextImage";
+/*
+todo next - when user signed in,
+ -  the menu is always the burger menu - check it works
+ -  the menu items should be completely different, so remove all except -> "import", "signout" only for now
+*/
 
 const RenderLinkWithIcon = ({ item }) => {
 	return (
@@ -26,6 +31,39 @@ const RenderLinkWithIcon = ({ item }) => {
 		</div>
 	);
 };
+
+const PageLinkItem = ({ item, pathname }) =>  
+	<Link to={item.path} 
+		style={{ color: pathname === item.path ? "#FF825C" : "#02073E" }}
+		onClick={() => {
+			if(item.page === "home" && item.id !== "home"){
+				window.manualScrollId = item.id;
+			}else{
+				window.manualScrollId = null;
+			}
+		}}
+		>
+		{item.label}
+	</Link>
+
+const ClickButtonItem = ({ item, history }) =>
+	<div
+		style={{ cursor: "pointer" }}
+		className={"click-button-menu-item"}
+		onClick={() => item.onClick(history)}>{item.label}
+	</div>
+
+const NormalItem = ({ item, history }) => {
+	return (
+		<>
+			{item.itemType === "page-link" ? 
+				<PageLinkItem item={item} pathname={history.location.pathname} />
+				:
+				<ClickButtonItem item={item} history={history} />
+			}
+		</>
+	)
+}
 
 const ScrollSpyMenu = ({ className, menuItems, drawerClose, history, ...props }) => {
 	const { dispatch } = useContext(DrawerContext);
@@ -54,7 +92,6 @@ const ScrollSpyMenu = ({ className, menuItems, drawerClose, history, ...props })
 		});
 	};
 
-	const pathname = history.location.pathname
 	return (
 		<Scrollspy
 			items={scrollItems}
@@ -64,19 +101,8 @@ const ScrollSpyMenu = ({ className, menuItems, drawerClose, history, ...props })
 		>
 			{menuItems.map((item, index) => (
 				<li key={`menu-item-${item.id}`}>
-					{item.isPage ?
-						<Link to={item.path} 
-							style={{ color: pathname === item.path ? "#FF825C" : "#02073E" }}
-							onClick={() => {
-								if(item.page === "home" && item.id !== "home"){
-									window.manualScrollId = item.id;
-								}else{
-									window.manualScrollId = null;
-								}
-							}}
-							>
-							{item.label}
-						</Link>
+					{item.itemType === "click-button" || item.itemType === "page-link" ?
+						<NormalItem item={item} history={history} />
 					 	:
 						item.staticLink ? (
 							<RenderLinkWithIcon item={item} />
