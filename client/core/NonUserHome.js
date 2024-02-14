@@ -21,6 +21,7 @@ import Subscribe from '../templates/containers/AgencyModern/Subscribe';
 import Footer from '../templates/containers/AgencyModern/Footer';
 import Heading from '../templates/common/components/Heading';
 import data from '../templates/common/data/AgencyModern';
+import { NAVBAR_HEIGHT } from "./websiteConstants";
 
 import PeopleWithQuotes from './PeopleWithQuotes';
 import SVGImage from "./SVGImage";
@@ -95,6 +96,18 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
+
+//helper
+const scrollIntoViewWithOffset = (node, offset) => {
+  window.scrollTo({
+    behavior: 'smooth',
+    top:
+      node.getBoundingClientRect().top -
+      document.body.getBoundingClientRect().top -
+      offset,
+  })
+}
+
 const NonUserHome = ({ screen, initScrollTo }) =>{
   const largeImageDimns = { width: screen.width * 0.45, height: screen.height - 40 - 40 }
   const styleProps = { largeImageDimns }
@@ -110,13 +123,14 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
   //@todo - stop using window and use store instead
   useEffect(() => {
     if(window.manualScrollId){
-      d3.select(`#${window.manualScrollId}`).node().scrollIntoView();
+      const requiredNode = d3.select(`#${window.manualScrollId}`).node();//.scrollIntoView({ behavior: 'smooth' });
+      scrollIntoViewWithOffset(requiredNode, NAVBAR_HEIGHT)
       window.manualScrollId = null;
     }
   },[]);
 
   return (
-    <div className={classes.nonUserHomeRoot} ref={rootRef} >
+    <div className={classes.nonUserHomeRoot} ref={rootRef} id="home" >
       <div className={classes.heroImageContainer}>
         <SVGImage image={{ url: "website/heroImg.png", transform:"translate(-20, 5) scale(0.65)" }} dimns={largeImageDimns}
           styles={{ borderColour:"#f0ded5" }} imgKey="main"/>

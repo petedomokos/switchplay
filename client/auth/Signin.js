@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, { useState, useEffect } from 'react'
 import { withRouter, Redirect } from 'react-router-dom'
 import Card from '@material-ui/core/Card'
 import CardActions from '@material-ui/core/CardActions'
@@ -14,6 +14,7 @@ import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import { makeStyles } from '@material-ui/core/styles'
 import auth from './auth-helper'
+import { NAVBAR_HEIGHT } from '../core/websiteConstants'
 
 const useStyles = makeStyles(theme => ({
   signinRoot:{
@@ -69,6 +70,10 @@ export default withRouter(function Signin({ onSignin, serverErrorMesg, location,
   })
   
   if(auth.isAuthenticated()){ return <Redirect to='/'/> }
+
+  useEffect(() => {
+    window.scrollTo(0, -NAVBAR_HEIGHT);
+  },[]);
 
   const clickSubmit = () => {
     const user = {

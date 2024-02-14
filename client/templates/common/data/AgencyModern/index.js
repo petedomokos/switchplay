@@ -14,6 +14,7 @@ import facebook from '../../assets/image/agencyModern/icons/facebook.png';
 import dribbble from '../../assets/image/agencyModern/icons/dribbble.png';
 import github from '../../assets/image/agencyModern/icons/github.png';
 import twitter from '../../assets/image/agencyModern/icons/twitter.png';
+import { NAVBAR_HEIGHT }  from "../../../../core/websiteConstants";
 
 const data = {
   leftMenuItems: [
@@ -22,7 +23,7 @@ const data = {
       id:"home",
       path: '#home',
       page:"home",
-      offset: '70',
+      offset: `${NAVBAR_HEIGHT}`,
       itemType:"anchor-link",
       whenToShow:["visitor"]
     },
@@ -31,7 +32,7 @@ const data = {
       id: 'services',
       path: '#services',
       page:"home",
-      offset: '70',
+      offset: `${NAVBAR_HEIGHT}`,
       itemType:"anchor-link",
       whenToShow:["visitor"]
     },
@@ -40,7 +41,7 @@ const data = {
       id: 'features',
       path: '#features',
       page:"home",
-      offset: '70',
+      offset: `${NAVBAR_HEIGHT}`,
       itemType:"anchor-link",
       whenToShow:["visitor"]
     },
@@ -49,7 +50,7 @@ const data = {
       id: 'customer',
       path: '#customer',
       page:"home",
-      offset: '70',
+      offset: `${NAVBAR_HEIGHT}`,
       itemType:"anchor-link",
       whenToShow:["visitor"]
     },
@@ -60,7 +61,7 @@ const data = {
       id: 'about-us',
       path: '/about',
       page:"about",
-      offset: '70',
+      offset: `${NAVBAR_HEIGHT}`,
       itemType:"page-link",
       whenToShow:["visitor"]
     },
@@ -69,7 +70,7 @@ const data = {
       id: 'get-demo',
       path: '/get-demo',
       page:"get-demo",
-      offset: '70',
+      offset: `${NAVBAR_HEIGHT}`,
       itemType:"page-link",
       whenToShow:["visitor"]
     },
@@ -78,7 +79,7 @@ const data = {
       id:"login",
       path: '/signin',
       page:"login",
-      offset: '70',
+      offset: `${NAVBAR_HEIGHT}`,
       itemType:"page-link",
       whenToShow:["visitor"]
     },
@@ -87,7 +88,7 @@ const data = {
       id:"logout",
       path: '/signout',
       page:"login",
-      offset: '70',
+      offset: `${NAVBAR_HEIGHT}`,
       itemType:"click-button",
       whenToShow:["all-users"]
     },
@@ -98,7 +99,7 @@ const data = {
       id:"home",
       path: '#home',
       page:"home",
-      offset: '70',
+      offset: `${NAVBAR_HEIGHT}`,
       itemType:"anchor-link",
       whenToShow:["visitor"]
     },
@@ -107,7 +108,7 @@ const data = {
       id: 'services',
       path: '#services',
       page:"home",
-      offset: '70',
+      offset: `${NAVBAR_HEIGHT}`,
       itemType:"anchor-link",
       whenToShow:["visitor"]
     },
@@ -116,7 +117,7 @@ const data = {
       id: 'features',
       path: '#features',
       page:"home",
-      offset: '70',
+      offset: `${NAVBAR_HEIGHT}`,
       itemType:"anchor-link",
       whenToShow:["visitor"]
     },
@@ -125,7 +126,7 @@ const data = {
       id:"customer",
       path: '#customer',
       page:"home",
-      offset: '70',
+      offset: `${NAVBAR_HEIGHT}`,
       itemType:"anchor-link",
       whenToShow:["visitor"]
     },
@@ -135,7 +136,7 @@ const data = {
       path: '/about',
       page:"about",
       isPage:true,
-      offset: '70',
+      offset: `${NAVBAR_HEIGHT}`,
       itemType:"page-link",
       whenToShow:["visitor"]
     },
@@ -145,7 +146,7 @@ const data = {
       path: '/get-demo',
       page:"get-demo",
       isPage:true,
-      offset: '70',
+      offset: `${NAVBAR_HEIGHT}`,
       itemType:"page-link",
       whenToShow:["visitor"]
     },
@@ -155,7 +156,7 @@ const data = {
       path: '/signin',
       page:"login",
       isPage:true,
-      offset: '70',
+      offset: `${NAVBAR_HEIGHT}`,
       itemType:"page-link",
       whenToShow:["visitor"]
     },
@@ -163,7 +164,7 @@ const data = {
       label: 'Logout',
       id:"logout",
       path: '/signout',
-      offset: '70',
+      offset: `${NAVBAR_HEIGHT}`,
       itemType:"click-button",
       whenToShow:["all-users"]
     },

@@ -46,20 +46,45 @@ const customiseItemsForUser = (items, user, onSignout) => {
   }
   return items.filter(it => it.whenToShow.includes("visitor"))
 }
-const getNavBarItemsFromOtherPages = (user, onSignout) => {
+
+const getPathForPage = page => {
+  if(page === "home"){ return "/"; }
+  //@todo - add paths if anchor links on other pages eg about page
+  return "";
+}
+
+const getPageFromPath = path => {
+  if(path === "/"){ return "home"; }
+  //@todo - add pages if needed
+  return "other";
+}
+
+const updateItemsForPage = (items, currentPage="home") => {
+  return items.map(item => {
+      //if its an anchor link for a different page, we convert it to a page-link
+      if(item.itemType === "anchor-link" && item.page !== currentPage){
+        return { ...item, itemType: "page-link", path: getPathForPage(item.page) }
+      }
+      return item;
+  })
+}
+
+const getNavBarItemsFromOtherPages = (user, onSignout, path) => {
+  const page = getPageFromPath(path);
   return {
     ...data,
-    leftMenuItems:data.leftMenuItems.map(it => ({ ...it, itemType:"page-link", path:"/" })),
-    rightMenuItems:customiseItemsForUser(data.rightMenuItems, user, onSignout),
-    mobileMenuItems:customiseItemsForUser(data.mobileMenuItems, user, onSignout)
+    leftMenuItems:updateItemsForPage(data.leftMenuItems, page),
+    rightMenuItems:customiseItemsForUser(updateItemsForPage(data.rightMenuItems, page), user, onSignout),
+    mobileMenuItems:customiseItemsForUser(updateItemsForPage(data.mobileMenuItems, page), user, onSignout)
   }
 }
 
 const getNavBarItemsFromHomePage = (user, onSignout) => {
+  const page = "home"//getPageFromPath(path);
   return {
     ...data,
-    rightMenuItems:customiseItemsForUser(data.rightMenuItems, user, onSignout),
-    mobileMenuItems:customiseItemsForUser(data.mobileMenuItems, user, onSignout)
+    rightMenuItems:customiseItemsForUser(updateItemsForPage(data.rightMenuItems, page), user, onSignout),
+    mobileMenuItems:customiseItemsForUser(updateItemsForPage(data.mobileMenuItems, page), user, onSignout)
   }
 
 }

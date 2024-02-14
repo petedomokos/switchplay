@@ -5,6 +5,7 @@ import AnchorLink from "react-anchor-link-smooth-scroll";
 import {Link, withRouter} from 'react-router-dom'
 import Button from '@material-ui/core/Button'
 import * as d3 from 'd3';
+import Logo from '../../../common/components/UIElements/Logo';
 
 import { DrawerContext } from "../../contexts/DrawerContext";
 import NextImage from "../NextImage";
@@ -13,6 +14,13 @@ todo next - when user signed in,
  -  the menu is always the burger menu - check it works
  -  the menu items should be completely different, so remove all except -> "import", "signout" only for now
 */
+
+export const SwitchplayLogo = () =>
+	<div style={{ width: "130px", height: "80%" }}>
+		<img
+			src="/website/logo.png"
+		/>
+	</div> 
 
 const RenderLinkWithIcon = ({ item }) => {
 	return (
@@ -36,14 +44,18 @@ const PageLinkItem = ({ item, pathname }) =>
 	<Link to={item.path} 
 		style={{ color: pathname === item.path ? "#FF825C" : "#02073E" }}
 		onClick={() => {
-			if(item.page === "home" && item.id !== "home"){
+			if(item.page === "home"){
 				window.manualScrollId = item.id;
 			}else{
 				window.manualScrollId = null;
 			}
 		}}
 		>
-		{item.label}
+		{item.id !== "home" ? 
+			item.label
+			:
+			<SwitchplayLogo /> 
+		}
 	</Link>
 
 const ClickButtonItem = ({ item, history }) =>
@@ -114,11 +126,19 @@ const ScrollSpyMenu = ({ className, menuItems, drawerClose, history, ...props })
 										offset={item.offset}
 										onClick={toggleDrawer}
 									>
-										{item.label}
+										{item.id !== "home" ? 
+											item.label 
+											:
+											<SwitchplayLogo /> 
+										}
 									</AnchorLink>
 								) : (
 									<AnchorLink href={item.path} offset={item.offset}>
-										{item.label}
+										{item.id !== "home" ? 
+											item.label 
+											:
+											<SwitchplayLogo /> 
+										}
 									</AnchorLink>
 								)}
 							</>

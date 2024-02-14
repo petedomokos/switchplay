@@ -79,6 +79,7 @@ export const MenuArea = styled.nav`
     margin-left:50px;
   }
   .menu-items {
+    border-color: red;
     display: flex;
     align-items: center;
     margin-right: 11px;

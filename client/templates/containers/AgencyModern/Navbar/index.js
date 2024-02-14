@@ -11,6 +11,7 @@ import Button from '../../../common/components/Button';
 import Container from '../../../common/components/UI/ContainerTwo';
 import NavbarWrapper, { MenuArea, MobileMenu } from './navbar.style';
 import LogoImage from '../../../common/assets/image/agencyModern/logo.png';
+import { SwitchplayLogo } from '../../../common/components/ScrollSpyMenu';
 //import data from '../../../common/data/AgencyModern';
 //import { Fade } from 'react-awesome-reveal';
 //<Fade triggerOnce></Fade>
@@ -42,14 +43,6 @@ const Navbar = ({ data, history, user }) => {
   return (
     <NavbarWrapper className={`agencyModern-navbar navbar ${user ? "for-signed-in-user" : ""}`}>
       <Container className={`${user ? "for-signed-in-user" : ""}`}>
-        {!user && 
-          <Logo
-            href="/agencymodern"
-            logoSrc={{ src: "/website/logo.png" }}
-            title="Crypto Modern"
-            className="main-logo"
-          />
-        }
         {/* end of logo */}
         <MenuArea className={`${user ? "for-signed-in-user" : ""}`}>
           <div className={`main-menu-area ${user ? "for-signed-in-user" : ""}`}>
@@ -116,7 +109,11 @@ const Navbar = ({ data, history, user }) => {
                     offset={item.offset}
                     onClick={handleHandleMenuClose}
                   >
-                    {item.label}
+                    {item.id !== "home" ? 
+                      item.label 
+                      :
+                      <SwitchplayLogo /> 
+                    }
                   </AnchorLink>
                 }
               </li>
