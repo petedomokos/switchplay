@@ -43,7 +43,7 @@ const Navbar = ({ data, history, user }) => {
   return (
     <NavbarWrapper className={`agencyModern-navbar navbar ${user ? "for-signed-in-user" : ""}`}>
       <Container className={`${user ? "for-signed-in-user" : ""}`}>
-        {/* end of logo */}
+        <SwitchplayLogo className="sm-down" /> 
         <MenuArea className={`${user ? "for-signed-in-user" : ""}`}>
           <div className={`main-menu-area ${user ? "for-signed-in-user" : ""}`}>
             <ScrollSpyMenu

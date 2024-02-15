@@ -15,8 +15,8 @@ todo next - when user signed in,
  -  the menu items should be completely different, so remove all except -> "import", "signout" only for now
 */
 
-export const SwitchplayLogo = () =>
-	<div style={{ width: "130px", height: "80%" }}>
+export const SwitchplayLogo = ({className }) =>
+	<div className={className || ""} style={{ width: "130px", height: "80%" }}>
 		<img
 			src="/website/logo.png"
 		/>

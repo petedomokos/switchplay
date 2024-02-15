@@ -11,10 +11,10 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const SVGImage = ({ imgKey, image, dimns, styles, settings }) =>{
+const SVGImage = ({ imgKey, image, dimns, styles, className, settings }) =>{
     const { width, height } = dimns;
     const { borderColour="black" } = styles;
-    const { withBorderGradient=true, borderWidth=40 } = settings;
+    const { withBorderGradient=false, borderWidth=0 } = settings;
 
     const styleProps = { };
     const classes = useStyles(styleProps);
@@ -38,7 +38,7 @@ const SVGImage = ({ imgKey, image, dimns, styles, settings }) =>{
     },[])
 
     return (
-        <svg className={classes.imageSvg} id={`image-svg`} ref={containerRef} width={width} height={height} >
+        <svg className={`${classes.imageSvg} ${className}`} id={`image-svg`} ref={containerRef} width={width} height={height} style={{ ...styles.root }} >
             <defs>
                 <clipPath id={`${imgKey}-circle-clip`}><circle/></clipPath>
                 <clipPath id={`${imgKey}-rect-clip`}><rect/></clipPath>
@@ -70,9 +70,10 @@ SVGImage.defaultProps = {
         height:300
     },
     image:{},
-    style:{},
+    styles:{ root:{} },
     settings:{
-    }
+    },
+    className:""
   }
   
 export default SVGImage;

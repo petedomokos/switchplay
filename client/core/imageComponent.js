@@ -15,7 +15,8 @@ export default function imageComponent() {
     let contentsWidth;
     let contentsHeight;
 
-    let withBorderGradient = true;
+    let withBorderGradient = false;
+    let cornerRadius = 0;
     let imgKey = ""
 
     function updateDimns(){
@@ -80,10 +81,11 @@ export default function imageComponent() {
             
                 container.select("rect.image-bg")
                     //.attr("stroke-width", borderWidth)
-                    .attr("rx", 50)
-                    .attr("ry", 50)
+                    .attr("rx", cornerRadius)
+                    .attr("ry", cornerRadius)
                     .attr("width", width)
                     .attr("height", height)
+                    .attr("display", "none")
                     .attr("fill", withBorderGradient ? "none" : styles.borderColour)
                     /*.call(updateRectDimns, { 
                         width: () => width, 
@@ -101,8 +103,8 @@ export default function imageComponent() {
                     .select("rect")
                         .attr("width", contentsWidth)
                         .attr("height", contentsHeight)
-                        .attr("rx", 50)
-                        .attr("ry", 50)
+                        .attr("rx", cornerRadius)
+                        .attr("ry", cornerRadius)
 
                 contentsG.select("image")
                     .attr("xlink:href", data.url)

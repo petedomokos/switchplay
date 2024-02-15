@@ -26,6 +26,7 @@ import { NAVBAR_HEIGHT } from "./websiteConstants";
 import PeopleWithQuotes from './PeopleWithQuotes';
 import SVGImage from "./SVGImage";
 import { makeStyles } from '@material-ui/core/styles'
+import { MAIN_BANNER_MARGIN_VERT } from "./websiteConstants";
 
 const playerQuotesData = { 
     key:"players", 
@@ -77,22 +78,9 @@ const useStyles = makeStyles(theme => ({
     width:"100%",
     background:"#FF825C"
   },
-  heroImageContainer:{
-    //border:"solid",
-    borderColor:"white",
-    position:"absolute", 
-    right:"7.5vw", 
-    top:props => `calc(70px + (100vh - 70px - ${props.largeImageDimns.height}px) / 2)`,//"140px",
-    width:props => `${props.largeImageDimns.width}px`, 
-    height:props => `${props.largeImageDimns.height}px`, 
-    overflow:"hidden",
-    [theme.breakpoints.down('md')]: {
-      display:"none"
-    },
-    //[theme.breakpoints.up('md')]: {
-      //borderColor:"red"
-    //},
-
+  screen:{
+    display:"flex",
+    justifyContent:"center"
   }
 }))
 
@@ -109,8 +97,15 @@ const scrollIntoViewWithOffset = (node, offset) => {
 }
 
 const NonUserHome = ({ screen, initScrollTo }) =>{
-  const largeImageDimns = { width: screen.width * 0.45, height: screen.height - 40 - 40 }
-  const styleProps = { largeImageDimns }
+  const largeImageDimns = { 
+    width: screen.width * 0.45, 
+    height: screen.height - 2 * MAIN_BANNER_MARGIN_VERT[screen.size],
+    marginTop:MAIN_BANNER_MARGIN_VERT[screen.size],
+    marginBottom:MAIN_BANNER_MARGIN_VERT[screen.size]
+  }
+  const styleProps = { 
+    image:largeImageDimns,
+  }
   const classes = useStyles(styleProps);
   const rootRef = useRef(null);
   const potentialAnimationWidth = d3.min([screen.width * 0.9, d3.max([600, screen.width * 0.7]) ]);// sceneNr >= 8 ? 600 : 800;// d3.min([screen.width * 0.8, d3.max([screen.width * 0.5, 600]) ]);
@@ -131,17 +126,7 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
 
   return (
     <div className={classes.nonUserHomeRoot} ref={rootRef} id="home" >
-      <div className={classes.heroImageContainer}>
-        <SVGImage image={{ url: "website/heroImg.png", transform:"translate(-20, 5) scale(0.65)" }} dimns={largeImageDimns}
-          styles={{ borderColour:"#f0ded5" }} imgKey="main"/>
-        {/**<img src="website/heroImg.png" 
-        style={{ transform:"translate(0px, 0px) scale(0.65)", transformOrigin: "top left" }} />*/}
-      </div>
       <Banner screen={screen} /> 
-      {/**<div className={classes.heroImageContainer}>
-        <img src="website/heroImg.png" 
-          style={{ transform:"translate(30px, 0px) scale(0.65)", transformOrigin: "top left" }} />
-      </div>*/}
       <Services />
       <div style={{ height:"30px"}}></div>
       <PeopleWithQuotes title="What Players Say" data={playerQuotesData} dimns={{ width: screen.width * 0.9, minHeight: 260 }}

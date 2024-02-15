@@ -132,8 +132,6 @@ const useStyles = makeStyles(theme => ({
     background:grey10(9.5),//"black",
     //padding:"5px 2.5%",
     width:"100%",
-    border:"solid",
-    borderColor:"red"
   },
   screen:{
     width:"100%",

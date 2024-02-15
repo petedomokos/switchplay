@@ -16,6 +16,7 @@ import BannerWrapper, {
 
 import { grey10 } from "../../../../core/cards/constants"
 import SVGImage from "../../../../core/SVGImage";
+import { MAIN_BANNER_MARGIN_VERT } from "../../../../core/websiteConstants";
 
 //import paypal from '../../../common/assets/image/agencyModern/paypal.png';
 //import google from '../../../common/assets/image/agencyModern/google.png';
@@ -38,59 +39,98 @@ const mainImgInfo = {
 
 //old...Great football development comes down to relationships, communication, learning & growth,( & details?)
 const Banner = ({screen}) => {
+  const largeImgDimns = { 
+    width: screen.width * 0.45, 
+    height: screen.height - 2 * MAIN_BANNER_MARGIN_VERT[screen.size]
+  }
+  const largeImgTransform = `translate(${-200 + 0.1 * screen.width},${0}) scale(${0.65})`;
+
   const { url, imgWidth, imgHeight, imgTransX=0, imgTransY=0 } = mainImgInfo;
   const requiredImgAspectRatio = 0.7;
-  const requiredImgWidth = screen.width * (screen.orientation === "landscape" ?  0.4 : 0.8);
+  const requiredImgWidth = screen.width;// * (screen.orientation === "landscape" ?  0.4 : 1);
   const requiredImgDimns = { width: requiredImgWidth, height: requiredImgWidth * requiredImgAspectRatio };
   const imgScale = requiredImgWidth / imgWidth;
   const imgTransform = `translate(${imgTransX},${imgTransY}) scale(${imgScale})`;
 
-  //md-down
-  //next - remove all styleing and start again - it shouldnt be this hard!
+
 
   return (
     <BannerWrapper id="home">
-      <Container>
         <BannerContent>
-          <div className="md-down main-img-small">
-            <SVGImage image={{ url, transform:imgTransform }} dimns={requiredImgDimns}
-                    styles={{ borderColour:"#f0ded5" }} imgKey="main-ss"/>
-          </div>
-          <Heading
-            as="h1"
+            <div style={{ }}>
+              <Heading
+                as="h1"
+                className="md-up"
+                content="The tool"
+              />
+              <Heading
+                as="h1"
+                className="md-up"
+                content="that puts"
+              />
+              <Heading
+                as="h1"
+                className="md-up in-bold"
+                content="people first"
+              />
+              <Heading
+                as="h1"
+                className="sm-down-land"
+                content="The tool that puts people first"
+              />
+              <Heading
+                as="h1"
+                className="sm-down-port"
+                content="The tool that puts"
+              />
+              <Heading
+                as="h1"
+                className="sm-down-port in-bold"
+                content="people first"
+              />
+            </div>
+            <Text
+              className="banner-caption md-up"
+              content="Get your players thinking and acting like pros. Manage all your team's communication and information in one place. Use data with confidence and purpose."
+            />
+            <Subscribe>
+              <Input
+                inputType="email"
+                placeholder="Enter Email Address"
+                iconPosition="left"
+                aria-label="email"
+              />
+              <Button title="Get A Demo" type="submit" />
+            </Subscribe>
+          
+        </BannerContent>
+        <div className="banner-image-area">
+          <SVGImage 
             className="md-up"
-            content="The development tool that puts people first"
+            image={{ url: "website/heroImg.png", transform:largeImgTransform }} dimns={largeImgDimns}
+            imgKey="main"
           />
-          <Heading
-            as="h1"
-            className="sm-down-land"
-            content="The development tool that puts people first"
+          <SVGImage 
+            className="sm-down"
+            image={{ url: "website/heroImg.png", transform:imgTransform }} dimns={requiredImgDimns}
+            imgKey="main"
           />
-          <Heading
-            as="h1"
-            className="sm-down-port"
-            content="The development tool that"
-          />
-          <Heading
-            as="h1"
-            className="sm-down-port"
-            content="puts people first"
+        </div>
+        <div className="banner-caption-area-sm sm-down">
+          <Text
+            className="banner-caption banner-caption-1"
+            content="Get your players thinking and acting like pros."
           />
           <Text
-            className="banner-caption"
-            content="Get your players thinking and acting like pros. Manage your whole team's communication and information in one place. Use data effectively."
+            className="banner-caption banner-caption-2"
+            content="Manage all your team's communication and information in one place."
           />
-          <Subscribe>
-            <Input
-              inputType="email"
-              placeholder="Enter Email Address"
-              iconPosition="left"
-              aria-label="email"
-            />
-            <Button title="Get A Demo" type="submit" />
-          </Subscribe>
-        </BannerContent>
-        <div className="compatible-items-area">
+          <Text
+            className="banner-caption banner-caption-3"
+            content="Use data with confidence and purpose."
+          />
+        </div>
+        {/**<div className="compatible-items-area">
           <div style={{ height:"30px", fontSize:"16px", color:grey10(8) }}>Works well with</div>
           <div className="compatible-items-list">
             <div style={{ display:"flex", justifyContent:"space-around", flexWrap:"wrap" }}>
@@ -106,8 +146,7 @@ const Banner = ({screen}) => {
               <span style={compatibleItemSt}>SQL</span>
             </div>
           </div>
-        </div>
-      </Container>
+        </div>*/}
     </BannerWrapper>
   );
 };
