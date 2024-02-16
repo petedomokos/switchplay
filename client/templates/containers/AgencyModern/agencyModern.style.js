@@ -1,4 +1,5 @@
 import styled, { createGlobalStyle } from 'styled-components';
+import { MAIN_BANNER_MARGIN_VERT, COLOURS } from '../../../core/websiteConstants';
 
 export const GlobalStyle = createGlobalStyle`
   body {
@@ -42,7 +43,7 @@ export const ContentWrapper = styled.div`
 
   .sticky-nav-active {
     .agencyModern-navbar {
-      background-color: #f0ded5;
+      background-color: ${COLOURS.banner.bg};
       box-shadow: 0px 3px 8px 0px rgba(43, 83, 135, 0.08);
     }
   }

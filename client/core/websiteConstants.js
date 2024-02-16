@@ -7,3 +7,10 @@ export const MAIN_BANNER_MARGIN_VERT = {
     lg:100,
     xl:100
 }
+
+export const COLOURS = {
+    banner:{
+        bg:"#DBEFF0"
+
+    }
+}

@@ -27,6 +27,7 @@ import PeopleWithQuotes from './PeopleWithQuotes';
 import SVGImage from "./SVGImage";
 import { makeStyles } from '@material-ui/core/styles'
 import { MAIN_BANNER_MARGIN_VERT } from "./websiteConstants";
+import Players from "./Players"
 
 const playerQuotesData = { 
     key:"players", 
@@ -127,7 +128,8 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
   return (
     <div className={classes.nonUserHomeRoot} ref={rootRef} id="home" >
       <Banner screen={screen} /> 
-      <Services />
+      <Players />
+      {/**<Services />
       <div style={{ height:"30px"}}></div>
       <PeopleWithQuotes title="What Players Say" data={playerQuotesData} dimns={{ width: screen.width * 0.9, minHeight: 260 }}
           styles={{ borderColour:"#FF825C" }} direction={screen.isSmall ? "column" : "row"}  />
@@ -139,6 +141,7 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
           dimns={{ width: screen.width * 0.9, minHeight: 360 }} direction={screen.isSmall ? "column" : "row"} />
       <Subscribe />
       <Footer />
+      */}
     </div>
   )
 }

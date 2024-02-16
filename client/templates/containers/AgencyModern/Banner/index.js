@@ -29,28 +29,37 @@ const dropbox = "";
 const compatibleItemSt = { margin:"5px 5px 10px", width:"110px", fontSize:"14px", color:grey10(5) }
 // &amp; 
 
-const mainImgInfo = {
+const largeImageInfo = {
   url:"website/heroImg.png",
-  imgWidth:900, 
-  imgHeight:900, 
-  imgTransX:0, 
+  rawImgWidth:800,//actual whole is 1100, 
+  rawImgHeight:200, 
+  imgTransX:-60, 
   imgTransY:0
+}
+
+const smallImageInfo = {
+  url:"website/heroImg.png",
+  rawImgWidth:800,//actual whole is 1100, 
+  rawImgHeight:200, 
+  imgTransX:-60, 
+  imgTransY:0,
+  aspectRatio:0.85
 }
 
 //old...Great football development comes down to relationships, communication, learning & growth,( & details?)
 const Banner = ({screen}) => {
+  //aspect ratio changes for large image depending on screen
   const largeImgDimns = { 
     width: screen.width * 0.45, 
     height: screen.height - 2 * MAIN_BANNER_MARGIN_VERT[screen.size]
   }
+  const requiredLargeAspectRatio = largeImgDimns.height / largeImgDimns.width;
   const largeImgTransform = `translate(${-200 + 0.1 * screen.width},${0}) scale(${0.65})`;
 
-  const { url, imgWidth, imgHeight, imgTransX=0, imgTransY=0 } = mainImgInfo;
-  const requiredImgAspectRatio = 0.7;
-  const requiredImgWidth = screen.width;// * (screen.orientation === "landscape" ?  0.4 : 1);
-  const requiredImgDimns = { width: requiredImgWidth, height: requiredImgWidth * requiredImgAspectRatio };
-  const imgScale = requiredImgWidth / imgWidth;
-  const imgTransform = `translate(${imgTransX},${imgTransY}) scale(${imgScale})`;
+  const { url, imgWidth, imgHeight, imgTransX=0, imgTransY=0 } = largeImageInfo;
+
+  const smallImage = smallImageInfo;
+  const largeImage = { ...largeImageInfo, aspectRatio:requiredLargeAspectRatio }
 
 
 
@@ -104,15 +113,15 @@ const Banner = ({screen}) => {
             </Subscribe>
           
         </BannerContent>
-        <div className="banner-image-area">
+        <div className="banner-image-area" style={{ /**border:"solid"*/ }}>
           <SVGImage 
             className="md-up"
-            image={{ url: "website/heroImg.png", transform:largeImgTransform }} dimns={largeImgDimns}
+            image={largeImage}
             imgKey="main"
           />
           <SVGImage 
             className="sm-down"
-            image={{ url: "website/heroImg.png", transform:imgTransform }} dimns={requiredImgDimns}
+            image={smallImage}
             imgKey="main"
           />
         </div>

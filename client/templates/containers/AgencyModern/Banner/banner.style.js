@@ -3,7 +3,7 @@ import { rgba } from 'polished';
 import { themeGet } from '@styled-system/theme-get';
 
 import bannerBg from '../../../common/assets/image/agencyModern/banner2.png';
-import { MAIN_BANNER_MARGIN_VERT } from '../../../../core/websiteConstants';
+import { MAIN_BANNER_MARGIN_VERT, COLOURS } from '../../../../core/websiteConstants';
 
 
 //#f0ded5
@@ -11,7 +11,7 @@ const BannerWrapper = styled.div`
   //border: solid;
   border-color:yellow;
   background-image: url(${bannerBg?.src});
-  background-color: #DBEFF0;
+  background-color: ${COLOURS.banner.bg};
   background-size: 100%;
   background-position: right bottom;
   background-repeat: no-repeat;
@@ -69,7 +69,7 @@ const BannerWrapper = styled.div`
     //border:solid;
     color: ${themeGet('colors.paragraph', '#02073E')};
     font-size: 16px;
-    line-height: 2.2;
+    line-height: 1.5;
     font-weight: 400;
     max-width:330px;
     @media only screen and (max-width: 1400px) {
@@ -199,7 +199,7 @@ export const Subscribe = styled.div`
     width: 100%;
   }
   .field-wrapper {
-    margin-bottom:0px;
+    margin-bottom:5px;
     input {
       min-width: 200px;
       font-family: DM Sans;
