@@ -10,35 +10,72 @@ import data from '../../../common/data/AgencyModern';
 //<Fade direction='up' triggerOnce delay={100}></Fade>
 //</Fade>
 
+/*
+<SectionHeader>
+  <Heading content="Get more of your players thinking like pros" />
+  <Text content="Think of the most proactive player in your squad. Switchplay engages and inspires all players to become like them." />
+</SectionHeader>
+*/
+
 const Services = () => {
   return (
     <SectionWrapper id="services">
       <Container>
-        
-          <SectionHeader>
-            <Heading content="Get more of your players thinking like pros" />
-            <Text content="Think of the most proactive player in your squad. Switchplay engages and inspires all players to become like them." />
-          </SectionHeader>
-       
         <ServiceWrapper>
-          {data.services.map((item, index) => (
-              <SimpleFeatureBlock
-                key={`post_key-${index}`}
-                id={`post_id-${item.id}`}
-                className="service__item"
-                icon={
-                  <div style={{ width:"100px", height:"100px", paddingTop:10 }}>
-                    <img
-                      src={`website/icons/${item.key}.png`}
-                      alt={`Blog Image ${item.id}`}
-                      objectFit="cover"
-                      style={{ transform:item.imageTransform, padding:0, margin:0 }}
+          <div className="services">
+            {data.services[0].map((item, index) => (
+              <div className="service primary-service">
+                <SimpleFeatureBlock
+                  key={`post_key-${index}`}
+                  id={`post_id-${item.id}`}
+                  className="service__item"
+                  icon={
+                    <div style={{ width:"100px", height:"100px", paddingTop:10}}>
+                      <img
+                        src={`website/icons/${item.key}.png`}
+                        alt={`Blog Image ${item.id}`}
+                        objectFit="cover"
+                        style={{ transform:item.imageTransform, padding:0, margin:0 }}
+                      />
+                    </div>
+                  }
+                  title={<Heading as="h4" content={item.title} />}
+                  description={
+                    <Text
+                      content={item.description}
                     />
-                  </div>
-                }
-                title={<Heading as="h4" content={item.title} />}
-              />
-          ))}
+                  }
+                />
+              </div>
+            ))}
+          </div>
+          <div className="services">
+            {data.services[1].map((item, index) => (
+              <div className="service secondary-service">
+                <SimpleFeatureBlock
+                  key={`post_key-${index}`}
+                  id={`post_id-${item.id}`}
+                  className="service__item"
+                  icon={
+                    <div style={{ width:"100px", height:"100px", paddingTop:10}}>
+                      <img
+                        src={`website/icons/${item.key}.png`}
+                        alt={`Blog Image ${item.id}`}
+                        objectFit="cover"
+                        style={{ transform:item.imageTransform, padding:0, margin:0 }}
+                      />
+                    </div>
+                  }
+                  title={<Heading as="h4" content={item.title} />}
+                  description={
+                    <Text
+                      content={item.description}
+                    />
+                  }
+                />
+              </div>
+            ))}
+          </div>
         </ServiceWrapper>
       </Container>
     </SectionWrapper>

@@ -17,6 +17,7 @@ import BannerWrapper, {
 import { grey10 } from "../../../../core/cards/constants"
 import SVGImage from "../../../../core/SVGImage";
 import { MAIN_BANNER_MARGIN_VERT } from "../../../../core/websiteConstants";
+import CompatibilityInfo from '../../../../core/CompatibilityInfo';
 
 //import paypal from '../../../common/assets/image/agencyModern/paypal.png';
 //import google from '../../../common/assets/image/agencyModern/google.png';
@@ -26,7 +27,6 @@ const paypal = "";
 const google = "";
 const dropbox = "";
 
-const compatibleItemSt = { margin:"5px 5px 10px", width:"110px", fontSize:"14px", color:grey10(5) }
 // &amp; 
 
 const largeImageInfo = {
@@ -66,7 +66,7 @@ const Banner = ({screen}) => {
   return (
     <BannerWrapper id="home">
         <BannerContent>
-            <div style={{ }}>
+            <div className="heading">
               <Heading
                 as="h1"
                 className="md-up"
@@ -111,18 +111,18 @@ const Banner = ({screen}) => {
               />
               <Button title="Get A Demo" type="submit" />
             </Subscribe>
-          
+            <CompatibilityInfo screen={screen} className="md-up"/>
         </BannerContent>
-        <div className="banner-image-area" style={{ /**border:"solid"*/ }}>
+        <div className="banner-image-area">
           <SVGImage 
             className="md-up"
             image={largeImage}
-            imgKey="main"
+            imgKey="main-lg"
           />
           <SVGImage 
             className="sm-down"
             image={smallImage}
-            imgKey="main"
+            imgKey="main-sm"
           />
         </div>
         <div className="banner-caption-area-sm sm-down">
@@ -139,23 +139,7 @@ const Banner = ({screen}) => {
             content="Use data with confidence and purpose."
           />
         </div>
-        {/**<div className="compatible-items-area">
-          <div style={{ height:"30px", fontSize:"16px", color:grey10(8) }}>Works well with</div>
-          <div className="compatible-items-list">
-            <div style={{ display:"flex", justifyContent:"space-around", flexWrap:"wrap" }}>
-              <span style={compatibleItemSt}>Kitman Labs</span>
-              <span style={compatibleItemSt}>Hudl</span>
-              <span style={compatibleItemSt}>Session Planner</span>
-              <span style={compatibleItemSt}>PDF</span>
-            </div>
-            <div style={{ display:"flex", justifyContent:"space-around", flexWrap:"wrap" }}>
-              <span style={compatibleItemSt}>Excel</span>
-              <span style={compatibleItemSt}>Word</span>
-              <span style={compatibleItemSt}>GDrive</span>
-              <span style={compatibleItemSt}>SQL</span>
-            </div>
-          </div>
-        </div>*/}
+        <CompatibilityInfo screen={screen} className="sm-down"/>
     </BannerWrapper>
   );
 };

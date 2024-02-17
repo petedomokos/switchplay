@@ -4,144 +4,100 @@ import { makeStyles } from '@material-ui/core/styles'
 
 import Quote from './Quote';
 import SVGImage from './SVGImage';
+import { PEOPLE_WITH_QUOTES } from './websiteConstants';
 
 const useStyles = makeStyles(theme => ({
     peopleWithQuotesRoot: {
-        margin:"50px auto",
-        width:props => `${props.width}px`,
-        maxWidth:props => `${props.width}px`,
+        width:"100vw",
+        //height:"2000px",
+        display:"flex",
+        flexDirection:props => props.direction,
+        [theme.breakpoints.down('sm')]: {
+            //passing in direction = colummn affects teh boundingClient calc in image, 
+            //so we use flex property to switch to a vertical display instead
+            display:"block",
+        },
+        background:"#FFFEFE",
+        border:'solid',
+        borderColor:"red",
+    },
+    peopleContainer:{
+        width:"50vw",
+        height:props => `${props.aspectRatio * 50}vw`,
+        //display:"flex",
+        //justifyContent:"center",
+        //border:'solid',
+        borderColor:"black",
+        background:"pink",
+        [theme.breakpoints.down('sm')]: {
+            width:"100vw",
+            height:props => `${props.aspectRatio * 100}vw`,
+            borderColor:"blue",
+        },
+    },
+    quotesContainer:{
+        width:"50vw",
+        height:props => `${props.aspectRatio * 50}vw`,
+        //color:"red",
+        border:"solid",
+        borderColor:"red",
+        display:"flex",
+        flexDirection:"column",
+        alignItems:"center",
+        [theme.breakpoints.down('sm')]: {
+            width:"100vw",
+            height:() => "500px",
+            padding:"10px 0 50px",
+            borderColor:"blue",
+        },
     },
     title:{
         width:"100%",
-        height:props => `${props.titleHeight}px`,
-        margin:"auto",
-        marginBottom:"20px",
+        height:`${PEOPLE_WITH_QUOTES.titleHeightPC.mdUp}%`,
         display:"flex",
         justifyContent:"center",
         alignItems:"center",
         //border:"solid",
         color:"black",//theme.palette.blue,
         fontFamily: "Brush Script MT, cursive",
-        fontSize:"36px"
-    },
-    contents:{
-        width:props => `${props.contentsWidth}px`,
-        //height:props => `${props.contentsHeight}px`,
-        display:"flex",
-        flexDirection:props => props.direction,
-        justifyContent:"center",
-        alignItems:"center",
-        flexWrap:"wrap",
-        //border:'solid'
-    },
-    peopleContainer:{
-        width:props => `${props.peopleContainerWidth}px`,
-        height:props => `${props.peopleHeight}px`,
-        display:"flex",
-        justifyContent:"center",
-        //border:'solid',
-        borderColor:"white"
-    },
-    people:{
-        width:props => `${props.peopleWidth}px`,
-        minWidth:props => `${props.peopleWidth}px`,
-        height:props => `${props.peopleHeight}px`,
-        //margin:"20px",
-        //display:"flex",
-        //flexDirection:"column",
-        //justifyContent:"center",
-        overflow:"hidden",
-        //border:"solid",
-        //borderColor:"blue",
+        fontSize:"36px",
+        [theme.breakpoints.down('sm')]: {
+            height:`${PEOPLE_WITH_QUOTES.titleHeightPC.smDown}%`
+        }
     },
     quotes:{
-        //color:"red",
-        [theme.breakpoints.only('sm')]: {
-            display:"none"
-        },
-        //border:"solid",
-        borderColor:"blue",
-        width:props => `${props.quotesWidth}px`,
-        minWidth:props => `${props.quotesWidth}px`,
-        height:props => `${props.contentsHeight}px`,
-        paddingLeft:"40px",
+        width:"100%",
+        height:"75%",
+        padding:"30px",
         display:"flex",
         flexDirection:"column",
-        justifyContent:"center",
-    },
-    widerQuotes:{
-        //color:"blue",
-        [theme.breakpoints.down('xs')]: {
-            display:"none"
+        justifyContent:"space-around",
+        alignItems:"center",
+        [theme.breakpoints.down('sm')]: {
+            padding:"10px 10px 10px 20px"
         },
-        [theme.breakpoints.up('md')]: {
-            display:"none"
-        },
-        //border:"solid",
-        width:"80%",
-        minWidth:"300px",
-        height:"90%",
-        margin:"20px",
-        display:"flex",
-        flexDirection:"column",
-        justifyContent:"center",
     }
 }))
 
-const PeopleWithQuotes = ({ title, data, dimns, direction }) =>{
+const PeopleWithQuotes = ({ title, data, direction }) =>{
     //for now, static. later can do carousel
-    const { key, url, imgWidth, imgHeight, imgTransX=0, imgTransY=0, quotes } = data;
-
-    const { width, minHeight } = dimns;
-    const contentsWidth = width;
-    const titleHeight = 90;
-    const peopleContainerWidth = direction === "column" ? d3.min([500, width * 0.9]) : width * 0.49;
-    const peopleWidth = direction === "column" ? peopleContainerWidth : peopleContainerWidth * 0.8;
-    const imgScale = imgWidth ? peopleWidth / imgWidth : 1;
-    const transform = `translate(${imgTransX},${imgTransY}) scale(${imgScale})`;
-    const requiredAspectRatio = imgWidth && imgHeight ? imgHeight / imgWidth : 0.666;
-    const peopleHeight = peopleWidth * requiredAspectRatio;
-    const contentsHeight = d3.max([peopleHeight, minHeight]);
-
-    const quotesWidth = direction === "column" ? width * 0.9 : width * 0.49;
-
-    const imgDimns = { width: peopleWidth, height: peopleHeight }
-
-    const styleProps = { 
-        direction,
-        width,
-        contentsWidth,
-        titleHeight,
-        contentsHeight,
-        peopleContainerWidth,
-        peopleWidth,
-        peopleHeight,
-        quotesWidth
-        //contentsHeight: title ? "calc(100% - 40px)" : "100%"
-    };
+    const { key, image, quotes } = data;
+    const styleProps = { aspectRatio:image.aspectRatio, direction };
     const classes = useStyles(styleProps);
 
     return (
-        <div className={classes.peopleWithQuotesRoot} >
-            {title && <div className={classes.title}>{title}</div>}
-            <div className={classes.contents}>
+        <div className={classes.peopleWithQuotesRoot}>
                 <div className={classes.peopleContainer}>
-                    <div className={classes.people}>
-                        <SVGImage image={{ url, transform }} dimns={imgDimns} settings={{ withBorderGradient: true, borderWidth:40 }}
-                            styles={{ borderColour:"#FF825C"}} imgKey={key} />
-                    </div>
+                    <SVGImage image={image} imgKey={key} />
                 </div>
-                <div className={classes.quotes}>
+                <div className={classes.quotesContainer}>
+                    {title && <div className={classes.title}>{title}</div>}
+                    <div className={classes.quotes}>
                         {quotes.map((q,i) => 
                             <Quote data={q} key={`${key}-${i}`} />
                         )}
+                        </div>
                 </div>
-                <div className={classes.widerQuotes}>
-                        {quotes.map((q,i) => 
-                            <Quote data={q} key={`${key}-${i}`} />
-                        )}
-                </div>
-            </div>
         </div>
     )
 }
@@ -149,7 +105,6 @@ const PeopleWithQuotes = ({ title, data, dimns, direction }) =>{
 PeopleWithQuotes.defaultProps = {
     style:{},
     data:{ key:"default", url:"", quotes:[] },
-    dimns:{ width: 700, height: 300 },
     direction:"row"
 }
   

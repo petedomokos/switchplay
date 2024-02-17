@@ -4,12 +4,13 @@ import * as d3 from 'd3';
 import SVGImage from "./SVGImage";
 import { makeStyles } from '@material-ui/core/styles'
 import { NAVBAR_HEIGHT } from "./websiteConstants";
+import Services from '../templates/containers/AgencyModern/Services';
 
 const mainImageLarge = {
   url:"website/images/player-as-pro.png",
-  rawImgWidth:400,//actual whole is 1100, 
+  rawImgWidth:800,//actual whole is 1100, 
   rawImgHeight:200, 
-  imgTransX:0, 
+  imgTransX:-20, 
   imgTransY:0,
   aspectRatio:1.6
 }
@@ -33,7 +34,7 @@ const useStyles = makeStyles(theme => ({
     borderColor:"white",
   },
   topBanner:{
-    border:"solid",
+    //border:"solid",
     borderColor:"red",
     height:`calc(100vh - ${NAVBAR_HEIGHT}px)`,
     display:"flex",
@@ -48,7 +49,7 @@ const useStyles = makeStyles(theme => ({
     },
   },
   heading:{
-    border:"solid",
+    //border:"solid",
     borderColor:"yellow",
     width:"20vw",
     marginRight:"3vw",
@@ -59,48 +60,47 @@ const useStyles = makeStyles(theme => ({
       width:"auto",
       alignItems:"flex-start",
       marginRight:0,
-      margin:"40px 0",
-      padding:"30px 0"
+      margin:"40px 0 120px 0",
     },
   },
   mainImageSmall:{
     width:"100vw",
     //height:`${100 * mainImageSmall.aspectRatio}vw`,
-    border:"solid",
+    //border:"solid",
     borderColor:"yellow",
   },
   mainImageLarge:{
     width:"25vw",
     height:`${25 * mainImageLarge.aspectRatio}vw`,
     marginLeft:"3vw",
-    border:"solid",
+    //border:"solid",
     borderColor:"yellow",
   },
   headingSmallLine:{
-    margin:"5px 0",
+    margin:"0 0 10px 0",
     lineHeight:1,
     fontSize:"14px",
     color:'white',
     [theme.breakpoints.down('sm')]: {
-      margin:"10px 0",
+      margin:"0 0 20px 0",
       lineHeight:1,
       fontSize:"14px",
     },
   },
   headingLargeLine:{
-    margin:"7.5px 0",
+    margin:"0 0 15px 0",
     lineHeight:1.2,
     fontSize:"42px",
     color:'white',
     [theme.breakpoints.down('sm')]: {
-      margin:"15px 0",
+      margin:"0 0 15px 0",
       lineHeight:1.2,
       fontSize:"42px",
     },
   }
 }))
 
-const Players = ({ screen }) =>{
+const PlayersBanner = ({ screen }) =>{
   const mainImgRef = useRef(null);
 
   const styleProps = { 
@@ -122,14 +122,15 @@ const Players = ({ screen }) =>{
           <div className={classes.headingSmallLine}>LIKE PROS</div>
         </div>
         <div className={`${classes.mainImageLarge} md-up`}>
-          {/**<SVGImage image={mainImageLarge} />*/}
+          <SVGImage image={mainImageLarge} />
         </div>
         <div className={`${classes.mainImageSmall} sm-down`}>
           <SVGImage image={mainImageSmall} />
         </div>
       </div>
+      <Services />
     </div>
   )
 }
   
-export default withRouter(Players)
+export default withRouter(PlayersBanner)

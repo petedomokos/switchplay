@@ -8,7 +8,7 @@ import { MAIN_BANNER_MARGIN_VERT, COLOURS } from '../../../../core/websiteConsta
 
 //#f0ded5
 const BannerWrapper = styled.div`
-  //border: solid;
+  border: solid;
   border-color:yellow;
   background-image: url(${bannerBg?.src});
   background-color: ${COLOURS.banner.bg};
@@ -43,26 +43,10 @@ const BannerWrapper = styled.div`
       height:auto;
     }
   }
-  .compatible-items-area {
-    display:none;
-    margin:auto;
-    margin-top:210px;
-    padding-bottom:60px;
-    width: 90%;
-    @media only screen and (max-width: 1400px) {
-      margin-top:230px;
-    }
-    @media only screen and (max-width: 990px) {
-      margin-top:60px;
-    }
-  }
-  .compatible-items-list {
-
-  }
   .banner-caption-area-sm {
     //border:solid;
     width:300px;
-    margin:60px auto;
+    margin:60px auto 20px;
     padding-left:20px;
   }
   .banner-caption {
@@ -76,7 +60,6 @@ const BannerWrapper = styled.div`
       font-size: 14px;
     }
     @media only screen and (max-width: 990px) {
-      line-height: 33px;
       max-width: 85%;
     }
     @media only screen and (max-width: 575px) {
@@ -103,7 +86,6 @@ export const BannerContent = styled.div`
   width: 45%;
   display: flex;
   flex-direction: column;
-  justify-content:space-around;
   height:calc(100vh - ${2 * MAIN_BANNER_MARGIN_VERT.xl}px);
   @media only screen and (max-width: 1600px) {
     border-color: red;

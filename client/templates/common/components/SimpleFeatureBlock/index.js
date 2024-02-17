@@ -46,6 +46,7 @@ const FeatureBlock = ({
 			{Icon}
 			<div style={{ width:"260px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
 				{title}
+				{description}
 			</div>
 			{/**additionalContent*/}
 		</div>

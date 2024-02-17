@@ -8,14 +8,13 @@ import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles(theme => ({
   imageSvg: {
-      border:"solid",
-      borderColor:"yellow",
+      //border:"solid",
+      //borderColor:"yellow",
   }
 }))
 
+//@todo - add proper window event listener
 const SVGImage = ({ imgKey, image, fixedDimns, styles, className, settings }) =>{
-    console.log("image", image)
-    //const { width, height } = dimns;
     const [dimns, setDimns] = useState({ width: fixedDimns?.width || 0, height: fixedDimns?.height || 0 })
     const containerRef = useRef(null);
     
@@ -32,8 +31,10 @@ const SVGImage = ({ imgKey, image, fixedDimns, styles, className, settings }) =>
 
     useEffect(() => {
         if(fixedDimns){ return; }
+        //console.log("parent", containerRef?.current?.parentNode)
         const containerDimns = containerRef?.current?.parentNode.getBoundingClientRect() || { width:0, height:0 };
         const { width } = containerDimns;
+        //console.log("cont dimns", containerDimns)
         const height = aspectRatio ? width * aspectRatio : containerDimns.height;
         
         //console.log("USE-EFFECT heights equal?", height === dimns.height)
@@ -52,8 +53,6 @@ const SVGImage = ({ imgKey, image, fixedDimns, styles, className, settings }) =>
         //@todo - impl option to scale y separately based on height
         const imgScale = dimns.width / rawImgWidth;
         const imgTransform = `translate(${imgTransX},${imgTransY}) scale(${imgScale})`;
-        console.log("imgTransform calc", imgTransform)
-        console.log("transform passed in", image.transform)
 
         d3.select(containerRef.current)
             .datum({ ...image, transform:image.transform || imgTransform })
@@ -64,7 +63,7 @@ const SVGImage = ({ imgKey, image, fixedDimns, styles, className, settings }) =>
                 .withBorderGradient(withBorderGradient)
                 .imgKey(imgKey))
             
-    }, [dimns])
+    }, [dimns, image])
 
     useEffect(() => {
 

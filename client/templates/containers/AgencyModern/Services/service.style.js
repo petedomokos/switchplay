@@ -1,15 +1,17 @@
 import styled from 'styled-components';
 import { themeGet } from '@styled-system/theme-get';
+import { grey10 }  from "../../../../core/websiteConstants";
 
 const SectionWrapper = styled.section`
-  width: 100%;
+  width: 90%;
+  margin:auto;
   padding: 100px 0 60px;
   @media only screen and (max-width: 1440px) {
-    padding: 70px 0 0px;
+    padding: 40px 0 0px;
   }
 
   @media only screen and (max-width: 768px) {
-    padding: 70px 0 40px;
+    padding: 40px 0 40px;
   }
 `;
 
@@ -70,53 +72,74 @@ export const SectionHeader = styled.header`
 
 export const ServiceWrapper = styled.div`
   display: flex;
-  @media only screen and (max-width: 480px) {
-    flex-direction:column;
-  }
-  @media only screen and (min-width: 481px) and (max-width: 768px) {
-    transform:scale(0.6);
-  }
+  flex-direction:column;
   justify-content:center;
   align-items:center;
-    h4 {
-      margin: 0 0 14px;
-      font-family: 'DM Sans';
-      font-weight: 700;
-      font-size: 18px;
-      line-height: 30px;
-      @media only screen and (max-width: 1440px) {
-        margin: 0 0 5px;
-      }
-      @media only screen and (max-width: 1360px) {
-        font-size: 18px;
-      }
-      @media only screen and (max-width: 768px) {
-        text-align: center;
-      }
-      @media only screen and (max-width: 480px) {
-        text-align: center;
-      }
+  @media only screen and (min-width: 576px) and (max-width: 768px) {
+    transform:scale(0.6);
+  }
+  .services {
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    @media only screen and (max-width: 575px) {
+      flex-direction:column;
+      align-items:center;
     }
 
-    p {
-      margin: 0;
-      font-family: 'DM Sans';
+    .service {
+      &.primary-service {
+        @media only screen and (max-width: 575px) {
+          margin-bottom:30px;
+        }
+      }
+      &.secondary-service {
+        margin:0 50px;
+        @media only screen and (max-width: 575px) {
+          margin:0 0 30px;
+        }
+      }
+    }
+  }
+
+  h4 {
+    margin: 20px 0 20px;
+    font-family: 'DM Sans';
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 30px;
+    color:${grey10(2)};
+    @media only screen and (max-width: 1440px) {
+    }
+    @media only screen and (max-width: 990px) {
+      font-size: 18px;
+    }
+    @media only screen and (max-width: 768px) {
+      text-align: center;
+    }
+    @media only screen and (max-width: 575px) {
+      text-align: center;
+    }
+  }
+
+  p {
+    margin: 0;
+    font-family: 'DM Sans';
+    font-size: 15px;
+    line-height: 30px;
+    color: ${themeGet('colors.text', grey10(4))};
+    @media only screen and (max-width: 1440px) {
+      font-size: 16px;
+    }
+    @media only screen and (max-width: 1360px) {
       font-size: 15px;
-      line-height: 30px;
-      color: ${themeGet('colors.text', '#294859')};
-      @media only screen and (max-width: 1440px) {
-        font-size: 16px;
-      }
-      @media only screen and (max-width: 1360px) {
-        font-size: 15px;
-        line-height: 26px;
-      }
-      @media only screen and (max-width: 768px) {
-        text-align: center;
-      }
-      @media only screen and (max-width: 480px) {
-        text-align: center;
-      }
+      line-height: 26px;
+    }
+    @media only screen and (max-width: 768px) {
+      text-align: center;
+    }
+    @media only screen and (max-width: 480px) {
+      text-align: center;
     }
   }
 `;
