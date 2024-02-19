@@ -8,7 +8,7 @@ import { MAIN_BANNER_MARGIN_VERT, COLOURS } from '../../../../core/websiteConsta
 
 //#f0ded5
 const BannerWrapper = styled.div`
-  border: solid;
+  //border: solid;
   border-color:yellow;
   background-image: url(${bannerBg?.src});
   background-color: ${COLOURS.banner.bg};

@@ -94,7 +94,7 @@ export const ServiceWrapper = styled.div`
         }
       }
       &.secondary-service {
-        margin:0 50px;
+        margin:0 7.5vw;
         @media only screen and (max-width: 575px) {
           margin:0 0 30px;
         }
@@ -128,6 +128,7 @@ export const ServiceWrapper = styled.div`
     font-size: 15px;
     line-height: 30px;
     color: ${themeGet('colors.text', grey10(4))};
+    text-align:center;
     @media only screen and (max-width: 1440px) {
       font-size: 16px;
     }

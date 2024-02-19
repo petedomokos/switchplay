@@ -1,7 +1,6 @@
 import styled, { css } from 'styled-components';
 
 const ContainerWrapper = styled.div`
-  border-color:yellow;
   margin-left: auto;
   margin-right: auto;
   ${(props) =>
@@ -47,7 +46,6 @@ const ContainerWrapper = styled.div`
       `};
   }
   &.for-signed-in-user {
-    border-color:red;
     padding: 0;
     margin:0;
     width:100%;

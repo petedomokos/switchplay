@@ -35,6 +35,8 @@ import {
   ContentWrapper,
 } from './templates/containers/AgencyModern/agencyModern.style';
 
+import { COLOURS } from './core/websiteConstants';
+
 const customiseItemsForUser = (items, user, onSignout) => {
   if(user){ 
     return items
@@ -99,10 +101,9 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, onSignout, history }) => {
-  console.log("userid", userId)
   //BUG - onSignout leads to the Homepage re-rendering with store.screen reset to init ie 0,0
  
-  const styleProps = { appBg: history.location.pathname === "/" ? "#FF825C" : "#f0ded5" }
+  const styleProps = { appBg: history.location.pathname === "/" ? COLOURS.banner.bg : "#f0ded5" }
   const classes = useStyles(styleProps);
   const jwt = auth.isAuthenticated();
   const user = jwt?.user;

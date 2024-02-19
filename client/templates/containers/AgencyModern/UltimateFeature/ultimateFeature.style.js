@@ -3,28 +3,32 @@ import { themeGet } from '@styled-system/theme-get';
 
 const SectionWrapper = styled.section`
   background-color: #283742;
-  padding: 70px 0 150px;
+  padding: 70px 0px 150px;
 `;
 
 export const SectionTitle = styled.div`
-  text-align: center;
-  max-width: 800px;
-  width: 100%;
-  margin: 0 auto;
+  max-width: 900px;
+  width: 90%;
+  margin: 60px auto 40px;
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
   h2 {
-    font-weight: 700;
-    font-size: 36px;
-    line-height: 1.9;
+    font-weight: 500;
+    font-size: 30px;
+    line-height: 1.3;
     letter-spacing: -0.5px;
-    margin-bottom: 12px;
+    margin: 10px 15px;
     color: #ffffff;
+    white-space: nowrap;
     @media screen and (max-width: 1440px) {
       margin-bottom: 4px;
     }
-    @media screen and (max-width: 480px) {
-      margin-bottom: 10px;
-      line-height: 1.5;
-      margin-bottom: 20px;
+    @media screen and (max-width: 575px) {
+      line-height: 1.2;
+      margin: 10px 0px;
+      font-size:26px;
+      font-weight: 200;
     }
   }
   p {
@@ -49,20 +53,16 @@ export const FeatureWrapper = styled.div`
 
   .ultimateFeature {
     text-align: center;
-    margin-top: 80px;
+    margin: 20px auto;
     width: calc(33.3333% - 70px);
-    @media screen and (max-width: 991px) {
+    @media screen and (max-width: 990px) {
       width: calc(50% - 70px);
     }
     @media screen and (max-width: 768px) {
       width: calc(50% - 40px);
     }
-    @media screen and (max-width: 624px) {
-      margin-top: 30px;
-      width: 100%;
-    }
-    @media screen and (max-width: 480px) {
-      width: 100%;
+    @media screen and (max-width: 575px) {
+      width: 90%;
     }
     .icon__wrapper {
       margin-bottom: 28px;

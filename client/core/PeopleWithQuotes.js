@@ -18,7 +18,7 @@ const useStyles = makeStyles(theme => ({
             display:"block",
         },
         background:"#FFFEFE",
-        border:'solid',
+        //border:'solid',
         borderColor:"red",
     },
     peopleContainer:{
@@ -39,7 +39,7 @@ const useStyles = makeStyles(theme => ({
         width:"50vw",
         height:props => `${props.aspectRatio * 50}vw`,
         //color:"red",
-        border:"solid",
+        //border:"solid",
         borderColor:"red",
         display:"flex",
         flexDirection:"column",

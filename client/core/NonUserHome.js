@@ -25,7 +25,7 @@ import { NAVBAR_HEIGHT } from "./websiteConstants";
 import PeopleWithQuotes from './PeopleWithQuotes';
 import SVGImage from "./SVGImage";
 import { makeStyles } from '@material-ui/core/styles'
-import { MAIN_BANNER_MARGIN_VERT } from "./websiteConstants";
+import { MAIN_BANNER_MARGIN_VERT, COLOURS } from "./websiteConstants";
 import Players from "./Players"
 
 const playerQuotesData = screen => ({
@@ -98,7 +98,7 @@ const dataSections = [
 const useStyles = makeStyles(theme => ({
   nonUserHomeRoot:{
     width:"100%",
-    background:"#FF825C"
+    background:COLOURS.banner.bg
   },
   screen:{
     display:"flex",
@@ -116,19 +116,10 @@ const scrollIntoViewWithOffset = (node, offset) => {
       document.body.getBoundingClientRect().top -
       offset,
   })
-}
+} 
 
 const NonUserHome = ({ screen, initScrollTo }) =>{
-  const largeImageDimns = { 
-    width: screen.width * 0.45, 
-    height: screen.height - 2 * MAIN_BANNER_MARGIN_VERT[screen.size],
-    marginTop:MAIN_BANNER_MARGIN_VERT[screen.size],
-    marginBottom:MAIN_BANNER_MARGIN_VERT[screen.size]
-  }
-  const styleProps = { 
-    image:largeImageDimns,
-  }
-  const classes = useStyles(styleProps);
+  const classes = useStyles();
   const rootRef = useRef(null);
 
   //@todo - stop using window and use store instead
@@ -145,14 +136,13 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
       <Banner screen={screen} /> 
       <Players />
       <PeopleWithQuotes title="What Players Say" data={playerQuotesData(screen)} direction="row" />
-      <UltimateFeature animationDimns={animationDimns} />
+      <UltimateFeature screen={screen} />
       {/**
       <Customer data={dataSections[0]} screen={screen} imgLocation={screen.isLarge ? "left" : "bottom"}  />
       <Customer data={dataSections[1]} screen={screen} imgLocation={screen.isLarge ? "right" : "bottom"} />*/}
       <PeopleWithQuotes title="What Staff Say" data={staffQuotesData(screen)} direction="row-reverse" />
-      {/**<Subscribe />
+      {/**<Subscribe />*/}
       <Footer />
-      */}
     </div>
   )
 }

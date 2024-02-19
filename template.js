@@ -4,7 +4,7 @@ export default () => {
       <head>
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no" charset="utf-8">
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="theme-color" content="#FF825C" />
+        <meta name="theme-color" content="#DBEFF0" />
         <title>Switchplay</title>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">

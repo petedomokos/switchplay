@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import * as d3 from 'd3';
 import { Icon } from 'react-icons-kit';
 import { chevronRight } from 'react-icons-kit/feather/chevronRight';
 
@@ -16,18 +17,32 @@ import SectionWrapper, {
 import data from '../../../common/data/AgencyModern';
 import WorkflowAnimation from "../../../../core/WorkflowAnimation";
 
-const UltimateFeature = ({ animationDimns }) => {
+//helper
+const maximiseDimns = (maxWidth, maxHeight, aspectRatio) => {
+  const _height = maxWidth * aspectRatio;
+  if(_height <= maxHeight){
+      return { width: maxWidth, height: _height };
+  }
+  return { width: maxHeight / aspectRatio, height: maxHeight }
+} 
+
+const UltimateFeature = ({ screen }) => {
+  const animationAspectRatio = screen.orientation === "landscape" ? 0.8 : 1;
+  const maxAnimationWidth = screen.isSmall ? screen.width * 0.8 : d3.min([screen.width * 0.7, 600]);
+  const maxAnimationHeight = screen.height * 0.6;
+  const animationDimns = maximiseDimns(maxAnimationWidth, maxAnimationHeight, animationAspectRatio);
+
   return (
     <SectionWrapper id="features">
       <Container>
-        <SectionTitle>
-          <Heading content="Make your data &amp; information flow smoother" />
-          <Text content="One user-friendly view for all sources of info, centred around the player" />
-        </SectionTitle>
         <div style={{ margin:`50px 0px 0px calc(50% - ${animationDimns.width/2}px)`, 
                       width:`${animationDimns.width}px`, height:`${animationDimns.height}px` }} >
           <WorkflowAnimation dimns={animationDimns} />
         </div>
+        <SectionTitle>
+          <Heading content="One user-friendly view" />
+          <Heading content="centered on the player" />
+        </SectionTitle>
         <FeatureWrapper>
           {data.features.map((feature, index) => (
             <FeatureBlock
