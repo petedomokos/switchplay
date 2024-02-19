@@ -145,8 +145,8 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
       <Banner screen={screen} /> 
       <Players />
       <PeopleWithQuotes title="What Players Say" data={playerQuotesData(screen)} direction="row" />
-      {/**
       <UltimateFeature animationDimns={animationDimns} />
+      {/**
       <Customer data={dataSections[0]} screen={screen} imgLocation={screen.isLarge ? "left" : "bottom"}  />
       <Customer data={dataSections[1]} screen={screen} imgLocation={screen.isLarge ? "right" : "bottom"} />*/}
       <PeopleWithQuotes title="What Staff Say" data={staffQuotesData(screen)} direction="row-reverse" />
