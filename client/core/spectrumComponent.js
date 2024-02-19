@@ -6,7 +6,7 @@ import { fadeIn, remove } from './journey/domHelpers';
 const eyePathD1 = "M15.0007 12C15.0007 13.6569 13.6576 15 12.0007 15C10.3439 15 9.00073 13.6569 9.00073 12C9.00073 10.3431 10.3439 9 12.0007 9C13.6576 9 15.0007 10.3431 15.0007 12Z";
 const eyePathD2 = "M12.0012 5C7.52354 5 3.73326 7.94288 2.45898 12C3.73324 16.0571 7.52354 19 12.0012 19C16.4788 19 20.2691 16.0571 21.5434 12C20.2691 7.94291 16.4788 5 12.0012 5Z";
 const dataPathD = "M30.000,32.000 L23.000,32.000 C22.447,32.000 22.000,31.552 22.000,31.000 L22.000,1.000 C22.000,0.448 22.447,-0.000 23.000,-0.000 L30.000,-0.000 C30.553,-0.000 31.000,0.448 31.000,1.000 L31.000,31.000 C31.000,31.552 30.553,32.000 30.000,32.000 ZM29.000,2.000 L24.000,2.000 L24.000,30.000 L29.000,30.000 L29.000,2.000 ZM19.000,32.000 L12.000,32.000 C11.448,32.000 11.000,31.552 11.000,31.000 L11.000,17.000 C11.000,16.448 11.448,16.000 12.000,16.000 L19.000,16.000 C19.553,16.000 20.000,16.448 20.000,17.000 L20.000,31.000 C20.000,31.552 19.553,32.000 19.000,32.000 ZM18.000,18.000 L13.000,18.000 L13.000,30.000 L18.000,30.000 L18.000,18.000 ZM8.000,32.000 L1.000,32.000 C0.448,32.000 0.000,31.552 0.000,31.000 L0.000,11.000 C0.000,10.448 0.448,10.000 1.000,10.000 L8.000,10.000 C8.552,10.000 9.000,10.448 9.000,11.000 L9.000,31.000 C9.000,31.552 8.552,32.000 8.000,32.000 ZM7.000,12.000 L2.000,12.000 L2.000,30.000 L7.000,30.000 L7.000,12.000 Z"
-const dataPathTransform = "translate(5,5) scale(1.2)"
+const dataPathTransform = "translate(5,15) scale(1.2)"
 const transition = { duration: 400 }
 export default function spectrumComponent() {
     //API SETTINGS
@@ -57,7 +57,10 @@ export default function spectrumComponent() {
     }
 
     let styles = {
-        wvaeColor:"black"
+        wvaeColor:"black",
+        eyeStroke:grey10(2),
+        barStroke:grey10(2),
+        fusedStroke:grey10(2),
     }
 
     //state
@@ -99,7 +102,9 @@ export default function spectrumComponent() {
                 contentsG
                     .append("rect")
                         .attr("class", "spectrum-contents-bg")
-                        //.attr("stroke", "yellow")
+                        .attr("stroke", grey10(2))
+                        .attr("stroke-width", 0.3)
+                        .attr("stroke-dasharray", 3)
                         .attr("fill", "none");
 
                 const spectrumLineG = contentsG.append("g").attr("class", "spectrum-line")
@@ -157,15 +162,19 @@ export default function spectrumComponent() {
                 startContentsG.append("path").attr("class", " start-path start-path1")
                 startContentsG.append("path").attr("class", "start-path start-path2")
                 startContentsG.selectAll("path.start-path")
-                    .attr("stroke", "#000000")
-                    .attr("stroke-width", 2)
+                    .attr("stroke", styles.eyeStroke)
+                    .attr("stroke-width", 1)
                     .attr("stroke-linecap", "round")
                     .attr("stroke-linejoin", "round")
                     .attr("fill", "none");
 
                 endContentsG.append("path").attr("class", "end-path")
+                    .attr("stroke", styles.barStroke)
+                    .attr("stroke-width", 0.8)
 
                 fusedContentsG.append("image")
+                    .attr("stroke", styles.fusedStroke)
+                    .attr("stroke-width", 1)
 
             }
 
@@ -261,7 +270,7 @@ export default function spectrumComponent() {
 
                 //images and paths
                 //start and end points
-                const eyeTransform = contentsHeight < 200 ? "translate(0,0) scale(2)" : "translate(0,0) scale(2)"
+                const eyeTransform = contentsHeight < 200 ? "translate(0,15) scale(2)" : "translate(0,15) scale(2)"
                 const barsTransform = contentsHeight < 200 ? "translate(-10,20) scale(0.025)" : "translate(-33,-8) scale(0.035)"
                 startContentsG.selectAll("path.start-path").attr("transform", eyeTransform)
                 startContentsG.select("path.start-path1").attr("d", eyePathD1)

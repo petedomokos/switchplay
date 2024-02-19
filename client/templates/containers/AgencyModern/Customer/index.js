@@ -9,6 +9,7 @@ import Heading from '../../../common/components/Heading';
 import NextImage from '../../../common/components/NextImage';
 import Link from '../../../common/components/Link';
 import spectrumComponent from '../../../../core/spectrumComponent';
+import { grey10 } from '../../../../core/websiteConstants';
 
 import SectionWrapper, {
   Section,
@@ -19,19 +20,19 @@ import illustration from '../../../common/assets/image/agencyModern/customer.png
 import colors from "../../../common/theme/agencyModern/colors";
 import SVGImage from "../../../../core/SVGImage";
 
-const Customer = ({ data, screen, imgLocation, minHeight }) => {
+const Customer = ({ data, screen, direction, minHeight }) => {
   const [spectrum, setSpectrum] = useState(() => spectrumComponent());
   const spectrumContainerRef = useRef(null);
 
-  const alignVertically = imgLocation === "bottom" || imgLocation === "top";
+  const alignVertically = direction.includes("column");
   const spectrumWidth = alignVertically ? d3.min([400, screen.width * 0.8]) : screen.width * 0.4;
-  const spectrumHeight = minHeight || (alignVertically ? 260 : 300);
+  const spectrumHeight = minHeight || (alignVertically ? 220 : 300);
 
   const requiredImgAspectRatio = 0.6;
   //@todo - pass the 70% and 75% trhough to stylesheet as props rather than hardcoding it here and there separately
-  const requiredImgWidth = spectrumWidth * 0.7;
-  const requiredImgDimns = { width: requiredImgWidth, height: requiredImgWidth * requiredImgAspectRatio }
-
+  const requiredImgWidth = screen.isLarge ? spectrumWidth * 0.7 : screen.width;
+  const requiredImgHeight = requiredImgWidth * requiredImgAspectRatio ;
+  const requiredImgDimns = { width: requiredImgWidth, height: requiredImgHeight }
 
   const { key, visual, heading, desc } = data;
   const { url, imgWidth, imgHeight, imgTransX=0, imgTransY=0 } = visual;
@@ -47,47 +48,36 @@ const Customer = ({ data, screen, imgLocation, minHeight }) => {
             .width(spectrumWidth)
             .height(spectrumHeight)
             .margin({ 
-              left: alignVertically ? 0.15 * spectrumWidth : (imgLocation === "left" ? 0 : 0.3 * spectrumWidth), 
-              right:alignVertically ? 0.15 * spectrumWidth : (imgLocation === "right" ? 0 : 0.3 * spectrumWidth), 
-              top: alignVertically ? 0.15 * spectrumHeight : 0, 
-              bottom: alignVertically ? 0.15 * spectrumHeight : 0.3 * spectrumHeight, 
+              left: alignVertically ? 0 * spectrumWidth : (direction === "row" ? 0 : 0.3 * spectrumWidth), 
+              right:alignVertically ? 0 * spectrumWidth : (direction === "row-reverse" ? 0 : 0.3 * spectrumWidth), 
+              top: alignVertically ? 0 * spectrumHeight : 0, 
+              bottom: alignVertically ? 0 * spectrumHeight : 0.3 * spectrumHeight, 
             })
             .styles({
-              waveColor:colors.linkColor
+              waveColor:grey10(3),
+              eyeStroke:grey10(2),
+              barStroke:grey10(2),
+              fusedStroke:grey10(2),
             }))
-        
   }, [spectrumWidth, spectrumHeight])
-
-  const singleLineHeading = typeof heading === "string" ? heading : heading.join(" ");
 
   return (
     <SectionWrapper id="customer">
-      <Container>
-        <Section>
-          {(imgLocation === "top" || imgLocation === "left") &&
+        <Section className={`${direction}`}>
+          {visual?.type === "img" ? 
+            <div style={{ width:`${requiredImgWidth}px`, height:`${requiredImgHeight}px` }}>
+              <SVGImage image={{ url, transform, aspectRatio:requiredImgAspectRatio }} dimns={requiredImgDimns} imgKey={key} />
+            </div>
+            :
             <div className="visual-container" style={{ width:`${spectrumWidth}px`, height:`${spectrumHeight}px` }} >
-                {visual?.type === "img" ? 
-                  <div className={`img-container ${imgLocation}-img-container`} >
-                    {/**<img src={data.visual.url} />*/}
-                    <SVGImage image={{ url, transform }} dimns={requiredImgDimns} settings={{ withBorderGradient: false, borderWidth:10 }}
-                        styles={{ borderColour:"#FF825C"}} imgKey={key} />
-                  </div>
-                  :
-                  <svg ref={spectrumContainerRef}></svg>
-                }
+              <svg ref={spectrumContainerRef}></svg>
             </div>
           }
-          {/**<Illustration><img src="website/logo.png" /></Illustration>*/}
           <Content>
-            <div className={typeof heading === "string" ? "" : "md-down"}>
-              <Heading
-                as="h2"
-                content={singleLineHeading || ""}
-              />
-            </div>
-            <div className={typeof heading === "string" ? "" : "lg-up"}>
+            <div>
               {typeof heading !== "string" && 
                 <>
+                  <div style={{ width:"100%", height:"20px" }}></div>
                   <Heading
                     as="h3"
                     content={heading[0] || ""}
@@ -96,6 +86,7 @@ const Customer = ({ data, screen, imgLocation, minHeight }) => {
                     as="h3"
                     content={heading[1] || ""}
                   />
+                   <div style={{ width:"100%", height:"20px" }}></div>
                 </>
               }
             </div>
@@ -104,23 +95,13 @@ const Customer = ({ data, screen, imgLocation, minHeight }) => {
               Explore more <Icon icon={chevronRight} />
             </Link>*/}
           </Content>
-          {(imgLocation === "bottom" || imgLocation === "right") &&
-            <div className="visual-container" style={{ width:`${spectrumWidth}px`, height:`${spectrumHeight}px` }} >
-                {visual?.type === "img" ? 
-                  <div className={`img-container ${imgLocation}-img-container`} >
-                    {/**<img src={data.visual.url} />*/}
-                    <SVGImage image={{ url, transform }} dimns={requiredImgDimns} settings={{ withBorderGradient: false, borderWidth:0 }}
-                        styles={{ borderColour:"#FF825C"}} imgKey={key} />
-                  </div>
-                  :
-                  <svg ref={spectrumContainerRef}></svg>
-                }
-            </div>
-          }
         </Section>
-      </Container>
     </SectionWrapper>
   );
 };
+
+Customer.defaultProps = {
+  direction:"row"
+}
 
 export default Customer;

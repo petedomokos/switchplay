@@ -9,7 +9,7 @@ import { makeStyles } from '@material-ui/core/styles'
 const useStyles = makeStyles(theme => ({
   imageSvg: {
       //border:"solid",
-      //borderColor:"yellow",
+      borderColor:"yellow",
   }
 }))
 
@@ -37,14 +37,14 @@ const SVGImage = ({ imgKey, image, fixedDimns, styles, className, settings }) =>
         //console.log("cont dimns", containerDimns)
         const height = aspectRatio ? width * aspectRatio : containerDimns.height;
         
-        //console.log("USE-EFFECT heights equal?", height === dimns.height)
+        //console.log("USE-EFFECT widths heights equal?", width === dimns.width, height === dimns.height)
         //console.log("dimns.w rw w", dimns.width, width)
         //console.log("dimns.h rh", dimns.height, height)
         if((isNumber(width) && width !== dimns.width) || (isNumber(height) && height !== dimns.height)){
             //console.log("setting.................")
             //setTimeout(() => {
                 setDimns({ width, height })
-            //}, 8000)
+            //}, 5000)
         }
     })
 

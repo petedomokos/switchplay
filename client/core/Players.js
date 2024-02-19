@@ -112,7 +112,7 @@ const PlayersBanner = ({ screen }) =>{
   },[]);
 
   return (
-    <div className={classes.playersRoot} id="players" >
+    <div className={classes.playersRoot} id="services" >
       <div className={classes.topBanner}>
         <div className={classes.heading}>
           <div className={classes.headingSmallLine}>GET YOUR PLAYERS</div>

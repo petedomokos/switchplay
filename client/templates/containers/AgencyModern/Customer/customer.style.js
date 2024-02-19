@@ -1,135 +1,74 @@
 import styled from 'styled-components';
 import { themeGet } from '@styled-system/theme-get';
+import { grey10 } from '../../../../core/websiteConstants';
 
 const SectionWrapper = styled.section`
-  margin-left:7.5vw;
-  margin-right: 7.5vw;
-  padding: 100px 0 75px;
+  width:100%; 
+  padding: 80px 0 80px;
   @media only screen and (max-width: 1440px) {
-    padding: 100px 0 0;
   }
   @media only screen and (max-width: 768px) {
-    padding: 50px 0 0;
   }
 `;
 
 export const Section = styled.div`
+  width:100%;
   display: flex;
-  align-items: flex-start;
-
-  @media only screen and (max-width: 990px) {
-    flex-direction: column;
-    align-items: center;
-  }
+  align-items: center;
+  flex-direction:column;
+  
   .visual-container {
-    border-color: red;
-    margin: auto;
-    padding-top:5px;
     display: flex; 
     alignItems: flex-start; 
     justify-content: center;
   }
-  .img-container {
-    border-color: yellow;
-    width: 70%;
-    height: 75%;
-    padding-top:5px;
-    display:flex;
-    justify-content:center;
-    align-items:flex-start;
-
-    img {
-      object-fit: contain;
-      width:300px;
-      @media only screen and (min-width: 1024px) and (max-width: 1366px) {
-      }
-      @media only screen and (max-width: 1024px) {
-      }
-    }
-  
-
-  }
-  .left-img-container {
-    margin-right:30%;
-  }
-  .right-img-container {
-    margin-left:30%;
-  }
-  .top-img-container {
-    align-self:center;
-  }
-  .bottom-img-container {
-    align-self:center;
-  }
 `;
 
 export const Content = styled.div`
-  width: 50%;
+  width: 90%;
+  max-width:600px;
   display: flex;
   flex-direction: column;
-  @media only screen and (min-width: 1024px) and (max-width: 1366px) {
-    width: 50%;
-  }
-  @media only screen and (min-width: 768px) and (max-width: 1024px) {
-    width: 50%;
-  }
-  @media only screen and (max-width: 990px) {
-    width: 80vw;
-    margin: auto;
-    align-items: center;
-  }
-  h2 {
-    display:flex;
-    flex-direction:column;
-    border-color: pink;
-    font-weight: 700;
-    font-size: 40px;
-    line-height: 1.66;
-    letter-spacing: -1px;
-    @media only screen and (min-width: 1024px) and (max-width: 1440px) {
-      font-size: 36px;
-      line-height: 1.5;
-    }
-    @media only screen and (min-width: 768px) and (max-width: 1024px) {
-      font-size: 30px;
-    }
-    @media only screen and (max-width: 768px) {
-      font-size: 30px;
-      text-align: center;
-    }
-  }
+  align-items:center;
   h3 {
+    margin:10px auto;
     display:flex;
     flex-direction:column;
+    align-items:center;
     border-color: pink;
     font-weight: 700;
     font-size: 40px;
     line-height: 1;
     letter-spacing: -1px;
+    color:${grey10(2)};
     @media only screen and (min-width: 1024px) and (max-width: 1440px) {
-      font-size: 36px;
+      font-size: 42px;
       line-height: 1;
     }
     @media only screen and (min-width: 768px) and (max-width: 1024px) {
-      font-size: 30px;
+      font-size: 32px;
     }
     @media only screen and (max-width: 768px) {
-      font-size: 30px;
+      font-size: 28px;
+      text-align: center;
+    }
+    @media only screen and (max-width: 575px) {
+      font-size: 24px;
       text-align: center;
     }
   }
   p {
-    padding-top:10px;
+    padding:10px 5% 0;
     display:flex;
     flex-direction:column;
     font-size: 15px;
     line-height: 42px;
+    color:${grey10(3)};
     @media only screen and (min-width: 1024px) and (max-width: 1366px) {
       line-height: 32px;
     }
     @media only screen and (min-width: 768px) and (max-width: 1024px) {
       line-height: 28px;
-      text-align: center;
     }
     @media only screen and (max-width: 768px) {
       line-height: 32px;
@@ -162,6 +101,8 @@ export const Content = styled.div`
       margin-top: 5px;
     }
   }
+  margin:0;
+  padding:0;
 `;
 
 export const Illustration = styled.figure`

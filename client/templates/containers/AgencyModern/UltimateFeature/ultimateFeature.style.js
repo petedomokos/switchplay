@@ -9,7 +9,7 @@ const SectionWrapper = styled.section`
 export const SectionTitle = styled.div`
   max-width: 900px;
   width: 90%;
-  margin: 60px auto 40px;
+  margin: 40px auto 20px;
   display:flex;
   justify-content:center;
   flex-wrap:wrap;

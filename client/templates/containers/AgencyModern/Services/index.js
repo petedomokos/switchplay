@@ -19,7 +19,7 @@ import data from '../../../common/data/AgencyModern';
 
 const Services = () => {
   return (
-    <SectionWrapper id="services">
+    <SectionWrapper>
       <Container>
         <ServiceWrapper>
           <div className="services">

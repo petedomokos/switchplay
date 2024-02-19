@@ -14,7 +14,6 @@ import Banner from '../templates/containers/AgencyModern/Banner';
 import Features from '../templates/containers/AgencyModern/Features';
 import WorkHard from '../templates/containers/AgencyModern/WorkHard';
 import UltimateFeature from '../templates/containers/AgencyModern/UltimateFeature';
-import Customer from '../templates/containers/AgencyModern/Customer';
 import News from '../templates/containers/AgencyModern/News';
 import Subscribe from '../templates/containers/AgencyModern/Subscribe';
 import Footer from '../templates/containers/AgencyModern/Footer';
@@ -27,6 +26,7 @@ import SVGImage from "./SVGImage";
 import { makeStyles } from '@material-ui/core/styles'
 import { MAIN_BANNER_MARGIN_VERT, COLOURS } from "./websiteConstants";
 import Players from "./Players"
+import DataSection from './DataSection';
 
 const playerQuotesData = screen => ({
     key:"players", 
@@ -80,21 +80,6 @@ const staffQuotesData = screen => ({
   ]
 })
 
-const dataSections = [
-  {
-    key:"spectrum",
-    heading:["Use data with confidence", "and purpose"],
-    desc:"Should you trust your 'coaches eye' more than data? Switchplay helps you find the balance through great collaboration between analysts and coaches.",
-    visual:{ type:"d3" }
-  },
-  {
-    key:"path",
-    heading:"Show your players how data relates to their path",
-    desc:"Do you think of yourself as a storyteller? Switchplay brings out the true power of data by enabling you to weave it into players' journeys.",
-    visual:{ type:"img", url:"website/images/path.png", imgWidth:1600, imgHeight:900, imgTransX:0, imgTransY:0 }
-  }
-]
-
 const useStyles = makeStyles(theme => ({
   nonUserHomeRoot:{
     width:"100%",
@@ -137,11 +122,9 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
       <Players />
       <PeopleWithQuotes title="What Players Say" data={playerQuotesData(screen)} direction="row" />
       <UltimateFeature screen={screen} />
-      {/**
-      <Customer data={dataSections[0]} screen={screen} imgLocation={screen.isLarge ? "left" : "bottom"}  />
-      <Customer data={dataSections[1]} screen={screen} imgLocation={screen.isLarge ? "right" : "bottom"} />*/}
       <PeopleWithQuotes title="What Staff Say" data={staffQuotesData(screen)} direction="row-reverse" />
-      {/**<Subscribe />*/}
+      <DataSection screen={screen} />
+      <Subscribe />
       <Footer />
     </div>
   )
