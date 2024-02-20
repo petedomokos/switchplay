@@ -46,11 +46,13 @@ const Subscribe = () => {
           </SubscriptionForm>
         </FooterInner>
       </Container>
-      <img src={bg1?.src} alt="bg1" className="illustration bg1" />
+      {/*
+      ((<img src={bg1?.src} alt="bg1" className="illustration bg1" />
       <img src={bg2?.src} alt="bg2" className="illustration bg2" />
       <img src={bg3?.src} alt="bg3" className="illustration bg3" />
       <img src={bg4?.src} alt="bg4" className="illustration bg4" />
       <img src={bg5?.src} alt="bg5" className="illustration bg5" />
+      */}
     </SectionWrapper>
   );
 };

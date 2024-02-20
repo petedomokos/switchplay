@@ -38,7 +38,7 @@ const DataSection = ({ screen, className }) =>{
   return (
     <div className={`${classes.dataSectionRoot} ${className}`} id="customer">
       <Customer data={dataSections[0]} screen={screen} direction={screen.isLarge ? "column" : "column"}  />
-      <svg height={`${breakHeight}px`} >
+      <svg height={`${breakHeight}px`} style={{ width:"100%" }}>
         <line x1={screen.width * 0.3} y1={breakHeight/2} x2={screen.width * 0.7} y2={breakHeight/2} stroke="white" strokeWidth="0.4"/>
       </svg>
       <Customer data={dataSections[1]} screen={screen} imgLocation={screen.isLarge ? "column" : "column"} />

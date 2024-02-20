@@ -25,8 +25,8 @@ export const SectionTitle = styled.div`
       margin-bottom: 4px;
     }
     @media screen and (max-width: 575px) {
-      line-height: 1.2;
-      margin: 10px 0px;
+      line-height: 1;
+      margin: 10px 0px 0;
       font-size:26px;
       font-weight: 200;
     }

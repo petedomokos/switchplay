@@ -13,6 +13,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const WorkflowAnimation = ({ dimns }) =>{
+    //console.log("dimns", dimns)
     const { width, height } = dimns;
     const styleProps = { };
     const classes = useStyles(styleProps);
@@ -37,14 +38,14 @@ const WorkflowAnimation = ({ dimns }) =>{
         const scene = sceneElements[sceneNr];
         const { key, title, lineStyles, lines, heroX, heroY, characterX, characterY } = scene;
         const sceneMetadata = {
-        key,
-        title,
-        lineStyles,
-        lines,
-        heroX, heroY, characterX, characterY,
-        nrHeroes:d3.max(Object.values(scene), d => d.heroes?.length) || 0,
-        nrCharacters:d3.max(Object.values(scene), d => d.characters?.length) || 0,
-        nrWaves:d3.max(Object.values(scene), d => d.waves?.length) || 0
+            key,
+            title,
+            lineStyles,
+            lines,
+            heroX, heroY, characterX, characterY,
+            nrHeroes:d3.max(Object.values(scene), d => d.heroes?.length) || 0,
+            nrCharacters:d3.max(Object.values(scene), d => d.characters?.length) || 0,
+            nrWaves:d3.max(Object.values(scene), d => d.waves?.length) || 0
         }
         d3.select(containerRef.current)
             .datum({ ...sceneElements[sceneNr][frameNr], sceneMetadata })
@@ -58,11 +59,11 @@ const WorkflowAnimation = ({ dimns }) =>{
 
     useEffect(() => {
         const t = d3.interval(() => {
-        //updateSceneState();
+            updateSceneState();
         }, 4000);
 
         return () => {
-        t.stop()
+            t.stop()
         }
 
     },[])

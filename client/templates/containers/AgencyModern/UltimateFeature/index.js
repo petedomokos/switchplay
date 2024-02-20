@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as d3 from 'd3';
-import { Icon } from 'react-icons-kit';
-import { chevronRight } from 'react-icons-kit/feather/chevronRight';
 
 import FeatureBlock from '../../../common/components/FeatureBlock';
 import Container from '../../../common/components/UI/ContainerTwo';
@@ -27,11 +25,13 @@ const maximiseDimns = (maxWidth, maxHeight, aspectRatio) => {
 } 
 
 const UltimateFeature = ({ screen }) => {
-  const animationAspectRatio = screen.orientation === "landscape" ? 0.8 : 1;
-  const maxAnimationWidth = screen.isSmall ? screen.width * 0.8 : d3.min([screen.width * 0.7, 600]);
-  const maxAnimationHeight = screen.height * (screen.isSmall ? 0.7 : 0.5);
+  const animationAspectRatio = screen.orientation === "landscape" ? 0.7 : 1;
+  const maxAnimationWidth = d3.min([screen.width * 0.8, 600]);
+  //console.log("maxw", maxAnimationWidth)
+  const maxAnimationHeight = screen.height * 0.6;
   const animationDimns = maximiseDimns(maxAnimationWidth, maxAnimationHeight, animationAspectRatio);
 
+  console.log("feat", data.features)
   return (
     <SectionWrapper id="features">
       <Container>
