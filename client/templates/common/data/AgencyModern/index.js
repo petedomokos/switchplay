@@ -177,7 +177,14 @@ const data = {
         key:"accountability",
         title: 'Being Accountable',
         description: `Something here about learning to be accountable, ow Switchplay helps by connecting actions to outcomes in an engaging gamified way (mention gamification)`,
-        imageTransform:"scale(1)"
+        image:{
+          type:"svg",
+          rawImgWidth:3000,
+          rawImgHeight:3000, 
+          imgTransX:0, 
+          imgTransY:0,
+          aspectRatio:1
+        }
       }
     ],
     [
@@ -187,7 +194,24 @@ const data = {
         key:"thinking",
         title: 'Reflective Thinking',
         description:`Switchplay simplifies your online comms with players, parents and staff. You can easily engage players and get them thinking about a video review or a tactical point. `,
-        imageTransform:"translate(0px,7px) scale(1.5)"
+        image:{
+          type:"svg",
+          /*rawImgWidth:50, 
+          rawImgHeight:50, 
+          imgTransX:0, 
+          imgTransY:0,*/
+          rawImgWidth:20,
+          rawImgHeight:20, 
+          imgTransX:-55, 
+          imgTransY:-40,
+          aspectRatio:1
+        }
+        /*
+        image:{
+          type:"png",
+          transform:"translate(0px,7px) scale(1.5)"
+        }
+        */
       },
       {
         id: 3,
@@ -195,7 +219,18 @@ const data = {
         key:"communication",
         title: 'Proactive Communication',
         description: `These days, your messages have to compete with all the noise in players’ lives: opinions on social media, the emotions of a game, and all the rest.`,
-        imageTransform:"scale(1.1)"
+        image:{
+          type:"svg",
+          rawImgWidth:1000, 
+          rawImgHeight:1000, 
+          imgTransX:-20, 
+          imgTransY:-10,
+          aspectRatio:1
+        }
+        /*image:{
+          type:"png",
+          transform:"scale(1)"
+        }*/
       },
     ]
   ],

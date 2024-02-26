@@ -27,6 +27,15 @@ import { makeStyles } from '@material-ui/core/styles'
 import { MAIN_BANNER_MARGIN_VERT, COLOURS } from "./websiteConstants";
 import Players from "./Players"
 import DataSection from './DataSection';
+import overheadBanner from './overhead-kick.png';
+
+const overheadBannerImage = {
+  url:"website/banners/overhead-kick.png",
+  rawImgWidth:3600,
+  rawImgHeight:200, 
+  imgTransX:0, 
+  imgTransY:0,
+}
 
 const playerQuotesData = screen => ({
     key:"players", 
@@ -88,6 +97,11 @@ const useStyles = makeStyles(theme => ({
   screen:{
     display:"flex",
     justifyContent:"center"
+  },
+  overheadBanner:{
+    //backgroundImage: "url('website/banners/overhead-kick.png')",
+    backgroundImage:`url(${overheadBanner})`,
+    backgroundSize: "cover",
   }
 }))
 
@@ -104,7 +118,10 @@ const scrollIntoViewWithOffset = (node, offset) => {
 } 
 
 const NonUserHome = ({ screen, initScrollTo }) =>{
-  const classes = useStyles();
+  const overheadImageRatio = 3/9;
+  const overheadBannerHeight = screen.width * overheadImageRatio;
+  const styleProps = { overheadBannerHeight };
+  const classes = useStyles({styleProps});
   const rootRef = useRef(null);
 
   //@todo - stop using window and use store instead
@@ -118,14 +135,16 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
 
   return (
     <div className={classes.nonUserHomeRoot} ref={rootRef} id="home" >
-      <Banner screen={screen} /> 
+      <Banner screen={screen} />
       <Players />
       <PeopleWithQuotes title="What Players Say" data={playerQuotesData(screen)} direction="row" />
       <UltimateFeature screen={screen} />
       <PeopleWithQuotes title="What Staff Say" data={staffQuotesData(screen)} direction="row-reverse" />
       <DataSection screen={screen} />
       <Subscribe />
-      <Footer />
+      <div className={classes.overheadBanner} style={{ width:"100%", height:`${overheadBannerHeight}px`}}></div>
+      <div style={{ width:"100%", height:"200px", background:"black" }}></div>
+      {/**<Footer />*/}
     </div>
   )
 }

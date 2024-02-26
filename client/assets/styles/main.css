@@ -9,10 +9,11 @@ body{
   -webkit-user-select: none;
   user-select: none;
   /*background:#FF825C;*/
-  background: #DBEFF0;
+  background:none; /*#DBEFF0;*/
   width: 100%;
   /*-webkit-text-size-adjust: none;*/
 }
+
 /*MAIN-BURGER-MENU------------------------------*/
 /* Position and sizing of burger button */
 .bm-burger-button {

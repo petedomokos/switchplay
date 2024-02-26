@@ -8,7 +8,7 @@ import { grey10, MAIN_BANNER_MARGIN_VERT } from "./websiteConstants";
 const dataSections = [
   {
     key:"spectrum",
-    heading:["Use data with confidence", "and purpose"],
+    heading:["See the data with your", "coaches eye"],
     desc:"Should you trust your 'coaches eye' more than data? Switchplay helps you find the balance through great collaboration between analysts and coaches.",
     visual:{ type:"d3" }
   },
@@ -23,7 +23,7 @@ const dataSections = [
 const useStyles = makeStyles(theme => ({
     dataSectionRoot:{
         width:"100%",
-        //padding:"15vh 0",
+        padding:"10vh 0",
         background:"#1E1E1E",
         //border:"solid",
         borderColor:"yellow"

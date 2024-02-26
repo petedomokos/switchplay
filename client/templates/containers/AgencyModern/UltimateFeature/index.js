@@ -30,8 +30,6 @@ const UltimateFeature = ({ screen }) => {
   //console.log("maxw", maxAnimationWidth)
   const maxAnimationHeight = screen.height * 0.6;
   const animationDimns = maximiseDimns(maxAnimationWidth, maxAnimationHeight, animationAspectRatio);
-
-  console.log("feat", data.features)
   return (
     <SectionWrapper id="features">
       <Container>

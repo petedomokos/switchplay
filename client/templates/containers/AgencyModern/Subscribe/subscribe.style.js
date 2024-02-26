@@ -2,8 +2,9 @@ import styled from 'styled-components';
 import { rgba } from 'polished';
 
 const SectionWrapper = styled.section`
-  background-color: #f6ebe6;
-  padding: 75px 0;
+  //background-color: #f6ebe6;
+  background-color:#ffffff;
+  padding: 0px 0;
   position: relative;
   z-index: 0;
   .illustration {

@@ -5,6 +5,7 @@ import FeatureBlockWrapper, {
 	ContentWrapper,
 	ButtonWrapper,
 } from "./featureBlock.style";
+import MailOutlineIcon from '@material-ui/icons/MailOutline';
 
 const FeatureBlock = ({
 	className,
@@ -36,13 +37,15 @@ const FeatureBlock = ({
 
 	// check icon value and add
 	const Icon = icon && (
-		<IconWrapper className="icon__wrapper" {...iconStyle}>
+		<div style={{ height:"120px", /*border:"solid", borderColor:"yellow"*/ }}>
+			<IconWrapper className="icon__wrapper" {...iconStyle}>
 			{icon}
-		</IconWrapper>
+			</IconWrapper>
+		</div>
 	);
 
 	return (
-		<div style={{ width:"300px", display:"flex", flexDirection:"column", alignItems:"center" }}>
+		<div style={{ width:"300px", display:"flex", flexDirection:"column", alignItems:"center", /*border:"solid", borderColor:"yellow"*/ }}>
 			{Icon}
 			<div style={{ width:"260px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
 				{title}

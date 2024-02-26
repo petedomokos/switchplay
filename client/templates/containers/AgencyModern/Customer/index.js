@@ -25,8 +25,8 @@ const Customer = ({ data, screen, direction, minHeight }) => {
   const spectrumContainerRef = useRef(null);
 
   const alignVertically = direction.includes("column");
-  const spectrumWidth = alignVertically ? d3.min([400, screen.width * 0.8]) : screen.width * 0.4;
-  const spectrumHeight = minHeight || (alignVertically ? 220 : 300);
+  const spectrumWidth = alignVertically ? d3.min([500, screen.width * 0.8]) : screen.width * 0.6;
+  const spectrumHeight = minHeight || (alignVertically ? 300 : 300);
 
   const requiredImgAspectRatio = 0.6;
   //@todo - pass the 70% and 75% trhough to stylesheet as props rather than hardcoding it here and there separately

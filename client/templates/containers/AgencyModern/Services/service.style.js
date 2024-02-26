@@ -71,6 +71,8 @@ export const SectionHeader = styled.header`
 
 
 export const ServiceWrapper = styled.div`
+  //border:solid;
+  border-color:white;
   display: flex;
   flex-direction:column;
   justify-content:center;
@@ -79,6 +81,8 @@ export const ServiceWrapper = styled.div`
     transform:scale(0.6);
   }
   .services {
+    //border:solid;
+    border-color:red;
     display:flex;
     align-items:flex-start;
     justify-content:center;
@@ -88,6 +92,10 @@ export const ServiceWrapper = styled.div`
     }
 
     .service {
+      //border:solid;
+      border-color:yellow;
+      width:300px;
+      height:350px;
       &.primary-service {
         @media only screen and (max-width: 575px) {
           margin-bottom:30px;
