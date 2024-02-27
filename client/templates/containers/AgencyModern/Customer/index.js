@@ -69,8 +69,10 @@ const Customer = ({ data, screen, direction, minHeight }) => {
               <SVGImage image={{ url, transform, aspectRatio:requiredImgAspectRatio }} dimns={requiredImgDimns} imgKey={key} />
             </div>
             :
-            <div className="visual-container" style={{ width:`${spectrumWidth}px`, height:`${spectrumHeight}px` }} >
-              <svg ref={spectrumContainerRef}></svg>
+            <div className="visual-container" style={{ 
+              width:`${spectrumWidth}px`, height:`${spectrumHeight}px`, overflow:"hidden" }} >
+              {/**<svg ref={spectrumContainerRef} style={{ width:`${spectrumWidth}px`, height:`200px`, overflow:"hidden" }}></svg>*/}
+              <img src="website/data-display/eye_transparent.png" style={{ objectFit:"contain" }}/>
             </div>
           }
           <Content>

@@ -3,13 +3,14 @@ import { grey10 } from "./cards/constants"
 import { updateTransform, updateRectDimns } from './journey/transitionHelpers';
 import { fadeIn, remove } from './journey/domHelpers';
 
-const eyeImgDimns = { width: 304, height:215 };
+//const eyeImgDimns = { width: 304, height:215 }; 
+const eyeImgDimns = { width: 4677, height:3307 };
 //note  //width was 4677, went to 300 = scale 15.59, so height 3307 becomes 212.123
 const eyeAspectRatio = eyeImgDimns.height / eyeImgDimns.width;
 const eyeImage = {
     ...eyeImgDimns,
     aspectRatio:eyeAspectRatio,
-    url:"website/data-display/eye_transparent.png"
+    url:"website/data-display/eye_transparent_large.png"
 }
 const transition = { duration: 400 }
 export default function spectrumComponent() {
@@ -32,7 +33,7 @@ export default function spectrumComponent() {
 
         eyeWidth = contentsWidth;
         eyeHeight = eyeWidth * eyeImage.aspectRatio;
-        console.log("ew eh", eyeWidth, eyeHeight)
+        //console.log("ew eh", eyeWidth, eyeHeight)
         eyeScaleK = eyeWidth / eyeImage.width;
         extraVertSpace = contentsHeight - eyeHeight;
 
@@ -71,7 +72,7 @@ export default function spectrumComponent() {
                     .attr("height", height)
                     .attr("stroke", "none")
                     .attr("stroke-width", 1)
-                    .attr("fill", "transparent");
+                    .attr("fill","white")// "transparent");
 
                 const contentsG = containerElement.append("g")
                     .attr("class", "spectrum-contents")
@@ -89,13 +90,20 @@ export default function spectrumComponent() {
                 const eyeG = contentsG.append("g")
                     .attr("class", "eye")
 
+                eyeG
+                    .attr("opacity", 0)
+                    //.attr("display", "none")
+
                 eyeG.append("rect")
                     .attr("class", "eye-bg bg")
                     .attr("fill", "transparent")
                     .attr("stroke", "none")
                     .attr("stroke-width", 0.1)
 
-                eyeG.append("image");
+                const eyeTransform = `scale(${eyeScaleK})`
+                eyeG.append("image")
+                    .attr("xlink:href", eyeImage.url)
+                    .attr("transform", eyeTransform);
 
             }
 
@@ -133,9 +141,17 @@ export default function spectrumComponent() {
 
                 const eyeTransform = `scale(${eyeScaleK})`
                 eyeG.select("image")
-                    .attr("xlink:href", eyeImage.url)
+                    //.attr("xlink:href", eyeImage.url)
                     .attr("transform", eyeTransform)
-                    .attr("opacity", 1);
+
+                eyeG
+                    .transition()
+                    .duration(2000)
+                        .attr("opacity", 1)
+                        .on("end", function(){ 
+                            console.log("end......")
+                            //d3.select(this).attr("display", null)
+                        });
 
             }
 

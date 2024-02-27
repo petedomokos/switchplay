@@ -21,6 +21,7 @@ import Profile from './core/profile/Profile'
 import auth from './auth/auth-helper'
 import ImportDataContainer from './data/ImportDataContainer'
 import VisualsContainer from './visuals/VisualsContainer'
+import About from "./core/About";
 import './assets/styles/main.css'
 
 import Sticky from 'react-stickynode';
@@ -176,19 +177,20 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, onSignout, hi
                 <Route exact path="/"><Navbar data={getNavBarItemsFromHomePage(user, onSignout)} history={history} user={user} /></Route>
               </DrawerProvider>
             </Sticky>
-            <Switch>
-              <Route path="/signup" component={CreateUserContainer}/>
-              <Route path="/signin" component={SigninContainer}/>
-              <Route path="/profile" component={Profile}/>
-              <Route path="/visuals" component={VisualsContainer} />
-              <PrivateRoute path="/import" component={ImportDataContainer} />
-              <PrivateRoute path="/datasets/new" component={CreateDatasetContainer}/>
-              {jwt ?
-                <Route path="/" component={UserHomeContainer} />
-                :
-                <Route exact path="/" component={NonUserHomeContainer}/>
-              }
-            </Switch>
+              <Switch>
+                <Route path="/about" component={About}/>
+                <Route path="/signup" component={CreateUserContainer}/>
+                <Route path="/signin" component={SigninContainer}/>
+                <Route path="/profile" component={Profile}/>
+                <Route path="/visuals" component={VisualsContainer} />
+                <PrivateRoute path="/import" component={ImportDataContainer} />
+                <PrivateRoute path="/datasets/new" component={CreateDatasetContainer}/>
+                {jwt ?
+                  <Route path="/" component={UserHomeContainer} />
+                  :
+                  <Route exact path="/" component={NonUserHomeContainer}/>
+                }
+              </Switch>
           </ContentWrapper>
         </Fragment>
       </ThemeProvider>
