@@ -575,8 +575,7 @@ export default function pentagonComponent() {
 
                         //status - renders iff optionsData non-null
                         const statusOptionsData = editable && statusMenuItemNr === itemNr ? STATUS_OPTIONS : null;
-
-                        const gapBetweenItemAndMenu = 5;
+                        const gapBetweenItemAndMenu = itemNr === 3 ? 15 : 5;
                         //containerG is positioned in hoz middle of menu, and vertically at the bottom because its expands out and up
                         sectionContentsG.select("g.status-menu-container")
                             .attr("transform", `translate(${itemAreaWidth/2}, ${-gapBetweenItemAndMenu})`)

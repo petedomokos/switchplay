@@ -236,7 +236,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
             <Decks 
               table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
               datasets={datasets}
-              data={decksData/*.slice(0,1)*/} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
+              data={decksData/*.slice(1,2)*/} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
               groupingTag={groupingTag} timeframeKey={timeframeKey}
               tableMarginTop={tableMarginTop}
               onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={handleUpdateDeck}

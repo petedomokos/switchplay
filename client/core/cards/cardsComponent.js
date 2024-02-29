@@ -23,6 +23,11 @@ const contextMenuData = [
     { key:"delete-card", url:"/delete.png" }
 ]
 
+const diamondImage = {
+    url:"/diamond.png",
+    transform:"translate(-2.5,0) scale(0.03)"
+}
+
 export default function cardsComponent() {
     //API SETTINGS
     // dimensions
@@ -597,7 +602,7 @@ export default function cardsComponent() {
                             .width(contentsWidth)
                             .height(headerHeight)
                             .withTitle(!cardTitleIsBeingEdited)
-                            .rightContent(timeframeKey === "singleDeck" ? "progress-chain" : "progress-trophy")
+                            .rightContent(timeframeKey === "singleDeck" ? "card-progress" : "progress-trophy")
                             .styles({
                                 //need to decide whether to do stroke from here or just inside cardHeader
                                 getStatusItemStroke:(itemD,linePartNr) => getProgressStatusColour(cardD, itemD, linePartNr),
@@ -642,7 +647,7 @@ export default function cardsComponent() {
                             })
                         
                         const headerId = `deck-${deckId}-card-${cardNr}`
-                        const frontHeaderDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr, id:headerId };
+                        const frontHeaderDatum = { ...info, status, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr, id:headerId };
                         frontContentsG.selectAll("g.card-header")
                             //.attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
                             .datum(frontHeaderDatum)
@@ -689,7 +694,10 @@ export default function cardsComponent() {
                             })
                             .setForm(setForm)
 
-                        const shouldShowItems = !isHidden && timeframeKey === "singleDeck" && (isPlaced || isSelected || isFront || (isHeld && selectedSectionKey && deckIsSelected))
+                        const shouldShowCardContent = !isHidden && timeframeKey === "singleDeck";
+                        const isPlacedAndIncomplete = isPlaced && status !== 2;
+                        const isPlacedAndComplete = isPlaced && status == 2;
+                        const shouldShowItems = shouldShowCardContent && (isPlacedAndIncomplete || isSelected || isFront || (isHeld && selectedSectionKey && deckIsSelected))
                         frontContentsG.select("g.items-area")
                             //not sure why we need this when entire containr shold have pointer-events none when no deck selected
                             .attr("pointer-events", deckIsSelected ? null : "none")
@@ -697,6 +705,24 @@ export default function cardsComponent() {
                             .call(fadeInOut, shouldShowItems)
                             .datum(itemsData)
                             .call(items);
+                        
+                        const shouldShowLargeDiamond = shouldShowCardContent && isPlacedAndComplete;
+                        const diamondG = frontContentsG.selectAll("g.diamond").data(shouldShowLargeDiamond ? [1] : []);
+                        diamondG.enter()
+                            .append("g")
+                                .attr("class", "diamond")
+                                .each(function(){
+                                    d3.select(this).append("image")
+                                })
+                                .merge(diamondG)
+                                .attr("transform", `translate(0,${headerHeight})`)
+                                .each(function(){
+                                    d3.select(this).select("image")
+                                        .attr("xlink:href", diamondImage.url)
+                                        .attr("transform", diamondImage.transform)
+                                })
+
+                        diamondG.exit().remove();
 
                         //PURPOSE (instead of items when in long-term longTerm view)
                         const shouldShowPurpose = isFront && timeframeKey === "longTerm" && !cardsAreFlipped;
