@@ -57,7 +57,7 @@ const data = {
   ],
   rightMenuItems: [
     {
-      label: 'About',
+      label: 'Our Story',
       id: 'about-us',
       path: '/about',
       page:"about",

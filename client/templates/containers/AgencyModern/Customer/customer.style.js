@@ -3,6 +3,8 @@ import { themeGet } from '@styled-system/theme-get';
 import { grey10 } from '../../../../core/websiteConstants';
 
 const SectionWrapper = styled.section`
+//border:solid;
+border-color:red;
   width:100%; 
   padding: 80px 0 80px;
   @media only screen and (max-width: 1440px) {
@@ -12,6 +14,8 @@ const SectionWrapper = styled.section`
 `;
 
 export const Section = styled.div`
+//border:solid;
+border-color:yellow;
   width:100%;
   display: flex;
   align-items: center;
@@ -25,10 +29,13 @@ export const Section = styled.div`
 `;
 
 export const Content = styled.div`
+//border:solid;
+border-color:blue;
   width: 90%;
   max-width:600px;
   display: flex;
   flex-direction: column;
+  justify-content:flex-end;
   align-items:center;
   h3 {
     margin:10px auto;
@@ -58,7 +65,10 @@ export const Content = styled.div`
     }
   }
   p {
+    //border:solid;
+    border-color:pink;
     padding:10px 5% 0;
+    margin:0;
     display:flex;
     flex-direction:column;
     font-size: 15px;
@@ -101,8 +111,6 @@ export const Content = styled.div`
       margin-top: 5px;
     }
   }
-  margin:0;
-  padding:0;
 `;
 
 export const Illustration = styled.figure`

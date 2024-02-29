@@ -1,8 +1,6 @@
 import React, { Fragment, useEffect, useRef } from 'react';
 import { withRouter } from 'react-router-dom'
 import * as d3 from 'd3';
-
-
 import ResetCSS from '../templates/common/assets/css/style';
 import {
   GlobalStyle,
@@ -27,15 +25,9 @@ import { makeStyles } from '@material-ui/core/styles'
 import { MAIN_BANNER_MARGIN_VERT, COLOURS } from "./websiteConstants";
 import Players from "./Players"
 import DataSection from './DataSection';
+import CompatibilityInfo from './CompatibilityInfo';
 import overheadBanner from './overhead-kick.png';
-
-const overheadBannerImage = {
-  url:"website/banners/overhead-kick.png",
-  rawImgWidth:3600,
-  rawImgHeight:200, 
-  imgTransX:0, 
-  imgTransY:0,
-}
+import { scrollIntoViewWithOffset } from './websiteHelpers';
 
 const playerQuotesData = screen => ({
     key:"players", 
@@ -44,7 +36,7 @@ const playerQuotesData = screen => ({
       rawImgWidth:400,//550, //900 - full img
       rawImgHeight:800,//1040,  //900 - full img
       imgTransX:-270,//-100, 
-      imgTransY:-85,//-55,
+      imgTransY:-90,//-55,
       aspectRatio:0.9
     }
     :
@@ -53,7 +45,7 @@ const playerQuotesData = screen => ({
       rawImgWidth:600, //900 - full img
       rawImgHeight:1040,  //900 - full img
       imgTransX:-170, 
-      imgTransY:-85,
+      imgTransY:-90,
       aspectRatio:0.9
     },
     quotes:[
@@ -94,33 +86,23 @@ const useStyles = makeStyles(theme => ({
     width:"100%",
     background:COLOURS.banner.bg
   },
-  screen:{
-    display:"flex",
-    justifyContent:"center"
+  topDisplay:{
+    padding:`${NAVBAR_HEIGHT}px 7.5vw 0`,
+    minHeight:`calc(100vh + 100px)`,
+    backgroundColor: `${COLOURS.banner.bg}`,
+    //border:"solid",
+    borderColor:"blue"
   },
   overheadBanner:{
-    //backgroundImage: "url('website/banners/overhead-kick.png')",
     backgroundImage:`url(${overheadBanner})`,
     backgroundSize: "cover",
   }
 }))
 
-
-//helper
-const scrollIntoViewWithOffset = (node, offset) => {
-  window.scrollTo({
-    behavior: 'smooth',
-    top:
-      node.getBoundingClientRect().top -
-      document.body.getBoundingClientRect().top -
-      offset,
-  })
-} 
-
 const NonUserHome = ({ screen, initScrollTo }) =>{
   const overheadImageRatio = 3/9;
   const overheadBannerHeight = screen.width * overheadImageRatio;
-  const styleProps = { overheadBannerHeight };
+  const styleProps = { };
   const classes = useStyles({styleProps});
   const rootRef = useRef(null);
 
@@ -135,7 +117,10 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
 
   return (
     <div className={classes.nonUserHomeRoot} ref={rootRef} id="home" >
-      <Banner screen={screen} />
+      <div className={classes.topDisplay}>
+        <Banner screen={screen} />
+        <CompatibilityInfo screen={screen} className=""/>
+      </div>
       <Players />
       <PeopleWithQuotes title="What Players Say" data={playerQuotesData(screen)} direction="row" />
       <UltimateFeature screen={screen} />
@@ -143,7 +128,7 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
       <DataSection screen={screen} />
       <Subscribe />
       <div className={classes.overheadBanner} style={{ width:"100%", height:`${overheadBannerHeight}px`}}></div>
-      <div style={{ width:"100%", height:"200px", background:"black" }}></div>
+      <div style={{ width:"100%", height:"100px", background:"black" }}></div>
       {/**<Footer />*/}
     </div>
   )

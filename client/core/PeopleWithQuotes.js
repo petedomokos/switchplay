@@ -56,7 +56,7 @@ const useStyles = makeStyles(theme => ({
         height:`${PEOPLE_WITH_QUOTES.titleHeightPC.mdUp}%`,
         display:"flex",
         justifyContent:"center",
-        alignItems:"center",
+        alignItems:"flex-end",
         //border:"solid",
         color:"black",//theme.palette.blue,
         fontFamily: "Brush Script MT, cursive",
@@ -66,6 +66,7 @@ const useStyles = makeStyles(theme => ({
         }
     },
     quotes:{
+        //border:"solid",
         width:"100%",
         height:"75%",
         padding:"30px",

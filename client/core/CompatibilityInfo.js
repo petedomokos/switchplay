@@ -1,21 +1,25 @@
 import React, { Fragment, useEffect, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles'
 import * as d3 from 'd3';
-import { grey10, MAIN_BANNER_MARGIN_VERT } from "./websiteConstants";
+import { grey10, MAIN_BANNER_MARGIN_VERT, NAVBAR_HEIGHT } from "./websiteConstants";
 
 
 const useStyles = makeStyles(theme => ({
     compatibilityInfoRoot:{
-        width:"100%",
-        maxWidth:"300px",
+        width:"700px",
+        [theme.breakpoints.down('md')]: {
+          width:"100%",
+          maxWidth:"300px",
+        },
+        height:`${NAVBAR_HEIGHT}px`,
         background:"transparent",
         //border:"solid",
-        padding:"10px 10px 10px 0",
+        padding:"0",
         marginBottom:props => props.className === "sm-down" ? "50px" : 0
     },
     listLabel:{
         height:"20px", 
-        margin:"10px 0 0",
+        margin:"0",
         fontSize:"11px", 
         color:grey10(5),
         [theme.breakpoints.down('sm')]: {
@@ -26,13 +30,15 @@ const useStyles = makeStyles(theme => ({
         },
     },
     itemRows:{
-
+      //border:"solid",
     },
     itemRow:{
+        //border:"solid",
+        borderColor:"blue",
         display:"flex", 
         justifyContent:"flex-start", 
         flexWrap:"wrap",
-        [theme.breakpoints.down('sm')]: {
+        [theme.breakpoints.down('md')]: {
             justifyContent:"space-around", 
         },
 
@@ -64,6 +70,12 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
+const singleRowItems = ["Kitman labs", "Session Planner", "Hudl", "Excel", "Word", "PDF", "GDrive", "SQL"]
+const row1Items = ["Kitman labs", "Hudl", "Excel", "PDF"]
+const row2Items = ["Session Planner", "Hudl", "Word", "GDrive", "SQL"]
+const rows = [row1Items, row2Items]
+const getColClassname = i => `col${i + 1}Item`;
+
 const CompatibilityInfo = ({ screen, className }) =>{
   const styleProps = { screen, className }
   const classes = useStyles(styleProps);
@@ -72,17 +84,21 @@ const CompatibilityInfo = ({ screen, className }) =>{
     <div className={`${classes.compatibilityInfoRoot} ${className}`}>
         <div className={classes.listLabel} >Works with</div>
           <div className={classes.itemRows} >
-            <div className={classes.itemRow} >
-              <span className={`${classes.item} ${classes.col1Item}`}>Kitman Labs</span>
-              <span className={`${classes.item} ${classes.col2Item}`}>Hudl</span>
-              <span className={`${classes.item} ${classes.col3Item}`}>Excel</span>
-              <span className={`${classes.item} ${classes.col4Item}`}>PDF</span>
+            <div className="lg-up">
+                <div className={classes.itemRow} >
+                  {singleRowItems.map((it,i) =>
+                    <span className={classes.item}>{it}</span>
+                  )}
+                </div>
             </div>
-            <div className={classes.itemRow} >
-              <span className={`${classes.item} ${classes.col1Item}`}>Session Planner</span>
-              <span className={`${classes.item} ${classes.col2Item}`}>Word</span>
-              <span className={`${classes.item} ${classes.col3Item}`}>GDrive</span>
-              <span className={`${classes.item} ${classes.col4Item}`}>SQL</span>
+            <div className="md-down">
+              {rows.map(rowItems =>
+                <div className={classes.itemRow} >
+                  {row1Items.map((it,i) =>
+                    <span className={`${classes.item} ${classes[getColClassname(i)]}`}>{it}</span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
     </div>

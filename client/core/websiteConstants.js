@@ -1,11 +1,11 @@
 export const NAVBAR_HEIGHT = 70;
 
 export const MAIN_BANNER_MARGIN_VERT = {
-    xs:100,
-    sm:100,
-    md:100,
-    lg:100,
-    xl:100
+    xs:25,
+    sm:25,
+    md:25,
+    lg:25,
+    xl:25
 }
 
 export const COLOURS = {
@@ -16,7 +16,7 @@ export const COLOURS = {
 }
 
 export const PEOPLE_WITH_QUOTES = {
-    titleHeightPC:{ smDown:25, mdUp:20 }
+    titleHeightPC:{ smDown:25, mdUp:15 }
 }
 
 export const grey3pt5 = "#C8C8C8";

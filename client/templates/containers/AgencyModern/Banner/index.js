@@ -16,8 +16,8 @@ import BannerWrapper, {
 
 import { grey10 } from "../../../../core/cards/constants"
 import SVGImage from "../../../../core/SVGImage";
-import { MAIN_BANNER_MARGIN_VERT } from "../../../../core/websiteConstants";
-import CompatibilityInfo from '../../../../core/CompatibilityInfo';
+import { MAIN_BANNER_MARGIN_VERT, NAVBAR_HEIGHT } from "../../../../core/websiteConstants";
+
 
 //import paypal from '../../../common/assets/image/agencyModern/paypal.png';
 //import google from '../../../common/assets/image/agencyModern/google.png';
@@ -29,7 +29,7 @@ const dropbox = "";
 
 // &amp; 
 
-const largeImageInfo = {
+const largeImage = {
   url:"website/heroImg.png",
   rawImgWidth:800,//actual whole is 1100, 
   rawImgHeight:200, 
@@ -37,7 +37,7 @@ const largeImageInfo = {
   imgTransY:0
 }
 
-const smallImageInfo = {
+const smallImage = {
   url:"website/heroImg.png",
   rawImgWidth:800,//actual whole is 1100, 
   rawImgHeight:200, 
@@ -49,9 +49,9 @@ const smallImageInfo = {
 //old...Great football development comes down to relationships, communication, learning & growth,( & details?)
 const Banner = ({screen}) => {
   //aspect ratio changes for large image depending on screen
-  const largeImgDimns = { 
-    width: screen.width * 0.45, 
-    height: screen.height - 2 * MAIN_BANNER_MARGIN_VERT[screen.size]
+  /*const largeImgDimns = { 
+    width: screen.width * 0.5, 
+    height: screen.height// - 2 * NAVBAR_HEIGHT - 2 * MAIN_BANNER_MARGIN_VERT[screen.size]
   }
   const requiredLargeAspectRatio = largeImgDimns.height / largeImgDimns.width;
   const largeImgTransform = `translate(${-200 + 0.1 * screen.width},${0}) scale(${0.65})`;
@@ -60,6 +60,7 @@ const Banner = ({screen}) => {
 
   const smallImage = smallImageInfo;
   const largeImage = { ...largeImageInfo, aspectRatio:requiredLargeAspectRatio }
+  */
 
 
 
@@ -111,7 +112,6 @@ const Banner = ({screen}) => {
               />
               <Button title="Get A Demo" type="submit" />
             </Subscribe>
-            <CompatibilityInfo screen={screen} className="md-up"/>
         </BannerContent>
         <div className="banner-image-area">
           <SVGImage 
@@ -139,7 +139,6 @@ const Banner = ({screen}) => {
             content="Use data with confidence and purpose."
           />
         </div>
-        <CompatibilityInfo screen={screen} className="sm-down"/>
     </BannerWrapper>
   );
 };

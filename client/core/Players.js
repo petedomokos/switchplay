@@ -30,8 +30,6 @@ const useStyles = makeStyles(theme => ({
     width:"100%",
     padding:"15vh 0",
     background:"#1E1E1E",
-    border:"solid",
-    borderColor:"white",
   },
   topBanner:{
     //border:"solid",

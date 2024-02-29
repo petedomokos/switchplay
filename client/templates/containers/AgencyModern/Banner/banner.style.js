@@ -3,42 +3,42 @@ import { rgba } from 'polished';
 import { themeGet } from '@styled-system/theme-get';
 
 import bannerBg from '../../../common/assets/image/agencyModern/banner2.png';
-import { MAIN_BANNER_MARGIN_VERT, COLOURS } from '../../../../core/websiteConstants';
+import { MAIN_BANNER_MARGIN_VERT, COLOURS, NAVBAR_HEIGHT } from '../../../../core/websiteConstants';
 
 
 //#f0ded5
 const BannerWrapper = styled.div`
   //border: solid;
-  border-color:yellow;
   //background-image: url(${bannerBg?.src});
-  background-color: ${COLOURS.banner.bg};
+  //background-color: ${COLOURS.banner.bg};
   background-size: 100%;
   background-position: right bottom;
   background-repeat: no-repeat;
   width:100%;
-  min-height: 80vh;
+  height: calc(100vh - ${2 * NAVBAR_HEIGHT}px);
   display:flex;
   justify-content:center;
   align-items: center;
-  padding-top:${MAIN_BANNER_MARGIN_VERT.xl}px;
-  padding-bottom:${MAIN_BANNER_MARGIN_VERT.xl}px;
+  //padding-top:${MAIN_BANNER_MARGIN_VERT.xl}px;
+  //padding-bottom:${MAIN_BANNER_MARGIN_VERT.xl}px;
+  padding:0;
 
   @media only screen and (max-width: 1440px) {
-    min-height: 100vh;
   }
   @media only screen and (max-width: 990px) {
-    min-height: auto;
   }
-  @media only screen and (max-width: 575px) {
+  @media only screen and (max-width: 768px) {
     flex-direction: column;
     min-height: auto;
     padding-top:130px;
     padding-bottom:0;
   }
   .banner-image-area {
-    width:45%;
-    height:calc(100vh - ${2 * MAIN_BANNER_MARGIN_VERT.xl}px);
-    @media only screen and (max-width: 575px) {
+    //border:solid;
+    border-color:red;
+    width:50%;
+    height:calc(100% - ${2 * MAIN_BANNER_MARGIN_VERT.xl}px);
+    @media only screen and (max-width: 768px) {
       width:100%;
       height:auto;
     }
@@ -62,7 +62,7 @@ const BannerWrapper = styled.div`
     @media only screen and (max-width: 990px) {
       max-width: 85%;
     }
-    @media only screen and (max-width: 575px) {
+    @media only screen and (max-width: 768px) {
       margin:40px 0;
       font-size: 18px;
       height:auto;
@@ -82,24 +82,29 @@ const BannerWrapper = styled.div`
 
 export const BannerContent = styled.div`  
   //border: solid;
+  border-color:red;
   max-width: 50%;
-  width: 45%;
+  width: 50%;
   display: flex;
   flex-direction: column;
-  height:calc(100vh - ${2 * MAIN_BANNER_MARGIN_VERT.xl}px);
+  justify-content: space-between;
+  height:calc(100% - ${2 * MAIN_BANNER_MARGIN_VERT.xl}px);
   @media only screen and (max-width: 1600px) {
     border-color: red;
-    padding-left:2.5vw;
     padding-right:2.5vw;
   }
   @media only screen and (max-width: 1400px) {
     border-color: yellow;
+    border-color:red;
   }
   @media only screen and (max-width: 990px) {
     border-color: blue;
   }
   @media only screen and (max-width: 768px) {
-    justify-content:flex-start;
+    //justify-content:flex-start;
+    width:90%;
+    max-width:90%;
+    height:auto;
     border-color: pink;
   }
   @media only screen and (max-width: 575px) {
@@ -115,10 +120,13 @@ export const BannerContent = styled.div`
     margin-top:0px;
     margin-bottom:20px; 
   }
+  .heading {
+    margin-top:30px;
+  }
   h1 {
     //border: solid;
     border-color: red;
-    font-size: 54px;
+    font-size: 60px;
     line-height: 0.8;
     font-weight: 500;
     &.in-bold {
@@ -127,14 +135,14 @@ export const BannerContent = styled.div`
     color: ${themeGet('colors.menu', '#02073e')};
     letter-spacing: -2px;
     @media only screen and (max-width: 1600px) {
-      font-size: 48px;
+      font-size: 54px;
     }
     @media only screen and (max-width: 1440px) {
-      font-size: 42px;
+      font-size: 48px;
       letter-spacing: -1.5px;
     }
     @media only screen and (max-width: 990px) {
-      font-size: 36px;
+      font-size: 42px;
       max-width: 550px;
     }
 
@@ -159,28 +167,39 @@ export const BannerContent = styled.div`
 
 export const Subscribe = styled.div`
   //border: solid;
-  border-color:blue;
+  border-color:red;
   display: flex;
   flex-direction: column;
   max-width:300px;
   @media only screen and (max-width: 1440px) {
     width: 93%;
+    border-color: yellow;
   }
   @media only screen and (max-width: 990px) {
+    border-color: blue;
   }
   @media only screen and (max-width: 768px) {
-  }
-
-  @media only screen and (max-width: 575px) {
-    margin:20px 0 40px;
+    margin:20px auto 40px;
     align-items: center;
     width: 100%;
     flex-direction: column;
+    border-color:pink;
+  }
+
+  @media only screen and (max-width: 575px) {
+    margin:20px auto 40px;
+    align-items: center;
+    width: 100%;
+    flex-direction: column;
+    border-color:black;
   }
   .reusecore__input {
     width: 100%;
   }
   .field-wrapper {
+    @media only screen and (max-width: 990px) {
+      display:none;
+    }
     margin-bottom:5px;
     input {
       min-width: 200px;
