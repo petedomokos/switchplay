@@ -9,6 +9,10 @@ import { PEOPLE_WITH_QUOTES } from './websiteConstants';
 const useStyles = makeStyles(theme => ({
     peopleWithQuotesRoot: {
         width:"100vw",
+        /*height:props => {
+            console.log("props", props)
+            return props.aspectRatio === 2 ? "300px" : "200px"
+        },*/
         //height:"2000px",
         display:"flex",
         flexDirection:props => props.direction,
@@ -23,7 +27,10 @@ const useStyles = makeStyles(theme => ({
     },
     peopleContainer:{
         width:"50vw",
-        height:props => `${props.aspectRatio * 50}vw`,
+        height:props => {
+            console.log("pplcontheight props", props)
+            return `${props.aspectRatio * 50}vw`;
+        },
         //display:"flex",
         //justifyContent:"center",
         //border:'solid',
@@ -37,9 +44,12 @@ const useStyles = makeStyles(theme => ({
     },
     quotesContainer:{
         width:"50vw",
-        height:props => `${props.aspectRatio * 50}vw`,
-        //color:"red",
-        //border:"solid",
+        height:props => {
+            console.log("quotescontheight props", props)
+            return `${props.aspectRatio * 50}vw`;
+        },
+        color:"red",
+        border:"solid",
         borderColor:"red",
         display:"flex",
         flexDirection:"column",
@@ -83,22 +93,24 @@ const useStyles = makeStyles(theme => ({
 const PeopleWithQuotes = ({ title, data, direction }) =>{
     //for now, static. later can do carousel
     const { key, image, quotes } = data;
+    console.log("aspectRatio", image.aspectRatio)
     const styleProps = { aspectRatio:image.aspectRatio, direction };
+    console.log("styleprops", styleProps)
     const classes = useStyles(styleProps);
 
     return (
         <div className={classes.peopleWithQuotesRoot}>
-                <div className={classes.peopleContainer}>
-                    <SVGImage image={image} imgKey={key} />
-                </div>
-                <div className={classes.quotesContainer}>
-                    {title && <div className={classes.title}>{title}</div>}
-                    <div className={classes.quotes}>
-                        {quotes.map((q,i) => 
-                            <Quote data={q} key={`${key}-${i}`} />
-                        )}
-                        </div>
-                </div>
+            <div className={classes.peopleContainer}>
+                {<SVGImage image={image} imgKey={key} />}
+            </div>
+            <div className={classes.quotesContainer}>
+                {title && <div className={classes.title}>{title}</div>}
+                <div className={classes.quotes}>
+                    {quotes.map((q,i) => 
+                        <Quote data={q} key={`${key}-${i}`} />
+                    )}
+                </div> 
+            </div>
         </div>
     )
 }
@@ -110,3 +122,17 @@ PeopleWithQuotes.defaultProps = {
 }
   
 export default PeopleWithQuotes;
+
+/*
+<div className={classes.peopleContainer}>
+                    {<SVGImage image={image} imgKey={key} />}
+                </div>
+                <div className={classes.quotesContainer}>
+                    {title && <div className={classes.title}>{title}</div>}
+                    <div className={classes.quotes}>
+                        {quotes.map((q,i) => 
+                            <Quote data={q} key={`${key}-${i}`} />
+                        )}
+                        </div>
+                </div>
+                */

@@ -112,6 +112,13 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, onSignout, hi
   const phoneMaxWidth = 480;
   const tabletMaxWidth = 1024; //ipad air
   //const calcScreenSize = width => width <= 480 ? "s" : width <= 1024 ? "m" : "l";
+
+  //SCREEN
+  //first time must load screen before rendering children
+  /*if(!window._screen || window.screen.width === 0){
+    updateScreen(getScreenInfo())
+  }*/
+
   const q1 = useMediaQuery('(max-width:575px)');
   const q2 = useMediaQuery('(max-width:768px)');
   const q3 = useMediaQuery('(max-width:990px)');
@@ -123,40 +130,35 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, onSignout, hi
   else if(q4){ size = "lg"; }
   else { size = "xl";}
 
-  const getScreenInfo = () => {
-    const orientation = window.innerWidth < window.innerHeight ? "portrait" : "landscape";
-    const screen =  { 
-      width: window.innerWidth, 
-      height: window.innerHeight, 
-      orientation,
-      size,
-      isLarge:["lg", "xl"].includes(size),
-      isSmall:["sm", "xs"].includes(size),
-      isMediumDown:["md", "sm", "xs"].includes(size),
-      isMediumUp:["md", "lg", "xl"].includes(size)
-    }
-    window._screen = screen;
-    //note - we still save in store, as ReactNative wont hve window
-    return screen;
-  }
-
-  //SCREEN
-  //first time must load screen before rendering children
-  if(!window._screen || window.screen.width === 0){
-    updateScreen(getScreenInfo())
-  }
-
   useEffect(() => {
       const handleResize = () => {
-        updateScreen(getScreenInfo())
+        console.log("resize...", size)
+
+
+        const orientation = window.innerWidth < window.innerHeight ? "portrait" : "landscape";
+        const screen =  { 
+          width: window.innerWidth, 
+          height: window.innerHeight, 
+          orientation,
+          size,
+          isLarge:["lg", "xl"].includes(size),
+          isSmall:["sm", "xs"].includes(size),
+          isMedium:size === "md",
+          isMediumDown:["md", "sm", "xs"].includes(size),
+          isMediumUp:["md", "lg", "xl"].includes(size)
+        }
+        //legacy - store it on window too
+        window._screen = screen;
+
+        updateScreen(screen)
       };
       window.addEventListener("resize", handleResize);
       //init
-      updateScreen(getScreenInfo())
+      handleResize();
       return () => {
           window.removeEventListener("resize", handleResize);
       };
-  }, [q1, q2, q3, q4]);
+  }, [size]);
 
   useEffect(() => {
     if(jwt && !userId && !loadingUser){

@@ -7,7 +7,7 @@ import { grey10, MAIN_BANNER_MARGIN_VERT, NAVBAR_HEIGHT } from "./websiteConstan
 const useStyles = makeStyles(theme => ({
     compatibilityInfoRoot:{
         width:"700px",
-        [theme.breakpoints.down('md')]: {
+        [theme.breakpoints.down('sm')]: {
           width:"100%",
           maxWidth:"300px",
         },
@@ -38,7 +38,7 @@ const useStyles = makeStyles(theme => ({
         display:"flex", 
         justifyContent:"flex-start", 
         flexWrap:"wrap",
-        [theme.breakpoints.down('md')]: {
+        [theme.breakpoints.down('sm')]: {
             justifyContent:"space-around", 
         },
 
@@ -84,17 +84,17 @@ const CompatibilityInfo = ({ screen, className }) =>{
     <div className={`${classes.compatibilityInfoRoot} ${className}`}>
         <div className={classes.listLabel} >Works with</div>
           <div className={classes.itemRows} >
-            <div className="lg-up">
+            <div className="md-up">
                 <div className={classes.itemRow} >
                   {singleRowItems.map((it,i) =>
                     <span className={classes.item}>{it}</span>
                   )}
                 </div>
             </div>
-            <div className="md-down">
+            <div className="sm-down">
               {rows.map(rowItems =>
                 <div className={classes.itemRow} >
-                  {row1Items.map((it,i) =>
+                  {rowItems.map((it,i) =>
                     <span className={`${classes.item} ${classes[getColClassname(i)]}`}>{it}</span>
                   )}
                 </div>

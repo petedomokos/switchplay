@@ -29,24 +29,40 @@ import CompatibilityInfo from './CompatibilityInfo';
 import overheadBanner from './overhead-kick.png';
 import { scrollIntoViewWithOffset } from './websiteHelpers';
 
-const playerQuotesData = screen => ({
-    key:"players", 
-    image:screen.isSmall ? {
-      url:"website/images/what-players-say.png",
+//next - do same for staff img
+const playersImageDimns = screen => {
+  if(screen.isSmall){
+    return {
       rawImgWidth:400,//550, //900 - full img
       rawImgHeight:800,//1040,  //900 - full img
       imgTransX:-270,//-100, 
       imgTransY:-90,//-55,
       aspectRatio:0.9
     }
-    :
-    {
-      url:"website/images/what-players-say.png",
-      rawImgWidth:600, //900 - full img
+  }
+  if(screen.isMedium){
+    return {
+      rawImgWidth:550, //900 - full img
       rawImgHeight:1040,  //900 - full img
-      imgTransX:-170, 
+      imgTransX:-165, 
       imgTransY:-90,
-      aspectRatio:0.9
+      aspectRatio:1
+    }
+  }
+  //lg-up
+  return {
+    rawImgWidth:600, //900 - full img
+    rawImgHeight:1040,  //900 - full img
+    imgTransX:-170, 
+    imgTransY:-90,
+    aspectRatio:0.9
+  }
+}
+const playerQuotesData = screen => ({
+    key:"players", 
+    image:{
+      url:"website/images/what-players-say.png",
+      ...playersImageDimns(screen)
     },
     quotes:[
       { key:"playersQ1", label:"Andrew", text:"It's motivating! I get to see all my progress in one place on my phone." },
@@ -100,6 +116,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const NonUserHome = ({ screen, initScrollTo }) =>{
+  console.log("screen", screen)
   const overheadImageRatio = 3/9;
   const overheadBannerHeight = screen.width * overheadImageRatio;
   const styleProps = { };
@@ -124,7 +141,7 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
       <Players />
       <PeopleWithQuotes title="What Players Say" data={playerQuotesData(screen)} direction="row" />
       <UltimateFeature screen={screen} />
-      <PeopleWithQuotes title="What Staff Say" data={staffQuotesData(screen)} direction="row-reverse" />
+      {/**<PeopleWithQuotes title="What Staff Say" data={staffQuotesData(screen)} direction="row-reverse" />*/}
       <DataSection screen={screen} />
       <Subscribe />
       <div className={classes.overheadBanner} style={{ width:"100%", height:`${overheadBannerHeight}px`}}></div>
