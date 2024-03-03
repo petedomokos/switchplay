@@ -3,7 +3,7 @@ import { themeGet } from '@styled-system/theme-get';
 
 const SectionWrapper = styled.section`
   background-color: #283742;
-  padding: 70px 0px 150px;
+  padding: 120px 0px 120px;
 `;
 
 export const SectionTitle = styled.div`
@@ -23,6 +23,9 @@ export const SectionTitle = styled.div`
     white-space: nowrap;
     @media screen and (max-width: 1440px) {
       margin-bottom: 4px;
+    }
+    @media screen and (max-width: 990px) {
+      font-size: 26px;
     }
     @media screen and (max-width: 575px) {
       line-height: 1;

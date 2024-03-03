@@ -27,14 +27,16 @@ const maximiseDimns = (maxWidth, maxHeight, aspectRatio) => {
 const UltimateFeature = ({ screen }) => {
   const animationAspectRatio = screen.orientation === "landscape" ? 0.7 : 1;
   const maxAnimationWidth = d3.min([screen.width * 0.8, 600]);
-  //console.log("maxw", maxAnimationWidth)
   const maxAnimationHeight = screen.height * 0.6;
   const animationDimns = maximiseDimns(maxAnimationWidth, maxAnimationHeight, animationAspectRatio);
   return (
     <SectionWrapper id="features">
       <Container>
-        <div style={{ margin:`30px 0px 0px calc(50% - ${animationDimns.width/2}px)`, 
-                      width:`${animationDimns.width}px`, height:`${animationDimns.height}px` }} >
+        <div style={{ 
+            margin:`0px 0px 0px calc(50% - ${animationDimns.width/2}px)`, 
+            width:`${animationDimns.width}px`, height:`${animationDimns.height}px` 
+          }} 
+        >
           <WorkflowAnimation dimns={animationDimns} />
         </div>
         <SectionTitle>

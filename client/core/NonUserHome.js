@@ -22,14 +22,12 @@ import { NAVBAR_HEIGHT } from "./websiteConstants";
 import PeopleWithQuotes from './PeopleWithQuotes';
 import SVGImage from "./SVGImage";
 import { makeStyles } from '@material-ui/core/styles'
-import { MAIN_BANNER_MARGIN_VERT, COLOURS } from "./websiteConstants";
+import { MAIN_BANNER_MARGIN_VERT, COLOURS, scrollIntoViewWithOffset } from "./websiteConstants";
 import Players from "./Players"
 import DataSection from './DataSection';
 import CompatibilityInfo from './CompatibilityInfo';
-import overheadBanner from './overhead-kick.png';
-import { scrollIntoViewWithOffset } from './websiteHelpers';
+import overheadBanner from '../../assets/website/banners/overhead-kick.png';
 
-//next - do same for staff img
 const playersImageDimns = screen => {
   if(screen.isSmall){
     return {
@@ -58,6 +56,37 @@ const playersImageDimns = screen => {
     aspectRatio:0.9
   }
 }
+
+
+const staffImageDimns = screen => {
+  if(screen.isSmall){
+    return {
+      rawImgWidth:800, //900 - full img
+      rawImgHeight:900,  //900 - full img
+      imgTransX:-90, 
+      imgTransY:0,
+      aspectRatio:0.9
+    }
+  }
+  if(screen.isMedium){
+    return {
+      rawImgWidth:800, //900 - full img
+      rawImgHeight:900,  //900 - full img
+      imgTransX:-80, 
+      imgTransY:0,
+      aspectRatio:1.1
+    }
+  }
+  //lg-up
+  return {
+    rawImgWidth:900, //900 - full img
+    rawImgHeight:900,  //900 - full img
+    imgTransX:-80, 
+    imgTransY:0,
+    aspectRatio:0.9
+  }
+}
+
 const playerQuotesData = screen => ({
     key:"players", 
     image:{
@@ -73,23 +102,10 @@ const playerQuotesData = screen => ({
 
 const staffQuotesData = screen => ({ 
   key:"staff",
-  image: screen.isSmall ? {
-      url:"website/images/what-staff-say.png",
-      rawImgWidth:800, //900 - full img
-      rawImgHeight:900,  //900 - full img
-      imgTransX:-90, 
-      imgTransY:0,
-      aspectRatio:0.9
-    }
-    :
-    {
-      url:"website/images/what-staff-say.png",
-      rawImgWidth:900, //900 - full img
-      rawImgHeight:900,  //900 - full img
-      imgTransX:-80, 
-      imgTransY:0,
-      aspectRatio:0.9
-  }, 
+  image:{
+    url:"website/images/what-staff-say.png",
+    ...staffImageDimns(screen)
+  },
   quotes:[
     { key:"coachQ", label:"Coach", text:"Now I know everyone is pushing in the same direction, and my key messages wont get lost with all the noise." },
     { key:"analystQ", label:"Analyst", text:"Now that I don't have to do all the manual merging, I've got more time to talk and to help people to make data-informed decisions." },
@@ -111,12 +127,12 @@ const useStyles = makeStyles(theme => ({
   },
   overheadBanner:{
     backgroundImage:`url(${overheadBanner})`,
+    backgroundColor:"#ffffff",
     backgroundSize: "cover",
   }
 }))
 
 const NonUserHome = ({ screen, initScrollTo }) =>{
-  console.log("screen", screen)
   const overheadImageRatio = 3/9;
   const overheadBannerHeight = screen.width * overheadImageRatio;
   const styleProps = { };
@@ -141,11 +157,11 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
       <Players />
       <PeopleWithQuotes title="What Players Say" data={playerQuotesData(screen)} direction="row" />
       <UltimateFeature screen={screen} />
-      {/**<PeopleWithQuotes title="What Staff Say" data={staffQuotesData(screen)} direction="row-reverse" />*/}
+      <PeopleWithQuotes title="What Staff Say" data={staffQuotesData(screen)} direction="row-reverse" />
       <DataSection screen={screen} />
       <Subscribe />
       <div className={classes.overheadBanner} style={{ width:"100%", height:`${overheadBannerHeight}px`}}></div>
-      <div style={{ width:"100%", height:"100px", background:"black" }}></div>
+      <div style={{ marginTop:"-2.5px", width:"100%", height:"100px", background:COLOURS.OFFBLACK }}></div>
       {/**<Footer />*/}
     </div>
   )

@@ -1,5 +1,6 @@
 import React, { Fragment, useState, useEffect, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles'
+import { grey10 } from './cards/colourThemes';
 
 const useStyles = makeStyles(theme => ({
     quoteRoot: {
@@ -15,12 +16,19 @@ const useStyles = makeStyles(theme => ({
     label:{
         margin:"5px 0",
         fontSize:"12px",
+        [theme.breakpoints.only('md')]: {
+            fontSize:"11px"
+        },
         //border:"solid",
         borderColor:"red",
         color:theme.palette.blue
     },
     text:{
         fontSize:"16px",
+        [theme.breakpoints.only('md')]: {
+            fontSize:"14px"
+        },
+        color:grey10(9),
         fontStyle:"italic",
         //border:"solid",
         borderColor:"yellow"

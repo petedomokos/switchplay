@@ -28,7 +28,7 @@ const useStyles = makeStyles(theme => ({
     peopleContainer:{
         width:"50vw",
         height:props => {
-            console.log("pplcontheight props", props)
+            console.log("...")
             return `${props.aspectRatio * 50}vw`;
         },
         //display:"flex",
@@ -42,18 +42,23 @@ const useStyles = makeStyles(theme => ({
             borderColor:"blue",
         },
     },
-    quotesContainer:{
+    titleAndQuotesContainer:{
         width:"50vw",
         height:props => {
-            console.log("quotescontheight props", props)
+            //WARNING - REMOVING THIS LOG APPEARS TO PREVENT UPDATE
+            console.log("...")
             return `${props.aspectRatio * 50}vw`;
         },
+        padding:"20px 0",
         color:"red",
-        border:"solid",
+        //border:"solid",
         borderColor:"red",
         display:"flex",
         flexDirection:"column",
         alignItems:"center",
+        [theme.breakpoints.down('md')]: {
+            padding:0
+        },
         [theme.breakpoints.down('sm')]: {
             width:"100vw",
             height:() => "500px",
@@ -64,15 +69,17 @@ const useStyles = makeStyles(theme => ({
     title:{
         width:"100%",
         height:`${PEOPLE_WITH_QUOTES.titleHeightPC.mdUp}%`,
+        paddingTop:"30px",
         display:"flex",
         justifyContent:"center",
-        alignItems:"flex-end",
+        alignItems:"center",
         //border:"solid",
         color:"black",//theme.palette.blue,
         fontFamily: "Brush Script MT, cursive",
         fontSize:"36px",
         [theme.breakpoints.down('sm')]: {
-            height:`${PEOPLE_WITH_QUOTES.titleHeightPC.smDown}%`
+            height:`${PEOPLE_WITH_QUOTES.titleHeightPC.smDown}%`,
+            paddingTop:0
         }
     },
     quotes:{
@@ -93,9 +100,7 @@ const useStyles = makeStyles(theme => ({
 const PeopleWithQuotes = ({ title, data, direction }) =>{
     //for now, static. later can do carousel
     const { key, image, quotes } = data;
-    console.log("aspectRatio", image.aspectRatio)
     const styleProps = { aspectRatio:image.aspectRatio, direction };
-    console.log("styleprops", styleProps)
     const classes = useStyles(styleProps);
 
     return (
@@ -103,7 +108,7 @@ const PeopleWithQuotes = ({ title, data, direction }) =>{
             <div className={classes.peopleContainer}>
                 {<SVGImage image={image} imgKey={key} />}
             </div>
-            <div className={classes.quotesContainer}>
+            <div className={classes.titleAndQuotesContainer}>
                 {title && <div className={classes.title}>{title}</div>}
                 <div className={classes.quotes}>
                     {quotes.map((q,i) => 
@@ -122,17 +127,3 @@ PeopleWithQuotes.defaultProps = {
 }
   
 export default PeopleWithQuotes;
-
-/*
-<div className={classes.peopleContainer}>
-                    {<SVGImage image={image} imgKey={key} />}
-                </div>
-                <div className={classes.quotesContainer}>
-                    {title && <div className={classes.title}>{title}</div>}
-                    <div className={classes.quotes}>
-                        {quotes.map((q,i) => 
-                            <Quote data={q} key={`${key}-${i}`} />
-                        )}
-                        </div>
-                </div>
-                */

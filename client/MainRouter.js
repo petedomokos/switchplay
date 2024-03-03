@@ -132,9 +132,6 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, onSignout, hi
 
   useEffect(() => {
       const handleResize = () => {
-        console.log("resize...", size)
-
-
         const orientation = window.innerWidth < window.innerHeight ? "portrait" : "landscape";
         const screen =  { 
           width: window.innerWidth, 

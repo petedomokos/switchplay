@@ -92,6 +92,7 @@ export default function storyAnimationComponent() {
     let fontSizes = {};
 
     function updateDimns(){
+        console.log("w h", width, height)
         margin = { left: width * 0, right:width * 0, top: height * 0, bottom: height * 0 }
 
         scaledContentsWidth = width - margin.left - margin.right;
@@ -99,6 +100,7 @@ export default function storyAnimationComponent() {
         const aspectRatio = height / width || 1;
         contentsWidth = fixedContentsHeight / aspectRatio;
         scaleK = scaledContentsHeight / fixedContentsHeight;
+        console.log("scaleK", scaleK)
 
         heroesWidth = d3.max([55, contentsWidth * 0.2]);
         charactersWidth = d3.max([70, contentsWidth * 0.2]);
@@ -176,7 +178,7 @@ export default function storyAnimationComponent() {
                 contentsG
                     .append("rect")
                         .attr("class", "contents-bg")
-                        //.attr("stroke", "red")
+                        .attr("stroke", "none")
                         .attr("fill", "none")
 
                 contentsG.append("g").attr("class", "heroes")
@@ -267,8 +269,8 @@ export default function storyAnimationComponent() {
                     })
 
                 const contentsG = containerElement.select("g.story-animation-contents")
-                    .call(updateTransform, { x:() => margin.left, y:() => margin.top, k:() => scaleK, transition:transitionIn })
-                    //.attr("transform", `translate(${margin.left},${margin.top})`);
+                    //.call(updateTransform, { x:() => margin.left, y:() => margin.top, k:() => scaleK, transition:transitionIn })
+                    .attr("transform", `translate(${margin.left},${margin.top}) scale(${scaleK})`);
 
                 const wavesG = contentsG.select("g.waves")
                     .call(updateTransform, { x:() => heroesWidth, y:() => 0, transition:transitionIn })

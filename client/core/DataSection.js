@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import * as d3 from 'd3';
 
 import Customer from '../templates/containers/AgencyModern/Customer';
-import { grey10, MAIN_BANNER_MARGIN_VERT } from "./websiteConstants";
+import { grey10, MAIN_BANNER_MARGIN_VERT, COLOURS } from "./websiteConstants";
 
 const dataSections = [
   {
@@ -24,7 +24,7 @@ const useStyles = makeStyles(theme => ({
     dataSectionRoot:{
         width:"100%",
         padding:"10vh 0",
-        background:"#1E1E1E",
+        background:COLOURS.OFFBLACK,
         //border:"solid",
         borderColor:"yellow"
     }

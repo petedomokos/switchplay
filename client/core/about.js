@@ -2,9 +2,9 @@ import React, { Fragment, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import SVGImage from "./SVGImage";
 import { makeStyles } from '@material-ui/core/styles'
-import { NAVBAR_HEIGHT, COLOURS } from "./websiteConstants";
+import { NAVBAR_HEIGHT, COLOURS, grey10 } from "./websiteConstants";
 import { aboutPageData } from "../data/websiteData";
-import overheadBanner from './overhead-kick.png';
+import overheadBanner from '../../assets/website/banners/header-goal.png';
 import stadiumBanner from '../../assets/website/about-page-images/stadium.png';
 import { scrollIntoViewWithOffset } from './websiteHelpers';
 
@@ -25,6 +25,7 @@ const useStyles = makeStyles(theme => ({
     borderColor:"yellow",
     width:"100%",
     height:"40vh",
+    background:"#584543", //"#613737",
     //minHeight:"400px",
     [theme.breakpoints.down('md')]: {
       //fontSize:"50px"
@@ -35,12 +36,12 @@ const useStyles = makeStyles(theme => ({
     width:"100%",
     minHeight:`calc(100vh - ${NAVBAR_HEIGHT}px)`,
     background:"#613737",
-    border:"solid",
+    //border:"solid",
   },
   team:{
     padding:"0 7.5vw",
     background:"white",
-    border:"solid",
+    //border:"solid",
     //borderColor:"yellow",
     width:"100%",
     minHeight:`calc(100vh - ${NAVBAR_HEIGHT}px)`,
@@ -67,7 +68,8 @@ const useStyles = makeStyles(theme => ({
 
   },
   paragraph:{
-    fontSize:"16px"
+    fontSize:"16px",
+    color:grey10(2)
 
   },
   welcomeParagraph:{
@@ -81,8 +83,8 @@ const useStyles = makeStyles(theme => ({
     backgroundSize: "cover",
   },
   overheadBanner:{
-    //backgroundImage: "url('website/banners/overhead-kick.png')",
     backgroundImage:`url(${overheadBanner})`,
+    backgroundColor:"#ffffff",
     backgroundSize: "cover",
   },
 }))
@@ -143,7 +145,7 @@ const About = ({ screen, className }) =>{
       <Team/>
       <div style={{ width:"100%", height:"50px", background:"white" }}></div>
       <div className={classes.overheadBanner} style={{ width:"100vw", height:`${100 * overheadImageRatio}vw`}}></div>
-      <div style={{ width:"100%", height:"100px", background:"black" }}></div>
+      <div style={{ width:"100%", height:"100px", background:COLOURS.OFFBLACK }}></div>
     </div>
   )
 }

@@ -9,6 +9,8 @@ export const MAIN_BANNER_MARGIN_VERT = {
 }
 
 export const COLOURS = {
+    OFFBLACK:"#1E1E1E",
+    OFFWHITE:"",
     banner:{
         bg:"#DBEFF0"
 
@@ -16,7 +18,7 @@ export const COLOURS = {
 }
 
 export const PEOPLE_WITH_QUOTES = {
-    titleHeightPC:{ smDown:25, mdUp:15 }
+    titleHeightPC:{ smDown:25, mdUp:20 }
 }
 
 export const grey3pt5 = "#C8C8C8";
