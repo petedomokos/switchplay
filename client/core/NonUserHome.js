@@ -22,7 +22,8 @@ import { NAVBAR_HEIGHT } from "./websiteConstants";
 import PeopleWithQuotes from './PeopleWithQuotes';
 import SVGImage from "./SVGImage";
 import { makeStyles } from '@material-ui/core/styles'
-import { MAIN_BANNER_MARGIN_VERT, COLOURS, scrollIntoViewWithOffset } from "./websiteConstants";
+import { MAIN_BANNER_MARGIN_VERT, COLOURS } from "./websiteConstants";
+import { scrollIntoViewWithOffset } from "./websiteHelpers";
 import Players from "./Players"
 import DataSection from './DataSection';
 import CompatibilityInfo from './CompatibilityInfo';
@@ -31,28 +32,28 @@ import overheadBanner from '../../assets/website/banners/overhead-kick.png';
 const playersImageDimns = screen => {
   if(screen.isSmall){
     return {
-      rawImgWidth:400,//550, //900 - full img
-      rawImgHeight:800,//1040,  //900 - full img
-      imgTransX:-270,//-100, 
-      imgTransY:-90,//-55,
-      aspectRatio:0.9
+      rawImgWidth:935,
+      rawImgHeight:598,
+      scale:1.7,
+      imgTransX:-screen.width / 2.6,
+      aspectRatio:0.7
     }
   }
   if(screen.isMedium){
     return {
-      rawImgWidth:550, //900 - full img
-      rawImgHeight:1040,  //900 - full img
-      imgTransX:-165, 
-      imgTransY:-90,
-      aspectRatio:1
+      rawImgWidth:935,
+      rawImgHeight:598,
+      scale:1.7,
+      imgTransX:-screen.width / 5,
+      aspectRatio:0.9
     }
   }
   //lg-up
   return {
-    rawImgWidth:600, //900 - full img
-    rawImgHeight:1040,  //900 - full img
-    imgTransX:-170, 
-    imgTransY:-90,
+    rawImgWidth:935,
+    rawImgHeight:598,
+    scale:1.7,
+    imgTransX:-screen.width / 5,
     aspectRatio:0.9
   }
 }
@@ -61,26 +62,26 @@ const playersImageDimns = screen => {
 const staffImageDimns = screen => {
   if(screen.isSmall){
     return {
-      rawImgWidth:800, //900 - full img
-      rawImgHeight:900,  //900 - full img
-      imgTransX:-90, 
+      rawImgWidth:800,
+      rawImgHeight:900, 
+      imgTransX:-screen.width / 4.3, 
       imgTransY:0,
-      aspectRatio:0.9
+      aspectRatio:0.73
     }
   }
   if(screen.isMedium){
     return {
-      rawImgWidth:800, //900 - full img
-      rawImgHeight:900,  //900 - full img
-      imgTransX:-80, 
+      rawImgWidth:800,
+      rawImgHeight:900, 
+      imgTransX:-screen.width / 8,
       imgTransY:0,
       aspectRatio:1.1
     }
   }
   //lg-up
   return {
-    rawImgWidth:900, //900 - full img
-    rawImgHeight:900,  //900 - full img
+    rawImgWidth:900,
+    rawImgHeight:900, 
     imgTransX:-80, 
     imgTransY:0,
     aspectRatio:0.9
@@ -121,6 +122,10 @@ const useStyles = makeStyles(theme => ({
   topDisplay:{
     padding:`${NAVBAR_HEIGHT}px 7.5vw 0`,
     minHeight:`calc(100vh + 100px)`,
+    [theme.breakpoints.down('md')]: {
+      padding:`${NAVBAR_HEIGHT}px 0 0`,
+      //fontSize:"40px"
+    },
     backgroundColor: `${COLOURS.banner.bg}`,
     //border:"solid",
     borderColor:"blue"

@@ -7,15 +7,16 @@ import { grey10, MAIN_BANNER_MARGIN_VERT, NAVBAR_HEIGHT } from "./websiteConstan
 const useStyles = makeStyles(theme => ({
     compatibilityInfoRoot:{
         width:"700px",
-        [theme.breakpoints.down('sm')]: {
-          width:"100%",
-          maxWidth:"300px",
-        },
         height:`${NAVBAR_HEIGHT}px`,
+        [theme.breakpoints.down('sm')]: {
+          width:"90%",
+          maxWidth:"350px",
+          height:`${NAVBAR_HEIGHT + 25}px`,
+          margin:"30px auto 50px"
+
+        },
         background:"transparent",
         //border:"solid",
-        padding:"0",
-        marginBottom:props => props.className === "sm-down" ? "50px" : 0
     },
     listLabel:{
         height:"20px", 
@@ -48,7 +49,7 @@ const useStyles = makeStyles(theme => ({
         fontSize:"11px", 
         color:grey10(4),
         [theme.breakpoints.down('sm')]: {
-          fontSize:"12px",
+          fontSize:"14px",
           color:grey10(5),
           margin:"5px"
         },
@@ -56,11 +57,11 @@ const useStyles = makeStyles(theme => ({
     col1Item:{
         width:"80px",
         [theme.breakpoints.down('sm')]: {
-          width:"95px"
+          width:"110px"
         }
     },
     col2Item:{
-        width:"30px"
+        width:"30px",
     },
     col3Item:{
         width:"40px"
@@ -70,9 +71,9 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-const singleRowItems = ["Kitman labs", "Session Planner", "Hudl", "Excel", "Word", "PDF", "GDrive", "SQL"]
-const row1Items = ["Kitman labs", "Hudl", "Excel", "PDF"]
-const row2Items = ["Session Planner", "Hudl", "Word", "GDrive", "SQL"]
+const singleRowItems = ["Kitman Labs", "Session Planner", "Hudl", "Excel", "Word", "PDF", "GDrive", "SQL"]
+const row1Items = ["Kitman Labs", "Hudl", "Excel", "PDF"]
+const row2Items = ["Session Planner", "GDrive", "Word", "SQL"]
 const rows = [row1Items, row2Items]
 const getColClassname = i => `col${i + 1}Item`;
 

@@ -79,7 +79,7 @@ const Customer = ({ data, screen, direction, minHeight }) => {
             <div>
               {typeof heading !== "string" && 
                 <>
-                  <div style={{ width:"100%", height:"20px" }}></div>
+                  <div style={{ width:"100%", height:visual.type === "img" ? "50px" : "20px" }}></div>
                   <Heading
                     as="h3"
                     content={heading[0] || ""}

@@ -9,7 +9,7 @@ import { makeStyles } from '@material-ui/core/styles'
 const useStyles = makeStyles(theme => ({
   imageSvg: {
       //border:"solid",
-      borderColor:"yellow",
+      borderColor:"blue",
   }
 }))
 
@@ -26,7 +26,7 @@ const SVGImage = ({ imgKey, image, fixedDimns, styles, className, settings }) =>
     const classes = useStyles(styleProps);
     const [svgImage, setImageComponent] = useState(() => imageComponent());
 
-    const { aspectRatio, rawImgWidth=dimns.width, imgTransX=0, imgTransY=0  } = image;
+    const { aspectRatio, rawImgWidth=dimns.width, imgTransX=0, imgTransY=0, scale  } = image;
     
 
     useEffect(() => {
@@ -51,7 +51,7 @@ const SVGImage = ({ imgKey, image, fixedDimns, styles, className, settings }) =>
     useEffect(() => {
         //calc the transform required
         //@todo - impl option to scale y separately based on height
-        const imgScale = dimns.width / rawImgWidth;
+        const imgScale = (dimns.width / rawImgWidth) * (scale || 1);
         const imgTransform = `translate(${imgTransX},${imgTransY}) scale(${imgScale})`;
 
         d3.select(containerRef.current)

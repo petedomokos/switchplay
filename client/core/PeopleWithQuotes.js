@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles'
 
 import Quote from './Quote';
 import SVGImage from './SVGImage';
+import Image from "./Image";
 import { PEOPLE_WITH_QUOTES } from './websiteConstants';
 
 const useStyles = makeStyles(theme => ({
@@ -34,12 +35,11 @@ const useStyles = makeStyles(theme => ({
         //display:"flex",
         //justifyContent:"center",
         //border:'solid',
-        borderColor:"black",
-        background:"pink",
+        borderColor:"blue",
+        background:"yellow",
         [theme.breakpoints.down('sm')]: {
             width:"100vw",
             height:props => `${props.aspectRatio * 100}vw`,
-            borderColor:"blue",
         },
     },
     titleAndQuotesContainer:{
@@ -63,7 +63,7 @@ const useStyles = makeStyles(theme => ({
             width:"100vw",
             height:() => "500px",
             padding:"10px 0 50px",
-            borderColor:"blue",
+            borderColor:"yellow",
         },
     },
     title:{
@@ -106,7 +106,9 @@ const PeopleWithQuotes = ({ title, data, direction }) =>{
     return (
         <div className={classes.peopleWithQuotesRoot}>
             <div className={classes.peopleContainer}>
-                {<SVGImage image={image} imgKey={key} />}
+                <SVGImage image={image} imgKey={key} />
+                {/**<Image image={image} imgKey={key} />*/}
+
             </div>
             <div className={classes.titleAndQuotesContainer}>
                 {title && <div className={classes.title}>{title}</div>}

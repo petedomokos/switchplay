@@ -28,7 +28,7 @@ const mainImageSmall = {
 const useStyles = makeStyles(theme => ({
   playersRoot:{
     width:"100%",
-    padding:"15vh 0",
+    padding:"15vh 0 10vh",
     background:"#1E1E1E",
   },
   topBanner:{

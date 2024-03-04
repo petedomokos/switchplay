@@ -92,7 +92,6 @@ export default function storyAnimationComponent() {
     let fontSizes = {};
 
     function updateDimns(){
-        console.log("w h", width, height)
         margin = { left: width * 0, right:width * 0, top: height * 0, bottom: height * 0 }
 
         scaledContentsWidth = width - margin.left - margin.right;
@@ -100,7 +99,6 @@ export default function storyAnimationComponent() {
         const aspectRatio = height / width || 1;
         contentsWidth = fixedContentsHeight / aspectRatio;
         scaleK = scaledContentsHeight / fixedContentsHeight;
-        console.log("scaleK", scaleK)
 
         heroesWidth = d3.max([55, contentsWidth * 0.2]);
         charactersWidth = d3.max([70, contentsWidth * 0.2]);

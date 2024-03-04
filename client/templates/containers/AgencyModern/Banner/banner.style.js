@@ -9,6 +9,7 @@ import { MAIN_BANNER_MARGIN_VERT, COLOURS, NAVBAR_HEIGHT } from '../../../../cor
 //#f0ded5
 const BannerWrapper = styled.div`
   //border: solid;
+  border-color:white;
   //background-image: url(${bannerBg?.src});
   //background-color: ${COLOURS.banner.bg};
   background-size: 100%;
@@ -29,8 +30,11 @@ const BannerWrapper = styled.div`
   }
   @media only screen and (max-width: 768px) {
     flex-direction: column;
+    flex-direction:column;
+    justify-content:flex-start;
+    height:auto;
     min-height: auto;
-    padding-top:130px;
+    padding-top:70px;
     padding-bottom:0;
   }
   .banner-image-area {
@@ -46,7 +50,7 @@ const BannerWrapper = styled.div`
   .banner-caption-area-sm {
     //border:solid;
     width:300px;
-    margin:60px auto 20px;
+    margin:40px auto;
     padding-left:20px;
   }
   .banner-caption {
