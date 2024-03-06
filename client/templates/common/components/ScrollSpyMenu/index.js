@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import Scrollspy from "react-scrollspy";
 import AnchorLink from "react-anchor-link-smooth-scroll";
 import {Link, withRouter} from 'react-router-dom'
-import Button from '@material-ui/core/Button'
+import Button from '../../../common/components/Button';
 import * as d3 from 'd3';
 import Logo from '../../../common/components/UIElements/Logo';
 
@@ -51,11 +51,9 @@ const PageLinkItem = ({ item, pathname }) =>
 			}
 		}}
 		>
-		{item.id !== "home" ? 
-			item.label
-			:
-			<SwitchplayLogo /> 
-		}
+			{/**item.id === "contact" && <Button title="Demo" type="submit" style={{ maxHeight:"25px", minHeight:"25px", minWidth:"60px", maxWidth:"60px", fontSize:"14px" }}/>*/}
+			{item.id === "home" && <SwitchplayLogo />}
+			{/*item.id !== "contact" && */item.id !== "home" && item.label}
 	</Link>
 
 const ClickButtonItem = ({ item, history }) =>
