@@ -7,8 +7,8 @@ import Button from '@material-ui/core/Button'
 //children
 import Strapline from "./Strapline";
 import Keypoint from './Keypoint';
-import heroImage from '../assets/images/hero-image.png'
-import peterDomokos from '../assets/images/peter-domokos.png'
+//import heroImage from '../assets/images/hero-image.png'
+//import peterDomokos from '../assets/images/peter-domokos.png'
 import { grey10 } from "./cards/constants"
 import WelcomeMessage from './WelcomeMessage';
 import HomePage from './NonUserHome';
@@ -389,7 +389,7 @@ const useStyles = makeStyles(theme => ({
     height:"120px",
     //border:"solid",
     //borderColor:"yellow",
-    backgroundImage: `url(${peterDomokos})`,
+    //backgroundImage: `url(${peterDomokos})`,
     backgroundSize: "contain",
   },
   backgroundImage:{
@@ -398,7 +398,7 @@ const useStyles = makeStyles(theme => ({
     width:"100%",
     height:"300px",
     //opacity:"0.5",
-    backgroundImage: `url(${heroImage})`,
+    //backgroundImage: `url(${heroImage})`,
     backgroundSize: "contain",
     //backgroundSize: "cover",
     //border:"solid",
