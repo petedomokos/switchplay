@@ -22,6 +22,7 @@ import auth from './auth/auth-helper'
 import ImportDataContainer from './data/ImportDataContainer'
 import VisualsContainer from './visuals/VisualsContainer'
 import About from "./core/About";
+import Contact from './core/Contact';
 import './assets/styles/main.css'
 
 import Sticky from 'react-stickynode';
@@ -178,6 +179,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, onSignout, hi
             </Sticky>
               <Switch>
                 <Route path="/about" component={About}/>
+                <Route path="/contact" component={Contact}/>
                 <Route path="/signup" component={CreateUserContainer}/>
                 <Route path="/signin" component={SigninContainer}/>
                 <Route path="/profile" component={Profile}/>

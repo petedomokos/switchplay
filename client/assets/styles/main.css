@@ -172,3 +172,12 @@ Note: Beware of modifying this element as it can break the animations - you shou
   }
 }
 
+.slick-dots li button:before {
+  font-size:14px;
+}
+
+.slick-arrow::before {
+  font-size:28px;
+  color:grey;
+}
+

@@ -19,14 +19,14 @@ const bg3 = { src:"website/bgs/cta/3.png" }
 const bg4 = { src:"website/bgs/cta/4.png" }
 const bg5 = { src:"website/bgs/cta/5.png" }
 
-const Subscribe = () => {
+const Subscribe = ({ heading, text, buttonLabel }) => {
   return (
     <SectionWrapper>
       <Container>
         <FooterInner>
           <Content>
-            <Heading as="h3" content="Interested? Subscribe to us." />
-            <Text content="We have more than thousand of creative entrepreneurs and stat joining our business" />
+            <Heading as="h3" content={heading} />
+            <Text content={text} />
           </Content>
           <SubscriptionForm>
             <div>
@@ -36,7 +36,7 @@ const Subscribe = () => {
                 iconPosition="left"
                 aria-label="email"
               />
-              <Button title="Subscribe" type="submit" />
+              <Button title={buttonLabel} type="submit" />
             </div>
             <CheckBox
               id="remember"

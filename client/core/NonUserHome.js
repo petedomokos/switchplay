@@ -122,7 +122,7 @@ const useStyles = makeStyles(theme => ({
   topDisplay:{
     padding:`${NAVBAR_HEIGHT}px 7.5vw 0`,
     minHeight:`calc(100vh + 100px)`,
-    [theme.breakpoints.down('md')]: {
+    [theme.breakpoints.down('sm')]: {
       padding:`${NAVBAR_HEIGHT}px 0 0`,
       //fontSize:"40px"
     },
@@ -164,7 +164,11 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
       <UltimateFeature screen={screen} />
       <PeopleWithQuotes title="What Staff Say" data={staffQuotesData(screen)} direction="row-reverse" />
       <DataSection screen={screen} />
-      <Subscribe />
+      <Subscribe 
+        heading="Interested? Subscribe to us."
+        text="We have more than thousand of creative entrepreneurs and stat joining our business"
+        buttonLabel="Subscribe"
+      />
       <div className={classes.overheadBanner} style={{ width:"100%", height:`${overheadBannerHeight}px`}}></div>
       <div style={{ marginTop:"-2.5px", width:"100%", height:"100px", background:COLOURS.OFFBLACK }}></div>
       {/**<Footer />*/}

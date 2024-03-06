@@ -14,7 +14,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 //@todo - add proper window event listener
-const SVGImage = ({ imgKey, image, fixedDimns, styles, className, settings }) =>{
+const SVGImage = ({ imgKey, image, fixedDimns, styles, className, settings, contentFit }) =>{
     const [dimns, setDimns] = useState({ width: fixedDimns?.width || 0, height: fixedDimns?.height || 0 })
     const containerRef = useRef(null);
     
@@ -26,7 +26,7 @@ const SVGImage = ({ imgKey, image, fixedDimns, styles, className, settings }) =>
     const classes = useStyles(styleProps);
     const [svgImage, setImageComponent] = useState(() => imageComponent());
 
-    const { aspectRatio, rawImgWidth=dimns.width, imgTransX=0, imgTransY=0, scale  } = image;
+    const { aspectRatio, rawImgWidth=dimns.width, rawImgHeight=dimns.height, imgTransX=0, imgTransY=0, scale  } = image;
     
 
     useEffect(() => {
@@ -41,7 +41,7 @@ const SVGImage = ({ imgKey, image, fixedDimns, styles, className, settings }) =>
         //console.log("dimns.w rw w", dimns.width, width)
         //console.log("dimns.h rh", dimns.height, height)
         if((isNumber(width) && width !== dimns.width) || (isNumber(height) && height !== dimns.height)){
-            //console.log("setting.................")
+            //console.log("setting.................", width, height)
             //setTimeout(() => {
                 setDimns({ width, height })
             //}, 5000)
@@ -51,8 +51,34 @@ const SVGImage = ({ imgKey, image, fixedDimns, styles, className, settings }) =>
     useEffect(() => {
         //calc the transform required
         //@todo - impl option to scale y separately based on height
-        const imgScale = (dimns.width / rawImgWidth) * (scale || 1);
-        const imgTransform = `translate(${imgTransX},${imgTransY}) scale(${imgScale})`;
+        //console.log("scale", scale)
+
+        //todo - if contentFit = contain, work out the vertScale too,
+        //then use the max of the two scales
+        const horizScale = (dimns.width / rawImgWidth) * (scale || 1);
+        const vertScale = (dimns.height / rawImgHeight) * (scale || 1);
+        //two options atm: contain or horizFit
+        const imgScale = contentFit === "contain" ? d3.min([horizScale, vertScale]) : horizScale;
+
+        let dx = 0;
+        let dy = 0;
+        if(contentFit === "contain"){
+            if(vertScale < horizScale){
+                //extra horiz space needs sharing out so img is centered
+                const extraHorizSpace = (horizScale - vertScale) * rawImgWidth;
+                dx = extraHorizSpace/2; 
+            }else{
+                const extraVertSpace = (vertScale - horizScale) * rawImgHeight;
+                dy = extraVertSpace/2;
+            }
+        }
+        //if contentsFit is contain, need to add extra transX or transY so img is centered
+        //find the extra reduction to the one that could have been bigger
+        //then divide it by two
+
+        //console.log("imgScale", imgScale)
+        const imgTransform = `translate(${imgTransX + dx},${imgTransY + dy}) scale(${imgScale})`;
+        //console.log("trans", imgTransform)
 
         d3.select(containerRef.current)
             .datum({ ...image, transform:image.transform || imgTransform })
@@ -64,10 +90,6 @@ const SVGImage = ({ imgKey, image, fixedDimns, styles, className, settings }) =>
                 .imgKey(imgKey))
             
     }, [dimns, image])
-
-    useEffect(() => {
-
-    },[])
 
     return (
         <svg className={`${classes.imageSvg} ${className}`} id={`image-svg`} ref={containerRef} width={dimns.width} height={dimns.height} style={{ ...styles.root }} >
@@ -101,7 +123,8 @@ SVGImage.defaultProps = {
     styles:{ root:{} },
     settings:{
     },
-    className:""
+    className:"",
+    contentFit:"horizFit"
   }
   
 export default SVGImage;

@@ -57,7 +57,7 @@ const data = {
   ],
   rightMenuItems: [
     {
-      label: 'Our Story',
+      label: 'About',
       id: 'about-us',
       path: '/about',
       page:"about",
@@ -67,9 +67,9 @@ const data = {
     },
     {
       label: 'Demo',
-      id: 'get-demo',
-      path: '/get-demo',
-      page:"get-demo",
+      id: 'contact',
+      path: '/contact',
+      page:"contact",
       offset: `${NAVBAR_HEIGHT}`,
       itemType:"page-link",
       whenToShow:["visitor"]
@@ -142,9 +142,9 @@ const data = {
     },
     {
       label: 'Demo',
-      id: 'get-demo',
-      path: '/get-demo',
-      page:"get-demo",
+      id: 'contact',
+      path: '/contact',
+      page:"contact",
       isPage:true,
       offset: `${NAVBAR_HEIGHT}`,
       itemType:"page-link",

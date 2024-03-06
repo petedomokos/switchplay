@@ -15,7 +15,7 @@ const Services = () => {
         <ServiceWrapper>
           <div className="services">
             {data.services[0].map((item, index) => (
-              <div className="service primary-service">
+              <div className="service primary-service" key={`service-item-key-${index}-${item.key}`}>
                 <SimpleFeatureBlock
                   key={`post_key-${index}`}
                   id={`post_id-${item.id}`}

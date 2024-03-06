@@ -209,7 +209,7 @@ const Team = () => {
   )
 }
 
-const About = ({ className }) =>{
+const Contact = ({ className }) =>{
   const styleProps = { className }
   const overheadImageRatio = 3/9;
   const stadiumImageRatio = 2/9;
@@ -221,10 +221,9 @@ const About = ({ className }) =>{
 
   return (
     <div className={`${classes.aboutRoot} ${className}`}>
+      Contact Us
       <Welcome/>
       <Story/>
-      {/**<Team/>*/}
-      {/**<div style={{ width:"100%", height:"50px", background:"white" }}></div>*/}
       <Subscribe 
         heading="Share our vision? Get a demo."
         text="We have more than thousand of creative entrepreneurs and stat joining our business"
@@ -236,8 +235,8 @@ const About = ({ className }) =>{
   )
 }
 
-About.defaultProps = {
+Contact.defaultProps = {
   className:""
 }
   
-export default About
+export default Contact

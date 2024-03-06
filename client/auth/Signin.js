@@ -75,6 +75,11 @@ export default withRouter(function Signin({ onSignin, serverErrorMesg, location,
     window.scrollTo(0, -NAVBAR_HEIGHT);
   },[]);
 
+  /*useEffect(() => {
+    const requiredNode = containerRef.current;
+    scrollIntoViewWithOffset(requiredNode, NAVBAR_HEIGHT)
+  },[]);*/
+
   const clickSubmit = () => {
     const user = {
       emailOrUsername: values.emailOrUsername || undefined,
