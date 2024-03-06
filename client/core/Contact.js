@@ -8,7 +8,7 @@ import { NAVBAR_HEIGHT, COLOURS, grey10 } from "./websiteConstants";
 import { aboutPageData } from "../data/websiteData";
 import teamworkIcon from '../../assets/website/about-page-images/teamwork-100.png';
 import overheadBanner from '../../assets/website/banners/header-goal.png';
-import stadiumBanner from '../../assets/website/about-page-images/stadium.png';
+//import stadiumBanner from '../../assets/website/about-page-images/stadium.png';
 import { scrollIntoViewWithOffset } from './websiteHelpers';
 
 const { welcomeData, storyData } = aboutPageData;
@@ -163,7 +163,7 @@ const useStyles = makeStyles(theme => ({
 
   },
   stadiumBanner:{
-    backgroundImage:`url(${stadiumBanner})`,
+    //backgroundImage:`url(${stadiumBanner})`,
     backgroundSize: "cover",
   },
   overheadBanner:{
