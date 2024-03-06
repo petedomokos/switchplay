@@ -1,16 +1,7 @@
 import React, { Fragment, useEffect, useRef } from 'react';
 import { withRouter } from 'react-router-dom'
 import * as d3 from 'd3';
-import ResetCSS from '../templates/common/assets/css/style';
-import {
-  GlobalStyle,
-  ContentWrapper,
-} from '../templates/containers/AgencyModern/agencyModern.style';
-import { DrawerProvider } from '../templates/common/contexts/DrawerContext';
-import Navbar from '../templates/containers/AgencyModern/Navbar';
 import Banner from '../templates/containers/AgencyModern/Banner';
-import Features from '../templates/containers/AgencyModern/Features';
-import WorkHard from '../templates/containers/AgencyModern/WorkHard';
 import UltimateFeature from '../templates/containers/AgencyModern/UltimateFeature';
 import News from '../templates/containers/AgencyModern/News';
 import Subscribe from '../templates/containers/AgencyModern/Subscribe';
