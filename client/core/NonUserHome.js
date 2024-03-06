@@ -14,7 +14,8 @@ import WorkHard from '../templates/containers/AgencyModern/WorkHard';
 import UltimateFeature from '../templates/containers/AgencyModern/UltimateFeature';
 import News from '../templates/containers/AgencyModern/News';
 import Subscribe from '../templates/containers/AgencyModern/Subscribe';
-import Footer from '../templates/containers/AgencyModern/Footer';
+//import Footer from '../templates/containers/AgencyModern/Footer';
+import Footer from './Footer';
 import Heading from '../templates/common/components/Heading';
 import data from '../templates/common/data/AgencyModern';
 import { NAVBAR_HEIGHT } from "./websiteConstants";
@@ -27,7 +28,6 @@ import { scrollIntoViewWithOffset } from "./websiteHelpers";
 import Players from "./Players"
 import DataSection from './DataSection';
 import CompatibilityInfo from './CompatibilityInfo';
-import overheadBanner from '../../assets/website/banners/overhead-kick.png';
 
 const playersImageDimns = screen => {
   if(screen.isSmall){
@@ -130,16 +130,9 @@ const useStyles = makeStyles(theme => ({
     //border:"solid",
     borderColor:"blue"
   },
-  overheadBanner:{
-    backgroundImage:`url(${overheadBanner})`,
-    backgroundColor:"#ffffff",
-    backgroundSize: "cover",
-  }
 }))
 
 const NonUserHome = ({ screen, initScrollTo }) =>{
-  const overheadImageRatio = 3/9;
-  const overheadBannerHeight = screen.width * overheadImageRatio;
   const styleProps = { };
   const classes = useStyles({styleProps});
   const rootRef = useRef(null);
@@ -169,9 +162,7 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
         text="We have more than thousand of creative entrepreneurs and stat joining our business"
         buttonLabel="Subscribe"
       />
-      <div className={classes.overheadBanner} style={{ width:"100%", height:`${overheadBannerHeight}px`}}></div>
-      <div style={{ marginTop:"-2.5px", width:"100%", height:"100px", background:COLOURS.OFFBLACK }}></div>
-      {/**<Footer />*/}
+      <Footer />
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles'
 
 import SimpleSlider from './SimpleSlider';
 import Subscribe from '../templates/containers/AgencyModern/Subscribe';
+import Footer from './Footer';
 import { NAVBAR_HEIGHT, COLOURS, grey10 } from "./websiteConstants";
 import { aboutPageData } from "../data/websiteData";
 import teamworkIcon from '../../assets/website/about-page-images/teamwork-100.png';
@@ -166,11 +167,6 @@ const useStyles = makeStyles(theme => ({
     backgroundImage:`url(${stadiumBanner})`,
     backgroundSize: "cover",
   },
-  overheadBanner:{
-    backgroundImage:`url(${overheadBanner})`,
-    backgroundColor:"#ffffff",
-    backgroundSize: "cover",
-  }
 }))
 
 const Welcome = ({ }) => {
@@ -211,8 +207,6 @@ const Team = () => {
 
 const About = ({ className }) =>{
   const styleProps = { className }
-  const overheadImageRatio = 3/9;
-  const stadiumImageRatio = 2/9;
   const classes = useStyles(styleProps);
 
   useEffect(() => {
@@ -230,8 +224,7 @@ const About = ({ className }) =>{
         text="We have more than thousand of creative entrepreneurs and stat joining our business"
         buttonLabel="Get Demo"
       />
-      <div className={classes.overheadBanner} style={{ width:"100vw", height:`${100 * overheadImageRatio}vw`}}></div>
-      <div style={{ width:"100%", height:"100px", background:COLOURS.OFFBLACK }}></div>
+      <Footer page="about" />
     </div>
   )
 }
