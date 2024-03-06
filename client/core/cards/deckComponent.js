@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { grey10, COLOURS, DIMNS, FONTSIZES, STYLES, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIONS, DECK_PHOTO_POS } from "./constants";
 import cardsComponent from './cardsComponent';
-import headerComponent from './headerComponent';
+import deckHeaderComponent from './deckHeaderComponent';
 import contextMenuComponent from "./contextMenuComponent";
 import textComponent from './textComponent';
 import dragEnhancements from '../journey/enhancedDragHandler';
@@ -14,9 +14,13 @@ import { icons } from '../../util/icons';
 import { fadeIn, remove, getPosition, fadeInOut } from '../journey/domHelpers';
 import purposeComponent from './purposeComponent';
 
+const { CARD:{ ITEM_FILL } } = COLOURS;
+
 const CONTEXT_MENU_ITEM_WIDTH = DIMNS.CONTEXT_MENU.ITEM_WIDTH;
 const CONTEXT_MENU_ITEM_HEIGHT = DIMNS.CONTEXT_MENU.ITEM_HEIGHT;
 const CONTEXT_MENU_ITEM_GAP = DIMNS.CONTEXT_MENU.ITEM_GAP;
+
+
 
 const contextMenuData = [ 
     { key:"delete", url:"/delete.png" }, 
@@ -83,7 +87,7 @@ export default function deckComponent() {
 
     function updateDimns(data){
         //deck photo
-        photoContentsWidth = data.photoUrl ? 20 : 0;
+        photoContentsWidth = data.photoURL ? 30 : 0;
         photoContentsHeight = photoContentsWidth / DIMNS.CARD.ASPECT_RATIO; //33.548
         photoMargin = { 
             left:photoContentsWidth * 0.1, right:photoContentsWidth * 0.1, 
@@ -293,7 +297,7 @@ export default function deckComponent() {
     let _styles = () => DEFAULT_STYLES;
 
     //settings
-    let groupingTagKey;
+    let groupingTag;
     let timeframeKey = "singleDeck";
     let deckIsSelected;
     let selectedCardNr;
@@ -354,7 +358,7 @@ export default function deckComponent() {
     const itemAreaDrag = d3.drag();
 
     //components
-    const header = headerComponent();
+    const header = deckHeaderComponent();
     const cards = cardsComponent();
     const contextMenu = contextMenuComponent();
     const enhancedDrag = dragEnhancements();
@@ -421,9 +425,8 @@ export default function deckComponent() {
             }
 
             function update(_deckData, options={}){
-                //console.log("update", _deckData.photoUrl)
                 const { } = options;
-                const { id, frontCardNr, startDate, listPos, colNr, rowNr, purposeData, sections, photoUrl } = _deckData;
+                const { id, frontCardNr, startDate, listPos, colNr, rowNr, purposeData, sections, photoURL } = _deckData;
 
                 //PURPOSE
                 const getPurposeFormDimns = (i, dimns) => {
@@ -441,16 +444,17 @@ export default function deckComponent() {
                     }
                 }
         
+                const spaceForPhoto = deckIsSelected ? 0 : photoHeight;
                 const purposeG = contentsG.selectAll("g.purpose").data(content === "purpose" ? [purposeData] : [])
                 purposeG.enter()
                     .append("g")
                         .attr("class", "purpose")
                         .call(fadeIn, { transition:{ delay:400 }})
                         .merge(purposeG)
-                        .attr("transform", () => `translate(0, ${headerHeight})`)
+                        .attr("transform", () => `translate(0, ${headerHeight + spaceForPhoto})`)
                         .call(purpose
                             .width(contentsWidth)
-                            .height(contentsHeight - headerHeight)
+                            .height(contentsHeight - headerHeight - spaceForPhoto)
                             .onClick((e, d, dimns) => {
                                 const formDimns = getPurposeFormDimns(d.i, dimns);
                                 setForm({ formType:"purpose", value:d, formDimns } )
@@ -715,7 +719,7 @@ export default function deckComponent() {
                 }
 
                 //PHOTO
-                const photoData = deckIsSelected || !photoUrl ? [] : [photoUrl];
+                const photoData = deckIsSelected || !photoURL ? [] : [photoURL];
                 const photoG = contentsG.selectAll("g.deck-photo").data(photoData)
                 const photoX = selectedSection || DECK_PHOTO_POS === "left" ? 3 + photoMargin.left : (contentsWidth - photoWidth)/2 + photoMargin.left;
 
@@ -730,7 +734,7 @@ export default function deckComponent() {
 
                             photoG.append("image");
 
-                            d3.select("svg#decks-svg").append("clipPath")
+                            d3.select("svg#decks-svg").select("defs").append("clipPath")
                                 .attr('id', `deck-photo-${id}`)
                                 .append("rect")
                         })
@@ -763,7 +767,8 @@ export default function deckComponent() {
                 //CARDS
                 const cardsData = _deckData.cardsData.map(c => ({ 
                     ...c,
-                    isSelected:selectedCardNr === c.cardNr 
+                    isSelected:selectedCardNr === c.cardNr,
+                    photoURL
                 }))
 
                 cardsAreaG.call(fadeInOut, content === "cards" /*{ transition:{ duration: 1000 } }*/);
@@ -783,7 +788,7 @@ export default function deckComponent() {
                         .selectedCardHeight(selectedCardHeight)
                         .sectionViewHeldCardWidth(sectionViewHeldCardWidth)
                         .sectionViewHeldCardHeight(sectionViewHeldCardHeight)
-                        .groupingTagKey(groupingTagKey)
+                        .groupingTag(groupingTag)
                         .timeframeKey(timeframeKey)
                         .deckIsSelected(deckIsSelected)
                         .cardsAreFlipped(cardsAreFlipped)
@@ -828,7 +833,6 @@ export default function deckComponent() {
                             const cardId = cardD.id;
                             const getNextCardId = () => {
                                 const nextCard = cardsData.find(c => c.cardNr === cardNr + 1);
-                                console.log("nextCard", nextCard)
                                 return nextCard?.id || "none"; //defaults to all cards placed
                             }
                             if(frontCardNr === cardD.cardNr){ 
@@ -848,19 +852,59 @@ export default function deckComponent() {
 
 
                 //controls
+                const controlsData = !sections || cardsAreFlipped || timeframeKey === "longTerm" ? [] : [
+                    { i:0, key:"section-view", icon:icons.drill }
+                ];
+
+                const btnWidth = 10;
+                const btnHeight = 18;
+                const btnMargin = { left: 1, right: 1, top:5, bottom:5 }
+                const btnContentsWidth = btnWidth - btnMargin.left - btnMargin.right;
+                const btnContentsHeight = btnHeight - btnMargin.top - btnMargin.bottom;
+
+                const controlsMarginVert = 0;
+                const controlsContentsWidth = btnWidth;
+                const controlsWidth = controlsContentsWidth;
+                const controlsContentsHeight = controlsData.length * btnHeight;
+                const controlsHeight = controlsContentsHeight + 2 * controlsMarginVert;
+                
+                const spaceAvailableOnLeftOfCards = (width - heldCardWidth)/2;
+                const controlsOuterMarginLeft = (spaceAvailableOnLeftOfCards - controlsWidth)/2;
+                const controlsOuterMarginBottom = controlsOuterMarginLeft;
+
+                const xToCentre = -controlsOuterMarginLeft + (width - btnWidth)/2;//+ deckToCentrePos.x   // -controlsOuterMarginLeft + (width - btnWidth)/2;
+                const cardItemsAreaHeight = heldCardHeight - cardHeaderHeight;
+                const yToCentre = controlsOuterMarginBottom + controlsMarginVert - placedCardsAreaHeight - cardItemsAreaHeight/2 + btnHeight/2 + 1;
+
+                const btnY = (d,i) => controlsMarginVert + i * btnHeight;
+                const btnScaleWhenDragged = 1.8;
+
+                //highlighting 
                 let potentialSelectedSectionNr;
                 const highlightSection = nr => {
-                    const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${nr}`);
+                    const highlightColour = grey10(7);
+                    //top-right header pentagon
+                    const headerPentagonSectionG = containerG.selectAll("g.card-header").select("g.pentagon").select(`g.section-${nr}`);
+                    headerPentagonSectionG.select("path.section-bg")
+                        .transition("highlight-header-section")
+                        .duration(TRANSITIONS.VERY_FAST)
+                            .attr("opacity", 1)
+                            .attr("fill", highlightColour)
+
+                    //items-area stuff
+                    const sectionG = containerG.selectAll("g.card").select("g.items-area").select(`g.section-${nr}`);
+
                     sectionG.select("path.section-bg")
                         .transition("highlight")
                         .duration(TRANSITIONS.VERY_FAST)
-                            .attr("fill", grey10(2))
+                            .attr("opacity", 1)
+                            .attr("fill", highlightColour)
 
                     sectionG.selectAll("text.section-identifier")
                         .attr("transform", "scale(1)")
                             .transition("highlight")
                             .duration(TRANSITIONS.VERY_FAST)
-                                .attr("fill", grey10(2))
+                                .attr("fill", highlightColour)
                                 .attr("font-size", FONTSIZES.SECTION_ID * 1.2)
                                 .attr("opacity", 1)
 
@@ -868,11 +912,21 @@ export default function deckComponent() {
                 }
 
                 const unhighlightSection = nr => {
-                    const sectionG = containerG.selectAll("g.card").selectAll(`g.section-${nr}`);
+                     //top-right header pentagon
+                     const headerPentagonSectionG = containerG.selectAll("g.card-header").select("g.pentagon").select(`g.section-${nr}`);
+                     headerPentagonSectionG.select("path.section-bg")
+                         .transition("unhighlight-header-section")
+                         .duration(TRANSITIONS.VERY_FAST)
+                             .attr("opacity", 0)
+                             .attr("fill", 'blue')
+
+                    //items-area stuff
+                    const sectionG = containerG.selectAll("g.card").select("g.items-area").select(`g.section-${nr}`);
                     sectionG.select("path.section-bg")
                         .transition("unhighlight")
                         .duration(TRANSITIONS.VERY_FAST)
-                            .attr("fill", "transparent")
+                            .attr("opacity", 1)
+                            .attr("fill", ITEM_FILL)
 
                     sectionG.selectAll("text.section-identifier")
                         .transition("highlight")
@@ -880,13 +934,12 @@ export default function deckComponent() {
                             .attr("fill", COLOURS.CARD.SECTION_ID)
                             .attr("font-size", FONTSIZES.SECTION_ID)
                             .attr("opacity", STYLES.SECTION_ID_OPACITY)
-
                 }
 
                 btnDrag
                     .on("start", function(e,d){
                     })
-                    .on("drag", function(e, d, i){
+                    .on("drag", function(e, d){
                         const btnG = d3.select(this);
                         const { translateX, translateY } = getTransformationFromTrans(btnG.attr("transform"));
                         const newX = translateX + e.dx;
@@ -903,7 +956,6 @@ export default function deckComponent() {
                         const distFromCentre = Math.sqrt(_x ** 2 + _y ** 2);
                         //console.log("distFromCentre", distFromCentre)
                         const theta = angleFromNorth([[_x, _y]])
-                        //console.log("theta", Math.round(theta))
                         if(distFromCentre > cards.itemsOuterRadius()){ 
                             if(potentialSelectedSectionNr !== ""){ unhighlightSection(potentialSelectedSectionNr); }
                             potentialSelectedSectionNr = ""; 
@@ -919,55 +971,36 @@ export default function deckComponent() {
                             potentialSelectedSectionNr = newPotentialSelectedSectionNr;
                         }
                     })
-                    .on("end", function(e,d){
+                    .on("end", function(e, d){
+                        const cleanup = () => {
+                            //get i from the datum
+                            const { i } = d; 
+                            controlsG.selectAll("g.deck-control-btn")
+                                .transition()
+                                .duration(TRANSITIONS.FAST)
+                                    .attr("transform", `translate(0, ${btnY(d, i)})`)
+                        }
+                        if(!selectedSection && !potentialSelectedSectionNr){  cleanup(); }
                         //bug - this doesnt work sometimes
                         if(selectedSection?.nr !== potentialSelectedSectionNr){
                             const section = sections.find(s => s.nr === potentialSelectedSectionNr)
                             onSelectSection(section?.key || "")
                             potentialSelectedSectionNr = "";
                         }else{
-                            //call update here to clean up
-                            update(_deckData)
+                            cleanup();
                         }
                     })
+    
+                controlsG.call(fadeInOut, content === "cards" && deckIsSelected && !isNumber(selectedCardNr) && !selectedSection?.key)
+                controlsG
+                    .attr("transform", `translate(${controlsOuterMarginLeft},${height - controlsOuterMarginBottom - controlsHeight})`)
 
-                    const controlsData = !sections || cardsAreFlipped || timeframeKey === "longTerm" ? [] : [
-                        { key:"section-view", icon:icons.drill }
-                    ];
-    
-                    const btnWidth = 10;
-                    const btnHeight = 18;
-                    const btnMargin = { left: 1, right: 1, top:5, bottom:5 }
-                    const btnContentsWidth = btnWidth - btnMargin.left - btnMargin.right;
-                    const btnContentsHeight = btnHeight - btnMargin.top - btnMargin.bottom;
-    
-                    const controlsMarginVert = 0;
-                    const controlsContentsWidth = btnWidth;
-                    const controlsWidth = controlsContentsWidth;
-                    const controlsContentsHeight = controlsData.length * btnHeight;
-                    const controlsHeight = controlsContentsHeight + 2 * controlsMarginVert;
-                    
-                    const spaceAvailableOnLeftOfCards = (width - heldCardWidth)/2;
-                    const controlsOuterMarginLeft = (spaceAvailableOnLeftOfCards - controlsWidth)/2;
-                    const controlsOuterMarginBottom = controlsOuterMarginLeft;
-    
-                    const xToCentre = -controlsOuterMarginLeft + (width - btnWidth)/2;//+ deckToCentrePos.x   // -controlsOuterMarginLeft + (width - btnWidth)/2;
-                    const cardItemsAreaHeight = heldCardHeight - cardHeaderHeight;
-                    const yToCentre = controlsOuterMarginBottom + controlsMarginVert - placedCardsAreaHeight - cardItemsAreaHeight/2 + btnHeight/2 + 1;
-    
-                    controlsG.call(fadeInOut, content === "cards" && deckIsSelected && !isNumber(selectedCardNr) && !selectedSection?.key)
-                    controlsG
-                        .attr("transform", `translate(${controlsOuterMarginLeft},${height - controlsOuterMarginBottom - controlsHeight})`)
-    
-    
-                    controlsG.select("rect.controls-bg")
-                        .attr("width", controlsWidth)
-                        .attr("height", controlsHeight)
-                        .attr("rx", 1.5)
-                        .attr("ry", 1.5)
-                
-                const btnY = (d,i) => controlsMarginVert + i * btnHeight;
-                const btnScaleWhenDragged = 1.8;
+
+                controlsG.select("rect.controls-bg")
+                    .attr("width", controlsWidth)
+                    .attr("height", controlsHeight)
+                    .attr("rx", 1.5)
+                    .attr("ry", 1.5)
             
                 const btnG = controlsG.selectAll("g.deck-control-btn").data(controlsData, d => d.key);
                 btnG.enter()
@@ -1238,9 +1271,9 @@ export default function deckComponent() {
         
         return deck;
     };
-    deck.groupingTagKey = function (value) {
-        if (!arguments.length) { return groupingTagKey; }
-        groupingTagKey = value;
+    deck.groupingTag = function (value) {
+        if (!arguments.length) { return groupingTag; }
+        groupingTag = value;
         return deck;
     };
     deck.timeframeKey = function (value) {

@@ -1,19 +1,7 @@
 import * as d3 from 'd3';
 import { grey10, COLOURS, DIMNS, FONTSIZES, STYLES, INFO_HEIGHT_PROPORTION_OF_CARDS_AREA, TRANSITIONS } from "./constants";
-import cardsComponent from './cardsComponent';
-import headerComponent from './headerComponent';
-import contextMenuComponent from "./contextMenuComponent";
 import textComponent from './textComponent';
-import dragEnhancements from '../journey/enhancedDragHandler';
-import { updateRectDimns } from '../journey/transitionHelpers';
-import { getTransformationFromTrans } from '../journey/helpers';
-import { isNumber } from '../../data/dataHelpers';
-import { maxDimns } from "../../util/geometryHelpers";
-import { angleFromNorth } from '../journey/screenGeometryHelpers';
-import { icons } from '../../util/icons';
 import { fadeIn, remove, getPosition, fadeInOut } from '../journey/domHelpers';
-import { TextBox } from 'd3plus-text';
-import { ContactSupportOutlined, ControlPointRounded } from '@material-ui/icons';
 
 export default function purposeComponent() {
     //API SETTINGS
@@ -86,7 +74,7 @@ export default function purposeComponent() {
                 //bgs
                 containerG.select("rect.purpose-bg")
                     .attr("width", width)
-                    .attr("height", height)
+                    .attr("height", height);
 
                 contentsG.attr("transform", `translate(${margin.left},${margin.top})`)
 
@@ -123,10 +111,16 @@ export default function purposeComponent() {
                                 .text(d => d.text);
 
                         })
-                        .merge(paragraphG)
                         .attr("transform", (d,i) => `translate(0, ${i * paragraphHeight})`)
+                        .merge(paragraphG)
                         .each(function(d,i){
+                            d3.select(this)
+                                .transition(`para-${i}`)
+                                .duration(TRANSITIONS.MED)
+                                    .attr("transform", `translate(0, ${i * paragraphHeight})`);
+
                             const paragraphG = d3.select(this);
+
                             paragraphG.select("rect.bg")
                                 .attr("width", paragraphWidth)
                                 .attr("height", paragraphHeight)

@@ -10,7 +10,7 @@ import { isNumber } from '../../data/dataHelpers';
 import { fadeInOut, fadeIn, remove } from '../journey/domHelpers';
 import { icons } from '../../util/icons';
 
-const { GOLD, SILVER, NOT_STARTED_FILL } = COLOURS;
+const { GOLD, SILVER, NOT_STARTED_FILL, CARD:{ ITEM_FILL } } = COLOURS;
 const NR_SECTIONS = 5;
 
 const videoIconD = "M85.527,80.647c2.748,0,4.973-2.225,4.973-4.974V24.327c0-2.749-2.225-4.974-4.973-4.974H14.474c-2.748,0-4.974,2.225-4.974,4.974v51.346c0,2.749,2.225,4.974,4.974,4.974H85.527z M80.553,70.699H19.446V29.301h61.107V70.699z"
@@ -38,6 +38,8 @@ export default function pentagonComponent() {
     let withSections = true;
     let withSectionLabels = true;
     let withText = true;
+    let middleInfo = null;
+    let middleStrokeWidth = 1;
     let editable = true;
     let selectedSectionKey;
     let statusMenuItemNr = null;
@@ -71,8 +73,8 @@ export default function pentagonComponent() {
     let styles = {
         getItemStrokeWidth:(itemD, linePartNr) => 0.1,
         getItemStroke:(itemD, linePartNr) => "grey",
-        itemTextFill:COLOURS.CARD.ITEM_TEXT,
-        itemAttachmentFill:COLOURS.CARD.ITEM_ATTACHMENT
+        itemTextFill:grey10(7),//COLOURS.CARD.ITEM_TEXT,
+        itemAttachmentFill:grey10(6)//COLOURS.CARD.ITEM_ATTACHMENT
     }
 
     //API CALLBACKS
@@ -98,6 +100,9 @@ export default function pentagonComponent() {
         })
 
         function update(itemsData){
+            //middle photo clipPath
+            d3.select("svg#decks-svg").select("defs").select("clipPath#card-photo").select("circle")
+                .attr("r", r1)
             //drag
             enhancedDrag
                 .dragThreshold(100)
@@ -128,7 +133,10 @@ export default function pentagonComponent() {
                             .attr("rx", 3) //@todo - store in constants and use in cardsComponent too
                             .attr("ry", 3)
 
-                        sectionG.append("path").attr("class", "section-bg").attr("fill", "transparent");
+                        sectionG.append("path").attr("class", "section-bg")
+                            //.attr("fill", "transparent")
+                            //.attr("opacity", withText ? 1 : 0); //use opacity coz fill transition dosnt seem to work
+
                         sectionG.append("line").attr("class", "start edge-inside show-with-section visible"); 
                         //added inner here and above - now change stroke of it so its normal always
                         sectionG.append("line").attr("class", "finish edge-inside show-with-section visible")
@@ -145,11 +153,9 @@ export default function pentagonComponent() {
 
                         const sectionContentsG = sectionG.append("g").attr("class", "section-contents show-with-section");
                         const itemContentsG = sectionContentsG.append("g").attr("class", "item-contents")
-                            .style("opacity", withText ? 1 : 0)
 
                         //we always want status to appear on top of item title text, so append separate container
                         sectionContentsG.append("g").attr("class", "status-menu-container");
-                            
                         sectionG.append("path").attr("class", "section-hitbox")
                             .attr("fill", "transparent")
 
@@ -165,7 +171,8 @@ export default function pentagonComponent() {
                             .fontSize(2)
                             .fontMin(1)
                             .fontMax(12)
-                            .verticalAlign("middle")
+                            .textAnchor("middle")
+                            //.verticalAlign("middle") - use this if titles are all/often 1 or 2 lines only
                             .overflow("visible");
 
                     })
@@ -299,12 +306,18 @@ export default function pentagonComponent() {
                             .attr("display", editable ? null : "none")*/
 
                         sectionG.select("path.section-bg")
-                            .attr("d", `M${ax},${ay} L${bx},${by} L${cx},${cy} L${dx},${dy}`);
+                            .attr("d", `M${ax},${ay} L${bx},${by} L${cx},${cy} L${dx},${dy}`)
+                            .attr("fill", ITEM_FILL)
+                            //.attr("fill", withText ? ITEM_FILL : "none")
+                                .transition("section-bg-opacity") //use opacity coz fill transitoin not working
+                                //.delay(isAppearing ? 0 : 200)
+                                    .duration(TRANSITIONS.MED)
+                                    .attr("opacity", withText ? 1 : 0)
+                                
 
                         sectionG.select("path.section-hitbox")
                             .attr("d", `M${ax},${ay} L${bx},${by} L${cx},${cy} L${dx},${dy}`)
                             .on("click", function(e,d){ 
-                                console.log("sect click")
                                 e.stopPropagation();
                                 onClickSection.call(this.parentNode, e, d); 
                             });
@@ -329,8 +342,8 @@ export default function pentagonComponent() {
                             .transition("trans-stroke")
                                 .delay(sizeIsIncreasing ? 300 : 0)
                                 .duration(TRANSITIONS.MED)
-                                    .attr("stroke", statusMenuItemNr === itemNr ? grey10(1) : grey10(9))
-                                    .attr("stroke-width", statusMenuItemNr === itemNr ? 0.1 : 0.015)
+                                    .attr("stroke", statusMenuItemNr === itemNr ? grey10(1) : NOT_STARTED_FILL)
+                                    .attr("stroke-width", statusMenuItemNr === itemNr ? 0.15 : 0.15)
 
                         sectionG.selectAll(".show-with-section")
                             .transition("outer-trans")
@@ -379,24 +392,24 @@ export default function pentagonComponent() {
 
                         const xShift = () => {
                             //top 2
-                            if(i === 0){ return itemAreaWidth * 0 }
-                            if(i === 4){ return -itemAreaWidth * 0 }
+                            if(i === 0){ return -itemAreaWidth * 0.1 }
+                            if(i === 4){ return itemAreaWidth * 0.1 }
                             //middle 2
-                            if(i === 1) { return 0; }
-                            if(i === 3) { return 0; }
+                            if(i === 1) { return -itemAreaWidth * 0.1; }
+                            if(i === 3) { return itemAreaWidth * 0.15; }
                             //bottom 1
                             if(i === 2) { return 0; }
 
                         }
                         const yShift = () => {
                             //top 2
-                            if(i === 0){ return 0 }
-                            if(i === 4){ return 0 }
+                            if(i === 0){ return textAreaMaxHeight * 0.15; }
+                            if(i === 4){ return textAreaMaxHeight * 0.2; }
                             //middle 2
                             if(i === 1) { return -textAreaMaxHeight * 0.12; }
                             if(i === 3) { return -textAreaMaxHeight * 0.12; }
                             //bottom 1
-                            if(i === 2) { return textAreaMaxHeight * 0.2; }
+                            if(i === 2) { return 0; }
 
                         }
 
@@ -405,7 +418,8 @@ export default function pentagonComponent() {
 
                         //contents
                         const sectionContentsG = sectionG.select("g.section-contents");
-                        const itemContentsG = sectionContentsG.select("g.item-contents");
+                        const itemContentsG = sectionContentsG.select("g.item-contents")
+
                         sectionContentsG
                             .transition()
                             //.delay(sizeIsIncreasing ? 300 : 0)
@@ -417,6 +431,7 @@ export default function pentagonComponent() {
                         itemContentsG.select("rect")
                             .attr("width", itemAreaWidth)
                             .attr("height", itemAreaHeight)
+                            //.attr("fill", "red");
 
                         //item text and attachments
                         //text
@@ -429,12 +444,12 @@ export default function pentagonComponent() {
                         //show or hide text based on deck status
                         const itemTitleG = itemContentsG.select("g.item-title");
                         itemTitleG.selectAll("text")
-                            .attr("display", withText ? null : "none")
                             .transition(`text-${key}`)
                             .duration(TRANSITIONS.FAST)
                                 .style("opacity", withText ? (itemIsDefined ? 1 : 0.5) : 0)
                        
                         if(withText){
+
                             //we put a fake delay on rendering so it doesnt clash with zooming transitions,
                             //as for some reason it stops the zooming happening smoothly
                             setTimeout(() => {
@@ -444,10 +459,10 @@ export default function pentagonComponent() {
                                         .maxLines(maxNrLines)
                                         .render();
 
-                                    itemTitleG.selectAll("text")
-                                        .style("fill", styles.itemTextFill)
-                                        .style("stroke", styles.itemTextFill)
-                                        .style("stroke-width", 0.01)
+                                itemTitleG.selectAll("text")
+                                    .style("fill", styles.itemTextFill)
+                                    .style("stroke", styles.itemTextFill)
+                                    .style("stroke-width", 0.01)
 
                                 //attachments
                                 //first we need to know how many lines of text there are so we can shoft attachments up if necc
@@ -464,7 +479,7 @@ export default function pentagonComponent() {
                                     }
                                 }
 
-                                const attachmentsG = sectionContentsG.selectAll("g.item-attachments").data(hasAttachments ? [1] : []);
+                                const attachmentsG = sectionContentsG.selectAll("g.item-attachments").data(hasAttachments ? [] : []);
                                 attachmentsG.enter()
                                     .append("g")
                                         .attr("class", "item-attachments")
@@ -560,8 +575,7 @@ export default function pentagonComponent() {
 
                         //status - renders iff optionsData non-null
                         const statusOptionsData = editable && statusMenuItemNr === itemNr ? STATUS_OPTIONS : null;
-
-                        const gapBetweenItemAndMenu = 5;
+                        const gapBetweenItemAndMenu = itemNr === 3 ? 15 : 5;
                         //containerG is positioned in hoz middle of menu, and vertically at the bottom because its expands out and up
                         sectionContentsG.select("g.status-menu-container")
                             .attr("transform", `translate(${itemAreaWidth/2}, ${-gapBetweenItemAndMenu})`)
@@ -578,6 +592,45 @@ export default function pentagonComponent() {
                     })
 
             sectionG.exit().remove();
+
+            //middle
+            const photoContentsWidth = middleInfo?.photoURL ? 30 : 0;
+            const photoContentsHeight = photoContentsWidth / DIMNS.CARD.ASPECT_RATIO; //33.548
+            const middleData = middleInfo ? [{ url:middleInfo?.photoURL }] : [];
+            const middleG = containerG.selectAll("g.pentagon-middle").data(middleData);
+            middleG.enter()
+                .append("g")
+                    .attr("class", "pentagon-middle")
+                    .call(fadeIn)
+                    .each(function(){
+                        const middleG = d3.select(this);
+                        middleG
+                            .append("circle")
+                                .attr("class", "border")
+                                .attr("fill", "black")
+
+                        middleG.append("image");
+
+                    })
+                    .merge(middleG)
+                    .each(function(d){
+                        const middleG = d3.select(this);
+                        middleG.attr('clip-path', `url(#card-photo)`)
+                        middleG.select("circle.border")
+                            .attr("r", r1)
+                            .attr("stroke", "blue")
+                            .attr("stroke-width", middleStrokeWidth)
+                            .attr("fill", "transparent")
+
+                        middleG.select("image")
+                            .attr("xlink:href", d.url)
+                            .attr("transform", `translate(${-r1 * 0.9},${-r1}) scale(${photoContentsWidth / 900})`)
+                            //for mobile....attr("transform", `translate(${-r1},${-r1}) scale(${photoContentsWidth / 1000})`) //based on reneeRegis photoSize 260 by 335.48 
+
+                    })
+                    .raise();
+
+            middleG.exit().call(remove);
 
         }
 
@@ -614,6 +667,11 @@ export default function pentagonComponent() {
     pentagon.withText = function (value) {
         if (!arguments.length) { return withText; }
         withText = value;
+        return pentagon;
+    };
+    pentagon.middleInfo = function (value) {
+        if (!arguments.length) { return middleInfo; }
+        middleInfo = value;
         return pentagon;
     };
     pentagon.editable = function (value) {

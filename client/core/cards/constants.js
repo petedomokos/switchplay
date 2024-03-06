@@ -1,6 +1,122 @@
 import * as d3 from 'd3';
 import { GREY_COLOUR_THEME, BLUE_COLOUR_THEME, SATURATED_BLUE_COLOUR_THEME } from './colourThemes';
 
+export const NOW = new Date("2024/07/12");
+
+export const DECK_SETTINGS = [
+    {
+        key:"currentValueDataMethod",
+        value: "latest",
+        label:"Data Method",
+        desc:"...",
+        valueType:"string",
+        positionInCurrentCardSettings:1,
+        displayFormat:"buttons",
+        options:[
+            { key:"currentValueDataMethod", value: "best", label:"BEST", desc:"desc..." },
+            { key:"currentValueDataMethod", value: "specificSession",/*defaults to last session*/ label:"SESSION", desc:"desc..." },
+            { key:"currentValueDataMethod", value: "latest", label:"LATEST", desc:"desc..." }
+        ]
+    },
+    {
+        key:"achievedValueDataMethod",
+        value: "mean",
+        label:"Data Method For Past Cards",
+        desc:"...",
+        valueType:"string",
+        displayFormat:"buttons",
+        options:[
+            { key:"achievedValueDataMethod", value: "best", label:"BEST", desc:"desc..." },
+            { key:"achievedDataMethod", value: "specificSession",/*defaults to last session*/ label:"SESSION", desc:"desc..." },
+            { key:"achievedValueDataMethod", value: "latest", label:"LATEST", desc:"desc..." },
+        ]
+    },
+    {
+        key:"dataToIncludeInCards",
+        value: "all",
+        label:"Data To Include In Cards",
+        desc:"...",
+        valueType:"string",
+        positionInCurrentCardSettings:2,
+        displayFormat:"buttons",
+        options:[
+            { key:"dataToIncludeInCards", value:"all", label:"All Data", desc:"..." },
+            { key:"dataToIncludeInCards", value:"fromStart", label:"From Start Date", desc:"..." },
+        ]
+    },
+    {
+        key:"dataExpiryTimeNumber",
+        value: 2,
+        positionInCurrentCardSettings:3,
+        label:"Data Expiry Amount",
+        desc:"...",
+        valueType:"naturalNumber",
+        displayFormat:"dropdown",
+    },
+    {
+        key:"dataExpiryTimeUnits",
+        value: "months",
+        positionInCurrentCardSettings:4,
+        label:"Data Expiry Unit",
+        desc:"...",
+        valueType:"string",
+        displayFormat:"dropdown",
+        options:[
+            //{ key:"dataExpiryTimeUnits", value:"hours", label:"hours" },
+            //{ key:"dataExpiryTimeUnits", value:"days", label:"days" },
+            { key:"dataExpiryTimeUnits", value:"weeks", label:"weeks" },
+            { key:"dataExpiryTimeUnits", value:"months", label:"months" },
+            { key:"dataExpiryTimeUnits", value:"years", label:"years" }
+        ]
+    },
+    {
+        key:"defaultDeckStartDate",
+        value: "creationDate",
+        //note - this does not update, it is set at the time of the cards creation
+        label:"Default Start Date",
+        desc:"...",
+        valueType:"string",
+        positionInCurrentCardSettings:5,
+        displayFormat:"buttons",
+        options:[
+            //note - fixed means it is set at the time of creation and then doesnt change, 
+            //       even if new cards are created, deleted or move from future to past
+            //note - both lastPast and chain settings default to creationDate if no pastCard (or no prevcard for chain)
+            { key:"defaultDeckStartDate", value: "creationDate", label:"Creation Date", desc:"desc..." },
+            { key:"defaultDeckStartDate", value: "lastPastFixed", label:"Most Recent Past Card Date (fixed)", desc:"desc..." },
+            { key:"defaultDeckStartDate", value: "lastPastDynamic", label:"Most Recent Past Card Date (dynamic)", desc:"desc..." },
+            { key:"defaultDeckStartDate", value: "prevCardFixed",/*defaults to last session*/ label:"Previous Card (fixed)", desc:"desc..." },
+            { key:"defaultDeckStartDate", value: "prevCardDynamic",/*defaults to last session*/ label:"Previous Card (dynamic)", desc:"desc..." },
+        ]
+    },
+    {
+        key:"cardDateGranularity",
+        value:"day",
+        label:"Date Granularity On Cards",
+        desc:"...",
+        valueType:"string",
+        displayFormat:"buttons",
+        options:[
+            { key:"cardDateGranularity", value: "week", label:"Weeks", desc:"desc..." },
+            { key:"cardDateGranularity", value: "day", label:"Days", desc:"desc..." },
+            { key:"cardDateGranularity", value: "hour", label:"Hours", desc:"desc..." },
+            { key:"cardDateGranularity", value: "minute", label:"Minutes", desc:"desc..." },
+            { key:"cardDateGranularity", value: "second", label:"Seconds", desc:"desc..." },
+        ]
+    },
+    {
+        key:"progressStatusOnlyIncludesKpisWithTargets",
+        label:"Only Include Kpis With Targets When Calculating Progress",
+        desc:"...",
+        valueType:"boolean",
+        displayFormat:"buttons",
+        options:[
+            { key:"progressStatusOnlyIncludesKpisWithTargets", value: true, label:"True", desc:"desc..." },
+            { key:"progressStatusOnlyIncludesKpisWithTargets", value: false, label:"False", desc:"desc..." },
+        ]
+    },
+]
+
 export const STATUS_OPTIONS = [
     { key:"status-1", status:1 },
     { key:"status-2", status:2 }
@@ -96,7 +212,9 @@ export const STYLES = {
 export const DECK_PHOTO_POS = "centre";
 
 export const DIMNS = {
-    burgerBarWidth:45,
+    burgerBarWidth:50,
+    CUSTOMER_LOGO_WIDTH:35,
+    CUSTOMER_LOGO_HEIGHT:35,
     DECK:{
         ASPECT_RATIO:9/16,
         HEADER_HEIGHT:25,

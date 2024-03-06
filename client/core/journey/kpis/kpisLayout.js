@@ -4,8 +4,7 @@ import { isNumber, valueIsInDomain, calcPCIntervalsFromValue } from '../../../da
 import { fireworks1, fire, waterOnFire, iceCrystals, ice, meltingIce, emptyGoal, ball, goalWithBall, shiningCrystalBall, nonShiningCrystalBall } from "../../../../assets/icons/milestoneIcons.js"
 
 export default function kpisLayout(){
-    let format = "actual"; //actual
-    let datasets = [];
+    let format = "raw"; //raw
     let targets = [];
     let withDeficitBar = false;
     let allKpisActive = false;
@@ -13,32 +12,33 @@ export default function kpisLayout(){
     let milestoneId = "";
 
     function update(data){
-        //const data = _data.slice(0,1);
-        //console.log("kpislayout", data)
+        //console.log("kpisLayout data", data)
         //flag
         const nrDatasetKpis = data.filter(kpi => kpi.datasetKey).length;
         const kpisData = data.map((kpi,i) => {
-            const { key, values, accuracy, order, isPast, isCurrent, isFuture, isActive, milestoneId, datasetKey, statKey,
+            const { key, values, min, max, accuracy, order, isPast, isCurrent, isFuture, isActive, datasetKey, statKey,
                 steps=[], stepsValues, allSteps=[], statProgressStatus, stepsProgressStatus, minStandard, orientationFocus,
                 dataStart, dataEnd 
             } = kpi; 
 
-            //console.log("values", values)
-            
-            const shouldLog = false;// milestoneId === "profile-2" && datasetKey === "meditation"
-            const start = values.start?.actual;
-            const current = values.current?.actual;
-            const target = orientationFocus === "defence" ? minStandard.value : values.target?.actual;
-            const achieved = values.achieved?.actual;
-            const expected = values.expected?.actual;
-            const { min, max } = values;
+            //console.log("kpi...", kpi)
+            const start = values.start?.raw;
+            const current = values.current?.raw || values.achieved?.raw;
+            const target = orientationFocus === "defence" ? minStandard.value : values.target?.raw;
+            const achieved = values.current?.raw || values.achieved?.raw;
+            const expected = values.expected?.raw;
+            //console.log("current", current)
+
+            const isOnTrack = order === "highest is best" ? achieved >= expected : achieved <= expected;
+            const isBetterThanExpected = isOnTrack && achieved !== expected;
+            //console.log("s c t a e", start, current, target, achieved, expected)
             //bars
-            const currentColour = grey10(7);// "#696969";
+            const currentColour = grey10(2);// "#696969";
             const colours = {
                 current: currentColour,
                 currentMaintanence: "#483d8b",
                 currentNoData:grey10(5),
-                target:grey10(2),// "#DCDCDC",
+                target:grey10(9),// "#DCDCDC",
                 expectedBehind:"red",
                 expectedAhead:currentColour,
                 stepsCurrent:"blue",
@@ -53,9 +53,10 @@ export default function kpisLayout(){
             const maintenanceTargetHasSlipped = isNumber(current) && isNumber(target) && (order === "highest is best" ? target > current : target < current);
             
             //Bar datums
+            //next - error - barStart and end should be min and max
             let barStart, barEnd;
             //4 cases
-            if(isCurrent || orientationFocus === "defence"){
+            if(orientationFocus === "defence"){
                 //case 1: current card any orientation - use full scale
                 barStart = dataStart
                 barEnd = dataEnd;
@@ -90,10 +91,23 @@ export default function kpisLayout(){
                 isMaintenanceTarget
             }
 
+
+            const expectedBarDatum = {
+                key:"expected",
+                label: "Expected",
+                shouldDisplay:(status, editing) => isNumber(expected),// orientationFocus === "defence" || editing?.desc === "target",
+                isAchieved:order === "highest is best" ? expected <= current : expected >= current,
+                startValue:barStart,
+                endValue:expected,
+                fill:isNumber(current) && !isOnTrack ? colours.redZone : "none",
+                opacity: 0.7,
+                format,
+            }
+
             const targetBarDatum = {
                 key:"target",
                 label: "Target",
-                shouldDisplay:(status, editing) => orientationFocus === "defence" || editing?.desc === "target",
+                shouldDisplay:(status, editing) => true,// orientationFocus === "defence" || editing?.desc === "target",
                 isAchieved:order === "highest is best" ? target <= current : target >= current,
                 startValue:barStart,
                 endValue:orientationFocus === "defence" ? minStandard.value : target,
@@ -121,7 +135,7 @@ export default function kpisLayout(){
                 dataStart,
                 dataEnd,
                 standardsData:getStandardsData(),
-                sectionsData: [targetBarDatum, currentBarDatum],
+                sectionsData: [targetBarDatum, expectedBarDatum, currentBarDatum],
                 stepsData:stepsBarData
             }
             
@@ -245,15 +259,15 @@ export default function kpisLayout(){
                     //dont display if past or no future profiles
                     //note - if no steps, then target will be 0 so this wont show
                     shouldDisplay:(status, editing, displayFormat) => 
-                        status === "open" && isFuture && !!stepsValues.target.actual && 
-                        isNumber(stepsValues.expected?.actual) && !editing && displayFormat !== "stat", 
+                        status === "open" && isFuture && !!stepsValues.target.raw && 
+                        isNumber(stepsValues.expected?.raw) && !editing && displayFormat !== "stat", 
                     location:"below",
                     rowNr: -1, y: 1, current,
                     //value is required on all tooltips for positioning - we want it to be positioned by completion %
-                    value: stepsValues.expected?.actualSteps, x:stepsValues.expected?.completion,
-                    //actual steps are used in this tooltip for comparison
-                    expectedActualSteps:stepsValues.expected?.actualSteps,
-                    currentActualSteps:stepsValues.current?.actualSteps,
+                    value: stepsValues.expected?.rawSteps, x:stepsValues.expected?.completion,
+                    //raw steps are used in this tooltip for comparison
+                    expectedActualSteps:stepsValues.expected?.rawSteps,
+                    currentActualSteps:stepsValues.current?.rawSteps,
                     dataOrder: "highest is best",
                     accuracy:2,
                     //@todo - maybe we only show the expected icons here, so if achieved, we still show just the shining crystal ball
@@ -418,7 +432,7 @@ export default function kpisLayout(){
                 withInnerValue:false,
             }
 
-            const tooltipsData = [...scaleTooltipsData, ...comparisonTooltipsData, currentTooltipDatum]
+            const tooltipsData = [];// [...scaleTooltipsData, ...comparisonTooltipsData, currentTooltipDatum]
             
             //numbers
             const currentNumberDatum = {
@@ -432,8 +446,20 @@ export default function kpisLayout(){
                 fill:getFill("number"),
                 format
             }
-            
-            const numbersData = [currentNumberDatum]; //dont amend the current value like we did for bar
+
+            const expectedNumberDatum = {
+                milestoneId,
+                progressBarType:"dataset",
+                key:"expected",
+                shouldDisplay:(status, editing, displayFormat) => /*editing?.desc !== "target" &&*/ displayFormat !== "steps",
+                label: "Expected",
+                value: expected,
+                //fill:colours.current,
+                fill:isBetterThanExpected ? "#90EE90" : (isOnTrack || !isNumber(achieved) ? grey10(5): colours.redZone), //red or green depending on 
+                format
+            }
+
+            const numbersData = [currentNumberDatum, expectedNumberDatum]; //dont amend the current value like we did for bar
 
             /*
             if(stepsBarData){
@@ -453,11 +479,13 @@ export default function kpisLayout(){
                 numbersData,
                 stepsBarData:[],
                 stepsTooltipsData:[],
-                stepsNumbersData:[]
+                stepsNumbersData:[],
             }
         })
 
-        return { kpisData, milestoneId }
+        //console.log("kpisData", kpisData)
+
+        return kpisData;
     }
 
     update.format = function (value) {
@@ -490,16 +518,6 @@ export default function kpisLayout(){
     update.noKpisActive = function (value) {
         if (!arguments.length) { return noKpisActive; }
         noKpisActive = value;
-        return update;
-    };
-    update.datasets = function (value) {
-        if (!arguments.length) { return datasets; }
-        datasets = value;
-        return update;
-    };
-    update.datasets = function (value) {
-        if (!arguments.length) { return datasets; }
-        datasets = value;
         return update;
     };
     return update;

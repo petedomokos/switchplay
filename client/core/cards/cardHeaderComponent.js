@@ -9,6 +9,11 @@ import { fadeIn, remove } from '../journey/domHelpers';
 
 const { GOLD, SILVER } = COLOURS;
 
+const diamondImage = {
+    url:"/diamond.png",
+    transform:"translate(-6.5,-6.5) scale(0.006)"
+}
+
 /*
 
 */
@@ -138,7 +143,7 @@ export default function cardHeaderComponent() {
         })
 
         function update(data){
-            //console.log("cardHeader update", data)
+            //console.log("cardHeader update")
             const { id, firstname, surname, age, position, isCurrent, isFuture, settings, personType } = data;
 
             const contentsG = containerG.selectAll("g.info-contents").data([data])
@@ -197,7 +202,7 @@ export default function cardHeaderComponent() {
                                         .attr("stroke-width", styles.title.strokeWidth)
                                         .attr("fill", styles.title.fill)
                                         //.text(d.title || d.id)
-                                        .text(truncateIfNecc(d.title, 17) || `Card ${d.cardNr + 1}`)
+                                        .text(truncateIfNecc(d.title || "Enter Title...", 17) || `Card ${d.cardNr + 1}`)
 
                                     //hitbox
                                     contentsG.select("rect.hitbox")
@@ -217,7 +222,7 @@ export default function cardHeaderComponent() {
                                 })
 
                         //TITLE
-                        const progressSummaryData = selectedSectionKey ? [] : [data];
+                        const progressSummaryData = selectedSectionKey || rightContent !== "card-progress" ? [] : [data];
                         const progressSummaryG = contentsG.selectAll("g.progress-summary").data(progressSummaryData)
                         progressSummaryG.enter()
                             .append("g")
@@ -235,12 +240,12 @@ export default function cardHeaderComponent() {
                                 .attr("display", rightContent ? null : "none")
                                 .attr("transform", `translate(${dateWidth + titleWidth},${0})`)
                                 .each(function(d,i){
-                                    const { cardNr, isFront, isNext, isSecondNext, isSelected, isHeld, completion, itemsData } = d;
+                                    const { cardNr, isFront, isNext, isSecondNext, isSelected, isHeld, completion, itemsData, status } = d;
                                     const contentsG = d3.select(this).select("g.summary-contents")
                                         .attr("transform", `translate(${progressSummaryMargin.left},${progressSummaryMargin.top})`);
 
                                     //if rightContent is chain, call pentagon, else call trophy
-                                    const pentagonG = contentsG.selectAll("g.pentagon").data(rightContent === "progress-chain" ? [itemsData] : [], d => d);
+                                    const pentagonG = contentsG.selectAll("g.pentagon").data(status !== 2 ? [itemsData] : [], d => d);
                                     pentagonG.enter()
                                         .append("g")
                                             .attr("class", "pentagon")
@@ -256,25 +261,23 @@ export default function cardHeaderComponent() {
 
                                     pentagonG.exit().remove();
 
-                                    return;
-                                    const trophyDatum = { id, completion };
-                                    const trophyG = contentsG.selectAll("g.trophy").data(rightContent === "progress-trophy" ? [trophyDatum] : [], d => d);
-                                    trophyG.enter()
+                                    const diamondG = contentsG.selectAll("g.diamond-progress").data(status === 2 ? [1] : []);
+                                    diamondG.enter()
                                         .append("g")
-                                            .attr("class", "trophy")
-                                            .merge(trophyG)
-                                            //.attr("transform", `translate(${progressSummaryContentsWidth/2},${progressSummaryContentsHeight/2})`)
-                                            .call(trophy
-                                                .width(progressSummaryContentsWidth)
-                                                .height(progressSummaryContentsHeight)
-                                                .margin({ left:0, right:0, top: 0, bottom: 0 })
-                                                .iconTransform({ x:-1.2, y:-1.2 }))
-                                                
-                                    trophyG.exit().remove();
-                                        
+                                            .attr("class", "diamond-progress")
+                                            .each(function(){
+                                                d3.select(this).append("image")
+                                            })
+                                            .merge(diamondG)
+                                            .attr("transform", `translate(${progressSummaryContentsWidth/2},${progressSummaryContentsHeight/2})`)
+                                            .each(function(){
+                                                d3.select(this).select("image")
+                                                    .attr("xlink:href", diamondImage.url)
+                                                    .attr("transform", diamondImage.transform)
+                                            })
 
-                                    //hitbox
-                                    //@todo - remove all this and move the logic into a progressIcon component
+                                    diamondG.exit().remove();
+
                                     //atm, we hide the hitbiox of using trophy, as it has its own hitbox
                                     d3.select(this).select("rect.hitbox")
                                         .attr("width", progressSummaryWidth)

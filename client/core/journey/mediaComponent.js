@@ -91,7 +91,6 @@ export default function mediaComponent() {
         })
 
         function update(data){
-            //console.log("data", withTextInfo, data)
             const { id, firstname, surname, age, position, isCurrent, isFuture, settings, personType } = data;
             //photosdata can be passed in, or otherwise it constructs the data from the photos array
             const photosData = data.photosData || (isCurrent ? data.photos["profile"] : data.photos[currentPage.key]);
@@ -104,8 +103,10 @@ export default function mediaComponent() {
                     .attr("width", width)
                     .attr("height", height)
                     .attr("fill", "none")
-                    .attr("stroke", grey10(5))
+                    .attr("stroke","none")// grey10(5))
                     .attr("stroke-width", 0.03)
+
+            const isMobile = photoWidth < 27.5; 
 
             const photoG = containerG.selectAll("g.photo").data(photosData, d => d.key);
             photoG.enter()
@@ -135,7 +136,7 @@ export default function mediaComponent() {
                                         .attr("fill", grey10(7));
                     })
                     .merge(photoG)
-                    .attr("transform", (d,i) => `translate(${i * photoWidth}, 0)`)
+                    .attr("transform", (d,i) => `translate(${i * photoWidth + (isMobile ? 0 : 2)}, 0)`)
                     .each(function(d){
                         //w = 29.116, h = 21.389, ar = 1.361 (ie w = 1.361 * h)
                         const photoG = d3.select(this);
@@ -149,7 +150,7 @@ export default function mediaComponent() {
                             .attr("width", photoWidth)
                             .attr("height", photoHeight)
                             .attr("fill", "none")
-                            .attr("stroke", beingEdited === "photo" ? "orange" : "none")
+                            .attr("stroke","none")// beingEdited === "photo" ? "orange" : "none")
                             .attr("stroke-width", 5)
 
                         photoG.select("image")  
@@ -159,7 +160,7 @@ export default function mediaComponent() {
                             //.attr("height", photoHeight)
 
                         const videoIconG = photoG.select("g.video-icon")
-                            .attr("transform", `translate(${photoWidth/2 - 2},${photoHeight - 5})`);
+                            .attr("transform", `translate(${photoWidth/2 - 2},${photoHeight - 5 - (isMobile ? 0 : 3)})`);
 
                         videoIconG.select("path").attr("transform", `scale(0.02)`)
                             .attr("d", icons.video.d)

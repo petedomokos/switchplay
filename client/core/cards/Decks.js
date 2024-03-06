@@ -6,7 +6,6 @@ import Button from '@material-ui/core/Button'
 import DeckHeader from './DeckHeader';
 import deckLayout from './deckLayout';
 import decksComponent from "./decksComponent";
-import milestonesLayout from "../journey/milestonesLayout";
 import ItemForm from "./forms/ItemForm";
 import DeckTitleForm from './forms/DeckTitleForm';
 import SectionTitleForm from './forms/SectionTitleForm';
@@ -26,6 +25,7 @@ import dragEnhancements from '../journey/enhancedDragHandler';
 import { toCamelCase } from '../../data/measures';
 import { createInitCard } from '../../data/initDeck';
 import { addWeeks } from '../../util/TimeHelpers';
+import { addKpiValuesToCards } from './kpiValuesForCards';
 import uuid from 'react-uuid';
 
 const useStyles = makeStyles((theme) => ({
@@ -76,16 +76,24 @@ const useStyles = makeStyles((theme) => ({
 
 const enhancedZoom = dragEnhancements();
 
+/*const getFrontCardNr = (cards, frontCardId) => {
+  if(!frontCardId){ return 0; }
+  if(frontCardId === "current"){ 
+      const now = new Date();
+      return d3.least(cards.filter(c => c.date > now)).cardNr;
+  }
+  //all cards placed
+  if(frontCardId === "none"){ return cards.length; }
+  //custom card
+  return cards.find(c => c.id === frontCardId).cardNr;
+}*/
+
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
+const Decks = ({ table, data, groupingTag, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
   //console.log("Decks table", table)
-  //console.log("Decks data", data)
-  //console.log("journeyData", journeyData)
-  //processed props
-  const stringifiedData = JSON.stringify({ data, table });
   //state
-  const [decksLayout, setLayout] = useState(() => deckLayout());
+  const [_deckLayout, setLayout] = useState(() => deckLayout());
   const [decks, setDecks] = useState(() => decksComponent());
   const [zoom, setZoom] = useState(() => d3.zoom());
   const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
@@ -95,14 +103,25 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customS
   const [longpressedDeckId, setLongpressedDeckId] = useState("");
   const [form, setForm] = useState(null);
 
+  //update flags
+  //processed props
+  const frontCardIds = JSON.stringify(data.map(d => d.frontCardId))
+  const stringifiedData = JSON.stringify({ data, table, datasets });
+  const stringifiedTable = JSON.stringify(table);
+  const stringifiedDatasets = JSON.stringify(datasets);
+  const stringifiedCards = JSON.stringify(data.map(d => d.cards));
+  const stringifiedDeckInfo = JSON.stringify(data.map(d => ({ 
+    id:d.id, title: d.title, frontcardNr:d.frontCardNr, sections:d.sections, purpose:d.purpose
+  })))
+
   const shouldPersistChanges = !table?.isMock && !data?.find(d => d.isMock);
   //profiles state
-  const [profilesLayout, setProfilesLayout] = useState(() => milestonesLayout());
   const [kpiFormat, setKpiFormat] = useState("actual");
 
   //processed state
   const selectedDeck = data.find(deck => deck.id === selectedDeckId);
   //refs
+  const cardsWithKpisRef = useRef([]);
   const zoomRef = useRef(null);
   const containerRef = useRef(null);
   const formRef = useRef(null);
@@ -460,7 +479,6 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customS
   //console.log("Decks", selectedDeckId)
 
   const updateFrontCardNr = useCallback(frontCardId => {
-    console.log("updateFront", frontCardId)
     updateDeck({ ...selectedDeck, frontCardId });
     setForm(null);
   }, [stringifiedData, form, selectedDeckId]);
@@ -589,7 +607,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customS
   useEffect(() => {
     setSelectedSection(null);
     setForm(null);
-  }, [timeframeKey, groupingTagKey])
+  }, [timeframeKey, groupingTag])
 
   useEffect(() => {
     decks.selectedSection(selectedSection);
@@ -612,9 +630,9 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customS
     decks.selectedItemNr(selectedItemNr);
   }, [selectedItemNr])
 
-  //overlay and pointer events none was stopiing zoom working!!
-  useEffect(() => {
-    //journeyData
+  /*
+  merge current change was...
+  //journeyData
     profilesLayout
       .format(kpiFormat)
       .datasets(datasets)
@@ -630,20 +648,31 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customS
     //decksdata
     decksLayout
       .groupingTagKey(groupingTagKey)
+      */
+
+  //kpi values
+  useEffect(() => {
+    const cardsWithKpiValues = data
+      .map((deck, i) => ({ deckId:deck.id, cards:addKpiValuesToCards(deck, datasets, i) }));
+
+    cardsWithKpisRef.current = cardsWithKpiValues;
+  }, [stringifiedCards, stringifiedDatasets])
+
+  //layout and bind
+  useEffect(() => {
+    const decksToRender = selectedDeckId ? [data.find(d => d.id === selectedDeckId)] : data;
+    const decksWithCardKpis = decksToRender.map(d => ({ 
+      ...d, 
+      cards:cardsWithKpisRef.current.find(obj => obj.deckId === d.id).cards
+    }))
+    
+    _deckLayout
+      .groupingTag(groupingTag)
       .timeframeKey(timeframeKey)
       .withSections(true);
 
-    const decksToDisplay = selectedDeckId ? [selectedDeck] : data;
-    const processedDeckData = decksToDisplay
-      .map(d => ({
-        ...d,
-        //cards:d.cards.map((c,i) => ({ ...c, profile:profilesData[i] }))
-        cards:d.cards.map((c,i) => ({ ...c, profile:profilesData[0] }))
-      }))
-      .map(deckData => decksLayout(deckData));
-
-    //just use first deck for now
-    d3.select(containerRef.current).datum(processedDeckData)
+    const decksData = decksWithCardKpis.map(deck => _deckLayout(deck)) 
+    d3.select(containerRef.current).datum(decksData)
 
   }, [stringifiedData, selectedDeckId])
 
@@ -654,7 +683,7 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customS
       .width(width)
       .height(tableHeight + deckHeightWithMargins)
       .nrCols(nrCols)
-      .groupingTagKey(groupingTagKey)
+      .groupingTag(groupingTag)
       .timeframeKey(timeframeKey)
       .selectedSection(selectedSection)
       .form(form)
@@ -730,12 +759,9 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customS
 
         const { sourceEvent } = e;
         const clientY = isNumber(sourceEvent.clientY) ? sourceEvent.clientY : sourceEvent.touches[0].clientY;
-        // console.log("x y", clientX, clientY)
         if(clientY < deckHeight/4){
-          console.log("near to border!!")
           //scroll up if poss
         }else if(height - clientY < deckHeight/4){
-          console.log("near bottom border")
           //scroll down if poss
         }
         const pseudoE = { dx: e.transform.x - zoomTransformPrev.x, dy:e.transform.y - zoomTransformPrev.y }
@@ -744,10 +770,8 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customS
         e.sourceEvent.stopPropagation();
       })
       .onLongpressEnd(function(e){
-        //console.log("lpend", wasDragged)
         if(wasDragged){ 
           wasDragged = false;
-          //console.log("setting lpId to nullxxxxxxxx")
           setLongpressedDeckId(""); 
         }
        
@@ -795,7 +819,6 @@ const Decks = ({ table, data, journeyData, groupingTagKey, timeframeKey, customS
     function zoomEnd(e){
       e.sourceEvent?.stopPropagation();
       if(zoomTransformLpStartRef.current){
-        //console.log("do nothing")
         //do nothing as this is a just reset
         zoomTransformLpStartRef.current = null;
         return;
@@ -881,6 +904,9 @@ useEffect(() => {
         <g ref={zoomRef} className="zoom"><rect width={width} height={height} fill="transparent" /></g>
         <g ref={containerRef} className="decks" pointerEvents={selectedDeckId && !form ? "all" : "none"} />
         <defs>
+          <clipPath id="card-photo">
+            <circle></circle>
+          </clipPath>
           <filter id="shine">
             <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
           </filter>

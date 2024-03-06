@@ -106,7 +106,7 @@ export default function titleComponent() {
                         .append("g")
                             .attr("class", "name")
                                 .append("text")
-                                    .attr("font-size", contentsHeight)
+                                    .attr("font-size", contentsHeight * 1.2)
                                     //.attr("font-size", styles.primaryTitle.fontSize) //init
                                     .style("font-family", styles.primaryTitle.fontFamily)
 
@@ -163,7 +163,7 @@ export default function titleComponent() {
                         .transition()
                             .duration(fontSizeTransition?.duration || 0)
                             .delay(fontSizeTransition?.delay || 0)
-                            .attr("font-size", contentsHeight)
+                            .attr("font-size", contentsHeight * 1.2)
                             //.attr("font-size", styles.primaryTitle.fontSize)
     
                 })

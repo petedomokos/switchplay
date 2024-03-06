@@ -3,9 +3,10 @@ import { calcDateCount } from '../../util/TimeHelpers';
 import { isNumber } from '../../data/dataHelpers';
 import { mockCardFlags } from './mockCardFlags';
 import { purposeLayout } from './purposeLayout';
+import kpisLayout from "../journey/kpis/kpisLayout";
+import { NOW } from "./constants"
 
 export default function cardsLayout(){
-    let datasets = [];
     let sections;
     let info = {};
     let format = "profiles";
@@ -13,17 +14,19 @@ export default function cardsLayout(){
 
     let prevData = [];
 
-    function update(cards){
-        //console.log("cardsLayout frontCardNr", frontCardNr)
-        const now = new Date();
+    const _kpisLayout = kpisLayout();
 
+    function update(cards){
+
+        //error in deck of decks - sections is not defined here
         const getSection = (it,i) => {
             if(it.sectionKey){ return sections.find(s => s.key === it.sectionKey) }
             return sections[i]
         }
 
         const _data = cards.map((c,i) => {
-            const { deckId, cardNr, title="", date, items, purpose } = c;
+            const { deckId, cardNr, title="", date, items, purpose, kpis } = c;
+            //console.log("cardsLayout....", c.cardNr, c.title)
             const pos = cardNr - frontCardNr;
 
             const mockFlags = mockCardFlags[i] || [];
@@ -52,15 +55,14 @@ export default function cardsLayout(){
                 info:{ 
                     ...info,
                     date,
-                    dateCount:calcDateCount(now, date),
+                    dateCount:calcDateCount(NOW, date),
                     title
                 },
+                kpis:_kpisLayout(kpis)
     
             }
         })
         .map(c => { 
-            //console.log("cardNr isHeldxxxxx", c.cardNr, c.isHeld)
-            //console.log("wasPlaced?", prevData?.find(card => card.cardNr === c.cardNr)?.isPlaced)
             const nrPlacedCards = cards.filter(card => card.cardNr < frontCardNr).length;
             const nrVisiblePlacedCards = d3.min([nrPlacedCards, 5]);
             const slotPos = nrVisiblePlacedCards + c.pos;
@@ -96,11 +98,6 @@ export default function cardsLayout(){
     update.sections = function (value) {
         if (!arguments.length) { return sections; }
         sections = value;
-        return update;
-    };
-    update.datasets = function (value) {
-        if (!arguments.length) { return datasets; }
-        datasets = value;
         return update;
     };
     update.info = function (value) {

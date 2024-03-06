@@ -21,7 +21,7 @@ export const createInitCard = (options={}) => {
     }
     return {
         id:uuid(),
-        title:"Enter Title...", //cardNr ? (cardTitles[cardNr] || `Level ${cardNr + 1}`) : "Enter Title...",
+        title:"", //cardNr ? (cardTitles[cardNr] || `Level ${cardNr + 1}`) : "Enter Title...",
         //next - finaih this so it doesnt need a cardNr... or always pass a cardNr
         date:date || calcDate(),
         items

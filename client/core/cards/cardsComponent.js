@@ -23,6 +23,11 @@ const contextMenuData = [
     { key:"delete-card", url:"/delete.png" }
 ]
 
+const diamondImage = {
+    url:"/diamond.png",
+    transform:"translate(-2.5,0) scale(0.03)"
+}
+
 export default function cardsComponent() {
     //API SETTINGS
     // dimensions
@@ -97,7 +102,7 @@ export default function cardsComponent() {
     let y = (d,i) => 0;
 
     //state
-    let groupingTagKey;
+    let groupingTag;
     let timeframeKey = "singleDeck";
     let deckIsSelected;
     let format = "actual";
@@ -241,10 +246,12 @@ export default function cardsComponent() {
             const getCardStroke = d => COLOURS.CARD.STROKE(d);
             const getBackOfCardFill = d => COLOURS.BACK_OF_CARD.FILL(d);
             const getBackOfCardStroke = d => COLOURS.BACK_OF_CARD.STROKE(d);
-            const getBackOfCardStrokeWidth = d => 0.5;
+            const getBackOfCardStrokeWidth = d => d.isCurrent ? (d.isPlaced ? 2 : 0.75) : 0.5;
 
             const getCardStrokeWidth = cardD => {
-                return STYLES.CARD.STROKE_WIDTH * (cardD.isPlaced && cardD.isHidden ? 3 : 1)
+                const { isPlaced, isHidden, isCurrent } = cardD;
+                const currentMultiplier = isPlaced ? (cardsAreFlipped ? 5 : 3) : 1.25;
+                return STYLES.CARD.STROKE_WIDTH * (isPlaced && isHidden ? 3 : 1) * (isCurrent ? currentMultiplier : 1)
             }
 
             //stroke-widths
@@ -260,9 +267,9 @@ export default function cardsComponent() {
                 }
                 //multiple deck view
                 if(isHeld || isSelected){
-                    return status === 2 ? 1.5 : (status === 1 ? 1 : 0.2);
+                    return status === 2 ? 0.8 : (status === 1 ? 0.8 : 0.2);
                 }
-                return status === 2 ? 3 : (status === 1 ? 2 : 0.2);
+                return status === 2 ? 3 : (status === 1 ? 3 : 0.2);
             }
 
             const getHeaderStatusItemStrokeWidth = itemD => {
@@ -274,6 +281,8 @@ export default function cardsComponent() {
             const getSectionViewCardStrokeWidth = (itemsData, cardD) => {
                 //can assume 1 item per card per section for now
                 const itemD = itemsData ? itemsData[0] : null;
+
+                if(cardD.isPlaced){ return STYLES.CARD.STROKE_WIDTH * 5; }
 
                 if(itemD?.title){
                     const { status } = itemD;
@@ -316,7 +325,7 @@ export default function cardsComponent() {
                     .attr("class", d => `card card-${d.id}`)
                     .attr("opacity", 1)
                     .each(function(cardD,i){
-                        const { id, cardNr, pos, isHeld, isHidden, isSelected, profile } = cardD;
+                        const { id, cardNr, pos, isHeld, isHidden, isSelected } = cardD;
                         const itemsData = timeframeKey !== "singleDeck" || isHidden ? [] : (selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items);
 
                         //front components
@@ -349,6 +358,26 @@ export default function cardsComponent() {
                                 .attr("class", "flags-container");
 
                         //bgs for front and back
+                        //add linear gradient for this card
+                        const grad = d3.select("svg#decks-svg").select("defs").append("linearGradient")
+                            .attr("id", `card-front-grad-${id}`)
+                            .attr("x1", "0%")
+                            .attr("y1", "0%")
+                            .attr("x2", "100%")
+                            .attr("y2", "100%");
+                        
+                        grad.append("stop")
+                            .attr("class", "stop1")
+                            .attr("offset", "0%")
+                            .style("stop-color", getCardFill(cardD)[0])
+                            .style("stop-opacity", 1);
+                        
+                        grad.append("stop")
+                            .attr("class", "stop2")
+                            .attr("offset", "100%")
+                            .style("stop-color", getCardFill(cardD)[1])
+                            .style("stop-opacity", 1);
+
                         contentsG
                             .append("rect")
                                 .attr("class", "card-bg card-front-bg")
@@ -359,11 +388,12 @@ export default function cardsComponent() {
                                 //for placed cards, we dont want the dimns to be changed when in section view
                                 .attr("width", getCardContentsWidth(cardD))
                                 .attr("height", getCardContentsHeight(cardD))
-                                .attr("fill", selectedSectionKey ? getCardFill({ pos: 0 }) : getCardFill(cardD))
+                                .attr("fill", `url(#card-front-grad-${id})`)
+                                //.attr("fill", selectedSectionKey ? getCardFill({ pos: 0 }) : 
+                                    //(pos < 0 || pos > 4 ? getCardFill(cardD) : `url(#card-front-grad-${pos})`))
                                 .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData, 1) : getCardStroke(cardD))
-                                .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth() : getCardStrokeWidth(cardD))
+                                .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth(null, cardD) : getCardStrokeWidth(cardD))
                                 .on("click", e => {
-                                    //console.log("card bg click")
                                     onClickCard.call(this, e, cardD)
                                     e.stopPropagation();
                                 })
@@ -429,7 +459,7 @@ export default function cardsComponent() {
                     })
                     .sort((a,b) => d3.descending(a.cardNr, b.cardNr))
                     .each(function(cardD,i){
-                        const { deckId, cardNr, id, pos, isHidden, slotPos, isHeld, isFront, hasBeenPickedUp, isNext, isSecondNext, isSelected, info, status, profile, deckListPos, purposeData=[], flagsData } = cardD;
+                        const { deckId, cardNr, id, pos, isHidden, slotPos, isHeld, isPlaced, isFront, hasBeenPickedUp, isNext, isSecondNext, isSelected, info, status, deckListPos, purposeData=[], flagsData, photoURL } = cardD;
                         const itemsData = selectedSectionKey ? cardD.items.filter(it => it.section?.key === selectedSectionKey) : cardD.items;
                         const items = itemsComponents[id];
 
@@ -505,13 +535,26 @@ export default function cardsComponent() {
                         contextMenuG.exit().call(remove);
 
                         //bgs for front and back
+                        const grad = d3.select("svg#decks-svg").select("defs").select(`linearGradient#card-front-grad-${id}`)
+                        grad.select("stop.stop1")
+                            .transition("stop1")
+                            .duration(400)
+                                .style("stop-color", getCardFill(cardD)[0]);
+
+                        grad.select("stop.stop2")
+                            .transition("stop2")
+                            .duration(400)
+                                .style("stop-color", getCardFill(cardD)[1]);
+
                         contentsG.select("rect.card-front-bg")
                             .transition("card-front-bg-appearance")
                             .delay(200)
                             .duration(400)
-                                .attr("fill", selectedSectionKey ? getCardFill({ pos: 0 }) : getCardFill(cardD))
+                                //.attr("fill", url)
+                                //.attr("fill", selectedSectionKey ? getCardFill({ pos: 0 }) : 
+                                    //( pos < 0 || pos > 4 ? getCardFill(cardD) : `url(#card-front-grad-${pos})`))
                                 .attr("stroke", selectedSectionKey ? getSectionViewCardStroke(itemsData, 1) : getCardStroke(cardD))
-                                .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth(itemsData) : getCardStrokeWidth(cardD))
+                                .attr("stroke-width", selectedSectionKey ? getSectionViewCardStrokeWidth(itemsData, cardD) : getCardStrokeWidth(cardD))
                                 .attr("stroke-dasharray", selectedSectionKey && itemsData[0] && itemsData[0].status === 1 ? "3 4" : null)
 
                         contentsG.select("rect.card-front-bg")
@@ -559,7 +602,7 @@ export default function cardsComponent() {
                             .width(contentsWidth)
                             .height(headerHeight)
                             .withTitle(!cardTitleIsBeingEdited)
-                            .rightContent(timeframeKey === "singleDeck" ? "progress-chain" : "progress-trophy")
+                            .rightContent(timeframeKey === "singleDeck" ? "card-progress" : "progress-trophy")
                             .styles({
                                 //need to decide whether to do stroke from here or just inside cardHeader
                                 getStatusItemStroke:(itemD,linePartNr) => getProgressStatusColour(cardD, itemD, linePartNr),
@@ -604,7 +647,7 @@ export default function cardsComponent() {
                             })
                         
                         const headerId = `deck-${deckId}-card-${cardNr}`
-                        const frontHeaderDatum = { ...info, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr, id:headerId };
+                        const frontHeaderDatum = { ...info, status, itemsData:cardD.items, isSelected, isFront, isNext, isSecondNext, cardNr, id:headerId };
                         frontContentsG.selectAll("g.card-header")
                             //.attr("pointer-events", deckIsSelected & (isHeld || isSelected) ? "all" : "none")
                             .datum(frontHeaderDatum)
@@ -627,7 +670,8 @@ export default function cardsComponent() {
                             .height(itemsAreaHeight)
                             .headerHeight(headerHeight)
                             .withSections(cardIsEditable)
-                            .withText(d => cardIsEditable)
+                            .withText(cardIsEditable)
+                            .middleInfo(cardIsEditable ? { photoURL } : null)
                             .cardIsSelected(selectedCardNr === cardNr)
                             .selectedItemNr(selectedItemNr)
                             .editable(cardIsEditable)
@@ -650,7 +694,10 @@ export default function cardsComponent() {
                             })
                             .setForm(setForm)
 
-                        const shouldShowItems = !isHidden && timeframeKey === "singleDeck" && (isSelected || isFront || (isHeld && selectedSectionKey && deckIsSelected))
+                        const shouldShowCardContent = !isHidden && timeframeKey === "singleDeck";
+                        const isPlacedAndIncomplete = isPlaced && status !== 2;
+                        const isPlacedAndComplete = isPlaced && status == 2;
+                        const shouldShowItems = shouldShowCardContent && (isPlacedAndIncomplete || isSelected || isFront || (isHeld && selectedSectionKey && deckIsSelected))
                         frontContentsG.select("g.items-area")
                             //not sure why we need this when entire containr shold have pointer-events none when no deck selected
                             .attr("pointer-events", deckIsSelected ? null : "none")
@@ -658,9 +705,27 @@ export default function cardsComponent() {
                             .call(fadeInOut, shouldShowItems)
                             .datum(itemsData)
                             .call(items);
+                        
+                        const shouldShowLargeDiamond = shouldShowCardContent && isPlacedAndComplete;
+                        const diamondG = frontContentsG.selectAll("g.diamond").data(shouldShowLargeDiamond ? [1] : []);
+                        diamondG.enter()
+                            .append("g")
+                                .attr("class", "diamond")
+                                .each(function(){
+                                    d3.select(this).append("image")
+                                })
+                                .merge(diamondG)
+                                .attr("transform", `translate(0,${headerHeight})`)
+                                .each(function(){
+                                    d3.select(this).select("image")
+                                        .attr("xlink:href", diamondImage.url)
+                                        .attr("transform", diamondImage.transform)
+                                })
+
+                        diamondG.exit().remove();
 
                         //PURPOSE (instead of items when in long-term longTerm view)
-                        const shouldShowPurpose = deckIsSelected && isFront && timeframeKey === "longTerm" && !cardsAreFlipped;
+                        const shouldShowPurpose = isFront && timeframeKey === "longTerm" && !cardsAreFlipped;
                         const purpose = purposeComponents[id];
                         const purposeG = frontContentsG.selectAll("g.card-purpose").data(shouldShowPurpose ? [purposeData] : [])
                         purposeG.enter()
@@ -914,7 +979,7 @@ export default function cardsComponent() {
                                 //.call(fadeIn, { transition:{ delay: 500, duration:500 }})
                                 .merge(mediaG)
                                 .attr("transform", `translate(0.5,${headerHeight})`)
-                                .datum({ ...profile.info, photosData })
+                                .datum({ id:`deck-${deckId}-card-${id}`, photosData })
                                 .call(media)
                                 .call(fadeInOut, isFront, { 
                                     transitionIn:{ delay: 0, duration:200 },
@@ -928,6 +993,7 @@ export default function cardsComponent() {
                         //kpis
                         //const textInfoHeight = 20;
                         const kpis = kpisComponents[id]
+                            .milestoneId(`deck-${deckId}-card-${id}`)
                             .width(contentsWidth)
                             .height(kpisHeight)
                             //.expandedHeight(contentsHeight - textInfoHeight)
@@ -955,7 +1021,7 @@ export default function cardsComponent() {
                             .scrollable(false)
                             .profileIsSelected(false)
 
-                        const shouldShowKpis = /*deckIsSelected &&*/ isFront && cardsAreFlipped && !selectedSectionKey;
+                        const shouldShowKpis = /*deckIsSelected &&*/ cardsAreFlipped && !selectedSectionKey && (isFront || isPlaced);
                         const kpisG = backContentsG.selectAll("g.kpis").data(shouldShowKpis ? [1] : []);
                         kpisG.enter()
                             .append("g")
@@ -963,7 +1029,7 @@ export default function cardsComponent() {
                                 .call(fadeIn)
                                 .merge(kpisG)
                                 .attr("transform", `translate(0, ${headerHeight + mediaHeight})`)
-                                .datum(profile.kpis)
+                                .datum(cardD.kpis)
                                 .call(kpis);
 
                         kpisG.exit().call(remove);
@@ -1152,9 +1218,9 @@ export default function cardsComponent() {
         fontSizes = { ...fontSizes, ...values };
         return cards;
     };
-    cards.groupingTagKey = function (value) {
-        if (!arguments.length) { return groupingTagKey; }
-        groupingTagKey = value;
+    cards.groupingTag = function (value) {
+        if (!arguments.length) { return groupingTag; }
+        groupingTag = value;
         return cards;
     };
     cards.timeframeKey = function (value) {

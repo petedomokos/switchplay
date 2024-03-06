@@ -2,8 +2,28 @@ import C from '../Constants'
 import { status, parseResponse, logError, fetchStart, fetchEnd, fetchThenDispatch} from './CommonActions'
 import auth from '../auth/auth-helper'
 import { transformUserForClient } from "./UserActions"
+import { getMockUser } from "../mock/mockDatabases/users"
 
 export const signin = (user, history, redirectTo) => dispatch =>{
+	const mockUser = getMockUser(user.emailOrUsername);
+	if(mockUser){
+		console.log("mockUser", mockUser)
+		const userCredentials = {
+			email:mockUser.email, 
+			_id:mockUser._id, 
+			isSystemAdmin:false, 
+			isPlayer:mockUser.isPlayer,
+			isMock:true
+		}
+		const jwt = { user:userCredentials, token:"mock-token" }
+
+		auth.authenticate(jwt, () => {
+			history.push(redirectTo || "/")
+		})
+		dispatch({ type:C.SIGN_IN, user:transformUserForClient(mockUser) });
+		return;
+	}
+	console.log("not mock user")
 	fetchThenDispatch(dispatch, 
 		'loading.user',
 		{

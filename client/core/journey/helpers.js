@@ -56,7 +56,7 @@ export function linearProjValue(x0MS, y0, x1MS, y1, xProjMS, dps){
     const y = (deltaX) => m * deltaX + y0;
     const deltaX = xProj - x0;
     //console.log("returning...", dps ? (+y(deltaX)).toFixed(dps) : y(deltaX))
-    return dps ? Number((+y(deltaX)).toFixed(dps)) : y(deltaX);
+    return isNumber(dps) ? Number((+y(deltaX)).toFixed(dps)) : y(deltaX);
 }
 
 export function getTransformation(selection){

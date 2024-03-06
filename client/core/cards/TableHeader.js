@@ -1,23 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import * as d3 from 'd3';
-import ToggleButton from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
-import Card from '@material-ui/core/Card'
-import CardActions from '@material-ui/core/CardActions'
-import CardContent from '@material-ui/core/CardContent'
-import Button from '@material-ui/core/Button'
-import TextField from '@material-ui/core/TextField'
-import Typography from '@material-ui/core/Typography'
-import { Checkbox } from '@material-ui/core';
-import { FormControlLabel } from '@material-ui/core';
-import { FormGroup } from '@material-ui/core';
-import { Input } from '@material-ui/core';
-import Icon from '@material-ui/core/Icon'
-import HomeIcon from '@material-ui/icons/Home'
 import { makeStyles } from '@material-ui/core/styles'
-import { grey10, COLOURS } from './constants';
+import { grey10, COLOURS, DIMNS } from './constants';
 import TelescopeIcon from './TelescopeIcon';
 import StepsIcon from './StepsIcon';
+
+const { CUSTOMER_LOGO_WIDTH, CUSTOMER_LOGO_HEIGHT } = DIMNS;
 
 const useStyles = makeStyles(theme => ({
     tableHeaderRoot: {
@@ -34,8 +22,21 @@ const useStyles = makeStyles(theme => ({
         //border:"solid",
         borderColor:"pink"
     },
+    customerLogoContainer:{
+        width:CUSTOMER_LOGO_WIDTH,
+        minWidth:CUSTOMER_LOGO_WIDTH,
+        maxWidth:CUSTOMER_LOGO_WIDTH,
+        height:CUSTOMER_LOGO_HEIGHT,
+        alignSelf:"center",
+        marginRight:props => `${props.customerLogo.marginRight}px`,
+        //border:"solid"
+    },
+    customerLogo:{
+        //transform:`scale(0.05) translate(-10000px, -5000px)`
+        transform:props => props.customerLogo.transform || null
+    },
     title:{
-        width:props => `${props.width - props.timeframe.width - 10}px`,
+        width:props => `${props.width - props.timeframe.width - props.customerLogo.marginRight - 10}px`,
         padding:"0px 5px",
         display:"flex",
         alignItems:"center",
@@ -96,7 +97,7 @@ const useStyles = makeStyles(theme => ({
 
 }))
 
-export default function TableHeader({ table, dimns, timeframe, toggleTimeframe }) {
+export default function TableHeader({ table, dimns, timeframe, nrTimeframeOptions, toggleTimeframe }) {
     const { width, height, padding } = dimns;
     const contentsWidth = width - padding.left - padding.right;
     const contentsHeight = height - padding.top - padding.bottom;
@@ -115,6 +116,10 @@ export default function TableHeader({ table, dimns, timeframe, toggleTimeframe }
         height:dimns.height,
         padding:dimns.padding,
         activeFill,
+        customerLogo:{
+            marginRight:10,
+            transform:table.logoTransform
+        },
         timeframe:{
             width:timeframeWidth,
             toggleArea:{ height: iconHeight },
@@ -129,14 +134,19 @@ export default function TableHeader({ table, dimns, timeframe, toggleTimeframe }
 
     return (
         <div className={classes.tableHeaderRoot}>
-            <div className={classes.title}>{table.title || "Enter Table Title..."}</div>
-            <div className={classes.timeframe}>
-                <div className={classes.timeframeToggleArea}>
-                    <div className={classes.deckIcon} onClick={toggleTimeframe}><StepsIcon width={iconWidth} height={iconHeight} fill={deckIconFill}/></div>
-                    <div className={classes.longTermIcon} onClick={toggleTimeframe}><TelescopeIcon width={iconWidth} height={iconHeight} fill={longTermIconFill}/></div>       
-                </div>
-                <div className={classes.timeframeDescArea}>{timeframe.label}</div>
+            <div className={classes.customerLogoContainer}>
+                <img className={classes.customerLogo} src={table.photoURL} alt="customer logo"/>
             </div>
+            <div className={classes.title}>{table.title || "Enter Table Title..."}</div>
+            {nrTimeframeOptions === 2 && 
+                <div className={classes.timeframe}>
+                    <div className={classes.timeframeToggleArea}>
+                        <div className={classes.deckIcon} onClick={toggleTimeframe}><StepsIcon width={iconWidth} height={iconHeight} fill={deckIconFill}/></div>
+                        <div className={classes.longTermIcon} onClick={toggleTimeframe}><TelescopeIcon width={iconWidth} height={iconHeight} fill={longTermIconFill}/></div>       
+                    </div>
+                    <div className={classes.timeframeDescArea}>{timeframe.label}</div>
+                </div>
+            }
             {/**<form className={classes.form}>
             </form>*/}
         </div>
@@ -145,5 +155,6 @@ export default function TableHeader({ table, dimns, timeframe, toggleTimeframe }
 
 TableHeader.defaultProps = {
   dimns:{},
-  table:{}
+  table:{},
+  nrTimeframeOptions:[]
 }

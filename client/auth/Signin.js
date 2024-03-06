@@ -62,6 +62,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 export default withRouter(function Signin({ onSignin, serverErrorMesg, location, history }) {
+  //console.log("Signin", auth.isAuthenticated())
   const classes = useStyles()
   const [values, setValues] = useState({
       emailOrUsername: '',

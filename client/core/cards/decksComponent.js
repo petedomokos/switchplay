@@ -22,7 +22,7 @@ export default function decksComponent() {
     }
     let _styles = () => DEFAULT_STYLES;
 
-    let groupingTagKey;
+    let groupingTag;
     let timeframeKey = "singleDeck";
     let selectedDeckId = "";
     let longpressedDeckId = "";
@@ -119,7 +119,7 @@ export default function decksComponent() {
                             deck
                                 .width(deckWidth)
                                 .height(deckHeight)
-                                .groupingTagKey(groupingTagKey)
+                                .groupingTag(groupingTag)
                                 .timeframeKey(timeframeKey)
                                 .deckIsSelected(selectedDeckId === d.id)
                                 .content(deckContent)
@@ -260,7 +260,7 @@ export default function decksComponent() {
                 const deckWidth = _deckWidth();
                 const deckHeight = _deckHeight();
 
-                const newDeckIconData = selectedDeckId || groupingTagKey ? [] : [{
+                const newDeckIconData = selectedDeckId || groupingTag ? [] : [{
                     colNr: decksData.length % nrCols,
                     rowNr: Math.floor(decksData.length / nrCols),
                     withText:decksData.length === 0
@@ -340,7 +340,7 @@ export default function decksComponent() {
                             wordsG.select("text")
                                 .attr("x", wordsWidth/2)
                                 .attr("y", wordsHeight/2)
-                                .text("Add a deck")
+                                .text("Start my journey")
                         })
                         .on("click", onCreateDeck)
                 
@@ -429,9 +429,9 @@ export default function decksComponent() {
         
         return decks;
     };
-    decks.groupingTagKey = function (value) {
-        if (!arguments.length) { return groupingTagKey; }
-        groupingTagKey = value;
+    decks.groupingTag = function (value) {
+        if (!arguments.length) { return groupingTag; }
+        groupingTag = value;
         return decks;
     };
     decks.timeframeKey = function (value) {

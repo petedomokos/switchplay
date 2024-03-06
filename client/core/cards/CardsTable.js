@@ -10,7 +10,7 @@ import TableHeader from './TableHeader';
 import { tableLayout } from "./tableLayout"
 import { onlyUnique } from "../../util/ArrayHelpers"
 
-const { burgerBarWidth } = DIMNS;
+const { burgerBarWidth, CUSTOMER_LOGO_WIDTH, CUSTOMER_LOGO_HEIGHT } = DIMNS;
 
 const timeframeOptions = {
   longTerm:{ key:"longTerm", label:"Long Term" },
@@ -69,48 +69,39 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, updateDecks, deleteDeck, hideMenus, showMenus }) => {
-  const { tables=[], decks=[] } = user;
-  const stringifiedUser = JSON.stringify(user);
+const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, updateDecks, deleteDeck, hideMenus, showMenus }) => {
+  const { tables=[], decks=[], customer } = user;
+  const stringifiedDecks = JSON.stringify(decks);
   //console.log("CardsTable", user)
-  //@todo - move creating flag to asyncProcesses
-  //helper consts
-  //data will be grouped by playerId if at least one deck has a playerid tag, otherwise it is not grouped
-  const decksWithPlayerTag = decks.filter(d => !!d.tags?.find(t => t.key === "playerId"))
-  const playerTags = decks
-    .filter(d => !!d.tags?.find(t => t.key === "playerId"))
-    .map(d => d.tags.find(t => t.key === "playerId").value)
+  //console.log("datasets", datasets)
+  // @todo - move creating flag to asyncProcesses
+  // helper consts
+  // data will be grouped by playerId if at least one deck has a playerid tag, otherwise it is not grouped
+  const playerIds = decks.map(d => d.player?._id)
+  const allPlayerIdsSame = playerIds.filter(onlyUnique).length === 1;
+  const allPlayerIdsUnique = playerIds.filter(onlyUnique).length === decks.length;
+  const atLeastOnePlayer = playerIds.length !== 0
 
-  const allPlayerIdsSame = playerTags.filter(onlyUnique).length === 1;
-  const allPlayerIdsUnique = playerTags.filter(onlyUnique).length === decks.length;
-  //atm, longTermView is only available when playerIds are tagged and not all the same
-  const longTermViewPossible = playerTags.length !== 0; 
-
+  //State
   const [timeframe, setTimeframe] = useState(timeframeOptions.singleDeck);
-  const timeframeKey = timeframe.key === "longTerm" ? "longTerm" : "singleDeck";
-
-  let groupingTagKey;
-  if(timeframeKey === "longTerm"){
-    groupingTagKey = "playerId";
-  }else if(decksWithPlayerTag.length === 0 || allPlayerIdsSame || allPlayerIdsUnique){
-    //we never group decks if all decks refer to same player, unless user wants the long-term view
-    groupingTagKey = ""
-  }else{
-    groupingTagKey = "playerId"
-  }
-  //next - fix bug when clicking longterm view when no tags for players eg user pd
-  //and decide what to do - do we just remove teh option ?
-  //add icons (longterm = telescope, singleDeck = 'now' icon)
-
   const [creatingTable, setCreatingTable] = useState(false);
-  
   const [decksData, setDecksData] = useState([]);
+  const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
+  const [shouldDisplayInstructions, setShouldDisplayInstructions] = useState(false);
+  const [form, setForm] = useState(null);
+
+  const timeframeKey = timeframe.key === "longTerm" ? "longTerm" : "singleDeck";
+  let groupingTag;
+  if(timeframeKey === "longTerm"){
+    groupingTag = "player";
+  }else if(!atLeastOnePlayer || allPlayerIdsSame || allPlayerIdsUnique){
+    //we never group decks if all decks refer to same player, unless user wants the long-term view
+    groupingTag = ""
+  }else{
+    groupingTag = "player"
+  }
 
   const toggleTimeframe = () => {
-    if(!longTermViewPossible && timeframe.key === "singleDeck"){ 
-      alert("For Long Term View, decks should have a playerId tagged.");
-      return;
-    }
     setTimeframe(prevState => prevState.key === "singleDeck" ? timeframeOptions.longTerm : timeframeOptions.singleDeck)
   }
 
@@ -127,18 +118,23 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
     }
   },[user._id, tables.length])
 
-  const table = tables[0];
+  if(tables.length === 0){ return null; }
+
+  const table = { 
+    ...tables[0], 
+    title:tables[0]?.title || customer?.name || "",
+    photoURL:customer ? `/customers/${customer._id}/logo.png` : "/switchplay/logo.png",
+    logoTransform:customer ? customer.tableLogoTransform : "translate(-70px,-70px) scale(0.2)"
+    //logoTransform:customer ? customer.tableLogoTransform : "translate(-297px,-302px) scale(0.05)"
+  };
   const tableDecks = table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
+  const stringifiedTableAndDecks = JSON.stringify({ table, tableDecks });
 
   const width = screen.width || 300;
   const height = screen.height || 600;
 
   const containerWidth = 100000;
   const containerHeight = 100000;
-
-  const [selectedDeckId, setSelectedDeckId] = useState(customSelectedDeckId);
-  const [shouldDisplayInstructions, setShouldDisplayInstructions] = useState(false);
-  const [form, setForm] = useState(null);
 
   //we follow d3 margin convention here (eg html padding)
   //NOTE: WIDTH < HEIGHT TEMP FIXES A BUG WITH CARDTITLEFORM POSITIONING ON LARGER SCREENS
@@ -164,12 +160,11 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
 
   //this adds status and completionProportion to cards and deck based on items statuses
   useEffect(() => {
-    const playerType = user?.username === "athlete" ? "athlete" : "footballer"
-    const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTagKey, playerType }
+    const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag }
     const embellishedDecks = embellishDecks(tableDecks, settings);
     const decksData = tableLayout(embellishedDecks, nrCols, settings);
     setDecksData(decksData);
-  }, [stringifiedUser, groupingTagKey, timeframeKey])
+  }, [allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag, stringifiedTableAndDecks])
 
   //const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
 
@@ -225,27 +220,34 @@ const CardsTable = ({ user, journeyData, customSelectedDeckId, datasets, loading
     }
   }, [stringifiedData, form, selectedDeckId, timeframeKey]);
 
+  /*
+  //merge current change was....
+   <TableHeader dimns={{ 
+            padding: { left: 7.5, right:burgerBarWidth + (screen.width * 0.05), top:tableHeaderHeight * 0.1, bottom:tableHeaderHeight * 0.1 },
+            */
   return (
     <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
       <div className={classes.tableContents}>
-        <TableHeader dimns={{ 
-            padding: { left: 7.5, right:burgerBarWidth + (screen.width * 0.05), top:tableHeaderHeight * 0.1, bottom:tableHeaderHeight * 0.1 },
+        {!selectedDeckId && <TableHeader dimns={{ 
+            padding: { left:10, right:burgerBarWidth + 10, top:tableHeaderHeight * 0.1, bottom:tableHeaderHeight * 0.1 },
             width:width, 
             height:tableHeaderHeight 
           }}
           table={table}
           timeframe={timeframe}
+          nrTimeframeOptions={atLeastOnePlayer ? 2 : 1}
           toggleTimeframe={toggleTimeframe}
-        />
+        />}
         <div className={classes.decksContents}>
           {shouldDisplayInstructions ?  
             <Instructions />
             :
             <Decks 
               table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
-              data={decksData/*.slice(0,1)*/} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
-              groupingTagKey={groupingTagKey} timeframeKey={timeframeKey}
-              journeyData={journeyData} tableMarginTop={tableMarginTop}
+              datasets={datasets}
+              data={decksData/*.slice(1,2)*/} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
+              groupingTag={groupingTag} timeframeKey={timeframeKey}
+              tableMarginTop={tableMarginTop}
               onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={handleUpdateDeck}
               updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />
           }
