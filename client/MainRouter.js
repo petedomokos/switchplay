@@ -21,7 +21,7 @@ import Profile from './core/profile/Profile'
 import auth from './auth/auth-helper'
 import ImportDataContainer from './data/ImportDataContainer'
 import VisualsContainer from './visuals/VisualsContainer'
-import About from "./core/About";
+//import About from "./core/About";
 import Contact from './core/Contact';
 import './assets/styles/main.css'
 
@@ -169,7 +169,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, onSignout, hi
               </DrawerProvider>
             </Sticky>
               <Switch>
-                <Route path="/about" component={About}/>
+                {/**<Route path="/about" component={About}/>*/}
                 <Route path="/contact" component={Contact}/>
                 <Route path="/signup" component={CreateUserContainer}/>
                 <Route path="/signin" component={SigninContainer}/>
