@@ -110,15 +110,6 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, onSignout, hi
   const jwt = auth.isAuthenticated();
   const user = jwt?.user;
   //480 - portrait phone, 768 - tablets,992 - laptop, 1200 - desktop or large laptop
-  const phoneMaxWidth = 480;
-  const tabletMaxWidth = 1024; //ipad air
-  //const calcScreenSize = width => width <= 480 ? "s" : width <= 1024 ? "m" : "l";
-
-  //SCREEN
-  //first time must load screen before rendering children
-  /*if(!window._screen || window.screen.width === 0){
-    updateScreen(getScreenInfo())
-  }*/
 
   const q1 = useMediaQuery('(max-width:575px)');
   const q2 = useMediaQuery('(max-width:768px)');
