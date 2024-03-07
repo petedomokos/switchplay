@@ -116,32 +116,42 @@ Note: Beware of modifying this element as it can break the animations - you shou
 
 
 .xs-down {
-  @media only screen and (min-width: 576px) {
+  @media only screen and (min-width: 575px) {
+    display: none;
+  }
+}
+.xs-down-port {
+  @media only screen and ((orientation:landscape ) or (min-width: 575px)) {
+    display: none;
+  }
+}
+.xs-down-land {
+  @media only screen and ((orientation: portrait) or (min-width: 575px)) {
     display: none;
   }
 }
 .sm-down {
-  @media only screen and (min-width: 769px) {
+  @media only screen and (min-width: 768px) {
     display: none;
   }
 }
 .sm-down-port {
-  @media only screen and ((orientation:landscape ) or (min-width: 769px)) {
+  @media only screen and ((orientation:landscape ) or (min-width: 768px)) {
     display: none;
   }
 }
 .sm-down-land {
-  @media only screen and ((orientation: portrait) or (min-width: 769px)) {
+  @media only screen and ((orientation: portrait) or (min-width: 768px)) {
     display: none;
   }
 }
 .md-down {
-  @media only screen and (min-width: 991px) {
+  @media only screen and (min-width: 990px) {
     display: none;
   }
 }
 .lg-down {
-  @media only screen and (min-width: 1441px) {
+  @media only screen and (min-width: 1440px) {
     display: none;
   }
 }

@@ -113,7 +113,7 @@ const useStyles = makeStyles(theme => ({
   topDisplay:{
     padding:`${NAVBAR_HEIGHT}px 7.5vw 0`,
     minHeight:`calc(100vh + 100px)`,
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('xs')]: {
       padding:`${NAVBAR_HEIGHT}px 0 0`,
       //fontSize:"40px"
     },
@@ -124,6 +124,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const NonUserHome = ({ screen, initScrollTo }) =>{
+  console.log("screen", screen)
   const styleProps = { };
   const classes = useStyles({styleProps});
   const rootRef = useRef(null);
