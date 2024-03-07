@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import { NAVBAR_HEIGHT, COLOURS, grey10 } from "./websiteConstants";
 import homeBanner from '../../assets/website/banners/overhead-kick.png';
 import aboutBanner from '../../assets/website/banners/header-goal.png';
-//import linkedIn from "../../assets/website/footer/linkedIn.png";
+import linkedIn from "../../assets/website/footer/linkedin.png";
 
 
 const getBanner = page => {
@@ -101,9 +101,8 @@ const Footer = ({ className, page }) =>{
                 <div className={`${classes.normalItem} ${classes.item}`}>
                     <a href="about" className={classes.link}>About us</a>
                 </div>
-                {/**<h2 className={`${classes.normalItem} ${classes.item}`}>Linked in</h2>*/}
                 <div className={`${classes.linkedInItem} ${classes.item}`} onClick={() => onClick("linkedin")}>
-                    {/**<img src={linkedIn} style={{ contentFit:"contain" }} />*/}
+                    <img src={linkedIn} style={{ contentFit:"contain" }} />
                 </div>
             </div>
             <div className={classes.group}>
