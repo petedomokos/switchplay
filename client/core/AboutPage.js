@@ -205,7 +205,7 @@ const Team = () => {
   )
 }
 
-const About = ({ className }) =>{
+const AboutPage = ({ className }) =>{
   const styleProps = { className }
   const classes = useStyles(styleProps);
 
@@ -229,8 +229,8 @@ const About = ({ className }) =>{
   )
 }
 
-About.defaultProps = {
+AboutPage.defaultProps = {
   className:""
 }
   
-export default About
+export default AboutPage
