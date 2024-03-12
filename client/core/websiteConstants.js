@@ -4,7 +4,7 @@ export const MAIN_BANNER_MARGIN_VERT = {
     xs:25,
     sm:25,
     md:25,
-    lg:25,
+    lg:0,//25,
     xl:25
 }
 

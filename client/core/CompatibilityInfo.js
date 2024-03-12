@@ -24,6 +24,9 @@ const useStyles = makeStyles(theme => ({
       margin:"5px 25px 5px 0", 
       fontSize:"14px", 
       color:grey10(7),
+      [theme.breakpoints.down('md')]: {
+        fontSize:"12px",
+      },
       [theme.breakpoints.down('sm')]: {
         marginBottom:"20px",
         textAlign:"center",
@@ -49,6 +52,9 @@ const useStyles = makeStyles(theme => ({
       margin:"5px 25px 5px 0", 
       fontSize:"14px", 
       color:grey10(5),
+      [theme.breakpoints.down('md')]: {
+        fontSize:"12px",
+      },
       [theme.breakpoints.down('sm')]: {
         fontSize:"14px",
         color:grey10(5),
