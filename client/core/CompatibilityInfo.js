@@ -7,9 +7,11 @@ import { grey10, MAIN_BANNER_MARGIN_VERT, NAVBAR_HEIGHT } from "./websiteConstan
 const useStyles = makeStyles(theme => ({
     compatibilityInfoRoot:{
       display:"flex",
-      width:"700px",
+      width:"800px",
       height:`${NAVBAR_HEIGHT}px`,
+      margin:"10px 0 0",
       [theme.breakpoints.down('sm')]: {
+        flexDirection:"column",
         width:"90%",
         maxWidth:"350px",
         height:`${NAVBAR_HEIGHT + 25}px`,
@@ -20,6 +22,8 @@ const useStyles = makeStyles(theme => ({
       //border:"solid",
     },
     listLabel:{
+      border:"solid",
+      width:"120px",
       height:"20px", 
       margin:"5px 25px 5px 0", 
       fontSize:"14px", 
@@ -29,6 +33,7 @@ const useStyles = makeStyles(theme => ({
       },
       [theme.breakpoints.down('sm')]: {
         marginBottom:"20px",
+        alignSelf:"center",
         textAlign:"center",
         fontSize:"14px",
         color:grey10(7),

@@ -153,11 +153,12 @@ export const BannerContent = styled.div`
   }
   h1 {
     border: solid;
-    font-size: 88px;
+    font-size: 72px;
     line-height: 0.8;
     font-weight: 500;
-    &.in-bold {
+    &.highlighted {
       font-weight: 900;
+      font-size: 88px;
     }
     color: ${themeGet('colors.menu', '#02073e')};
     letter-spacing: -2px;
@@ -166,8 +167,11 @@ export const BannerContent = styled.div`
     }
     @media only screen and (orientation:portrait) and (max-width: 1440px) {
       border-color: blue;
-      font-size: 68px;
+      font-size: 60px;
       letter-spacing: -1.5px;
+      &.highlighted {
+        font-size: 68px;
+      }
     }
     @media only screen and (orientation:landscape) and (max-width: 1440px) {
       border-color: yellow;
@@ -176,26 +180,35 @@ export const BannerContent = styled.div`
     }
     @media only screen and (max-width: 990px) {
       border-color: blue;
-      font-size: 50px;
       max-width: 550px;
+      font-size: 42px;
+      &.highlighted {
+        font-size: 50px;
+      }
     }
 
     @media only screen and (max-width: 768px) {
       border-color: pink;
-      font-size: 42px;
       text-align: center;
       max-width: 550px;
+      font-size: 42px;
+      &.highlighted {
+        font-size: 50px;
+      }
     }
     @media only screen and (max-width: 575px) {
       font-weight: 200;
-      font-size: 36px;
       line-height: 1.1;
-      &.in-bold {
+      font-size: 36px;
+      &.highlighted {
         font-size:42px;
       }
     }
     @media only screen and (orientation: landscape) and (max-width: 768px) {
-      font-size: 24px;
+      font-size: 20px;
+      &.highlighted {
+        font-size:24px;
+      }
     }
   }
 `;

@@ -80,7 +80,7 @@ const Banner = ({screen}) => {
               />
               <Heading
                 as="h1"
-                className="md-up in-bold"
+                className="md-up highlighted"
                 content="people first"
               />
               <Heading
@@ -95,7 +95,7 @@ const Banner = ({screen}) => {
               />
               <Heading
                 as="h1"
-                className="sm-down-port in-bold"
+                className="sm-down-port highlighted"
                 content="people first"
               />
             </div>
