@@ -8,7 +8,7 @@ import { MAIN_BANNER_MARGIN_VERT, COLOURS, NAVBAR_HEIGHT } from '../../../../cor
 
 //#f0ded5
 const BannerWrapper = styled.div`
-  //border: solid;
+  border: solid;
   border-color:white;
   //background-image: url(${bannerBg?.src});
   //background-color: ${COLOURS.banner.bg};
@@ -48,18 +48,18 @@ const BannerWrapper = styled.div`
     }
   }
   .banner-caption-area-sm {
-    //border:solid;
+    border:solid;
     width:300px;
     margin:40px auto;
     padding-left:20px;
   }
   .banner-caption {
-    //border:solid;
+    border:solid;
     color: ${themeGet('colors.paragraph', '#02073E')};
-    font-size: 16px;
+    font-size: 24px;
     line-height: 1.5;
     font-weight: 400;
-    max-width:330px;
+    max-width:30vw;
     @media only screen and (max-width: 1400px) {
       font-size: 14px;
     }
@@ -85,11 +85,12 @@ const BannerWrapper = styled.div`
 `;
 
 export const BannerContent = styled.div`  
-  //border: solid;
+  border: solid;
   border-color:red;
   max-width: 50%;
   width: 50%;
   display: flex;
+  padding-top:30px;
   flex-direction: column;
   justify-content: space-between;
   height:calc(100% - ${2 * MAIN_BANNER_MARGIN_VERT.xl}px);
@@ -128,9 +129,8 @@ export const BannerContent = styled.div`
     margin-top:30px;
   }
   h1 {
-    //border: solid;
-    border-color: red;
-    font-size: 60px;
+    border: solid;
+    font-size: 80px;
     line-height: 0.8;
     font-weight: 500;
     &.in-bold {
@@ -139,19 +139,22 @@ export const BannerContent = styled.div`
     color: ${themeGet('colors.menu', '#02073e')};
     letter-spacing: -2px;
     @media only screen and (max-width: 1600px) {
-      font-size: 54px;
+      border-color: red;
     }
     @media only screen and (max-width: 1440px) {
+      border-color: yellow;
       font-size: 48px;
       letter-spacing: -1.5px;
     }
     @media only screen and (max-width: 990px) {
+      border-color: blue;
       font-size: 42px;
       max-width: 550px;
     }
 
     @media only screen and (max-width: 768px) {
-      font-size: 30px;
+      border-color: pink;
+      font-size: 42px;
       text-align: center;
       max-width: 550px;
     }
@@ -163,7 +166,7 @@ export const BannerContent = styled.div`
         font-size:42px;
       }
     }
-    @media only screen and (orientation: landscape) and (max-width: 768px) {m
+    @media only screen and (orientation: landscape) and (max-width: 768px) {
       font-size: 24px;
     }
   }
