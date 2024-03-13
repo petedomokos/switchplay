@@ -15,61 +15,6 @@ const SectionWrapper = styled.section`
   }
 `;
 
-export const SectionHeader = styled.header`
-  text-align: center;
-  margin-bottom: 60px;
-  @media only screen and (max-width: 1440px) {
-    margin-bottom: 50px;
-  }
-  @media only screen and (max-width: 991px) {
-    margin-bottom: 40px;
-  }
-  @media only screen and (max-width: 480px) {
-    margin-bottom: 25px;
-  }
-
-  h2 {
-    font-size: 36px;
-    font-weight: 700;
-    line-height: 1.9;
-    margin-bottom: 7px;
-
-    @media only screen and (max-width: 991px) {
-      font-size: 30px;
-      margin-bottom: 10px;
-    }
-    @media only screen and (max-width: 767px) {
-      font-size: 28px;
-    }
-    @media screen and (max-width: 480px) {
-      font-size: 24px;
-      line-height: 30px;
-      margin-bottom: 20px;
-    }
-  }
-
-  p {
-    padding-top:10px;
-    font-family: 'DM Sans';
-    font-weight: 400;
-    font-size: 15px;
-    line-height: 2;
-    margin-bottom: 0;
-    max-width: 500px;
-    margin: 0 auto;
-    width: 100%;
-    @media only screen and (max-width: 1440px) {
-      font-size: 16px;
-      line-height: 1.6;
-    }
-    @media only screen and (max-width: 991px) {
-      font-size: 15px;
-      line-height: 28px;
-    }
-  }
-`;
-
-
 export const ServiceWrapper = styled.div`
   //border:solid;
   border-color:white;
@@ -77,33 +22,34 @@ export const ServiceWrapper = styled.div`
   flex-direction:column;
   justify-content:center;
   align-items:center;
-  @media only screen and (min-width: 576px) and (max-width: 768px) {
-    transform:scale(0.6);
-  }
   .services {
-    //border:solid;
+    border:solid;
     border-color:red;
     display:flex;
     align-items:flex-start;
     justify-content:center;
-    @media only screen and (max-width: 575px) {
+    @media only screen and (max-width: 768px) {
       flex-direction:column;
       align-items:center;
     }
 
     .service {
-      //border:solid;
+      border:solid;
       border-color:yellow;
-      width:300px;
+      width:380px;
       height:350px;
+      @media only screen and (max-width: 1440px) {
+        width:300px;
+        height:350px;
+      }
       &.primary-service {
-        @media only screen and (max-width: 575px) {
+        @media only screen and (max-width: 768px) {
           margin-bottom:30px;
         }
       }
       &.secondary-service {
         margin:0 7.5vw;
-        @media only screen and (max-width: 575px) {
+        @media only screen and (max-width: 768px) {
           margin:0 0 30px;
         }
       }
@@ -111,13 +57,17 @@ export const ServiceWrapper = styled.div`
   }
 
   h4 {
+    border:solid;
+    border-color:yellow;
     margin: 20px 0 20px;
     font-family: 'DM Sans';
     font-weight: 700;
-    font-size: 18px;
+    font-size: 22px;
     line-height: 30px;
     color:${grey10(2)};
     @media only screen and (max-width: 1440px) {
+      font-size: 20px;
+
     }
     @media only screen and (max-width: 990px) {
       font-size: 18px;
@@ -125,30 +75,31 @@ export const ServiceWrapper = styled.div`
     @media only screen and (max-width: 768px) {
       text-align: center;
     }
-    @media only screen and (max-width: 575px) {
-      text-align: center;
-    }
   }
 
   p {
     margin: 0;
     font-family: 'DM Sans';
-    font-size: 15px;
+    font-size: 18px;
     line-height: 30px;
     color: ${themeGet('colors.text', grey10(4))};
     text-align:center;
     @media only screen and (max-width: 1440px) {
       font-size: 16px;
+      color:red;
     }
-    @media only screen and (max-width: 1360px) {
+    @media only screen and (max-width: 990px) {
       font-size: 15px;
       line-height: 26px;
+      color:yellow;
     }
     @media only screen and (max-width: 768px) {
       text-align: center;
+      color:blue;
     }
-    @media only screen and (max-width: 480px) {
+    @media only screen and (max-width: 575px) {
       text-align: center;
+      color:pink;
     }
   }
 `;

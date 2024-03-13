@@ -97,7 +97,7 @@ export const MenuArea = styled.nav`
       a {
         color: ${themeGet('colors.menu', '#02073E')};
         font-family: DM Sans;
-        font-size: 16px;
+        font-size: 18px;
         font-weight: 400;
         @media only screen and (max-width: 990px) {
           font-size: 12px;

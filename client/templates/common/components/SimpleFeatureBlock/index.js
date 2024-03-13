@@ -45,9 +45,9 @@ const FeatureBlock = ({
 	);
 
 	return (
-		<div style={{ width:"300px", display:"flex", flexDirection:"column", alignItems:"center", /*border:"solid", borderColor:"yellow"*/ }}>
+		<div style={{ display:"flex", flexDirection:"column", alignItems:"center", /*border:"solid", borderColor:"yellow"*/ }}>
 			{Icon}
-			<div style={{ width:"260px", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
+			<div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}>
 				{title}
 				{description}
 			</div>

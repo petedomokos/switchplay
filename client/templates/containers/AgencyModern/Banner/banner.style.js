@@ -8,7 +8,7 @@ import { MAIN_BANNER_MARGIN_VERT, COLOURS, NAVBAR_HEIGHT } from '../../../../cor
 
 //#f0ded5
 const BannerWrapper = styled.div`
-  //border: solid;
+  border: solid;
   border-color:white;
   //background-image: url(${bannerBg?.src});
   //background-color: ${COLOURS.banner.bg};
@@ -19,10 +19,8 @@ const BannerWrapper = styled.div`
   min-height: calc(100vh - ${2 * NAVBAR_HEIGHT}px);
   display:flex;
   justify-content:center;
-  align-items: center;
   padding-top:${MAIN_BANNER_MARGIN_VERT.xl}px;
   padding-bottom:${MAIN_BANNER_MARGIN_VERT.xl}px;
-  padding:0;
 
   @media only screen and (orientation:portrait) and (min-width: 769px) {
     padding-top:50px;
@@ -37,21 +35,25 @@ const BannerWrapper = styled.div`
   @media only screen and (max-width: 768px) {
     flex-direction:column;
     justify-content:flex-start;
+    align-items:center;
     height:auto;
     min-height: auto;
     padding-top:70px;
     padding-bottom:0;
   }
   .banner-image-area {
-    //border:solid;
+    border:solid;
     border-color:red;
     width:50%;
     height:calc(100vh - ${2 * NAVBAR_HEIGHT}px - ${2 * MAIN_BANNER_MARGIN_VERT.xl}px);
+    min-height:500px;
     @media only screen and (orientation:portrait) {
       height:650px;
+      min-height:650px;
     }
     @media only screen and (orientation:portrait) and (max-width: 990px) {
       height:500px;
+      min-height:500px;
     }
     @media only screen and (max-width: 575px) {
       width:100%;
@@ -76,7 +78,7 @@ const BannerWrapper = styled.div`
       max-width:35vw;
     }
     @media only screen and (orientation:landscape) and (max-width: 1440px) {
-      font-size: 26px;
+      font-size: 22px;
       max-width:35vw;
     }
     @media only screen and (max-width: 990px) {
@@ -171,12 +173,17 @@ export const BannerContent = styled.div`
       letter-spacing: -1.5px;
       &.highlighted {
         font-size: 68px;
+        line-height: 1;
       }
     }
     @media only screen and (orientation:landscape) and (max-width: 1440px) {
       border-color: yellow;
-      font-size: 88px;
+      font-size: 72px;
       letter-spacing: -1.5px;
+      &.highlighted {
+        font-size: 80px;
+        line-height: 1;
+      }
     }
     @media only screen and (max-width: 990px) {
       border-color: blue;
@@ -184,6 +191,7 @@ export const BannerContent = styled.div`
       font-size: 42px;
       &.highlighted {
         font-size: 50px;
+        line-height: 1;
       }
     }
 
@@ -194,6 +202,7 @@ export const BannerContent = styled.div`
       font-size: 42px;
       &.highlighted {
         font-size: 50px;
+        line-height: 1;
       }
     }
     @media only screen and (max-width: 575px) {
@@ -202,12 +211,14 @@ export const BannerContent = styled.div`
       font-size: 36px;
       &.highlighted {
         font-size:42px;
+        line-height: 1;
       }
     }
     @media only screen and (orientation: landscape) and (max-width: 768px) {
       font-size: 20px;
       &.highlighted {
         font-size:24px;
+        line-height: 1;
       }
     }
   }

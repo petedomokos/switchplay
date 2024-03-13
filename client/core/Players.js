@@ -50,7 +50,7 @@ const useStyles = makeStyles(theme => ({
     //border:"solid",
     borderColor:"yellow",
     width:"20vw",
-    marginRight:"3vw",
+    marginRight:"4vw",
     display:"flex",
     flexDirection:"column",
     alignItems:"flex-end",
@@ -70,30 +70,50 @@ const useStyles = makeStyles(theme => ({
   mainImageLarge:{
     width:"25vw",
     height:`${25 * mainImageLarge.aspectRatio}vw`,
-    marginLeft:"3vw",
+    marginLeft:"4vw",
     //border:"solid",
     borderColor:"yellow",
   },
   headingSmallLine:{
-    margin:"0 0 10px 0",
+    margin:"0 0 20px 0",
     lineHeight:1,
-    fontSize:"14px",
+    fontSize:"24px",
     color:'white',
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.only('lg')]: {
+      fontSize:"18px",
+      color:"red",
+    },
+    [theme.breakpoints.down('md')]: {
+      fontSize:"16px",
+      margin:"0 0 10px 0",
+      color:"yellow",
+    },
+    [theme.breakpoints.down('xs')]: {
       margin:"0 0 20px 0",
       lineHeight:1,
       fontSize:"14px",
+      color:"blue",
     },
   },
   headingLargeLine:{
-    margin:"0 0 15px 0",
+    margin:"0 0 25px 0",
     lineHeight:1.2,
-    fontSize:"42px",
+    fontSize:"72px",
     color:'white',
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.only('lg')]: {
+      fontSize:"54px",
+      color:"red",
+    },
+    [theme.breakpoints.down('md')]: {
+      fontSize:"48px",
+      margin:"0 0 15px 0",
+      color:"yellow",
+    },
+    [theme.breakpoints.down('xs')]: {
       margin:"0 0 15px 0",
       lineHeight:1.2,
       fontSize:"42px",
+      color:"blue",
     },
   }
 }))

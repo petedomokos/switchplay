@@ -21,7 +21,7 @@ const Services = () => {
                   id={`post_id-${item.id}`}
                   className="service__item"
                   icon={
-                    <div style={{ width:"100px", height:"100px", paddingTop:10}}>
+                    <div style={{ width:"100px", height:"100px", paddingTop:10 }}>
                       {item.image.type === "svg" ?
                         <SVGImage image={{ ...item.image, url:`website/icons/${item.key}.svg`}} />
                         :
