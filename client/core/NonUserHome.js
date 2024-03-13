@@ -113,7 +113,7 @@ const useStyles = makeStyles(theme => ({
   topDisplay:{
     padding:`${NAVBAR_HEIGHT}px 7.5vw 0`,
     minHeight:`calc(100vh + 100px)`,
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       padding:`${NAVBAR_HEIGHT}px 0 0`,
       //fontSize:"40px"
     },

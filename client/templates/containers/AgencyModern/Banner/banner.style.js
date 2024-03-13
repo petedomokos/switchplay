@@ -54,52 +54,78 @@ const BannerWrapper = styled.div`
     @media only screen and (orientation:portrait) and (max-width: 990px) {
       height:500px;
       min-height:500px;
+      border-color:yellow;
     }
-    @media only screen and (max-width: 575px) {
+    @media only screen and (max-width: 768px) {
       width:100%;
       height:auto;
+      min-height:auto;
+      border-color:blue;
     }
   }
-  .banner-caption-area-sm {
-    border:solid;
-    width:300px;
-    margin:40px auto;
-    padding-left:20px;
-  }
-  .banner-caption {
+  .banner-caption-md-up {
     border:solid;
     color: ${themeGet('colors.paragraph', '#02073E')};
     font-size: 24px;
     line-height: 1.5;
     font-weight: 400;
-    max-width:30vw;
+    width:90%;
     @media only screen and (orientation:portrait) and (max-width: 1440px) {
       font-size: 22px;
-      max-width:35vw;
+      //max-width:35vw;
     }
     @media only screen and (orientation:landscape) and (max-width: 1440px) {
       font-size: 22px;
-      max-width:35vw;
+      //max-width:35vw;
     }
     @media only screen and (max-width: 990px) {
       max-width: 85%;
-      font-size: 18px;
+      //font-size: 18px;
+    }
+  }
+  .banner-caption-area-sm {
+    border:solid;
+    width:400px;
+    margin:40px auto;
+    @media only screen and (max-width: 575px) {
+      width:300px;
+    }
+  }
+  .banner-caption-sm {
+    border:solid;
+    color: ${themeGet('colors.paragraph', '#02073E')};
+    font-size: 24px;
+    line-height: 1.5;
+    font-weight: 400;
+    text-align:center;
+    @media only screen and (orientation:portrait) and (max-width: 1440px) {
+      font-size: 22px;
+    }
+    @media only screen and (orientation:landscape) and (max-width: 1440px) {
+      font-size: 22px;
     }
     @media only screen and (max-width: 768px) {
-      margin:40px 0;
+      margin:40px auto;
       font-size: 18px;
-      height:auto;
-      max-width:300px;
+    }
+    @media only screen and (max-width: 575px) {
+      font-size:16px;
     }
   }
-  .banner-caption-1 {
-    width:300px;
+  .banner-caption-sm-1 {
+    @media only screen and (max-width: 575px) {
+      width:250px;
+    }
   }
-  .banner-caption-2 {
-    width:270px;
+  .banner-caption-sm-2 {
+    @media only screen and (max-width: 575px) {
+      width:250px;
+    }
   }
-  .banner-caption-3 {
-    width:230px;
+  .banner-caption-sm-3 {
+    @media only screen and (max-width: 575px) {
+      width:210px;
+    }
   }
 `;
 

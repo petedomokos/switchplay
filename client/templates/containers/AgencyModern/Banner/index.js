@@ -100,7 +100,7 @@ const Banner = ({screen}) => {
               />
             </div>
             <Text
-              className="banner-caption md-up"
+              className="banner-caption-md-up md-up"
               content="Get your players thinking and acting like pros. Manage all your team's communication and information in one place. Use data with confidence and purpose."
             />
             <Subscribe>
@@ -127,15 +127,15 @@ const Banner = ({screen}) => {
         </div>
         <div className="banner-caption-area-sm sm-down">
           <Text
-            className="banner-caption banner-caption-1"
+            className="banner-caption-sm banner-caption-sm-1"
             content="Get your players thinking and acting like pros."
           />
           <Text
-            className="banner-caption banner-caption-2"
+            className="banner-caption-sm banner-caption-sm-2"
             content="Manage all your team's communication and information in one place."
           />
           <Text
-            className="banner-caption banner-caption-3"
+            className="banner-caption-sm banner-caption-sm-3"
             content="Use data with confidence and purpose."
           />
         </div>
