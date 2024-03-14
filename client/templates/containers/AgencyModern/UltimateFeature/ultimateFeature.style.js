@@ -14,8 +14,9 @@ export const SectionTitle = styled.div`
   justify-content:center;
   flex-wrap:wrap;
   h2 {
+    //border:solid;
     font-weight: 500;
-    font-size: 30px;
+    font-size: 36px;
     line-height: 1.3;
     letter-spacing: -0.5px;
     margin: 10px 15px;
@@ -23,11 +24,15 @@ export const SectionTitle = styled.div`
     white-space: nowrap;
     @media screen and (max-width: 1440px) {
       margin-bottom: 4px;
+      border-color:red;
     }
     @media screen and (max-width: 990px) {
       font-size: 26px;
+      border-color:yellow;
+      
     }
     @media screen and (max-width: 575px) {
+      border-color:blue;
       line-height: 1;
       margin: 10px 0px 0;
       font-size:26px;
@@ -71,20 +76,37 @@ export const FeatureWrapper = styled.div`
       margin-bottom: 28px;
     }
     h4 {
-      font-size: 18px;
+      //border:solid;
+      font-size: 22px;
       line-height: 30px;
       color: #ffffff;
       @media screen and (max-width: 1440px) {
         margin-bottom: 10px;
+        font-size:20px;
+      }
+      @media screen and (max-width:990px) {
+        margin-bottom: 10px;
+        font-size:18px;
+      }
+      @media screen and (max-width: 768px) {
+        margin-bottom: 10px;
+        font-size:16px;
       }
     }
     p {
       color: rgba(255, 255, 255, 0.8);
-      font-size: 15px;
+      font-size: 18px;
       line-height: 30px;
       @media screen and (max-width: 1440px) {
         line-height: 25px;
+        font-size: 18px;
         margin-bottom: 8px;
+      }
+      @media screen and (max-width:990px) {
+        font-size:16px;
+      }
+      @media screen and (max-width: 768px) {
+        font-size:14px;
       }
     }
     .learn__more {

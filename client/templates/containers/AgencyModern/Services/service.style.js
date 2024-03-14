@@ -39,7 +39,7 @@ export const ServiceWrapper = styled.div`
       width:380px;
       height:350px;
       @media only screen and (max-width: 1440px) {
-        width:300px;
+        width:350px;
         height:350px;
       }
       &.primary-service {
@@ -58,7 +58,6 @@ export const ServiceWrapper = styled.div`
 
   h4 {
     border:solid;
-    border-color:yellow;
     margin: 20px 0 20px;
     font-family: 'DM Sans';
     font-weight: 700;
@@ -66,14 +65,17 @@ export const ServiceWrapper = styled.div`
     line-height: 30px;
     color:${grey10(2)};
     @media only screen and (max-width: 1440px) {
-      font-size: 20px;
+      font-size: 22px;
+      border-color:red;
 
     }
     @media only screen and (max-width: 990px) {
       font-size: 18px;
+      border-color:yellow;
     }
     @media only screen and (max-width: 768px) {
       text-align: center;
+      border-color:blue;
     }
   }
 
@@ -85,7 +87,7 @@ export const ServiceWrapper = styled.div`
     color: ${themeGet('colors.text', grey10(4))};
     text-align:center;
     @media only screen and (max-width: 1440px) {
-      font-size: 16px;
+      font-size: 18px;
       color:red;
     }
     @media only screen and (max-width: 990px) {

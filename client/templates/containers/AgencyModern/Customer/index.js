@@ -80,14 +80,22 @@ const Customer = ({ data, screen, direction, minHeight }) => {
               {typeof heading !== "string" && 
                 <>
                   <div style={{ width:"100%", height:visual.type === "img" ? "50px" : "20px" }}></div>
-                  <Heading
-                    as="h3"
-                    content={heading[0] || ""}
-                  />
-                  <Heading
-                    as="h3"
-                    content={heading[1] || ""}
-                  />
+                  <div className="md-down">
+                    <Heading
+                      as="h3"
+                      content={heading[0] || ""}
+                    />
+                    <Heading
+                      as="h3"
+                      content={heading[1] || ""}
+                    />
+                  </div>
+                  <div className="lg-up">
+                     <Heading
+                      as="h3"
+                      content={`${heading[0]} ${heading[1]}`}
+                    />
+                  </div>
                    <div style={{ width:"100%", height:"20px" }}></div>
                 </>
               }

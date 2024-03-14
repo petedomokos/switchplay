@@ -7,10 +7,6 @@ const SectionWrapper = styled.section`
 border-color:red;
   width:100%; 
   padding: 80px 0 80px;
-  @media only screen and (max-width: 1440px) {
-  }
-  @media only screen and (max-width: 768px) {
-  }
 `;
 
 export const Section = styled.div`
@@ -31,37 +27,40 @@ border-color:yellow;
 export const Content = styled.div`
 //border:solid;
 border-color:blue;
-  width: 90%;
-  max-width:600px;
+  width: 80%;
   display: flex;
   flex-direction: column;
   justify-content:flex-end;
   align-items:center;
   h3 {
+    border:solid;
     margin:10px auto;
     display:flex;
     flex-direction:column;
     align-items:center;
-    border-color: pink;
     font-weight: 700;
-    font-size: 40px;
+    font-size: 50px;
     line-height: 1;
     letter-spacing: -1px;
     color:${grey10(2)};
-    @media only screen and (min-width: 1024px) and (max-width: 1440px) {
-      font-size: 42px;
-      line-height: 1;
-    }
-    @media only screen and (min-width: 768px) and (max-width: 1024px) {
+    @media only screen and (max-width: 1440px) {
       font-size: 32px;
+      border-color: red;
+    }
+    @media only screen and (max-width: 990px) {
+      max-width:700px;
+      font-size: 32px;
+      border-color: yellow;
     }
     @media only screen and (max-width: 768px) {
       font-size: 28px;
       text-align: center;
+      border-color: blue;
     }
     @media only screen and (max-width: 575px) {
-      font-size: 24px;
+      font-size: 20px;
       text-align: center;
+      border-color: pink;
     }
   }
   p {
@@ -71,16 +70,24 @@ border-color:blue;
     margin:0;
     display:flex;
     flex-direction:column;
-    font-size: 15px;
+    font-size: 20px;
     line-height: 42px;
     color:${grey10(3)};
-    @media only screen and (min-width: 1024px) and (max-width: 1366px) {
+    @media only screen and (max-width: 1440px) {
+      font-size: 20px;
       line-height: 32px;
     }
-    @media only screen and (min-width: 768px) and (max-width: 1024px) {
+    @media only screen and (max-width: 990px) {
+      font-size: 20px;
       line-height: 28px;
     }
     @media only screen and (max-width: 768px) {
+      font-size: 20px;
+      line-height: 32px;
+      text-align: center;
+    }
+    @media only screen and (max-width: 575px) {
+      font-size: 16px;
       line-height: 32px;
       text-align: center;
     }

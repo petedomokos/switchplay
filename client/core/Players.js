@@ -80,7 +80,7 @@ const useStyles = makeStyles(theme => ({
     fontSize:"24px",
     color:'white',
     [theme.breakpoints.only('lg')]: {
-      fontSize:"18px",
+      fontSize:"22px",
       color:"red",
     },
     [theme.breakpoints.down('md')]: {
@@ -101,7 +101,7 @@ const useStyles = makeStyles(theme => ({
     fontSize:"72px",
     color:'white',
     [theme.breakpoints.only('lg')]: {
-      fontSize:"54px",
+      fontSize:"66px",
       color:"red",
     },
     [theme.breakpoints.down('md')]: {

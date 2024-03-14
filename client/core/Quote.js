@@ -15,23 +15,33 @@ const useStyles = makeStyles(theme => ({
     },
     label:{
         margin:"5px 0",
-        fontSize:"12px",
-        [theme.breakpoints.only('md')]: {
-            fontSize:"11px"
+        fontSize:"16px",
+        [theme.breakpoints.only('lg')]: {
+            fontSize:"16px"
+        },
+        [theme.breakpoints.down('md')]: {
+            fontSize:"12px",
+        },
+        [theme.breakpoints.down('sm')]: {
+            fontSize:"11px",
         },
         //border:"solid",
         borderColor:"red",
         color:theme.palette.blue
     },
     text:{
-        fontSize:"16px",
-        [theme.breakpoints.only('md')]: {
-            fontSize:"14px"
-        },
+        fontSize:"22px",
         color:grey10(9),
+        [theme.breakpoints.only('lg')]: {
+            fontSize:"22px",
+            borderColor:"red"
+        },
+        [theme.breakpoints.down('md')]: {
+            fontSize:"16px",
+            borderColor:"yellow"
+        },
         fontStyle:"italic",
         //border:"solid",
-        borderColor:"yellow"
     }
 }))
 
