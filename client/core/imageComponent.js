@@ -85,8 +85,9 @@ export default function imageComponent() {
                     .attr("ry", cornerRadius)
                     .attr("width", width)
                     .attr("height", height)
-                    .attr("display", "none")
-                    .attr("fill", withBorderGradient ? "none" : styles.borderColour)
+                    //.attr("display", "none")
+                    .attr("stroke", "white")
+                    .attr("fill","none")// withBorderGradient ? "none" : styles.borderColour)
                     /*.call(updateRectDimns, { 
                         width: () => width, 
                         height:() => height,
@@ -95,16 +96,22 @@ export default function imageComponent() {
 
                 const contentsG = container.select("g.image-contents")
                     .attr("transform", `translate(${withBorderGradient ? 0 : borderWidth}, ${withBorderGradient ? 0 : borderHeight})`)
-                    .attr('clip-path',`url(#${imgKey}-rect-clip)`)
+                    //.attr('clip-path',`url(#${imgKey}-rect-clip)`)
 
                 //next - diagonal rects for corners
                 //next - change compatible list into two rows always, 
+
+                //BUG - SAFARI ACTS WIERD WITH CLIPPATH DIMNS, BUTNOT NEEDED ANYWAY
+                /*
+                console.log("cw ch", contentsWidth, contentsHeight)
+                const roundedW = Math.round(contentsWidth);
+                console.log("roundedCW", roundedW, typeof roundedW)
                 container.select("defs").select(`#${imgKey}-rect-clip`)
                     .select("rect")
-                        .attr("width", contentsWidth)
-                        .attr("height", contentsHeight)
+                        .attr("width", roundedW + 71)// Math.round(contentsWidth))
+                        .attr("height", 1000)// Math.round(contentsHeight))
                         .attr("rx", cornerRadius)
-                        .attr("ry", cornerRadius)
+                        .attr("ry", cornerRadius)*/
 
                 contentsG.select("image")
                     .attr("xlink:href", data.url)

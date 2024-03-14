@@ -2,6 +2,9 @@ import React, { Fragment, useEffect, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles'
 import * as d3 from 'd3';
 import { grey10, MAIN_BANNER_MARGIN_VERT, NAVBAR_HEIGHT } from "./websiteConstants";
+import { styles } from "./websiteHelpers";
+
+const { mdUp, smDown } = styles;
 
 
 const useStyles = makeStyles(theme => ({
@@ -97,14 +100,14 @@ const CompatibilityInfo = ({ screen, className }) =>{
     <div className={`${classes.compatibilityInfoRoot} ${className}`}>
         <div className={classes.listLabel} >Works with</div>
           <div className={classes.itemRows} >
-            <div className="md-up">
+            <div className="md-up" style={mdUp(screen)}>
                 <div className={classes.itemRow} >
                   {singleRowItems.map((it,i) =>
                     <span className={classes.item}>{it}</span>
                   )}
                 </div>
             </div>
-            <div className="sm-down">
+            <div className="sm-down" style={smDown(screen)}>
               {rows.map(rowItems =>
                 <div className={classes.itemRow} >
                   {rowItems.map((it,i) =>

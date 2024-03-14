@@ -8,8 +8,14 @@ import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles(theme => ({
   imageSvg: {
-      //border:"solid",
+      border:"solid",
       borderColor:"blue",
+      /*[theme.breakpoints.up('md')]: {
+        display:props => props.className.includes("sm-down") ? "none" : null
+      },
+      [theme.breakpoints.down('sm')]: {
+        display:props => props.className.includes("md-up") ? "none" : null
+      },*/
   }
 }))
 
@@ -22,12 +28,11 @@ const SVGImage = ({ imgKey, image, fixedDimns, styles, className, settings, cont
     const { borderColour="black" } = styles;
     const { withBorderGradient=false, borderWidth=0 } = settings;
 
-    const styleProps = { };
+    const styleProps = { className };
     const classes = useStyles(styleProps);
     const [svgImage, setImageComponent] = useState(() => imageComponent());
 
     const { aspectRatio, rawImgWidth=dimns.width, rawImgHeight=dimns.height, imgTransX=0, imgTransY=0, scale  } = image;
-    
 
     useEffect(() => {
         if(fixedDimns){ return; }

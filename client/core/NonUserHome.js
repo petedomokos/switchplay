@@ -144,7 +144,7 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
         <Banner screen={screen} />
         <CompatibilityInfo screen={screen} className=""/>
       </div>
-      <Players />
+      <Players screen={screen} />
       <PeopleWithQuotes title="What Players Say" data={playerQuotesData(screen)} direction="row" />
       <UltimateFeature screen={screen} />
       <PeopleWithQuotes title="What Staff Say" data={staffQuotesData(screen)} direction="row-reverse" />

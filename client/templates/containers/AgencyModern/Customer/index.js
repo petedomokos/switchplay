@@ -19,6 +19,9 @@ import SectionWrapper, {
 import illustration from '../../../common/assets/image/agencyModern/customer.png';
 import colors from "../../../common/theme/agencyModern/colors";
 import SVGImage from "../../../../core/SVGImage";
+import { styles } from "../../../../core/websiteHelpers";
+
+const { lgUp, mdDown } = styles;
 
 const Customer = ({ data, screen, direction, minHeight }) => {
   const [spectrum, setSpectrum] = useState(() => spectrumComponent());
@@ -80,7 +83,7 @@ const Customer = ({ data, screen, direction, minHeight }) => {
               {typeof heading !== "string" && 
                 <>
                   <div style={{ width:"100%", height:visual.type === "img" ? "50px" : "20px" }}></div>
-                  <div className="md-down">
+                  <div className="md-down" style={mdDown(screen)}>
                     <Heading
                       as="h3"
                       content={heading[0] || ""}
@@ -90,7 +93,7 @@ const Customer = ({ data, screen, direction, minHeight }) => {
                       content={heading[1] || ""}
                     />
                   </div>
-                  <div className="lg-up">
+                  <div className="lg-up" style={lgUp(screen)}>
                      <Heading
                       as="h3"
                       content={`${heading[0]} ${heading[1]}`}

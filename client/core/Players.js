@@ -5,6 +5,9 @@ import SVGImage from "./SVGImage";
 import { makeStyles } from '@material-ui/core/styles'
 import { NAVBAR_HEIGHT } from "./websiteConstants";
 import Services from '../templates/containers/AgencyModern/Services';
+import { styles } from "./websiteHelpers";
+
+const { mdUp, smDown } = styles;
 
 const mainImageLarge = {
   url:"website/images/player-as-pro.png",
@@ -71,7 +74,7 @@ const useStyles = makeStyles(theme => ({
     width:"25vw",
     height:`${25 * mainImageLarge.aspectRatio}vw`,
     marginLeft:"4vw",
-    //border:"solid",
+    border:"solid",
     borderColor:"yellow",
   },
   headingSmallLine:{
@@ -139,10 +142,10 @@ const PlayersBanner = ({ screen }) =>{
           <div className={classes.headingLargeLine}>ACTING</div>
           <div className={classes.headingSmallLine}>LIKE PROS</div>
         </div>
-        <div className={`${classes.mainImageLarge} md-up`}>
+        <div className={`${classes.mainImageLarge} md-up`} style={mdUp(screen)}>
           <SVGImage image={mainImageLarge} />
         </div>
-        <div className={`${classes.mainImageSmall} sm-down`}>
+        <div className={`${classes.mainImageSmall} sm-down`} style={smDown(screen)}>
           <SVGImage image={mainImageSmall} />
         </div>
       </div>

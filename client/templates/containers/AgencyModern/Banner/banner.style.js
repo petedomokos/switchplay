@@ -42,7 +42,7 @@ const BannerWrapper = styled.div`
     padding-bottom:0;
   }
   .banner-image-area {
-    border:solid;
+    //border:solid;
     border-color:red;
     width:50%;
     height:calc(100vh - ${2 * NAVBAR_HEIGHT}px - ${2 * MAIN_BANNER_MARGIN_VERT.xl}px);
@@ -133,8 +133,8 @@ export const BannerContent = styled.div`
   border: solid;
   max-width: 600px;
   width: 50%;
-  display: flex;
   padding-top:1.5%;
+  display: flex;
   flex-direction: column;
   justify-content: space-between;
   height:calc(100vh - ${2 * NAVBAR_HEIGHT}px - ${2 * MAIN_BANNER_MARGIN_VERT.xl}px);
@@ -159,6 +159,7 @@ export const BannerContent = styled.div`
   }
   @media only screen and (max-width: 768px) {
     //justify-content:flex-start;
+    align-items:center;
     width:90%;
     max-width:90%;
     min-height:auto;
