@@ -100,7 +100,20 @@ const useStyles = makeStyles(theme => ({
     borderColor:"blue"
   },
   slideParagraph:{
-    color:grey10(9)//grey10(1),
+    color:grey10(9),
+    fontSize:"20px",
+    [theme.breakpoints.down('lg')]: {
+      fontSize:"18px",
+    },
+    [theme.breakpoints.down('md')]: {
+      fontSize:"16px",
+    },
+    [theme.breakpoints.down('sm')]: {
+      fontSize:"16px",
+    },
+    [theme.breakpoints.down('xs')]: {
+      fontSize:"14px",
+    },
     //border:"solid"
   },
   team:{
@@ -142,16 +155,16 @@ const useStyles = makeStyles(theme => ({
   },
   paragraph:{
     textAlign:"center",
-    fontSize:"24px",
+    fontSize:"28px",
     color:grey10(2),
     [theme.breakpoints.down('lg')]: {
-      fontSize:"20px",
+      fontSize:"24px",
     },
     [theme.breakpoints.down('md')]: {
-      fontSize:"18px",
+      fontSize:"20px",
     },
     [theme.breakpoints.down('sm')]: {
-      fontSize:"16px",
+      fontSize:"18px",
     },
     [theme.breakpoints.down('xs')]: {
       fontSize:"14px",

@@ -25,17 +25,22 @@ const useStyles = makeStyles(theme => ({
       //border:"solid",
     },
     listLabel:{
-      border:"solid",
-      width:"120px",
+      //border:"solid",
+      width:"100px",
       height:"20px", 
-      margin:"5px 25px 5px 0", 
+      margin:"5px 25px 5px 0px", 
       fontSize:"14px", 
       color:grey10(7),
+      [theme.breakpoints.up('xl')]: {
+        marginLeft:"5%",
+      },
       [theme.breakpoints.down('md')]: {
         fontSize:"12px",
+        borderColor:"red",
       },
       [theme.breakpoints.down('sm')]: {
-        marginBottom:"20px",
+        borderColor:"yellow",
+        margin:"5px 0 20px", 
         alignSelf:"center",
         textAlign:"center",
         fontSize:"14px",
@@ -57,6 +62,8 @@ const useStyles = makeStyles(theme => ({
 
     },
     item:{
+      //border:"solid",
+      height:"20px", 
       margin:"5px 25px 5px 0", 
       fontSize:"14px", 
       color:grey10(5),
@@ -76,13 +83,13 @@ const useStyles = makeStyles(theme => ({
       }
     },
     col2Item:{
-      width:"30px",
+      width:"48px",
     },
     col3Item:{
       width:"40px"
     },
     col4Item:{
-      width:"24px"
+      width:"30px"
     }
 }))
 

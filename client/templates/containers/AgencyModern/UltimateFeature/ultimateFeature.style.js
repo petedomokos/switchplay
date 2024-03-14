@@ -9,14 +9,14 @@ const SectionWrapper = styled.section`
 export const SectionTitle = styled.div`
   max-width: 900px;
   width: 90%;
-  margin: 40px auto 20px;
+  margin: 80px auto 60px;
   display:flex;
   justify-content:center;
   flex-wrap:wrap;
   h2 {
     //border:solid;
     font-weight: 500;
-    font-size: 36px;
+    font-size: 32px;
     line-height: 1.3;
     letter-spacing: -0.5px;
     margin: 10px 15px;

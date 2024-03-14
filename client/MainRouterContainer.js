@@ -8,7 +8,8 @@ const mapStateToProps = (state, ownProps) => {
 	return{
 		userId:state.user._id,
 		loadingUser:state.asyncProcesses.loading.user,
-		loadingError:state.asyncProcesses.error.loading.user
+		loadingError:state.asyncProcesses.error.loading.user,
+		screen:state.system.screen,
 	}
 }
 const mapDispatchToProps = dispatch => ({

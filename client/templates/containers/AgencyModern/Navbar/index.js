@@ -13,11 +13,15 @@ import NavbarWrapper, { MenuArea, MobileMenu } from './navbar.style';
 import LogoImage from '../../../common/assets/image/agencyModern/logo.png';
 import { SwitchplayLogo } from '../../../common/components/ScrollSpyMenu';
 //import data from '../../../common/data/AgencyModern';
+import { styles } from "../../../../core/websiteHelpers";
+
+const { smDown } = styles;
+
 //import { Fade } from 'react-awesome-reveal';
 //<Fade triggerOnce></Fade>
 
 
-const Navbar = ({ data, history, user }) => {
+const Navbar = ({ data, history, user, screen }) => {
   const [mobileMenu, setMobileMenu] = useState(false);
 
   const scrollItems = [];
@@ -43,7 +47,7 @@ const Navbar = ({ data, history, user }) => {
   return (
     <NavbarWrapper className={`agencyModern-navbar navbar ${user ? "for-signed-in-user" : ""}`}>
       <Container className={`${user ? "for-signed-in-user" : ""}`}>
-        <SwitchplayLogo className="sm-down" /> 
+        <SwitchplayLogo className="sm-down" style={smDown(screen)} /> 
         <MenuArea className={`${user ? "for-signed-in-user" : ""}`}>
           <div className={`main-menu-area ${user ? "for-signed-in-user" : ""}`}>
             <ScrollSpyMenu

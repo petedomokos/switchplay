@@ -8,7 +8,7 @@ import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles(theme => ({
   imageSvg: {
-      border:"solid",
+      //border:"solid",
       borderColor:"blue",
       /*[theme.breakpoints.up('md')]: {
         display:props => props.className.includes("sm-down") ? "none" : null

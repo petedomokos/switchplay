@@ -25,7 +25,6 @@ const WorkflowAnimation = ({ dimns }) =>{
     const nrScenes = Object.keys(sceneElements).length;
 
     const updateSceneState = () => {
-        return;
         if(sceneElements[sceneNr][frameNr + 1]){
         //move frame on
         setSceneState(prevState => ({ ...prevState, frameNr:frameNr + 1 }));

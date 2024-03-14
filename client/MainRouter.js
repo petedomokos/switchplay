@@ -102,7 +102,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, onSignout, history }) => {
+const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, onSignout, history }) => {
   //BUG - onSignout leads to the Homepage re-rendering with store.screen reset to init ie 0,0
  
   const styleProps = { appBg: history.location.pathname === "/" ? COLOURS.banner.bg : "#f0ded5" }
@@ -125,7 +125,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, onSignout, hi
   useEffect(() => {
       const handleResize = () => {
         const orientation = window.innerWidth < window.innerHeight ? "portrait" : "landscape";
-        const screen =  { 
+        const newScreen = { 
           width: window.innerWidth, 
           height: window.innerHeight, 
           orientation,
@@ -137,9 +137,9 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, onSignout, hi
           isMediumUp:["md", "lg", "xl"].includes(size)
         }
         //legacy - store it on window too
-        window._screen = screen;
+        window._screen = newScreen;
 
-        updateScreen(screen)
+        updateScreen(newScreen)
       };
       window.addEventListener("resize", handleResize);
       //init
@@ -164,8 +164,8 @@ const MainRouter = ({ userId, loadUser, loadingUser, updateScreen, onSignout, hi
           <ContentWrapper>
             <Sticky top={0} innerZ={9999} activeClass="sticky-nav-active">
               <DrawerProvider>
-                <Route path="/:any"><Navbar data={getNavBarItemsFromOtherPages(user, onSignout)} history={history} user={user} /></Route>
-                <Route exact path="/"><Navbar data={getNavBarItemsFromHomePage(user, onSignout)} history={history} user={user} /></Route>
+                <Route path="/:any"><Navbar data={getNavBarItemsFromOtherPages(user, onSignout)} history={history} user={user} screen={screen} /></Route>
+                <Route exact path="/"><Navbar data={getNavBarItemsFromHomePage(user, onSignout)} history={history} user={user} screen={screen} /></Route>
               </DrawerProvider>
             </Sticky>
               <Switch>

@@ -46,7 +46,7 @@ const SwitchplayApp = ({ dimns }) => {
   const containerRef = useRef(null);
 
   useEffect(() => {
-    const containerDimns = containerRef?.current?.getBoundingClientRect() || { width:0, height:0 };
+    const containerDimns = containerRef?.current?.parentNode.getBoundingClientRect() || { width:0, height:0 };
     const { width, height } = containerDimns;
     const strokeWidth = 1;
     const rectWidth = height * 0.7;
@@ -96,7 +96,7 @@ const SwitchplayApp = ({ dimns }) => {
       
   })
   return (
-    <svg width="100%" height="100%" ref={containerRef}>
+    <svg width="100%" height="100%" ref={containerRef} >
     </svg>
   )
 
