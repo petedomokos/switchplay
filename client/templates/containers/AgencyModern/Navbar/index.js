@@ -45,7 +45,7 @@ const Navbar = ({ data, history, user, screen }) => {
 
   //<div style={{ background:"red", width:"100%", height:"50px"}}>test</div>
   return (
-    <NavbarWrapper className={`agencyModern-navbar navbar ${user ? "for-signed-in-user" : ""}`}>
+    <NavbarWrapper className={`agencyModern-navbar navbar ${user ? "for-signed-in-user" : ""}`} id="navbar" >
       <Container className={`${user ? "for-signed-in-user" : ""}`}>
         <SwitchplayLogo className="sm-down" style={smDown(screen)} /> 
         <MenuArea className={`${user ? "for-signed-in-user" : ""}`}>

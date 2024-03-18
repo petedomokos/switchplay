@@ -25,6 +25,8 @@ const CheckBoxStyle = styled.div`
   /* Switch label style when labelPosition on right */
   &.label_right {
     label {
+      //border:solid;
+      border-color:red;
       display: flex;
       flex-direction: row-reverse;
       align-items: center;

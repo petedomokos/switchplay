@@ -1,5 +1,6 @@
 import { connect } from 'react-redux'
 import NonUserHome  from '../NonUserHomeOld'
+import { requestDemo, subscribe } from '../../actions/NonUserActions'
 
 const mapStateToProps = (state, ownProps) => {
 	return{
@@ -10,6 +11,12 @@ const mapStateToProps = (state, ownProps) => {
 	}
 }
 const mapDispatchToProps = dispatch => ({
+	requestDemo(user){
+		dispatch(requestDemo(user))
+	},
+	subscribe(user){
+		dispatch(subscribe(user))
+	}
 })
 
 //wrap all 4 sections in the same container for now.

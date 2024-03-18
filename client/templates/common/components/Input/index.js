@@ -20,7 +20,7 @@ const Input = ({
   const [state, setState] = useState({
     toggle: false,
     focus: false,
-    value: '',
+    //value: value || "",
   });
 
   // toggle function
@@ -51,16 +51,16 @@ const Input = ({
 
   // handle input value
   const handleOnChange = (event) => {
-    setState({
+    /*setState({
       ...state,
       value: event.target.value,
-    });
+    });*/
     onChange(event.target.value);
   };
 
   // get input focus class
   const getInputFocusClass = () => {
-    if (state.focus === true || state.value !== '') {
+    if (state.focus === true || value !== '') {
       return 'is-focus';
     } else {
       return '';
@@ -107,7 +107,7 @@ const Input = ({
           {...props}
           id={htmlFor}
           name={htmlFor}
-          value={state.value}
+          value={value}
           onChange={handleOnChange}
           onBlur={handleOnBlur}
           onFocus={handleOnFocus}
@@ -123,7 +123,7 @@ const Input = ({
             id={htmlFor}
             name={htmlFor}
             type={state.toggle ? 'password' : 'text'}
-            value={state.value}
+            value={value}
             onChange={handleOnChange}
             onBlur={handleOnBlur}
             onFocus={handleOnFocus}
@@ -148,7 +148,7 @@ const Input = ({
             id={htmlFor}
             name={htmlFor}
             type={inputType}
-            value={state.value}
+            value={value}
             onChange={handleOnChange}
             onBlur={handleOnBlur}
             onFocus={handleOnFocus}

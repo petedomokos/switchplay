@@ -232,11 +232,16 @@ const AboutPage = ({ className }) =>{
       <Story/>
       {/**<Team/>*/}
       {/**<div style={{ width:"100%", height:"50px", background:"white" }}></div>*/}
-      <Subscribe 
-        heading="Share our vision? Get a demo."
+      {/*<Subscribe 
+        heading="Interested? Subscribe to us."
         text="We have more than thousand of creative entrepreneurs and stat joining our business"
-        buttonLabel="Get Demo"
-      />
+        componentsData = {{
+          inputs:[{ key:"email", placeholder:"Enter Email Address" }],
+          submitButton:{ label: "Subscribe" },
+          checkbox:{ label:"No promotional messages." }
+        }}
+        onSubmit={onSubscribe}
+      />*/}
       <Footer page="about" />
     </div>
   )

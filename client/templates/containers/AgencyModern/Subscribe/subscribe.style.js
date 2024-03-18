@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { rgba } from 'polished';
 
 const SectionWrapper = styled.section`
+  border:solid;
   //background-color: #f6ebe6;
   background-color:#ffffff;
   padding: 0px 0;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import Container from '../../../common/components/UI/ContainerTwo';
 import CheckBox from '../../../common/components/Checkbox';
@@ -19,7 +19,15 @@ const bg3 = { src:"website/bgs/cta/3.png" }
 const bg4 = { src:"website/bgs/cta/4.png" }
 const bg5 = { src:"website/bgs/cta/5.png" }
 
-const Subscribe = ({ heading, text, buttonLabel }) => {
+const Subscribe = ({ heading, text, buttonLabel, componentsData, onSubmit }) => {
+  const [email, setEmail] = useState("")
+  const [isChecked, setIsChecked] = useState(false);
+  const { inputs, submitButton, checkbox } = componentsData;
+
+  const toggleCheckbox = () => setIsChecked(prevState => !prevState)
+  const submit = () => {
+    onSubmit({ email, isChecked });
+  }
   return (
     <SectionWrapper>
       <Container>
@@ -30,19 +38,25 @@ const Subscribe = ({ heading, text, buttonLabel }) => {
           </Content>
           <SubscriptionForm>
             <div>
-              <Input
-                inputType="email"
-                placeholder="Enter Email Address"
-                iconPosition="left"
-                aria-label="email"
-              />
-              <Button title={buttonLabel} type="submit" />
+              {inputs.map((input,i) =>
+                <Input
+                  inputType="email"
+                  placeholder={input.placeholder}
+                  iconPosition="left"
+                  aria-label="email"
+                  value={email}
+                  onChange={setEmail}
+                />
+              )}
+              <Button title={submitButton.label} type="submit" onClick={submit} />
             </div>
-            <CheckBox
+            {checkbox && <CheckBox
               id="remember"
               htmlFor="remember"
-              labelText="Don’t provide any promotional message."
-            />
+              isChecked={isChecked}
+              onToggle={toggleCheckbox}
+              labelText={checkbox.label}
+          />}
           </SubscriptionForm>
         </FooterInner>
       </Container>
@@ -56,5 +70,9 @@ const Subscribe = ({ heading, text, buttonLabel }) => {
     </SectionWrapper>
   );
 };
+
+Subscribe.defaultProps = {
+  componentsData:{}
+}
 
 export default Subscribe;

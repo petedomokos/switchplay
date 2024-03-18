@@ -6,6 +6,7 @@ import CheckBoxStyle from './checkbox.style';
 const CheckBox = ({
   className,
   isChecked,
+  onToggle,
   labelText,
   value,
   id,
@@ -16,7 +17,7 @@ const CheckBox = ({
   ...props
 }) => {
   // use toggle hooks
-  const [toggleValue, toggleHandler] = useToggle(isChecked);
+  //const [toggleValue, toggleHandler] = useToggle(isChecked);
 
   // Add all classs to an array
   const addAllClasses = ['reusecore__checkbox'];
@@ -43,17 +44,22 @@ const CheckBox = ({
 
   const position = labelPosition || 'right';
 
+  const onClick = e => {
+    e.preventDefault();
+    e.stopPropagation();
+    onToggle();
+  }
+
   return (
     <CheckBoxStyle className={addAllClasses.join(' ')} {...props}>
-      <label htmlFor={htmlFor}>
+      <label htmlFor={htmlFor} onClick={onClick} style={{ cursor:"pointer" }}>
         {position === 'left' || position === 'right' ? LabelField : ''}
         <input
           type="checkbox"
           className="checkbox"
           id={id}
           value={value}
-          checked={toggleValue}
-          onChange={toggleHandler}
+          checked={isChecked}
           disabled={disabled}
           {...props}
         />
@@ -97,5 +103,6 @@ CheckBox.defaultProps = {
   labelText: 'Checkbox label',
   labelPosition: 'right',
   disabled: false,
+  onToggle:() => {}
 };
 export default CheckBox;

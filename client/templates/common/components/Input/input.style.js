@@ -3,10 +3,14 @@ import { themeGet } from '@styled-system/theme-get';
 
 const InputField = styled.div`
   position: relative;
+  //border:solid;
+  border-color:yellow;
+  width:90%;
 
   /* Input field wrapper */
   .field-wrapper {
     position: relative;
+    //border:solid;
   }
 
   /* If input has icon then these styel */
@@ -56,11 +60,12 @@ const InputField = styled.div`
 
   /* Label default style */
   label {
+    //border:solid;
     display: block;
     color: ${themeGet('colors.labelColor', '#767676')};
     font-size: ${themeGet('fontSizes.4', '16')}px;
     font-weight: ${themeGet('fontWeights.4', '500')};
-    margin-bottom: ${themeGet('space.3', '10')}px;
+    //margin-bottom: ${themeGet('space.2', '5')}px;
     transition: 0.2s ease all;
   }
 

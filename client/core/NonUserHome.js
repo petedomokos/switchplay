@@ -1,15 +1,16 @@
-import React, { Fragment, useEffect, useRef } from 'react';
+import React, { Fragment, useEffect, useRef, useState, useCallback } from 'react';
 import { withRouter } from 'react-router-dom'
 import * as d3 from 'd3';
 import Banner from '../templates/containers/AgencyModern/Banner';
 import UltimateFeature from '../templates/containers/AgencyModern/UltimateFeature';
 import News from '../templates/containers/AgencyModern/News';
 import Subscribe from '../templates/containers/AgencyModern/Subscribe';
+import RequestDemo from '../templates/containers/AgencyModern/RequestDemo';
 //import Footer from '../templates/containers/AgencyModern/Footer';
 import Footer from './Footer';
 import Heading from '../templates/common/components/Heading';
 import data from '../templates/common/data/AgencyModern';
-import { NAVBAR_HEIGHT } from "./websiteConstants";
+import { grey10, NAVBAR_HEIGHT } from "./websiteConstants";
 
 import PeopleWithQuotes from './PeopleWithQuotes';
 import SVGImage from "./SVGImage";
@@ -108,7 +109,8 @@ const staffQuotesData = screen => ({
 const useStyles = makeStyles(theme => ({
   nonUserHomeRoot:{
     width:"100%",
-    background:COLOURS.banner.bg
+    background:COLOURS.banner.bg,
+    position:"relative"
   },
   topDisplay:{
     padding:`${NAVBAR_HEIGHT}px 7.5vw 0`,
@@ -121,13 +123,89 @@ const useStyles = makeStyles(theme => ({
     //border:"solid",
     borderColor:"blue"
   },
+  overlayFormContainer:{
+    position:"fixed",
+    left:0,
+    top:"0",
+    width:"100vw",
+    height:"100vh",
+    display:"flex",
+    flexDirection:"column",
+    justifyContent:"center",
+    alignItems:"center",
+    zIndex:1
+  },
+  overlayFormBackground:{
+    width:"100%",
+    height:"100%",
+    position:"absolute",
+    left:0,top:0,
+    background:"black",
+    opacity:0.7,
+  },
+  /*closeFormIcon:{
+    position:"absolute",
+    left:0,
+    top:"50px",
+    width:"100%",
+    display:"flex",
+    justifyContent:"center",
+    border:"solid"
+  },*/
+  overlayForm:{
+    width:"800px",
+    maxWidth:"90vw",
+    height:"95%",
+    overflow:"scroll",
+    //background:grey10(3),
+    zIndex:2
+  }
 }))
 
-const NonUserHome = ({ screen, initScrollTo }) =>{
-  console.log("screen", screen)
+const NonUserHome = ({ screen, initScrollTo, requestDemo, subscribe }) =>{
+  //console.log("screen", screen)
   const styleProps = { };
   const classes = useStyles({styleProps});
   const rootRef = useRef(null);
+  const overlayRef = useRef(null);
+
+  const showForm = useCallback(() => {
+    d3.select(overlayRef.current)
+      .style("opacity", 0)
+      .style("display", null)
+        .transition()
+        .duration(500)
+          .style("opacity", 1);
+
+    d3.select("#navbar")
+      .style("opacity", 1)
+        .transition()
+        .duration(100)
+          .style("opacity", 0)
+          .on("end", function(){
+            d3.select(this).style("display","none")
+          })
+  }, []);
+
+  const hideForm = useCallback(() => {
+    d3.select(overlayRef.current)
+      .style("opacity", 1)
+        .transition()
+        .duration(500)
+          .style("opacity", 0)
+          .on("end", function(){
+            d3.select(this).style("display","none")
+          })
+
+    d3.select("#navbar")
+      .style("opacity", 0)
+      .style("display", null)
+        .transition()
+        .duration(500)
+          .style("opacity", 1)
+  }, []);
+
+  useEffect(() => { d3.select(overlayRef.current).style("display","none"); },[]);
 
   //@todo - stop using window and use store instead
   useEffect(() => {
@@ -141,10 +219,10 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
   return (
     <div className={classes.nonUserHomeRoot} ref={rootRef} id="home" >
       <div className={classes.topDisplay}>
-        <Banner screen={screen} />
+        <Banner screen={screen} requestDemo={requestDemo} showForm={showForm} />
         <CompatibilityInfo screen={screen} className=""/>
       </div>
-      <Players screen={screen} />
+      <Players screen={screen}/>
       <PeopleWithQuotes title="What Players Say" data={playerQuotesData(screen)} direction="row" />
       <UltimateFeature screen={screen} />
       <PeopleWithQuotes title="What Staff Say" data={staffQuotesData(screen)} direction="row-reverse" />
@@ -152,9 +230,37 @@ const NonUserHome = ({ screen, initScrollTo }) =>{
       <Subscribe 
         heading="Interested? Subscribe to us."
         text="We have more than thousand of creative entrepreneurs and stat joining our business"
-        buttonLabel="Subscribe"
+        componentsData = {{
+          inputs:[{ key:"email", placeholder:"Enter Email Address" }],
+          submitButton:{ label: "Subscribe" },
+          checkbox:{ label:"No promotional messages." }
+        }}
+        onSubmit={subscribe}
       />
       <Footer />
+      <div className={classes.overlayFormContainer} ref={overlayRef}>
+        <div className={classes.overlayFormBackground} onClick={hideForm}></div>
+        {/**<div className={classes.closeFormIcon}>Go back</div>*/}
+        <div className={classes.overlayForm}>
+          <RequestDemo 
+            heading="Thanks for your interest."
+            text="Please provide some contact info and we will be in touch."
+            componentsData = {{
+              inputs:[
+                { key:"name", label:"Name", placeholder:"Enter Your Name" },
+                { key:"email", label:"Email", placeholder:"Enter Email Address" },
+                { key:"phone", label:"Phone (optional)", placeholder:"Enter Phone Number" },
+                { key:"club", label:"Club and Age/Phase", placeholder:"Enter Club And Age/Phase" },
+              ],
+              submitButton:{ label: "Send Request" },
+              checkbox:{ label:"No promotional messages." }
+            }}
+            onSubmit={subscribe}
+            onClose={hideForm}
+          />
+
+        </div>
+      </div>
     </div>
   )
 }

@@ -9,7 +9,7 @@ import Heading from '../../../common/components/Heading';
 import Input from '../../../common/components/Input';
 import BannerWrapper, {
   BannerContent,
-  Subscribe,
+  //Subscribe,
   SponsoredBy,
   ImageGroup,
 } from './banner.style';
@@ -49,23 +49,21 @@ const smallImage = {
   aspectRatio:0.85
 }
 
-//old...Great football development comes down to relationships, communication, learning & growth,( & details?)
-const Banner = ({screen}) => {
-  //aspect ratio changes for large image depending on screen
-  /*const largeImgDimns = { 
-    width: screen.width * 0.5, 
-    height: screen.height// - 2 * NAVBAR_HEIGHT - 2 * MAIN_BANNER_MARGIN_VERT[screen.size]
-  }
-  const requiredLargeAspectRatio = largeImgDimns.height / largeImgDimns.width;
-  const largeImgTransform = `translate(${-200 + 0.1 * screen.width},${0}) scale(${0.65})`;
+/*
+ - decide how to handle two differnt styles fro the Subscribe components -. can we just use different classnames for each component?
+ - but the ways its done doesnt allow for that -> could we pass props into the stylesheet? eg button belo, widths of bg div etc
+ -or abstract the functional elements of the Subscribe component ?
+ - in Subscribe component, make bg and width and height props too,
+ or at least allow a 'minimal' setting which simply displays the 
+ input and button, 
+ - also allow a hideInput prop, which puts the button over the input, therby reducing teh height
+ even more, and onclick, it slides down to reveal input(s)
 
-  const { url, imgWidth, imgHeight, imgTransX=0, imgTransY=0 } = largeImageInfo;
-
-  const smallImage = smallImageInfo;
-  const largeImage = { ...largeImageInfo, aspectRatio:requiredLargeAspectRatio }
-  */
+ - also allow a phonenumber input too
 
 
+*/
+const Banner = ({ screen, requestDemo, showForm }) => {
 
   return (
     <BannerWrapper id="home">
@@ -113,15 +111,7 @@ const Banner = ({screen}) => {
               content="Get your players thinking and acting like pros. Manage all your team's communication and information in one place. Use data with confidence and purpose."
               style={mdUp(screen)}
             />
-            <Subscribe>
-              <Input
-                inputType="email"
-                placeholder="Enter Email Address"
-                iconPosition="left"
-                aria-label="email"
-              />
-              <Button title="Get A Demo" type="submit" />
-            </Subscribe>
+            <Button title="Get A Demo" type="submit" style={{ width:"140px" }} onClick={showForm} />
         </BannerContent>
         <div className="banner-image-area">
           <SVGImage 
