@@ -218,8 +218,8 @@ const Team = () => {
   )
 }
 
-const AboutPage = ({ className }) =>{
-  const styleProps = { className }
+const AboutPage = ({ subscribe }) =>{
+  const styleProps = { }
   const classes = useStyles(styleProps);
 
   useEffect(() => {
@@ -227,12 +227,12 @@ const AboutPage = ({ className }) =>{
   },[]);
 
   return (
-    <div className={`${classes.aboutRoot} ${className}`}>
+    <div className={classes.aboutRoot}>
       <Welcome/>
       <Story/>
       {/**<Team/>*/}
       {/**<div style={{ width:"100%", height:"50px", background:"white" }}></div>*/}
-      {/*<Subscribe 
+      <Subscribe 
         heading="Interested? Subscribe to us."
         text="We have more than thousand of creative entrepreneurs and stat joining our business"
         componentsData = {{
@@ -240,8 +240,8 @@ const AboutPage = ({ className }) =>{
           submitButton:{ label: "Subscribe" },
           checkbox:{ label:"No promotional messages." }
         }}
-        onSubmit={onSubscribe}
-      />*/}
+        onSubmit={subscribe}
+      />
       <Footer page="about" />
     </div>
   )

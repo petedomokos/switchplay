@@ -21,7 +21,7 @@ import Profile from './core/profile/Profile'
 import auth from './auth/auth-helper'
 import ImportDataContainer from './data/ImportDataContainer'
 import VisualsContainer from './visuals/VisualsContainer'
-import AboutPage from "./core/AboutPage";
+import AboutPageContainer from "./core/containers/AboutPageContainer";
 import Contact from './core/Contact';
 import RequestDemoForm from './core/RequestDemoForm';
 import './assets/styles/main.css'
@@ -180,7 +180,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
               </DrawerProvider>
             </Sticky>
             <Switch>
-              <Route path="/about" component={AboutPage}/>
+              <Route path="/about" component={AboutPageContainer}/>
               <Route path="/contact" component={Contact}/>
               <Route path="/signup" component={CreateUserContainer}/>
               <Route path="/signin" component={SigninContainer}/>

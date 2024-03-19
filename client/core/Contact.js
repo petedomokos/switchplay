@@ -14,152 +14,140 @@ import { scrollIntoViewWithOffset } from './websiteHelpers';
 const { welcomeData, storyData } = aboutPageData;
 
 const useStyles = makeStyles(theme => ({
-  aboutRoot:{
+  contactRoot:{
     width:"100%",
-    background:COLOURS.banner.bg,
+    height:"100vh",
+    paddingTop:"100px",
+    backgroundColor:"#ffffff",
     padding:`${NAVBAR_HEIGHT + 20}px 0 0`,
     [theme.breakpoints.down('sm')]: {
       //paddingTop:0
     }
   },
-  welcome:{
-    padding:"0 7.5vw",
+  contactInfoArea:{
     //border:"solid",
-    borderColor:"yellow",
+    borderColor:"blue",
     width:"100%",
-    minHeight:`calc(100vh - ${NAVBAR_HEIGHT}px)`,
+    height:"calc(100vh - 450px)",
+    padding:"20px 0 0",
+    [theme.breakpoints.down('lg')]: {
+      height:"calc(100vh - 350px)",
+    },
+    [theme.breakpoints.down('md')]: {
+      height:"calc(100vh - 350px)",
+    },
+    [theme.breakpoints.down('sm')]: {
+      height:"auto",
+      minHeight:"60vh",
+      padding:"30px 0"
+    },
+    [theme.breakpoints.down('xs')]: {
+      height:"auto",
+      minHeight:"60vh",
+      padding:"30px 0"
+    },
     display:"flex",
     flexDirection:"column",
     justifyContent:"center",
-    background:"#584543", //"#613737",
-    //minHeight:"400px",
+    alignItems:"center",
+  },
+  contactInfo:{
+    width:"fit-content",
+    maxWidth:"80%",
+    margin:"0 auto",
+    display:"flex",
+    flexDirection:"column",
+    //border:"solid",
+    borderColor:"orange"
+  },
+  contactInfoSection:{
+    width:"fit-content",
+    //width:"480px",
+    //maxWidth:"90vw",
+    margin:"2.5vh 0",
+    //padding:"10%",
+    display:"flex",
+    //border:"solid",
+  },
+  sectionLabel:{
+    //border:"solid",
+    width:"200px",
+    padding:"0 10px 0 0",
+    fontSize:"18px",
+    fontWeight:"600",
+    [theme.breakpoints.down('lg')]: {
+      borderColor:"orange"
+    },
     [theme.breakpoints.down('md')]: {
-      //fontSize:"50px"
+      width:"160px",
+      fontSize:"18px",
+      borderColor:"red"
+    },
+    [theme.breakpoints.down('sm')]: {
+      width:"120px",
+      fontSize:"16px",
+      borderColor:"yellow"
+    },
+    [theme.breakpoints.down('xs')]: {
+      width:"80px",
+      fontSize:"12px",
+      borderColor:"blue"
+    }
+    //border:"solid"
+  },
+  callSectionContent:{
+    display:"flex",
+  },
+  email:{
+    marginBottom:"20px",
+  },
+  contentMainText:{
+    fontSize:"18px",
+    [theme.breakpoints.down('lg')]: {
+    },
+    [theme.breakpoints.down('md')]: {
+      fontSize:"18px",
+    },
+    [theme.breakpoints.down('sm')]: {
+      fontSize:"14px",
+    },
+    [theme.breakpoints.down('xs')]: {
+      fontSize:"12px",
     }
   },
-  story:{
-    width:"90%",
-    margin:"auto",
-    padding:"30px 7.5vw",
-    display:"flex",
-    justifyContent:"center",
-    minHeight:`calc(100vh - ${NAVBAR_HEIGHT}px)`,
-    background:"#DBEFF0",//#613737",
-    //border:"solid",
-  },
-  sliderContainer:{
-    width:"100%", 
-    height:`calc(90vh - ${NAVBAR_HEIGHT}px)`,
-    //background:"#ffffff"//"#605C5C",
-    //border:"solid"
-  },
-  slideContainer:{
-    //paddingTop:"50px",
-    width:"100%",
-    height:`calc(90vh - ${NAVBAR_HEIGHT}px - 40px)`,
-    //minHeight: height:`calc(90vh - ${NAVBAR_HEIGHT}px - 40px)`,
-    //border:"solid",
-    borderColor:"red"
-  },
-  slide:{
-    width:"100%",
-    height:"100%",//`calc(90vh - ${NAVBAR_HEIGHT}px - 40px)`,
-    maxHeight:"100%",
-    minHeight:"100%",
-    display:"flex",
-    flexDirection:"column",
-    justifyContent:"space-around",
-    alignItems:"center",
-    //background:"#605C5C", //"#ffffff"
-    //border:"solid",
-    borderColor:"yellow"
-  },
-  slideImgOuterContainer:{
-    width:"80%", //"90%",
-    //height:"50%",
-    display:"flex",
-    alignItems:"center",
-    //border:"solid",
-    borderColor:"blue"
-  },
-  slideImgInnerContainer:{
-    width:"100%",
-    height:"80%",
-    //border:"solid",
-    borderColor:"pink"
-  },
-  slideParagraphs:{
-    //height:"50%",
-    padding:"0 10%",
-    display:"flex",
-    flexDirection:"column",
-    justifyContent:"center",
-    alignItems:"center",
-    //border:"solid",
-    borderColor:"blue"
-  },
-  slideParagraph:{
-    color:grey10(9)//grey10(1),
-    //border:"solid"
-  },
-  team:{
-    padding:"0 7.5vw",
-    background:"white",
-    //border:"solid",
-    //borderColor:"yellow",
-    width:"100%",
-    minHeight:`calc(100vh - ${NAVBAR_HEIGHT}px)`,
-  },
-  title:{
-
-  },
-  welcomeTitle:{
-
-  },
-  storyTitle:{
-
-  },
-  paragraphs:{
-    display:"flex",
-    flexDirection:"column",
-    justifyContent:"space-between",
-    alignItems:"center",
-    padding:"10px 10vw"
-  },
-  welcomeMiddleIcon:{
-    width:"80px",
-    height:"80px",
-    margin:"20px 0",
-    backgroundImage:`url(${teamworkIcon})`,
-    backgroundSize: "cover",
-  },
-  welcomeParagraphs:{
-
-  },
-  storyParagraphs:{
-
-  },
-  paragraph:{
-    textAlign:"center",
-    fontSize:"24px",
-    color:grey10(2),
+  slash:{
+    margin:"-4px 10px 0",
+    fontSize:"22px",
     [theme.breakpoints.down('lg')]: {
       fontSize:"20px",
     },
     [theme.breakpoints.down('md')]: {
-      fontSize:"18px",
+      fontSize:"20px",
     },
     [theme.breakpoints.down('sm')]: {
       fontSize:"16px",
     },
     [theme.breakpoints.down('xs')]: {
       fontSize:"14px",
+    }
+  },
+  emailDesc:{
+    fontSize:"16px",
+    fontWeight:"bold",
+    [theme.breakpoints.down('lg')]: {
+      fontSize:"15px",
     },
+    [theme.breakpoints.down('md')]: {
+      fontSize:"16px",
+    },
+    [theme.breakpoints.down('sm')]: {
+      fontSize:"13px",
+    },
+    [theme.breakpoints.down('xs')]: {
+      fontSize:"12px",
+    }
   },
-  welcomeParagraph:{
-
-  },
-  storyParagraph:{
+  writeSectionContent:{
 
   },
   stadiumBanner:{
@@ -173,42 +161,6 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const Welcome = ({ }) => {
-  const styleProps = { };
-  const classes = useStyles({styleProps});
-  return (
-    <div className={classes.welcome}>
-      <div className={`${classes.paragraphs} ${classes.welcomeParagraphs}`}>
-        <p className={`${classes.paragraph} ${classes.welcomeParagraph}`}>{welcomeData.paragraphs[0].text}</p>
-        <div className={classes.welcomeMiddleIcon}></div>
-        <p className={`${classes.paragraph} ${classes.welcomeParagraph}`}>{welcomeData.paragraphs[1].text}</p>
-      </div>
-    </div>
-  )
-}
-
-const Story = ({ height }) => {
-  const styleProps = { 
-  };
-  const classes = useStyles({styleProps});
-  return (
-    <div className={classes.story}>
-      <SimpleSlider data={storyData.slides} classes={classes} />
-    </div>
-  )
-}
-
-
-const Team = () => {
-  const styleProps = { };
-  const classes = useStyles({styleProps});
-  return (
-    <div className={classes.team}>
-      team
-    </div>
-  )
-}
-
 const Contact = ({ className }) =>{
   const styleProps = { className }
   const overheadImageRatio = 3/9;
@@ -220,15 +172,41 @@ const Contact = ({ className }) =>{
   },[]);
 
   return (
-    <div className={`${classes.aboutRoot} ${className}`}>
-      Contact Us
-      <Welcome/>
-      <Story/>
-      <Subscribe 
-        heading="Share our vision? Get a demo."
-        text="We have more than thousand of creative entrepreneurs and stat joining our business"
-        buttonLabel="Get Demo"
-      />
+    <div className={`${classes.contactRoot} ${className}`}>
+      <div className={classes.contactInfoArea}>
+        <div className={classes.contactInfo}>
+          <div className={classes.contactInfoSection}>
+            <div className={classes.sectionLabel}>Call us</div>
+            <div className={`${classes.sectionContent} ${classes.callSectionContent}`}>
+              <div className={classes.contentMainText}>0208 087 3567</div>
+              <div className={classes.slash}>/</div>
+              <div className={classes.contentMainText}>07547 196642</div>
+            </div>
+          </div>
+          <div className={classes.contactInfoSection}>
+            <div className={classes.sectionLabel}>Email us</div>
+            <div className={`${classes.sectionContent} ${classes.emailSectionContent}`}>
+              <div className={classes.email}>
+                <div className={classes.emailDesc}>General Enquiries</div>
+                <div className={classes.contentMainText}>info@switchplay.co.uk</div>
+              </div>
+              <div className={classes.email}>
+                <div className={classes.emailDesc}>CEO</div>
+                <div className={classes.contentMainText}>peterdomokos@switchplay.co.uk</div>
+              </div>
+            </div>
+          </div>
+          <div className={classes.contactInfoSection}>
+          <div className={classes.sectionLabel}>Write to us</div>
+          <div className={`${classes.sectionContent} ${classes.writeSectionContent}`}>
+            <div className={classes.contentMainText}>Switchplay Technology Ltd</div>
+            <div className={classes.contentMainText}>107 Howson Road</div>
+            <div className={classes.contentMainText}>London</div>
+            <div className={classes.contentMainText}>SE4 2BB</div>
+          </div>
+        </div>
+      </div>
+      </div>
       <div className={classes.overheadBanner} style={{ width:"100vw", height:`${100 * overheadImageRatio}vw`}}></div>
       <div style={{ width:"100%", height:"100px", background:COLOURS.OFFBLACK }}></div>
     </div>

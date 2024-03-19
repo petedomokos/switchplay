@@ -71,8 +71,8 @@ export const aboutPageData = {
                     //aspectRatio:0.9
                 }, //1040 592
                 text: [
-                    "I began to train players who had been released from pro clubs, and I applied novel data methods to help them to turn their careers around.",
-                    "I moved into tech, became a data visualisation specialist and built custom tools for Premier League clients."
+                    "I moved into tech, became a data visualisation specialist and built custom tools for Premier League clients.",
+                    "Alongside this, I began to train players who had been released from pro clubs, and I applied novel data methods to help them to turn their careers around.",
                 ],
                 pcHeightForText:50
             },
