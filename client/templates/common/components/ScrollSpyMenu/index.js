@@ -61,12 +61,24 @@ const PageLinkItem = ({ item, pathname }) =>
 			{/*item.id !== "contact" && */item.id !== "home" && item.label}
 	</Link>
 
-const ClickButtonItem = ({ item, history }) =>
-	<div
-		style={{ cursor: "pointer", marginTop:"10px", marginBottom:"10px" }}
-		className={"click-button-menu-item"}
-		onClick={() => item.onClick(history)}>{item.label}
-	</div>
+const ClickButtonItem = ({ item, history }) => 
+	<>
+		{item.withButtonBg ?
+			<Button title={item.label} type="submit" 
+				style={{ 
+					maxHeight:"35px", minHeight:"35px", minWidth:"80px", maxWidth:"80px", 
+					fontSize:"18px", background:"#FF825C", color:"#ffffff"
+				}}
+				onClick={() => { item.onClick(history) }}
+			/> 
+			:
+			<div
+				style={{ cursor: "pointer", marginTop:"10px", marginBottom:"10px", border:"solid" }}
+				onClick={() => { item.onClick(history) }}
+				>{item.label}
+			</div>
+		}
+	</>
 
 export const NormalItem = ({ item, history }) => {
 	return (

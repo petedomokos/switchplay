@@ -16,7 +16,7 @@ import PeopleWithQuotes from './PeopleWithQuotes';
 import SVGImage from "./SVGImage";
 import { makeStyles } from '@material-ui/core/styles'
 import { MAIN_BANNER_MARGIN_VERT, COLOURS } from "./websiteConstants";
-import { scrollIntoViewWithOffset } from "./websiteHelpers";
+import { scrollIntoViewWithOffset, showDemoForm } from "./websiteHelpers";
 import Players from "./Players"
 import DataSection from './DataSection';
 import CompatibilityInfo from './CompatibilityInfo';
@@ -162,50 +162,11 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const NonUserHome = ({ screen, initScrollTo, requestDemo, subscribe }) =>{
+const NonUserHome = ({ screen, initScrollTo, subscribe }) =>{
   //console.log("screen", screen)
   const styleProps = { };
   const classes = useStyles({styleProps});
   const rootRef = useRef(null);
-  const overlayRef = useRef(null);
-
-  const showForm = useCallback(() => {
-    d3.select(overlayRef.current)
-      .style("opacity", 0)
-      .style("display", null)
-        .transition()
-        .duration(500)
-          .style("opacity", 1);
-
-    d3.select("#navbar")
-      .style("opacity", 1)
-        .transition()
-        .duration(100)
-          .style("opacity", 0)
-          .on("end", function(){
-            d3.select(this).style("display","none")
-          })
-  }, []);
-
-  const hideForm = useCallback(() => {
-    d3.select(overlayRef.current)
-      .style("opacity", 1)
-        .transition()
-        .duration(500)
-          .style("opacity", 0)
-          .on("end", function(){
-            d3.select(this).style("display","none")
-          })
-
-    d3.select("#navbar")
-      .style("opacity", 0)
-      .style("display", null)
-        .transition()
-        .duration(500)
-          .style("opacity", 1)
-  }, []);
-
-  useEffect(() => { d3.select(overlayRef.current).style("display","none"); },[]);
 
   //@todo - stop using window and use store instead
   useEffect(() => {
@@ -219,7 +180,7 @@ const NonUserHome = ({ screen, initScrollTo, requestDemo, subscribe }) =>{
   return (
     <div className={classes.nonUserHomeRoot} ref={rootRef} id="home" >
       <div className={classes.topDisplay}>
-        <Banner screen={screen} requestDemo={requestDemo} showForm={showForm} />
+        <Banner screen={screen} />
         <CompatibilityInfo screen={screen} className=""/>
       </div>
       <Players screen={screen}/>
@@ -238,9 +199,8 @@ const NonUserHome = ({ screen, initScrollTo, requestDemo, subscribe }) =>{
         onSubmit={subscribe}
       />
       <Footer />
-      <div className={classes.overlayFormContainer} ref={overlayRef}>
+      {/**<div className={classes.overlayFormContainer} ref={overlayRef}>
         <div className={classes.overlayFormBackground} onClick={hideForm}></div>
-        {/**<div className={classes.closeFormIcon}>Go back</div>*/}
         <div className={classes.overlayForm}>
           <RequestDemo 
             heading="Thanks for your interest."
@@ -260,7 +220,7 @@ const NonUserHome = ({ screen, initScrollTo, requestDemo, subscribe }) =>{
           />
 
         </div>
-      </div>
+      </div>*/}
     </div>
   )
 }

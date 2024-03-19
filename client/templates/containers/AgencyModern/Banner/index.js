@@ -18,7 +18,7 @@ import { grey10 } from "../../../../core/cards/constants"
 import SVGImage from "../../../../core/SVGImage";
 import { MAIN_BANNER_MARGIN_VERT, NAVBAR_HEIGHT } from "../../../../core/websiteConstants";
 
-import { styles } from "../../../../core/websiteHelpers";
+import { styles, showDemoForm } from "../../../../core/websiteHelpers";
 const { mdUp, smDown, smDownLand, smDownPort } = styles;
 
 
@@ -49,21 +49,7 @@ const smallImage = {
   aspectRatio:0.85
 }
 
-/*
- - decide how to handle two differnt styles fro the Subscribe components -. can we just use different classnames for each component?
- - but the ways its done doesnt allow for that -> could we pass props into the stylesheet? eg button belo, widths of bg div etc
- -or abstract the functional elements of the Subscribe component ?
- - in Subscribe component, make bg and width and height props too,
- or at least allow a 'minimal' setting which simply displays the 
- input and button, 
- - also allow a hideInput prop, which puts the button over the input, therby reducing teh height
- even more, and onclick, it slides down to reveal input(s)
-
- - also allow a phonenumber input too
-
-
-*/
-const Banner = ({ screen, requestDemo, showForm }) => {
+const Banner = ({ screen }) => {
 
   return (
     <BannerWrapper id="home">
@@ -111,7 +97,7 @@ const Banner = ({ screen, requestDemo, showForm }) => {
               content="Get your players thinking and acting like pros. Manage all your team's communication and information in one place. Use data with confidence and purpose."
               style={mdUp(screen)}
             />
-            <Button title="Get A Demo" type="submit" style={{ width:"140px" }} onClick={showForm} />
+            <Button title="Get A Demo" type="submit" style={{ width:"140px" }} onClick={showDemoForm} />
         </BannerContent>
         <div className="banner-image-area">
           <SVGImage 

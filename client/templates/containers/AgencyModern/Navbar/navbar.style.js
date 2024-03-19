@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { themeGet } from '@styled-system/theme-get';
 import navBg from '../../../common/assets/image/agencyModern/nav-bg.png';
+import { COLOURS } from '../../../../core/websiteConstants';
 
 const NavbarWrapper = styled.header`
   width: 100%;
@@ -151,7 +152,7 @@ export const MobileMenu = styled.div`
   position: absolute;
   top: 82px;
   flex-direction: column;
-  background-color: ${themeGet('colors.white', '#ffffff')};
+  background-color:${COLOURS.banner.bg};// ${themeGet('colors.white', '#ffffff')};
   transition: all 0.3s ease;
   color: ${themeGet('colors.secondary', '#000')};
   &.for-signed-in-user {

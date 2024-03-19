@@ -2,6 +2,7 @@ import { connect } from 'react-redux'
 import { fetchUser } from './actions/UserActions'
 import { updateScreen } from './actions/CommonActions'
 import { signout } from './actions/AuthActions'
+import { requestDemo, subscribe } from './actions/NonUserActions'
 import MainRouter  from './MainRouter'
 
 const mapStateToProps = (state, ownProps) => {
@@ -13,6 +14,9 @@ const mapStateToProps = (state, ownProps) => {
 	}
 }
 const mapDispatchToProps = dispatch => ({
+	requestDemo(user){
+		dispatch(requestDemo(user))
+	},
 	loadUser(userId){
 		dispatch(fetchUser(userId))
 	},

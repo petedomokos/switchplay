@@ -66,7 +66,7 @@ const data = {
       whenToShow:["visitor"]
     },
     {
-      label: 'Demo',
+      label: 'Contact',
       id: 'contact',
       path: '/contact',
       page:"contact",
@@ -90,7 +90,18 @@ const data = {
       page:"login",
       offset: `${NAVBAR_HEIGHT}`,
       itemType:"click-button",
+      withButtonBg:false,
       whenToShow:["all-users"]
+    },
+    {
+      label: 'Demo',
+      id: 'demo',
+      path: '/demo',
+      page:"demo",
+      offset: `${NAVBAR_HEIGHT}`,
+      itemType:"click-button",
+      withButtonBg:true,
+      whenToShow:["visitor"]
     },
   ],
   mobileMenuItems: [
@@ -141,11 +152,10 @@ const data = {
       whenToShow:["visitor"]
     },
     {
-      label: 'Demo',
+      label: 'Contact',
       id: 'contact',
       path: '/contact',
       page:"contact",
-      isPage:true,
       offset: `${NAVBAR_HEIGHT}`,
       itemType:"page-link",
       whenToShow:["visitor"]
@@ -166,8 +176,19 @@ const data = {
       path: '/signout',
       offset: `${NAVBAR_HEIGHT}`,
       itemType:"click-button",
+      withButtonBg:false,
       whenToShow:["all-users"]
     },
+    {
+      label: 'Demo',
+      id: 'demo',
+      path: '/demo',
+      page:"demo",
+      offset: `${NAVBAR_HEIGHT}`,
+      itemType:"click-button",
+      withButtonBg:true,
+      whenToShow:["visitor"]
+    }
   ],
   services: [
     [

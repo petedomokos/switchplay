@@ -108,7 +108,7 @@ export const Content = styled.div`
 export const SubscriptionForm = styled.div`
   //border:solid; 
   width:50%;
-  min-width:270px;
+  min-width:260px;
   padding:30px 0;
   display:flex;
   flex-direction:column;

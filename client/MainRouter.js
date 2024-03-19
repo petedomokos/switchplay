@@ -23,6 +23,7 @@ import ImportDataContainer from './data/ImportDataContainer'
 import VisualsContainer from './visuals/VisualsContainer'
 import AboutPage from "./core/AboutPage";
 import Contact from './core/Contact';
+import RequestDemoForm from './core/RequestDemoForm';
 import './assets/styles/main.css'
 
 import Sticky from 'react-stickynode';
@@ -38,17 +39,27 @@ import {
 } from './templates/containers/AgencyModern/agencyModern.style';
 
 import { COLOURS } from './core/websiteConstants';
+import { showDemoForm } from './core/websiteHelpers';
 
 const customiseItemsForUser = (items, user, onSignout) => {
   if(user){ 
     return items
       .filter(it => it.whenToShow.includes("all-users")) //later - allow specif customerId items
-      .map(it => it.id !== "logout" ? it : ({ 
-        ...it, 
-        onClick: history => onSignout(history)
-      }))
+      .map(it => {
+        if(it.id === "logout"){
+          return { ...it, onClick: history => onSignout(history) }
+        }
+        return it;
+      })
   }
-  return items.filter(it => it.whenToShow.includes("visitor"))
+  return items
+    .filter(it => it.whenToShow.includes("visitor"))
+    .map(it => {
+      if(it.id === "demo"){
+        return { ...it, onClick:showDemoForm }
+      }
+      return it;
+    })
 }
 
 const getPathForPage = page => {
@@ -102,7 +113,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, onSignout, history }) => {
+const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, requestDemo, onSignout, history }) => {
   //BUG - onSignout leads to the Homepage re-rendering with store.screen reset to init ie 0,0
  
   const styleProps = { appBg: history.location.pathname === "/" ? COLOURS.banner.bg : "#f0ded5" }
@@ -168,21 +179,22 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, onSig
                 <Route exact path="/"><Navbar data={getNavBarItemsFromHomePage(user, onSignout)} history={history} user={user} screen={screen} /></Route>
               </DrawerProvider>
             </Sticky>
-              <Switch>
-                <Route path="/about" component={AboutPage}/>
-                <Route path="/contact" component={Contact}/>
-                <Route path="/signup" component={CreateUserContainer}/>
-                <Route path="/signin" component={SigninContainer}/>
-                <Route path="/profile" component={Profile}/>
-                <Route path="/visuals" component={VisualsContainer} />
-                <PrivateRoute path="/import" component={ImportDataContainer} />
-                <PrivateRoute path="/datasets/new" component={CreateDatasetContainer}/>
-                {jwt ?
-                  <Route path="/" component={UserHomeContainer} />
-                  :
-                  <Route exact path="/" component={NonUserHomeContainer}/>
-                }
-              </Switch>
+            <Switch>
+              <Route path="/about" component={AboutPage}/>
+              <Route path="/contact" component={Contact}/>
+              <Route path="/signup" component={CreateUserContainer}/>
+              <Route path="/signin" component={SigninContainer}/>
+              <Route path="/profile" component={Profile}/>
+              <Route path="/visuals" component={VisualsContainer} />
+              <PrivateRoute path="/import" component={ImportDataContainer} />
+              <PrivateRoute path="/datasets/new" component={CreateDatasetContainer}/>
+              {jwt ?
+                <Route path="/" component={UserHomeContainer} />
+                :
+                <Route exact path="/" component={NonUserHomeContainer}/>
+              }
+            </Switch>
+            <RequestDemoForm submit={requestDemo} />
           </ContentWrapper>
         </Fragment>
       </ThemeProvider>

@@ -1,3 +1,5 @@
+import * as d3 from 'd3';
+
 export const scrollIntoViewWithOffset = (node, offset, settings={}) => {
   const { behaviour="smooth" } = settings;
   window.scrollTo({
@@ -16,4 +18,23 @@ export const styles = {
   lgUp:screen => ({ display: screen.isLarge ? null : "none" }),
   smDownLand: screen => ({ display: screen.isSmall && screen.orientation === "landscape" ? null : "none" }),
   smDownPort: screen => ({ display: screen.isSmall && screen.orientation === "portrait" ? null : "none" })
+}
+
+export const showDemoForm = () => {
+  d3.select("#request-demo-form")
+  //d3.select(overlayRef.current)
+    .style("opacity", 0)
+    .style("display", null)
+      .transition()
+      .duration(500)
+        .style("opacity", 1);
+
+  d3.select("#navbar")
+    .style("opacity", 1)
+      .transition()
+      .duration(100)
+        .style("opacity", 0)
+        .on("end", function(){
+          d3.select(this).style("display","none")
+        })
 }
