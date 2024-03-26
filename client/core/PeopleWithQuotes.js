@@ -10,76 +10,79 @@ import { PEOPLE_WITH_QUOTES } from './websiteConstants';
 const useStyles = makeStyles(theme => ({
     peopleWithQuotesRoot: {
         width:"100vw",
-        /*height:props => {
-            console.log("props", props)
-            return props.aspectRatio === 2 ? "300px" : "200px"
-        },*/
-        //height:"2000px",
+        height:"60vw",
+        minHeight:"500px",
+        maxHeight:"600px",
         display:"flex",
         flexDirection:props => props.direction,
         [theme.breakpoints.down('sm')]: {
+            borderColor:"blue",
+            height:"1060px",
+            minHeight:"1060px",
+            maxHeight:"1060px",
+            paddingBottom:"50px",
             //passing in direction = colummn affects teh boundingClient calc in image, 
             //so we use flex property to switch to a vertical display instead
             display:"block",
+
+        },
+        [theme.breakpoints.down('xs')]: {
+            borderColor:"red",
+            height:"870px",
+            minHeight:"870px",
+            maxHeight:"870px", 
         },
         background:"#FFFEFE",
-        //border:'solid',
-        borderColor:"red",
+        border:'solid',
     },
     peopleContainer:{
         width:"50vw",
-        height:props => {
-            console.log("...")
-            return `${props.aspectRatio * 50}vw`;
-        },
-        //display:"flex",
-        //justifyContent:"center",
-        //border:'solid',
-        borderColor:"blue",
-        //background:"yellow",
+        height:"100%",
+        maxHeight:"100%",
+        border:'solid',
         [theme.breakpoints.down('sm')]: {
             width:"100vw",
-            height:props => `${props.aspectRatio * 100}vw`,
+            height:"440px",
         },
+        [theme.breakpoints.down('xs')]: {
+            height:"300px",
+        }
     },
     titleAndQuotesContainer:{
         width:"50vw",
-        height:props => {
-            //WARNING - REMOVING THIS LOG APPEARS TO PREVENT UPDATE
-            console.log("...")
-            return `${props.aspectRatio * 50}vw`;
-        },
-        minHeight:"600px",
-        padding:"20px 0",
+        height:"100%",
+        maxHeight:"100%",
         color:"red",
-        //border:"solid",
-        borderColor:"red",
+        border:"solid",
         display:"flex",
         flexDirection:"column",
         alignItems:"center",
-        [theme.breakpoints.down('md')]: {
+        [theme.breakpoints.down('lg')]: {
             padding:0
         },
         [theme.breakpoints.down('sm')]: {
             width:"100vw",
-            height:() => "500px",
-            padding:"10px 0 50px",
+            height:"500px",
+            padding:"0",//"10px 0 50px",
             borderColor:"yellow",
         },
     },
     title:{
         width:"100%",
-        height:`${PEOPLE_WITH_QUOTES.titleHeightPC.mdUp}%`,
+        height:"20%",
+        minHeight:"70px",
         paddingTop:"30px",
         display:"flex",
         justifyContent:"center",
         alignItems:"center",
-        //border:"solid",
+        border:"solid",
         color:"black",//theme.palette.blue,
         fontFamily: "Brush Script MT, cursive",
         fontSize:"50px",
         [theme.breakpoints.down('lg')]: {
-            fontSize:"46px",
+            height:"15%",
+            paddingTop:"0px",
+            fontSize:"40px",
         },
         [theme.breakpoints.down('md')]: {
             fontSize:"36px",
@@ -91,7 +94,7 @@ const useStyles = makeStyles(theme => ({
         }
     },
     quotes:{
-        //border:"solid",
+        border:"solid",
         width:"100%",
         height:"75%",
         padding:"30px",
@@ -114,7 +117,7 @@ const PeopleWithQuotes = ({ title, data, direction }) =>{
     return (
         <div className={classes.peopleWithQuotesRoot}>
             <div className={classes.peopleContainer}>
-                <SVGImage image={image} imgKey={key} />
+                <SVGImage image={image} imgKey={key} contentFit="cover" centreHoriz={true} />
                 {/**<Image image={image} imgKey={key} />*/}
 
             </div>

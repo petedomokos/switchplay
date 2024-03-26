@@ -27,27 +27,27 @@ const playersImageDimns = screen => {
     return {
       rawImgWidth:935,
       rawImgHeight:598,
-      scale:1.7,
-      imgTransX:-screen.width / 2.6,
-      aspectRatio:0.7
+      //scale:1.7,
+      //imgTransX:-screen.width / 2.6,
+      //aspectRatio:0.7
     }
   }
   if(screen.isMedium){
     return {
       rawImgWidth:935,
       rawImgHeight:598,
-      scale:1.7,
-      imgTransX:-screen.width / 5,
-      aspectRatio:0.9
+      //scale:1.7,
+      //imgTransX:-screen.width / 5,
+      //aspectRatio:0.9
     }
   }
   //lg-up
   return {
     rawImgWidth:935,
     rawImgHeight:598,
-    scale:1.7,
-    imgTransX:-screen.width / 5,
-    aspectRatio:0.9
+    //scale:1.7,
+    //imgTransX:-screen.width / 5,
+    //aspectRatio:0.9
   }
 }
 
@@ -55,29 +55,29 @@ const playersImageDimns = screen => {
 const staffImageDimns = screen => {
   if(screen.isSmall){
     return {
-      rawImgWidth:800,
-      rawImgHeight:900, 
-      imgTransX:-screen.width / 4.3, 
-      imgTransY:0,
-      aspectRatio:0.73
+      rawImgWidth:1024,
+      rawImgHeight:1024, 
+      //imgTransX:-screen.width / 4.3, 
+      //imgTransY:0,
+      //aspectRatio:0.73
     }
   }
   if(screen.isMedium){
     return {
-      rawImgWidth:800,
-      rawImgHeight:900, 
-      imgTransX:-screen.width / 8,
-      imgTransY:0,
-      aspectRatio:1.1
+      rawImgWidth:1024,
+      rawImgHeight:1024, 
+      //imgTransX:-screen.width / 8,
+      //imgTransY:0,
+      //aspectRatio:1.1
     }
   }
   //lg-up
   return {
-    rawImgWidth:900,
-    rawImgHeight:900, 
-    imgTransX:-80, 
-    imgTransY:0,
-    aspectRatio:0.9
+    rawImgWidth:1024,
+    rawImgHeight:1024, 
+    //imgTransX:-80, 
+    //imgTransY:0,
+    //aspectRatio:0.9
   }
 }
 
@@ -188,8 +188,7 @@ const NonUserHome = ({ screen, initScrollTo, subscribe }) =>{
         <Banner screen={screen} />
         <CompatibilityInfo screen={screen} className=""/>
       </div>
-      {/**<Players screen={screen}/>*/}
-      {/**
+      <Players screen={screen}/>
       <PeopleWithQuotes title="What Players Say" data={playerQuotesData(screen)} direction="row" />
       <UltimateFeature screen={screen} />
       <PeopleWithQuotes title="What Staff Say" data={staffQuotesData(screen)} direction="row-reverse" />
@@ -204,7 +203,6 @@ const NonUserHome = ({ screen, initScrollTo, subscribe }) =>{
         }}
         onSubmit={subscribe}
       />
-      */}
       <Footer />
       {/**<div className={classes.overlayFormContainer} ref={overlayRef}>
         <div className={classes.overlayFormBackground} onClick={hideForm}></div>

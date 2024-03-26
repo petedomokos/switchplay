@@ -11,37 +11,37 @@ const useStyles = makeStyles(theme => ({
         flexDirection:"column",
         justifyContent:"center",
         padding:"5px",
-        //border:"solid"
+        border:"solid"
     },
     label:{
         margin:"5px 0",
-        fontSize:"16px",
+        fontSize:"14px",
         [theme.breakpoints.only('lg')]: {
-            fontSize:"16px"
+            fontSize:"12px"
         },
         [theme.breakpoints.down('md')]: {
-            fontSize:"12px",
+            fontSize:"11px",
         },
         [theme.breakpoints.down('sm')]: {
             fontSize:"11px",
         },
-        //border:"solid",
+        border:"solid",
         borderColor:"red",
         color:theme.palette.blue
     },
     text:{
-        fontSize:"22px",
+        fontSize:"20px",
         color:grey10(9),
         [theme.breakpoints.only('lg')]: {
-            fontSize:"22px",
+            fontSize:"16px",
             borderColor:"red"
         },
         [theme.breakpoints.down('md')]: {
-            fontSize:"16px",
+            fontSize:"14px",
             borderColor:"yellow"
         },
         fontStyle:"italic",
-        //border:"solid",
+        border:"solid",
     }
 }))
 

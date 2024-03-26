@@ -9,7 +9,7 @@ import { width } from 'styled-system';
 
 const useStyles = makeStyles(theme => ({
   imageSvg: {
-      border:"solid",
+      //border:"solid",
       borderColor:"yellow",
       overflow:"hidden"
       /*[theme.breakpoints.up('md')]: {
