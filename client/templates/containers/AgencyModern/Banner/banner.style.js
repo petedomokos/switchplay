@@ -166,12 +166,12 @@ export const BannerContent = styled.div`
     width:90%;
     max-width:90%;
     //min-height:auto;
-    margin: 0 0 80px;
+    margin: 40px auto 80px;
     //height:auto;
     border-color: pink;
   }
   @media only screen and (max-width: 575px) {
-    margin-bottom: 40px;
+    margin: 40px auto 60px;
   }
   .main-img-small {
     //margin:auto; 
