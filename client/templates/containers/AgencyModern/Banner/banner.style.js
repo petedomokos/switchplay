@@ -45,15 +45,22 @@ const BannerWrapper = styled.div`
     }
     @media only screen and (max-width: 990px) {
       width:100%;
-      height:40vh;
-      max-height:40vh;
-      min-height:40vh;
+      height:60vh;
+      max-height:60vh;
+      min-height:60vh;
       margin-top:80px;
       //height:auto;
       border-color:orange;
     }
     @media only screen and (max-width: 768px) {
-      margin-top:0px;
+      height:50vh;
+      max-height:50vh;
+      min-height:50vh;
+    }
+    @media only screen and (max-width: 575px) {
+      height:40vh;
+      max-height:40vh;
+      min-height:40vh;
     }
     overflow:hidden;
   }
@@ -166,12 +173,12 @@ export const BannerContent = styled.div`
     width:90%;
     max-width:90%;
     //min-height:auto;
-    margin: 40px auto 80px;
+    margin: 80px auto 80px;
     //height:auto;
     border-color: pink;
   }
   @media only screen and (max-width: 575px) {
-    margin: 40px auto 60px;
+    margin: 50px auto 20px;
   }
   .main-img-small {
     //margin:auto; 
@@ -230,9 +237,9 @@ export const BannerContent = styled.div`
 
     @media only screen and (max-width: 768px) {
       max-width: 550px;
-      font-size: 42px;
+      font-size: 48px;
       &.highlighted {
-        font-size: 50px;
+        font-size: 60px;
         line-height: 1;
       }
     }
@@ -253,83 +260,14 @@ export const BannerContent = styled.div`
       }
     }
   }
-`;
-
-export const Subscribe = styled.div`
-  //border: solid;
-  border-color:red;
-  display: flex;
-  flex-direction: column;
-  max-width:300px;
-  @media only screen and (max-width: 1440px) {
-    width: 93%;
-  }
-  @media only screen and (max-width: 990px) {
-  }
-  @media only screen and (max-width: 768px) {
-    margin:20px auto 40px;
-    align-items: center;
-    width: 100%;
-    flex-direction: column;
-  }
-
-  @media only screen and (max-width: 575px) {
-    margin:20px auto 40px;
-    align-items: center;
-    width: 100%;
-    flex-direction: column;
-  }
-  .reusecore__input {
-    width: 100%;
-  }
-  .field-wrapper {
-    @media only screen and (max-width: 990px) {
-      display:none;
-    }
-    margin-bottom:5px;
-    input {
-      min-width: 200px;
-      font-family: DM Sans;
-      font-size: 16px;
-      min-height: 60px;
-      padding: 0 24px;
-      ::placeholder {
-        color: ${rgba('#02073E', 0.4)};
-        opacity: 1; /* Firefox */
-      }
-      &:focus {
-        border-color: #ff825c;
-      }
-
-      @media only screen and (max-width: 1440px) {
-        min-height: 50px;
-      }
-      @media only screen and (max-width: 575px) {
-        min-height: default;
-        display:none;
-      }
-
-      @media only screen and (max-width: 575px) {
-        display:none;
-      }
-    }
-  }
   button {
-    background-color: #ff825c;
-    min-width: 150px;
-    max-width:150px;
-  }
-`;
-
-export const ImageGroup = styled.div`
-  gap: 23px;
-  display: grid;
-  align-items: center;
-  grid-template-columns: repeat(3, auto);
-  img {
-    @media only screen and (max-width: 575px) {
-      max-width: 27%;
+    @media only screen and (max-width: 768px) {
+      margin-top:30px;
     }
+    @media only screen and (max-width: 575px) {
+      margin-top:0px;
+    }
+    
   }
 `;
 
