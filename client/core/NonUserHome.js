@@ -120,7 +120,7 @@ const useStyles = makeStyles(theme => ({
       padding:`${NAVBAR_HEIGHT}px 5vw 0`,
       //fontSize:"40px"
     },
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       padding:`${NAVBAR_HEIGHT}px 0 0`,
       //fontSize:"40px"
     },

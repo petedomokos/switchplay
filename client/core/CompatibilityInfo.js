@@ -4,15 +4,25 @@ import * as d3 from 'd3';
 import { grey10, MAIN_BANNER_MARGIN_VERT, NAVBAR_HEIGHT } from "./websiteConstants";
 import { styles } from "./websiteHelpers";
 
-const { mdUp, smDown } = styles;
+const { lgUp, mdDown } = styles;
 
 
 const useStyles = makeStyles(theme => ({
     compatibilityInfoRoot:{
-      display:"flex",
       width:"800px",
       height:`${NAVBAR_HEIGHT}px`,
-      margin:"10px 0 0",
+      margin:"30px auto 0",
+      display:"flex",
+      justifyContent:"center",
+      alignItems:"center",
+      [theme.breakpoints.down('md')]: {
+        width:"100%",
+        maxWidth:"500px",
+        height:"auto",
+        margin:"100px auto",
+        flexDirection:"column",
+        borderColor:"red",
+      },
       [theme.breakpoints.down('sm')]: {
         flexDirection:"column",
         width:"90%",
@@ -31,18 +41,16 @@ const useStyles = makeStyles(theme => ({
       margin:"5px 25px 5px 0px", 
       fontSize:"14px", 
       color:grey10(7),
-      [theme.breakpoints.up('xl')]: {
-        marginLeft:"5%",
-      },
       [theme.breakpoints.down('md')]: {
-        fontSize:"12px",
+        margin:"5px 0 15px", 
+        textAlign:"center",
+        fontSize:"16px",
         borderColor:"red",
       },
       [theme.breakpoints.down('sm')]: {
         borderColor:"yellow",
         margin:"5px 0 20px", 
         alignSelf:"center",
-        textAlign:"center",
         fontSize:"14px",
         color:grey10(7),
       },
@@ -65,10 +73,12 @@ const useStyles = makeStyles(theme => ({
       //border:"solid",
       height:"20px", 
       margin:"5px 25px 5px 0", 
+      textAlign:"center",
       fontSize:"14px", 
       color:grey10(5),
       [theme.breakpoints.down('md')]: {
-        fontSize:"12px",
+        margin:"10px 25px", 
+        fontSize:"16px",
       },
       [theme.breakpoints.down('sm')]: {
         fontSize:"14px",
@@ -78,18 +88,40 @@ const useStyles = makeStyles(theme => ({
     },
     col1Item:{
       width:"80px",
+      [theme.breakpoints.down('md')]: {
+        width:"130px"
+      },
       [theme.breakpoints.down('sm')]: {
         width:"110px"
       }
     },
     col2Item:{
       width:"48px",
+      [theme.breakpoints.down('md')]: {
+        width:"48px"
+      },
+      [theme.breakpoints.down('sm')]: {
+        width:"48px"
+      }
     },
     col3Item:{
-      width:"40px"
+      //border:"solid",
+      width:"40px",
+      [theme.breakpoints.down('md')]: {
+        width:"50px"
+      },
+      [theme.breakpoints.down('sm')]: {
+        width:"40px"
+      }
     },
     col4Item:{
-      width:"30px"
+      width:"30px",
+      [theme.breakpoints.down('md')]: {
+        width:"30px"
+      },
+      [theme.breakpoints.down('sm')]: {
+        width:"30px"
+      }
     }
 }))
 
@@ -107,14 +139,14 @@ const CompatibilityInfo = ({ screen, className }) =>{
     <div className={`${classes.compatibilityInfoRoot} ${className}`}>
         <div className={classes.listLabel} >Works with</div>
           <div className={classes.itemRows} >
-            <div className="md-up" style={mdUp(screen)}>
+            <div style={lgUp(screen)}>
                 <div className={classes.itemRow} >
                   {singleRowItems.map((it,i) =>
                     <span className={classes.item}>{it}</span>
                   )}
                 </div>
             </div>
-            <div className="sm-down" style={smDown(screen)}>
+            <div style={mdDown(screen)}>
               {rows.map(rowItems =>
                 <div className={classes.itemRow} >
                   {rowItems.map((it,i) =>

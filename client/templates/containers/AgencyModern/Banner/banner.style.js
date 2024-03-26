@@ -9,7 +9,6 @@ import { MAIN_BANNER_MARGIN_VERT, COLOURS, NAVBAR_HEIGHT } from '../../../../cor
 //#f0ded5
 const BannerWrapper = styled.div`
   border: solid;
-  border-color:white;
   //background-image: url(${bannerBg?.src});
   //background-color: ${COLOURS.banner.bg};
   background-size: 100%;
@@ -18,62 +17,49 @@ const BannerWrapper = styled.div`
   width:100%;
   height:calc(100vh - ${2 * NAVBAR_HEIGHT}px - ${2 * MAIN_BANNER_MARGIN_VERT.xl}px);
   min-height:550px;
-  //min-height: calc(100vh - ${2 * NAVBAR_HEIGHT}px);
   margin-top:${MAIN_BANNER_MARGIN_VERT.xl}px;
   display:flex;
   justify-content:center;
 
-  @media only screen and (orientation:portrait) {
+  @media only screen and (orientation:portrait) (min-width: 991px) {
     max-height:550px;
   }
 
-  @media only screen and (orientation:portrait) and (min-width: 769px) {
-    //padding-top:50px;
-    border-color:black;
-    //min-height:auto;
-  }
-
-  @media only screen and (max-width: 1440px) {
-  }
   @media only screen and (max-width: 990px) {
-  }
-  @media only screen and (max-width: 768px) {
+    height:auto;
+    min-height: auto;
+    max-height:auto;
     flex-direction:column;
     justify-content:flex-start;
     align-items:center;
-    height:auto;
-    min-height: auto;
-    padding-top:70px;
+    margin-top:0;
+    padding-top:0px;
     padding-bottom:0;
   }
   .banner-image-area {
     border:solid;
     border-color:red;
     width:50%;
-    //height:calc(100vh - ${2 * NAVBAR_HEIGHT}px - ${2 * MAIN_BANNER_MARGIN_VERT.xl}px);
-    //height:100%;
-    //min-height:550px;
     @media only screen and (min-width: 769px) {
       max-height:60vw;
     }
-    @media only screen and (orientation:portrait) {
-      //min-height:550px;
-    }
-    @media only screen and (orientation:portrait) and (max-width: 990px) {
-      //min-height:500px;
-    }
-    @media only screen and (max-width: 768px) {
+    @media only screen and (max-width: 990px) {
       width:100%;
       height:40vh;
       max-height:40vh;
       min-height:40vh;
+      margin-top:80px;
       //height:auto;
       border-color:orange;
+    }
+    @media only screen and (max-width: 768px) {
+      margin-top:0px;
     }
     overflow:hidden;
   }
   .banner-caption-md-up {
     border:solid;
+    border-color:red;
     color: ${themeGet('colors.paragraph', '#02073E')};
     font-size: 26px;
     line-height: 1.5;
@@ -88,8 +74,10 @@ const BannerWrapper = styled.div`
       //max-width:35vw;
     }
     @media only screen and (max-width: 990px) {
+      margin:30px auto;
       max-width: 85%;
       font-size: 22px;
+      text-align:center;
     }
   }
   .banner-caption-area-sm {
@@ -113,7 +101,7 @@ const BannerWrapper = styled.div`
     @media only screen and (orientation:landscape) and (max-width: 1440px) {
       font-size: 22px;
     }
-    @media only screen and (max-width: 768px) {
+    @media only screen and (max-width: 990px) {
       margin:40px auto;
       font-size: 18px;
     }
@@ -165,6 +153,11 @@ export const BannerContent = styled.div`
   @media only screen and (max-width: 990px) {
     //min-height:500px;
     padding-top:0;
+    align-items:center;
+    width:90%;
+    max-width:90%;
+    //min-height:auto;
+    margin:100px 0 30px;
     border-color: blue;
   }
   @media only screen and (max-width: 768px) {
@@ -173,7 +166,7 @@ export const BannerContent = styled.div`
     width:90%;
     max-width:90%;
     //min-height:auto;
-    margin-bottom: 60px;
+    margin: 0 0 80px;
     //height:auto;
     border-color: pink;
   }
@@ -226,6 +219,7 @@ export const BannerContent = styled.div`
       }
     }
     @media only screen and (max-width: 990px) {
+      text-align: center;
       max-width: 550px;
       font-size: 48px;
       &.highlighted {
@@ -235,7 +229,6 @@ export const BannerContent = styled.div`
     }
 
     @media only screen and (max-width: 768px) {
-      text-align: center;
       max-width: 550px;
       font-size: 42px;
       &.highlighted {

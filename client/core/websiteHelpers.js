@@ -17,7 +17,8 @@ export const styles = {
   mdUp: screen => ({ display: screen.isSmall ? "none" : null }),
   lgUp:screen => ({ display: screen.isLarge ? null : "none" }),
   smDownLand: screen => ({ display: screen.isSmall && screen.orientation === "landscape" ? null : "none" }),
-  smDownPort: screen => ({ display: screen.isSmall && screen.orientation === "portrait" ? null : "none" })
+  smDownPort: screen => ({ display: screen.isSmall && screen.orientation === "portrait" ? null : "none" }),
+  mdOnly: screen => ({ display: screen.size === "md" ? null : "none" })
 }
 
 export const showDemoForm = () => {

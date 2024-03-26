@@ -17,10 +17,11 @@ import BannerWrapper, {
 
 import { grey10 } from "../../../../core/cards/constants"
 import SVGImage from "../../../../core/SVGImage";
+import CompatibilityInfo from '../../../../core/CompatibilityInfo';
 import { MAIN_BANNER_MARGIN_VERT, NAVBAR_HEIGHT } from "../../../../core/websiteConstants";
 
 import { styles, showDemoForm } from "../../../../core/websiteHelpers";
-const { mdUp, smDown, smDownLand, smDownPort } = styles;
+const { lgUp, mdDown, mdUp, smDown, smDownLand, smDownPort, mdOnly } = styles;
 
 
 //import paypal from '../../../common/assets/image/agencyModern/paypal.png';
@@ -37,26 +38,8 @@ const largeImage = {
   url:"website/heroImg.png",
   rawImgWidth:941,//actual whole is 1100, 
   rawImgHeight:805, 
-  imgTransX:-60, 
-  imgTransY:0
-}
-
-const smallImage = {
-  url:"website/heroImg.png",
-  rawImgWidth:941,//actual whole is 1100, 
-  rawImgHeight:805, 
   imgTransX:0, 
-  imgTransY:0,
-  aspectRatio:0.85
-}
-
-const narrowImage = {
-  url:"website/heroImg.png",
-  rawImgWidth:600,//actual whole is 1100, 
-  rawImgHeight:200, 
-  imgTransX:-60, 
   imgTransY:0
-
 }
 
 const Banner = ({ screen }) => {
@@ -73,19 +56,30 @@ const Banner = ({ screen }) => {
                 as="h1"
                 className="md-up"
                 content="The tool"
-                style={mdUp(screen)}
+                style={lgUp(screen)}
               />
               <Heading
                 as="h1"
                 className="md-up"
                 content="that puts"
-                style={mdUp(screen)}
+                style={lgUp(screen)}
               />
               <Heading
                 as="h1"
                 className="md-up highlighted"
                 content="people first"
-                style={mdUp(screen)}
+                style={lgUp(screen)}
+              />
+              <Heading
+                as="h1"
+                content="The tool that puts"
+                style={mdOnly(screen)}
+              />
+              <Heading
+                as="h1"
+                className="highlighted"
+                content="people first"
+                style={mdOnly(screen)}
               />
               <Heading
                 as="h1"
@@ -120,14 +114,13 @@ const Banner = ({ screen }) => {
             imgKey="main-lg"
             contentFit="cover"
             centreHoriz={true}
-            styles={{ root: mdUp(screen) }}
+            styles={{ root: lgUp(screen) }}
           />
           <SVGImage 
-            className="sm-down"
-            image={{ ...smallImage }}
+            image={{ ...largeImage }}
             imgKey="main-sm"
             contentFit="cover"
-            styles={{ root: smDown(screen) }}
+            styles={{ root: mdDown(screen) }}
           />
         </div>
         <div className="banner-caption-area-sm sm-down" style={smDown(screen)}>
