@@ -1,4 +1,5 @@
 import React from 'react';
+import * as d3 from 'd3';
 import Container from '../../../common/components/UI/ContainerTwo';
 
 import Text from '../../../common/components/Text';
@@ -34,22 +35,35 @@ const dropbox = "";
 
 const largeImage = {
   url:"website/heroImg.png",
-  rawImgWidth:800,//actual whole is 1100, 
-  rawImgHeight:200, 
+  rawImgWidth:941,//actual whole is 1100, 
+  rawImgHeight:805, 
   imgTransX:-60, 
   imgTransY:0
 }
 
 const smallImage = {
   url:"website/heroImg.png",
-  rawImgWidth:800,//actual whole is 1100, 
-  rawImgHeight:200, 
-  imgTransX:-60, 
+  rawImgWidth:941,//actual whole is 1100, 
+  rawImgHeight:805, 
+  imgTransX:0, 
   imgTransY:0,
   aspectRatio:0.85
 }
 
+const narrowImage = {
+  url:"website/heroImg.png",
+  rawImgWidth:600,//actual whole is 1100, 
+  rawImgHeight:200, 
+  imgTransX:-60, 
+  imgTransY:0
+
+}
+
 const Banner = ({ screen }) => {
+
+  //console.log("screenwidth", screen.width)
+  const contentsHeight = screen.orientation === "portrait" ? 550 : d3.max([550, screen.height - 2 * NAVBAR_HEIGHT - 2 * MAIN_BANNER_MARGIN_VERT[screen.size] ]);
+  console.log("contentsH", contentsHeight)
 
   return (
     <BannerWrapper id="home">
@@ -102,14 +116,17 @@ const Banner = ({ screen }) => {
         <div className="banner-image-area">
           <SVGImage 
             className="md-up"
-            image={largeImage}
+            image={{ ...largeImage, requiredHeight: contentsHeight }}
             imgKey="main-lg"
+            contentFit="cover"
+            centreHoriz={true}
             styles={{ root: mdUp(screen) }}
           />
           <SVGImage 
             className="sm-down"
-            image={smallImage}
+            image={{ ...smallImage }}
             imgKey="main-sm"
+            contentFit="cover"
             styles={{ root: smDown(screen) }}
           />
         </div>

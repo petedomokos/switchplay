@@ -86,7 +86,7 @@ export default function imageComponent() {
                     .attr("width", width)
                     .attr("height", height)
                     //.attr("display", "none")
-                    .attr("stroke", "white")
+                    //.attr("stroke", "white")
                     .attr("fill","none")// withBorderGradient ? "none" : styles.borderColour)
                     /*.call(updateRectDimns, { 
                         width: () => width, 

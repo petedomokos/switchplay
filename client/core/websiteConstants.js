@@ -2,10 +2,10 @@ export const NAVBAR_HEIGHT = 70;
 
 export const MAIN_BANNER_MARGIN_VERT = {
     xs:25,
-    sm:25,
-    md:25,
-    lg:0,//25,
-    xl:25
+    sm:50,
+    md:50,
+    lg:75,
+    xl:75
 }
 
 export const COLOURS = {

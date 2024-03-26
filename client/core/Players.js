@@ -11,20 +11,20 @@ const { mdUp, smDown } = styles;
 
 const mainImageLarge = {
   url:"website/images/player-as-pro.png",
-  rawImgWidth:800,//actual whole is 1100, 
-  rawImgHeight:200, 
-  imgTransX:-20, 
+  rawImgWidth:816,//actual whole is 1100, 
+  rawImgHeight:1456, 
+  imgTransX:0, 
   imgTransY:0,
   aspectRatio:1.6
 }
 
 const mainImageSmall = {
   url:"website/images/player-as-pro.png",
-  rawImgWidth:800,//actual whole is 1100, 
-  rawImgHeight:200, 
-  imgTransX:-30, 
+  rawImgWidth:816,//actual whole is 1100, 
+  rawImgHeight:1456, 
+  imgTransX:0, 
   imgTransY:0,
-  aspectRatio:1.2
+  aspectRatio:1.6
 }
 
 
@@ -74,7 +74,7 @@ const useStyles = makeStyles(theme => ({
     width:"25vw",
     height:`${25 * mainImageLarge.aspectRatio}vw`,
     marginLeft:"4vw",
-    border:"solid",
+    //border:"solid",
     borderColor:"yellow",
   },
   headingSmallLine:{
@@ -84,18 +84,15 @@ const useStyles = makeStyles(theme => ({
     color:'white',
     [theme.breakpoints.only('lg')]: {
       fontSize:"22px",
-      color:"red",
     },
     [theme.breakpoints.down('md')]: {
       fontSize:"16px",
       margin:"0 0 10px 0",
-      color:"yellow",
     },
     [theme.breakpoints.down('xs')]: {
       margin:"0 0 20px 0",
       lineHeight:1,
       fontSize:"14px",
-      color:"blue",
     },
   },
   headingLargeLine:{
@@ -105,18 +102,15 @@ const useStyles = makeStyles(theme => ({
     color:'white',
     [theme.breakpoints.only('lg')]: {
       fontSize:"66px",
-      color:"red",
     },
     [theme.breakpoints.down('md')]: {
       fontSize:"48px",
       margin:"0 0 15px 0",
-      color:"yellow",
     },
     [theme.breakpoints.down('xs')]: {
       margin:"0 0 15px 0",
       lineHeight:1.2,
       fontSize:"42px",
-      color:"blue",
     },
   }
 }))
@@ -143,10 +137,10 @@ const PlayersBanner = ({ screen }) =>{
           <div className={classes.headingSmallLine}>LIKE PROS</div>
         </div>
         <div className={`${classes.mainImageLarge} md-up`} style={mdUp(screen)}>
-          <SVGImage image={mainImageLarge} />
+          <SVGImage image={mainImageLarge} centreHoriz={true} centreVert={true} />
         </div>
         <div className={`${classes.mainImageSmall} sm-down`} style={smDown(screen)}>
-          <SVGImage image={mainImageSmall} />
+          <SVGImage image={mainImageSmall} centreHoriz={true} centreVert={true} />
         </div>
       </div>
       <Services />

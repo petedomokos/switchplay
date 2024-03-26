@@ -16,16 +16,21 @@ const BannerWrapper = styled.div`
   background-position: right bottom;
   background-repeat: no-repeat;
   width:100%;
-  min-height: calc(100vh - ${2 * NAVBAR_HEIGHT}px);
+  height:calc(100vh - ${2 * NAVBAR_HEIGHT}px - ${2 * MAIN_BANNER_MARGIN_VERT.xl}px);
+  min-height:550px;
+  //min-height: calc(100vh - ${2 * NAVBAR_HEIGHT}px);
+  margin-top:${MAIN_BANNER_MARGIN_VERT.xl}px;
   display:flex;
   justify-content:center;
-  padding-top:${MAIN_BANNER_MARGIN_VERT.xl}px;
-  padding-bottom:${MAIN_BANNER_MARGIN_VERT.xl}px;
+
+  @media only screen and (orientation:portrait) {
+    max-height:550px;
+  }
 
   @media only screen and (orientation:portrait) and (min-width: 769px) {
-    padding-top:50px;
-    border-color:yellow;
-    min-height:auto;
+    //padding-top:50px;
+    border-color:black;
+    //min-height:auto;
   }
 
   @media only screen and (max-width: 1440px) {
@@ -42,26 +47,30 @@ const BannerWrapper = styled.div`
     padding-bottom:0;
   }
   .banner-image-area {
-    //border:solid;
+    border:solid;
     border-color:red;
     width:50%;
-    height:calc(100vh - ${2 * NAVBAR_HEIGHT}px - ${2 * MAIN_BANNER_MARGIN_VERT.xl}px);
-    min-height:650px;
+    //height:calc(100vh - ${2 * NAVBAR_HEIGHT}px - ${2 * MAIN_BANNER_MARGIN_VERT.xl}px);
+    //height:100%;
+    //min-height:550px;
     @media only screen and (min-width: 769px) {
       max-height:60vw;
     }
     @media only screen and (orientation:portrait) {
-      min-height:650px;
+      //min-height:550px;
     }
     @media only screen and (orientation:portrait) and (max-width: 990px) {
-      min-height:500px;
+      //min-height:500px;
     }
     @media only screen and (max-width: 768px) {
       width:100%;
-      min-height:auto;
-      height:auto;
-      border-color:blue;
+      height:40vh;
+      max-height:40vh;
+      min-height:40vh;
+      //height:auto;
+      border-color:orange;
     }
+    overflow:hidden;
   }
   .banner-caption-md-up {
     border:solid;
@@ -133,17 +142,18 @@ export const BannerContent = styled.div`
   border: solid;
   max-width: 600px;
   width: 50%;
-  padding-top:1.5%;
+  //padding-top:1.5%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height:calc(100vh - ${2 * NAVBAR_HEIGHT}px - ${2 * MAIN_BANNER_MARGIN_VERT.xl}px);
-  min-height:650px;
+  //height:calc(100vh - ${2 * NAVBAR_HEIGHT}px - ${2 * MAIN_BANNER_MARGIN_VERT.xl}px);
+  height:100%;
+  //min-height:550px;
   @media only screen and (min-width: 769px) {
-    max-height:60vw;
+    //max-height:60vw;
   }
   @media only screen and (orientation:portrait) {
-    min-height:650px;
+    //min-height:550px;
   }
   @media only screen and (max-width: 1500px) {
     border-color: red;
@@ -153,7 +163,7 @@ export const BannerContent = styled.div`
     border-color: yellow;
   }
   @media only screen and (max-width: 990px) {
-    min-height:500px;
+    //min-height:500px;
     padding-top:0;
     border-color: blue;
   }
@@ -162,9 +172,13 @@ export const BannerContent = styled.div`
     align-items:center;
     width:90%;
     max-width:90%;
-    min-height:auto;
-    height:auto;
+    //min-height:auto;
+    margin-bottom: 60px;
+    //height:auto;
     border-color: pink;
+  }
+  @media only screen and (max-width: 575px) {
+    margin-bottom: 40px;
   }
   .main-img-small {
     //margin:auto; 
@@ -186,10 +200,8 @@ export const BannerContent = styled.div`
     color: ${themeGet('colors.menu', '#02073e')};
     letter-spacing: -2px;
     @media only screen and (max-width: 1500px) {
-      border-color: red;
     }
     @media only screen and (orientation:portrait) and (max-width: 1440px) {
-      border-color: blue;
       font-size: 60px;
       letter-spacing: -1.5px;
       &.highlighted {
@@ -198,7 +210,6 @@ export const BannerContent = styled.div`
       }
     }
     @media only screen and (orientation:landscape) and (max-width: 1440px) {
-      border-color: yellow;
       font-size: 80px;
       letter-spacing: -1.5px;
       &.highlighted {
@@ -207,7 +218,6 @@ export const BannerContent = styled.div`
       }
     }
     @media only screen and (max-width: 1250px) {
-      border-color: blue;
       max-width: 550px;
       font-size: 56px;
       &.highlighted {
@@ -216,7 +226,6 @@ export const BannerContent = styled.div`
       }
     }
     @media only screen and (max-width: 990px) {
-      border-color: blue;
       max-width: 550px;
       font-size: 48px;
       &.highlighted {
@@ -226,7 +235,6 @@ export const BannerContent = styled.div`
     }
 
     @media only screen and (max-width: 768px) {
-      border-color: pink;
       text-align: center;
       max-width: 550px;
       font-size: 42px;
@@ -262,17 +270,14 @@ export const Subscribe = styled.div`
   max-width:300px;
   @media only screen and (max-width: 1440px) {
     width: 93%;
-    border-color: yellow;
   }
   @media only screen and (max-width: 990px) {
-    border-color: blue;
   }
   @media only screen and (max-width: 768px) {
     margin:20px auto 40px;
     align-items: center;
     width: 100%;
     flex-direction: column;
-    border-color:pink;
   }
 
   @media only screen and (max-width: 575px) {
@@ -280,7 +285,6 @@ export const Subscribe = styled.div`
     align-items: center;
     width: 100%;
     flex-direction: column;
-    border-color:black;
   }
   .reusecore__input {
     width: 100%;

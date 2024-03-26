@@ -22,6 +22,7 @@ import DataSection from './DataSection';
 import CompatibilityInfo from './CompatibilityInfo';
 
 const playersImageDimns = screen => {
+  console.log("screen", screen)
   if(screen.isSmall){
     return {
       rawImgWidth:935,
@@ -96,7 +97,7 @@ const playerQuotesData = screen => ({
 const staffQuotesData = screen => ({ 
   key:"staff",
   image:{
-    url:"website/images/what-staff-say.png",
+    url:"website/images/what-staff-say.jpg",
     ...staffImageDimns(screen)
   },
   quotes:[
@@ -115,6 +116,10 @@ const useStyles = makeStyles(theme => ({
   topDisplay:{
     padding:`${NAVBAR_HEIGHT}px 7.5vw 0`,
     minHeight:`calc(100vh + 100px)`,
+    [theme.breakpoints.down('lg')]: {
+      padding:`${NAVBAR_HEIGHT}px 5vw 0`,
+      //fontSize:"40px"
+    },
     [theme.breakpoints.down('sm')]: {
       padding:`${NAVBAR_HEIGHT}px 0 0`,
       //fontSize:"40px"
@@ -183,7 +188,8 @@ const NonUserHome = ({ screen, initScrollTo, subscribe }) =>{
         <Banner screen={screen} />
         <CompatibilityInfo screen={screen} className=""/>
       </div>
-      <Players screen={screen}/>
+      {/**<Players screen={screen}/>*/}
+      {/**
       <PeopleWithQuotes title="What Players Say" data={playerQuotesData(screen)} direction="row" />
       <UltimateFeature screen={screen} />
       <PeopleWithQuotes title="What Staff Say" data={staffQuotesData(screen)} direction="row-reverse" />
@@ -198,6 +204,7 @@ const NonUserHome = ({ screen, initScrollTo, subscribe }) =>{
         }}
         onSubmit={subscribe}
       />
+      */}
       <Footer />
       {/**<div className={classes.overlayFormContainer} ref={overlayRef}>
         <div className={classes.overlayFormBackground} onClick={hideForm}></div>
