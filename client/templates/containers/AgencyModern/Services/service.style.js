@@ -23,7 +23,7 @@ export const ServiceWrapper = styled.div`
   justify-content:center;
   align-items:center;
   .services {
-    border:solid;
+    //border:solid;
     border-color:red;
     display:flex;
     align-items:flex-start;
@@ -34,13 +34,16 @@ export const ServiceWrapper = styled.div`
     }
 
     .service {
-      border:solid;
+      //border:solid;
       border-color:yellow;
       width:380px;
       height:350px;
       @media only screen and (max-width: 1440px) {
         width:350px;
         height:350px;
+      }
+      @media only screen and (max-width: 575px) {
+        width:300px;
       }
       &.primary-service {
         @media only screen and (max-width: 768px) {
@@ -57,7 +60,7 @@ export const ServiceWrapper = styled.div`
   }
 
   h4 {
-    border:solid;
+    //border:solid;
     margin: 20px 0 20px;
     font-family: 'DM Sans';
     font-weight: 700;

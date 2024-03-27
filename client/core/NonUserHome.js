@@ -22,7 +22,6 @@ import DataSection from './DataSection';
 import CompatibilityInfo from './CompatibilityInfo';
 
 const playersImageDimns = screen => {
-  console.log("screen", screen)
   if(screen.isSmall){
     return {
       rawImgWidth:935,
