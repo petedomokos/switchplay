@@ -11,7 +11,7 @@ import Button from '../../../common/components/Button';
 import Container from '../../../common/components/UI/ContainerTwo';
 import NavbarWrapper, { MenuArea, MobileMenu } from './navbar.style';
 import LogoImage from '../../../common/assets/image/agencyModern/logo.png';
-import { SwitchplayLogo } from '../../../common/components/ScrollSpyMenu';
+import { SwitchplayLogo, PageLinkItem } from '../../../common/components/ScrollSpyMenu';
 //import data from '../../../common/data/AgencyModern';
 import { styles } from "../../../../core/websiteHelpers";
 
@@ -47,7 +47,13 @@ const Navbar = ({ data, history, user, screen }) => {
   return (
     <NavbarWrapper className={`agencyModern-navbar navbar ${user ? "for-signed-in-user" : ""}`} id="navbar" >
       <Container className={`${user ? "for-signed-in-user" : ""}`}>
-        <SwitchplayLogo className="sm-down" style={smDown(screen)} /> 
+      <div style={smDown(screen)}>
+        {history.location.pathname === "/"  ?
+          <AnchorLink href='#home'><SwitchplayLogo /></AnchorLink>
+          :
+          <PageLinkItem item={{ id:"home", path:"/" }}/>
+        }
+      </div>
         <MenuArea className={`${user ? "for-signed-in-user" : ""}`}>
           <div className={`main-menu-area ${user ? "for-signed-in-user" : ""}`}>
             <ScrollSpyMenu
@@ -113,11 +119,12 @@ const Navbar = ({ data, history, user, screen }) => {
                     offset={item.offset}
                     onClick={handleHandleMenuClose}
                   >
-                    {item.id !== "home" ? 
+                    {item.label}
+                    {/**item.id !== "home" ? 
                       item.label 
                       :
                       <SwitchplayLogo /> 
-                    }
+                    */}
                   </AnchorLink>
                 }
               </li>

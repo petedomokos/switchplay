@@ -43,10 +43,7 @@ const largeImage = {
 }
 
 const Banner = ({ screen }) => {
-
-  //console.log("screenwidth", screen.width)
   const contentsHeight = screen.orientation === "portrait" ? 550 : d3.max([550, screen.height - 2 * NAVBAR_HEIGHT - 2 * MAIN_BANNER_MARGIN_VERT[screen.size] ]);
-  console.log("contentsH", contentsHeight)
 
   return (
     <BannerWrapper id="home">

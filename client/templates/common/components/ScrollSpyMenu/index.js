@@ -45,7 +45,7 @@ const RenderLinkWithIcon = ({ item }) => {
 	);
 };
 
-const PageLinkItem = ({ item, pathname }) =>  
+export const PageLinkItem = ({ item, pathname }) =>  
 	<Link to={item.path} 
 		style={{ color: pathname === item.path ? "#FF825C" : "#02073E" }}
 		onClick={() => {
