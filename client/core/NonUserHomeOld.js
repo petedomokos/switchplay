@@ -440,7 +440,7 @@ add a background image - pass in the window dimns so it can takeup full dimns ->
 
 */
 
-export default function NonUserHome({ screen, subscribe }){
+export default function NonUserHome({ screen, subscribe, dialog, closeDialog }){
   //todo  -do this screen size properly -> may need a container to get it from store
   //const screen = { width: window.innerWidth, height:window.innerHeight }
   //console.log("screen", screen)
@@ -454,12 +454,10 @@ export default function NonUserHome({ screen, subscribe }){
     }
   };
   const classes = useStyles(styleProps)
-
-  const heroStatementNrLines = 2;// screen.isSmall ? 3 : 2;
   return (
       <div className={classes.homeRoot}>
         <div className={classes.screen} >
-          <HomePage screen={screen} subscribe={subscribe} />
+          <HomePage screen={screen} subscribe={subscribe} dialog={dialog} closeDialog={closeDialog} />
         </div>
       </div>
   )

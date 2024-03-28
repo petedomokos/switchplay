@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useRef, useState, useCallback } from 'react';
-import { withRouter } from 'react-router-dom'
+import { withRouter, Link } from 'react-router-dom'
 import * as d3 from 'd3';
 import Banner from '../templates/containers/AgencyModern/Banner';
 import UltimateFeature from '../templates/containers/AgencyModern/UltimateFeature';
@@ -20,6 +20,13 @@ import { scrollIntoViewWithOffset, showDemoForm } from "./websiteHelpers";
 import Players from "./Players"
 import DataSection from './DataSection';
 import CompatibilityInfo from './CompatibilityInfo';
+
+import Dialog from '@material-ui/core/Dialog'
+import DialogActions from '@material-ui/core/DialogActions'
+import DialogContent from '@material-ui/core/DialogContent'
+import DialogContentText from '@material-ui/core/DialogContentText'
+import DialogTitle from '@material-ui/core/DialogTitle'
+import Button from '@material-ui/core/Button'
 
 const playersImageDimns = screen => {
   if(screen.isSmall){
@@ -163,11 +170,26 @@ const useStyles = makeStyles(theme => ({
     overflow:"scroll",
     //background:grey10(3),
     zIndex:2
+  },
+  dialog:{
+    display:"flex",
+    flexDirection:"column",
+    alignItems:"center"
+  },
+  dialogTitle:{
+    textAlign:"center"
+  },
+  dialogText:{
+  },
+  dialogActions:{
+    display:"flex",
+    justifyContent:"space-around"
+  },
+  dialogButton:{
   }
 }))
 
-const NonUserHome = ({ screen, initScrollTo, subscribe }) =>{
-  //console.log("screen", screen)
+const NonUserHome = ({ screen, initScrollTo, subscribe, dialog, closeDialog }) =>{
   const styleProps = { };
   const classes = useStyles({styleProps});
   const rootRef = useRef(null);
@@ -180,6 +202,14 @@ const NonUserHome = ({ screen, initScrollTo, subscribe }) =>{
       window.manualScrollId = null;
     }
   },[]);
+
+  const onDialogClick = btn => {
+    if(btn.key === "continue"){
+      //next - must also close form
+      //then - get details actually saving in back end
+      closeDialog(dialog.path);
+    }
+  }
 
   return (
     <div className={classes.nonUserHomeRoot} ref={rootRef} id="home" >
@@ -203,28 +233,22 @@ const NonUserHome = ({ screen, initScrollTo, subscribe }) =>{
         onSubmit={subscribe}
       />
       <Footer />
-      {/**<div className={classes.overlayFormContainer} ref={overlayRef}>
-        <div className={classes.overlayFormBackground} onClick={hideForm}></div>
-        <div className={classes.overlayForm}>
-          <RequestDemo 
-            heading="Thanks for your interest."
-            text="Please provide some contact info and we will be in touch."
-            componentsData = {{
-              inputs:[
-                { key:"name", label:"Name", placeholder:"Enter Your Name" },
-                { key:"email", label:"Email", placeholder:"Enter Email Address" },
-                { key:"phone", label:"Phone (optional)", placeholder:"Enter Phone Number" },
-                { key:"club", label:"Club and Age/Phase", placeholder:"Enter Club And Age/Phase" },
-              ],
-              submitButton:{ label: "Send Request" },
-              checkbox:{ label:"No promotional messages." }
-            }}
-            onSubmit={subscribe}
-            onClose={hideForm}
-          />
-
-        </div>
-      </div>*/}
+      <Dialog className={classes.dialog} open={!!dialog} disableBackdropClick={true}>
+        <DialogTitle className={classes.dialogTitle} >{dialog?.title}</DialogTitle>
+        <DialogContent>
+          <DialogContentText className={classes.dialogText}>
+            {dialog?.text}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions className={classes.dialogActions}>
+          {dialog?.buttons?.map(btn => 
+            <Button color="primary" autoFocus="autoFocus" variant="contained" className={classes.dialogButton}
+              onClick={() => onDialogClick(btn)} >
+              {btn.label}
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </div>
   )
 }

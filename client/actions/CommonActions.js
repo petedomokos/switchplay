@@ -1,5 +1,6 @@
 import C from '../Constants'
 import auth from '../auth/auth-helper'
+import { showNavbar } from '../core/websiteHelpers'
 
 //HELPER METHODS
 export const status = resp =>{
@@ -54,11 +55,14 @@ export const fetchThenDispatch = (dispatch, asyncProcessesPath, options) => {
 	}
 	console.log('making fetch req to url', url)
 	fetch(url, fetchSettings)
-	  .then(status)
-	  .then(parseResponse)
-	  .then(data => { dispatch(formatNextAction(data)) })
-	  .then(data => { dispatch(fetchEnd(asyncProcessesPath)) })
-	  .catch(err => logError(dispatch, err, asyncProcessesPath))
+		.then(status)
+		.then(parseResponse)
+		.then(data => { 
+			console.log("returned..................")
+			dispatch(formatNextAction(data)) 
+		})
+		.then(data => { dispatch(fetchEnd(asyncProcessesPath)) })
+		.catch(err => logError(dispatch, err, asyncProcessesPath))
 }
 
 export const resetStatus = path => (
@@ -76,6 +80,7 @@ export const openDialog = path => {
 }
 
 export const closeDialog = path => {
+	showNavbar();
 	return {
 		type:C.CLOSE_DIALOG,
 		path:path

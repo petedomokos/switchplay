@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import AboutPage  from '../AboutPage'
-import { subscribe } from '../../actions/NonUserActions'
+import { createNonuser } from '../../actions/NonUserActions'
 
 const mapStateToProps = (state, ownProps) => {
 	return{
@@ -8,7 +8,7 @@ const mapStateToProps = (state, ownProps) => {
 }
 const mapDispatchToProps = dispatch => ({
 	subscribe(user){
-		dispatch(subscribe(user))
+		dispatch(createNonuser("subscribe", user))
 	}
 })
 

@@ -66,7 +66,7 @@ const ClickButtonItem = ({ item, history }) =>
 		{item.withButtonBg ?
 			<Button title={item.label} type="submit" 
 				style={{ 
-					maxHeight:"35px", minHeight:"35px", minWidth:"80px", maxWidth:"80px", 
+					height:`${item.height || 35}`, width:`${item.width || 80}px`, 
 					fontSize:"18px", background:"#FF825C", color:"#ffffff"
 				}}
 				onClick={() => { item.onClick(history) }}

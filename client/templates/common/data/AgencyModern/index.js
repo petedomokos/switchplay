@@ -94,10 +94,11 @@ const data = {
       whenToShow:["all-users"]
     },
     {
-      label: 'Demo',
+      label: 'Request Demo',
       id: 'demo',
       path: '/demo',
       page:"demo",
+      width:130,
       offset: `${NAVBAR_HEIGHT}`,
       itemType:"click-button",
       withButtonBg:true,
@@ -180,10 +181,12 @@ const data = {
       whenToShow:["all-users"]
     },
     {
-      label: 'Demo',
+      label: 'Request Demo',
       id: 'demo',
       path: '/demo',
       page:"demo",
+      width:165,
+      height:35,
       offset: `${NAVBAR_HEIGHT}`,
       itemType:"click-button",
       withButtonBg:true,

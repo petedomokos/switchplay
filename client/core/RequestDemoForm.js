@@ -2,6 +2,7 @@ import React, { Fragment, useEffect, useRef, useState, useCallback } from 'react
 import * as d3 from 'd3';
 import RequestDemo from '../templates/containers/AgencyModern/RequestDemo';
 import { makeStyles } from '@material-ui/core/styles'
+import { hideDemoForm } from "./websiteHelpers"
 
 const useStyles = makeStyles(theme => ({
   overlayFormContainer:{
@@ -51,28 +52,9 @@ const RequestDemoForm = ({ submit }) =>{
 
   useEffect(() => { d3.select("#request-demo-form").style("display","none"); },[]);
 
-  const hideForm = useCallback(() => {
-    //d3.select(overlayRef.current)
-    d3.select("#request-demo-form")
-      .style("opacity", 1)
-        .transition()
-        .duration(500)
-          .style("opacity", 0)
-          .on("end", function(){
-            d3.select(this).style("display","none")
-          })
-  
-    d3.select("#navbar")
-      .style("opacity", 0)
-      .style("display", null)
-        .transition()
-        .duration(500)
-          .style("opacity", 1)
-  }, []);
-
   return (
       <div className={classes.overlayFormContainer} id="request-demo-form">
-          <div className={classes.overlayFormBackground} onClick={hideForm}></div>
+          <div className={classes.overlayFormBackground} onClick={hideDemoForm}></div>
           {/**<div className={classes.closeFormIcon}>Go back</div>*/}
           <div className={classes.overlayForm}>
           <RequestDemo 
@@ -89,7 +71,7 @@ const RequestDemoForm = ({ submit }) =>{
               checkbox:{ label:"No promotional messages." }
               }}
               onSubmit={submit}
-              onClose={hideForm}
+              onClose={hideDemoForm}
           />
           </div>
       </div>

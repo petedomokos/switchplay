@@ -6,6 +6,7 @@ import compress from 'compression'
 import cors from 'cors'
 import helmet from 'helmet'
 import template from './../template'
+import nonuserRoutes from './routes/nonuser.routes'
 import userRoutes from './routes/user.routes'
 import groupRoutes from './routes/group.routes'
 import datasetRoutes from './routes/dataset.routes'
@@ -38,6 +39,7 @@ app.use(cors())
 app.use('/dist', express.static(path.join(CURRENT_WORKING_DIR, 'dist')))
 
 // mount routes
+app.use('/', nonuserRoutes)
 app.use('/', userRoutes)
 app.use('/', groupRoutes)
 app.use('/', datasetRoutes)

@@ -39,3 +39,27 @@ export const showDemoForm = () => {
           d3.select(this).style("display","none")
         })
 }
+
+export const hideDemoForm = (shouldShowNavbar=true) => {
+  //d3.select(overlayRef.current)
+  d3.select("#request-demo-form")
+    .style("opacity", 1)
+      .transition()
+      .duration(500)
+        .style("opacity", 0)
+        .on("end", function(){
+          d3.select(this).style("display","none")
+        })
+
+  if(shouldShowNavbar){ showNavbar(); }
+    
+};
+
+export const showNavbar = () => {
+  d3.select("#navbar")
+    .style("opacity", 0)
+    .style("display", null)
+      .transition()
+      .duration(500)
+        .style("opacity", 1)
+}
