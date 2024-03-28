@@ -9,11 +9,6 @@ import Logo from '../../../common/components/UIElements/Logo';
 
 import { DrawerContext } from "../../contexts/DrawerContext";
 import NextImage from "../NextImage";
-/*
-todo next - when user signed in,
- -  the menu is always the burger menu - check it works
- -  the menu items should be completely different, so remove all except -> "import", "signout" only for now
-*/
 
 export const SwitchplayLogo = ({ className, style }) =>
 	<div className={className} style={{ width: "130px", height: "80%", ...style }}>
@@ -45,7 +40,7 @@ const RenderLinkWithIcon = ({ item }) => {
 	);
 };
 
-export const PageLinkItem = ({ item, pathname }) =>
+export const PageLinkItem = ({ item, pathname, setMobileMenu }) =>
 	<Link to={item.path} 
 		style={{ color: pathname === item.path ? "#FF825C" : "#02073E" }}
 		onClick={() => {
@@ -54,6 +49,10 @@ export const PageLinkItem = ({ item, pathname }) =>
 			}else{
 				window.manualScrollId = null;
 			}
+		}}
+		onClick={() => {
+			console.log("clicked", setMobileMenu)
+			if(setMobileMenu){ setMobileMenu(false) }
 		}}
 		>
 			{!item.asIcon && item.id === "home" && item.label}
@@ -81,11 +80,11 @@ const ClickButtonItem = ({ item, history }) =>
 		}
 	</>
 
-export const NormalItem = ({ item, history }) => {
+export const NormalItem = ({ item, history, setMobileMenu }) => {
 	return (
 		<>
 			{item.itemType === "page-link" ? 
-				<PageLinkItem item={item} pathname={history.location.pathname} />
+				<PageLinkItem item={item} pathname={history.location.pathname} setMobileMenu={setMobileMenu} />
 				:
 				<ClickButtonItem item={item} history={history} />
 			}
@@ -93,7 +92,7 @@ export const NormalItem = ({ item, history }) => {
 	)
 }
 
-const ScrollSpyMenu = ({ className, menuItems, drawerClose, history, ...props }) => {
+const ScrollSpyMenu = ({ className, menuItems, drawerClose, history, setMobileMenu, ...props }) => {
 	const { dispatch } = useContext(DrawerContext);
 	//@todo - move into the context
 	const [page, setPage] = useState("");
@@ -130,7 +129,7 @@ const ScrollSpyMenu = ({ className, menuItems, drawerClose, history, ...props })
 			{menuItems.map((item, index) => (
 				<li key={`menu-item-${item.id}`}>
 					{item.itemType === "click-button" || item.itemType === "page-link" ?
-						<NormalItem item={item} history={history} />
+						<NormalItem item={item} history={history} setMobileMenu={setMobileMenu} />
 					 	:
 						item.staticLink ? (
 							<RenderLinkWithIcon item={item} />

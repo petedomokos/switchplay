@@ -50,7 +50,7 @@ const Navbar = ({ data, history, user, screen, mobileMenu, setMobileMenu }) => {
         {history.location.pathname === "/"  ?
           <AnchorLink href='#home'><SwitchplayLogo /></AnchorLink>
           :
-          <PageLinkItem item={{ id:"home", path:"/", asIcon:true }}/>
+          <PageLinkItem item={{ id:"home", path:"/", asIcon:true }} setMobileMenu={setMobileMenu} />
         }
       </div>
         <MenuArea className={`${user ? "for-signed-in-user" : ""}`}>
@@ -106,12 +106,13 @@ const Navbar = ({ data, history, user, screen, mobileMenu, setMobileMenu }) => {
             offset={-84}
             currentClassName="active"
             history={history}
+            setMobileMenu={setMobileMenu}
           >
 
             {data.mobileMenuItems.map((item, index) => (
               <li key={`menu_key${index}`}>
                 {item.itemType === "click-button" || item.itemType === "page-link" ?
-                  <NormalItem item={item} history={history} />
+                  <NormalItem item={item} history={history} setMobileMenu={setMobileMenu} />
                   :
                   <AnchorLink
                     href={item.path}
