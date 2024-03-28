@@ -182,8 +182,16 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
             <div style={{ display: jwt ? "none" : null }}>
               <Sticky top={0} innerZ={9999} activeClass="sticky-nav-active">
                 <DrawerProvider>
-                  <Route path="/:any"><Navbar data={getNavBarItemsFromOtherPages(user, onSignout)} history={history} user={user} screen={screen} /></Route>
-                  <Route exact path="/"><Navbar data={getNavBarItemsFromHomePage(user, onSignout)} history={history} user={user} screen={screen} /></Route>
+                  <Route path="/:any">
+                    <Navbar data={getNavBarItemsFromOtherPages(user, onSignout)} history={history} 
+                            user={user} screen={screen} 
+                    />
+                  </Route>
+                  <Route exact path="/">
+                    <Navbar data={getNavBarItemsFromHomePage(user, onSignout)} history={history} 
+                            user={user} screen={screen} 
+                    />
+                  </Route>
                 </DrawerProvider>
               </Sticky>
             </div>

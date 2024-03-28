@@ -21,23 +21,25 @@ export const styles = {
   mdOnly: screen => ({ display: screen.size === "md" ? null : "none" })
 }
 
-export const showDemoForm = () => {
+export const showDemoForm = (hideNavBarFirst=false) => {
+  console.log("hidefirst", hideNavBarFirst)
   d3.select("#request-demo-form")
   //d3.select(overlayRef.current)
     .style("opacity", 0)
     .style("display", null)
       .transition()
+      .delay(hideNavBarFirst ? 600 : 0)
       .duration(500)
         .style("opacity", 1);
 
-  d3.select("#navbar")
+  /*d3.select("#navbar")
     .style("opacity", 1)
       .transition()
-      .duration(100)
+      .duration(hideNavBarFirst ? 500 : 100)
         .style("opacity", 0)
         .on("end", function(){
           d3.select(this).style("display","none")
-        })
+        })*/
 }
 
 export const hideDemoForm = (shouldShowNavbar=true) => {
@@ -51,15 +53,16 @@ export const hideDemoForm = (shouldShowNavbar=true) => {
           d3.select(this).style("display","none")
         })
 
-  if(shouldShowNavbar){ showNavbar(); }
+  //if(shouldShowNavbar){ showNavbar(500); }
     
 };
 
-export const showNavbar = () => {
+export const showNavbar = (delay=0) => {
   d3.select("#navbar")
     .style("opacity", 0)
     .style("display", null)
       .transition()
+      .delay(delay)
       .duration(500)
         .style("opacity", 1)
 }

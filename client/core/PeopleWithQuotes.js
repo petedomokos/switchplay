@@ -33,13 +33,13 @@ const useStyles = makeStyles(theme => ({
             maxHeight:"870px", 
         },
         background:"#FFFEFE",
-        border:'solid',
+        //border:'solid',
     },
     peopleContainer:{
         width:"50vw",
         height:"100%",
         maxHeight:"100%",
-        border:'solid',
+        //border:'solid',
         [theme.breakpoints.down('sm')]: {
             width:"100vw",
             height:"440px",
@@ -53,7 +53,7 @@ const useStyles = makeStyles(theme => ({
         height:"100%",
         maxHeight:"100%",
         color:"red",
-        border:"solid",
+        //border:"solid",
         display:"flex",
         flexDirection:"column",
         alignItems:"center",
@@ -75,7 +75,7 @@ const useStyles = makeStyles(theme => ({
         display:"flex",
         justifyContent:"center",
         alignItems:"center",
-        border:"solid",
+        //border:"solid",
         color:"black",//theme.palette.blue,
         fontFamily: "Brush Script MT, cursive",
         fontSize:"50px",
@@ -94,7 +94,7 @@ const useStyles = makeStyles(theme => ({
         }
     },
     quotes:{
-        border:"solid",
+        //border:"solid",
         width:"100%",
         height:"75%",
         padding:"30px",

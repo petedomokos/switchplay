@@ -11,7 +11,7 @@ const useStyles = makeStyles(theme => ({
         flexDirection:"column",
         justifyContent:"center",
         padding:"5px",
-        border:"solid"
+        //border:"solid"
     },
     label:{
         margin:"5px 0",
@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
         [theme.breakpoints.down('sm')]: {
             fontSize:"11px",
         },
-        border:"solid",
+        //border:"solid",
         borderColor:"red",
         color:theme.palette.blue
     },
@@ -41,7 +41,7 @@ const useStyles = makeStyles(theme => ({
             borderColor:"yellow"
         },
         fontStyle:"italic",
-        border:"solid",
+        //border:"solid",
     }
 }))
 

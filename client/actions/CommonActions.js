@@ -53,14 +53,11 @@ export const fetchThenDispatch = (dispatch, asyncProcessesPath, options) => {
 		headers: requiredHeaders,
 		body:body //maybe undefined
 	}
-	console.log('making fetch req to url', url)
+	//console.log('making fetch req to url', url)
 	fetch(url, fetchSettings)
 		.then(status)
 		.then(parseResponse)
-		.then(data => { 
-			console.log("returned..................")
-			dispatch(formatNextAction(data)) 
-		})
+		.then(data => { dispatch(formatNextAction(data)) })
 		.then(data => { dispatch(fetchEnd(asyncProcessesPath)) })
 		.catch(err => logError(dispatch, err, asyncProcessesPath))
 }

@@ -33,7 +33,7 @@ border-color:blue;
   justify-content:flex-end;
   align-items:center;
   h3 {
-    border:solid;
+    //border:solid;
     margin:10px auto;
     display:flex;
     flex-direction:column;

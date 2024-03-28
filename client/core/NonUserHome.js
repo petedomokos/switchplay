@@ -16,7 +16,7 @@ import PeopleWithQuotes from './PeopleWithQuotes';
 import SVGImage from "./SVGImage";
 import { makeStyles } from '@material-ui/core/styles'
 import { MAIN_BANNER_MARGIN_VERT, COLOURS } from "./websiteConstants";
-import { scrollIntoViewWithOffset, showDemoForm } from "./websiteHelpers";
+import { scrollIntoViewWithOffset } from "./websiteHelpers";
 import Players from "./Players"
 import DataSection from './DataSection';
 import CompatibilityInfo from './CompatibilityInfo';
@@ -174,7 +174,7 @@ const useStyles = makeStyles(theme => ({
   dialog:{
     display:"flex",
     flexDirection:"column",
-    alignItems:"center"
+    alignItems:"center",
   },
   dialogTitle:{
     textAlign:"center"

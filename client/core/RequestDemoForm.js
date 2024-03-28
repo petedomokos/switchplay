@@ -45,7 +45,6 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const RequestDemoForm = ({ submit }) =>{
-  //console.log("screen", screen)
   const styleProps = { };
   const classes = useStyles({styleProps});
   //const overlayRef = useRef(null);

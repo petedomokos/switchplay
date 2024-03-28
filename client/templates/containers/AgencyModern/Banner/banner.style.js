@@ -8,7 +8,7 @@ import { MAIN_BANNER_MARGIN_VERT, COLOURS, NAVBAR_HEIGHT } from '../../../../cor
 
 //#f0ded5
 const BannerWrapper = styled.div`
-  border: solid;
+  //border: solid;
   //background-image: url(${bannerBg?.src});
   //background-color: ${COLOURS.banner.bg};
   background-size: 100%;
@@ -37,7 +37,7 @@ const BannerWrapper = styled.div`
     padding-bottom:0;
   }
   .banner-image-area {
-    border:solid;
+    //border:solid;
     border-color:red;
     width:50%;
     @media only screen and (min-width: 769px) {
@@ -65,7 +65,7 @@ const BannerWrapper = styled.div`
     overflow:hidden;
   }
   .banner-caption-md-up {
-    border:solid;
+    //border:solid;
     border-color:red;
     color: ${themeGet('colors.paragraph', '#02073E')};
     font-size: 26px;
@@ -88,7 +88,7 @@ const BannerWrapper = styled.div`
     }
   }
   .banner-caption-area-sm {
-    border:solid;
+    //border:solid;
     width:400px;
     margin:40px auto;
     @media only screen and (max-width: 575px) {
@@ -96,7 +96,7 @@ const BannerWrapper = styled.div`
     }
   }
   .banner-caption-sm {
-    border:solid;
+    //border:solid;
     color: ${themeGet('colors.paragraph', '#02073E')};
     font-size: 24px;
     line-height: 1.5;
@@ -134,7 +134,7 @@ const BannerWrapper = styled.div`
 `;
 
 export const BannerContent = styled.div`  
-  border: solid;
+  //border: solid;
   max-width: 600px;
   width: 50%;
   //padding-top:1.5%;
@@ -189,7 +189,7 @@ export const BannerContent = styled.div`
     margin-top:30px;
   }
   h1 {
-    border: solid;
+    //border: solid;
     font-size: 72px;
     line-height: 0.8;
     font-weight: 500;

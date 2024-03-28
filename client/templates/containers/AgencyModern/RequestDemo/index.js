@@ -20,7 +20,7 @@ import SectionWrapper, {
 function validateInput(state){ return state; }
 
 const RequestDemo = ({ heading, text, buttonLabel, componentsData, onSubmit, onClose }) => {
-  const [state, setState] = useState({ name:"", email:"", phone:"", club:"", isChecked:false })
+  const [state, setState] = useState({ name:"", email:"", phone:"", club:"", noPromotionsChecked:false })
   const { inputs, submitButton, checkbox } = componentsData;
   const submit = () => {
     if(validateInput(state).error){
@@ -34,7 +34,7 @@ const RequestDemo = ({ heading, text, buttonLabel, componentsData, onSubmit, onC
   }
 
   const onChange = (key, value) => setState(prevState => ({ ...prevState, [key]: value }))
-  const toggleCheckbox = () => setState(prevState => ({ ...prevState, isChecked:!prevState.isChecked }))
+  const toggleCheckbox = () => setState(prevState => ({ ...prevState, noPromotionsChecked:!prevState.noPromotionsChecked }))
 
   return (
     <SectionWrapper>
@@ -64,7 +64,7 @@ const RequestDemo = ({ heading, text, buttonLabel, componentsData, onSubmit, onC
           {checkbox && <CheckBox
             id="remember"
             htmlFor="remember"
-            isChecked={state.isChecked}
+            isChecked={state.noPromotionsChecked}
             onToggle={toggleCheckbox}
             labelText={checkbox.label}
           />}

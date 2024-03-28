@@ -102,7 +102,7 @@ const Banner = ({ screen }) => {
               content="Get your players thinking and acting like pros. Manage all your team's communication and information in one place. Use data with confidence and purpose."
               style={mdUp(screen)}
             />
-            <Button title="Get A Demo" type="submit" style={{ width:"140px" }} onClick={showDemoForm} />
+            <Button title="Get A Demo" type="submit" style={{ width:"140px" }} onClick={() => showDemoForm()} />
         </BannerContent>
         <div className="banner-image-area">
           <SVGImage 
