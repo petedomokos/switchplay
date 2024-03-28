@@ -165,6 +165,12 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
       loadUser(jwt.user._id)
     }
   });
+
+  /*
+  add to issues - burger bar shows over the player trophy in mobile view
+  for now, we remove entire navbar
+
+  */
   
   return (
     <div className={classes.app}>
@@ -173,7 +179,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
           <ResetCSS />
           <GlobalStyle />
           <ContentWrapper>
-            <div style={{ display:jwt ? "none" : null }}>
+            <div style={{ display: jwt ? "none" : null }}>
               <Sticky top={0} innerZ={9999} activeClass="sticky-nav-active">
                 <DrawerProvider>
                   <Route path="/:any"><Navbar data={getNavBarItemsFromOtherPages(user, onSignout)} history={history} user={user} screen={screen} /></Route>

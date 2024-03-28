@@ -10,7 +10,8 @@ export const customers = [
         _id:"england",
         name:"England",
         settings:[],
-        tableLogoTransform:`translate(-622px, -342px) scale(0.055)`,
+        tableLogoTransform:`translate(0px, 7px) scale(2)`,
+        //tableLogoTransform:`translate(-622px, -342px) scale(0.055)`,
         //logo dimns - 1280 * 720
     },
     {
