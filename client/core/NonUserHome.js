@@ -189,10 +189,12 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const NonUserHome = ({ screen, initScrollTo, subscribe, dialog, closeDialog }) =>{
+const NonUserHome = ({ screen, initScrollTo, subscribe, dialog, demoForm, closeDialog, closeDemoForm, showDemoForm }) =>{
   const styleProps = { };
   const classes = useStyles({styleProps});
   const rootRef = useRef(null);
+
+  console.log("NonUserHome", demoForm)
 
   //@todo - stop using window and use store instead
   useEffect(() => {
@@ -205,16 +207,15 @@ const NonUserHome = ({ screen, initScrollTo, subscribe, dialog, closeDialog }) =
 
   const onDialogClick = btn => {
     if(btn.key === "continue"){
-      //next - must also close form
-      //then - get details actually saving in back end
       closeDialog(dialog.path);
+      closeDemoForm();
     }
   }
 
   return (
     <div className={classes.nonUserHomeRoot} ref={rootRef} id="home" >
       <div className={classes.topDisplay}>
-        <Banner screen={screen} />
+        <Banner screen={screen} showDemoForm={showDemoForm} />
         <CompatibilityInfo screen={screen} className=""/>
       </div>
       <Players screen={screen}/>

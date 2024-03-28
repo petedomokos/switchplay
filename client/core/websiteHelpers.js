@@ -22,7 +22,8 @@ export const styles = {
 }
 
 export const showDemoForm = (hideNavBarFirst=false) => {
-  console.log("hidefirst", hideNavBarFirst)
+  console.log("show")
+  return;
   d3.select("#request-demo-form")
   //d3.select(overlayRef.current)
     .style("opacity", 0)
@@ -43,6 +44,8 @@ export const showDemoForm = (hideNavBarFirst=false) => {
 }
 
 export const hideDemoForm = (shouldShowNavbar=true) => {
+  console.log("hide")
+  return;
   //d3.select(overlayRef.current)
   d3.select("#request-demo-form")
     .style("opacity", 1)

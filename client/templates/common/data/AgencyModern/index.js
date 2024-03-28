@@ -25,7 +25,8 @@ const data = {
       page:"home",
       offset: `${NAVBAR_HEIGHT}`,
       itemType:"anchor-link",
-      whenToShow:["visitor"]
+      whenToShow:["visitor"],
+      asIcon:true
     },
     {
       label: 'Your Players',
@@ -107,6 +108,7 @@ const data = {
   ],
   mobileMenuItems: [
     {
+      isMobile:true,
       label: 'Home',
       id:"home",
       path: '#home',
@@ -116,6 +118,7 @@ const data = {
       whenToShow:["visitor"]
     },
     {
+      isMobile:true,
       label: 'Your Players',
       id: 'services',
       path: '#services',
@@ -125,6 +128,7 @@ const data = {
       whenToShow:["visitor"]
     },
     {
+      isMobile:true,
       label: 'Your Workflow',
       id: 'features',
       path: '#features',
@@ -134,6 +138,7 @@ const data = {
       whenToShow:["visitor"]
     },
     {
+      isMobile:true,
       label: 'Data',
       id:"customer",
       path: '#customer',
@@ -143,6 +148,7 @@ const data = {
       whenToShow:["visitor"]
     },
     {
+      isMobile:true,
       label: 'About',
       id: 'about-us',
       path: '/about',
@@ -153,6 +159,7 @@ const data = {
       whenToShow:["visitor"]
     },
     {
+      isMobile:true,
       label: 'Contact',
       id: 'contact',
       path: '/contact',
@@ -162,6 +169,7 @@ const data = {
       whenToShow:["visitor"]
     },
     {
+      isMobile:true,
       label: 'Login',
       id: 'login',
       path: '/signin',
@@ -172,6 +180,7 @@ const data = {
       whenToShow:["visitor"]
     },
     {
+      isMobile:true,
       label: 'Logout',
       id:"logout",
       path: '/signout',
@@ -181,6 +190,7 @@ const data = {
       whenToShow:["all-users"]
     },
     {
+      isMobile:true,
       label: 'Request Demo',
       id: 'demo',
       path: '/demo',

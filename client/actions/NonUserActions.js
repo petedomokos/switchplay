@@ -15,7 +15,6 @@ export const createNonuser = (requestType, details, redirectTo) => dispatch =>{
 			method:'POST',
 			body: JSON.stringify(requestDetails),
 			nextAction: () => {
-				hideDemoForm(false);
 		        return { type:C.OPEN_DIALOG, path:`saved_${requestType}` }
 			}
 		})

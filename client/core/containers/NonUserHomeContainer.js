@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import NonUserHome  from '../NonUserHomeOld'
 import { createNonuser } from '../../actions/NonUserActions'
-import { closeDialog } from '../../actions/CommonActions'
+import { closeDialog, openDialog } from '../../actions/CommonActions'
 
 const savingDialog = { 
 	key:"saving", title:"Saving...", 
@@ -32,7 +32,8 @@ const mapStateToProps = (state, ownProps) => {
 			(dialogs?.saved_requestdemo ? savedRequestDemoDialog : 
 				(dialogs?.saved_subscribe ? savedSubscribeDialog :
 					(error?.requestdemo ? errorDialog : null
-			)))
+			))),
+		demoForm:dialogs.demoForm
 	}
 }
 const mapDispatchToProps = dispatch => ({
@@ -41,6 +42,12 @@ const mapDispatchToProps = dispatch => ({
 	},
 	closeDialog(path){
 		dispatch(closeDialog(path))
+	},
+	closeDemoForm(){
+		dispatch(closeDialog("demoForm"))
+	},
+	showDemoForm(){
+		dispatch(openDialog("demoForm"))
 	}
 })
 

@@ -44,8 +44,6 @@ const Navbar = ({ data, history, user, screen, mobileMenuAvailable }) => {
     setMobileMenu(false);
   }, [user])
 
-  //<div style={{ background:"red", width:"100%", height:"50px"}}>test</div>
-
   return (
     <NavbarWrapper className={`agencyModern-navbar navbar ${user ? "for-signed-in-user" : ""}`} id="navbar" >
       <Container className={`${user ? "for-signed-in-user" : ""}`}>
@@ -53,7 +51,7 @@ const Navbar = ({ data, history, user, screen, mobileMenuAvailable }) => {
         {history.location.pathname === "/"  ?
           <AnchorLink href='#home'><SwitchplayLogo /></AnchorLink>
           :
-          <PageLinkItem item={{ id:"home", path:"/" }}/>
+          <PageLinkItem item={{ id:"home", path:"/", asIcon:true }}/>
         }
       </div>
         <MenuArea className={`${user ? "for-signed-in-user" : ""}`}>

@@ -2,7 +2,6 @@ import React, { Fragment, useEffect, useRef, useState, useCallback } from 'react
 import * as d3 from 'd3';
 import RequestDemo from '../templates/containers/AgencyModern/RequestDemo';
 import { makeStyles } from '@material-ui/core/styles'
-import { hideDemoForm } from "./websiteHelpers"
 
 const useStyles = makeStyles(theme => ({
   overlayFormContainer:{
@@ -44,16 +43,31 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const RequestDemoForm = ({ submit }) =>{
+const RequestDemoForm = ({ submit, close }) =>{
   const styleProps = { };
   const classes = useStyles({styleProps});
-  //const overlayRef = useRef(null);
+  const rootRef = useRef(null);
 
-  useEffect(() => { d3.select("#request-demo-form").style("display","none"); },[]);
+  useEffect(() => { 
+    //d3.select("#request-demo-form").style("display","none"); 
+    d3.select(rootRef.current)
+      .style("opacity", 0)
+        .transition()
+        .duration(500)
+          .style("opacity", 1);
+    
+    return () => {
+      d3.select(rootRef.current)
+        .style("opacity", 1)
+          .transition()
+          .duration(500)
+            .style("opacity", 0);
+    }
+  },[]);
 
   return (
-      <div className={classes.overlayFormContainer} id="request-demo-form">
-          <div className={classes.overlayFormBackground} onClick={hideDemoForm}></div>
+      <div className={classes.overlayFormContainer} id="request-demo-form" ref={rootRef}>
+          <div className={classes.overlayFormBackground} onClick={close}></div>
           {/**<div className={classes.closeFormIcon}>Go back</div>*/}
           <div className={classes.overlayForm}>
           <RequestDemo 
@@ -70,7 +84,7 @@ const RequestDemoForm = ({ submit }) =>{
               checkbox:{ label:"No promotional messages." }
               }}
               onSubmit={submit}
-              onClose={hideDemoForm}
+              onClose={close}
           />
           </div>
       </div>

@@ -41,7 +41,7 @@ import {
 import { COLOURS } from './core/websiteConstants';
 import { showDemoForm } from './core/websiteHelpers';
 
-const customiseItemsForUser = (items, user, onSignout) => {
+const customiseItemsForUser = (items, user, onSignout, onShowDemoForm) => {
   if(user){ 
     return items
       .filter(it => it.whenToShow.includes("all-users")) //later - allow specif customerId items
@@ -56,7 +56,13 @@ const customiseItemsForUser = (items, user, onSignout) => {
     .filter(it => it.whenToShow.includes("visitor"))
     .map(it => {
       if(it.id === "demo"){
-        return { ...it, onClick:showDemoForm }
+        return { 
+          ...it, 
+          onClick:() => {
+            console.log("click")
+            onShowDemoForm()
+          } 
+        }
       }
       return it;
     })
@@ -84,22 +90,22 @@ const updateItemsForPage = (items, currentPage="home") => {
   })
 }
 
-const getNavBarItemsFromOtherPages = (user, onSignout, path) => {
+const getNavBarItemsFromOtherPages = (user, onSignout, onShowDemoForm, path) => {
   const page = getPageFromPath(path);
   return {
     ...data,
     leftMenuItems:updateItemsForPage(data.leftMenuItems, page),
-    rightMenuItems:customiseItemsForUser(updateItemsForPage(data.rightMenuItems, page), user, onSignout),
-    mobileMenuItems:customiseItemsForUser(updateItemsForPage(data.mobileMenuItems, page), user, onSignout)
+    rightMenuItems:customiseItemsForUser(updateItemsForPage(data.rightMenuItems, page), user, onSignout, onShowDemoForm),
+    mobileMenuItems:customiseItemsForUser(updateItemsForPage(data.mobileMenuItems, page), user, onSignout, onShowDemoForm)
   }
 }
 
-const getNavBarItemsFromHomePage = (user, onSignout) => {
+const getNavBarItemsFromHomePage = (user, onSignout, onShowDemoForm) => {
   const page = "home"//getPageFromPath(path);
   return {
     ...data,
-    rightMenuItems:customiseItemsForUser(updateItemsForPage(data.rightMenuItems, page), user, onSignout),
-    mobileMenuItems:customiseItemsForUser(updateItemsForPage(data.mobileMenuItems, page), user, onSignout)
+    rightMenuItems:customiseItemsForUser(updateItemsForPage(data.rightMenuItems, page), user, onSignout, onShowDemoForm),
+    mobileMenuItems:customiseItemsForUser(updateItemsForPage(data.mobileMenuItems, page), user, onSignout, onShowDemoForm)
   }
 
 }
@@ -113,7 +119,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, requestDemo, onSignout, history }) => {
+const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, requestDemo, onSignout, history, demoForm, showDemoForm, closeDemoForm }) => {
   //BUG - onSignout leads to the Homepage re-rendering with store.screen reset to init ie 0,0
  
   const styleProps = { appBg: history.location.pathname === "/" ? COLOURS.banner.bg : "#f0ded5" }
@@ -179,22 +185,22 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
           <ResetCSS />
           <GlobalStyle />
           <ContentWrapper>
-            <div style={{ display: jwt ? "none" : null }}>
+            {!jwt && !demoForm && 
               <Sticky top={0} innerZ={9999} activeClass="sticky-nav-active">
                 <DrawerProvider>
                   <Route path="/:any">
-                    <Navbar data={getNavBarItemsFromOtherPages(user, onSignout)} history={history} 
+                    <Navbar data={getNavBarItemsFromOtherPages(user, onSignout, showDemoForm)} history={history} 
                             user={user} screen={screen} 
                     />
                   </Route>
                   <Route exact path="/">
-                    <Navbar data={getNavBarItemsFromHomePage(user, onSignout)} history={history} 
+                    <Navbar data={getNavBarItemsFromHomePage(user, onSignout, showDemoForm)} history={history} 
                             user={user} screen={screen} 
                     />
                   </Route>
                 </DrawerProvider>
               </Sticky>
-            </div>
+            }
             <Switch>
               <Route path="/about" component={AboutPageContainer}/>
               <Route path="/contact" component={Contact}/>
@@ -210,7 +216,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
                 <Route exact path="/" component={NonUserHomeContainer}/>
               }
             </Switch>
-            <RequestDemoForm submit={requestDemo} />
+            {demoForm && <RequestDemoForm submit={requestDemo} close={closeDemoForm} />}
           </ContentWrapper>
         </Fragment>
       </ThemeProvider>

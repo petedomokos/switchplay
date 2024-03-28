@@ -20,7 +20,7 @@ import SVGImage from "../../../../core/SVGImage";
 import CompatibilityInfo from '../../../../core/CompatibilityInfo';
 import { MAIN_BANNER_MARGIN_VERT, NAVBAR_HEIGHT } from "../../../../core/websiteConstants";
 
-import { styles, showDemoForm } from "../../../../core/websiteHelpers";
+import { styles, /*showDemoForm*/ } from "../../../../core/websiteHelpers";
 const { lgUp, mdDown, mdUp, smDown, smDownLand, smDownPort, mdOnly } = styles;
 
 
@@ -42,7 +42,7 @@ const largeImage = {
   imgTransY:0
 }
 
-const Banner = ({ screen }) => {
+const Banner = ({ screen, showDemoForm }) => {
   const contentsHeight = screen.orientation === "portrait" ? 550 : d3.max([550, screen.height - 2 * NAVBAR_HEIGHT - 2 * MAIN_BANNER_MARGIN_VERT[screen.size] ]);
 
   return (

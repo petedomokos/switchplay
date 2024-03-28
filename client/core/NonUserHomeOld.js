@@ -440,7 +440,7 @@ add a background image - pass in the window dimns so it can takeup full dimns ->
 
 */
 
-export default function NonUserHome({ screen, subscribe, dialog, closeDialog }){
+export default function NonUserHome({ screen, subscribe, dialog, closeDialog, demoForm, showDemoForm, closeDemoForm }){
   //todo  -do this screen size properly -> may need a container to get it from store
   //const screen = { width: window.innerWidth, height:window.innerHeight }
   //console.log("screen", screen)
@@ -457,7 +457,8 @@ export default function NonUserHome({ screen, subscribe, dialog, closeDialog }){
   return (
       <div className={classes.homeRoot}>
         <div className={classes.screen} >
-          <HomePage screen={screen} subscribe={subscribe} dialog={dialog} closeDialog={closeDialog} />
+          <HomePage screen={screen} subscribe={subscribe} dialog={dialog} closeDialog={closeDialog}
+            demoForm={demoForm} showDemoForm={showDemoForm} closeDemoForm={closeDemoForm} />
         </div>
       </div>
   )
