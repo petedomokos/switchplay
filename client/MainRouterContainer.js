@@ -1,6 +1,6 @@
 import { connect } from 'react-redux'
 import { fetchUser } from './actions/UserActions'
-import { updateScreen, openDialog, closeDialog } from './actions/CommonActions'
+import { updateScreen, openDialog, closeDialog, setMobileMenu } from './actions/CommonActions'
 import { signout } from './actions/AuthActions'
 import { createNonuser } from './actions/NonUserActions'
 import MainRouter  from './MainRouter'
@@ -11,7 +11,8 @@ const mapStateToProps = (state, ownProps) => {
 		loadingUser:state.asyncProcesses.loading.user,
 		loadingError:state.asyncProcesses.error.loading.user,
 		screen:state.system.screen,
-		demoForm:state.dialogs.demoForm
+		demoForm:state.dialogs.demoForm,
+		mobileMenu:state.system.mobileMenu
 	}
 }
 const mapDispatchToProps = dispatch => ({
@@ -33,6 +34,9 @@ const mapDispatchToProps = dispatch => ({
 	closeDemoForm(){
 		dispatch(closeDialog("demoForm"))
 	},
+	setMobileMenu(shouldOpen){
+		dispatch(setMobileMenu(shouldOpen))
+	}
 })
 
 //wrap all 4 sections in the same container for now.

@@ -661,6 +661,12 @@ export const system = (state={}, act) => {
 		/*case C.SIGN_OUT:{
 			return InitialState.system;
 		}*/
+		case C.MOBILE_MENU:{
+			return {
+				...state,
+				mobileMenu:act.shouldOpen
+			}
+		}
 		case C.UPDATE_SCREEN:{
 			return {
 				...state,

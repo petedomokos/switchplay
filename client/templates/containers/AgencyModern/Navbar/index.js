@@ -21,9 +21,8 @@ const { smDown } = styles;
 //<Fade triggerOnce></Fade>
 
 
-const Navbar = ({ data, history, user, screen, mobileMenuAvailable }) => {
-  const [mobileMenu, setMobileMenu] = useState(false);
-  const mobileMenuOpen = mobileMenuAvailable && mobileMenu;
+const Navbar = ({ data, history, user, screen, mobileMenu, setMobileMenu }) => {
+  //const [mobileMenu, setMobileMenu] = useState(false);
 
   const scrollItems = [];
 
@@ -99,7 +98,7 @@ const Navbar = ({ data, history, user, screen, mobileMenuAvailable }) => {
 
       {/* start mobile menu */}
       {/*note - mobile-menu classname does nothing*/}
-      <MobileMenu className={`mobile-menu ${mobileMenuOpen ? 'active' : ''} ${user ? "for-signed-in-user" : ""}`}>
+      <MobileMenu className={`mobile-menu ${mobileMenu ? 'active' : ''} ${user ? "for-signed-in-user" : ""}`}>
         <Container>
           <Scrollspy
             className="menu"
@@ -138,7 +137,6 @@ const Navbar = ({ data, history, user, screen, mobileMenuAvailable }) => {
 };
 
 Navbar.defaultProps = {
-  mobileMenuAvailable:true
 }
 
 export default Navbar;

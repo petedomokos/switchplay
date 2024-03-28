@@ -119,7 +119,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, requestDemo, onSignout, history, demoForm, showDemoForm, closeDemoForm }) => {
+const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, requestDemo, onSignout, history, demoForm, showDemoForm, closeDemoForm, mobileMenu, setMobileMenu }) => {
   //BUG - onSignout leads to the Homepage re-rendering with store.screen reset to init ie 0,0
  
   const styleProps = { appBg: history.location.pathname === "/" ? COLOURS.banner.bg : "#f0ded5" }
@@ -190,12 +190,12 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
                 <DrawerProvider>
                   <Route path="/:any">
                     <Navbar data={getNavBarItemsFromOtherPages(user, onSignout, showDemoForm)} history={history} 
-                            user={user} screen={screen} 
+                            user={user} screen={screen} mobileMenu={mobileMenu} setMobileMenu={setMobileMenu}
                     />
                   </Route>
                   <Route exact path="/">
                     <Navbar data={getNavBarItemsFromHomePage(user, onSignout, showDemoForm)} history={history} 
-                            user={user} screen={screen} 
+                            user={user} screen={screen} mobileMenu={mobileMenu} setMobileMenu={setMobileMenu}
                     />
                   </Route>
                 </DrawerProvider>

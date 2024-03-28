@@ -27,6 +27,8 @@ export const fetchEnd = path => (
 		path:path
 	}
 )
+
+export const setMobileMenu = shouldOpen => ({ type: C.MOBILE_MENU, shouldOpen })
 //async
 /**
 *	fetches data from server and dispatched it to the store, 

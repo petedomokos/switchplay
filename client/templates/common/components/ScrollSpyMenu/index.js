@@ -58,7 +58,7 @@ export const PageLinkItem = ({ item, pathname }) =>
 		>
 			{!item.asIcon && item.id === "home" && item.label}
 			{/**item.id === "contact" && <Button title="Demo" type="submit" style={{ maxHeight:"25px", minHeight:"25px", minWidth:"60px", maxWidth:"60px", fontSize:"14px" }}/>*/}
-			{item.id === "home" && <SwitchplayLogo />}
+			{item.asIcon && item.id === "home" && <SwitchplayLogo />}
 			{/*item.id !== "contact" && */item.id !== "home" && item.label}
 	</Link>
 
