@@ -12,7 +12,9 @@ const mapStateToProps = (state, ownProps) => {
 		loadingError:state.asyncProcesses.error.loading.user,
 		screen:state.system.screen,
 		demoForm:state.dialogs.demoForm,
-		mobileMenu:state.system.mobileMenu
+		mobileMenu:state.system.mobileMenu,
+		dialogs:state.dialogs,
+		savedDialog:state.dialogs.saved_requestdemo
 	}
 }
 const mapDispatchToProps = dispatch => ({
@@ -27,6 +29,9 @@ const mapDispatchToProps = dispatch => ({
 	},
 	onSignout(history){
 		dispatch(signout(history))
+	},
+	closeDialog(path){
+		dispatch(closeDialog(path))
 	},
 	showDemoForm(){
 		dispatch(openDialog("demoForm"))

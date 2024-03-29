@@ -21,13 +21,6 @@ import Players from "./Players"
 import DataSection from './DataSection';
 import CompatibilityInfo from './CompatibilityInfo';
 
-import Dialog from '@material-ui/core/Dialog'
-import DialogActions from '@material-ui/core/DialogActions'
-import DialogContent from '@material-ui/core/DialogContent'
-import DialogContentText from '@material-ui/core/DialogContentText'
-import DialogTitle from '@material-ui/core/DialogTitle'
-import Button from '@material-ui/core/Button'
-
 const playersImageDimns = screen => {
   if(screen.isSmall){
     return {
@@ -194,8 +187,6 @@ const NonUserHome = ({ screen, initScrollTo, subscribe, dialog, demoForm, closeD
   const classes = useStyles({styleProps});
   const rootRef = useRef(null);
 
-  console.log("NonUserHome", demoForm)
-
   //@todo - stop using window and use store instead
   useEffect(() => {
     if(window.manualScrollId){
@@ -204,13 +195,6 @@ const NonUserHome = ({ screen, initScrollTo, subscribe, dialog, demoForm, closeD
       window.manualScrollId = null;
     }
   },[]);
-
-  const onDialogClick = btn => {
-    if(btn.key === "continue"){
-      closeDialog(dialog.path);
-      closeDemoForm();
-    }
-  }
 
   return (
     <div className={classes.nonUserHomeRoot} ref={rootRef} id="home" >
@@ -234,22 +218,6 @@ const NonUserHome = ({ screen, initScrollTo, subscribe, dialog, demoForm, closeD
         onSubmit={subscribe}
       />
       <Footer />
-      <Dialog className={classes.dialog} open={!!dialog} disableBackdropClick={true}>
-        <DialogTitle className={classes.dialogTitle} >{dialog?.title}</DialogTitle>
-        <DialogContent>
-          <DialogContentText className={classes.dialogText}>
-            {dialog?.text}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions className={classes.dialogActions}>
-          {dialog?.buttons?.map(btn => 
-            <Button color="primary" autoFocus="autoFocus" variant="contained" className={classes.dialogButton}
-              onClick={() => onDialogClick(btn)} >
-              {btn.label}
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
     </div>
   )
 }

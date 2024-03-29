@@ -2,10 +2,12 @@ import React, { Fragment, useEffect, useRef, useState, useCallback } from 'react
 import * as d3 from 'd3';
 import RequestDemo from '../templates/containers/AgencyModern/RequestDemo';
 import { makeStyles } from '@material-ui/core/styles'
+import { Transition } from "react-transition-group";
 
 const useStyles = makeStyles(theme => ({
   overlayFormContainer:{
-    position:"fixed",
+    //position:"fixed",
+    position:"absolute",
     left:0,
     top:"0",
     width:"100vw",
@@ -14,15 +16,16 @@ const useStyles = makeStyles(theme => ({
     flexDirection:"column",
     justifyContent:"center",
     alignItems:"center",
-    zIndex:1
+    color:"white"
+    //zIndex:1
   },
   overlayFormBackground:{
     width:"100%",
     height:"100%",
     position:"absolute",
     left:0,top:0,
-    background:"black",
-    opacity:0.7,
+    //background:"black",
+    //opacity:0.7,
   },
   /*closeFormIcon:{
     position:"absolute",
@@ -39,54 +42,121 @@ const useStyles = makeStyles(theme => ({
     height:"95%",
     overflow:"scroll",
     //background:grey10(3),
-    zIndex:2
+    //zIndex:2
+  },
+  dialog:{
+    display:"flex",
+    flexDirection:"column",
+    alignItems:"center",
+    zIndex:"3000",
+    background:"white",
+    borderRadius:"5px",
+    width:"380px",
+    height:"180px"
+  },
+  dialogTitle:{
+    textAlign:"center",
+    color:"black",
+    height:"45px"
+  },
+  dialogText:{
+  },
+  dialogActions:{
+    display:"flex",
+    justifyContent:"space-around",
+  },
+  dialogButton:{
+    marginBottom:"5px"
   }
 }))
 
-const RequestDemoForm = ({ submit, close }) =>{
+import Dialog from '@material-ui/core/Dialog'
+import DialogActions from '@material-ui/core/DialogActions'
+import DialogContent from '@material-ui/core/DialogContent'
+import DialogContentText from '@material-ui/core/DialogContentText'
+import DialogTitle from '@material-ui/core/DialogTitle'
+import Button from '@material-ui/core/Button'
+
+const RequestDemoForm = ({ submit, close, demoForm, dialog, onDialogClick }) =>{
+  const [dialogState, setDialogState] = useState(null);
   const styleProps = { };
   const classes = useStyles({styleProps});
-  const rootRef = useRef(null);
 
-  useEffect(() => { 
-    //d3.select("#request-demo-form").style("display","none"); 
-    d3.select(rootRef.current)
-      .style("opacity", 0)
-        .transition()
-        .duration(500)
-          .style("opacity", 1);
-    
-    return () => {
-      d3.select(rootRef.current)
-        .style("opacity", 1)
-          .transition()
-          .duration(500)
-            .style("opacity", 0);
+  useEffect(() => {
+    if(dialog){
+      setDialogState(dialog)
     }
-  },[]);
+  }, [dialog])
+
+  const defaultStyle = {
+    transition: "opacity 500ms", 
+    opacity:0,
+    position:"fixed",
+    left:"0",
+    top:"0px",
+    pointerEvents:"none",
+    width:"100%",
+    height:"100%",
+    display:"flex",
+    justifyContent:"center",
+    alignItems:"center"
+  }
+  
+  const transitionStyles = {
+    entering: { opacity: 0 },
+    entered: { opacity: 1, pointerEvents:null },
+    exiting: { opacity: 1 },
+    exited: { opacity: 0 },
+  };
 
   return (
-      <div className={classes.overlayFormContainer} id="request-demo-form" ref={rootRef}>
-          <div className={classes.overlayFormBackground} onClick={close}></div>
-          {/**<div className={classes.closeFormIcon}>Go back</div>*/}
-          <div className={classes.overlayForm}>
-          <RequestDemo 
-              heading="Thanks for your interest."
-              text="Please provide some contact info and we will be in touch."
-              componentsData = {{
-              inputs:[
-                  { key:"name", label:"Name", placeholder:"Enter Your Name" },
-                  { key:"email", label:"Email", placeholder:"Enter Email Address" },
-                  { key:"phone", label:"Phone (optional)", placeholder:"Enter Phone Number" },
-                  { key:"club", label:"Club and Age/Phase", placeholder:"Enter Club And Age/Phase" },
-              ],
-              submitButton:{ label: "Send Request" },
-              checkbox:{ label:"No promotional messages." }
-              }}
-              onSubmit={submit}
-              onClose={close}
-          />
-          </div>
+      <div className={classes.overlayFormContainer}>
+        {/**<div className={classes.overlayFormBackground} onClick={close}></div>*/}
+        <Transition in={demoForm} timeout={300}>
+          {(state) => (
+            <div style={{ ...defaultStyle, ...transitionStyles[state] }} >
+                <div className={classes.overlayForm}>
+                  <RequestDemo 
+                      heading="Thanks for your interest."
+                      text="Please provide some contact info and we will be in touch."
+                      componentsData = {{
+                      inputs:[
+                          { key:"name", label:"Name", placeholder:"Enter Your Name" },
+                          { key:"email", label:"Email", placeholder:"Enter Email Address" },
+                          { key:"phone", label:"Phone (optional)", placeholder:"Enter Phone Number" },
+                          { key:"club", label:"Club and Age/Phase", placeholder:"Enter Club And Age/Phase" },
+                      ],
+                      submitButton:{ label: "Send Request" },
+                      checkbox:{ label:"No promotional messages." }
+                      }}
+                      onSubmit={submit}
+                      onClose={close}
+                  />
+                </div>
+            </div>
+          )}
+        </Transition>
+        <Transition in={dialog} timeout={300}>
+          {(state) => (
+            <div style={{ ...defaultStyle, ...transitionStyles[state] }} >
+              <div className={classes.dialog} onClick={() => onDialogClick()} >
+                <DialogTitle className={classes.dialogTitle} >{dialogState?.title}</DialogTitle>
+                <DialogContent>``
+                  <DialogContentText className={classes.dialogText}>
+                    {dialogState?.text}
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions className={classes.dialogActions}>
+                  {dialogState?.buttons?.map(btn => 
+                    <Button color="primary" autoFocus="autoFocus" variant="contained" className={classes.dialogButton}>
+                      {btn.label}
+                    </Button>
+                  )}
+                </DialogActions>
+              </div>
+            </div>
+          )}
+        </Transition>
       </div>
   )
 }

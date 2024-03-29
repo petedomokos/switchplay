@@ -59,61 +59,25 @@ Note: Beware of modifying this element as it can break the animations - you shou
 .bm-overlay {background: rgba(0, 0, 0, 0.3);}
 
 /* This fires as soon as the element enters the DOM*/
-.hero-statement-transition-enter {
+.form-transition-enter {
   /*We give the list the initial dimension of the list button*/
   opacity:0;
-  transition: all 1000ms ease-in 2000ms;
 }
 /* This is where we can add the transition*/
-.hero-statement-transition-enter-active {
+.form-transition-enter-active {
   opacity:1;
-  transition: all 1000ms ease-in 2000ms;
+  transition: opacity 5000ms;
 }
 /* This fires as soon as the this.state.showList is false */
-.hero-statement-transition-exit {
+.form-transition-exit {
   opacity:1;
-  transition: all 1000ms ease-in 2000ms;
 }
 /* fires as element leaves the DOM*/
-.hero-statement-transition-exit-active {
+.form-transition-exit-active {
   opacity:0;
-  transition: all 1000ms ease-in 2000ms;
+  transition: opacity 2000ms;
 }
 
-
-/* This fires as soon as the element enters the DOM*/
-.list-transition-enter {
-  /*We give the list the initial dimension of the list button*/
-  top: 0;
-  width: 120px;
-  max-height: 40px;
-  color: transparent;
-  background-color: #5a564c;
-}
-/* This is where we can add the transition*/
-.list-transition-enter-active {
-  top: 45px;
-  width: 200px;
-  max-height: 200px;
-  background-color: #9e8949;
-  transition: all 400ms;
-}
-/* This fires as soon as the this.state.showList is false */
-.list-transition-exit {
-  top: 45px;
-  width: 200px;
-  max-height: 200px;
-  background-color: #9e8949;
-}
-/* fires as element leaves the DOM*/
-.list-transition-exit-active {
-  top: 0;
-  width: 120px;
-  max-height: 40px;
-  color: transparent;
-  background-color: #5a564c;
-  transition: all 400ms;
-}
 
 
 .xs-down {

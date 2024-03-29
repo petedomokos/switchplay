@@ -51,6 +51,7 @@ const RequestDemo = ({ heading, text, buttonLabel, componentsData, onSubmit, onC
         <SubscriptionForm>
           {inputs.map((input,i) =>
             <Input
+              key={`demo-form-${input.key}`}
               label={input.label}
               inputType={input.key}
               placeholder={input.placeholder}

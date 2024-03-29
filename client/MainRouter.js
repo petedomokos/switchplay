@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useEffect, useState, useRef } from 'react'
 import {Route, Switch, withRouter } from 'react-router-dom'
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { makeStyles } from '@material-ui/core/styles'
@@ -40,6 +40,34 @@ import {
 
 import { COLOURS } from './core/websiteConstants';
 import { showDemoForm } from './core/websiteHelpers';
+import { Transition, CSSTransition } from "react-transition-group";
+
+const savingDialog = { 
+	key:"saving", title:"Saving...", 
+	text: "One sec please, we're just saving your details."
+}
+const savedRequestDemoDialog = { 
+	key:"saved", title:"Saved", path:"saved_requestdemo",
+	text: "Thanks, we will be in touch soon" , 
+	buttons:[{ key:"continue", label:"Continue" }]
+}
+const savedSubscribeDialog = { 
+	key:"saved", title:"Saved", path:"saved_subscribe",
+	text: "Thanks, we will be in touch soon" , 
+	buttons:[{ key:"continue", label:"Continue" }]
+}
+const errorDialog = { 
+	key:"error", title:"Error", 
+	text: "There seems to be a server or internet error. Please try again, or contact us" , 
+	buttons:[{ key:"tryAgain", label:"Try Again" }, { key:"continue", label:"Go back" }]
+}
+
+const getDialogContent = dialogs => {
+  if(dialogs.saved_requestdemo){ return savedRequestDemoDialog; }
+  if(dialogs.saved_subscribe){ return savedSubscribeDialog; }
+  if(dialogs.saving_requestdemo || dialogs.saving_subscribe){ return savingDialog; }
+  return null;
+}
 
 const customiseItemsForUser = (items, user, onSignout, onShowDemoForm) => {
   if(user){ 
@@ -59,7 +87,6 @@ const customiseItemsForUser = (items, user, onSignout, onShowDemoForm) => {
         return { 
           ...it, 
           onClick:() => {
-            console.log("click")
             onShowDemoForm()
           } 
         }
@@ -116,12 +143,27 @@ const useStyles = makeStyles(theme => ({
     height:"120vh",
     minHeight:"120vh",
     background:props => props.appBg,
+  },
+  dialog:{
+    display:"flex",
+    flexDirection:"column",
+    alignItems:"center",
+    zIndex:"3000"
+  },
+  dialogTitle:{
+    textAlign:"center"
+  },
+  dialogText:{
+  },
+  dialogActions:{
+    display:"flex",
+    justifyContent:"space-around"
+  },
+  dialogButton:{
   }
 }))
 
-const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, requestDemo, onSignout, history, demoForm, showDemoForm, closeDemoForm, mobileMenu, setMobileMenu }) => {
-  //BUG - onSignout leads to the Homepage re-rendering with store.screen reset to init ie 0,0
- 
+const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, requestDemo, onSignout, history, dialogs, savedDialog, closeDialog, demoForm, showDemoForm, closeDemoForm, mobileMenu, setMobileMenu }) => {
   const styleProps = { appBg: history.location.pathname === "/" ? COLOURS.banner.bg : "#f0ded5" }
   const classes = useStyles(styleProps);
   const jwt = auth.isAuthenticated();
@@ -177,7 +219,48 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
   for now, we remove entire navbar
 
   */
+
+  const defaultNavTransStyle = {
+    transition: "opacity 500ms", 
+    opacity:0,
+    pointerEvents:"none",
+  }
+
+  const dialog = getDialogContent(dialogs);
+  const defaultStyle = {
+    transition: "opacity 500ms", 
+    opacity:0,
+    zIndex:"2001",
+    position:"fixed",
+    left:"0",
+    top:"0px",
+    width:"100vw",
+    height:"100vh",
+    pointerEvents:"none",
+  }
+
+  const overlayStyle = {
+    position:"absolute",
+    left:"0",
+    top:"0",
+    width:"100%",
+    height:"100%",
+    background:"black",
+    opacity: "0.7"
+  }
   
+  const transitionStyles = {
+    entering: { opacity: 0 },
+    entered: { opacity: 1, pointerEvents:null },
+    exiting: { opacity: 1 },
+    exited: { opacity: 0 },
+  };
+
+  const onDialogClick = btn => {
+      if(dialog){ closeDialog(dialog.path);}
+      closeDemoForm();
+  }
+
   return (
     <div className={classes.app}>
       <ThemeProvider theme={theme}>
@@ -185,22 +268,52 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
           <ResetCSS />
           <GlobalStyle />
           <ContentWrapper>
-            {!jwt && !demoForm && 
-              <Sticky top={0} innerZ={9999} activeClass="sticky-nav-active">
-                <DrawerProvider>
-                  <Route path="/:any">
-                    <Navbar data={getNavBarItemsFromOtherPages(user, onSignout, showDemoForm)} history={history} 
-                            user={user} screen={screen} mobileMenu={mobileMenu} setMobileMenu={setMobileMenu}
-                    />
-                  </Route>
-                  <Route exact path="/">
-                    <Navbar data={getNavBarItemsFromHomePage(user, onSignout, showDemoForm)} history={history} 
-                            user={user} screen={screen} mobileMenu={mobileMenu} setMobileMenu={setMobileMenu}
-                    />
-                  </Route>
-                </DrawerProvider>
-              </Sticky>
-            }
+            <Transition in={!jwt && !demoForm && !dialogs.saving_requestdemo && !dialogs.saved_requestdemo } timeout={300}>
+              {(state) => (
+                <div style={{ ...defaultNavTransStyle, ...transitionStyles[state] }} >
+                  <Sticky top={0} innerZ={9999} activeClass="sticky-nav-active">
+                    <DrawerProvider>
+                      <Route path="/:any">
+                        <Navbar data={getNavBarItemsFromOtherPages(user, onSignout, showDemoForm)} history={history} 
+                                user={user} screen={screen} mobileMenu={mobileMenu} setMobileMenu={setMobileMenu}
+                        />
+                      </Route>
+                      <Route exact path="/">
+                        <Navbar data={getNavBarItemsFromHomePage(user, onSignout, showDemoForm)} history={history} 
+                                user={user} screen={screen} mobileMenu={mobileMenu} setMobileMenu={setMobileMenu}
+                        />
+                      </Route>
+                    </DrawerProvider>
+                  </Sticky>
+                </div>
+              )}
+             </Transition>
+            <div onClick={onDialogClick}>
+              <Transition in={demoForm || dialog} timeout={300}>
+                {(state) => (
+                  <div style={{ ...defaultStyle, ...transitionStyles[state] }} >
+                    <div style={overlayStyle} onClick={closeDemoForm}></div>
+                    <RequestDemoForm demoForm={demoForm} submit={requestDemo} close={closeDemoForm} dialog={dialog} onDialogClick={onDialogClick} />
+                    {/**<Dialog className={classes.dialog} open={!!dialog}>
+                      <DialogTitle className={classes.dialogTitle} >{dialog?.title}</DialogTitle>
+                      <DialogContent>
+                        <DialogContentText className={classes.dialogText}>
+                          {dialog?.text}
+                        </DialogContentText>
+                      </DialogContent>
+                      <DialogActions className={classes.dialogActions}>
+                        {dialog?.buttons?.map(btn => 
+                          <Button color="primary" autoFocus="autoFocus" variant="contained" className={classes.dialogButton}
+                            onClick={() => onDialogClick(btn)} >
+                            {btn.label}
+                          </Button>
+                        )}
+                      </DialogActions>
+                        </Dialog>*/}
+                  </div>
+                )}
+              </Transition>
+            </div>
             <Switch>
               <Route path="/about" component={AboutPageContainer}/>
               <Route path="/contact" component={Contact}/>
@@ -216,7 +329,6 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
                 <Route exact path="/" component={NonUserHomeContainer}/>
               }
             </Switch>
-            {demoForm && <RequestDemoForm submit={requestDemo} close={closeDemoForm} />}
           </ContentWrapper>
         </Fragment>
       </ThemeProvider>

@@ -188,13 +188,13 @@ Input.propTypes = {
   passwordShowHide: PropTypes.bool,
 
   /** Set input type of the input element. Default type is text. */
-  inputType: PropTypes.oneOf([
+  /*inputType: PropTypes.oneOf([
     'text',
     'email',
     'password',
     'number',
     'textarea',
-  ]),
+  ]),*/
 
   /** Add icon in input field. This prop will not work with password
    * and textarea field.
