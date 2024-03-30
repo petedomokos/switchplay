@@ -142,6 +142,7 @@ const useStyles = makeStyles(theme => ({
     padding:"10px 10vw"
   },
   welcomeMiddleIcon:{
+    //border:"solid",
     width:"80px",
     height:"80px",
     margin:"20px 0",
@@ -172,6 +173,20 @@ const useStyles = makeStyles(theme => ({
     },
   },
   welcomeParagraph:{
+    //border:"solid",
+    fontSize:"24px",
+    [theme.breakpoints.down('lg')]: {
+      fontSize:"22px",
+    },
+    [theme.breakpoints.down('md')]: {
+      fontSize:"20px",
+    },
+    [theme.breakpoints.down('sm')]: {
+      fontSize:"18px",
+    },
+    [theme.breakpoints.down('xs')]: {
+      fontSize:"14px",
+    },
 
   },
   storyParagraph:{
@@ -192,6 +207,8 @@ const Welcome = ({ }) => {
         <p className={`${classes.paragraph} ${classes.welcomeParagraph}`}>{welcomeData.paragraphs[0].text}</p>
         <div className={classes.welcomeMiddleIcon}></div>
         <p className={`${classes.paragraph} ${classes.welcomeParagraph}`}>{welcomeData.paragraphs[1].text}</p>
+        <div className={classes.welcomeMiddleIcon}></div>
+        <p className={`${classes.paragraph} ${classes.welcomeParagraph}`}>{welcomeData.paragraphs[2].text}</p>
       </div>
     </div>
   )
@@ -204,17 +221,6 @@ const Story = ({ height }) => {
   return (
     <div className={classes.story}>
       <SimpleSlider data={storyData.slides} classes={classes} />
-    </div>
-  )
-}
-
-
-const Team = () => {
-  const styleProps = { };
-  const classes = useStyles({styleProps});
-  return (
-    <div className={classes.team}>
-      team
     </div>
   )
 }

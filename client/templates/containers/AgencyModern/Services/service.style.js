@@ -91,20 +91,16 @@ export const ServiceWrapper = styled.div`
     text-align:center;
     @media only screen and (max-width: 1440px) {
       font-size: 18px;
-      color:red;
     }
     @media only screen and (max-width: 990px) {
       font-size: 15px;
       line-height: 26px;
-      color:yellow;
     }
     @media only screen and (max-width: 768px) {
       text-align: center;
-      color:blue;
     }
     @media only screen and (max-width: 575px) {
       text-align: center;
-      color:pink;
     }
   }
 `;

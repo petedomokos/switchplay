@@ -7,7 +7,11 @@ export const aboutPageData = {
             },
             {
                 image:null,
-                text: "We are working with clubs, universities and technology partners. Our app is on trial at professional and non-professional academies for both youth development and professional development phases.",
+                text: "We are developing our app as part of academic research that aims to identify a framework of best practice for the use of data in player development, and the communication around that, including match reviews.",
+            },
+            {
+                image:null,
+                text: "Our app is on trial at professional and non-professional academies, and we would love to hear from you.",
             },
         ]
     },

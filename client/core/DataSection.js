@@ -8,7 +8,7 @@ import { grey10, MAIN_BANNER_MARGIN_VERT, COLOURS } from "./websiteConstants";
 const dataSections = [
   {
     key:"spectrum",
-    heading:["See the data with your", "coaches eye"],
+    heading:["See the data through your", "coaches eye"],
     desc:"Should you trust your 'coaches eye' more than data? Switchplay helps you find the balance through great collaboration between analysts and coaches.",
     visual:{ type:"d3" }
   },

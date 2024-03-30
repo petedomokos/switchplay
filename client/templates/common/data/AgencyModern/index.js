@@ -210,7 +210,7 @@ const data = {
         icon: serviceIcon1,
         key:"accountability",
         title: 'Being Accountable',
-        description: `Something here about learning to be accountable, ow Switchplay helps by connecting actions to outcomes in an engaging gamified way (mention gamification)`,
+        description: `Switchplay gives you an engaging way to nuture an accountability mindset in your players. You can set visible goals that won't get forgotten, with clear criteria for success that players can easily track`,
         image:{
           type:"svg",
           rawImgWidth:3000,
@@ -227,7 +227,8 @@ const data = {
         icon: serviceIcon2,
         key:"thinking",
         title: 'Reflective Thinking',
-        description:`Switchplay simplifies your online comms with players, parents and staff. You can easily engage players and get them thinking about a video review or a tactical point. `,
+        description:"Are your players good learners? Switchplay supports you to transform match reviews and discussions about data and videos into a trully valuable learning experience.",
+        //description:`Switchplay simplifies your online comms with players, parents and staff. You can easily engage players and get them thinking about a video review or a tactical point. `,
         image:{
           type:"svg",
           /*rawImgWidth:50, 
@@ -252,7 +253,8 @@ const data = {
         icon: serviceIcon3,
         key:"communication",
         title: 'Proactive Communication',
-        description: `These days, your messages have to compete with all the noise in players’ lives: opinions on social media, the emotions of a game, and all the rest.`,
+        description: `You probably have 1 or 2 players who are more proactive than the rest in finding out what they need to work on to improve. Switchplay can turn that 1 or 2 into 11 or 12 by changing the team culture.`,
+        //These days, your messages have to compete with all the noise in players’ lives: opinions on social media, the emotions of a game, and all the rest.
         image:{
           type:"svg",
           rawImgWidth:1000, 
@@ -299,19 +301,19 @@ const data = {
       id: 1,
       icon: featureIcon1,
       title: 'User-Friendly',
-      desc: 'To successfully engage with your subscribers, your newsletter must entice readers and encourage them.',
+      desc: 'No more clicking on all those menus and pages. Switchplay\'s unique view is intuitive and easy to use. It joins up all the pieces of info into a coherent whole.',
     },
     {
       id: 2,
       icon: featureIcon2,
       title: 'Customisable',
-      desc: 'LiteSpeed Web Server is a high-performance HTTP server and known for its high performance.',
+      desc: 'Switchplay can be adapted for your processes. The interface can be completely customised to support you to get the outcomes that matter to you.',
     },
     {
       id: 3,
       icon: featureIcon3,
       title: 'Integrated',
-      desc: 'Get your Secure Transaction delivered at home collect a sample from the your task.',
+      desc: 'Instead of having to use lots of apps and web pages, Switchplay integrates these so you can do everything from one place on any device.',
     },
   ],
   posts: [
