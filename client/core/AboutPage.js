@@ -91,16 +91,17 @@ const useStyles = makeStyles(theme => ({
   },
   slideParagraphs:{
     //height:"50%",
-    padding:"0 10%",
+    margin:"10% 10%",
     display:"flex",
     flexDirection:"column",
     justifyContent:"center",
-    alignItems:"center",
+    //alignItems:"center",
     //border:"solid",
     borderColor:"blue"
   },
   slideParagraph:{
     color:grey10(9),
+    textAlign:"center",
     fontSize:"20px",
     [theme.breakpoints.down('lg')]: {
       fontSize:"18px",
@@ -109,7 +110,7 @@ const useStyles = makeStyles(theme => ({
       fontSize:"16px",
     },
     [theme.breakpoints.down('sm')]: {
-      fontSize:"16px",
+      fontSize:"18px",
     },
     [theme.breakpoints.down('xs')]: {
       fontSize:"14px",

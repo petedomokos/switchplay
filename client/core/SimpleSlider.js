@@ -109,7 +109,7 @@ const Slide = ({ i, slide, classes, onClick }) =>
     <div className={classes.slide} onClick={() => onClick(i)}>
       <div className={classes.slideImgOuterContainer} style={{ height:`${100 - slide.pcHeightForText}%` }}>
         <div className={classes.slideImgInnerContainer}>
-          {slide.image && <SVGImage imgKey={`slide-img-${i}`} image={slide.image} contentFit="contain" centreHoriz={true} />}
+          {slide.image && <SVGImage imgKey={`slide-img-${i}`} image={slide.image} contentFit="contain" centreHoriz={true} centreVert={true} />}
           {/**slide.key === "spectrum" && <SpectrumViz />*/}
           {slide.key === "switchplay_app" && <SwitchplayApp />}
         </div>

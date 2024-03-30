@@ -90,7 +90,7 @@ export const aboutPageData = {
                     "I saw academies learning to integrate data and multi-disciplinary expertise with the subjective and emotional nature of football. And the tools & apps don’t cater for the humans at the heart of it all.",
                     //"Just as most maths lessons are designed for kids who love maths, the football tools and software are built for people who love data & tech."
                 ],
-                pcHeightForText:30
+                pcHeightForText:50
             },
             {
                 key:"switchplay_app",
