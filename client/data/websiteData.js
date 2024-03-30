@@ -101,7 +101,7 @@ export const aboutPageData = {
                 text: [
                     "So I put together a team to build Switchplay.",
                     "Our aim is clear. Our story is unfolding.",
-                    "We would love to here from you."
+                    "We would love to hear from you."
                 ],
                 pcHeightForText:50
             }
