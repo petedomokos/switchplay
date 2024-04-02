@@ -3,21 +3,26 @@ import { themeGet } from '@styled-system/theme-get';
 import { grey10 } from '../../../../core/websiteConstants';
 
 const SectionWrapper = styled.section`
-//border:solid;
-border-color:red;
+  //border:solid;
+  border-color:red;
   width:100%; 
-  padding: 80px 0 80px;
+  padding: 40px 0;
+  @media only screen and (max-width: 990px) {
+    padding: 40px 0;
+  }
 `;
 
 export const Section = styled.div`
-//border:solid;
-border-color:yellow;
+  //border:solid;
+  border-color:yellow;
   width:100%;
   display: flex;
   align-items: center;
   flex-direction:column;
   
   .visual-container {
+    //border: solid;
+    border-color: white;
     display: flex; 
     alignItems: flex-start; 
     justify-content: center;
@@ -25,8 +30,8 @@ border-color:yellow;
 `;
 
 export const Content = styled.div`
-//border:solid;
-border-color:blue;
+  //border:solid;
+  border-color:blue;
   width: 80%;
   display: flex;
   flex-direction: column;
@@ -67,7 +72,7 @@ border-color:blue;
     //border:solid;
     border-color:pink;
     padding:10px 5% 0;
-    margin:0;
+    margin:0 0 0 1.5%;
     display:flex;
     flex-direction:column;
     font-size: 20px;
@@ -78,18 +83,17 @@ border-color:blue;
       line-height: 32px;
     }
     @media only screen and (max-width: 990px) {
+      margin:0 0 0 5%;
       font-size: 20px;
       line-height: 28px;
     }
     @media only screen and (max-width: 768px) {
       font-size: 20px;
       line-height: 32px;
-      text-align: center;
     }
     @media only screen and (max-width: 575px) {
       font-size: 16px;
       line-height: 32px;
-      text-align: center;
     }
   }
   .explore {

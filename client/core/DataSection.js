@@ -8,14 +8,14 @@ import { grey10, MAIN_BANNER_MARGIN_VERT, COLOURS } from "./websiteConstants";
 const dataSections = [
   {
     key:"spectrum",
-    heading:["See the data through your", "coaches eye"],
-    desc:"Should you trust your 'coaches eye' more than data? Switchplay helps you find the balance through great collaboration between analysts and coaches.",
+    heading:["See the data through your", "coach's eye"],
+    desc:"Should you trust your coach's eye more than objective data? Ofcourse, it's not that simple! The solution comes from great collaboration between staff. Switchplay is designed to build people's confidence and to support best practice in decision-making and communication about data.",
     visual:{ type:"d3" }
   },
   {
     key:"path",
     heading:["Show your players how data", "relates to their path"],
-    desc:"Do you think of yourself as a storyteller? Switchplay brings out the true power of data by enabling you to weave it into players' journeys.",
+    desc:"Data insights are great, but do you think of yourself as a storyteller? With Switchplay, you can bring out the true power of data by weaving it into players' journeys. Your players will start to join up the dots, to see how your messages today relate to their future goals.",
     visual:{ type:"img", url:"website/images/path.png", imgWidth:1600, imgHeight:900, imgTransX:0, imgTransY:0 }
   }
 ]
@@ -34,7 +34,7 @@ const DataSection = ({ screen, className }) =>{
   const styleProps = { screen, className }
   const classes = useStyles(styleProps);
 
-  const breakHeight = 50;
+  const breakHeight = 200;
   return (
     <div className={`${classes.dataSectionRoot} ${className}`} id="customer">
       <Customer data={dataSections[0]} screen={screen} direction={screen.isLarge ? "column" : "column"}  />

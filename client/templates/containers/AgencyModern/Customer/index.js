@@ -29,9 +29,9 @@ const Customer = ({ data, screen, direction, minHeight }) => {
 
   const alignVertically = direction.includes("column");
   const spectrumWidth = alignVertically ? d3.min([500, screen.width * 0.8]) : screen.width * 0.6;
-  const spectrumHeight = minHeight || (alignVertically ? 300 : 300);
+  const spectrumHeight = minHeight || (alignVertically ? 200 : 300);
 
-  const requiredImgAspectRatio = 0.6;
+  const requiredImgAspectRatio = 0.45;
   //@todo - pass the 70% and 75% trhough to stylesheet as props rather than hardcoding it here and there separately
   const requiredImgWidth = screen.isLarge ? screen.width * 0.7 : screen.width;
   const requiredImgHeight = requiredImgWidth * requiredImgAspectRatio ;
@@ -68,7 +68,7 @@ const Customer = ({ data, screen, direction, minHeight }) => {
     <SectionWrapper id="customer">
         <Section className={`${direction}`}>
           {visual?.type === "img" ? 
-            <div style={{ width:`${requiredImgWidth}px`, height:`${requiredImgHeight}px` }}>
+            <div style={{ width:`${requiredImgWidth}px`, height:`${requiredImgHeight}px`, border:"solid", borderColor:"orange" }}>
               <SVGImage image={{ url, transform, aspectRatio:requiredImgAspectRatio }} dimns={requiredImgDimns} imgKey={key} />
             </div>
             :
