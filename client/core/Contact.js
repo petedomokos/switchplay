@@ -10,6 +10,7 @@ import teamworkIcon from '../../assets/website/about-page-images/teamwork-100.pn
 import overheadBanner from '../../assets/website/banners/header-goal.png';
 //import stadiumBanner from '../../assets/website/about-page-images/stadium.png';
 import { scrollIntoViewWithOffset } from './websiteHelpers';
+import Footer from './Footer';
 
 const { welcomeData, storyData } = aboutPageData;
 
@@ -207,8 +208,7 @@ const Contact = ({ className }) =>{
         </div>
       </div>
       </div>
-      <div className={classes.overheadBanner} style={{ width:"100vw", height:`${100 * overheadImageRatio}vw`}}></div>
-      <div style={{ width:"100%", height:"100px", background:COLOURS.OFFBLACK }}></div>
+      <Footer page="about" />
     </div>
   )
 }

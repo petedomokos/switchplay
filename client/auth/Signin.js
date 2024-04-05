@@ -18,12 +18,13 @@ import { NAVBAR_HEIGHT } from '../core/websiteConstants'
 
 const useStyles = makeStyles(theme => ({
   signinRoot:{
-    paddingTop:"100px",
+    paddingTop:"calc(50vh - 150px)",
     height:"120vh"
   },
   card: {
     width:"500px",
     maxWidth:"90%",
+    height:"300px",
 
     margin: "auto",
     textAlign: 'center',

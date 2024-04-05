@@ -11,7 +11,17 @@ import { DrawerContext } from "../../contexts/DrawerContext";
 import NextImage from "../NextImage";
 
 export const SwitchplayLogo = ({ className, style }) =>
-	<div className={className} style={{ width: "130px", height: "80%", ...style }}>
+	<div className={className} 
+		style={{ 
+			display:"flex",
+			alignItems:"center",
+			width: "170px", 
+			height: "100%", 
+			fontSize:"26px",
+			textAlign:"center",
+			//fontFamily:"'Lexend'",
+			...style 
+		}}>
 		<img
 			src="/website/logo.png"
 		/>
@@ -44,17 +54,14 @@ export const PageLinkItem = ({ item, pathname, setMobileMenu }) =>
 	<Link to={item.path} 
 		style={{ color: pathname === item.path ? "#FF825C" : "#02073E" }}
 		onClick={() => {
+			if(setMobileMenu){ setMobileMenu(false) }
 			if(item.page === "home"){
 				window.manualScrollId = item.id;
 			}else{
 				window.manualScrollId = null;
 			}
 		}}
-		onClick={() => {
-			console.log("clicked", setMobileMenu)
-			if(setMobileMenu){ setMobileMenu(false) }
-		}}
-		>
+	>
 			{!item.asIcon && item.id === "home" && item.label}
 			{/**item.id === "contact" && <Button title="Demo" type="submit" style={{ maxHeight:"25px", minHeight:"25px", minWidth:"60px", maxWidth:"60px", fontSize:"14px" }}/>*/}
 			{item.asIcon && item.id === "home" && <SwitchplayLogo />}

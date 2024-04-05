@@ -109,7 +109,7 @@ const staffQuotesData = screen => ({
 const useStyles = makeStyles(theme => ({
   nonUserHomeRoot:{
     width:"100%",
-    background:COLOURS.banner.bg,
+    background:COLOURS.banner.bg, 
     position:"relative"
   },
   topDisplay:{
@@ -189,6 +189,7 @@ const NonUserHome = ({ screen, initScrollTo, subscribe, dialog, demoForm, closeD
 
   //@todo - stop using window and use store instead
   useEffect(() => {
+    console.log("NonUserHome", window.manualScrollId)
     if(window.manualScrollId){
       const requiredNode = d3.select(`#${window.manualScrollId}`).node();//.scrollIntoView({ behavior: 'smooth' });
       scrollIntoViewWithOffset(requiredNode, NAVBAR_HEIGHT)

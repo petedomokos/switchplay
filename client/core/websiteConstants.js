@@ -14,7 +14,8 @@ export const COLOURS = {
     banner:{
         bg:"#DBEFF0"
 
-    }
+    },
+    orange:"#0f4745"
 }
 
 export const PEOPLE_WITH_QUOTES = {

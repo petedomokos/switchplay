@@ -68,7 +68,7 @@ const Customer = ({ data, screen, direction, minHeight }) => {
     <SectionWrapper id="customer">
         <Section className={`${direction}`}>
           {visual?.type === "img" ? 
-            <div style={{ width:`${requiredImgWidth}px`, height:`${requiredImgHeight}px`, border:"solid", borderColor:"orange" }}>
+            <div style={{ width:`${requiredImgWidth}px`, height:`${requiredImgHeight}px` }}>
               <SVGImage image={{ url, transform, aspectRatio:requiredImgAspectRatio }} dimns={requiredImgDimns} imgKey={key} />
             </div>
             :

@@ -164,7 +164,8 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, requestDemo, onSignout, history, dialogs, savedDialog, closeDialog, demoForm, showDemoForm, closeDemoForm, mobileMenu, setMobileMenu }) => {
-  const styleProps = { appBg: history.location.pathname === "/" ? COLOURS.banner.bg : "#f0ded5" }
+  ////DBEFF0
+  const styleProps = { appBg: history.location.pathname === "/" ? COLOURS.banner.bg : "#DBEFF0"/*"#f0ded5"*/ }
   const classes = useStyles(styleProps);
   const jwt = auth.isAuthenticated();
   const user = jwt?.user;
@@ -266,7 +267,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
       <ThemeProvider theme={theme}>
         <Fragment>
           <ResetCSS />
-          <GlobalStyle />
+          <GlobalStyle /> 
           <ContentWrapper>
             <Transition in={!jwt && !demoForm && !dialogs.saving_requestdemo && !dialogs.saved_requestdemo } timeout={300}>
               {(state) => (

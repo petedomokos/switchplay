@@ -35,6 +35,7 @@ const useStyles = makeStyles(theme => ({
     background:"#584543", //"#613737",
     //minHeight:"400px",
     [theme.breakpoints.down('md')]: {
+      padding:"5vh 7.5vw"
       //fontSize:"50px"
     }
   },
