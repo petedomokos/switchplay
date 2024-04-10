@@ -109,3 +109,18 @@ export const aboutPageData = {
     }
     
 }
+
+
+/*
+old
+
+banner
+The tool that puts people first
+Get your players thinking and acting like pros. Manage all your team's communication and information in one place. Use data with confidence and purpose.
+
+
+
+
+
+
+*/

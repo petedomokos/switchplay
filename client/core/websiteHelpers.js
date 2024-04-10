@@ -18,7 +18,10 @@ export const styles = {
   lgUp:screen => ({ display: screen.isLarge ? null : "none" }),
   smDownLand: screen => ({ display: screen.isSmall && screen.orientation === "landscape" ? null : "none" }),
   smDownPort: screen => ({ display: screen.isSmall && screen.orientation === "portrait" ? null : "none" }),
-  mdOnly: screen => ({ display: screen.size === "md" ? null : "none" })
+  xsDownLand: screen => ({ display: screen.size === "xs" && screen.orientation === "landscape" ? null : "none" }),
+  xsDownPort: screen => ({ display: screen.size === "xs" && screen.orientation === "portrait" ? null : "none" }),
+  mdOnly: screen => ({ display: screen.size === "md" ? null : "none" }),
+  smOnly: screen => ({ display: screen.size === "sm" ? null : "none" })
 }
 
 export const showDemoForm = (hideNavBarFirst=false) => {

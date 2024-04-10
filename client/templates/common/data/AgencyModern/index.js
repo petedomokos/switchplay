@@ -29,7 +29,7 @@ const data = {
       asIcon:true
     },
     {
-      label: 'Your Players',
+      label: 'Players',
       id: 'services',
       path: '#services',
       page:"home",
@@ -38,7 +38,7 @@ const data = {
       whenToShow:["visitor"]
     },
     {
-      label: 'Your Workflow',
+      label: 'Workflow',
       id: 'features',
       path: '#features',
       page:"home",

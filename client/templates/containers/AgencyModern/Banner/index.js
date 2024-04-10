@@ -21,7 +21,7 @@ import CompatibilityInfo from '../../../../core/CompatibilityInfo';
 import { MAIN_BANNER_MARGIN_VERT, NAVBAR_HEIGHT } from "../../../../core/websiteConstants";
 
 import { styles, /*showDemoForm*/ } from "../../../../core/websiteHelpers";
-const { lgUp, mdDown, mdUp, smDown, smDownLand, smDownPort, mdOnly } = styles;
+const { lgUp, mdDown, mdOnly, smOnly, xsDownLand, xsDownPort } = styles;
 
 
 //import paypal from '../../../common/assets/image/agencyModern/paypal.png';
@@ -51,57 +51,50 @@ const Banner = ({ screen, showDemoForm }) => {
             <div className="heading">
               <Heading
                 as="h1"
-                className="md-up"
-                content="The tool"
+                content="Tell the story"
                 style={lgUp(screen)}
               />
               <Heading
                 as="h1"
-                className="md-up"
-                content="that puts"
+                content="of the numbers"
                 style={lgUp(screen)}
               />
               <Heading
                 as="h1"
-                className="md-up highlighted"
-                content="people first"
-                style={lgUp(screen)}
-              />
-              <Heading
-                as="h1"
-                content="The tool that puts"
+                content="Tell the story of the numbers"
                 style={mdOnly(screen)}
               />
               <Heading
                 as="h1"
-                className="highlighted"
-                content="people first"
-                style={mdOnly(screen)}
+                content="Tell the story of the numbers"
+                style={smOnly(screen)}
               />
               <Heading
                 as="h1"
-                className="sm-down-land"
-                content="The tool that puts people first"
-                style={smDownLand(screen)}
+                content="Tell the story of the numbers"
+                style={xsDownLand(screen)}
               />
               <Heading
                 as="h1"
-                className="sm-down-port"
-                content="The tool that puts"
-                style={smDownPort(screen)}
+                content="Tell the story"
+                style={xsDownPort(screen)}
               />
               <Heading
                 as="h1"
-                className="sm-down-port highlighted"
-                content="people first"
-                style={smDownPort(screen)}
+                content="of the numbers"
+                style={xsDownPort(screen)}
               />
             </div>
-            <Text
-              className="banner-caption-md-up md-up"
-              content="Get your players thinking and acting like pros. Manage all your team's communication and information in one place. Use data with confidence and purpose."
-              style={mdUp(screen)}
-            />
+            <div className={`banner-caption-area`}>
+              <Text
+                className="banner-caption banner-caption-line-1"
+                content="Discover the true power of your data by turning it into a compelling story for your players."
+              />
+              <Text
+                className="banner-caption banner-caption-line-2"
+                content="Show them how it relates to their path, their progress, and their future."
+              />
+            </div>
             <Button title="Get A Demo" type="submit" style={{ width:"140px" }} onClick={() => showDemoForm()} />
         </BannerContent>
         <div className="banner-image-area">
@@ -118,20 +111,6 @@ const Banner = ({ screen, showDemoForm }) => {
             imgKey="main-sm"
             contentFit="cover"
             styles={{ root: mdDown(screen) }}
-          />
-        </div>
-        <div className="banner-caption-area-sm sm-down" style={smDown(screen)}>
-          <Text
-            className="banner-caption-sm banner-caption-sm-1"
-            content="Get your players thinking and acting like pros."
-          />
-          <Text
-            className="banner-caption-sm banner-caption-sm-2"
-            content="Manage all your team's communication and information in one place."
-          />
-          <Text
-            className="banner-caption-sm banner-caption-sm-3"
-            content="Use data with confidence and purpose."
           />
         </div>
     </BannerWrapper>
