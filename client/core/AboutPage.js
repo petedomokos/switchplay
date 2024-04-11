@@ -6,11 +6,12 @@ import SimpleSlider from './SimpleSlider';
 import Subscribe from '../templates/containers/AgencyModern/Subscribe';
 import Footer from './Footer';
 import { NAVBAR_HEIGHT, COLOURS, grey10 } from "./websiteConstants";
-import { aboutPageData } from "../data/websiteData";
+import { aboutPageData, subscribeData } from "../data/websiteData";
 import teamworkIcon from '../../assets/website/about-page-images/teamwork-100.png';
 import overheadBanner from '../../assets/website/banners/header-goal.png';
 //import stadiumBanner from '../../assets/website/about-page-images/stadium.png';
 import { scrollIntoViewWithOffset } from './websiteHelpers';
+
 
 const { welcomeData, storyData } = aboutPageData;
 
@@ -92,7 +93,7 @@ const useStyles = makeStyles(theme => ({
   },
   slideParagraphs:{
     //height:"50%",
-    margin:"10% 10%",
+    margin:"0 10%",
     display:"flex",
     flexDirection:"column",
     justifyContent:"center",
@@ -215,18 +216,19 @@ const Welcome = ({ }) => {
   )
 }
 
-const Story = ({ height }) => {
+const Story = ({ screen }) => {
   const styleProps = { 
   };
   const classes = useStyles({styleProps});
+  const data = storyData.slides.map(s => screen.size !== "xs" ?  s : ({ ...s, pcHeightForText: d3.min([100, s.pcHeightForText * 1.2]) }))
   return (
     <div className={classes.story}>
-      <SimpleSlider data={storyData.slides} classes={classes} />
+      <SimpleSlider data={data} classes={classes} />
     </div>
   )
 }
 
-const AboutPage = ({ subscribe }) =>{
+const AboutPage = ({ subscribe, screen }) =>{
   const styleProps = { }
   const classes = useStyles(styleProps);
 
@@ -237,12 +239,12 @@ const AboutPage = ({ subscribe }) =>{
   return (
     <div className={classes.aboutRoot}>
       <Welcome/>
-      <Story/>
+      <Story screen={screen} />
       {/**<Team/>*/}
       {/**<div style={{ width:"100%", height:"50px", background:"white" }}></div>*/}
       <Subscribe 
-        heading="Interested? Subscribe to us."
-        text="We have more than thousand of creative entrepreneurs and stat joining our business"
+        heading={subscribeData.heading}
+        text={subscribeData.text}
         componentsData = {{
           inputs:[{ key:"email", placeholder:"Enter Email Address" }],
           submitButton:{ label: "Subscribe" },

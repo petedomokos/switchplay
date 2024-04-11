@@ -210,7 +210,8 @@ const data = {
         icon: serviceIcon1,
         key:"accountability",
         title: 'Being Accountable',
-        description: `Switchplay gives you an engaging way to nuture an accountability mindset in your players. You can set visible goals that won't get forgotten, with clear criteria for success that players can easily track`,
+        description:"Our exclusive data visuals engage teenage players and nurture an accountabilty mindset. You can set visible goals that won't get forgotten, with clear criteria for success that players can easily track",
+        //description: `Switchplay gives you an engaging way to nuture an accountability mindset in your players. You can set visible goals that won't get forgotten, with clear criteria for success that players can easily track`,
         image:{
           type:"svg",
           rawImgWidth:3000,
@@ -227,7 +228,8 @@ const data = {
         icon: serviceIcon2,
         key:"thinking",
         title: 'Reflective Thinking',
-        description:"Are your players good learners? Switchplay supports you to transform match reviews and discussions about data and videos into a trully valuable learning experience.",
+        description:"We have applied new findings from the fields of education and neuroscience to transform match reviews into a trully valuable learning experience for your players.",
+        //description:"Are your players good learners? Switchplay supports you to transform match reviews and discussions about data and videos into a trully valuable learning experience.",
         //description:`Switchplay simplifies your online comms with players, parents and staff. You can easily engage players and get them thinking about a video review or a tactical point. `,
         image:{
           type:"svg",

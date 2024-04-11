@@ -125,6 +125,10 @@ export const SubscriptionForm = styled.div`
     }
   }
   .reusecore__checkbox {
+    border:solid;
+    display:flex;
+    justify-content:center;
+    margin-left:0;
     margin-top: 10px;
     .reusecore__field-label {
       cursor: pointer;

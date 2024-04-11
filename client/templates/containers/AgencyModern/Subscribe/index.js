@@ -50,13 +50,13 @@ const Subscribe = ({ heading, text, buttonLabel, componentsData, onSubmit }) => 
               )}
               <Button title={submitButton.label} type="submit" onClick={submit} />
             </div>
-            {checkbox && <CheckBox
+            {/**checkbox && <CheckBox
               id="remember"
               htmlFor="remember"
               isChecked={isChecked}
               onToggle={toggleCheckbox}
               labelText={checkbox.label}
-          />}
+            />*/}
           </SubscriptionForm>
         </FooterInner>
       </Container>

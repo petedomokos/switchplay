@@ -20,6 +20,7 @@ export const SwitchplayLogo = ({ className, style }) =>
 			fontSize:"26px",
 			textAlign:"center",
 			//fontFamily:"'Lexend'",
+			//fontFamily:"Impact",
 			...style 
 		}}>
 		<img

@@ -7,7 +7,7 @@ export const aboutPageData = {
             },
             {
                 image:null,
-                text: "We are developing our app as part of academic research that aims to identify a framework of best practice for the use of data in player development, and the communication around that, including match reviews.",
+                text: "We are developing our app alongside academic research that aims to identify a framework of best practice for the use of data in player development, and the communication around that, including match reviews.",
             },
             {
                 image:null,
@@ -91,7 +91,8 @@ export const aboutPageData = {
                     //aspectRatio:0.9
                 },
                 text: [
-                    "I saw academies learning to integrate data and multi-disciplinary expertise with the subjective and emotional nature of football. And the tools & apps don’t cater for the humans at the heart of it all.",
+                    "I saw academies trying to integrate data with the subjective and emotional nature of football, but the software tools & apps don’t relate to the human journeys at the heart of it.",
+                    "So I applied my dual expertise in maths education and data visualisation, and my love for football development, to this problem."
                     //"Just as most maths lessons are designed for kids who love maths, the football tools and software are built for people who love data & tech."
                 ],
                 pcHeightForText:50
@@ -99,7 +100,7 @@ export const aboutPageData = {
             {
                 key:"switchplay_app",
                 text: [
-                    "So I put together a team to build Switchplay.",
+                    "I put together a team to build Switchplay.",
                     "Our aim is clear. Our story is unfolding.",
                     "We would love to hear from you."
                 ],
@@ -108,6 +109,11 @@ export const aboutPageData = {
         ]
     }
     
+}
+
+export const subscribeData = {
+    heading:"Interested? Subscribe to us.",
+    text:"We will keep you updated on our academic research and on our app. We won't send promotional messages or share your data."
 }
 
 

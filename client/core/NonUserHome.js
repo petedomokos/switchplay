@@ -20,6 +20,7 @@ import { scrollIntoViewWithOffset } from "./websiteHelpers";
 import Players from "./Players"
 import DataSection from './DataSection';
 import CompatibilityInfo from './CompatibilityInfo';
+import { subscribeData } from '../data/websiteData';
 
 const playersImageDimns = screen => {
   if(screen.isSmall){
@@ -209,8 +210,8 @@ const NonUserHome = ({ screen, initScrollTo, subscribe, dialog, demoForm, closeD
       <PeopleWithQuotes title="What Staff Say" data={staffQuotesData(screen)} direction="row-reverse" />
       <DataSection screen={screen} />
       <Subscribe 
-        heading="Interested? Subscribe to us."
-        text="We have more than thousand of creative entrepreneurs and stat joining our business"
+        heading={subscribeData.heading}
+        text={subscribeData.text}
         componentsData = {{
           inputs:[{ key:"email", placeholder:"Enter Email Address" }],
           submitButton:{ label: "Subscribe" },

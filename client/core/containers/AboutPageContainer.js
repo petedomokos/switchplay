@@ -4,6 +4,7 @@ import { createNonuser } from '../../actions/NonUserActions'
 
 const mapStateToProps = (state, ownProps) => {
 	return{
+		screen:state.system.screen,
 	}
 }
 const mapDispatchToProps = dispatch => ({
