@@ -9,7 +9,7 @@ const dataSections = [
   {
     key:"spectrum",
     heading:["See the data through your", "coach's eye"],
-    desc:"Should you trust your coach's eye more than objective data? Switchplay's intuitive main view helps you to see the bigger picture so you can use data in the right places, and talk about it with confidence.",
+    desc:"Should you trust your coach's eye more than objective data? Switchplay's intuitive main view helps you to see the bigger picture, and helps analysts to talk communicate about data with coaches and players effectively.",
     //desc:"Should you trust your coach's eye more than objective data? Ofcourse, it's not that simple! The solution comes from great collaboration between staff. Switchplay is designed to build people's confidence and to support best practice in decision-making and communication about data.",
     visual:{ type:"d3" }
   },

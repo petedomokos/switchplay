@@ -210,7 +210,7 @@ const data = {
         icon: serviceIcon1,
         key:"accountability",
         title: 'Being Accountable',
-        description:"Our exclusive data visuals engage teenage players and nurture an accountabilty mindset. You can set visible goals that won't get forgotten, with clear criteria for success that players can easily track",
+        description:"Our exclusive data visuals engage teenage players and nurture an accountabilty mindset. You can set visible goals that won't get forgotten, with clear criteria for success that players can easily track.",
         //description: `Switchplay gives you an engaging way to nuture an accountability mindset in your players. You can set visible goals that won't get forgotten, with clear criteria for success that players can easily track`,
         image:{
           type:"svg",
@@ -228,7 +228,7 @@ const data = {
         icon: serviceIcon2,
         key:"thinking",
         title: 'Reflective Thinking',
-        description:"We have applied new findings from the fields of education and neuroscience to transform match reviews into a trully valuable learning experience for your players.",
+        description:"We improve the quality of discussion in post-match reviews. We get players thinking and reflecting in new ways as they watch their minutes and relate it to their data and goals.",
         //description:"Are your players good learners? Switchplay supports you to transform match reviews and discussions about data and videos into a trully valuable learning experience.",
         //description:`Switchplay simplifies your online comms with players, parents and staff. You can easily engage players and get them thinking about a video review or a tactical point. `,
         image:{
@@ -255,7 +255,7 @@ const data = {
         icon: serviceIcon3,
         key:"communication",
         title: 'Proactive Communication',
-        description: `You probably have 1 or 2 players who are more proactive than the rest in finding out what they need to work on to improve. Switchplay can turn that 1 or 2 into 11 or 12 by changing the team culture.`,
+        description: `You probably have 1 or 2 players who are more proactive than the rest in finding out what they need to do to improve. Switchplay changes the team culture, turning that 1 or 2 into 11 or 12.`,
         //These days, your messages have to compete with all the noise in players’ lives: opinions on social media, the emotions of a game, and all the rest.
         image:{
           type:"svg",

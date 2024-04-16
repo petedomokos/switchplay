@@ -36,7 +36,7 @@ const Services = () => {
                   }
                   title={<Heading as="h4" content={item.title} />}
                   description={
-                    <Text
+                    <Text style={{ fontFamily:"'DM Sans', sans-serif" }}
                       content={item.description}
                     />
                   }
