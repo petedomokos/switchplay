@@ -9,14 +9,14 @@ const dataSections = [
   {
     key:"spectrum",
     heading:["See the data through your", "coach's eye"],
-    desc:"Should you trust your coach's eye more than objective data? Switchplay's intuitive main view helps you to see the bigger picture, and helps analysts to talk communicate about data with coaches and players effectively.",
+    desc:"Should you trust your coach's eye more than objective data? Switchplay's intuitive main view helps you to see the bigger picture, and helps analysts to talk about data with coaches and players effectively.",
     //desc:"Should you trust your coach's eye more than objective data? Ofcourse, it's not that simple! The solution comes from great collaboration between staff. Switchplay is designed to build people's confidence and to support best practice in decision-making and communication about data.",
     visual:{ type:"d3" }
   },
   {
     key:"path",
     heading:["Show your players how data", "relates to their path"],
-    desc:"Data insights are great, but do you think of yourself as a storyteller? Our innovative visuals help you to bring out the true power of data by weaving it into players' journeys. Your players will start to join up the dots, to see how your messages today relate to their future goals.",
+    desc:"Data insights are great, but do you think of yourself as a storyteller? Our innovative visuals help you to bring out the true power of data by weaving it into players' journeys. Your players will start to join up the dots, to see how your messages today relate to their 'tomorrow'.",
     //desc:"Data insights are great, but do you think of yourself as a storyteller? With Switchplay, you can bring out the true power of data by weaving it into players' journeys. Your players will start to join up the dots, to see how your messages today relate to their future goals.",
     visual:{ type:"img", url:"website/images/path.png", imgWidth:1600, imgHeight:900, imgTransX:0, imgTransY:0 }
   }
