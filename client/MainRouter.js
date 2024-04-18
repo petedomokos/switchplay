@@ -239,16 +239,6 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
     height:"100vh",
     pointerEvents:"none",
   }
-
-  const overlayStyle = {
-    position:"absolute",
-    left:"0",
-    top:"0",
-    width:"100%",
-    height:"100%",
-    background:"black",
-    opacity: "0.7"
-  }
   
   const transitionStyles = {
     entering: { opacity: 0 },
@@ -289,32 +279,13 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
                 </div>
               )}
              </Transition>
-            <div onClick={onDialogClick}>
-              <Transition in={demoForm || dialog} timeout={300}>
-                {(state) => (
-                  <div style={{ ...defaultStyle, ...transitionStyles[state] }} >
-                    <div style={overlayStyle} onClick={closeDemoForm}></div>
-                    <RequestDemoForm demoForm={demoForm} submit={requestDemo} close={closeDemoForm} dialog={dialog} onDialogClick={onDialogClick} />
-                    {/**<Dialog className={classes.dialog} open={!!dialog}>
-                      <DialogTitle className={classes.dialogTitle} >{dialog?.title}</DialogTitle>
-                      <DialogContent>
-                        <DialogContentText className={classes.dialogText}>
-                          {dialog?.text}
-                        </DialogContentText>
-                      </DialogContent>
-                      <DialogActions className={classes.dialogActions}>
-                        {dialog?.buttons?.map(btn => 
-                          <Button color="primary" autoFocus="autoFocus" variant="contained" className={classes.dialogButton}
-                            onClick={() => onDialogClick(btn)} >
-                            {btn.label}
-                          </Button>
-                        )}
-                      </DialogActions>
-                        </Dialog>*/}
-                  </div>
-                )}
+            <Transition in={demoForm || dialog} timeout={300}>
+              {(state) => (
+                <div style={{ ...defaultStyle, ...transitionStyles[state], display:demoForm || dialog ? null : "none" }} >
+                  <RequestDemoForm demoForm={demoForm} submit={requestDemo} close={closeDemoForm} dialog={dialog} onDialogClick={onDialogClick} />
+                </div>
+              )}
               </Transition>
-            </div>
             <Switch>
               <Route path="/about" component={AboutPageContainer}/>
               <Route path="/contact" component={Contact}/>

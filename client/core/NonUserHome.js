@@ -183,14 +183,14 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const NonUserHome = ({ screen, initScrollTo, subscribe, dialog, demoForm, closeDialog, closeDemoForm, showDemoForm }) =>{
+const NonUserHome = ({ screen, initScrollTo, subscribe, dialog, demoForm, closeDialog, closeDemoForm, showDemoForm }) => {
   const styleProps = { };
   const classes = useStyles({styleProps});
   const rootRef = useRef(null);
 
   //@todo - stop using window and use store instead
   useEffect(() => {
-    console.log("NonUserHome", window.manualScrollId)
+    //console.log("NonUserHome", window.manualScrollId)
     if(window.manualScrollId){
       const requiredNode = d3.select(`#${window.manualScrollId}`).node();//.scrollIntoView({ behavior: 'smooth' });
       scrollIntoViewWithOffset(requiredNode, NAVBAR_HEIGHT)

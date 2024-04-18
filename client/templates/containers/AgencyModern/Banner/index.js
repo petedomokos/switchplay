@@ -95,7 +95,7 @@ const Banner = ({ screen, showDemoForm }) => {
                 content="Show them how it relates to their path, their progress, and their future."
               />
             </div>
-            <Button title="Get A Demo" type="submit" style={{ width:"140px" }} onClick={() => showDemoForm()} />
+            <Button title="Get A Demo" type="submit" style={{ width:"140px" }} onClick={() => showDemoForm() } />
         </BannerContent>
         <div className="banner-image-area">
           <SVGImage 

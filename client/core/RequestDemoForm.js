@@ -24,8 +24,8 @@ const useStyles = makeStyles(theme => ({
     height:"100%",
     position:"absolute",
     left:0,top:0,
-    //background:"black",
-    //opacity:0.7,
+    background:"black",
+    opacity:0.7,
   },
   /*closeFormIcon:{
     position:"absolute",
@@ -78,6 +78,7 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import Button from '@material-ui/core/Button'
 
 const RequestDemoForm = ({ submit, close, demoForm, dialog, onDialogClick }) =>{
+  console.log("dialog", dialog)
   const [dialogState, setDialogState] = useState(null);
   const styleProps = { };
   const classes = useStyles({styleProps});
@@ -111,11 +112,17 @@ const RequestDemoForm = ({ submit, close, demoForm, dialog, onDialogClick }) =>{
 
   return (
       <div className={classes.overlayFormContainer}>
-        {/**<div className={classes.overlayFormBackground} onClick={close}></div>*/}
-        <Transition in={demoForm} timeout={300}>
+        <Transition in={demoForm || dialog} timeout={300}>
           {(state) => (
             <div style={{ ...defaultStyle, ...transitionStyles[state] }} >
-                <div className={classes.overlayForm}>
+                <div className={classes.overlayFormBackground} onClick={close}></div>
+            </div>
+          )}
+        </Transition>
+        <Transition in={demoForm && !dialog} timeout={300}>
+          {(state) => (
+            <div style={{ ...defaultStyle, ...transitionStyles[state], pointerEvents:"none" }} >
+                <div className={classes.overlayForm} style={{ pointerEvents:"all" }}>
                   <RequestDemo 
                       heading="Thanks for your interest."
                       text="Please provide some contact info and we will be in touch."
