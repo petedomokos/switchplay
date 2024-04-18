@@ -111,13 +111,7 @@ const RequestDemoForm = ({ submit, close, demoForm, dialog, onDialogClick }) =>{
 
   return (
       <div className={classes.overlayFormContainer} style={{ pointerEvents:"none" }}>
-        <Transition in={demoForm || dialog} timeout={300}>
-          {(state) => (
-            <div style={{ ...defaultStyle, ...transitionStyles[state] }} >
-                <div className={classes.overlayFormBackground} onClick={close} style={{ pointerEvents:demoForm || dialog ? "all" : "none" }}></div>
-            </div>
-          )}
-        </Transition>
+        <div className={classes.overlayFormBackground} onClick={close} style={{ pointerEvents:demoForm || dialog ? "all" : "none" }}></div>
         <Transition in={demoForm && !dialog} timeout={300}>
           {(state) => (
             <div style={{ ...defaultStyle, ...transitionStyles[state], pointerEvents:"none" }} >
