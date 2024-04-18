@@ -78,7 +78,6 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import Button from '@material-ui/core/Button'
 
 const RequestDemoForm = ({ submit, close, demoForm, dialog, onDialogClick }) =>{
-  console.log("dialog", dialog)
   const [dialogState, setDialogState] = useState(null);
   const styleProps = { };
   const classes = useStyles({styleProps});
@@ -111,18 +110,18 @@ const RequestDemoForm = ({ submit, close, demoForm, dialog, onDialogClick }) =>{
   };
 
   return (
-      <div className={classes.overlayFormContainer}>
+      <div className={classes.overlayFormContainer} style={{ pointerEvents:"none" }}>
         <Transition in={demoForm || dialog} timeout={300}>
           {(state) => (
             <div style={{ ...defaultStyle, ...transitionStyles[state] }} >
-                <div className={classes.overlayFormBackground} onClick={close}></div>
+                <div className={classes.overlayFormBackground} onClick={close} style={{ pointerEvents:demoForm || dialog ? "all" : "none" }}></div>
             </div>
           )}
         </Transition>
         <Transition in={demoForm && !dialog} timeout={300}>
           {(state) => (
             <div style={{ ...defaultStyle, ...transitionStyles[state], pointerEvents:"none" }} >
-                <div className={classes.overlayForm} style={{ pointerEvents:"all" }}>
+                <div className={classes.overlayForm} style={{ pointerEvents:demoForm && !dialog ? "all" : "none" }}>
                   <RequestDemo 
                       heading="Thanks for your interest."
                       text="Please provide some contact info and we will be in touch."
@@ -145,8 +144,8 @@ const RequestDemoForm = ({ submit, close, demoForm, dialog, onDialogClick }) =>{
         </Transition>
         <Transition in={dialog} timeout={300}>
           {(state) => (
-            <div style={{ ...defaultStyle, ...transitionStyles[state] }} >
-              <div className={classes.dialog} onClick={() => onDialogClick()} >
+            <div style={{ ...defaultStyle, ...transitionStyles[state] }} onClick={() => onDialogClick()}>
+              <div className={classes.dialog} style={{ pointerEvents: dialog ? "all" : "none"}}  onClick={() => onDialogClick()} >
                 <DialogTitle className={classes.dialogTitle} >{dialogState?.title}</DialogTitle>
                 <DialogContent>``
                   <DialogContentText className={classes.dialogText}>

@@ -237,7 +237,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
     top:"0px",
     width:"100vw",
     height:"100vh",
-    pointerEvents:"none",
+    pointerEvents:demoForm || dialog ? null : "none",
   }
   
   const transitionStyles = {
@@ -281,11 +281,11 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
              </Transition>
             <Transition in={demoForm || dialog} timeout={300}>
               {(state) => (
-                <div style={{ ...defaultStyle, ...transitionStyles[state], display:demoForm || dialog ? null : "none" }} >
+                <div style={{ ...defaultStyle, ...transitionStyles[state] }} >
                   <RequestDemoForm demoForm={demoForm} submit={requestDemo} close={closeDemoForm} dialog={dialog} onDialogClick={onDialogClick} />
                 </div>
               )}
-              </Transition>
+            </Transition>
             <Switch>
               <Route path="/about" component={AboutPageContainer}/>
               <Route path="/contact" component={Contact}/>
