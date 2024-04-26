@@ -140,8 +140,8 @@ const getNavBarItemsFromHomePage = (user, onSignout, onShowDemoForm) => {
 const useStyles = makeStyles(theme => ({
   app:{
     width:"100%",
-    height:"120vh",
-    minHeight:"120vh",
+    height:props => props.appHeight,
+    minHeight:props => props.appHeight,
     background:props => props.appBg,
   },
   dialog:{
@@ -165,7 +165,10 @@ const useStyles = makeStyles(theme => ({
 
 const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, requestDemo, onSignout, history, dialogs, savedDialog, closeDialog, demoForm, showDemoForm, closeDemoForm, mobileMenu, setMobileMenu }) => {
   ////DBEFF0
-  const styleProps = { appBg: history.location.pathname === "/" ? COLOURS.banner.bg : "#DBEFF0"/*"#f0ded5"*/ }
+  const styleProps = { 
+    appHeight: userId ? "100vh" : "120vh",
+    appBg: history.location.pathname === "/" ? COLOURS.banner.bg : "#DBEFF0"/*"#f0ded5"*/ 
+  }
   const classes = useStyles(styleProps);
   const jwt = auth.isAuthenticated();
   const user = jwt?.user;

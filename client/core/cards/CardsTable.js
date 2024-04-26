@@ -18,6 +18,12 @@ const timeframeOptions = {
 } 
 
 const useStyles = makeStyles((theme) => ({
+  outerRoot:{
+    width:"100vw",
+    height:"100vh",
+    position:"relative",
+    overflow:"hidden",
+  },
   root: {
     position: "absolute",
     left:props => props.left,
@@ -32,15 +38,15 @@ const useStyles = makeStyles((theme) => ({
     background:COLOURS.CARDS_TABLE,
     overflow:"scroll",
     //border:"solid",
-    borderColor:"yellow"
+    //borderColor:"yellow"
     //borderWidth:"thin",
   },
   tableContents:{
-    //border:"solid",
-    borderColor:"yellow",
     position:"absolute",
     left:props => props.tableContents.left,
     top:props => props.tableContents.top,
+    width:"200px",
+    height:"200px",
     transition: `top ${TRANSITIONS.MED}ms`,
   },
   decksContents:{
@@ -191,6 +197,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
     },
 
   };
+  console.log("styleProps", styleProps)
   const classes = useStyles(styleProps) 
   const containerRef = useRef(null);
   const instructionsRef = useRef(null);
@@ -220,37 +227,34 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
     }
   }, [stringifiedData, form, selectedDeckId, timeframeKey]);
 
-  /*
-  //merge current change was....
-   <TableHeader dimns={{ 
-            padding: { left: 7.5, right:burgerBarWidth + (screen.width * 0.05), top:tableHeaderHeight * 0.1, bottom:tableHeaderHeight * 0.1 },
-            */
   return (
-    <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
-      <div className={classes.tableContents}>
-        {!selectedDeckId && <TableHeader dimns={{ 
-            padding: { left:10, right:burgerBarWidth + 10, top:tableHeaderHeight * 0.1, bottom:tableHeaderHeight * 0.1 },
-            width:width, 
-            height:tableHeaderHeight 
-          }}
-          table={table}
-          timeframe={timeframe}
-          nrTimeframeOptions={atLeastOnePlayer ? 2 : 1}
-          toggleTimeframe={toggleTimeframe}
-        />}
-        <div className={classes.decksContents}>
-          {shouldDisplayInstructions ?  
-            <Instructions />
-            :
-            <Decks 
-              table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
-              datasets={datasets}
-              data={decksData/*.slice(1,2)*/} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
-              groupingTag={groupingTag} timeframeKey={timeframeKey}
-              tableMarginTop={tableMarginTop}
-              onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={handleUpdateDeck}
-              updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />
-          }
+    <div className={classes.outerRoot}>
+      <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
+        <div className={classes.tableContents}>
+          {!selectedDeckId && <TableHeader dimns={{ 
+              padding: { left:10, right:10, top:tableHeaderHeight * 0.1, bottom:tableHeaderHeight * 0.1 },
+              width:width, 
+              height:tableHeaderHeight 
+            }}
+            table={table}
+            timeframe={timeframe}
+            nrTimeframeOptions={atLeastOnePlayer ? 2 : 1}
+            toggleTimeframe={toggleTimeframe}
+          />}
+          <div className={classes.decksContents}>
+            {shouldDisplayInstructions ?  
+              <Instructions />
+              :
+              <Decks 
+                table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
+                datasets={datasets}
+                data={decksData} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
+                groupingTag={groupingTag} timeframeKey={timeframeKey}
+                tableMarginTop={tableMarginTop}
+                onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={handleUpdateDeck}
+                updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />
+            }
+          </div>
         </div>
       </div>
     </div>

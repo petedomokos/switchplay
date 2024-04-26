@@ -19,8 +19,7 @@ const useStyles = makeStyles(theme => ({
         justifyContent:"space-between",
         pointerEvents:"all",
         background:grey10(8),//"transparent",
-        //border:"solid",
-        borderColor:"pink"
+        zIndex:1000,
     },
     customerLogoContainer:{
         width:CUSTOMER_LOGO_WIDTH,
@@ -49,24 +48,19 @@ const useStyles = makeStyles(theme => ({
         flexDirection:"column",
         justifyContent:"space-between",
         alignItems:"flex-end",
-        //border:"solid"
     },
     timeframeToggleArea:{
+        width:"100%",
         height:props => props.timeframe.toggleArea.height,
         display:"flex",
         justifyContent:"space-between",
-        /*
-        border:"solid",
-        borderColor:"white",
-        borderWidth:"thin"
-        */
     },
     timeframeDescArea:{
         width:"100%",
         height:props => props.timeframe.descArea.height,
         fontSize:props => `${props.timeframe.descArea.height}px`,
         display:"flex",
-        justifyContent:"center",
+        justifyContent:props => props.timeframe.descJustifyContent,
         alignItems:"flex-end",
         color:props => props.activeFill,
         /*
@@ -105,7 +99,7 @@ export default function TableHeader({ table, dimns, timeframe, nrTimeframeOption
     const iconHeight = 27.5;
     const vertGap = 10;
     const timeframeDescHeight = contentsHeight - iconHeight - vertGap;
-    const timeframeWidth = iconWidth * 2 + 10;
+    const timeframeWidth = iconWidth * nrTimeframeOptions + 30;
 
     const activeFill = grey10(1);
     const inactiveFill = grey10(5);
@@ -124,6 +118,7 @@ export default function TableHeader({ table, dimns, timeframe, nrTimeframeOption
             width:timeframeWidth,
             toggleArea:{ height: iconHeight },
             descArea: { height: timeframeDescHeight },
+            descJustifyContent:timeframe.key === "singleDeck" ? "flex-start" : "flex-end",
             icon:{
                 width:iconWidth, height:iconHeight, marginLeft:10,
             },
