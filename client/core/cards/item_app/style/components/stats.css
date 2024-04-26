@@ -1,0 +1,12 @@
+.stats-wrapper {
+  position: relative;
+  width: 100%;
+  background-color: rgba(246, 197, 122);
+  border-radius: 15px;
+  margin-right: 2.5%;
+}
+@media screen and (max-width: 1200px) {
+  .steps-wrapper {
+    margin-right: 0;
+  }
+}

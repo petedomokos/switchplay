@@ -1,0 +1,33 @@
+.profile-picture-wrapper {
+  position: absolute;
+  border-radius: 100%;
+  position: relative;
+}
+
+.profile-picture {
+  border-radius: 100%;
+  height: 35px;
+  width: 35px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.first {
+  position: relative;
+  top: 0;
+  right: 0;
+}
+.second {
+  position: absolute;
+  top: 0px;
+  right: 45px;
+}
+.third {
+  position: absolute;
+  top: 0px;
+  right: 90px;
+}

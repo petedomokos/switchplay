@@ -1,0 +1,11 @@
+.steps-wrapper {
+  position: relative;
+  width: 100%;
+  background-color: rgb(179, 205, 251);
+  border-radius: 15px;
+}
+@media screen and (max-width: 1200px) {
+  .steps-wrapper {
+    margin-left: 0;
+  }
+}

@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
     width:"100vw",
     height:"100vh",
     position:"relative",
-    overflow:"hidden",
+    overflow:props => props.overflow
   },
   root: {
     position: "absolute",
@@ -175,6 +175,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   //const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
 
   let styleProps = {
+    overflow:form ? null : "hidden",
     left: -containerWidth/2,
     top: -containerHeight/2,
     width: containerWidth,
@@ -187,7 +188,6 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
     decksContents:{
       left: margin.left + (screen.width - width)/2,
       top: margin.top,
-      overflow:"hidden"
     },
     form:{ 
       display: form ? null : "none",
@@ -197,7 +197,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
     },
 
   };
-  console.log("styleProps", styleProps)
+
   const classes = useStyles(styleProps) 
   const containerRef = useRef(null);
   const instructionsRef = useRef(null);
@@ -246,6 +246,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
               <Instructions />
               :
               <Decks 
+                setForm={setForm} form={form}
                 table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
                 datasets={datasets}
                 data={decksData} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}

@@ -1,0 +1,11 @@
+.attachment-wrapper {
+  width: 100%; 
+  background-color: rgba(191, 191, 253, 0.5);
+  border-radius: 15px;
+  position: relative;
+}
+
+.comment-aligner {
+  flex: 1;
+  margin-top: 10px;
+}

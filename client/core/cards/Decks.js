@@ -12,6 +12,8 @@ import SectionTitleForm from './forms/SectionTitleForm';
 import CardTitleForm from './forms/CardTitleForm';
 import CardDateForm from "./CardDateForm";
 import PurposeParagraphForm from './forms/PurposeParagraphForm';
+import ItemApp from "./item_app/ItemApp"
+
 import { sortAscending, moveElementPosition } from '../../util/ArrayHelpers';
 import { isNumber } from '../../data/dataHelpers';
 import { getPosition } from "../journey/domHelpers";
@@ -90,7 +92,7 @@ const enhancedZoom = dragEnhancements();
 
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ table, data, groupingTag, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
+const Decks = ({ form, setForm, table, data, groupingTag, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
   //console.log("Decks table", table)
   //state
   const [_deckLayout, setLayout] = useState(() => deckLayout());
@@ -101,7 +103,6 @@ const Decks = ({ table, data, groupingTag, timeframeKey, customSelectedDeckId, c
   const [selectedCardNr, setSelectedCardNr] = useState(customSelectedCardNr);
   const [selectedItemNr, setSelectedItemNr] = useState(customSelectedItemNr);
   const [longpressedDeckId, setLongpressedDeckId] = useState("");
-  const [form, setForm] = useState(null);
 
   //update flags
   //processed props
@@ -914,10 +915,21 @@ useEffect(() => {
       </svg>
       <div className={classes.formUnderlay} onClick={onClickBg}></div>
       <div className={classes.formContainer} ref={formRef}>
-        {form?.formType === "item" && 
+        {/**form?.formType === "item" && 
           <ItemForm item={form.value} cardTitle={getCardTitle(form.value.id)} 
             dimns={getFormDimnsAndPos()} fontSize={form.height * 0.5} save={updateItemTitle} close={() => onSelectItem()} />
-          }
+        */}
+        {form?.formType === "item" && 
+          <div 
+            style={{ width:"100%", height:"100%", background:"yellow", border:"solid", pointerEvents:"all" }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelectItem()
+            }}
+          >
+            <ItemApp/>
+          </div>
+        }
         {form?.formType === "deck-title" && 
           <DeckTitleForm deck={selectedDeck} save={updateDeckTitle} close={() => setForm(null)}
             dimns={getFormDimnsAndPos()} 

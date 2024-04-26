@@ -1,0 +1,21 @@
+.unchecked-icon {
+  height: 25px;
+  width: 25px;
+  border: 1px solid black;
+  border-radius: 100%;
+}
+.checked-icon {
+  height: 25px;
+  width: 25px;
+  border: 1px solid black;
+  border-radius: 100%;
+  margin: auto;
+}
+
+.icon-image{
+   clip-path: circle(37.4%); 
+  height: 25px;
+  width: 25px;
+  border: 1px solid black;
+  background-color: rgb(213, 29, 60);
+}

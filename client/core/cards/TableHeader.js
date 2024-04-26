@@ -127,8 +127,6 @@ export default function TableHeader({ table, dimns, timeframe, nrTimeframeOption
     }
     const classes = useStyles(styleProps);
 
-    console.log("table", table)
-
     return (
         <div className={classes.tableHeaderRoot}>
             <div className={classes.customerLogoContainer}>

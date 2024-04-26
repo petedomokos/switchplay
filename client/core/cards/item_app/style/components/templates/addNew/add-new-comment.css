@@ -1,0 +1,27 @@
+.comment {
+  display: flex;
+  margin-top: 10px;
+  bottom: 0;
+}
+
+.comment-input {
+  all: initial;
+  border-bottom: 1px solid rgba(241, 241, 241, 0.7);
+  margin-right: 10px;
+  padding-left: 5px;
+  width: 100%;
+  color: rgb(241, 241, 241);
+  height: 25px;
+  max-height: 60px;
+  overflow-y: auto;
+  text-align: justify;
+}
+
+.send-comment {
+  all: initial;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(241, 241, 241, 1);
+}

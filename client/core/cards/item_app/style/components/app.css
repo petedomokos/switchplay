@@ -1,0 +1,58 @@
+* {
+  --team-color: rgb(195, 1, 22);
+  --app-background-color: rgb(225, 225, 225);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.item-container {
+  background-color: var(--app-background-color);
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.item-contents {
+  height: 100%;
+  padding: calc(50px + 2.5%) 5% 50px 5%;
+}
+.stats-steps-wrapper {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+.stats-steps-wrapper > * {
+  margin-bottom: 2.5%;
+}
+
+.attachment {
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+@media screen and (max-width: 1200px) {
+  .item-contents {
+    padding-right: 2.5%;
+    padding-left: 2.5%;
+  }
+  .stats-steps-wrapper {
+    flex-direction: column;
+  }
+  .attachment {
+    position: static;
+  }
+}
+
+@media screen and (max-width: 300px) {
+  .stats-steps-wrapper {
+    margin-top: 25px;
+  }
+}

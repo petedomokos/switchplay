@@ -1,0 +1,35 @@
+.attachment-items {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  
+}
+.attachment-items > div {
+  margin-bottom: 15%;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: rgba(15, 15, 15, 0.6);
+  width: calc(33.33% - 70px);
+  display: flex;
+  flex-direction: column;
+}
+
+@media screen and (max-width: 1200px) {
+  .attachment-items > div {
+    width: calc(50% - 70px);
+  }
+}
+@media screen and (max-width: 800px) {
+  .attachment-items > div {
+    width: calc(40%);
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .attachment-items > div {
+    width: 100%;
+    margin-right: 0px;
+    margin-left: 0px;
+    padding: 10px;
+  }
+}

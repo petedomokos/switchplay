@@ -1,0 +1,29 @@
+.new-attachment {
+  position: absolute;
+  bottom: 25px;
+  right: 25px;
+  padding: 5px 10px;
+  border: 1px solid rgb(122, 122, 122);
+  border-radius: 16px;
+  cursor: pointer;
+}
+@media screen and (max-width: 1200px) {
+  .new-attachment {
+    bottom: 2.5vh;
+    right: 2.5vh;
+  }
+}
+@media screen and (max-width: 1200px) {
+  .new-attachment {
+    bottom: 1.5vh;
+    right: 1.5vh;
+  }
+}
+
+@media screen and (max-width: 200px) {
+  .new-attachment {
+    left: 5%;
+    right: 5%;
+    text-align: center;
+  }
+}
