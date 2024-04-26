@@ -29,7 +29,7 @@ const useStyles = makeStyles(theme => ({
         height:CUSTOMER_LOGO_HEIGHT,
         alignSelf:"center",
         marginRight:props => `${props.customerLogo.marginRight}px`,
-        border:"solid"
+        //border:"solid"
     },
     customerLogo:{
         //transform:`scale(0.05) translate(-10000px, -5000px)`
