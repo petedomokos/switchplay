@@ -33,7 +33,7 @@ app.listen(config.port, (err) => {
   console.info('Server started on port %s.', config.port)
 })
 
-app.listen(443, function() {
-  console.log("Express HTTP server listening on port 443" );
+app.listen(80, function() {
+  console.log("Express HTTP server listening on port 80" );
 });
 
