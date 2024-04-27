@@ -18,6 +18,8 @@ mongoose.connection.on('open', function (ref) {
 })
 */
 
+/*
+didnt work
 // set up a route to redirect http to https
 app.get('*', function(req, res) {  
   res.redirect('https://' + req.headers.host + req.url);
@@ -25,6 +27,7 @@ app.get('*', function(req, res) {
   // Or, if you don't want to automatically detect the domain name from the request header, you can hard code it:
   // res.redirect('https://example.com' + req.url);
 })
+*/
 
 app.listen(config.port, (err) => {
   if (err) {
@@ -33,7 +36,12 @@ app.listen(config.port, (err) => {
   console.info('Server started on port %s.', config.port)
 })
 
+/*
+broke app - stackoverflow siln uses createServer instead
+https://stackoverflow.com/questions/7450940/automatic-https-connection-redirect-with-node-js-express
+
 app.listen(80, function() {
   console.log("Express HTTP server listening on port 80" );
 });
+*/
 
