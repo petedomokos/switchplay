@@ -1,9 +1,0 @@
-.item-wrapper {
-  margin: 25px;
-}
-
-@media screen and (max-width: 1200px) {
-  .item-wrapper {
-    margin: 5%;
-  }
-}

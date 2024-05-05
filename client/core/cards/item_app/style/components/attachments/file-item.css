@@ -1,7 +1,0 @@
-.text-underline {
-  cursor: pointer;
-  color: rgba(241, 241, 241, 0.9);
-}
-.text-underline:hover {
-  text-decoration: underline;
-}

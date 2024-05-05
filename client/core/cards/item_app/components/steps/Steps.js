@@ -1,30 +1,31 @@
 import React from 'react';
 import TitleTemplate from '../templates/TitleTemplate';
 import StepsItemTemplate from '../templates/StepsItemTemplate';
-import AddNewAttachmentTemplate from '../templates/addNew/AddNewAttachmentTemplate';
+import AddNewTemplate from '../templates/addNew/AddNewTemplate';
 
-import { mockItem } from '../../data/mockData';
-
-import '../../style/components/attachments/content-item.css';
-import '../../style/components/items.css';
+import '../../style/components/sections.css';
 import '../../style/components/steps.css';
-function Steps() {
-  const steps = mockItem.item1.steps;
+
+function Steps({ steps }) {
   const title = 'Steps';
-  const placeholder = 'Add your next step';
+  const placeholder = 'Add step';
   return (
     <div className='steps-wrapper'>
-      <div className='item-wrapper'>
+      <div className='section-wrapper'>
         <TitleTemplate title={title} />
-        <div className='child-content'>
+        <div className='section-child-content'>
           {steps.map(({ title, status, id }) => (
             <StepsItemTemplate key={id} value={title} status={status} />
           ))}
         </div>
-        <AddNewAttachmentTemplate placeholder={placeholder} />
+        <AddNewTemplate placeholder={placeholder} />
       </div>
     </div>
   );
+}
+
+Steps.defaultProps = {
+  steps:[]
 }
 
 export default Steps;

@@ -1,29 +1,30 @@
 import React from 'react';
 import TitleTemplate from '../templates/TitleTemplate';
-import AddNewAttachmentTemplate from '../templates/addNew/AddNewAttachmentTemplate';
-import { mockItem } from '../../data/mockData';
-import '../../style/components/attachments/content-item.css';
-import '../../style/components/items.css';
+import AddNewTemplate from '../templates/addNew/AddNewTemplate';
+
+import '../../style/components/sections.css';
 import '../../style/components/stats.css';
 
-function Stats() {
-  const stats = mockItem.item1.stats;
-
+function Stats({ stats }) {
   const title = 'Stats';
-  const placeholder = 'Add new Stats';
+  const placeholder = 'Add stat';
   return (
     <div className='stats-wrapper'>
-      <div className='item-wrapper'>
+      <div className='section-wrapper'>
         <TitleTemplate title={title} />
-        <div className='child-content'>
+        <div className='section-child-content'>
           {stats.map((stat, index) => (
-            <div key={index}>{stat.statInfo}</div>
+            <div key={index}></div>
           ))}
         </div>
       </div>
-      <AddNewAttachmentTemplate placeholder={placeholder} />
+      <AddNewTemplate placeholder={placeholder} />
     </div>
   );
+}
+
+Stats.defaultProps = {
+  stats:[]
 }
 
 export default Stats;

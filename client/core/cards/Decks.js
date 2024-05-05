@@ -29,6 +29,7 @@ import { createInitCard } from '../../data/initDeck';
 import { addWeeks } from '../../util/TimeHelpers';
 import { addKpiValuesToCards } from './kpiValuesForCards';
 import uuid from 'react-uuid';
+import { mockItem } from './item_app/data/mockData';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -92,7 +93,7 @@ const enhancedZoom = dragEnhancements();
 
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ form, setForm, table, data, groupingTag, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
+const Decks = ({ form, setForm, screen, table, data, groupingTag, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
   //console.log("Decks table", table)
   //state
   const [_deckLayout, setLayout] = useState(() => deckLayout());
@@ -454,6 +455,11 @@ const Decks = ({ form, setForm, table, data, groupingTag, timeframeKey, customSe
 
   const getCardTitle = useCallback((cardId) => {
     return selectedDeck?.cards.find(c => c.id === cardId)?.title
+  }, [selectedDeckId]);
+
+  const getSectionTitle = useCallback((cardId) => {
+    console.log("selDeck", selectedDeck)
+    return selectedDeck?.cards.find(c => c.id === cardId)?.section?.title
   }, [selectedDeckId]);
 
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
@@ -895,6 +901,11 @@ useEffect(() => {
     }
   })
 }, [form, stringifiedData])
+/*
+ - add itemtitle from my form into ItemApp and get it functional
+  - think about where decktitle goes? eg playername
+*/
+console.log("form", form)
 
   return (
     <div className={`cards-root ${classes.root}`} onClick={onClickBg} >
@@ -921,13 +932,14 @@ useEffect(() => {
         */}
         {form?.formType === "item" && 
           <div 
-            style={{ width:"100%", height:"100%", background:"yellow", border:"solid", pointerEvents:"all" }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelectItem()
-            }}
+            style={{ width:"100%", height:"100%", pointerEvents:"all" }}
+            onClick={(e) => { e.stopPropagation(); }}
           >
-            <ItemApp/>
+            <ItemApp 
+              screen={screen} item={{ ...mockItem, ...form.value }}
+              cardTitle={getCardTitle(form.value.id) || `Card ${form.value.cardNr}`}
+              save={updateItemTitle} close={() => onSelectItem()}  
+            />
           </div>
         }
         {form?.formType === "deck-title" && 

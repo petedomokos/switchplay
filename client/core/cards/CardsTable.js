@@ -246,7 +246,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
               <Instructions />
               :
               <Decks 
-                setForm={setForm} form={form}
+                setForm={setForm} form={form} screen={screen}
                 table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
                 datasets={datasets}
                 data={decksData} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}

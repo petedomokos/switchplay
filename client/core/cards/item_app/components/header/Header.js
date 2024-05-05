@@ -7,7 +7,7 @@ import PathTitle from './PathTitle';
 import People from './People';
 // import ImageColorAnalyzer from '../../utils/colorExtractor/ImageColorAnalyzer';
 // import TeamLogo from '../../utils/images/charlton@3x.png'
-function Header() {
+function Header({ screen, cardTitle, sectionTitle, close }) {
   const ArrowBack = () => {
     return (
       <div>
@@ -18,17 +18,17 @@ function Header() {
 
   return (
     <div className='header-wrapper'>
-      <div className='back-arrow'>
+      <div className='back-arrow' onClick={close}>
         <ArrowBack />
       </div>
       {/* <ImageColorAnalyzer imageUrl={TeamLogo} /> */}
       <div className='header-item path'>
-        <PathTitle />
+        <PathTitle sectionTitle={sectionTitle} cardTitle={cardTitle} />
       </div>
-      <div className=' header-item people'>
-        <People />
+      <div className='header-item people'>
+        <People screen={screen} />
       </div>
-      <div className=' header-item inbox'>
+      <div className='header-item inbox'>
         <MailOutlineIcon style={{ height: '100%', width: '100%' }} className='mail' />
       </div>
     </div>

@@ -33,7 +33,6 @@
 
 .path {
   width: 100%;
-  margin-left: calc((100px + 50px + 20px) / 2); /* people width + inbox width + inbox margin-right */
   display: flex;
   justify-content: center;
   text-align: center;

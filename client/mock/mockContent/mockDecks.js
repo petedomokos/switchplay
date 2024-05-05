@@ -85,7 +85,7 @@ const mockAthleteDecks = [
 ]
 
 const englandSections = [
-    { key:"section1", title: "Psych/Soc", initials: "PSO" },
+    { key:"section1", title: "Psych Social", initials: "PSO" },
     { key:"section2", title: "Technical", initials: "TEC" },
     { key:"section3", title: "Physical", initials: "PHY" },
     { key:"section4", title: "Tactical", initials: "TAC" },

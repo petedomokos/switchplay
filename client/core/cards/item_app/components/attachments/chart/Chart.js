@@ -1,20 +1,10 @@
 import React from 'react';
 import '../../../style/components/attachments/attachment-item.css';
 import ChartTemplate from '../../templates/ChartTemplate';
-import CommentTemplate from '../../templates/CommentTemplate';
 
-const Chart = ({ item }) => {
+const Chart = ({ chart }) => {
   return (
-    <>
-      {item.map((chart, index) => (
-        <div key={index}>
-          <ChartTemplate url={chart.url} />
-          <div className='comment-aligner'>
-            <CommentTemplate msg={chart.comments} />
-          </div>
-        </div>
-      ))}
-    </>
+    <ChartTemplate url={chart.url} />
   );
 };
 export default Chart;

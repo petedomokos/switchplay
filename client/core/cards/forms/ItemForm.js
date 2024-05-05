@@ -139,11 +139,14 @@ export default function ItemForm({ cardTitle, item, dimns, fontSize, save, close
   useEffect(() => { d3.timeout(() => { setEditing(true) }, 1) }, [])
 
   return (
-    <div className={classes.root} onClick={e => { e.stopPropagation() }}>
+    <div className={classes.root} onClick={e => {
+      console.log("item app click") 
+      e.stopPropagation();
+    }}>
       <div className={classes.backBtn} onClick={close}>
-      <IconButton aria-label="add-datapoint" color="primary">
-        <ArrowBackIcon className={classes.backBtnIcon} />
-      </IconButton>
+        <IconButton aria-label="add-datapoint" color="primary">
+          <ArrowBackIcon className={classes.backBtnIcon} />
+        </IconButton>
       </div>
       
       <div className={classes.sectionAndCardTitle}>

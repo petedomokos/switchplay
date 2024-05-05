@@ -1,0 +1,11 @@
+.file-template {
+    width:100%;
+    height:100%;
+    cursor: pointer;
+    color: black;
+    background:rgba(241, 241, 241, 0.9);
+}
+
+.file-template:hover {
+    text-decoration: underline;
+  }

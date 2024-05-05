@@ -19,15 +19,36 @@
 .first {
   position: relative;
   top: 0;
-  right: 0;
 }
 .second {
   position: absolute;
   top: 0px;
-  right: 45px;
 }
 .third {
   position: absolute;
   top: 0px;
-  right: 90px;
+}
+
+.first-md-up { right: 0; }
+.second-md-up { right: 45px; }
+.third-md-up { right: 90px; }
+.first-sm-down { 
+  right: 0; 
+  border:solid;
+  border-width:thin;
+  border-color:#DAA520;
+}
+.second-sm-down { 
+  top: 0px;
+  right: 5px; 
+  border:solid;
+  border-width:thin;
+  border-color:#DAA520;
+}
+.third-sm-down { 
+  top: 0px;
+  right: 10px; 
+  border:solid;
+  border-width:thin;
+  border-color:#DAA520;
 }

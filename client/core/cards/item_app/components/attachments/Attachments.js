@@ -1,39 +1,27 @@
 import React from 'react';
-import { mockItem } from '../../data/mockData';
 import TitleTemplate from '../templates/TitleTemplate';
-import AddNewAttachmentTemplate from '../templates/addNew/AddNewAttachmentTemplate';
-
-import Video from './video/Video.js';
-import Chart from './chart/Chart';
-import Image from './image/Image.js';
-import File from './file/File';
-
+import AddNewTemplate from '../templates/addNew/AddNewTemplate';
+import Attachment from './Attachment';
 
 import '../../style/components/attachments.css';
-import '../../style/components/items.css';
-import '../../style/components/attachments/content-item.css';
+import '../../style/components/sections.css';
 import '../../style/components/attachments/attachment-item.css';
 
-function Attachments() {
-  const attachments = mockItem.item1.attachments;
-
+function Attachments({ attachments }) {
   const title = 'Attachments';
-  const filePlaceholder = 'Add new attachment';
-
-
+  const addLabel = 'Add attachment';
 
   return (
-    <div className='attachment-wrapper'>
-      <div className='item-wrapper'>
+    <div className='attachments-wrapper'>
+      <div className='section-wrapper'>
         <TitleTemplate title={title} />
-        <div className='child-content attachment-items'>
-          <Video item={attachments.video} />
-          <Chart item={attachments.chart} />
-          <Image item={attachments.image} />
-          <File item={attachments.file} />
+        <div className="section-child-content attachments-list">
+          {attachments.map(att => 
+            <Attachment key={`att-${att.key}`} attachment={att} />
+          )}
         </div>
-        <AddNewAttachmentTemplate placeholder={filePlaceholder} />
       </div>
+      <AddNewTemplate placeholder={addLabel} />
     </div>
   );
 }

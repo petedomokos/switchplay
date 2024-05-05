@@ -1,12 +1,12 @@
-.child-content {
+.section-child-content {
   align-items: center;
   margin-bottom: 100px;
 }
 
-.child-content:nth-child(2) {
+.section-child-content:nth-child(2) {
   margin-top: 50px;
 }
-.child-content > * {
+.section-child-content > * {
   margin-top: 15px;
   /* margin-left: 25px; */
 }
