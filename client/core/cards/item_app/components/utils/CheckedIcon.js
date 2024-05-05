@@ -1,11 +1,10 @@
 import React from 'react';
-import teamLogo from '../../utils/images/charlton@3x.png';
 import '../../style/utils/steps-icon.css';
 
-function CheckedIcon() {
+function CheckedIcon({ teamLogoUrl }) {
   return (
     <div className='checked-icon'>
-      <img className='icon-image' src={teamLogo} alt='team logo'></img>
+      <img className='icon-image' src={teamLogoUrl} alt='team logo'></img>
     </div>
   );
 }

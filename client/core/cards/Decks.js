@@ -93,7 +93,7 @@ const enhancedZoom = dragEnhancements();
 
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ form, setForm, screen, table, data, groupingTag, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
+const Decks = ({ form, setForm, screen, table, data, groupingTag, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, logo, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
   //console.log("Decks table", table)
   //state
   const [_deckLayout, setLayout] = useState(() => deckLayout());
@@ -938,7 +938,8 @@ console.log("form", form)
             <ItemApp 
               screen={screen} item={{ ...mockItem, ...form.value }}
               cardTitle={getCardTitle(form.value.id) || `Card ${form.value.cardNr}`}
-              save={updateItemTitle} close={() => onSelectItem()}  
+              save={updateItemTitle} close={() => onSelectItem()} 
+              logo={logo}
             />
           </div>
         }

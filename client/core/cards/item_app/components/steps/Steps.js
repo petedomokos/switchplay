@@ -6,7 +6,7 @@ import AddNewTemplate from '../templates/addNew/AddNewTemplate';
 import '../../style/components/sections.css';
 import '../../style/components/steps.css';
 
-function Steps({ steps }) {
+function Steps({ steps, logo }) {
   const title = 'Steps';
   const placeholder = 'Add step';
   return (
@@ -15,7 +15,7 @@ function Steps({ steps }) {
         <TitleTemplate title={title} />
         <div className='section-child-content'>
           {steps.map(({ title, status, id }) => (
-            <StepsItemTemplate key={id} value={title} status={status} />
+            <StepsItemTemplate key={id} value={title} status={status} logo={logo} />
           ))}
         </div>
         <AddNewTemplate placeholder={placeholder} />

@@ -8,7 +8,7 @@ import Attachments from './components/attachments/Attachments';
 import './index.css';
 import './style/components/app.css';
 
-function ItemApp({ screen, item, cardTitle, save, close }) {
+function ItemApp({ screen, item, cardTitle, save, close, logo }) {
   console.log("ItemApp", item)
   const [value, setValue] = useState(item)
   const [editing, setEditing] = useState(false);
@@ -42,7 +42,7 @@ function ItemApp({ screen, item, cardTitle, save, close }) {
         </form>
         <div className='stats-steps-outer-wrapper'>
           <Stats stats={item.stats} />
-          <Steps steps={item.steps} />
+          <Steps steps={item.steps} logo={logo} />
         </div>
         <div className='attachments-outer-wrapper'>
           <Attachments attachments={item.attachments} />

@@ -126,12 +126,15 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
 
   if(tables.length === 0){ return null; }
 
+  const logo = {
+    url:customer ? `/customers/${customer._id}/logo.png` : "/switchplay/logo.png",
+    transform:customer ? customer.tableLogoTransform : "translate(-70px,-70px) scale(0.2)"
+  }
   const table = { 
     ...tables[0], 
     title:tables[0]?.title || customer?.name || "",
-    photoURL:customer ? `/customers/${customer._id}/logo.png` : "/switchplay/logo.png",
-    logoTransform:customer ? customer.tableLogoTransform : "translate(-70px,-70px) scale(0.2)"
-    //logoTransform:customer ? customer.tableLogoTransform : "translate(-297px,-302px) scale(0.05)"
+    photoURL:logo.url,
+    logoTransform:logo.transform
   };
   const tableDecks = table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
   const stringifiedTableAndDecks = JSON.stringify({ table, tableDecks });
@@ -249,6 +252,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
                 setForm={setForm} form={form} screen={screen}
                 table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
                 datasets={datasets}
+                logo={logo}
                 data={decksData} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
                 groupingTag={groupingTag} timeframeKey={timeframeKey}
                 tableMarginTop={tableMarginTop}
