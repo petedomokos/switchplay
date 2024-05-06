@@ -998,7 +998,7 @@ export default function cardsComponent() {
                             .height(kpisHeight)
                             //.expandedHeight(contentsHeight - textInfoHeight)
                             .gapBetweenKpis(2)
-                            /*.styles({
+                            .styles({
                                 kpi:{
                                     title:{
 
@@ -1011,7 +1011,7 @@ export default function cardsComponent() {
                                 ctrls:{
 
                                 }
-                            })*/
+                            })
                             //.kpiHeight(10)//kpiHeight)...
                             .fontSizes(4)//fontSizes.kpis)
                             //.kpiFormat(kpiFormat)
@@ -1031,7 +1031,7 @@ export default function cardsComponent() {
                                 .merge(kpisG)
                                 .attr("transform", `translate(0, ${headerHeight + mediaHeight})`)
                                 .datum(cardD.kpis)
-                                //.call(kpis);
+                                .call(kpis);
 
                         kpisG.exit().call(remove);
                     })

@@ -44,8 +44,8 @@ export const englandDatasets = [
             { _id:uuid(), date:"2024/07/11", /*sessionId:"",*/ player:"jimmy-JayMorgan", values:[{ measureKey:"successfulDribbles", value:"16" }] },
             //player G
             { _id:uuid(), date:"2024/06/28", /*sessionId:"",*/ player:"default", values:[{ measureKey:"successfulDribbles", value:"6" }] },
-            { _id:uuid(), date:"2024/07/03", /*sessionId:"",*/ player:"default", values:[{ measureKey:"successfulDribbles", value:"7" }] },
-            { _id:uuid(), date:"2024/07/11", /*sessionId:"",*/ player:"default", values:[{ measureKey:"successfulDribbles", value:"8" }] },
+            { _id:uuid(), date:"2024/07/03", /*sessionId:"",*/ player:"default", values:[{ measureKey:"successfulDribbles", value:"5" }] },
+            { _id:uuid(), date:"2024/07/11", /*sessionId:"",*/ player:"default", values:[{ measureKey:"successfulDribbles", value:"5" }] },
         ]
     },
     {
@@ -229,7 +229,7 @@ export const englandDatasets = [
             },
             { 
                 _id:uuid(), date:"2024/07/03", /*sessionId:"",*/ player:"chrisRigg", 
-                values:[{ measureKey:"total", value:"15" }, { measureKey:"successPC", value:"82" }]
+                values:[{ measureKey:"total", value:"12" }, { measureKey:"successPC", value:"82" }]
             },
             { 
                 _id:uuid(), date:"2024/07/11", /*sessionId:"",*/ player:"chrisRigg", 
@@ -264,15 +264,15 @@ export const englandDatasets = [
             //player G
             { 
                 _id:uuid(), date:"2024/06/28", /*sessionId:"",*/ player:"default", 
-                values:[{ measureKey:"total", value:"15" }, { measureKey:"successPC", value:"70" }]
+                values:[{ measureKey:"total", value:"12" }, { measureKey:"successPC", value:"65" }]
             },
             { 
                 _id:uuid(), date:"2024/07/03", /*sessionId:"",*/ player:"default", 
-                values:[{ measureKey:"total", value:"17" }, { measureKey:"successPC", value:"75" }]
+                values:[{ measureKey:"total", value:"12" }, { measureKey:"successPC", value:"70" }]
             },
             { 
                 _id:uuid(), date:"2024/07/11", /*sessionId:"",*/ player:"default", 
-                values:[{ measureKey:"total", value:"19" }, { measureKey:"successPC", value:"80" }]
+                values:[{ measureKey:"total", value:"14" }, { measureKey:"successPC", value:"60" }]
             },
         ]
     },

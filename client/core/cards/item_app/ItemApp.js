@@ -9,7 +9,6 @@ import './index.css';
 import './style/components/app.css';
 
 function ItemApp({ screen, item, cardTitle, save, close, logo }) {
-  console.log("ItemApp", item)
   const [value, setValue] = useState(item)
   const [editing, setEditing] = useState(false);
   const [applyChangesToAllDecks, setApplyChangesToAllDecks] = useState(false);

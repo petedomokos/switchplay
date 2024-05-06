@@ -173,7 +173,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   useEffect(() => {
     const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag }
     //console.log("tableDecks", tableDecks)
-    const embellishedDecks = embellishDecks([tableDecks[0]], settings);
+    const embellishedDecks = embellishDecks(tableDecks, settings);
     //console.log("emb", embellishedDecks)
     const decksData = tableLayout(embellishedDecks, nrCols, settings);
     //console.log("decksData", decksData)
