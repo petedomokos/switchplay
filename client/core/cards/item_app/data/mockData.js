@@ -1,5 +1,6 @@
 export const mockItem = {
   key: 'mock-item',
+  people:[{ key:"" }, { key:"" }, { key:"" }],
   steps: [
     { id: 1, title: 'First step to achieve my goal', status: 'done' },
     { id: 2, title: 'Second step', status: 'pending' },
@@ -79,19 +80,19 @@ export const mockItem = {
     {
       key:"1",
       type: 'video',
-      url: 'https://www.youtube.com/embed/vMhk-Tt1tXU?si=_iiscXHozYlxnDki',
+      url:"https://www.youtube.com/embed/zgE5Hy7p0lg?si=0c74bDjMTONRmRA2",
       comments: ['message one', 'message two'],
     },
     {
       key:"2",
       type: 'video',
-      url: 'https://www.youtube.com/embed/YyUskgVVB2c?si=-Rxs_ef4f1Axtzag',
+      url: "https://www.youtube.com/embed/Icep7blKlIc?si=pfHFcswZ2CFop1do" ,
       comments: ['message one', 'message two'],
     },
     {
       key:"3",
       type: 'video',
-      url: 'https://www.youtube-nocookie.com/embed/FiJ1R5f3frc?si=OCSTPCQa8EyB8HoS',
+      url: "https://www.youtube.com/embed/n82IBXn6NFM?si=-rDc7t0TsDIrX_72" ,
       comments: ['message one', 'message two'],
     },
     {

@@ -903,6 +903,12 @@ useEffect(() => {
   })
 }, [form, stringifiedData])
 
+const itemPeople = selectedDeck && form?.formType === "item" ? [
+  '/customers/england/analyst.png',
+  '/customers/england/ryanGarry.png',
+  selectedDeck.photoURL
+ ] : []
+
   return (
     <div className={`cards-root ${classes.root}`} onClick={onClickBg} >
       {data.map(deckData => 
@@ -932,7 +938,7 @@ useEffect(() => {
             onClick={(e) => { e.stopPropagation(); }}
           >
             <ItemApp 
-              screen={screen} item={{ ...mockItem, ...form.value }}
+              screen={screen} item={{ ...mockItem, ...form.value, people: itemPeople }}
               cardTitle={getCardTitle(form.value.id) || `Card ${form.value.cardNr}`}
               save={updateItemTitle} close={() => onSelectItem()} 
               logo={logo}

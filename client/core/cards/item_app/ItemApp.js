@@ -9,6 +9,7 @@ import './index.css';
 import './style/components/app.css';
 
 function ItemApp({ screen, item, cardTitle, save, close, logo }) {
+  console.log("Item", item, item.people)
   const [value, setValue] = useState(item)
   const [editing, setEditing] = useState(false);
   const [applyChangesToAllDecks, setApplyChangesToAllDecks] = useState(false);
@@ -51,6 +52,7 @@ function ItemApp({ screen, item, cardTitle, save, close, logo }) {
           screen={screen} 
           cardTitle={cardTitle} 
           sectionTitle={item.section.title || `Section ${item.section.nr}`} 
+          people={item.people}
           close={close}
       />
     </div>
