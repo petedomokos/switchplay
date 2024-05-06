@@ -78,6 +78,8 @@ const useStyles = makeStyles((theme) => ({
 const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, updateDecks, deleteDeck, hideMenus, showMenus }) => {
   const { tables=[], decks=[], customer } = user;
   const stringifiedDecks = JSON.stringify(decks);
+
+  //next - find where kpi values are added, and adjust so they are not all completed
   //console.log("CardsTable", user)
   //console.log("datasets", datasets)
   // @todo - move creating flag to asyncProcesses
@@ -170,8 +172,11 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   //this adds status and completionProportion to cards and deck based on items statuses
   useEffect(() => {
     const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag }
-    const embellishedDecks = embellishDecks(tableDecks, settings);
+    //console.log("tableDecks", tableDecks)
+    const embellishedDecks = embellishDecks([tableDecks[0]], settings);
+    //console.log("emb", embellishedDecks)
     const decksData = tableLayout(embellishedDecks, nrCols, settings);
+    //console.log("decksData", decksData)
     setDecksData(decksData);
   }, [allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag, stringifiedTableAndDecks])
 

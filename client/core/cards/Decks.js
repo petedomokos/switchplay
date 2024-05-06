@@ -95,6 +95,7 @@ const enhancedZoom = dragEnhancements();
 //without it, each deckHeight is slighlty wrong
 const Decks = ({ form, setForm, screen, table, data, groupingTag, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, logo, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
   //console.log("Decks table", table)
+  //console.log("data", data)
   //state
   const [_deckLayout, setLayout] = useState(() => deckLayout());
   const [decks, setDecks] = useState(() => decksComponent());
@@ -458,7 +459,6 @@ const Decks = ({ form, setForm, screen, table, data, groupingTag, timeframeKey, 
   }, [selectedDeckId]);
 
   const getSectionTitle = useCallback((cardId) => {
-    console.log("selDeck", selectedDeck)
     return selectedDeck?.cards.find(c => c.id === cardId)?.section?.title
   }, [selectedDeckId]);
 
@@ -679,6 +679,7 @@ const Decks = ({ form, setForm, screen, table, data, groupingTag, timeframeKey, 
       .withSections(true);
 
     const decksData = decksWithCardKpis.map(deck => _deckLayout(deck)) 
+    //console.log("decksData", decksData)
     d3.select(containerRef.current).datum(decksData)
 
   }, [stringifiedData, selectedDeckId])
@@ -901,11 +902,6 @@ useEffect(() => {
     }
   })
 }, [form, stringifiedData])
-/*
- - add itemtitle from my form into ItemApp and get it functional
-  - think about where decktitle goes? eg playername
-*/
-console.log("form", form)
 
   return (
     <div className={`cards-root ${classes.root}`} onClick={onClickBg} >

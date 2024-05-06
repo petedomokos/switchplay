@@ -4,9 +4,15 @@
   background-color: rgba(246, 197, 122);
   border-radius: 15px;
   margin-right: 2.5%;
+  overflow:"visible"
 }
 @media screen and (max-width: 1200px) {
   .steps-wrapper {
     margin-right: 0;
   }
+}
+
+.stats-list {
+  margin:0px auto;
+  overflow:"visible"
 }

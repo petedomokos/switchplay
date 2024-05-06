@@ -1,6 +1,5 @@
 import * as d3 from 'd3';
 import { calcDateCount } from '../../util/TimeHelpers';
-import { isNumber } from '../../data/dataHelpers';
 import { mockCardFlags } from './mockCardFlags';
 import { purposeLayout } from './purposeLayout';
 import kpisLayout from "../journey/kpis/kpisLayout";
@@ -17,6 +16,7 @@ export default function cardsLayout(){
     const _kpisLayout = kpisLayout();
 
     function update(cards){
+        //console.log("cardsLayout....", cards);
 
         //error in deck of decks - sections is not defined here
         const getSection = (it,i) => {
@@ -26,7 +26,6 @@ export default function cardsLayout(){
 
         const _data = cards.map((c,i) => {
             const { deckId, cardNr, title="", date, items, purpose, kpis } = c;
-            //console.log("cardsLayout....", c.cardNr, c.title)
             const pos = cardNr - frontCardNr;
 
             const mockFlags = mockCardFlags[i] || [];

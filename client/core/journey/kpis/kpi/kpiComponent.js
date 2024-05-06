@@ -25,7 +25,7 @@ export default function kpiComponent() {
     let DEFAULT_WIDTH = DIMNS.profile.width;
     let DEFAULT_HEIGHT = DIMNS.profile.height;
     let DEFAULT_MARGIN = { left: 0, right:0, top: 0, bottom: 0 };
-    let DEFAULT_TITLE_DIMNS = { width: 0, height:0, margin:{ left:0, right:0, top:0, bottom:0 }, fontSize:9 }
+    let DEFAULT_TITLE_DIMNS = { width: 15, height:15, margin:{ left:0, right:0, top:2.5, bottom:2.5 }, fontSize:9 }
 
     let _width = () => DEFAULT_WIDTH;
     let _height = () => DEFAULT_HEIGHT;
@@ -48,7 +48,6 @@ export default function kpiComponent() {
             const contentsHeight = height - margin.top - margin.bottom;
 
             const titleDimns = _titleDimns(d,i);
-
             const progressBarWidth = contentsWidth;
 
             /*
@@ -177,7 +176,7 @@ export default function kpiComponent() {
                 .width((d,i) => dimns[d.key].width)
                 .height((d,i) => dimns[d.key].height)
                 .styles((d, i) => ({
-                    //stroke:"none",
+                    //stroke:"red",
                     //need to trabnsition bg, but may aswell just be transparent
                     fill:"none"//grey10(3)
                 }))
@@ -213,12 +212,11 @@ export default function kpiComponent() {
                     primaryTitle:{ 
                         //fontSize:3,//dimns[d.key].titleDimns.fontSize,
                         strokeWidth:0.075,
-                        ..._styles(d,i).name,
                         dominantBaseline:"hanging",//central",
                         fontFamily:"helvetica, sans-serifa",
                         fill:grey10(5),
                         stroke:grey10(5),
-                        fontSize:9
+                        ..._styles(d,i).title,
                         //fontSize:titleDimns(d,i).fontSize
                     },
                     secondaryTitle:{

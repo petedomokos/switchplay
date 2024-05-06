@@ -41,7 +41,7 @@ function ItemApp({ screen, item, cardTitle, save, close, logo }) {
           />
         </form>
         <div className='stats-steps-outer-wrapper'>
-          <Stats stats={item.stats} />
+          <Stats stats={item.stats} screen={screen} />
           <Steps steps={item.steps} logo={logo} />
         </div>
         <div className='attachments-outer-wrapper'>
