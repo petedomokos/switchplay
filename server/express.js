@@ -19,6 +19,11 @@ import devBundle from './devBundle'
 const CURRENT_WORKING_DIR = process.cwd()
 const app = express()
 
+const domain = "www.switchplay.co.uk"
+app.get('*',function(req, res){
+  res.redirect('https://' + domain + req.path);
+});
+
 //comment out before building for production
 devBundle.compile(app)
 
