@@ -242,7 +242,7 @@ export default function kpisComponent() {
 
             const nrOfCtrlsButtons = ctrlsData?.length || 0;
             const nrTooltipRowsAbove = kpisData[0]?.tooltipsData ? d3.max(kpisData[0].tooltipsData, d => d.rowNr) : 0;
-            const nrTooltipRowsBelow = kpisData[0].tooltipsData ? Math.abs(d3.max(kpisData[0].tooltipsData.filter(t => t.rowNr < 0), d => d.rowNr)) : 0;
+            const nrTooltipRowsBelow = kpisData[0]?.tooltipsData ? Math.abs(d3.max(kpisData[0].tooltipsData.filter(t => t.rowNr < 0), d => d.rowNr)) : 0;
             const nrTooltipRows = nrTooltipRowsAbove + nrTooltipRowsBelow || 0;
             updateDimns(nrOfCtrlsButtons, nrTooltipRows, kpisData);
             //plan - dont update dom twice for name form
