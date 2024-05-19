@@ -20,11 +20,6 @@ const CURRENT_WORKING_DIR = process.cwd()
 const app = express()
 
 const domain = "www.switchplay.co.uk"
-app.get('*',function(req, res){
-  //console.log("host.....", req.headers.host)
-  console.log("req!!!!!!!!!!!!!!!!!!!!!!!!!", req.headers)
-  //res.redirect('https://' + domain + req.path);
-});
 
 //comment out before building for production
 devBundle.compile(app)
@@ -55,7 +50,21 @@ app.use('/', authRoutes)
 app.use('/', journeyRoutes)
 
 app.get('*', (req, res) => {
-  res.status(200).send(template())
+  //console.log("host.....", req.headers.host)
+  const proto = req.headers["x-forwarded-proto"]
+  const host = req.headers.host;
+  console.log("host", host)
+  console.log("proto", proto)
+  console.log("ref", req.headers.referer)
+  console.log("path", req.headers.path)
+  //res.redirect('https://' + domain + req.path);
+  if(proto !== "https" && !host.includes("local")){
+    console.log("REDIRECT!!!!!!!!!!!!!!!!")
+    res.redirect('https://' + domain + req.path)
+  }else{
+    console.log("OK")
+    res.status(200).send(template())
+  }
 })
 
 export default app
