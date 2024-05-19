@@ -21,7 +21,9 @@ const app = express()
 
 const domain = "www.switchplay.co.uk"
 app.get('*',function(req, res){
-  res.redirect('https://' + domain + req.path);
+  //console.log("host.....", req.headers.host)
+  console.log("req!!!!!!!!!!!!!!!!!!!!!!!!!", req.headers)
+  //res.redirect('https://' + domain + req.path);
 });
 
 //comment out before building for production
