@@ -1,0 +1,54 @@
+.profile-picture-wrapper {
+  position: absolute;
+  border-radius: 100%;
+  position: relative;
+}
+
+.profile-picture {
+  border-radius: 100%;
+  height: 35px;
+  width: 35px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.first {
+  position: relative;
+  top: 0;
+}
+.second {
+  position: absolute;
+  top: 0px;
+}
+.third {
+  position: absolute;
+  top: 0px;
+}
+
+.first-md-up { right: 0; }
+.second-md-up { right: 45px; }
+.third-md-up { right: 90px; }
+.first-sm-down { 
+  right: 0; 
+  border:solid;
+  border-width:thin;
+  border-color:#DAA520;
+}
+.second-sm-down { 
+  top: 0px;
+  right: 5px; 
+  border:solid;
+  border-width:thin;
+  border-color:#DAA520;
+}
+.third-sm-down { 
+  top: 0px;
+  right: 10px; 
+  border:solid;
+  border-width:thin;
+  border-color:#DAA520;
+}

@@ -1,0 +1,36 @@
+.attachments-wrapper {
+  position: relative;
+  width: 100%; 
+  background-color: rgba(191, 191, 253, 0.5);
+  border-radius: 15px;
+}
+
+.attachments-list {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  
+}
+
+.attachment-wrapper {
+  width:400px;
+  min-width:300px;
+  max-width:90%;
+  padding: 10px;
+  margin-bottom:5%;
+  border-radius: 8px;
+  background-color: rgba(15, 15, 15, 0.6);
+}
+
+.attachment {
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  width:100%;
+  aspect-ratio: 16/9;
+}
+
+.comments-aligner {
+  flex: 1;
+  margin-top: 10px;
+}

@@ -12,6 +12,8 @@ import SectionTitleForm from './forms/SectionTitleForm';
 import CardTitleForm from './forms/CardTitleForm';
 import CardDateForm from "./CardDateForm";
 import PurposeParagraphForm from './forms/PurposeParagraphForm';
+import ItemApp from "./item_app/ItemApp"
+
 import { sortAscending, moveElementPosition } from '../../util/ArrayHelpers';
 import { isNumber } from '../../data/dataHelpers';
 import { getPosition } from "../journey/domHelpers";
@@ -27,6 +29,7 @@ import { createInitCard } from '../../data/initDeck';
 import { addWeeks } from '../../util/TimeHelpers';
 import { addKpiValuesToCards } from './kpiValuesForCards';
 import uuid from 'react-uuid';
+import { mockItem } from './item_app/data/mockData';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -90,8 +93,9 @@ const enhancedZoom = dragEnhancements();
 
 //note (old now): heightK is a special value to accomodate fact that height changes when deck is selected
 //without it, each deckHeight is slighlty wrong
-const Decks = ({ table, data, groupingTag, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
+const Decks = ({ form, setForm, screen, table, data, groupingTag, timeframeKey, customSelectedDeckId, customSelectedCardNr, customSelectedItemNr, customSelectedSection, setSel, tableMarginTop, /*heightK,*/ nrCols, datasets, asyncProcesses, deckWidthWithMargins, availWidth, height, heightInSelectedDeckMode, logo, onClick, onCreateDeck, updateTable, updateDeck, updateDecks, deleteDeck, applyChangesToAllDecks }) => {
   //console.log("Decks table", table)
+  //console.log("data", data)
   //state
   const [_deckLayout, setLayout] = useState(() => deckLayout());
   const [decks, setDecks] = useState(() => decksComponent());
@@ -101,7 +105,6 @@ const Decks = ({ table, data, groupingTag, timeframeKey, customSelectedDeckId, c
   const [selectedCardNr, setSelectedCardNr] = useState(customSelectedCardNr);
   const [selectedItemNr, setSelectedItemNr] = useState(customSelectedItemNr);
   const [longpressedDeckId, setLongpressedDeckId] = useState("");
-  const [form, setForm] = useState(null);
 
   //update flags
   //processed props
@@ -455,6 +458,10 @@ const Decks = ({ table, data, groupingTag, timeframeKey, customSelectedDeckId, c
     return selectedDeck?.cards.find(c => c.id === cardId)?.title
   }, [selectedDeckId]);
 
+  const getSectionTitle = useCallback((cardId) => {
+    return selectedDeck?.cards.find(c => c.id === cardId)?.section?.title
+  }, [selectedDeckId]);
+
   //note- this bg isn't clicked if a card is selected, as the deck-bg turns on for that instead
   const onClickBg = useCallback((e, d) => {
     //console.log("bgClick")
@@ -672,6 +679,7 @@ const Decks = ({ table, data, groupingTag, timeframeKey, customSelectedDeckId, c
       .withSections(true);
 
     const decksData = decksWithCardKpis.map(deck => _deckLayout(deck)) 
+    //console.log("decksData", decksData)
     d3.select(containerRef.current).datum(decksData)
 
   }, [stringifiedData, selectedDeckId])
@@ -895,6 +903,12 @@ useEffect(() => {
   })
 }, [form, stringifiedData])
 
+const itemPeople = selectedDeck && form?.formType === "item" ? [
+  '/customers/england/analyst.png',
+  '/customers/england/ryanGarry.png',
+  selectedDeck.photoURL
+ ] : []
+
   return (
     <div className={`cards-root ${classes.root}`} onClick={onClickBg} >
       {data.map(deckData => 
@@ -914,10 +928,23 @@ useEffect(() => {
       </svg>
       <div className={classes.formUnderlay} onClick={onClickBg}></div>
       <div className={classes.formContainer} ref={formRef}>
-        {form?.formType === "item" && 
+        {/**form?.formType === "item" && 
           <ItemForm item={form.value} cardTitle={getCardTitle(form.value.id)} 
             dimns={getFormDimnsAndPos()} fontSize={form.height * 0.5} save={updateItemTitle} close={() => onSelectItem()} />
-          }
+        */}
+        {form?.formType === "item" && 
+          <div 
+            style={{ width:"100%", height:"100%", pointerEvents:"all" }}
+            onClick={(e) => { e.stopPropagation(); }}
+          >
+            <ItemApp 
+              screen={screen} item={{ ...mockItem, ...form.value, people: itemPeople }}
+              cardTitle={getCardTitle(form.value.id) || `Card ${form.value.cardNr}`}
+              save={updateItemTitle} close={() => onSelectItem()} 
+              logo={logo}
+            />
+          </div>
+        }
         {form?.formType === "deck-title" && 
           <DeckTitleForm deck={selectedDeck} save={updateDeckTitle} close={() => setForm(null)}
             dimns={getFormDimnsAndPos()} 

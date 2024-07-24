@@ -29,6 +29,7 @@ export default function kpisComponent() {
     let height = DIMNS.profile.height;
     let expandedHeight = height;
     let margin;
+    let fixedMargin;
     let contentsWidth;
     let contentsHeight;
 
@@ -66,7 +67,7 @@ export default function kpisComponent() {
     function updateDimns(nrCtrlsButtons=0, nrTooltipRows=0, kpisData){
         const nrKpis = kpisData.length;
 
-        margin = { 
+        margin = fixedMargin || { 
             left: width * 0.1, 
             right: width * 0.1, 
             top:height * 0.1, 
@@ -94,10 +95,7 @@ export default function kpisComponent() {
         //title to create a little jump
         //but also we should make 
         listHeight = contentsHeight - ctrlsHeight;
-        //console.log("ch ctrlsh", contentsHeight, ctrlsHeight)
-        kpiHeight = fixedKpiHeight || d3.min([maxKpiHeight, listHeight/5]);
-        //console.log("listH kpiH",listHeight, kpiHeight)
-        //console.log("kpiH", kpiHeight)
+        kpiHeight = fixedKpiHeight || d3.min([maxKpiHeight, listHeight/nrKpis]);
         //selectedKpi must expand for tooltip rows, by 0.75 of kpiHeight per tooltip
         const expandedContentsHeight = expandedHeight - margin.top - margin.bottom;
         //const expandedListHeight = expandedContentsHeight - ctrlsHeight;
@@ -124,7 +122,14 @@ export default function kpisComponent() {
         ctrls:10
     };
     let styles = {
+        numberLabels:{
+            fontSize:1.35
+        },
         kpi:{
+            bg:{},
+            title:{},
+            progressBar:{},
+            step:{}
         },
         ctrls:{
         }
@@ -195,7 +200,6 @@ export default function kpisComponent() {
 
         // expression elements
         selection.each(function (kpisData,i) {
-            //console.log("kpisData", kpisData)
             prevData = kpisData;
             const nrDefenceKpis = kpisData.filter(kpi => kpi.orientationFocus === "defence").length;
             //const attackKpisData = kpisData.filter(kpi => kpi.orientationFocus === "attack")
@@ -236,11 +240,9 @@ export default function kpisComponent() {
                 return d3.max(nrsPerKpi)
             }
 
-            const nrOfCtrlsButtons = ctrlsData?.length;
+            const nrOfCtrlsButtons = ctrlsData?.length || 0;
             const nrTooltipRowsAbove = kpisData[0]?.tooltipsData ? d3.max(kpisData[0].tooltipsData, d => d.rowNr) : 0;
-            //console.log("rowsAb", nrTooltipRowsAbove)
-            const nrTooltipRowsBelow = kpisData[0].tooltipsData ? Math.abs(d3.max(kpisData[0].tooltipsData.filter(t => t.rowNr < 0), d => d.rowNr)) : 0;
-            //console.log("rowsbe", nrTooltipRowsBelow)
+            const nrTooltipRowsBelow = kpisData[0]?.tooltipsData ? Math.abs(d3.max(kpisData[0].tooltipsData.filter(t => t.rowNr < 0), d => d.rowNr)) : 0;
             const nrTooltipRows = nrTooltipRowsAbove + nrTooltipRowsBelow || 0;
             updateDimns(nrOfCtrlsButtons, nrTooltipRows, kpisData);
             //plan - dont update dom twice for name form
@@ -363,8 +365,10 @@ export default function kpisComponent() {
                                 .attr("transform", (d,i) => `translate(${listWidth - numbersWidth + (i+1) * numberWidth},0)`)
                                 .each(function(d){
                                     d3.select(this).select("text")
-                                        .attr("fill", grey10(3))
-                                        .attr("font-size", 1.35)
+                                        .attr("fill", styles.numberLabels.fill || grey10(3))
+                                        .attr("font-size", styles.numberLabels.fontSize || 1.35)
+                                        .attr("transform", styles.numberLabels.transform || null)
+                                        .attr("transform-origin", styles.numberLabels.transformOrigin || null)
                                         .text(d.label)
                                 })
 
@@ -487,17 +491,18 @@ export default function kpisComponent() {
                                 })
                                 .styles((d,i) => ({
                                     bg:{
-                                        fill:profileIsSelected ? COLOURS.selectedMilestone : COLOURS.milestone
+                                        fill:profileIsSelected ? COLOURS.selectedMilestone : COLOURS.milestone,
+                                        ...styles.kpi.bg
+
                                     },
-                                    title:{
-                                    },
-                                    progressBar:{
-                                    },
+                                    title:styles.kpi.title,
+                                    progressBar: styles.kpi.progressBar,
                                     step:{
                                         fill:"transparent",
                                         //fill:profileIsSelected ? COLOURS.selectedMilestone : COLOURS.milestone
                                         stroke:profileIsSelected ? grey10(5) : grey10(6),
                                         strokeWidth:0.1,
+                                        ...styles.kpi.step
                                     }
                                 }))
                                 /*
@@ -629,7 +634,6 @@ export default function kpisComponent() {
     }
 
     function updateSelected(key, data, shouldUpdateScroll=false, shouldUpdateDom=false){
-        console.log("updateSelected")
         return;
         const { kpisData } = data;
         const newSelectedDatum = kpisData.find(d => d.key === key);
@@ -839,6 +843,16 @@ export default function kpisComponent() {
     kpis.height = function (value) {
         if (!arguments.length) { return height; }
         height = value;
+        return kpis;
+    };
+    kpis.margin = function (value) {
+        if (!arguments.length) { return margin; }
+        fixedMargin = value;
+        return kpis;
+    };
+    kpis.maxKpiHeight = function (value) {
+        if (!arguments.length) { return maxKpiHeight; }
+        maxKpiHeight = value;
         return kpis;
     };
     kpis.gapBetweenKpis = function (value) {

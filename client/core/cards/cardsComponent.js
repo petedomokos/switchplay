@@ -1021,6 +1021,7 @@ export default function cardsComponent() {
                             .scrollable(false)
                             .profileIsSelected(false)
 
+                        //console.log("cardKpis", cardNr, cardD.kpis)
                         const shouldShowKpis = /*deckIsSelected &&*/ cardsAreFlipped && !selectedSectionKey && (isFront || isPlaced);
                         const kpisG = backContentsG.selectAll("g.kpis").data(shouldShowKpis ? [1] : []);
                         kpisG.enter()

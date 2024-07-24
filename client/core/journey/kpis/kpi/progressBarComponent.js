@@ -37,7 +37,6 @@ export default function progressBarComponent() {
         dimns = [];
 
         return kpisData.forEach((kpiD,i) => {
-            //console.log("kpiD", kpiD)
             const barData = { 
                 ...kpiD.barData, 
                 sectionsData:kpiD.barData.sectionsData.filter(d => d.shouldDisplay(status, editing, displayFormat))
@@ -104,12 +103,6 @@ export default function progressBarComponent() {
                 bottom:numbersMarginVert, 
             };
             const numbersWidth = nrNumbers === 0 ? 0 : numbersContentsWidth + numbersMargin.left + numbersMargin.right;
-            /*console.log("margin", margin)
-          
-            console.log("numberWidth", numberWidth)
-            console.log("numbersWidth", numbersWidth)
-            console.log("numbersMargin", numbersMargin)*/
-            //@todo - numberheight mx should be in sync with barheight max
            
             const numbers = {
                 width:numbersWidth,

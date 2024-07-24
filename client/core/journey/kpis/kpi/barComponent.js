@@ -218,7 +218,6 @@ export default function barComponent() {
                         .attr("class", d => `bar-section ${d.key}-bar-section`)
                         .call(fadeIn)
                             .each(function(d,j){
-                                //console.log("sectionD enter", d)
                                 const sectionWidth = scale(bound(d.endValue)) - scale.range()[0];
                                 //append rect
                                 d3.select(this)
@@ -227,7 +226,10 @@ export default function barComponent() {
                                         .attr("pointer-events", "none")
                                         .attr("width", sectionWidth || 0)
                                         .attr("height", barHeight)
-                                        .attr("fill", d.fill);;
+                                        .attr("fill", d.fill || "none")
+                                        .attr("stroke", d.stroke || "none")
+                                        .attr("rx", d.rx || null)
+                                        .attr("ry", d.ry || null);
                             })
                             .merge(barSectionG)
                             .attr("transform", `translate(0,${(contentsHeight-barHeight)/2})`)
@@ -242,13 +244,14 @@ export default function barComponent() {
                                         .duration(MED_SLIDE_DURATION)
                                             .attr("width", sectionWidth || 0)
                                             .attr("height", barHeight)
-                                            .attr("fill", d.fill)
+                                            .attr("fill", d.fill || "none")
                                             .attr("opacity", 1)// d.opacity || 1);
                                 }else{
                                     d3.select(this).select("rect.bar-section")
                                         .attr("width", sectionWidth || 0)
                                         .attr("height", barHeight)
                                         .attr("fill", d.fill || "transparent")
+                                        .attr("stroke", d.stroke || "none")
                                         .attr("opacity", 1)// d.opacity || 1);
                                 }
                             })

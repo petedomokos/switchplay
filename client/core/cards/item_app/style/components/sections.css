@@ -1,0 +1,15 @@
+.section-wrapper {
+  margin: 25px;
+}
+
+@media screen and (max-width: 1200px) {
+  .section-wrapper {
+    margin: 5%;
+  }
+}
+
+.section-child-content {
+  align-items: center;
+  margin-top:30px;
+  margin-bottom: 80px;
+}

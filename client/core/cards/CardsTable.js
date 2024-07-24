@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
     width:"100vw",
     height:"100vh",
     position:"relative",
-    overflow:"hidden",
+    overflow:props => props.overflow
   },
   root: {
     position: "absolute",
@@ -78,6 +78,8 @@ const useStyles = makeStyles((theme) => ({
 const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, updateDecks, deleteDeck, hideMenus, showMenus }) => {
   const { tables=[], decks=[], customer } = user;
   const stringifiedDecks = JSON.stringify(decks);
+
+  //next - find where kpi values are added, and adjust so they are not all completed
   //console.log("CardsTable", user)
   //console.log("datasets", datasets)
   // @todo - move creating flag to asyncProcesses
@@ -126,12 +128,15 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
 
   if(tables.length === 0){ return null; }
 
+  const logo = {
+    url:customer ? `/customers/${customer._id}/logo.png` : "/switchplay/logo.png",
+    transform:customer ? customer.tableLogoTransform : "translate(-70px,-70px) scale(0.2)"
+  }
   const table = { 
     ...tables[0], 
     title:tables[0]?.title || customer?.name || "",
-    photoURL:customer ? `/customers/${customer._id}/logo.png` : "/switchplay/logo.png",
-    logoTransform:customer ? customer.tableLogoTransform : "translate(-70px,-70px) scale(0.2)"
-    //logoTransform:customer ? customer.tableLogoTransform : "translate(-297px,-302px) scale(0.05)"
+    photoURL:logo.url,
+    logoTransform:logo.transform
   };
   const tableDecks = table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
   const stringifiedTableAndDecks = JSON.stringify({ table, tableDecks });
@@ -167,14 +172,18 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   //this adds status and completionProportion to cards and deck based on items statuses
   useEffect(() => {
     const settings = { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag }
+    //console.log("tableDecks", tableDecks)
     const embellishedDecks = embellishDecks(tableDecks, settings);
+    //console.log("emb", embellishedDecks)
     const decksData = tableLayout(embellishedDecks, nrCols, settings);
+    //console.log("decksData", decksData)
     setDecksData(decksData);
   }, [allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag, stringifiedTableAndDecks])
 
   //const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
 
   let styleProps = {
+    overflow:form ? null : "hidden",
     left: -containerWidth/2,
     top: -containerHeight/2,
     width: containerWidth,
@@ -187,7 +196,6 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
     decksContents:{
       left: margin.left + (screen.width - width)/2,
       top: margin.top,
-      overflow:"hidden"
     },
     form:{ 
       display: form ? null : "none",
@@ -197,7 +205,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
     },
 
   };
-  console.log("styleProps", styleProps)
+
   const classes = useStyles(styleProps) 
   const containerRef = useRef(null);
   const instructionsRef = useRef(null);
@@ -246,8 +254,10 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
               <Instructions />
               :
               <Decks 
+                setForm={setForm} form={form} screen={screen}
                 table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
                 datasets={datasets}
+                logo={logo}
                 data={decksData} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
                 groupingTag={groupingTag} timeframeKey={timeframeKey}
                 tableMarginTop={tableMarginTop}
