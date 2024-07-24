@@ -54,12 +54,12 @@ app.get('*', (req, res) => {
   const proto = req.headers["x-forwarded-proto"]
   const host = req.headers.host;
   const secFetchDest = req.headers["sec-fetch-dest"];
-  console.log("host", host)
+  /*console.log("host", host)
   console.log("proto", proto)
   console.log("ref", req.headers.referer)
   console.log("path", req.path)
   //console.log("req.headers", req.headers)
-  console.log("secFetchDest", secFetchDest)
+  console.log("secFetchDest", secFetchDest)*/
   //res.redirect('https://' + domain + req.path);
   if(proto !== "https" && !host.includes("local") && secFetchDest !== "image"){
     console.log("REDIRECT!!!!!!!!!!!!!!!!")
