@@ -22,7 +22,10 @@ export const groups = {
                     //playerStartValues:??? in mockDatabases, these are stored under each payer in group
                 },
             ],
-            deckSettings:DECK_SETTINGS,
+            deckSettings:DECK_SETTINGS.map(setting => {
+                if(setting.key === "numberOfCards"){ return { ...setting, value:4 }}
+                return setting;
+            }),
             players:["606b2f1f3eecde47d8864798"]
         },
         {

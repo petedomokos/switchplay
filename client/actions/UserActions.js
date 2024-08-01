@@ -244,15 +244,16 @@ export const updateTable = (table, shouldPersist=true, shouldUpdateStore=true) =
 	)
 }
 
-export const createDeck = (settings, tableId) => dispatch => {
+export const createDeck = (user, options, tableId) => dispatch => {
 	const jwt = auth.isAuthenticated();
 	if(jwt?.user.isMock){ return; }
 	//@todo - move this to server
+	console.log("createDeck user", user)
 
-	const deck = settings?.copy || initDeck(jwt.user._id, settings);
+	const deck = options?.copy || initDeck(user, options);
 	//@todo - keep a copy of the player in case it is not populated on server eg if player is the user
 	//@todo - populate player on server unless player is the user
-	const userPlayer = settings.player?._id === jwt.user._id ? settings.player : null;
+	const userPlayer = options.player?._id === jwt.user._id ? options.player : null;
 	console.log("userPlayer", userPlayer)
 	console.log("createDeck", deck)
 	const serverDeck = transformDeckForServer(deck);

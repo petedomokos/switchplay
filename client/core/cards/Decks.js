@@ -19,7 +19,6 @@ import { isNumber } from '../../data/dataHelpers';
 import { getPosition } from "../journey/domHelpers";
 import { getTransformationFromTrans } from '../journey/helpers';
 import { maxDimns } from '../../util/geometryHelpers';
-import { initDeck } from '../../data/initDeck';
 //import { createId } from './helpers';
 import { grey10, COLOURS, TRANSITIONS, DIMNS } from './constants';
 const { GOLD } = COLOURS;

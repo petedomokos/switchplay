@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { addDays, addWeeks } from "../util/TimeHelpers"
 import uuid from 'react-uuid';
+import { DECK_SETTINGS } from '../core/cards/constants';
 
 const items = [
     { itemNr:1, status:0, id:uuid() }, 
@@ -24,36 +25,46 @@ const createItems = options => {
 
 /*
 */
-export const createInitCard = (options={}) => {
-    const { cardNr, date, startDate = new Date(), prevDate, weeksPerCard=1, cardTitles=[], player, userId } = options;
+export const createInitCard = (deckSettings, options={}) => {
+    const { cardNr, date, startDate = new Date(), prevDate, weeksPerCard=1, player, userId } = options;
     const calcDate = () => {
         if(prevDate){ return addWeeks(weeksPerCard, prevDate); }
         if(cardNr){ return addWeeks(weeksPerCard * (cardNr + 1), startDate) }
         return addWeeks(weeksPerCard, new Date());
     }
+    const cardTitleSettingsObj = deckSettings.find(set => set.key === "defaultCardTitle");
+    const cardTitleSettingsValue = cardTitleSettingsObj.value;
+    const cardTitleSetting = cardTitleSettingsObj.options.find(opt => opt.value === cardTitleSettingsValue);
+
     return {
         id:uuid(),
-        title:"", //cardNr ? (cardTitles[cardNr] || `Level ${cardNr + 1}`) : "Enter Title...",
+        title:cardTitleSetting.getTitle(cardNr), //cardNr ? (cardTitles[cardNr] || `Level ${cardNr + 1}`) : "Enter Title...",
         //next - finaih this so it doesnt need a cardNr... or always pass a cardNr
         date:date || calcDate(),
         items:createItems(options)
     }
 }
 
-export const createInitCards = (options={}) => {
-    const { nrCards=5 } = options;
-    return d3.range(nrCards).map(i => createInitCard({ ...options, cardNr:i }));
+export const createInitCards = (deckSettings, options={}) => {
+    console.log("createInitCards set", deckSettings)
+    const nrOfCards = deckSettings.find(set => set.key === "numberOfCards").value;
+    console.log("createInitCards nrCards", nrOfCards)
+    return d3.range(nrOfCards).map(i => createInitCard(deckSettings, { ...options, cardNr:i }));
 }
 
-export const initDeck = (userId, settings={}) => {  
-    const { player } = settings;  
+export const initDeck = (user, options={}) => {  
+    console.log("initDeck..........user", user)
+    const { player } = options;  
+    const settings = user.groupsMemberOf[0]?.deckSettings || DECK_SETTINGS;
     return {
         startDate:new Date(),
-        owner:userId,
-        editors:player && player._id !== userId ? [userId, player._id] : [userId],
+        owner:user._id,
+        editors:player && player._id !== user._id ? [user._id, player._id] : [user._id],
         id:`temp-${Date.now()}`,
         title:"",
-        ...settings,
-        cards:createInitCards({ player, userId })
+        ...options,
+        //@todo - allow options to determine which group's settings to use
+        settings,
+        cards:createInitCards(settings, { player, userId:user._id })
     }
 }

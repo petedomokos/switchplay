@@ -3,13 +3,57 @@ import { GREY_COLOUR_THEME, BLUE_COLOUR_THEME, SATURATED_BLUE_COLOUR_THEME } fro
 
 export const NOW = new Date("2024/07/12");
 
+function getWeekday(dayNr){
+    if(dayNr === 1){ return "Monday"; }
+    if(dayNr === 2){ return "Tuesday"; }
+    if(dayNr === 3){ return "Wednesday"; }
+    if(dayNr === 4){ return "Thursday"; }
+    if(dayNr === 5){ return "Friday"; }
+    if(dayNr === 6){ return "Saturday"; }
+    if(dayNr === 7){ return "Sunday"; }
+}
+
 export const DECK_SETTINGS = [
-    /*{
+    {
         key:"numberOfCards",
         value:5,
         label:"Number of Cards",
-        valueType:"number",
-    },*/
+        valueType:"naturalNumber",
+        displayFormat:"dropdown",
+        optionsRange:{ min:1, max:365 }
+    },
+    {
+        key:"defaultCardTitle",
+        value: "week",
+        label:"Default Card Title",
+        desc:"...",
+        valueType:"string",
+        displayFormat:"dropdown",
+        options:[
+            { key:"defaultCardTitle", value: "day", getTitle:cardNr => `Day ${cardNr+1}`, desc:"desc..." },
+            { key:"defaultCardTitle", value: "week", getTitle:cardNr => `Week ${cardNr+1}`, desc:"desc..." },
+            { key:"defaultCardTitle", value: "card", getTitle:cardNr => `Card ${cardNr+1}`, desc:"desc..." },
+            { key:"defaultCardTitle", value: "step", getTitle:cardNr => `Step ${cardNr+1}`, desc:"desc..." },
+            { key:"defaultCardTitle", value: "weekDay", getTitle:cardNr => getWeekday(cardNr+1), desc:"desc..." }
+        ]
+    },
+    {
+        key:"defaultSectionTitle",
+        value: "section",
+        label:"Default Section Title",
+        desc:"...",
+        valueType:"string",
+        positionInCurrentCardSettings:1,
+        displayFormat:"dropdown",
+        options:[
+            { key:"defaultSectionTitle", value: "day", getTitle:sectNr => `Day ${sectNr}`, getInitials:sectNr => `D${sectNr}`, desc:"desc..." },
+            { key:"defaultSectionTitle", value: "week", getTitle:sectNr => `Week ${sectNr}`, getInitials:sectNr => `W${sectNr}`, desc:"desc..." },
+            { key:"defaultSectionTitle", value: "step", getTitle:sectNr => `Step ${sectNr}`, getInitials:sectNr => `S${sectNr}`, desc:"desc..." },
+            { key:"defaultSectionTitle", value: "section", getTitle:sectNr => `Section ${sectNr}`, getInitials:sectNr => `S${sectNr}`, desc:"desc..." },
+            { key:"defaultSectionTitle", value: "part", getTitle:sectNr => `Part ${sectNr}`, getInitials:sectNr => `P${sectNr}`, desc:"desc..." },
+            { key:"defaultSectionTitle", value: "weekDay", getTitle:sectNr => getWeekday(sectNr), getInitials:sectNr => getWeekday(sectNr).slice(0, 2), desc:"desc..." },
+        ]
+    },
     {
         key:"currentValueDataMethod",
         value: "latest",

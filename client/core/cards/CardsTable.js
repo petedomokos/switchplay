@@ -214,10 +214,10 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   const containerRef = useRef(null);
   const instructionsRef = useRef(null);
 
-  const onCreateDeck = useCallback((settings={}) => {
+  const onCreateDeck = useCallback((options={}) => {
     //@todo -in settings in Decks, give option to assign a different player or a group to the deck instead of the user
-    const player = settings.group ? null : (settings.player || createPlayerFromUser(user));
-    createDeck({ ...settings, player }, table.id)
+    const player = options.group ? null : (options.player || createPlayerFromUser(user));
+    createDeck(user, { ...options, player }, table.id)
   }, [table]);
 
   useEffect(() => {

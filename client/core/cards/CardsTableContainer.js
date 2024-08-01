@@ -53,8 +53,8 @@ const mapDispatchToProps = dispatch => ({
 	},
 	hideMenus(){ dispatch(hideMenus()) },
 	showMenus(){ dispatch(showMenus()) },
-	createDeck(settings, tableId){
-		dispatch(createDeck(settings, tableId))
+	createDeck(user, options, tableId){
+		dispatch(createDeck(user, options, tableId))
 	},
 	updateDeck(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter){
 		dispatch(updateDeck(deck, shouldPersist, shouldUpdateStoreBefore, shouldUpdateStoreAfter));
