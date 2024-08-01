@@ -29,7 +29,7 @@ import { createInitCard } from '../../data/initDeck';
 import { addWeeks } from '../../util/TimeHelpers';
 import { addKpiValuesToCards } from './kpiValuesForCards';
 import uuid from 'react-uuid';
-import { mockItem } from './item_app/data/mockData';
+//import { mockItem } from './item_app/data/mockData';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -229,7 +229,8 @@ const Decks = ({ form, setForm, screen, table, data, groupingTag, timeframeKey, 
   //@todo - add a settings form with a useState toggle to show it when user clicks to create
   const createNewDeck = e => {
     //@todo - do animation to show its being created
-    onCreateDeck({})
+
+    onCreateDeck({ })
     e.stopPropagation();
   };
 
@@ -938,8 +939,8 @@ const itemPeople = selectedDeck && form?.formType === "item" ? [
             onClick={(e) => { e.stopPropagation(); }}
           >
             <ItemApp 
-              screen={screen} item={{ ...mockItem, ...form.value, people: itemPeople }}
-              cardTitle={getCardTitle(form.value.id) || `Card ${form.value.cardNr}`}
+              screen={screen} item={{ ...form.value }}
+              cardTitle={getCardTitle(form.value.id) || `Card ${form.value.cardNr + 1}`}
               save={updateItemTitle} close={() => onSelectItem()} 
               logo={logo}
             />

@@ -66,11 +66,11 @@ export const groups = {
             ],
             deckSettings:DECK_SETTINGS,
             players:[
-                //{ id:"tedCurd", firstName:"Ted", surname:"Curd", pos:"GK" },
-                //{ id:"zachAbbot", firstName:"Zach", surname:"Abbot", pos:"DEF" },
+                //{ id:"tedCurd", firstname:"Ted", surname:"Curd", pos:"GK" },
+                //{ id:"zachAbbot", firstname:"Zach", surname:"Abbot", pos:"DEF" },
                 //player Z
                 { 
-                    _id:"harrisonMurray-Campbell", firstName:"Harrison", surname:"Murray-Campbell", position:"DEF",
+                    _id:"harrisonMurray-Campbell", firstname:"Harrison", surname:"Murray-Campbell", position:"DEF",
                     kpiStartValues:[
                         { datasetKey:"dribbles", measureKey:"successfulDribbles", value:5 },
                         { datasetKey:"matchRuns", measureKey:"sprints", value:5 },
@@ -80,21 +80,21 @@ export const groups = {
                     ] 
                 },
                 { 
-                    _id:"tristanRowe", firstName:"Tristan", surname:"Rowe", position:"DEF",
+                    _id:"tristanRowe", firstname:"Tristan", surname:"Rowe", position:"DEF",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"joshAcheampong", firstName:"Josh", surname:"Acheampong", pos:"DEF" ,
+                    _id:"joshAcheampong", firstname:"Josh", surname:"Acheampong", pos:"DEF" ,
                     kpiStartValues:defaultStartValues
                 },
-                //{ id:"joeJohnson", firstName:"Joe", surname:"Johnson", pos:"DEF" },
+                //{ id:"joeJohnson", firstname:"Joe", surname:"Johnson", pos:"DEF" },
                 { 
-                    _id:"jaydenMeghoma", firstName:"Jayden", surname:"Meghoma", pos:"DEF",
+                    _id:"jaydenMeghoma", firstname:"Jayden", surname:"Meghoma", pos:"DEF",
                     kpiStartValues:defaultStartValues
                 },
                 //player A
                 { 
-                    _id:"samAmo-Ameyaw", firstName:"Samuel", surname:"Amo-Ameyaw", pos:"MID",
+                    _id:"samAmo-Ameyaw", firstname:"Samuel", surname:"Amo-Ameyaw", pos:"MID",
                     kpiStartValues:[
                         { datasetKey:"dribbles", measureKey:"successfulDribbles", value:2 },
                         { datasetKey:"matchRuns", measureKey:"sprints", value:4 },
@@ -105,7 +105,7 @@ export const groups = {
                 },
                 //player B
                 { 
-                    _id:"michaelGolding", firstName:"Michael", surname:"Golding", pos:"MID",
+                    _id:"michaelGolding", firstname:"Michael", surname:"Golding", pos:"MID",
                     kpiStartValues:[
                         { datasetKey:"dribbles", measureKey:"successfulDribbles", value:3 },
                         { datasetKey:"matchRuns", measureKey:"sprints", value:4 },
@@ -116,7 +116,7 @@ export const groups = {
                 },
                 //player C
                 { 
-                    _id:"finleyMcAllister", firstName:"Finley", surname:"McAllister", pos:"MID",
+                    _id:"finleyMcAllister", firstname:"Finley", surname:"McAllister", pos:"MID",
                     kpiStartValues:[
                         { datasetKey:"dribbles", measureKey:"successfulDribbles", value:5 },
                         { datasetKey:"matchRuns", measureKey:"sprints", value:8 },
@@ -127,7 +127,7 @@ export const groups = {
                 }, 
                 //player D
                 { 
-                    _id:"chrisRigg", firstName:"Chris", surname:"Rigg", pos:"MID",
+                    _id:"chrisRigg", firstname:"Chris", surname:"Rigg", pos:"MID",
                     kpiStartValues:[
                         { datasetKey:"dribbles", measureKey:"successfulDribbles", value:6 },
                         { datasetKey:"matchRuns", measureKey:"sprints", value:8 },
@@ -138,7 +138,7 @@ export const groups = {
                 },
                 //player E
                 { 
-                    _id:"jaydenDanns", firstName:"Jayden", surname:"Danns", pos:"FOR",
+                    _id:"jaydenDanns", firstname:"Jayden", surname:"Danns", pos:"FOR",
                     kpiStartValues:[
                         { datasetKey:"dribbles", measureKey:"successfulDribbles", value:7 },
                         { datasetKey:"matchRuns", measureKey:"sprints", value:7 },
@@ -149,7 +149,7 @@ export const groups = {
                 },
                 //player F
                 { 
-                    _id:"jimmy-JayMorgan", firstName:"Jimmy-Jay", surname:"Morgan", pos:"FOR",
+                    _id:"jimmy-JayMorgan", firstname:"Jimmy-Jay", surname:"Morgan", pos:"FOR",
                     kpiStartValues:[
                         { datasetKey:"dribbles", measureKey:"successfulDribbles", value:11 },
                         { datasetKey:"matchRuns", measureKey:"sprints", value:9 },
@@ -159,84 +159,84 @@ export const groups = {
                     ] 
                 },
                 { 
-                    _id:"zakLovelace", firstName:"Zak", surname:"Lovelace", pos:"FOR",
+                    _id:"zakLovelace", firstname:"Zak", surname:"Lovelace", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"joelNDala", firstName:"Joel", surname:"NDala", pos:"FOR",
+                    _id:"joelNDala", firstname:"Joel", surname:"NDala", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"tomWatson", firstName:"Tom", surname:"Watson", pos:"FOR",
+                    _id:"tomWatson", firstname:"Tom", surname:"Watson", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"justinOboavwoduo", firstName:"Justin", surname:"Oboavwoduo", pos:"FOR",
+                    _id:"justinOboavwoduo", firstname:"Justin", surname:"Oboavwoduo", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"archieStevens", firstName:"Archie", surname:"Stevens", pos:"FOR",
+                    _id:"archieStevens", firstname:"Archie", surname:"Stevens", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"zakLovelace2", firstName:"Zak", surname:"Lovelace", pos:"FOR",
+                    _id:"zakLovelace2", firstname:"Zak", surname:"Lovelace", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"joelNDala2", firstName:"Joel", surname:"NDala", pos:"FOR",
+                    _id:"joelNDala2", firstname:"Joel", surname:"NDala", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"tomWatson2", firstName:"Tom", surname:"Watson", pos:"FOR",
+                    _id:"tomWatson2", firstname:"Tom", surname:"Watson", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"justinOboavwoduo2", firstName:"Justin", surname:"Oboavwoduo", pos:"FOR",
+                    _id:"justinOboavwoduo2", firstname:"Justin", surname:"Oboavwoduo", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"archieStevens2", firstName:"Archie", surname:"Stevens", pos:"FOR",
+                    _id:"archieStevens2", firstname:"Archie", surname:"Stevens", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"zakLovelace3", firstName:"Zak", surname:"Lovelace", pos:"FOR",
+                    _id:"zakLovelace3", firstname:"Zak", surname:"Lovelace", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"joelNDala3", firstName:"Joel", surname:"NDala", pos:"FOR",
+                    _id:"joelNDala3", firstname:"Joel", surname:"NDala", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"tomWatson3", firstName:"Tom", surname:"Watson", pos:"FOR",
+                    _id:"tomWatson3", firstname:"Tom", surname:"Watson", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"justinOboavwoduo3", firstName:"Justin", surname:"Oboavwoduo", pos:"FOR",
+                    _id:"justinOboavwoduo3", firstname:"Justin", surname:"Oboavwoduo", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"archieStevens3", firstName:"Archie", surname:"Stevens", pos:"FOR",
+                    _id:"archieStevens3", firstname:"Archie", surname:"Stevens", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"zakLovelace4", firstName:"Zak", surname:"Lovelace", pos:"FOR",
+                    _id:"zakLovelace4", firstname:"Zak", surname:"Lovelace", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"joelNDala4", firstName:"Joel", surname:"NDala", pos:"FOR",
+                    _id:"joelNDala4", firstname:"Joel", surname:"NDala", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"tomWatson4", firstName:"Tom", surname:"Watson", pos:"FOR",
+                    _id:"tomWatson4", firstname:"Tom", surname:"Watson", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 /*
                 { 
-                    _id:"justinOboavwoduo4", firstName:"Justin", surname:"Oboavwoduo", pos:"FOR",
+                    _id:"justinOboavwoduo4", firstname:"Justin", surname:"Oboavwoduo", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 { 
-                    _id:"archieStevens4", firstName:"Archie", surname:"Stevens", pos:"FOR",
+                    _id:"archieStevens4", firstname:"Archie", surname:"Stevens", pos:"FOR",
                     kpiStartValues:defaultStartValues
                 },
                 */
@@ -249,7 +249,7 @@ export const groups = {
             deckSettings:DECK_SETTINGS,
             players:[
                 { 
-                    _id:"reneeRegis", firstName:"Renee", surname:"Regis"
+                    _id:"reneeRegis", firstname:"Renee", surname:"Regis"
                 }
             ]
         }

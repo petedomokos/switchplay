@@ -25,7 +25,7 @@ const UserSchema = new mongoose.Schema({
     trim: true,
     required: 'User initials are required'
   },
-  photo:{
+  profilePhoto:{
     data:Buffer,
     contentType:String,
     added:Date,

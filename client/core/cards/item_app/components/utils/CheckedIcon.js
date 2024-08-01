@@ -1,10 +1,15 @@
 import React from 'react';
 import '../../style/utils/steps-icon.css';
 
-function CheckedIcon({ teamLogoUrl }) {
+function CheckedIcon({ customerLogoUrl }) {
+  console.log("logo", customerLogoUrl)
   return (
     <div className='checked-icon'>
-      <img className='icon-image' src={teamLogoUrl} alt='team logo'></img>
+      {customerLogoUrl ? 
+        <img className='icon-image' src={customerLogoUrl} alt=''></img>
+        :
+        <div></div>
+      }
     </div>
   );
 }

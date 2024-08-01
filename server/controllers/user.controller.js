@@ -90,6 +90,10 @@ const userByID = async (req, res, next, id) => {
           select:'_id name desc'
         } 
       })
+      /*.populate({ 
+        path: 'decks/player', 
+        select: 'username firstname surname photos',
+      })*/
       .populate(administeredDatasetsPopulationObj)
       .populate(datasetsMemberOfPopulationObj)
       //.populate('administeredDatasets', '_id name desc notes photo admin created')

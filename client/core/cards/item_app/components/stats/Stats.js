@@ -13,9 +13,8 @@ function Stats({ stats, screen }) {
     <div className='stats-wrapper'>
       <div className='section-wrapper'>
         <TitleTemplate title={title} />
-        <div className='section-child-content' >
-          <StatsList statsData={stats} screen={screen} />
-        </div>
+        <div className='section-child-content' ></div>
+        
       </div>
       <AddNewTemplate placeholder={placeholder} />
     </div>
@@ -27,3 +26,12 @@ Stats.defaultProps = {
 }
 
 export default Stats;
+
+/*
+
+<TitleTemplate title={title} />
+        <div className='section-child-content' >
+          <StatsList statsData={stats} screen={screen} />
+        </div>
+
+        */

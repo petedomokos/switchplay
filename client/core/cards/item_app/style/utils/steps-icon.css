@@ -3,12 +3,14 @@
   width: 25px;
   border: 1px solid black;
   border-radius: 100%;
+  background:#F5F5F5;
 }
 .checked-icon {
   width:25px;
   height:25px;
   border: 1px solid black;
   border-radius: 100%;
+  background:#088F8F;
   margin: auto;
   padding:0;
 }

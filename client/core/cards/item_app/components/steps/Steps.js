@@ -13,13 +13,13 @@ function Steps({ steps, logo }) {
     <div className='steps-wrapper'>
       <div className='section-wrapper'>
         <TitleTemplate title={title} />
-        <div className='section-child-content'>
-          {steps.map(({ title, status, id }) => (
-            <StepsItemTemplate key={id} value={title} status={status} logo={logo} />
-          ))}
+        <div className='section-child-content' >
+          {steps.map(step => 
+            <StepsItemTemplate key={step.id} value={step.title} status={step.status} logo={logo} />
+          )}
         </div>
-        <AddNewTemplate placeholder={placeholder} />
       </div>
+      <AddNewTemplate placeholder={placeholder} />
     </div>
   );
 }
@@ -29,3 +29,12 @@ Steps.defaultProps = {
 }
 
 export default Steps;
+
+/*
+<TitleTemplate title={title} />
+        <div className='section-child-content'>
+          {steps.map(({ title, status, id }) => (
+            <StepsItemTemplate key={id} value={title} status={status} logo={logo} />
+          ))}
+        </div>
+        */

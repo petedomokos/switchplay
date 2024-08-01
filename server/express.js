@@ -65,7 +65,7 @@ app.get('*', (req, res) => {
     console.log("REDIRECT!!!!!!!!!!!!!!!!")
     res.redirect(`https://${domain}${req.path}`)
   }else{
-    console.log("OK")
+    //console.log("OK")
     res.status(200).send(template())
   }
 })

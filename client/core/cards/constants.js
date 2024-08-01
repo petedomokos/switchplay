@@ -4,6 +4,12 @@ import { GREY_COLOUR_THEME, BLUE_COLOUR_THEME, SATURATED_BLUE_COLOUR_THEME } fro
 export const NOW = new Date("2024/07/12");
 
 export const DECK_SETTINGS = [
+    /*{
+        key:"numberOfCards",
+        value:5,
+        label:"Number of Cards",
+        valueType:"number",
+    },*/
     {
         key:"currentValueDataMethod",
         value: "latest",

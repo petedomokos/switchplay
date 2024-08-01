@@ -9,6 +9,7 @@ import { embellishDecks } from "./embellishDecks"
 import TableHeader from './TableHeader';
 import { tableLayout } from "./tableLayout"
 import { onlyUnique } from "../../util/ArrayHelpers"
+import { createPlayerFromUser } from '../../util/userHelpers';
 
 const { burgerBarWidth, CUSTOMER_LOGO_WIDTH, CUSTOMER_LOGO_HEIGHT } = DIMNS;
 
@@ -75,12 +76,15 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
+//helper
+
+
 const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, updateDecks, deleteDeck, hideMenus, showMenus }) => {
   const { tables=[], decks=[], customer } = user;
   const stringifiedDecks = JSON.stringify(decks);
 
   //next - find where kpi values are added, and adjust so they are not all completed
-  //console.log("CardsTable", user)
+  console.log("CardsTable", user)
   //console.log("datasets", datasets)
   // @todo - move creating flag to asyncProcesses
   // helper consts
@@ -88,7 +92,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   const playerIds = decks.map(d => d.player?._id)
   const allPlayerIdsSame = playerIds.filter(onlyUnique).length === 1;
   const allPlayerIdsUnique = playerIds.filter(onlyUnique).length === decks.length;
-  const atLeastOnePlayer = playerIds.length !== 0
+  const atLeastOnePlayer = playerIds.length !== 0;
 
   //State
   const [timeframe, setTimeframe] = useState(timeframeOptions.singleDeck);
@@ -211,7 +215,9 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   const instructionsRef = useRef(null);
 
   const onCreateDeck = useCallback((settings={}) => {
-    createDeck(settings, table.id)
+    //@todo -in settings in Decks, give option to assign a different player or a group to the deck instead of the user
+    const player = settings.group ? null : (settings.player || createPlayerFromUser(user));
+    createDeck({ ...settings, player }, table.id)
   }, [table]);
 
   useEffect(() => {

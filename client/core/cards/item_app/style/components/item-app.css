@@ -9,6 +9,7 @@ code {
 }
 
 .item-container {
+  min-height:100%;
   background-color: var(--app-background-color);
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',

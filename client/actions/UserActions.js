@@ -11,11 +11,14 @@ import uuid from 'react-uuid';
 import { addWeeks } from '../util/TimeHelpers';
 import { userIdIsMock, getMockUserById } from '../mock/mockDatabases/users';
 import { sortAscending } from '../util/ArrayHelpers';
+import { addHardcodedDataToUser } from "../data/hardcodedData/users";
+import { createPlayerFromUser } from '../util/userHelpers';
 
 export const transformGroupForClient = group => ({
 	...group,
 	kpis:group.kpis.map(kpi => ({ ...kpi, key:`${kpi.datasetKey}-${kpi.measureKey}`}))
 })
+
 export const transformTableForClient = serverTable => {
 	//console.log("transformTableForClient", serverTable)
 	const { created, updated, ...clientTable } = serverTable;
@@ -27,9 +30,9 @@ export const transformTableForClient = serverTable => {
 	}
 }
 
-export const transformDeckForClient = serverDeck => {
-	//console.log("tDFC.............", serverDeck)
-	const { created, updated, cards, purpose=[], sections, tags, frontCardId, player, ...clientDeck } = serverDeck;
+export const transformDeckForClient = (serverDeck, userPlayer) => {
+	console.log("tDFC.............", serverDeck)
+	const { created, updated, cards, purpose=[], sections, tags, frontCardId, player, ...rest } = serverDeck;
 	//ensure prupose has at least two paragraphs
 	const hydratedPurpose = purpose.length === 0 ? ["",""] : purpose.length === 1 ? [purpose[0], ""] : purpose;
 	const hydratedDeckSections = hydrateDeckSections(sections ? JSON.parse(sections) : undefined);
@@ -46,7 +49,7 @@ export const transformDeckForClient = serverDeck => {
 	}))
 
 	const sortedCards = sortAscending(parsedCards, d => d.date).map((c,i) => ({ ...c, cardNr:i }))
-
+	console.log("parsed and sorted Cards", sortedCards)
 	const now = new Date();
 	const earliestCardDate = sortedCards[0]?.date; //d3.min(parsedCards, c => c.date);
 
@@ -56,7 +59,7 @@ export const transformDeckForClient = serverDeck => {
 		customStartDate : addWeeks(-1, (earliestCardDate || now))
 
 	return {
-		...clientDeck,
+		...rest,
 		startDate,
 		frontCardId, //shouldnt be needed beyond this point?
 		created:new Date(created),
@@ -66,25 +69,28 @@ export const transformDeckForClient = serverDeck => {
 		tags:tags?.map(tag => JSON.parse(tag)) || [],
 		sections:hydratedDeckSections,
 		cards:sortedCards,
-		player:player ? { ...player, id:player._id } : null
+		//if player is nt the user, it will have been populated on the server
+		player:typeof player ===  "string" ? userPlayer : player
 	}
 }
 
 export const transformDeckForServer = clientDeck => {
-	const { id, cards, sections, tags=[], ...serverDeck } = clientDeck;
+	const { id, cards, sections, tags=[], player, group, ...rest } = clientDeck;
 	//console.log("transDFS.....clientDeck", clientDeck)
 	return {
-		...serverDeck,
+		...rest,
 		//frontCardId is either a specific card, none (all cards placed) or current, which defaults to current card,
 		cards:JSON.stringify(cards),
 		sections:JSON.stringify(sections),
-		tags:tags.map(tag => JSON.stringify(tag))
+		tags:tags.map(tag => JSON.stringify(tag)),
+		player:player ? player._id : null,
+		group:group ? group._id : null
 	}
 }
  
 //getMock functions below
 export const transformUserForClient = serverUser => {
-	//console.log("transformUserForClient", serverUser)
+	console.log("transformUserForClient", serverUser)
 	const { journeys=[], photos=[], decks=[], tables=[], groups=[] } = serverUser;
 	const hydratedPhotos = photos.map(p => ({ ...p, added: new Date(p.added) }))
 	//@todo - check will we ever use this for updating journeys? I dont think we need it 
@@ -94,13 +100,14 @@ export const transformUserForClient = serverUser => {
 		photos:hydratedPhotos,
 		journeys:hydratedJourneys,
 		tables:tables.map(t => transformTableForClient(t)),
-		decks:decks.map(s => transformDeckForClient(s)),
+		decks:decks.map(d => transformDeckForClient(d, createPlayerFromUser(serverUser))),
 		groups:groups.map(g => tranformGroupForClient(g))
 	}
 }
 
 
 export const createUser = user => dispatch => {
+	console.log("createUser...........")
 	fetchThenDispatch(dispatch, 
 		'creating.user',
 		{
@@ -123,9 +130,11 @@ export const createUser = user => dispatch => {
 
 //to fetch a user in full
 export const fetchUser = id => dispatch => {
+	console.log("fetchuser.....................", id)
 	//mock users
 	const mockUser = getMockUserById(id);
 	if(mockUser){
+		console.log("mock user..................")
 		dispatch({ type:C.SIGN_IN, user:transformUserForClient(mockUser) });
 		return;
 	}
@@ -138,15 +147,21 @@ export const fetchUser = id => dispatch => {
 			nextAction: data => {
 				const jwt = auth.isAuthenticated();
 				//may be reloading the signed in user
+				console.log("user returned from server", data)
+				const transformedUser = transformUserForClient(data);
+				console.log("transformeduser", transformedUser)
+				const user = addHardcodedDataToUser(transformedUser);
+				console.log("userwithhardcodeddata", user)
 				return {
 					type:jwt.user._id === data._id ? C.SIGN_IN : C.LOAD_USER, 
-					user:transformUserForClient(data) 
+					user 
 				};
 			}
 		}) 
 }
 
 export const fetchUsers = () => dispatch => {
+	console.log("fetchUsers.............")
 	fetchThenDispatch(dispatch, 
 		'loading.users',
 		{
@@ -162,6 +177,7 @@ export const fetchUsers = () => dispatch => {
 
 export const updateUser = (id, formData, history) => dispatch => {
 	//setTimeout(() => {
+		console.log("updateUser............")
 		fetchThenDispatch(dispatch, 
 			'updating.user',
 			{
@@ -234,7 +250,13 @@ export const createDeck = (settings, tableId) => dispatch => {
 	//@todo - move this to server
 
 	const deck = settings?.copy || initDeck(jwt.user._id, settings);
+	//@todo - keep a copy of the player in case it is not populated on server eg if player is the user
+	//@todo - populate player on server unless player is the user
+	const userPlayer = settings.player?._id === jwt.user._id ? settings.player : null;
+	console.log("userPlayer", userPlayer)
+	console.log("createDeck", deck)
 	const serverDeck = transformDeckForServer(deck);
+	console.log("serverDeck", serverDeck)
 	const requestBody = { deck:serverDeck, tableId }
 	fetchThenDispatch(dispatch, 
 		'updating.user',
@@ -244,7 +266,11 @@ export const createDeck = (settings, tableId) => dispatch => {
 			body:JSON.stringify(requestBody),
 			requireAuth:true,
 			nextAction: data => {
-				return { type:C.CREATE_DECK, deck: transformDeckForClient(data), tableId }
+				console.log("deck returned from server", data)
+				const d = transformDeckForClient(data, userPlayer);
+				console.log("d", d)
+				return { type:C.CREATE_DECK, deck:d, tableId }
+				//return { type:C.CREATE_DECK, deck: transformDeckForClient(data), tableId }
 			}
 		}
 	)

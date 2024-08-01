@@ -22,19 +22,19 @@ const users = [
     {
         _id:"db",
         username:"dbdemo",
-        firstName:"Damian",
+        firstname:"Damian",
         surname:"Briggs",
     },
     {
         _id:"rg",
         username:"rgdemo",
-        firstName:"Ryan",
+        firstname:"Ryan",
         surname:"Garry",
     },
     {
         _id:"rregis",
         username:"rrdemo",
-        firstName:"Renee",
+        firstname:"Renee",
         surname:"Regis",
     },
 

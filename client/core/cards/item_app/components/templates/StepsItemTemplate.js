@@ -5,16 +5,14 @@ import CheckedIcon from '../utils/CheckedIcon';
 import UncheckedIcon from '../utils/UncheckedIcon';
 
 function StepsItemTemplate({ value, status, logo }) {
-  const isChecked = status === 'done';
-
   return (
     <div className='steps-item-template'>
       <div className='checkbox'>
-        {isChecked ? ( // Render Checkbox with defaultChecked if status is 'done'
-          <Checkbox value='checkedA' inputProps={{ 'aria-label': 'Checkbox A' }} icon={<UncheckedIcon />} checkedIcon={<CheckedIcon teamLogoUrl={logo?.url} />} defaultChecked />
-        ) : (
-          <Checkbox value='checkedA' inputProps={{ 'aria-label': 'Checkbox A' }} icon={<UncheckedIcon />} checkedIcon={<CheckedIcon teamLogoUrl={logo?.url} />} />
-        )}{' '}
+        {status === "complete" ?
+          <Checkbox value='checkedA' inputProps={{ 'aria-label': 'Checkbox A' }} icon={<UncheckedIcon />} checkedIcon={<CheckedIcon customerLogoUrl={logo?.url} />} defaultChecked />
+        :
+          <Checkbox value='checkedA' inputProps={{ 'aria-label': 'Checkbox A' }} icon={<UncheckedIcon />} checkedIcon={<CheckedIcon customerLogoUrl={logo?.url} />} />
+        }
       </div>
       {value}
     </div>

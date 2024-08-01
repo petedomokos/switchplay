@@ -15,7 +15,19 @@ const People = ({ people, screen }) => {
   return (
     <div className='profile-picture-wrapper'>
       {people.map((p,i) => 
-        <img src={p} key={`prof-${i}`} alt="Person Profile" className={getClassname(i)} />
+        <div className={getClassname(i)} key={`prof-${i}`}>
+          {
+            p.profilePhoto ? 
+              <img src={p.profilePhoto} alt="Person Profile" />
+              :
+              <div style={{ 
+                  width:"30px", height:"30px", borderRadius:"100%", background:"#DAA520", 
+                  display:"flex", justifyContent:"center", alignItems:"center",
+                  fontSize:"14px", opacity:0.75
+                }}>{p.initials}
+              </div>
+          }
+        </div>
       )}
     </div>
   );

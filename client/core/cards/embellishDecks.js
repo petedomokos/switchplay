@@ -26,7 +26,7 @@ const calcDeckCompletion = cards => {
 }
 
 export const embellishDeck = (deck, settings={}) => {
-  //console.log("embellishDeck", deck)
+  console.log("embellishDeck", deck)
   const { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag } = settings;
   //console.log("timeframeKey gTag",timeframeKey, groupingTag)
   const futureCards = deck.cards.filter(c => c.date > NOW);
@@ -40,23 +40,24 @@ export const embellishDeck = (deck, settings={}) => {
   }));
   //console.log('cards', cards)
 
-  const playerName = deck.player ? `${deck.player.firstName} ${deck.player.surname}` : "";
+  const playerName = deck.player ? `${deck.player.firstname} ${deck.player.surname}` : "";
   const phaseTitle = deck.phase?.title || "";
 
-  const getTitle = () => {
+  /*const getTitle = () => {
     //Both could be undefined
      //@todo - change this to check if customer group only has one player or something like that (see also deck name)
-    /*if(allPlayerIdsSame){
+    //if(allPlayerIdsSame){
       //we dont display player name
-      return phaseTitle || deck.title;
-    }*/
+      //return phaseTitle || deck.title;
+    //}
     return playerName && phaseTitle ? `${playerName} (${phaseTitle})` : 
       playerName || phaseTitle || deck.title;
   }
+  */
 
   return {
     ...deck,
-    title:getTitle(),
+    title:deck.title || deck._id,
     date:d3.max(cards, d => d.date),
     cards,
     status:calcDeckStatus(cards),

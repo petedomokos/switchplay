@@ -22,7 +22,7 @@ export const getMockAthleteDecks = group => {
     }));
 }
 
-const mockAthlete = { id:"reneeRegis", firstName:"Renee", surname:"Regis" }
+const mockAthlete = { id:"reneeRegis", firstname:"Renee", surname:"Regis" }
 const mockAthleteDecks = [
     {
         _id:"athleteDeck0",

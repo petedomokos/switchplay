@@ -5,11 +5,10 @@ import Stats from './components/stats/Stats';
 import Steps from './components/steps/Steps';
 import Attachments from './components/attachments/Attachments';
 
-import './index.css';
-import './style/components/app.css';
+import './item-index.css';
+import './style/components/item-app.css';
 
 function ItemApp({ screen, item, cardTitle, save, close, logo }) {
-  console.log("Item", item, item.people)
   const [value, setValue] = useState(item)
   const [editing, setEditing] = useState(false);
   const [applyChangesToAllDecks, setApplyChangesToAllDecks] = useState(false);
