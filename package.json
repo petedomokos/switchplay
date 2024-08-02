@@ -94,6 +94,7 @@
     "react-countdown-now": "^2.1.2",
     "react-countup": "6.4.2",
     "react-dom": "16.13.1",
+    "react-draggable": "^4.4.6",
     "react-hot-loader": "4.12.20",
     "react-icons-kit": "^2.0.0",
     "react-id-swiper": "^4.0.0",
