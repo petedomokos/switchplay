@@ -2,7 +2,6 @@ import React from 'react'
 import '../../style/components/header/people.css';
 
 const People = ({ people, screen }) => {
-  console.log("people", people)
   const getClassname = i => {
     if(i === 0){
       return `profile-picture first ${screen.isSmall ? "first-sm-down" : "first-md-up"} `

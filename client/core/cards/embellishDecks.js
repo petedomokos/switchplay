@@ -26,7 +26,7 @@ const calcDeckCompletion = cards => {
 }
 
 export const embellishDeck = (deck, settings={}) => {
-  console.log("embellishDeck", deck)
+  //console.log("embellishDeck", deck)
   const { allPlayerIdsSame, allPlayerIdsUnique, timeframeKey, groupingTag } = settings;
   //console.log("timeframeKey gTag",timeframeKey, groupingTag)
   const futureCards = deck.cards.filter(c => c.date > NOW);

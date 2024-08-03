@@ -2,7 +2,6 @@ import React from 'react';
 import '../../style/utils/steps-icon.css';
 
 function CheckedIcon({ customerLogoUrl }) {
-  console.log("logo", customerLogoUrl)
   return (
     <div className='checked-icon'>
       {customerLogoUrl ? 
