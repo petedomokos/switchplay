@@ -13,6 +13,7 @@ const createEmptyStep = pos => ({ pos, id:uuid(), title:"", status:"todo" })
 
 function Steps({ steps, logo, updateSteps }) {
 
+  const [stepBeingEdited, setStepBeingEdited] = useState("")
   const dragRef = useRef({})
   const longpressRef = useRef({ mouseMoves: 0 })
   console.log("Steps...", steps)
@@ -27,21 +28,23 @@ function Steps({ steps, logo, updateSteps }) {
     height:`${stepHeight}px`, margin:`${stepMarginVert}px`,
   }
 
-  const calcTop = pos => titleHeight + stepMarginVert + (pos * stepHeight + stepMarginVert); 
-  const getStepStyle = pos => ({
+  const calcTop = pos => stepMarginVert + (pos * stepHeight + stepMarginVert); 
+  const getStepStyle = step => ({
     ...stepStyle,
-    top:`${calcTop(pos)}px`,
+    top:`${calcTop(step.pos)}px`,
     left:0,
     backgroundColor:"transparent",
-    padding:"0px 5%"
+    padding:"0px",
   })
 
-  const getStepOverlayStyle = pos => ({
+  const getStepOverlayStyle = step => ({
     ...stepStyle,
-    top:`${calcTop(pos)}px`,
-    left:0,
+    width:"calc(100% - 55px)",
+    left:"55px",
+    top:`${calcTop(step.pos)}px`,
     opacity:0.5,
-    padding:"0px 5%"
+    padding:"0px",
+    display:stepBeingEdited === step.id ? "none" : null
   })
 
   const createStep = () => { updateSteps([ ...steps, createEmptyStep(steps.length) ]); }
@@ -60,17 +63,19 @@ function Steps({ steps, logo, updateSteps }) {
 
   const onClickBg = e => {
     //console.log("clickbg", longpressRef.current.isLongpress)
+    if(stepBeingEdited){ setStepBeingEdited(""); }
     //this will be an issue due to propagation, but no need for it now
     //cleanupDrag();
     e.stopPropagation();
     e.preventDefault();
   }
 
-  const onClickStepOverlay = e => {
+  const onClickStepOverlay = (e, step) => {
     //console.log("click step overlay")
     cleanupDrag();
     e.stopPropagation();
     e.preventDefault();
+    setStepBeingEdited(step.id);
   }
 
   const onClick = e => {
@@ -81,7 +86,7 @@ function Steps({ steps, logo, updateSteps }) {
   }
 
   const onMouseDown = (e, step) => {
-    console.log("md")
+    //console.log("md")
     e.stopPropagation();
     //console.log("md")
     cleanupDrag();
@@ -98,7 +103,7 @@ function Steps({ steps, logo, updateSteps }) {
     }, 500);
   }
   const onMouseUp = e => {
-    console.log("mu")
+    //console.log("mu")
     e.stopPropagation();
     //console.log("mu")
     d3.select(e.target)
@@ -142,7 +147,7 @@ function Steps({ steps, logo, updateSteps }) {
   }
   const onDragEnd = (e, step) => {
     e.stopPropagation();
-    console.log("de")
+    //console.log("de")
     cleanupDrag();
 
     const selection = d3.select(e.target);
@@ -238,7 +243,7 @@ function Steps({ steps, logo, updateSteps }) {
             <div
               datum={JSON.stringify(step)}
               className={`handle step-wrapper step-wrapper-${step.id}`} 
-              style={getStepStyle(step.pos)}
+              style={getStepStyle(step)}
               key={`step-${step.id}`}
               onClick={onClick}
               draggable={true}
@@ -250,7 +255,10 @@ function Steps({ steps, logo, updateSteps }) {
               onDragLeave={e => onDragLeave(e, step)}
               onDrop={e => onDrop(e, step)}
             >
-                <StepsItemTemplate key={step.id} value={step.title} status={step.status} logo={logo} update={updateStep} />
+                <StepsItemTemplate 
+                  key={step.id} step={step} logo={logo} 
+                  beingEdited={stepBeingEdited === step.id} update={updateStep} 
+                />
             </div>
           )}
           {steps.map(step => 
@@ -258,8 +266,8 @@ function Steps({ steps, logo, updateSteps }) {
               key={`step-overlay step-overlay-${step.id}`}
               datum={JSON.stringify(step)}
               className={`step-overlay step-overlay-${step.id}`}
-              style={getStepOverlayStyle(step.pos)}
-              onClick={onClickStepOverlay}
+              style={getStepOverlayStyle(step)}
+              onClick={e => onClickStepOverlay(e, step)}
               onMouseDown={e => onMouseDown(e, step)}
               onMouseUp={onMouseUp}
               onMouseMove={onMouseMove}
