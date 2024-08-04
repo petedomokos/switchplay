@@ -32,6 +32,7 @@ export const transformTableForClient = serverTable => {
 
 export const transformDeckForClient = (serverDeck, userPlayer) => {
 	console.log("tDFC.............", serverDeck)
+	console.log("userPlayer", userPlayer)
 	const { created, updated, cards, purpose=[], sections, tags, frontCardId, player, ...rest } = serverDeck;
 	//ensure prupose has at least two paragraphs
 	const hydratedPurpose = purpose.length === 0 ? ["",""] : purpose.length === 1 ? [purpose[0], ""] : purpose;
@@ -44,7 +45,17 @@ export const transformDeckForClient = (serverDeck, userPlayer) => {
 		cardNr:null,
 		id:c.id || uuid(), //legacy - add uuid - can remove this func call later
 		date:new Date(c.date),
-		items:c.items.map(it => ({ ...it, status:it.status || 0, id:it.id || uuid() })), //legacy uuii()
+		items:c.items.map(it => ({ 
+			...it, 
+			status:it.status || 0, 
+			id:it.id || uuid(),
+			//legacy additions
+			title:it.title || "",
+			steps:it.steps || [],
+			stats:it.stats || [],
+			attachments:it.attachments || [],
+			people:it.people || [userPlayer],
+		})),
 		kpis:c.kpis || []
 	}))
 
