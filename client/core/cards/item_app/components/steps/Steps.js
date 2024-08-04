@@ -61,33 +61,27 @@ function Steps({ /*steps,*/ logo }) {
     opacity:0.5
   })
 
-  const onClickStepOverlay = () => {
+  const cleanupDrag = () => {
     d3.selectAll(".step-overlay")
-      //.style("background-color", "pink")
       .style("z-index", 1)
     
     d3.selectAll(".step-wrapper")
-      .style("background-color","transparent")
+      .transition("cleanup")
+      .duration(200)
+        .style("background-color","transparent")
+  }
+
+  const onClickStepOverlay = () => {
+    cleanupDrag();
   }
 
   const onClick = () => {
-    d3.selectAll(".step-overlay")
-      //.style("background-color", "pink")
-      .style("z-index", 1)
-    
-    d3.selectAll(".step-wrapper")
-      .style("background-color","transparent")
-
+    cleanupDrag();
   }
 
   const onMouseDown = (e, step) => {
     //console.log("md")
-    d3.selectAll(".step-overlay")
-      //.style("background-color", "pink")
-      .style("z-index", 1);
-    
-    d3.selectAll(".step-wrapper")
-      .style("background-color","transparent")
+    cleanupDrag();
 
     const overlaySelection = d3.select(e.target);
     const stepSelection = d3.select(`.step-wrapper-${step.id}`)
@@ -132,13 +126,7 @@ function Steps({ /*steps,*/ logo }) {
   }
   const onDragEnd = (e, step) => {
     //console.log("de")
-    //console.log("RESET")
-    d3.selectAll(".step-overlay")
-      //.style("background-color", "pink")
-      .style("z-index", 1)
-    
-    d3.selectAll(".step-wrapper")
-      .style("background-color","transparent")
+    cleanupDrag();
 
     const selection = d3.select(e.target);
     selection.style("opacity", 1)
@@ -221,13 +209,7 @@ function Steps({ /*steps,*/ logo }) {
           }
         })
 
-    //console.log("RESET")
-    d3.selectAll(".step-overlay")
-        //.style("background-color", "pink")
-        .style("z-index", 1);
-
-    d3.selectAll(".step-wrapper")
-      .style("background-color","transparent");
+    cleanupDrag();
   }
 
   return (
