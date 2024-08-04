@@ -561,8 +561,8 @@ const Decks = ({ form, setForm, screen, table, data, groupingTag, timeframeKey, 
     }
   }, [stringifiedData, form, selectedDeckId, selectedCardNr]);
 
-  const updateItemTitle = useCallback((title, applyToAllDecks) => {
-    //console.log("updateItemTitle", applyToAllDecks)
+  const updateItem = useCallback((updatedItem, applyToAllDecks, propertiesUpdated) => {
+    console.log("updateItem", updatedItem)
     const { cardId, itemNr } = form.value;
     const cardToUpdate = selectedDeck.cards.find(c => c.id === cardId);
     if(applyToAllDecks){
@@ -570,7 +570,8 @@ const Decks = ({ form, setForm, screen, table, data, groupingTag, timeframeKey, 
       //const prevTitle = cardToUpdate.items.find(it => it.itemNr === itemNr).title
       //updateDecks({ desc:"item-title", cardNr, itemNr, title, prevTitle }, shouldPersistChanges)
     }else{
-      const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : ({ ...it, title }));
+      const updatedItems = cardToUpdate.items.map(it => it.itemNr !== itemNr ? it : updatedItem);
+      console.log("updatedItems", updatedItems)
       updateCard({ ...cardToUpdate, items:updatedItems })
     }
   }, [stringifiedData, form, selectedDeckId]);
@@ -940,7 +941,7 @@ const itemPeople = selectedDeck && form?.formType === "item" ? [
             <ItemApp 
               screen={screen} item={{ ...form.value }}
               cardTitle={getCardTitle(form.value.id) || `Card ${form.value.cardNr + 1}`}
-              save={updateItemTitle} close={() => onSelectItem()} 
+              save={updateItem} close={() => onSelectItem()} 
               logo={logo}
             />
           </div>

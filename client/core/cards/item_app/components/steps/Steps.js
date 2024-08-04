@@ -9,28 +9,13 @@ import '../../style/components/sections.css';
 import '../../style/components/steps.css';
 import uuid from 'react-uuid';
 
-const initSteps = [
-  { pos:0, id:"step-a", title:"step 1 - This is a long step to test how it wraps on deifferent devices. Lets have a look at it.", status:"complete" },
-  { pos: 1, id:"step-b", title:"step 2 - This is a medium step to test how ", status:"In Progress" },
-  { pos: 2, id:"step-c", title:"step 3 - a short step", status:"Todo" }
-]
-
 const createEmptyStep = pos => ({ pos, id:uuid(), title:"", status:"todo" })
 
-/*
-todo
- - deploy and test on mobile with touchstart and touchend
- - pass in steps as props, and make update happen in db for order of steps, add and delete
-*/
-
-
-function Steps({ /*steps,*/ logo }) {
+function Steps({ steps, logo, updateSteps }) {
 
   const dragRef = useRef({})
   const longpressRef = useRef({ mouseMoves: 0 })
-  const [steps, setSteps] = useState(initSteps);
   console.log("Steps...", steps)
-  //console.log("longpressRef", longpressRef.current)
   const title = 'Steps';
   const placeholder = 'Add step';
   const titleHeight = 80;
@@ -59,9 +44,9 @@ function Steps({ /*steps,*/ logo }) {
     padding:"0px 5%"
   })
 
-  const createStep = () => {
-    setSteps(prevState => [ ...prevState, createEmptyStep(prevState.length) ])
-  }
+  const createStep = () => { updateSteps([ ...steps, createEmptyStep(steps.length) ]); }
+  const updateStep = updatedStep => { updateSteps(steps.map(s => s.id !== updatedStep.id ? s : updatedStep)); }
+  const deleteStep = step => { updateSteps(steps.filter(s => s.pos !== step.pos).map(s => s.pos < step.pos ? s : ({ ...s, pos: s.pos - 1 }))) }
 
   const cleanupDrag = () => {
     d3.selectAll(".step-overlay")
@@ -73,15 +58,31 @@ function Steps({ /*steps,*/ logo }) {
         .style("background-color","transparent")
   }
 
-  const onClickStepOverlay = () => {
-    cleanupDrag();
+  const onClickBg = e => {
+    //console.log("clickbg", longpressRef.current.isLongpress)
+    //this will be an issue due to propagation, but no need for it now
+    //cleanupDrag();
+    e.stopPropagation();
+    e.preventDefault();
   }
 
-  const onClick = () => {
+  const onClickStepOverlay = e => {
+    //console.log("click step overlay")
     cleanupDrag();
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
+  const onClick = e => {
+    //console.log("click step")
+    cleanupDrag();
+    e.stopPropagation();
+    e.preventDefault();
   }
 
   const onMouseDown = (e, step) => {
+    console.log("md")
+    e.stopPropagation();
     //console.log("md")
     cleanupDrag();
 
@@ -97,6 +98,8 @@ function Steps({ /*steps,*/ logo }) {
     }, 500);
   }
   const onMouseUp = e => {
+    console.log("mu")
+    e.stopPropagation();
     //console.log("mu")
     d3.select(e.target)
     clearTimeout(longpressRef.current.timer)
@@ -105,9 +108,11 @@ function Steps({ /*steps,*/ logo }) {
     }
   }
   const onMouseMove = () => {
+    //e.stopPropagation();
   }
 
   const onDragStart = (e, step) => {
+    e.stopPropagation();
     //console.log("ds", e.timeStamp)
     const selection = d3.select(e.target);
     dragRef.current.draggedSelection = selection;
@@ -121,6 +126,7 @@ function Steps({ /*steps,*/ logo }) {
   }
 
   const onDrag = (e, step) => {
+    e.stopPropagation();
     const { startPos } = dragRef.current;
     //console.log("dg")
     const totalDX = Math.abs(e.clientX - startPos[0]);
@@ -129,14 +135,13 @@ function Steps({ /*steps,*/ logo }) {
     const vx = totalDX / totalTime;
     //console.log("vx", vx)
     if(totalDX > 50 && totalDY < 50 && vx > 0.1){
-      console.log("DELETE", totalDX, vx)
-      setSteps(prevState => prevState
-          .filter(s => s.pos !== step.pos)
-          .map(s => s.pos < step.pos ? s : ({ ...s, pos: s.pos - 1 })))
+      //console.log("DELETE", totalDX, vx)
+      deleteStep(step);
     }
     
   }
   const onDragEnd = (e, step) => {
+    e.stopPropagation();
     console.log("de")
     cleanupDrag();
 
@@ -213,7 +218,7 @@ function Steps({ /*steps,*/ logo }) {
         .on("end", function(_d, j, data){
           //set state when last transition ends
           if(j === data.length - 1){
-            setSteps(prevState => prevState.map(step => ({ ...step, pos: calcNewPos(step.pos) })))
+            updateSteps(steps.map(step => ({ ...step, pos: calcNewPos(step.pos) })))
           }
         })
 
@@ -221,10 +226,14 @@ function Steps({ /*steps,*/ logo }) {
   }
 
   return (
-    <div className='steps-wrapper'>
+    <div className='steps-wrapper' onClick={onClickBg}>
       <div className='section-wrapper'>
         <TitleTemplate title={title} />
-        <div className='section-child-content' style={{ height: steps.length * (stepHeight + 2 * stepMarginVert) }}>
+        <div 
+          className='section-child-content' 
+          style={{ height: steps.length * (stepHeight + 2 * stepMarginVert) }}
+          onClick={onClickBg}
+        >
           {steps.map(step => 
             <div
               datum={JSON.stringify(step)}
@@ -241,7 +250,7 @@ function Steps({ /*steps,*/ logo }) {
               onDragLeave={e => onDragLeave(e, step)}
               onDrop={e => onDrop(e, step)}
             >
-                <StepsItemTemplate key={step.id} value={step.title} status={step.status} logo={logo} />
+                <StepsItemTemplate key={step.id} value={step.title} status={step.status} logo={logo} update={updateStep} />
             </div>
           )}
           {steps.map(step => 
