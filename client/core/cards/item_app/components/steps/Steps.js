@@ -7,24 +7,21 @@ import AddNewTemplate from '../templates/addNew/AddNewTemplate';
 
 import '../../style/components/sections.css';
 import '../../style/components/steps.css';
-
+import uuid from 'react-uuid';
 
 const initSteps = [
-  { pos:0, id:"step-a", title:"step 1", status:"complete" },
-  { pos: 1, id:"step-b", title:"step 2", status:"In Progress" },
-  { pos: 2, id:"step-c", title:"step 3", status:"Todo" }
+  { pos:0, id:"step-a", title:"step 1 - This is a long step to test how it wraps on deifferent devices. Lets have a look at it.", status:"complete" },
+  { pos: 1, id:"step-b", title:"step 2 - This is a medium step to test how ", status:"In Progress" },
+  { pos: 2, id:"step-c", title:"step 3 - a short step", status:"Todo" }
 ]
 
+const createEmptyStep = pos => ({ pos, id:uuid(), title:"", status:"todo" })
+
 /*
-todo - 
- - put RESET code into a reset function
- - remove unused variables eg ref stuff
+todo
  - deploy and test on mobile with touchstart and touchend
- - pass in steps as props, and make update happen in db for order of steps
-  - add and delete steps similarly
-  - add a transition to the initial styles so when added or delete, the rest slide into place
-  
-  */
+ - pass in steps as props, and make update happen in db for order of steps, add and delete
+*/
 
 
 function Steps({ /*steps,*/ logo }) {
@@ -32,7 +29,7 @@ function Steps({ /*steps,*/ logo }) {
   const dragRef = useRef({})
   const longpressRef = useRef({ mouseMoves: 0 })
   const [steps, setSteps] = useState(initSteps);
-  //console.log("Steps...", steps)
+  console.log("Steps...", steps)
   //console.log("longpressRef", longpressRef.current)
   const title = 'Steps';
   const placeholder = 'Add step';
@@ -51,15 +48,20 @@ function Steps({ /*steps,*/ logo }) {
     top:`${calcTop(pos)}px`,
     left:0,
     backgroundColor:"transparent",
+    padding:"0px 5%"
   })
 
   const getStepOverlayStyle = pos => ({
     ...stepStyle,
     top:`${calcTop(pos)}px`,
     left:0,
-    //backgroundColor:"pink",
-    opacity:0.5
+    opacity:0.5,
+    padding:"0px 5%"
   })
+
+  const createStep = () => {
+    setSteps(prevState => [ ...prevState, createEmptyStep(prevState.length) ])
+  }
 
   const cleanupDrag = () => {
     d3.selectAll(".step-overlay")
@@ -88,7 +90,6 @@ function Steps({ /*steps,*/ logo }) {
     longpressRef.current.timer = setTimeout(() => { 
       longpressRef.current.isLongpress = true;
       overlaySelection
-        //.style("background-color","transparent")
         .style("z-index", -1);
 
       stepSelection.style("background-color", "grey");
@@ -101,31 +102,42 @@ function Steps({ /*steps,*/ logo }) {
     clearTimeout(longpressRef.current.timer)
     if(longpressRef.current.isLongpress){
       longpressRef.current.isLongpress = false;
-      longpressRef.current.mouseMoves = 0;
     }
   }
   const onMouseMove = () => {
-    //console.log("mousemove")
-    if(longpressRef.current.timer){
-      longpressRef.current.mouseMoves += 1;
-    }
   }
 
   const onDragStart = (e, step) => {
-    //console.log("ds")
+    //console.log("ds", e.timeStamp)
     const selection = d3.select(e.target);
     dragRef.current.draggedSelection = selection;
     dragRef.current.draggedOrigIndex = step.pos;
+    dragRef.current.startPos = [e.clientX, e.clientY];
+    dragRef.current.startTime = e.timeStamp;
 
     selection.style("background-color", "grey").style("z-index", 0)
     selection.transition().duration(0.01).style("opacity", 0)
 
   }
+
   const onDrag = (e, step) => {
+    const { startPos } = dragRef.current;
     //console.log("dg")
+    const totalDX = Math.abs(e.clientX - startPos[0]);
+    const totalDY = Math.abs(e.clientY - startPos[1]);
+    const totalTime = e.timeStamp - dragRef.current.startTime;
+    const vx = totalDX / totalTime;
+    //console.log("vx", vx)
+    if(totalDX > 50 && totalDY < 50 && vx > 0.1){
+      console.log("DELETE", totalDX, vx)
+      setSteps(prevState => prevState
+          .filter(s => s.pos !== step.pos)
+          .map(s => s.pos < step.pos ? s : ({ ...s, pos: s.pos - 1 })))
+    }
+    
   }
   const onDragEnd = (e, step) => {
-    //console.log("de")
+    console.log("de")
     cleanupDrag();
 
     const selection = d3.select(e.target);
@@ -174,11 +186,7 @@ function Steps({ /*steps,*/ logo }) {
 
     const all = d3.selectAll(".step-wrapper")
     //if new pos is numerically above old pos (ie lower down the list physically), 
-    //then move all that are before new pos numerically down 1 (ie physically up 1)
-    //and...
-    //if newpos is numerically below old pos (ie higher up the list physically),
-    //then move all that are after new pos numerically up one (ie physically down 1)
-
+    //then move all that are before new pos numerically down 1 (ie physically up 1), and opposite
     const { draggedOrigIndex } = dragRef.current;
     const draggedIndexIncreased = draggedNewIndex > draggedOrigIndex;
     const nodeMustShift = pos => 
@@ -216,7 +224,7 @@ function Steps({ /*steps,*/ logo }) {
     <div className='steps-wrapper'>
       <div className='section-wrapper'>
         <TitleTemplate title={title} />
-        <div className='section-child-content' style={{ height: 3 * (stepHeight + 2 * stepMarginVert)}}>
+        <div className='section-child-content' style={{ height: steps.length * (stepHeight + 2 * stepMarginVert) }}>
           {steps.map(step => 
             <div
               datum={JSON.stringify(step)}
@@ -257,7 +265,7 @@ function Steps({ /*steps,*/ logo }) {
           )}
         </div>
       </div>
-      <AddNewTemplate placeholder={placeholder} />
+      <AddNewTemplate placeholder={placeholder} onClick={createStep} />
     </div>
   );
 }
@@ -267,16 +275,3 @@ Steps.defaultProps = {
 }
 
 export default Steps;
-
-/*
-<Draggable 
-              key={`step-${step.id}`}
-              onStart={(e, info) => onDragStart(e, info, step, i)} 
-              onDrag={(e, info) => onDrag(e, info, step, i)} 
-              onStop={(e, info) => onDragEnd(e, info, step, i)}
-              axis="y" position={dragPosition[step.id] || { x:0, y: 0}}>
-              <div className={`handle step-wrapper-${step.id}`} style={getStepStyle(i)}>
-                <StepsItemTemplate key={step.id} value={step.title} status={step.status} logo={logo} />
-              </div>
-            </Draggable>
-*/
