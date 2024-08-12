@@ -20,7 +20,6 @@ function StepsItemTemplate({ step, logo, update, beingEdited }) {
   }
 
   const onChangeText = e => {
-    console.log("change", e.target.value)
     setProperties(prevState => ({ ...prevState, title:e.target.value }));
     update({ ...properties, title:e.target.value });
   }
@@ -38,7 +37,7 @@ function StepsItemTemplate({ step, logo, update, beingEdited }) {
         />
       </div>
       <Input
-            id="desc" onChange={onChangeText} margin="dense" autoFocus 
+            id="desc" onChange={onChangeText} margin="dense" autoFocus
             className={`item-input ${beingEdited ? "item-input-editing" : ""}`}
             disableUnderline value={title} placeholder="Type here..."
             style={{ border: "none", marginBottom:"0px", marginTop:"5px" }}

@@ -11,12 +11,23 @@ import uuid from 'react-uuid';
 
 const createEmptyStep = pos => ({ pos, id:uuid(), title:"", status:"todo" })
 
-function Steps({ steps, logo, updateSteps }) {
+function getLeftAsNumber(step){
+  const currentLeftString = d3.select(`.step-wrapper-${step.pos}`).style("left");
+  return currentLeftString ? Number(currentLeftString.slice(0, currentLeftString.length - 2)) : 0;
+}
 
+function getTopAsNumber(step){
+  const currentTopString = d3.select(`.step-wrapper-${step.pos}`).style("top");
+  return currentTopString ? Number(currentTopString.slice(0, currentTopString.length - 2)) : 0;
+}
+
+
+function Steps({ steps, logo, updateSteps }) {
   const [stepBeingEdited, setStepBeingEdited] = useState("")
   const dragRef = useRef({})
+  const touchRef = useRef({})
   const longpressRef = useRef({ mouseMoves: 0 })
-  console.log("Steps...", steps)
+  //console.log("Steps...", steps)
   const title = 'Steps';
   const placeholder = 'Add step';
   const titleHeight = 80;
@@ -26,6 +37,7 @@ function Steps({ steps, logo, updateSteps }) {
     position:"absolute",
     width:"100%",
     height:`${stepHeight}px`, margin:`${stepMarginVert}px`,
+    touchAction: "none"
   }
 
   const calcTop = pos => stepMarginVert + (pos * stepHeight + stepMarginVert); 
@@ -35,6 +47,9 @@ function Steps({ steps, logo, updateSteps }) {
     left:0,
     backgroundColor:"transparent",
     padding:"0px",
+    transform:"translate(0,0)",
+    opacity:1,
+    zIndex:null
   })
 
   const getStepOverlayStyle = step => ({
@@ -44,7 +59,8 @@ function Steps({ steps, logo, updateSteps }) {
     top:`${calcTop(step.pos)}px`,
     opacity:0.5,
     padding:"0px",
-    display:stepBeingEdited === step.id ? "none" : null
+    display:stepBeingEdited === step.id ? "none" : null,
+    zIndex:1
   })
 
   const createStep = () => { updateSteps([ ...steps, createEmptyStep(steps.length) ]); }
@@ -53,9 +69,10 @@ function Steps({ steps, logo, updateSteps }) {
 
   const cleanupDrag = () => {
     d3.selectAll(".step-overlay")
-      .style("z-index", 1)
+      .style("z-index", null)
     
     d3.selectAll(".step-wrapper")
+      .style("z-index", null)
       .transition("cleanup")
       .duration(200)
         .style("background-color","transparent")
@@ -80,6 +97,7 @@ function Steps({ steps, logo, updateSteps }) {
 
   const onClick = e => {
     //console.log("click step")
+    return;
     cleanupDrag();
     e.stopPropagation();
     e.preventDefault();
@@ -94,6 +112,7 @@ function Steps({ steps, logo, updateSteps }) {
     const overlaySelection = d3.select(e.target);
     const stepSelection = d3.select(`.step-wrapper-${step.id}`)
     longpressRef.current.timer = setTimeout(() => { 
+      //console.log("set lp true")
       longpressRef.current.isLongpress = true;
       overlaySelection
         .style("z-index", -1);
@@ -103,7 +122,6 @@ function Steps({ steps, logo, updateSteps }) {
     }, 500);
   }
   const onMouseUp = e => {
-    //console.log("mu")
     e.stopPropagation();
     //console.log("mu")
     d3.select(e.target)
@@ -122,7 +140,7 @@ function Steps({ steps, logo, updateSteps }) {
     const selection = d3.select(e.target);
     dragRef.current.draggedSelection = selection;
     dragRef.current.draggedOrigIndex = step.pos;
-    dragRef.current.startPos = [e.clientX, e.clientY];
+    dragRef.current.startCoods = [e.clientX, e.clientY];
     dragRef.current.startTime = e.timeStamp;
 
     selection.style("background-color", "grey").style("z-index", 0)
@@ -132,15 +150,13 @@ function Steps({ steps, logo, updateSteps }) {
 
   const onDrag = (e, step) => {
     e.stopPropagation();
-    const { startPos } = dragRef.current;
+    const { startCoods } = dragRef.current;
     //console.log("dg")
-    const totalDX = Math.abs(e.clientX - startPos[0]);
-    const totalDY = Math.abs(e.clientY - startPos[1]);
+    const totalDX = e.clientX - startCoods[0];
+    const totalDY = e.clientY - startCoods[1];
     const totalTime = e.timeStamp - dragRef.current.startTime;
     const vx = totalDX / totalTime;
-    //console.log("vx", vx)
-    if(totalDX > 50 && totalDY < 50 && vx > 0.1){
-      //console.log("DELETE", totalDX, vx)
+    if(Math.abs(totalDX) > 50 && Math.abs(totalDY) < 50 && Math.abs(vx) > 0.1){
       deleteStep(step);
     }
     
@@ -230,6 +246,158 @@ function Steps({ steps, logo, updateSteps }) {
     cleanupDrag();
   }
 
+  const cleanupTouch = () => {
+    touchRef.current = {};
+    longpressRef.current.isLongpress = false;
+    d3.selectAll(".step-wrapper").style("background-color", "transparent").style("z-index", null)
+    d3.selectAll(".step-wrapper-overlay").style("z-index", null)
+  }
+
+  const onTouchStart = (e, step) => {
+    //console.log("touchstart overlay")
+    e.stopPropagation();
+    e.preventDefault();
+    d3.selectAll(".step-wrapper").style("background-color", "transparent")
+    //cleanupDrag();
+    //console.log("touch", e.timeStamp, touch)
+    const overlaySelection = d3.select(e.target);
+    const stepSelection = d3.select(`.step-wrapper-${step.id}`)
+    const selection = d3.select(e.target);
+
+    longpressRef.current.timer = setTimeout(() => { 
+      longpressRef.current.isLongpress = true;
+      overlaySelection.style("z-index", 1);
+      stepSelection
+        .style("z-index", 1)
+        .style("background-color", "grey");
+    }, 500);
+  }
+  const onTouchMove = (e, step) => {
+    //console.log("touchmove overlay")
+    e.stopPropagation();
+    const touch = e.touches[0];
+
+    if(longpressRef.current.isLongpress && !touchRef.current.startCoods){
+      //console.log("set start pos for drag")
+      touchRef.current.origPos = step.pos;
+      touchRef.current.startCoods = [touch.clientX, touch.clientY];
+      touchRef.current.startTime = e.timeStamp;
+      touchRef.current.stepOrigLeft = getLeftAsNumber(step);
+      touchRef.current.stepOrigTop = getTopAsNumber(step);
+      touchRef.current.nrEvents = 1;
+      return;
+    }
+    touchRef.current.nrEvents += 1;
+    const { nrEvents, startCoods, stepOrigLeft, stepOrigTop, startTime, origPos, prevPos, prevPosWasValidChange } = touchRef.current;
+    const overlaySelection = d3.select(touch.target);
+    const stepSelection = d3.select(`.step-wrapper-${step.id}`);
+    const totalDX = touch.clientX - startCoods[0];
+    const totalDY = touch.clientY - startCoods[1];
+    const totalTime = e.timeStamp - touchRef.current.startTime;
+    //@todo - calc velocity from the last few events only, so user can press and hold for ages before deleting
+    const vx = totalDX / totalTime;
+    stepSelection
+      .style("left", `${stepOrigLeft + totalDX}px`)
+      .style("top", `${stepOrigTop + totalDY}px`);
+
+    //console.log("ev dx dy vx",nrEvents, totalDX, totalDY, vx)
+    if(Math.abs(totalDX) > 100 && Math.abs(totalDY) < 50 && Math.abs(vx) > 0.1){
+      //console.log("DELETE------------------------", step)
+      cleanupTouch();
+      deleteStep(step);
+      return;
+    }
+
+    const newPos = origPos + Math.round(totalDY / stepHeight);
+    //console.log("newPos", newPos)
+    //check if no change
+    if(prevPos === newPos){ return; }
+    //helper
+    const newPosIsValidChange = newPos !== origPos && newPos !== prevPos && steps[newPos];
+    //remove highlight from old (if it was a valid pos)
+    if(prevPosWasValidChange){
+      d3.select(`.step-wrapper-${prevPos}`).style("background-color", "transparent")
+    }
+    //add highlight to new (if it is a valid pos)
+    if(newPosIsValidChange){
+      d3.select(`.step-wrapper-${newPos}`).style("background-color", "#F5F5F5")
+    }
+    //update ref
+    touchRef.current.prevPos = newPos;
+    touchRef.current.prevPosWasValidChange = newPosIsValidChange;
+  }
+
+  const onTouchEnd = (e, step) => {
+    //console.log("touchend overlay")
+    e.preventDefault();
+    e.stopPropagation();
+    clearTimeout(longpressRef.current.timer)
+    if(!longpressRef.current.isLongpress){
+      setStepBeingEdited(step.id);
+      return;
+    }
+
+    const { startCoods, stepOrigTop, startTime, origPos, prevPos, prevPosWasValidChange } = touchRef.current;
+    if(prevPosWasValidChange){
+      const draggedNewPos = prevPos;
+      const draggedOrigPos = origPos;
+
+      const posDelta = draggedNewPos - origPos;
+      const draggedPosIncreased = draggedNewPos > origPos;
+      const nodeMustShift = pos => 
+        (draggedPosIncreased && pos <= draggedNewPos && pos > draggedOrigPos) || 
+        (!draggedPosIncreased && pos >= draggedNewPos && pos < draggedOrigPos);
+  
+      const numericalShiftDirection = draggedPosIncreased ? "down" : "up";
+  
+      const calcNewPos = step => {
+        if(step.pos === draggedOrigPos){ return draggedNewPos; }
+        if(!nodeMustShift(step.pos)){ return step.pos; }
+        return numericalShiftDirection === "up" ? step.pos + 1 : step.pos - 1;
+      }
+
+      const calcNewTopForStep = step => {
+        const currentTop = getTopAsNumber(step)
+        //the dragged step
+        if(step.pos === draggedOrigPos){ 
+          return stepOrigTop + (posDelta * stepHeight)
+        }
+        //other steps that don't have to move
+        if(!nodeMustShift(step.pos)){ return currentTop; }
+        //other steps that do need to move
+        return numericalShiftDirection === "up" ? currentTop + stepHeight : currentTop - stepHeight;
+      }
+
+      d3.selectAll(".step-wrapper")
+          .transition()
+          .duration(500)
+            .style("background-color", "transparent")
+            .style("left", 0)
+            .style("top", function(){
+              const step = JSON.parse(d3.select(this).attr("datum"))
+              return `${calcNewTopForStep(step)}px`
+            })
+            .on("end", function(_d, j, data){
+              //set state when last transition ends
+              if(j === data.length - 1){
+                cleanupTouch();
+                updateSteps(steps.map(step => ({ ...step, pos: calcNewPos(step) })))
+              }
+            })
+    } else {
+      //@todo - add transition onto the React render instead, but only want it on update, not init render
+      d3.select(`.step-wrapper-${step.pos}`)
+        .transition()
+        .duration(200)
+          .style("background-color", "transparent")
+          .style("top", `${stepOrigTop}px`)
+          .on("end", function(){
+            cleanupTouch();
+            updateSteps(steps);
+          })
+    }
+  }
+
   return (
     <div className='steps-wrapper' onClick={onClickBg}>
       <div className='section-wrapper'>
@@ -242,7 +410,7 @@ function Steps({ steps, logo, updateSteps }) {
           {steps.map(step => 
             <div
               datum={JSON.stringify(step)}
-              className={`handle step-wrapper step-wrapper-${step.id}`} 
+              className={`handle step-wrapper step-wrapper-${step.id} step-wrapper-${step.pos}`} 
               style={getStepStyle(step)}
               key={`step-${step.id}`}
               onClick={onClick}
@@ -263,7 +431,7 @@ function Steps({ steps, logo, updateSteps }) {
           )}
           {steps.map(step => 
             <div
-              key={`step-overlay step-overlay-${step.id}`}
+              key={`step-overlay step-overlay-${step.id} step-overlay-${step.pos}`}
               datum={JSON.stringify(step)}
               className={`step-overlay step-overlay-${step.id}`}
               style={getStepOverlayStyle(step)}
@@ -271,8 +439,11 @@ function Steps({ steps, logo, updateSteps }) {
               onMouseDown={e => onMouseDown(e, step)}
               onMouseUp={onMouseUp}
               onMouseMove={onMouseMove}
-              onTouchStart={e => onMouseDown(e, step)}
-              onTouchEnd={onMouseUp}
+
+              onTouchStart={e => onTouchStart(e, step)}
+              onTouchMove={e => onTouchMove(e, step)}
+              onTouchEnd={e => onTouchEnd(e, step)}
+
               onDragEnter={e => onDragEnter(e, step, true)} 
               onDragOver={e => onDragOver(e, step, true)} 
               onDragLeave={e => onDragLeave(e, step, true)}

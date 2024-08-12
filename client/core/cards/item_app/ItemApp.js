@@ -8,16 +8,9 @@ import Attachments from './components/attachments/Attachments';
 import './item-index.css';
 import './style/components/item-app.css';
 
-/*const initSteps = [
-  { pos:0, id:"step-a", title:"step 1 - This is a long step to test how it wraps on deifferent devices. Lets have a look at it.", status:"complete" },
-  { pos: 1, id:"step-b", title:"step 2 - This is a medium step to test how ", status:"In Progress" },
-  { pos: 2, id:"step-c", title:"step 3 - a short step", status:"Todo" }
-]*/
-
 function ItemApp({ screen, item, cardTitle, save, close, logo }) {
   const [properties, setProperties] = useState(item);
   const { steps, stats, attachments, people, section } = properties;
-  //console.log("Item steps", steps)
   const updateSteps = steps => {
     console.log("updateSteps", steps)
     setProperties(prevState => ({ ...prevState, steps })) 
