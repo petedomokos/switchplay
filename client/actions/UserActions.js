@@ -289,11 +289,9 @@ export const createDeck = (user, options, tableId) => dispatch => {
 }
 
 export const updateDeck = (deck, shouldPersist=true) => dispatch => {
-	console.log("updateDeck.....................................", deck)
+	//console.log("updateDeck.....................................", deck)
 	//update in store
 	dispatch({ type:C.UPDATE_DECK, deck });
-
-	return;
 	if(!shouldPersist || deck.isMock){ return; }
 
 	const jwt = auth.isAuthenticated();

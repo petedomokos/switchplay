@@ -95,6 +95,12 @@ function Steps({ steps, logo, updateSteps }) {
     setStepBeingEdited(step.id);
   }
 
+  /*
+  next - bug - on mobile, when typing 2nd step (of 3), it jumps to 3rd pos and 3rd one stays there too!!!
+  also the http redirect is crucial, it has to work!!!!!
+
+  */
+
   const onClick = e => {
     //console.log("click step")
     return;
@@ -372,7 +378,7 @@ function Steps({ steps, logo, updateSteps }) {
           .transition()
           .duration(500)
             .style("background-color", "transparent")
-            .style("left", 0)
+            .style("left", "0px")
             .style("top", function(){
               const step = JSON.parse(d3.select(this).attr("datum"))
               return `${calcNewTopForStep(step)}px`
@@ -390,6 +396,7 @@ function Steps({ steps, logo, updateSteps }) {
         .transition()
         .duration(200)
           .style("background-color", "transparent")
+          .style("left", "0px")
           .style("top", `${stepOrigTop}px`)
           .on("end", function(){
             cleanupTouch();
