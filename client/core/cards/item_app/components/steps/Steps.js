@@ -95,12 +95,6 @@ function Steps({ steps, logo, updateSteps }) {
     setStepBeingEdited(step.id);
   }
 
-  /*
-  next - bug - on mobile, when typing 2nd step (of 3), it jumps to 3rd pos and 3rd one stays there too!!!
-  also the http redirect is crucial, it has to work!!!!!
-
-  */
-
   const onClick = e => {
     //console.log("click step")
     return;
