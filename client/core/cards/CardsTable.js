@@ -63,7 +63,7 @@ const useStyles = makeStyles((theme) => ({
     //border:"solid",
     borderColor:"red",
     borderWidth:"thin",
-    touchAction: "none"
+    //touchAction: "none"
   },
   hideInstructions:{
     margin:"25px 5px",
@@ -255,8 +255,8 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   }, [stringifiedData, form, selectedDeckId, timeframeKey]);
 
   const preventPropagationAndDefault = e => {
-    e.preventDefault();
-    e.stopPropagation();
+    //e.preventDefault();
+    //e.stopPropagation();
   } 
   return (
     <div className={classes.container}>
