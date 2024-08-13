@@ -254,9 +254,14 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
     }
   }, [stringifiedData, form, selectedDeckId, timeframeKey]);
 
+  /*
+  next - I cant quit get teh right combo o fthis function and touchAction so that scrolling of url doesnt happen,
+  but touch events on buttons here do happen. Its the preventDefault that stops the buttons working.
+
+  */
   const preventPropagationAndDefault = e => {
     //e.preventDefault();
-    //e.stopPropagation();
+    e.stopPropagation();
   } 
   return (
     <div className={classes.container}>
