@@ -19,13 +19,16 @@ const timeframeOptions = {
 } 
 
 const useStyles = makeStyles((theme) => ({
-  outerRoot:{
+  container:{
     width:"100vw",
     height:"100vh",
     position:"relative",
-    overflow:props => props.overflow
+    overflow:props => props.overflow,
+    border:"solid",
+    borderColor:"white",
+    borderWidth:"thin"
   },
-  root: {
+  canvas: {
     position: "absolute",
     left:props => props.left,
     top:props => props.top,
@@ -46,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
     width:props => `${props.tableContents.width}px`,
     height:props => `${props.tableContents.height}px`,
     transition: `top ${TRANSITIONS.MED}ms`,
-    border:"solid",
+    //border:"solid",
     borderColor:"yellow",
     borderWidth:"thin"
   },
@@ -57,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
     width:props => `${props.decksContents.width}px`,
     height:props => `${props.decksContents.height}px`,
     transition: `top ${TRANSITIONS.MED}ms`,
-    border:"solid",
+    //border:"solid",
     borderColor:"red",
     borderWidth:"thin"
   },
@@ -154,8 +157,8 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   const width = screen.width || 300;
   const height = screen.height || 600;
 
-  const containerWidth = 100000;
-  const containerHeight = 100000;
+  const canvasWidth = 100000;
+  const canvasHeight = 100000;
 
   //we follow d3 margin convention here (eg html padding)
   //NOTE: WIDTH < HEIGHT TEMP FIXES A BUG WITH CARDTITLEFORM POSITIONING ON LARGER SCREENS
@@ -194,14 +197,14 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
 
   let styleProps = {
     overflow:form ? null : "hidden",
-    left: -containerWidth/2,
-    top: -containerHeight/2,
-    width: containerWidth,
-    height: containerHeight,
+    left: -canvasWidth/2,
+    top: -canvasHeight/2,
+    width: canvasWidth,
+    height: canvasHeight,
     //padding:`${margin.top}px ${margin.right}px  ${margin.bottom}px  ${margin.left}px`,
     tableContents:{
-      left: containerWidth/2,
-      top: containerHeight/2,
+      left: canvasWidth/2,
+      top: canvasHeight/2,
       width,
       height
     },
@@ -221,8 +224,6 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   };
 
   const classes = useStyles(styleProps) 
-  const containerRef = useRef(null);
-  const instructionsRef = useRef(null);
 
   const onCreateDeck = useCallback((options={}) => {
     //@todo -in settings in Decks, give option to assign a different player or a group to the deck instead of the user
@@ -252,8 +253,8 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   }, [stringifiedData, form, selectedDeckId, timeframeKey]);
 
   return (
-    <div className={classes.outerRoot}>
-      <div className={classes.root} onClick={() => { setSelectedDeckId("") }}>
+    <div className={classes.container}>
+      <div className={classes.canvas} onClick={() => { setSelectedDeckId("") }}>
         <div className={classes.tableContents}>
           {!selectedDeckId && <TableHeader dimns={{ 
               padding: { left:10, right:10, top:tableHeaderHeight * 0.1, bottom:tableHeaderHeight * 0.1 },
