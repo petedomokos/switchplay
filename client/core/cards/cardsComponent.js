@@ -585,7 +585,7 @@ export default function cardsComponent() {
                             //.call(fadeInOut, cardsAreFlipped);
                         
                         //const headerHeight;
-                        const cardTitleIsBeingEdited = form?.formType !== "card-title" && form?.value?.cardNr === cardD.cardNr;
+                        const cardTitleIsBeingEdited = form?.formType === "card-title" && form?.value?.cardNr === cardD.cardNr;
                         //component colours
                         //in section view, pos for all cads is overwritten to be 0
                         const _cardD = { ...cardD, pos: selectedSectionKey ? 0 : cardD.pos }
