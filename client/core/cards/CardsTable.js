@@ -27,7 +27,6 @@ const useStyles = makeStyles((theme) => ({
     //border:"solid",
     borderColor:"white",
     borderWidth:"thin",
-    touchAction: "none"
   },
   canvas: {
     position: "absolute",
@@ -52,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
     transition: `top ${TRANSITIONS.MED}ms`,
     //border:"solid",
     borderColor:"yellow",
-    borderWidth:"thin"
+    borderWidth:"thin",
   },
   decksContents:{
     position:"absolute",
@@ -63,7 +62,8 @@ const useStyles = makeStyles((theme) => ({
     transition: `top ${TRANSITIONS.MED}ms`,
     //border:"solid",
     borderColor:"red",
-    borderWidth:"thin"
+    borderWidth:"thin",
+    touchAction: "none"
   },
   hideInstructions:{
     margin:"25px 5px",
@@ -254,6 +254,10 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
     }
   }, [stringifiedData, form, selectedDeckId, timeframeKey]);
 
+  const preventPropagationAndDefault = e => {
+    e.preventDefault();
+    e.stopPropagation();
+  } 
   return (
     <div className={classes.container}>
       <div className={classes.canvas} onClick={() => { setSelectedDeckId("") }}>
@@ -268,7 +272,15 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
             nrTimeframeOptions={atLeastOnePlayer ? 2 : 1}
             toggleTimeframe={toggleTimeframe}
           />}
-          <div className={classes.decksContents}>
+          <div 
+            className={classes.decksContents}
+            onTouchStart={preventPropagationAndDefault}
+            onTouchMove={preventPropagationAndDefault}
+            onTouchEnd={preventPropagationAndDefault}
+            onDragStart={preventPropagationAndDefault}
+            onDrag={preventPropagationAndDefault}
+            onDragEnd={preventPropagationAndDefault}
+          >
             {shouldDisplayInstructions ?  
               <Instructions />
               :
