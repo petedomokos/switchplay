@@ -11,7 +11,8 @@ body{
   -webkit-user-select: none;
   user-select: none;
   /*background:#FF825C;*/
-  background:none; /*#DBEFF0;*/
+  /*background:none;*/ /*#DBEFF0;*/
+  background:#181818;
   width: 100%;
   /*-webkit-text-size-adjust: none;*/
 }

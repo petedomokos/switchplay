@@ -166,8 +166,8 @@ const useStyles = makeStyles(theme => ({
 const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, requestDemo, onSignout, history, dialogs, savedDialog, closeDialog, demoForm, showDemoForm, closeDemoForm, mobileMenu, setMobileMenu }) => {
   ////DBEFF0
   const styleProps = { 
-    appHeight: userId ? "100vh" : "120vh",
-    appBg: history.location.pathname === "/" ? COLOURS.banner.bg : "#DBEFF0"/*"#f0ded5"*/ 
+    appHeight: userId ? "calc(100vh - 100px)" : "120vh",
+    appBg:userId ? "blue" : (history.location.pathname === "/" ? COLOURS.banner.bg : "#DBEFF0")
   }
   const classes = useStyles(styleProps);
   const jwt = auth.isAuthenticated();
