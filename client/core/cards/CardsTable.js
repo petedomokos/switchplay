@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     left:props => props.left,
     top:props => props.top,
     width:props => props.width,
-    height:props => props.height,
+    height:props => props.height * 0.8,
     //margin:"30px",
     //padding:props => props.padding,
     transition: `all ${TRANSITIONS.MED}ms`,
@@ -38,23 +38,28 @@ const useStyles = makeStyles((theme) => ({
     //flexDirection:"column",
     background:COLOURS.CARDS_TABLE,
     overflow:"scroll",
-    //border:"solid",
-    //borderColor:"yellow"
-    //borderWidth:"thin",
   },
   tableContents:{
     position:"absolute",
     left:props => props.tableContents.left,
     top:props => props.tableContents.top,
-    width:"200px",
-    height:"200px",
+    width:props => `${props.tableContents.width}px`,
+    height:props => `${props.tableContents.height}px`,
     transition: `top ${TRANSITIONS.MED}ms`,
+    border:"solid",
+    borderColor:"yellow",
+    borderWidth:"thin"
   },
   decksContents:{
     position:"absolute",
     left:props => props.decksContents.left,
     top:props => props.decksContents.top,
+    width:props => `${props.decksContents.width}px`,
+    height:props => `${props.decksContents.height}px`,
     transition: `top ${TRANSITIONS.MED}ms`,
+    border:"solid",
+    borderColor:"red",
+    borderWidth:"thin"
   },
   hideInstructions:{
     margin:"25px 5px",
@@ -145,6 +150,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   const tableDecks = table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
   const stringifiedTableAndDecks = JSON.stringify({ table, tableDecks });
 
+  console.log("screen", screen)
   const width = screen.width || 300;
   const height = screen.height || 600;
 
@@ -196,10 +202,14 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
     tableContents:{
       left: containerWidth/2,
       top: containerHeight/2,
+      width,
+      height
     },
     decksContents:{
       left: margin.left + (screen.width - width)/2,
       top: margin.top,
+      width,
+      height:height - tableHeaderHeight - 5
     },
     form:{ 
       display: form ? null : "none",
@@ -264,7 +274,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
                 table={table} setSel={onSetSelectedDeckId} nrCols={nrCols} deckWidthWithMargins={deckWidthWithMargins} 
                 datasets={datasets}
                 logo={logo}
-                data={decksData} height={contentsHeight} heightInSelectedDeckMode={selectedDeckContentsHeight}
+                data={decksData} height={contentsHeight * 0.8} heightInSelectedDeckMode={selectedDeckContentsHeight}
                 groupingTag={groupingTag} timeframeKey={timeframeKey}
                 tableMarginTop={tableMarginTop}
                 onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={handleUpdateDeck}

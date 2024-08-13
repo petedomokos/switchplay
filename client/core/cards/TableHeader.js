@@ -12,7 +12,7 @@ const useStyles = makeStyles(theme => ({
         position:"absolute",
         //left:props => props.left,
         //top:0,
-        width:props => `${props.width}px`,
+        width:props => `${props.width - 2.5}px`, //@todo - remove this 2.5 - shouldnt be needed
         height:props => `${props.height}px`,
         padding:props => `${props.padding.top}px ${props.padding.right}px ${props.padding.bottom}px ${props.padding.left}px`,
         display:"flex",
