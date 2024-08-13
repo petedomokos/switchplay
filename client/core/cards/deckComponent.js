@@ -474,7 +474,7 @@ export default function deckComponent() {
                 const contextMenuWidth = nrItems * CONTEXT_MENU_ITEM_WIDTH + (nrItems - 1) * CONTEXT_MENU_ITEM_GAP + menuMargin.left + menuMargin.right;
                 const contextMenuHeight = CONTEXT_MENU_ITEM_HEIGHT + menuMargin.top + menuMargin.bottom;
     
-                const gapBetweenDeckAndMenu = rowNr === 0 ? -10 : 10;
+                const gapBetweenDeckAndMenu = rowNr === 0 ? -60 : 10;
                 contextMenuG
                     .attr("transform", `translate(${(width - contextMenuWidth)/2},${-contextMenuHeight - gapBetweenDeckAndMenu})`)
                 

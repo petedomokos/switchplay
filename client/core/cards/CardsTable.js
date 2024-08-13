@@ -84,7 +84,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   const stringifiedDecks = JSON.stringify(decks);
 
   //next - find where kpi values are added, and adjust so they are not all completed
-  console.log("CardsTable", user)
+  //console.log("CardsTable", user)
   //console.log("datasets", datasets)
   // @todo - move creating flag to asyncProcesses
   // helper consts

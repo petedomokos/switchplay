@@ -258,7 +258,7 @@ export default function cardsComponent() {
             const getMainItemStrokeWidth = (cardD, itemD) => {
                 const { status, isSectionView, title } = itemD;
                 const { isHeld, isSelected } = cardD;
-                if(!title){ return 0.15 }
+                if(!title && !isHeld){ return 2 }
                 if(deckIsSelected){
                     if(isHeld || isSelected){
                         return status === 2 ? 1 : 0.8;//(status === 1 ? 0.8 : 0.2);
@@ -299,6 +299,8 @@ export default function cardsComponent() {
                 //console.log("getItemColor", cardD.cardNr, itemD.itemNr, linePartNr)
                 //const { isSelected, isFront, isNext, isSecondNext, info } = cardD;
                 const { status, title, isSectionView } = itemD;
+
+                //if(!title) { return "red"}
 
                 const NOT_STARTED_COLOUR = isSectionView ? SECTION_VIEW_NOT_STARTED_FILL : NOT_STARTED_FILL;
 
@@ -1048,7 +1050,7 @@ export default function cardsComponent() {
             cardG.exit().call(remove);
 
             function dragged(e , d){
-                //console.log("drg")
+                //console.log("drg", swipeTriggered)
                 if(d.isSelected){ return; }
                 if(swipeTriggered){ return; }
                 //bug next - this is 0 when swiping down on items 4/5 -> need to look at teh drag handler inside cardItems, why dy is 0
@@ -1082,7 +1084,8 @@ export default function cardsComponent() {
                     //const cardNode = containerG.select(`g.card-${cardD.cardNr}`).node();
                     //console.log("calling pickup1......")
                     //onPickUp.call(cardNode, cardD);
-                    onPickUp(cardD)
+                    onPickUp(cardD);
+                    cleanUp();
                     
                 }
                 //CASE 3 - A HELD CARD IS DRAGGED UP -> pick up the next card
@@ -1093,23 +1096,25 @@ export default function cardsComponent() {
                     //const cardNode = containerG.select(`g.card-${cardD.cardNr}`).node();
                     //console.log("calling pickup2.........")
                     //onPickUp.call(cardNode, cardD);
-                    onPickUp(cardD)
+                    onPickUp(cardD);
+                    cleanUp();
                 }
                 if(swipeDirection === "down" && cardD.isHeld){
                     swipeTriggered = true;
                     //const cardNode = containerG.select(`g.card-${cardD.cardNr}`).node();
                     //console.log("calling putdown1.......", cardNode)
                     onPutDown(cardD);
+                    cleanUp();
                 }
                 if(swipeDirection === "down" && !cardD.isHeld){
                     swipeTriggered = true;
                     //const cardNode = containerG.select(`g.card-${cardD.cardNr}`).node();
                     //console.log("calling putdown2.....", cardNode)
                     onPutDown(frontCard);
+                    cleanUp();
                 }
                 //cleanup here because dragEnd seems to not be called sometimes - an update cuts off the drag handling
                 //@todo - fix the issue above properly
-                //cleanUp();
             }
 
             function dragEnd(e, d){

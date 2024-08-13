@@ -234,7 +234,6 @@ export default function cardItemsComponent() {
 
             function longpressStart(e,d){
                 console.log("lpstart")
-                return;
                 if(!editable || !d.title){ return; }
                 d3.select(this).raise();
                 const changeStatus = (prevStatus) => {
