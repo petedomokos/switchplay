@@ -41,7 +41,8 @@ const useStyles = makeStyles((theme) => ({
     height:props => props.height,
    //border:"solid",
     //borderWidth:"thin",
-    borderColor:"red"
+    borderColor:"red",
+    touchAction: "none"
   },
   keyPhrase:{
     color:grey10(1)
