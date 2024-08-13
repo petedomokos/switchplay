@@ -27,6 +27,7 @@ const useStyles = makeStyles((theme) => ({
     //border:"solid",
     borderColor:"white",
     borderWidth:"thin",
+    touchAction: "none"
   },
   canvas: {
     position: "absolute",

@@ -42,7 +42,6 @@ const useStyles = makeStyles((theme) => ({
    //border:"solid",
     //borderWidth:"thin",
     borderColor:"red",
-    touchAction: "none"
   },
   keyPhrase:{
     color:grey10(1)
@@ -912,20 +911,9 @@ const itemPeople = selectedDeck && form?.formType === "item" ? [
   selectedDeck.photoURL
  ] : []
 
-const preventPropagationAndDefault = e => {
-  e.preventDefault();
-  e.stopPropagation();
-} 
-
   return (
     <div className={`cards-root ${classes.root}`} 
       onClick={onClickBg}
-      onTouchStart={preventPropagationAndDefault}
-      onTouchMove={preventPropagationAndDefault}
-      onTouchEnd={preventPropagationAndDefault}
-      onDragStart={preventPropagationAndDefault}
-      onDrag={preventPropagationAndDefault}
-      onDragEnd={preventPropagationAndDefault}
     >
       {data.map(deckData => 
         <div key={`cell-${deckData.id}`} className={classes.cell} style={{ left: cellX(deckData), top: cellY(deckData) }}></div>
