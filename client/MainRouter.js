@@ -166,8 +166,8 @@ const useStyles = makeStyles(theme => ({
 const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, requestDemo, onSignout, history, dialogs, savedDialog, closeDialog, demoForm, showDemoForm, closeDemoForm, mobileMenu, setMobileMenu }) => {
   ////DBEFF0
   const styleProps = { 
-    appHeight: userId ? "calc(100vh - 100px)" : "120vh",
-    appBg:userId ? "blue" : (history.location.pathname === "/" ? COLOURS.banner.bg : "#DBEFF0")
+    appHeight: userId ? `calc(100vh - ${screen?.urlBarHeight || 0}px)` : "120vh",
+    appBg:userId ? "transparent" : (history.location.pathname === "/" ? COLOURS.banner.bg : "#DBEFF0")
   }
   const classes = useStyles(styleProps);
   const jwt = auth.isAuthenticated();
@@ -197,7 +197,8 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
           isSmall:["sm", "xs"].includes(size),
           isMedium:size === "md",
           isMediumDown:["md", "sm", "xs"].includes(size),
-          isMediumUp:["md", "lg", "xl"].includes(size)
+          isMediumUp:["md", "lg", "xl"].includes(size),
+          urlBarHeight:["sm", "xs"].includes(size) ? 70 : 0
         }
         //legacy - store it on window too
         window._screen = newScreen;

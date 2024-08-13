@@ -18,20 +18,13 @@ const timeframeOptions = {
   singleDeck:{ key:"singleDeck", label:"Next Steps" }
 } 
 
-/*
-next - check height:100% instead of 100vh for container
-then - remove a fixed amount from the tableContentsHeight (is screen.height - fixedamountForURL)
-and test for noth chrome and safari on both phones
-
-next - tidy up  we have appBg and height in mainRouter too , also subtracts the urlbarheight - refactor
-*/
 const useStyles = makeStyles((theme) => ({
   container:{
     width:"100vw",
     height:props => `calc(100vh - ${props.urlBarHeight}px)`,
     position:"relative",
     overflow:props => props.overflow,
-    border:"solid",
+    //border:"solid",
     borderColor:"white",
     borderWidth:"thin",
   },
@@ -160,10 +153,9 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   const tableDecks = table?.decks.map(id => decks.find(d => d.id === id)).filter(d => d) || [];
   const stringifiedTableAndDecks = JSON.stringify({ table, tableDecks });
 
-  console.log("screen", screen)
-  const urlBarHeight = 100;
+  //console.log("screen", screen)
   const width = screen.width || 300;
-  const height = screen.height - urlBarHeight || 600;
+  const height = screen.height - screen.urlBarHeight || 600;
 
   const canvasWidth = 100000;
   const canvasHeight = 100000;
@@ -204,7 +196,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   //const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
 
   let styleProps = {
-    urlBarHeight,
+    urlBarHeight:screen.urlBarHeight,
     overflow:form ? null : "hidden",
     left: -canvasWidth/2,
     top: -canvasHeight/2,
