@@ -18,10 +18,18 @@ const timeframeOptions = {
   singleDeck:{ key:"singleDeck", label:"Next Steps" }
 } 
 
+/*
+next - check height:100% instead of 100vh for container
+then - remove a fixed amount from the tableContentsHeight (is screen.height - fixedamountForURL)
+and test for noth chrome and safari on both phones
+
+
+
+*/
 const useStyles = makeStyles((theme) => ({
   container:{
     width:"100vw",
-    height:"100vh",
+    height:"100%",
     position:"relative",
     overflow:props => props.overflow,
     border:"solid",
