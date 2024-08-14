@@ -21,10 +21,10 @@ const timeframeOptions = {
 const useStyles = makeStyles((theme) => ({
   container:{
     width:"100vw",
-    height:"110vh",//props => `calc(100vh - ${props.urlBarHeight}px)`,
+    height:props => `calc(100vh - ${props.urlBarHeight}px)`,
     position:"relative",
     overflow:props => props.overflow,
-    border:"solid",
+    //border:"solid",
     borderColor:"white",
     borderWidth:"thin",
   },
@@ -265,12 +265,14 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
 
   */
   const onTouchEvent = e => {
-    const className = d3.select(e.target).attr("class") || "";
-    const isBtn = className.includes("interactive") || className.includes("btn");
-    console.log("touchev", e.target.nodeName, className, isBtn, e.target)
-    //console.log("isBtn", isBtn)
-    alert(`${isBtn}-${e.target.nodeName} -${className}`);
-    if(!isBtn){
+    const { target } = e;
+    const { nodeName } = target;
+    const className = d3.select(target).attr("class") || "";
+    const isInteractive = className.includes("interactive") || className.includes("btn") || className.includes("icon") 
+      || ["svg", "rect", "circle", "path", "polygon"].includes(nodeName)
+    console.log("touchev", isInteractive, nodeName, className, target)
+    alert(`${isInteractive}-${nodeName} -${className}`);
+    if(!isInteractive){
       preventPropagationAndDefault(e);
     }
   }
@@ -279,13 +281,13 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
     e.stopPropagation();
   } 
   return (
-    <div className={classes.container}
+    <div className={`${classes.container} container`}
       onTouchStart={onTouchEvent}
       onTouchMove={onTouchEvent}
       onTouchEnd={onTouchEvent}
     >
-      <div className={classes.canvas} onClick={() => { setSelectedDeckId("") }}>
-        <div className={classes.tableContents}>
+      <div className={`${classes.canvas} canvas`} onClick={() => { setSelectedDeckId("") }}>
+        <div className={`${classes.tableContents} table-contents`}>
           {!selectedDeckId && <TableHeader dimns={{ 
               padding: { left:10, right:10, top:tableHeaderHeight * 0.1, bottom:tableHeaderHeight * 0.1 },
               width:width, 
@@ -296,8 +298,8 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
             nrTimeframeOptions={atLeastOnePlayer ? 2 : 1}
             toggleTimeframe={toggleTimeframe}
           />}
-          {/**<div 
-            className={classes.decksContents}
+          <div 
+            className={`${classes.decksContents} decks-contents`}
             onTouchStart={onTouchEvent}
             onTouchMove={onTouchEvent}
             onTouchEnd={onTouchEvent}
@@ -316,7 +318,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
                 onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={handleUpdateDeck}
                 updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />
             }
-          </div>*/}
+          </div>
         </div>
       </div>
     </div>

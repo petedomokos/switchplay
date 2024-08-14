@@ -268,7 +268,7 @@ export default function decksComponent() {
                 const newDeckIconG = containerG.selectAll("g.new-deck-icon").data(newDeckIconData)
                 newDeckIconG.enter()
                     .append("g")
-                        .attr("class", "new-deck-icon")
+                        .attr("class", "new-deck-icon btn")
                         .attr("pointer-events", "all") //override pointer-events none for containerG
                         //@todo: replce the hardcoded * 1.5 with proper delay so it fades in with cards
                         .call(fadeIn, { transition:{ delay:TRANSITIONS.MED * 1.5 } }) 
@@ -284,6 +284,7 @@ export default function decksComponent() {
                                 .attr("stroke-width", 0.2)
 
                             wordsG.append("rect")
+                                .attr("class", "btn")
                                 .attr("fill", "transparent");
 
                             const iconG = newDeckIconG.append("g").attr("class", "icon")

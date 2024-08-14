@@ -767,14 +767,14 @@ export default function cardsComponent() {
                         const botRightBtnG = contentsG.selectAll("g.card-bottom-right-btn").data(botRightBtnData, d => d.key);
                         botRightBtnG.enter()
                             .append("g")
-                                .attr("class", "card-bottom-right-btn")
+                                .attr("class", "card-bottom-right-btn btn")
                                 .call(fadeIn, { transition:{ delay: TRANSITIONS.MED }})
                                 .each(function(d){
                                     const btnG = d3.select(this);
                                     btnG.append("path")
                                         .attr("fill", COLOURS.CARD.EXPAND_COLLAPSE_BTN);
 
-                                    btnG.append("rect").attr("class", "btn-hitbox")
+                                    btnG.append("rect").attr("class", "btn-hitbox btn")
                                         .attr("fill", "transparent")
                                         //.attr("stroke-width", 0.3)
                                         //.attr("stroke", "black")

@@ -916,7 +916,7 @@ const itemPeople = selectedDeck && form?.formType === "item" ? [
       onClick={onClickBg}
     >
       {data.map(deckData => 
-        <div key={`cell-${deckData.id}`} className={classes.cell} style={{ left: cellX(deckData), top: cellY(deckData) }}></div>
+        <div key={`cell-${deckData.id}`} className={`${classes.cell} cell interactive`} style={{ left: cellX(deckData), top: cellY(deckData) }}></div>
       )}
       <svg className={classes.svg} id={`decks-svg`} overflow="visible">
         <g ref={zoomRef} className="zoom"><rect width={width} height={height} fill="transparent" /></g>
