@@ -18,8 +18,8 @@ const mapStateToProps = (state, ownProps) => {
 		.filter(dset => dset.datapoints)
 		
 	const allDatasetsFullyLoaded = datasets.length === fullyLoadedDatasets.length;
-	console.log("screen", window._screen)
-    alert(`width ${window._screen.width} height ${window._screen.height}`)
+	//console.log("screen", window._screen)
+    //alert(`width ${window._screen.width} height ${window._screen.height}`)
 
 	//const hydratedJourneyData = user.isMock ? [] : hydrateJourneyData(journeyData, user, fullyLoadedDatasets);
 
