@@ -21,10 +21,10 @@ const timeframeOptions = {
 const useStyles = makeStyles((theme) => ({
   container:{
     width:"100vw",
-    height:props => `calc(100vh - ${props.urlBarHeight}px)`,
+    height:"110vh",//props => `calc(100vh - ${props.urlBarHeight}px)`,
     position:"relative",
     overflow:props => props.overflow,
-    //border:"solid",
+    border:"solid",
     borderColor:"white",
     borderWidth:"thin",
   },
@@ -265,11 +265,11 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
 
   */
   const onTouchEvent = e => {
-    //console.log("touchev", e.target)
     const className = d3.select(e.target).attr("class") || "";
     const isBtn = className.includes("interactive") || className.includes("btn");
+    console.log("touchev", e.target.nodeName, className, isBtn, e.target)
     //console.log("isBtn", isBtn)
-    alert(`isBtn?${isBtn} class: ${className}`);
+    alert(`${isBtn}-${e.target.nodeName} -${className}`);
     if(!isBtn){
       preventPropagationAndDefault(e);
     }
@@ -279,7 +279,11 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
     e.stopPropagation();
   } 
   return (
-    <div className={classes.container}>
+    <div className={classes.container}
+      onTouchStart={onTouchEvent}
+      onTouchMove={onTouchEvent}
+      onTouchEnd={onTouchEvent}
+    >
       <div className={classes.canvas} onClick={() => { setSelectedDeckId("") }}>
         <div className={classes.tableContents}>
           {!selectedDeckId && <TableHeader dimns={{ 
@@ -292,7 +296,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
             nrTimeframeOptions={atLeastOnePlayer ? 2 : 1}
             toggleTimeframe={toggleTimeframe}
           />}
-          <div 
+          {/**<div 
             className={classes.decksContents}
             onTouchStart={onTouchEvent}
             onTouchMove={onTouchEvent}
@@ -312,7 +316,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
                 onCreateDeck={onCreateDeck} deleteDeck={deleteDeck} updateDeck={handleUpdateDeck}
                 updateTable={updateTable} updateDecks={updateDecks} availWidth={width} availHeight={height} />
             }
-          </div>
+          </div>*/}
         </div>
       </div>
     </div>
