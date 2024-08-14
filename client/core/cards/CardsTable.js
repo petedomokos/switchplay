@@ -27,6 +27,7 @@ const useStyles = makeStyles((theme) => ({
     //border:"solid",
     borderColor:"white",
     borderWidth:"thin",
+    touchAction:"none"
   },
   canvas: {
     position: "absolute",
@@ -41,6 +42,7 @@ const useStyles = makeStyles((theme) => ({
     //flexDirection:"column",
     background:COLOURS.CARDS_TABLE,
     overflow:"scroll",
+    touchAction:"none"
   },
   tableContents:{
     position:"absolute",
@@ -52,6 +54,7 @@ const useStyles = makeStyles((theme) => ({
     //border:"solid",
     borderColor:"yellow",
     borderWidth:"thin",
+    touchAction:"none"
   },
   decksContents:{
     position:"absolute",
@@ -63,14 +66,15 @@ const useStyles = makeStyles((theme) => ({
     //border:"solid",
     borderColor:"red",
     borderWidth:"thin",
-    //touchAction: "none"
+    touchAction: "none"
   },
   hideInstructions:{
     margin:"25px 5px",
     width:"125px",
     height:"30px",
     fontSize:"12px",
-    color:grey10(2)
+    color:grey10(2),
+    touchAction:"none"
   },
   shouldDisplayInstructions:{
 
@@ -81,7 +85,8 @@ const useStyles = makeStyles((theme) => ({
     top:"0px",
     width:props => `${props.width}px`,
     height:props => `${props.height}px`,
-    display:props => props.form.display
+    display:props => props.form.display,
+    touchAction:"none"
   }
 }))
 

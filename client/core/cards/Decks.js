@@ -42,9 +42,11 @@ const useStyles = makeStyles((theme) => ({
    //border:"solid",
     //borderWidth:"thin",
     borderColor:"red",
+    touchAction:"none"
   },
   keyPhrase:{
-    color:grey10(1)
+    color:grey10(1),
+    touchAction:"none"
   },
   cell:{
     position:"absolute",
@@ -53,7 +55,8 @@ const useStyles = makeStyles((theme) => ({
     borderWidth:"thin",
     borderColor:"white",*/
     width:props => props.cell.width,
-    height:props => props.cell.height
+    height:props => props.cell.height,
+    touchAction:"none"
   },
   svg:{
     position:"absolute",
@@ -61,7 +64,8 @@ const useStyles = makeStyles((theme) => ({
   formUnderlay:{
     width:props => props.formUnderlay.width,
     height:props => props.formUnderlay.height,
-    display:props => props.formUnderlay.display
+    display:props => props.formUnderlay.display,
+    touchAction:"none"
   },
   formContainer:{
     pointerEvents:"none",//props => props.form.pointerEvents,
@@ -73,6 +77,7 @@ const useStyles = makeStyles((theme) => ({
     width:props => `${props.width}px`,
     height:props => `${props.height}px`,
     display:props => props.form.display,
+    touchAction:"none"
   }
 }))
 
