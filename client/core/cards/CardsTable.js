@@ -265,10 +265,11 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
 
   */
   const onTouchEvent = e => {
-    console.log("touchev", e.target)
-    const isBtn = d3.select(e.target).attr("class")?.includes("btn");
+    //console.log("touchev", e.target)
+    const className = d3.select(e.target).attr("class") || "";
+    const isBtn = className.includes("interactive") || className.includes("btn");
     //console.log("isBtn", isBtn)
-    //alert(`isBtn?${isBtn} class: ${d3.select(e.target).attr("class")}`)
+    alert(`isBtn?${isBtn} class: ${className}`);
     if(!isBtn){
       preventPropagationAndDefault(e);
     }
