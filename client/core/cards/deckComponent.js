@@ -1196,9 +1196,8 @@ export default function deckComponent() {
                 const backBtnDatum = { 
                     key:"back", 
                     onClick:e => { 
-                        console.log("click back btn")
                         e.stopPropagation();
-                        onSelectDeck("")
+                        onSelectDeck("");
                     },
                     fill:grey10(5),
                     icon:icons.back,

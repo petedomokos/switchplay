@@ -259,13 +259,12 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
   }
 
   const onTouchEvent = e => {
-    console.log("main router touch event")
     const { target } = e;
     const { nodeName } = target;
     const className = d3.select(target).attr("class") || "";
     const isInteractive = className.includes("interactive") || className.includes("btn") || className.includes("icon") 
       || ["svg", "rect", "circle", "path", "polygon"].includes(nodeName)
-    console.log("touchev", isInteractive, nodeName, className, target)
+    console.log("touchev mr", isInteractive, nodeName, className)
     //alert(`mr ${isInteractive}-${nodeName} -${className}`);
     //if(!isInteractive){
       //preventPropagationAndDefault(e);

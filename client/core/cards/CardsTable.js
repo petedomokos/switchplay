@@ -96,7 +96,6 @@ const useStyles = makeStyles((theme) => ({
 const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, updateDecks, deleteDeck, hideMenus, showMenus }) => {
   const { tables=[], decks=[], customer } = user;
   const stringifiedDecks = JSON.stringify(decks);
-
   //next - find where kpi values are added, and adjust so they are not all completed
   //console.log("CardsTable", user)
   //console.log("datasets", datasets)
@@ -261,13 +260,12 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   }, [stringifiedData, form, selectedDeckId, timeframeKey]);
 
   const onTouchEvent = e => {
-    console.log("cardstable touch event")
     const { target } = e;
     const { nodeName } = target;
     const className = d3.select(target).attr("class") || "";
     const isInteractive = className.includes("interactive") || className.includes("btn") || className.includes("icon") 
       || ["svg", "rect", "circle", "path", "polygon"].includes(nodeName)
-    console.log("touchev", styleProps.touchAction, isInteractive, nodeName, className, target)
+    //console.log("touchev CT", /*styleProps.touchAction,*/ isInteractive, nodeName, className)
     //alert(`ct ${isInteractive}-${nodeName} -${className}`);
     if(!isInteractive){
       preventPropagationAndDefault(e);
