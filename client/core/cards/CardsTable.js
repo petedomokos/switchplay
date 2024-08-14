@@ -270,13 +270,14 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
 
   */
   const onTouchEvent = e => {
+    console.log("cardstable touch event")
     const { target } = e;
     const { nodeName } = target;
     const className = d3.select(target).attr("class") || "";
     const isInteractive = className.includes("interactive") || className.includes("btn") || className.includes("icon") 
       || ["svg", "rect", "circle", "path", "polygon"].includes(nodeName)
     console.log("touchev", isInteractive, nodeName, className, target)
-    alert(`${isInteractive}-${nodeName} -${className}`);
+    alert(`ct ${isInteractive}-${nodeName} -${className}`);
     if(!isInteractive){
       preventPropagationAndDefault(e);
     }

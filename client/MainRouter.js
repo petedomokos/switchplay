@@ -256,6 +256,24 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
       closeDemoForm();
   }
 
+  const onTouchEvent = e => {
+    console.log("main router touch event")
+    const { target } = e;
+    const { nodeName } = target;
+    const className = d3.select(target).attr("class") || "";
+    const isInteractive = className.includes("interactive") || className.includes("btn") || className.includes("icon") 
+      || ["svg", "rect", "circle", "path", "polygon"].includes(nodeName)
+    console.log("touchev", isInteractive, nodeName, className, target)
+    alert(`mr ${isInteractive}-${nodeName} -${className}`);
+    if(!isInteractive){
+      preventPropagationAndDefault(e);
+    }
+  }
+  const preventPropagationAndDefault = e => {
+    e.preventDefault();
+    e.stopPropagation();
+  } 
+
   return (
     <div className={classes.app}>
       <ThemeProvider theme={theme}>
@@ -265,7 +283,11 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
           <ContentWrapper>
             <Transition in={!jwt && !demoForm && !dialogs.saving_requestdemo && !dialogs.saved_requestdemo } timeout={300}>
               {(state) => (
-                <div style={{ ...defaultNavTransStyle, ...transitionStyles[state] }} >
+                <div style={{ ...defaultNavTransStyle, ...transitionStyles[state] }} class="app-wrapper"
+                  onTouchStart={onTouchEvent}
+                  onTouchMove={onTouchEvent}
+                  onTouchEnd={onTouchEvent} 
+                >
                   <Sticky top={0} innerZ={9999} activeClass="sticky-nav-active">
                     <DrawerProvider>
                       <Route path="/:any">

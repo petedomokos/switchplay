@@ -916,12 +916,37 @@ const itemPeople = selectedDeck && form?.formType === "item" ? [
   selectedDeck.photoURL
  ] : []
 
+ const onTouchEvent = e => {
+    console.log("Decks touch event")
+    const { target } = e;
+    const { nodeName } = target;
+    const className = d3.select(target).attr("class") || "";
+    const isInteractive = className.includes("interactive") || className.includes("btn") || className.includes("icon") 
+      || ["svg", "rect", "circle", "path", "polygon"].includes(nodeName)
+    console.log("touchev", isInteractive, nodeName, className, target)
+    alert(`d ${isInteractive}-${nodeName} -${className}`);
+    if(!isInteractive){
+      preventPropagationAndDefault(e);
+    }
+}
+const preventPropagationAndDefault = e => {
+  e.preventDefault();
+  e.stopPropagation();
+} 
+
   return (
     <div className={`cards-root ${classes.root}`} 
       onClick={onClickBg}
+      onTouchStart={onTouchEvent}
+      onTouchMove={onTouchEvent}
+      onTouchEnd={onTouchEvent}
     >
       {data.map(deckData => 
-        <div key={`cell-${deckData.id}`} className={`${classes.cell} cell interactive`} style={{ left: cellX(deckData), top: cellY(deckData) }}></div>
+        <div key={`cell-${deckData.id}`} className={`${classes.cell} cell interactive`} style={{ left: cellX(deckData), top: cellY(deckData) }}
+          onTouchStart={onTouchEvent}
+          onTouchMove={onTouchEvent}
+          onTouchEnd={onTouchEvent}
+        ></div>
       )}
       <svg className={classes.svg} id={`decks-svg`} overflow="visible">
         <g ref={zoomRef} className="zoom"><rect width={width} height={height} fill="transparent" /></g>
@@ -935,8 +960,16 @@ const itemPeople = selectedDeck && form?.formType === "item" ? [
           </filter>
         </defs>
       </svg>
-      <div className={classes.formUnderlay} onClick={onClickBg}></div>
-      <div className={classes.formContainer} ref={formRef}>
+      <div className={classes.formUnderlay} onClick={onClickBg}
+        onTouchStart={onTouchEvent}
+        onTouchMove={onTouchEvent}
+        onTouchEnd={onTouchEvent}
+      ></div>
+      <div className={classes.formContainer} ref={formRef} 
+        onTouchStart={onTouchEvent}
+        onTouchMove={onTouchEvent}
+        onTouchEnd={onTouchEvent}
+      >
         {/**form?.formType === "item" && 
           <ItemForm item={form.value} cardTitle={getCardTitle(form.value.id)} 
             dimns={getFormDimnsAndPos()} fontSize={form.height * 0.5} save={updateItemTitle} close={() => onSelectItem()} />
