@@ -202,6 +202,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   //const deckScale = selectedDeckId ? 1 : nonSelectedDeckWidth/selectedDeckWidth;
 
   let styleProps = {
+    touchAction:selectedDeckId ? "none" : "auto",
     urlBarHeight:screen.urlBarHeight,
     overflow:form ? null : "hidden",
     left: -canvasWidth/2,
@@ -259,16 +260,6 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
     }
   }, [stringifiedData, form, selectedDeckId, timeframeKey]);
 
-  /*
-  next - I cant quit get teh right combo o fthis function and touchAction so that scrolling of url doesnt happen,
-  but touch events on buttons here do happen. Its the preventDefault that stops the buttons working.
-  lets see now if removing prevDefault allows the scrolling to work again which we dont want.
-
-  todo - add btn to class of all buttons in svgs so it doesnt prevent default
-
-  also to do - small screen adjustment eg my iphone
-
-  */
   const onTouchEvent = e => {
     console.log("cardstable touch event")
     const { target } = e;
@@ -276,7 +267,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
     const className = d3.select(target).attr("class") || "";
     const isInteractive = className.includes("interactive") || className.includes("btn") || className.includes("icon") 
       || ["svg", "rect", "circle", "path", "polygon"].includes(nodeName)
-    console.log("touchev", isInteractive, nodeName, className, target)
+    console.log("touchev", styleProps.touchAction, isInteractive, nodeName, className, target)
     alert(`ct ${isInteractive}-${nodeName} -${className}`);
     if(!isInteractive){
       preventPropagationAndDefault(e);
