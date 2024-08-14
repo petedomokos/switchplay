@@ -278,9 +278,6 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
 
   return (
     <div className={`${classes.app} app`}
-      onTouchStart={onTouchEvent}
-      onTouchMove={onTouchEvent}
-      onTouchEnd={onTouchEvent} 
     >
       <ThemeProvider theme={theme}>
         <Fragment>
