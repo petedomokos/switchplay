@@ -144,7 +144,7 @@ const useStyles = makeStyles(theme => ({
     width:"100%",
     height:props => props.appHeight,
     minHeight:props => props.appHeight,
-    background:"red",//props => props.appBg,
+    background:props => props.appBg,
   },
   dialog:{
     display:"flex",
@@ -266,7 +266,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
     const isInteractive = className.includes("interactive") || className.includes("btn") || className.includes("icon") 
       || ["svg", "rect", "circle", "path", "polygon"].includes(nodeName)
     console.log("touchev", isInteractive, nodeName, className, target)
-    alert(`mr ${isInteractive}-${nodeName} -${className}`);
+    //alert(`mr ${isInteractive}-${nodeName} -${className}`);
     //if(!isInteractive){
       //preventPropagationAndDefault(e);
     //}
@@ -278,7 +278,6 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
 
   return (
     <div className={`${classes.app} app`}
-      onClick={() => { console.log("app click bg")}}
       onTouchStart={onTouchEvent}
       onTouchMove={onTouchEvent}
       onTouchEnd={onTouchEvent} 

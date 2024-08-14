@@ -268,7 +268,7 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
     const isInteractive = className.includes("interactive") || className.includes("btn") || className.includes("icon") 
       || ["svg", "rect", "circle", "path", "polygon"].includes(nodeName)
     console.log("touchev", styleProps.touchAction, isInteractive, nodeName, className, target)
-    alert(`ct ${isInteractive}-${nodeName} -${className}`);
+    //alert(`ct ${isInteractive}-${nodeName} -${className}`);
     if(!isInteractive){
       preventPropagationAndDefault(e);
     }

@@ -924,7 +924,7 @@ const itemPeople = selectedDeck && form?.formType === "item" ? [
     const isInteractive = className.includes("interactive") || className.includes("btn") || className.includes("icon") 
       || ["svg", "rect", "circle", "path", "polygon"].includes(nodeName)
     console.log("touchev", isInteractive, nodeName, className, target)
-    alert(`d ${isInteractive}-${nodeName} -${className}`);
+    //alert(`d ${isInteractive}-${nodeName} -${className}`);
     if(!isInteractive){
       preventPropagationAndDefault(e);
     }
