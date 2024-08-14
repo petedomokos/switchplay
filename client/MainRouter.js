@@ -1,5 +1,7 @@
 import React, { Fragment, useEffect, useState, useRef } from 'react'
 import {Route, Switch, withRouter } from 'react-router-dom'
+import * as d3 from 'd3';
+
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { makeStyles } from '@material-ui/core/styles'
 import NonUserHomeContainer from './core/containers/NonUserHomeContainer'
@@ -142,7 +144,7 @@ const useStyles = makeStyles(theme => ({
     width:"100%",
     height:props => props.appHeight,
     minHeight:props => props.appHeight,
-    background:props => props.appBg,
+    background:"red",//props => props.appBg,
   },
   dialog:{
     display:"flex",
@@ -166,7 +168,7 @@ const useStyles = makeStyles(theme => ({
 const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, requestDemo, onSignout, history, dialogs, savedDialog, closeDialog, demoForm, showDemoForm, closeDemoForm, mobileMenu, setMobileMenu }) => {
   ////DBEFF0
   const styleProps = { 
-    appHeight: userId ? `calc(100vh - ${screen?.urlBarHeight || 0}px)` : "120vh",
+    appHeight: userId ? `calc(100vh - ${0/*screen?.urlBarHeight || 0*/}px)` : "120vh",
     appBg:userId ? "transparent" : (history.location.pathname === "/" ? COLOURS.banner.bg : "#DBEFF0")
   }
   const classes = useStyles(styleProps);
@@ -265,9 +267,9 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
       || ["svg", "rect", "circle", "path", "polygon"].includes(nodeName)
     console.log("touchev", isInteractive, nodeName, className, target)
     alert(`mr ${isInteractive}-${nodeName} -${className}`);
-    if(!isInteractive){
-      preventPropagationAndDefault(e);
-    }
+    //if(!isInteractive){
+      //preventPropagationAndDefault(e);
+    //}
   }
   const preventPropagationAndDefault = e => {
     e.preventDefault();
@@ -275,7 +277,12 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
   } 
 
   return (
-    <div className={classes.app}>
+    <div className={`${classes.app} app`}
+      onClick={() => { console.log("app click bg")}}
+      onTouchStart={onTouchEvent}
+      onTouchMove={onTouchEvent}
+      onTouchEnd={onTouchEvent} 
+    >
       <ThemeProvider theme={theme}>
         <Fragment>
           <ResetCSS />
@@ -283,11 +290,7 @@ const MainRouter = ({ userId, loadUser, loadingUser, screen, updateScreen, reque
           <ContentWrapper>
             <Transition in={!jwt && !demoForm && !dialogs.saving_requestdemo && !dialogs.saved_requestdemo } timeout={300}>
               {(state) => (
-                <div style={{ ...defaultNavTransStyle, ...transitionStyles[state] }} class="app-wrapper"
-                  onTouchStart={onTouchEvent}
-                  onTouchMove={onTouchEvent}
-                  onTouchEnd={onTouchEvent} 
-                >
+                <div style={{ ...defaultNavTransStyle, ...transitionStyles[state] }}>
                   <Sticky top={0} innerZ={9999} activeClass="sticky-nav-active">
                     <DrawerProvider>
                       <Route path="/:any">
