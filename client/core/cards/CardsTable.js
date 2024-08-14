@@ -257,10 +257,24 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
   /*
   next - I cant quit get teh right combo o fthis function and touchAction so that scrolling of url doesnt happen,
   but touch events on buttons here do happen. Its the preventDefault that stops the buttons working.
+  lets see now if removing prevDefault allows the scrolling to work again which we dont want.
+
+  todo - add btn to class of all buttons in svgs so it doesnt prevent default
+
+  also to do - small screen adjustment eg my iphone
 
   */
+  const onTouchEvent = e => {
+    console.log("touchev", e.target)
+    const isBtn = d3.select(e.target).attr("class")?.includes("btn");
+    //console.log("isBtn", isBtn)
+    //alert(`isBtn?${isBtn} class: ${d3.select(e.target).attr("class")}`)
+    if(!isBtn){
+      preventPropagationAndDefault(e);
+    }
+  }
   const preventPropagationAndDefault = e => {
-    //e.preventDefault();
+    e.preventDefault();
     e.stopPropagation();
   } 
   return (
@@ -279,12 +293,9 @@ const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingErro
           />}
           <div 
             className={classes.decksContents}
-            onTouchStart={preventPropagationAndDefault}
-            onTouchMove={preventPropagationAndDefault}
-            onTouchEnd={preventPropagationAndDefault}
-            onDragStart={preventPropagationAndDefault}
-            onDrag={preventPropagationAndDefault}
-            onDragEnd={preventPropagationAndDefault}
+            onTouchStart={onTouchEvent}
+            onTouchMove={onTouchEvent}
+            onTouchEnd={onTouchEvent}
           >
             {shouldDisplayInstructions ?  
               <Instructions />

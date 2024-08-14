@@ -1005,7 +1005,7 @@ export default function deckComponent() {
                 const btnG = controlsG.selectAll("g.deck-control-btn").data(controlsData, d => d.key);
                 btnG.enter()
                     .append("g")
-                        .attr("class", "deck-control-btn")
+                        .attr("class", "deck-control-btn btn")
                         .each(function(d){
                             const btnG = d3.select(this);
                             
@@ -1196,6 +1196,7 @@ export default function deckComponent() {
                 const backBtnDatum = { 
                     key:"back", 
                     onClick:e => { 
+                        console.log("click back btn")
                         e.stopPropagation();
                         onSelectDeck("")
                     },
