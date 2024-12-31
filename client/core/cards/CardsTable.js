@@ -91,6 +91,13 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 //helper
+/*
+next - small screen size - safari and chrome - may have nothing to do with screensize, may just be iphone
+
+could try on a proper emulator
+https://blisk.io/devices/details/iphone-se#screen-size-viewport-and-css-pixel-ratio
+
+*/
 
 
 const CardsTable = ({ user, customSelectedDeckId, datasets, loading, loadingError, screen, createTable, updateTable, createDeck, updateDeck, updateDecks, deleteDeck, hideMenus, showMenus }) => {
