@@ -16,13 +16,3 @@ Previous: Milestones Bar https://github.com/petedomokos/switchplay/blob/master/c
 
 Initial: Journey https://github.com/petedomokos/switchplay/blob/master/client/core/journey/Journey.js
 
-## Visuals
-
-There are some visuals here at the moment which users can select as a window into a particular dataset that is part of a players journey/target. These are due to be removed into a separate Visualisations package, but for now, there loactions are as follows:
-
-The 4 Quadrant Bar Chart https://github.com/petedomokos/switchplay/tree/master/client/visuals/quadrantBarChart
-
-Bee Swarm Plot https://github.com/petedomokos/switchplay/tree/master/client/charts/beeswarm
-
-Time Series https://github.com/petedomokos/switchplay/tree/master/client/charts/timeseries
-
