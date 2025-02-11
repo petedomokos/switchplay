@@ -14,9 +14,17 @@ There have been 3 main iterations. All remain in the main branch at the moment(t
 
 Most Recent: Cards https://github.com/petedomokos/switchplay/tree/master/client/core/cards 
 
+A player's developmental journey is reflected using the metaphor of a pack of playing cards, each one representing a match or a week.
+
 Previous: Milestones Bar https://github.com/petedomokos/switchplay/blob/master/client/core/journey/MilestonesBar.js
 
+The cards idea came out of this milestone bar, which was a set of milestones on cards, progressing gradually from left to right.
+This was a more mobile-friendly UI, important for players and coaches who access the app through mobiles rtaher than larger screens.
+
 Initial: Journey https://github.com/petedomokos/switchplay/blob/master/client/core/journey/Journey.js
+
+This was a blank canvas in which players and staff members could collectively map out there goals and milestones.
+It shows their developmental journey well, but is not very user-friendly for mobile screens.
 
 ## Technical setup
 
