@@ -15,6 +15,8 @@ There have been 3 main iterations. All remain in the main branch at the moment(t
 Most Recent: Cards https://github.com/petedomokos/switchplay/tree/master/client/core/cards 
 
 A player's developmental journey is reflected using the metaphor of a pack of playing cards, each one representing a match or a week.
+Data is tracked, and the status of the cards are autmatically updated. The aim is for all cards to be completed, depicted by a completely gold ring,
+where all measures that contribute to the player's development have a piece of the ring.
 
 Previous: Milestones Bar https://github.com/petedomokos/switchplay/blob/master/client/core/journey/MilestonesBar.js
 
